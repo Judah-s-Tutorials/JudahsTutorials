@@ -1,0 +1,1 @@
+This directory contains figures for insertion into a tutorial.
