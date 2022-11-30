@@ -1,4 +1,4 @@
-package com.acmemail.judah.sandbox;
+package com.acmemail.judah.figures;
 
 import com.acmemail.judah.cartesian_plane.Root;
 

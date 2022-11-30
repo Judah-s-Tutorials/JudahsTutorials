@@ -1,4 +1,4 @@
-package com.acmemail.judah.sandbox;
+package com.acmemail.judah.figures;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

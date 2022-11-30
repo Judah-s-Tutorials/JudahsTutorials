@@ -3,4 +3,4 @@
  * to incorporate concepts and tools that eventually 
  * became part of the main product.
  */
-package com.acmemail.judah.sandbox;
+package com.acmemail.judah.figures;
