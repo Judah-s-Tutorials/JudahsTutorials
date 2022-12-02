@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import com.acmemail.judah.cartesian_plane.Root;
 
 @SuppressWarnings("serial")
-public class SampleTarget001 extends JPanel
+public class SampleTarget002 extends JPanel
 {
     private final Color     bgColor     = new Color( .9f, .9f, .9f );
     private final Color     ticColor    = Color.BLACK;
@@ -60,12 +60,12 @@ public class SampleTarget001 extends JPanel
     
     public static void main( String[] args )
     {
-        SampleTarget001 canvas  = new SampleTarget001( 500, 600 );
+        SampleTarget002 canvas  = new SampleTarget002( 500, 600 );
         Root            root    = new Root( canvas );
         root.start();
     }
     
-    public SampleTarget001( int width, int height )
+    public SampleTarget002( int width, int height )
     {
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );

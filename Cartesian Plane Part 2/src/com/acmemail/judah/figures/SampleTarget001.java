@@ -22,6 +22,7 @@ public class SampleTarget001 extends JPanel
     private final Color     axisColor   = Color.BLACK;
     private final Color     gridColor   = new Color( .75f, .75f, .75f);
     private final Color     textColor   = Color.BLACK;
+    private final Color     marginColor = new Color( 0x008080 );
     
     private final float		axisWeight			= 4;
     private final float		majorTicWeight		= 3;
@@ -102,12 +103,13 @@ public class SampleTarget001 extends JPanel
         maxYco = minYco + gridHeight;
         centerYco = minYco + gridHeight / 2f;
         
+        drawMargins();
         drawGrid();
-        drawMinorTics();
-        drawMajorTics();
-        drawAxes();
-        drawText();
-        drawUserText();
+//        drawMinorTics();
+//        drawMajorTics();
+//        drawAxes();
+//        drawText();
+//        drawUserText();
         
         // begin boilerplate
         gtx.dispose();
@@ -250,6 +252,42 @@ public class SampleTarget001 extends JPanel
             }
             nextYUnit -= 1.0 / majorTicsPerUnit;
         }
+    }
+    
+    private void drawMargins()
+    {
+        gtx.setColor( marginColor );
+        // top margin
+        Rectangle2D rect    =
+            new Rectangle2D.Float( 0, 0, currWidth, topMargin );
+        gtx.fill( rect );
+        
+        // right margin
+        rect = new Rectangle2D.Float( 
+            maxXco, 
+            0, 
+            currWidth - maxXco, 
+            currHeight
+        );
+        gtx.fill( rect );
+        
+        // bottom margin
+        rect = new Rectangle2D.Float( 
+            0, 
+            maxYco, 
+            currWidth, 
+            currHeight - maxYco
+        );
+        gtx.fill( rect );
+        
+        // left margin
+        rect = new Rectangle2D.Float( 
+            0, 
+            0, 
+            minXco, 
+            currHeight
+        );
+        gtx.fill( rect );
     }
     
     private void drawUserText()
