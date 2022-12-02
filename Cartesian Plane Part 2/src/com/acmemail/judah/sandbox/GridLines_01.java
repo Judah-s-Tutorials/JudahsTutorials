@@ -66,11 +66,20 @@ public class GridLines_01 extends JPanel
         gtx.setStroke( new BasicStroke( gridWeight ) );
         
         float   centerXco   = currWidth / 2f;
-        float   numLeft = (float)Math.floor( currWidth / 2f / gridSpacing);
+        float   numLeft = (float)Math.floor( currWidth / 2f / gridSpacing );
         float   leftXco = centerXco - numLeft * gridSpacing;
         for ( float xco = leftXco ; xco <= currWidth ; xco += gridSpacing )
         {
             Line2D  gridLine    = new Line2D.Float( xco, 0, xco, currHeight );
+            gtx.draw( gridLine );
+        }
+        
+        float   centerYco   = currHeight / 2f;
+        float   numTop      = (float)Math.floor( currHeight / 2f / gridSpacing );
+        float   topYco      = centerYco - numTop * gridSpacing;
+        for ( float yco = topYco ; yco <= currHeight ; yco += gridSpacing )
+        {
+            Line2D  gridLine    = new Line2D.Float( 0, yco, currWidth, yco );
             gtx.draw( gridLine );
         }
     }

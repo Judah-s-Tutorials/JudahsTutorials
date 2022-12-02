@@ -6,7 +6,7 @@ public class RunGridlines
 {
     public static void main(String[] args)
     {
-        GridLines_01    canvas  = new GridLines_01( 600, 500 );
+        GridLines_03    canvas  = new GridLines_03( 600, 500 );
         Root            root    = new Root( canvas );
         root.start();
     }
