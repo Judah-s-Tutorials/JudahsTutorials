@@ -17,17 +17,18 @@ import com.acmemail.judah.cartesian_plane.Root;
 @SuppressWarnings("serial")
 public class GridLines_03 extends JPanel
 {
-    private final Color bgColor     = new Color( .9f, .9f, .9f );
-    private Color       gridColor   = new Color( .75f, .75f, .75f);
+    private Color   bgColor             = new Color( .9f, .9f, .9f );
+    private Color   gridColor           = new Color( .75f, .75f, .75f);
+    private Color   marginColor         = new Color( 0x008080 );
     
     private float   gridLinesPerUnit    = 2;
     private float   pixelsPerUnit       = 75;
     private float   gridWeight  = 1;
     
-    private int         leftMargin          = 60;
-    private int         rightMargin         = 20;
-    private int         topMargin           = 20;
-    private int         bottomMargin        = 60;
+    private int     leftMargin          = 60;
+    private int     rightMargin         = 20;
+    private int     topMargin           = 20;
+    private int     bottomMargin        = 60;
 
     ///////////////////////////////////////////////////////
     //
@@ -88,6 +89,7 @@ public class GridLines_03 extends JPanel
         centerYco = minYco + gridHeight / 2f;
 
         drawGrid();
+        paintMargins();
         
         // begin boilerplate
         gtx.dispose();
@@ -117,5 +119,27 @@ public class GridLines_03 extends JPanel
                 new Line2D.Float( minXco, yco, maxXco, yco );
             gtx.draw( gridLine );
         }
+    }
+    
+    private void paintMargins()
+    {
+        gtx.setColor( marginColor );
+        Rectangle2D rect    = new Rectangle2D.Float();
+        
+        // top margin
+        rect.setRect( 0, 0, currWidth, topMargin );
+        gtx.fill( rect );
+        
+        // right margin
+        rect.setRect( currWidth - rightMargin, 0, rightMargin, currHeight );
+        gtx.fill( rect );
+        
+        // bottom margin
+        rect.setRect( 0, currHeight - bottomMargin, currWidth, bottomMargin );
+        gtx.fill( rect );
+        
+        // left margin
+        rect.setRect( 0, 0, leftMargin, currHeight );
+        gtx.fill( rect );
     }
 }
