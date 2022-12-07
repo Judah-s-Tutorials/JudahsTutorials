@@ -4,7 +4,7 @@ public class Main
 {
     public static void main(String[] args)
     {
-        CartesianPlane   canvas  = new CartesianPlane( 600, 500 );
+        CartesianPlane   canvas  = new CartesianPlane();
         Root            root    = new Root( canvas );
         root.start();
     }
