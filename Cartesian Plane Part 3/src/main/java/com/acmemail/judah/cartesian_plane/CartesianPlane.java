@@ -80,7 +80,6 @@ public class CartesianPlane extends JPanel
     private boolean ticMajorDraw        =
         CPConstants.asBoolean( CPConstants.TIC_MAJOR_DRAW_DV );
 
-    
     /////////////////////////////////////////////////
     //   Grid line properties
     /////////////////////////////////////////////////
@@ -103,7 +102,7 @@ public class CartesianPlane extends JPanel
 
     /////////////////////////////////////////////////
     //   Label properties (these are the labels that
-    //   go on the x- and y-axes, e.g., 1.1, 1.2
+    //   go on the x- and y-axes, e.g., 1.1, 1.2)
     /////////////////////////////////////////////////
     private Color   labelFontColor      =
         CPConstants.asColor( CPConstants.LABEL_FONT_COLOR_DV );
@@ -478,6 +477,22 @@ public class CartesianPlane extends JPanel
     }
 
     /**
+     * @return the ticMinorDraw
+     */
+    public boolean isTicMinorDraw()
+    {
+        return ticMinorDraw;
+    }
+
+    /**
+     * @param ticMinorDraw the ticMinorDraw to set
+     */
+    public void setTicMinorDraw(boolean ticMinorDraw)
+    {
+        this.ticMinorDraw = ticMinorDraw;
+    }
+
+    /**
      * @return the ticMajorColor
      */
     public Color getTicMajorColor()
@@ -542,6 +557,22 @@ public class CartesianPlane extends JPanel
     }
 
     /**
+     * @return the ticMajorDraw
+     */
+    public boolean isTicMajorDraw()
+    {
+        return ticMajorDraw;
+    }
+
+    /**
+     * @param ticMajorDraw the ticMajorDraw to set
+     */
+    public void setTicMajorDraw(boolean ticMajorDraw)
+    {
+        this.ticMajorDraw = ticMajorDraw;
+    }
+
+    /**
      * @return the gridLineColor
      */
     public Color getGridLineColor()
@@ -587,6 +618,22 @@ public class CartesianPlane extends JPanel
     public void setGridLineLPU(float gridLineLPU)
     {
         this.gridLineLPU = gridLineLPU;
+    }
+
+    /**
+     * @return the gridLineDraw
+     */
+    public boolean isGridLineDraw()
+    {
+        return gridLineDraw;
+    }
+
+    /**
+     * @param gridLineDraw the gridLineDraw to set
+     */
+    public void setGridLineDraw(boolean gridLineDraw)
+    {
+        this.gridLineDraw = gridLineDraw;
     }
 
     /**
@@ -684,21 +731,4 @@ public class CartesianPlane extends JPanel
     {
         this.labelFontSize = labelFontSize;
     }
-
-    /**
-     * @return the gridWidth
-     */
-    public float getGridWidth()
-    {
-        return gridWidth;
-    }
-
-    /**
-     * @param gridWidth the gridWidth to set
-     */
-    public void setGridWidth(float gridWidth)
-    {
-        this.gridWidth = gridWidth;
-    }
-
 }

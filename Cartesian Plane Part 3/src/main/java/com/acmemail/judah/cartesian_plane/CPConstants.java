@@ -72,7 +72,7 @@ public class CPConstants
     /** Grid line weight default value: float. */
     public static final String  GRID_LINE_WEIGHT_DV     = "1";
     /** Grid lines per unit default value: float. */
-    public static final String  GRID_LINE_LPU_DV   = TIC_MAJOR_MPU_DV;
+    public static final String  GRID_LINE_LPU_DV        = TIC_MAJOR_MPU_DV;
     /** Left margin background color: int. */
     public static final String  GRID_LINE_COLOR_DV      = "0x4B4B4B";
     /** Draw grid lines default value: boolean */
@@ -142,7 +142,7 @@ public class CPConstants
     /**
      * Convert a String to a boolean and return the boolean.
      * The operation is case-insensitive.
-     * Any value other than "true" is converts to false.
+     * Any value other than "true" is converted to false.
      * 
      * @param sVal  the String to convert
      * 
