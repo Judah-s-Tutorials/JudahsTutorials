@@ -48,9 +48,9 @@ public class CPConstants
     /** Minor tic mark color default value default value: int. */
     public static final String  TIC_MINOR_COLOR_DV          = "0X000000";
     /** Minor tic mark weight default value: float. */
-    public static final String  TIC_MINOR_WEIGHT_DV         = "3";
+    public static final String  TIC_MINOR_WEIGHT_DV         = "2";
     /** Minor tic mark length default value: float. */
-    public static final String  TIC_MINOR_LEN_DV            = "7";
+    public static final String  TIC_MINOR_LEN_DV            = "6";
     /** Minor tic marks per unit default value: float. */
     public static final String  TIC_MINOR_MPU_DV            = "10";
     /** Draw minor tic marks default value: boolean */
@@ -58,11 +58,11 @@ public class CPConstants
     /** Minor tic mark color default value: int. */
     public static final String  TIC_MAJOR_COLOR_DV          = "0X000000";
     /** Major tic mark weight default value: float. */
-    public static final String  TIC_MAJOR_WEIGHT_DV         = "3";
+    public static final String  TIC_MAJOR_WEIGHT_DV         = "2";
     /** MAJOR tic mark length default value: float. */
-    public static final String  TIC_MAJOR_LEN_DV            = "7";
+    public static final String  TIC_MAJOR_LEN_DV            = "16";
     /** Major tic marks per unit default value: float. */
-    public static final String  TIC_MAJOR_MPU_DV            = "1";
+    public static final String  TIC_MAJOR_MPU_DV            = "2";
     /** Draw major tic marks default value: boolean */
     public static final String  TIC_MAJOR_DRAW_DV           = "true";
     
@@ -74,7 +74,7 @@ public class CPConstants
     /** Grid lines per unit default value: float. */
     public static final String  GRID_LINE_LPU_DV        = TIC_MAJOR_MPU_DV;
     /** Left margin background color: int. */
-    public static final String  GRID_LINE_COLOR_DV      = "0x4B4B4B";
+    public static final String  GRID_LINE_COLOR_DV      = "0xCBCBCB";
     /** Draw grid lines default value: boolean */
     public static final String  GRID_LINE_DRAW_DV       = "true";
 
@@ -84,7 +84,7 @@ public class CPConstants
     /** Axis color default value: int. */
     public static final String  AXIS_COLOR_DV          = "0X000000";
     /** Axis weight default value: float. */
-    public static final String  AXIS_WEIGHT_DV         = "3";
+    public static final String  AXIS_WEIGHT_DV         = "2";
 
     /////////////////////////////////////////////////
     //   Label properties
@@ -100,7 +100,7 @@ public class CPConstants
      */
     public static final String  LABEL_FONT_STYLE_DV     = "PLAIN";
     /** Label font size default value: float. */
-    public static final String  LABEL_FONT_SIZE_DV      = "10";
+    public static final String  LABEL_FONT_SIZE_DV      = "8";
     /**
      *  Label font units default value: String.
      *  em or px.
