@@ -180,6 +180,7 @@ public class CartesianPlane extends JPanel
         drawMajorTics();
         drawAxes();
         drawHorizontalLabels();
+        drawVerticalLabels();
         paintMargins();
         
         // begin boilerplate
@@ -262,11 +263,14 @@ public class CartesianPlane extends JPanel
             );
         for ( Line2D line : lineGen )
         {
-            System.out.println( line );
             gtx.draw( line );
         }
     }
     
+    /**
+     * Draw the labels on the horizontal tic marks
+     * (top to bottom of y-axis).
+     */
     private void drawHorizontalLabels()
     {
         // padding between tic mark and label
@@ -286,16 +290,69 @@ public class CartesianPlane extends JPanel
         float       nextLabel   = numAbove * labelIncr;
         for ( Line2D line : lineGen )
         {
-            String      label   = String.format( "%3.2f", nextLabel );
-            TextLayout  layout  = 
-                new TextLayout( label, labelFont, labelFRC );
-            Rectangle2D bounds  = layout.getBounds();
-            float       yOffset = (float)(bounds.getHeight() / 2);
-            float       xco     = (float)line.getX2() + labelPadding;
-            float       yco     = (float)line.getY2() + yOffset;
-            layout.draw( gtx, xco, yco );
+            // Don't draw a label at the origin
+            if ( !equal( nextLabel, 0 ) )
+            {
+                String      label   = String.format( "%3.2f", nextLabel );
+                TextLayout  layout  = 
+                    new TextLayout( label, labelFont, labelFRC );
+                Rectangle2D bounds  = layout.getBounds();
+                float       yOffset = (float)(bounds.getHeight() / 2);
+                float       xco     = (float)line.getX2() + labelPadding;
+                float       yco     = (float)line.getY2() + yOffset;
+                layout.draw( gtx, xco, yco );
+            }
             nextLabel -= labelIncr;
         }
+    }
+    
+    /**
+     * Draw the labels on the vertical tic marks
+     * (left to right of x-axis).
+     */
+    private void drawVerticalLabels()
+    {
+        // padding between tic mark and label
+        final int   labelPadding    = 3;
+        
+        LineGenerator   lineGen = 
+            new LineGenerator( 
+                gridRect, 
+                gridUnit, 
+                ticMajorMPU,
+                ticMajorLen,
+                LineGenerator.VERTICAL
+            );
+        int         numLeft     = 
+            (int)(lineGen.getTotalVerticalLines() / 2);
+        float       labelIncr   = 1 / ticMajorMPU;
+        float       nextLabel   = -numLeft * labelIncr;
+        for ( Line2D line : lineGen )
+        {
+            // Don't draw a label at the origin
+            if ( !equal( nextLabel, 0 ) )
+            {
+                String      label   = String.format( "%3.2f", nextLabel );
+                TextLayout  layout  = 
+                    new TextLayout( label, labelFont, labelFRC );
+                Rectangle2D bounds  = layout.getBounds();
+                float       yOffset = 
+                    (float)(bounds.getHeight() + labelPadding);
+                float       xOffset = (float)(bounds.getWidth() / 2);
+                float       xco     = (float)line.getX2() - xOffset;
+                float       yco     = (float)line.getY2() + yOffset;
+                layout.draw( gtx, xco, yco );
+            }
+            nextLabel += labelIncr;
+        }
+    }
+    
+    private boolean equal( float fVal1, float fVal2 )
+    {
+        final float epsilon = .0001f;
+        float       diff    = Math.abs( fVal1 - fVal2 );
+        boolean     equal   = diff < epsilon;
+        return equal;
     }
     
     private void paintMargins()
@@ -803,10 +860,5 @@ public class CartesianPlane extends JPanel
     public void setLabelFontSize(float labelFontSize)
     {
         this.labelFontSize = labelFontSize;
-    }
-    
-    private void centerVertically( float xco, float yco, String label )
-    {
-        
     }
 }

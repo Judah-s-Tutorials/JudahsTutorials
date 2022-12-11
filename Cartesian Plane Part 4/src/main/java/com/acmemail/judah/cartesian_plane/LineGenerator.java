@@ -13,21 +13,19 @@ public class LineGenerator implements Iterable<Line2D>
     private final float gridWidth;      // width of the rectangle
     private final float gridHeight;     // height of the rectangle
     private final float centerXco;      // center x-coordinate
-    private final float minXco;         // left-most x-coordinate
     private final float maxXco;         // right-most x-coordinate
     private final float centerYco;      // center y-coordinate
-    private final float minYco;         // top-most y-coordinate
     private final float maxYco;         // bottom-most y-coordinate
     
     private final float gridUnit;       // pixels per unit
     
-    private float       lpu;            // lines per unit
-    private float       length;
-    private int         orientation;
+    private final float lpu;            // lines per unit
+    private final float length;         // the length of a line
+    private final int   orientation;    // HORIZONTAL, VERTICAL or BOTH
     
-    private final float gridSpacing;
-    private final float totalHorLines;
-    private final float totalVerLines;
+    private final float gridSpacing;    // pixels between lines
+    private final float totalHorLines;  // total number of horizontal lines
+    private final float totalVerLines;  // total number of vertical lines
     
     public LineGenerator( Rectangle2D rect, float gridUnit, float lpu )
     {
@@ -45,10 +43,8 @@ public class LineGenerator implements Iterable<Line2D>
         gridWidth = (float)rect.getWidth();
         gridHeight = (float)rect.getHeight();
         centerXco = (float)rect.getCenterX();
-        minXco = (float)rect.getMinX();
         maxXco = (float)rect.getMaxX();
         centerYco = (float)rect.getCenterY();
-        minYco = (float)rect.getMinY();
         maxYco = (float)rect.getMaxY();
         this.gridUnit = gridUnit;
         
@@ -79,60 +75,6 @@ public class LineGenerator implements Iterable<Line2D>
         return iter;
     }
     
-    /**
-     * @return the lpu
-     */
-    public float getLpu()
-    {
-        return lpu;
-    }
-
-    /**
-     * @param lpu the lpu to set
-     */
-    public void setLpu(float lpu)
-    {
-        this.lpu = lpu;
-    }
-
-    /**
-     * @return the length
-     */
-    public float getLength()
-    {
-        return length;
-    }
-
-    /**
-     * @param length the length to set
-     */
-    public void setLength(float length)
-    {
-        this.length = length;
-    }
-
-    /**
-     * @return the orientation
-     */
-    public int getOrientation()
-    {
-        return orientation;
-    }
-
-    /**
-     * @param orientation the orientation to set
-     */
-    public void setOrientation(int orientation)
-    {
-        this.orientation = orientation;
-    }
-
-    public void setLengthAndLPU( float length, float lpu )
-    {
-        this.length = length;
-        this.lpu = lpu;
-    }
-    
     public float getTotalHorizontalLines()
     {
         return totalHorLines;
@@ -142,17 +84,8 @@ public class LineGenerator implements Iterable<Line2D>
     {
         return totalVerLines;
     }
-    
-    public float getCenterXco()
-    {
-        return centerXco;
-    }
-    
-    public float getCenterYco()
-    {
-        return centerYco;
-    }
 
+    // produces a sequence of vertical lines from left to right.
     private class Line2DVerticalIterator implements Iterator<Line2D>
     {
         private final float yco1;
@@ -163,7 +96,7 @@ public class LineGenerator implements Iterable<Line2D>
         public Line2DVerticalIterator()
         {
             actLength = length >= 0 ? length : gridHeight;
-            float   numLeft = (float)Math.floor( totalVerLines );
+            float   numLeft = (float)Math.floor( totalVerLines / 2 );
             xco = centerXco - numLeft * gridSpacing;
             yco1 = centerYco - actLength / 2;
             yco2 = yco1 + actLength;
@@ -187,6 +120,7 @@ public class LineGenerator implements Iterable<Line2D>
 
     }
     
+    // Produces a sequence of horizontal lines from top to bottom
     private class Line2DHorizontalIterator implements Iterator<Line2D>
     {
         private final float gridSpacing;
