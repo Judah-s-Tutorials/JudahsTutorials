@@ -175,7 +175,7 @@ public class CartesianPlane extends JPanel
         gridRect = 
             new Rectangle2D.Float( minXco, minYco, gridWidth, gridHeight );
 
-        drawGrid();
+        drawGridLines();
         drawMinorTics();
         drawMajorTics();
         drawAxes();
@@ -188,18 +188,27 @@ public class CartesianPlane extends JPanel
         // end boilerplate
     }
     
-    private void drawGrid()
+    private void drawAxes()
+    {
+        gtx.setColor( axisColor );
+        gtx.setStroke( new BasicStroke( axisWeight ) );
+        
+        // Set the gridUnit to the width of the grid...
+        // ... set the LPU to 1...
+        // ... LineGenerator will iterate lines only for the axes.
+        float   gridUnit    = (float)gridRect.getWidth();
+        LineGenerator   lineGen = 
+            new LineGenerator( gridRect, gridUnit, 1 );
+        for ( Line2D line : lineGen )
+            gtx.draw( line );
+    }
+    
+    private void drawGridLines()
     {
         if ( gridLineDraw )
         {
             LineGenerator   lineGen = 
-                new LineGenerator( 
-                    gridRect, 
-                    gridUnit, 
-                    gridLineLPU,
-                    -1,
-                    LineGenerator.BOTH
-                );
+                new LineGenerator( gridRect, gridUnit, gridLineLPU );
             gtx.setStroke( new BasicStroke( gridLineWeight ) );
             gtx.setColor( gridLineColor );
             for ( Line2D line : lineGen )
@@ -242,28 +251,6 @@ public class CartesianPlane extends JPanel
             gtx.setColor( ticMajorColor );
             for ( Line2D line : lineGen )
                 gtx.draw( line );
-        }
-    }
-    
-    private void drawAxes()
-    {
-        gtx.setColor( axisColor );
-        gtx.setStroke( new BasicStroke( axisWeight ) );
-        
-        // Set the gridUnit to the width of the grid...
-        // ... set the LPU to 1...
-        // ... LineGenerator will iterate lines only for the axes.
-        LineGenerator   lineGen = 
-            new LineGenerator( 
-                gridRect, 
-                (float)gridRect.getWidth(), 
-                1,
-                -1,
-                LineGenerator.BOTH
-            );
-        for ( Line2D line : lineGen )
-        {
-            gtx.draw( line );
         }
     }
     

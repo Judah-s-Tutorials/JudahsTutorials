@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 public class LineGenerator implements Iterable<Line2D>
 {
@@ -90,34 +91,54 @@ public class LineGenerator implements Iterable<Line2D>
     {
         private final float yco1;
         private final float yco2;
-        private final float actLength;
         private float       xco;
         
         public Line2DVerticalIterator()
         {
-            actLength = length >= 0 ? length : gridHeight;
-            float   numLeft = (float)Math.floor( totalVerLines / 2 );
-            xco = centerXco - numLeft * gridSpacing;
+            // Calculate the number of lines drawn left of the origin.
+            float   numLeft     = (float)Math.floor( totalVerLines / 2 );
+            
+            // The actual length is the length passed by the user, or,
+            // if the user passed a negative value, the height of the grid.
+            float   actLength   = length >= 0 ? length : gridHeight;
+            
+            // The y-coordinates of the end points of a line are
+            // the same for every line.
             yco1 = centerYco - actLength / 2;
             yco2 = yco1 + actLength;
+            
+            // Calculate the x-coordinate of the leftmost line. The
+            // x-coordinate is the same for both endpoints of a line.
+            // After generating a line, the x-coordinate is incremented
+            // to the next line.
+            xco = centerXco - numLeft * gridSpacing;
         }
         
         @Override
+        // This method required by "implements Iterator<Line2D>"
         public boolean hasNext()
         {
+            // The iterator is exhausted when the x-coordinate
+            // exceeds the bounds of the grid.
             boolean hasNext = xco < maxXco;
             return hasNext;
         }
 
         @Override
+        // This method required by "implements Iterator<Line2D>"
         public Line2D next()
         {
+            // Throw an exception if there is no next line.
+            if ( xco > maxXco )
+            {
+                String  msg = "Grid bounds exceeded at x = " + xco;
+                throw new NoSuchElementException( msg );
+            }
             Line2D  line    = 
                 new Line2D.Float( xco, yco1, xco, yco2 );
             xco += gridSpacing;
             return line;
         }
-
     }
     
     // Produces a sequence of horizontal lines from top to bottom
@@ -126,17 +147,16 @@ public class LineGenerator implements Iterable<Line2D>
         private final float gridSpacing;
         private final float xco1;
         private final float xco2;
-        private final float actLength;
         private float       yco;
         
         public Line2DHorizontalIterator()
         {
-            actLength = length >= 0 ? length : gridWidth;
-            gridSpacing = gridUnit / lpu;
+            float   actLength = length >= 0 ? length : gridWidth;
             float   numTop  = (float)Math.floor( totalHorLines / 2 );
-            yco = centerYco - numTop * gridSpacing;
+            gridSpacing = gridUnit / lpu;
             xco1 = centerXco - actLength / 2;
             xco2 = xco1 + actLength;
+            yco = centerYco - numTop * gridSpacing;
         }
         
         @Override
@@ -149,6 +169,11 @@ public class LineGenerator implements Iterable<Line2D>
         @Override
         public Line2D next()
         {
+            if ( yco > maxYco )
+            {
+                String  msg = "Grid bounds exceeded at y = " + yco;
+                throw new NoSuchElementException( msg ); 
+            }
             Line2D  line    = 
                 new Line2D.Float( xco1, yco, xco2, yco );
             yco += gridSpacing;
@@ -158,8 +183,10 @@ public class LineGenerator implements Iterable<Line2D>
     
     private class Line2DIterator implements Iterator<Line2D>
     {
-        Iterator<Line2D>    horizontalIter  = new Line2DHorizontalIterator();
-        Iterator<Line2D>    verticalIter    = new Line2DVerticalIterator();
+        private Iterator<Line2D>    horizontalIter  = 
+            new Line2DHorizontalIterator();
+        private Iterator<Line2D>    verticalIter    = 
+            new Line2DVerticalIterator();
         
         @Override
         public boolean hasNext()
