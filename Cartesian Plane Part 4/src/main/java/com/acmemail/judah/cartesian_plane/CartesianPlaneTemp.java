@@ -8,14 +8,39 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
-public class CartesianPlane extends JPanel
+public class CartesianPlaneTemp extends JPanel
 {
+    ////////////////////////////////////////////////////////////
+    // BEGIN TEMPORARY CODE FOR PLOTTING FUNCTIONS
+    // These bits of code can be used to plot a function on the
+    // Cartesian plane. They are considered temporary, and will
+    // not be present in future versions of this class.
+    ///////////////////////////////////////////////////////////
+    private List<Point2D>   plot    = null;
+    
+    public void setPlot( List<Point2D> plot )
+    {
+        this.plot = new ArrayList<Point2D>( plot );
+    }
+    
+    public void clearPlot()
+    {
+        plot = null;
+    }
+    ///////////////////////////////////////////////////////////
+    // END TEMPORARY CODE
+    ///////////////////////////////////////////////////////////
+    
     private static final int    mainWindowWidthDV   =
         CPConstants.asInt( CPConstants.MW_WIDTH_DV );
     private static final int    mainWindowHeightDV   =
@@ -129,12 +154,12 @@ public class CartesianPlane extends JPanel
     private Font                labelFont;
     private FontRenderContext   labelFRC;
         
-    public CartesianPlane()
+    public CartesianPlaneTemp()
     {
         this( mainWindowWidthDV, mainWindowHeightDV );
     }
     
-    public CartesianPlane( int width, int height )
+    public CartesianPlaneTemp( int width, int height )
     {
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );
@@ -182,6 +207,32 @@ public class CartesianPlane extends JPanel
         drawHorizontalLabels();
         drawVerticalLabels();
         paintMargins();
+        
+        ////////////////////////////////////////////////////////////
+        // BEGIN TEMPORARY CODE FOR PLOTTING FUNCTIONS
+        // These bits of code can be used to plot a function on the
+        // Cartesian plane. They are considered temporary, and will
+        // not be present in future versions of this class.
+        ///////////////////////////////////////////////////////////
+        if ( plot != null )
+        {
+            Ellipse2D   circle  = new Ellipse2D.Float();
+            float       centerX = (float)gridRect.getCenterX();
+            float       centerY = (float)gridRect.getCenterY();
+            gtx.setColor( Color.BLACK );
+            for ( Point2D point : plot )
+            {
+                float   plotXco     = (float)point.getX();
+                float   plotYco     = (float)point.getY();
+                float   pixelXco    = centerX + plotXco * gridUnit;
+                float   pixelYco    = centerY - plotYco * gridUnit;
+                circle.setFrame( pixelXco, pixelYco, 3, 3 );
+                gtx.fill( circle );
+            }
+        }
+        ///////////////////////////////////////////////////////////
+        // END TEMPORARY CODE
+        ///////////////////////////////////////////////////////////
         
         // begin boilerplate
         gtx.dispose();
