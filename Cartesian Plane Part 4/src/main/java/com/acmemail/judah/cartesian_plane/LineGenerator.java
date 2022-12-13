@@ -102,8 +102,7 @@ public class LineGenerator implements Iterable<Line2D>
             // if the user passed a negative value, the height of the grid.
             float   actLength   = length >= 0 ? length : gridHeight;
             
-            // The y-coordinates of the end points of a line are
-            // the same for every line.
+            // Calculate the top (yco1) and bottom (yco2) of the line
             yco1 = centerYco - actLength / 2;
             yco2 = yco1 + actLength;
             
@@ -183,9 +182,9 @@ public class LineGenerator implements Iterable<Line2D>
     
     private class Line2DIterator implements Iterator<Line2D>
     {
-        private Iterator<Line2D>    horizontalIter  = 
+        private final Iterator<Line2D>  horizontalIter  = 
             new Line2DHorizontalIterator();
-        private Iterator<Line2D>    verticalIter    = 
+        private final Iterator<Line2D>  verticalIter    = 
             new Line2DVerticalIterator();
         
         @Override
