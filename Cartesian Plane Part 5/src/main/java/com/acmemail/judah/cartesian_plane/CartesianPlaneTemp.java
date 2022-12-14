@@ -3,16 +3,44 @@ package com.acmemail.judah.cartesian_plane;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
-public class CartesianPlane extends JPanel
+public class CartesianPlaneTemp extends JPanel
 {
+    ////////////////////////////////////////////////////////////
+    // BEGIN TEMPORARY CODE FOR PLOTTING FUNCTIONS
+    // These bits of code can be used to plot a function on the
+    // Cartesian plane. They are considered temporary, and will
+    // not be present in future versions of this class.
+    ///////////////////////////////////////////////////////////
+    private List<Point2D>   plot    = null;
+    
+    public void setPlot( List<Point2D> plot )
+    {
+        this.plot = new ArrayList<Point2D>( plot );
+    }
+    
+    public void clearPlot()
+    {
+        plot = null;
+    }
+    ///////////////////////////////////////////////////////////
+    // END TEMPORARY CODE
+    ///////////////////////////////////////////////////////////
+    
     private static final int    mainWindowWidthDV   =
         CPConstants.asInt( CPConstants.MW_WIDTH_DV );
     private static final int    mainWindowHeightDV   =
@@ -119,28 +147,19 @@ public class CartesianPlane extends JPanel
     // paintComponent is invoked.
     //
     ///////////////////////////////////////////////////////
-    private int             currWidth;
-    private int             currHeight;
-    private Graphics2D      gtx;
-    
-    // These variables describe the shape of the rectangle, exclusive
-    // of the margins, in which the grid is drawn. Their values
-    // are recalculated every time paintComponent is invoked.
-    private float           gridWidth;      // width of the rectangle
-    private float           gridHeight;     // height of the rectangle
-    private float           centerXco;      // center x-coordinate
-    private float           minXco;         // left-most x-coordinate
-    private float           maxXco;         // right-most x-coordinate
-    private float           centerYco;      // center y-coordinate
-    private float           minYco;         // top-most y-coordinate
-    private float           maxYco;         // bottom-most y-coordinate
-    
-    public CartesianPlane()
+    private int                 currWidth;
+    private int                 currHeight;
+    private Graphics2D          gtx;
+    private Rectangle2D         gridRect;
+    private Font                labelFont;
+    private FontRenderContext   labelFRC;
+        
+    public CartesianPlaneTemp()
     {
         this( mainWindowWidthDV, mainWindowHeightDV );
     }
     
-    public CartesianPlane( int width, int height )
+    public CartesianPlaneTemp( int width, int height )
     {
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );
@@ -166,63 +185,212 @@ public class CartesianPlane extends JPanel
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
         
-        // Describe the rectangle containing the grid
-        gridWidth = currWidth - marginLeftWidth - marginRightWidth;
-        minXco = marginLeftWidth;
-        maxXco = minXco + gridWidth;
-        centerXco = minXco + gridWidth / 2f;
-        gridHeight = currHeight - marginTopWidth - marginBottomWidth;
-        minYco = marginTopWidth;
-        maxYco = minYco + gridHeight;
-        centerYco = minYco + gridHeight / 2f;
+        // set up the label font
+        //     round font size to nearest int
+        int     fontSize    = (int)(labelFontSize + .5);
+        labelFont = new Font( labelFontName, labelFontStyle, fontSize );
+        gtx.setFont( labelFont );
+        labelFRC = gtx.getFontRenderContext();
 
-        drawGrid();
+        // Describe the rectangle containing the grid
+        float   gridWidth = currWidth - marginLeftWidth - marginRightWidth;
+        float   minXco = marginLeftWidth;
+        float   gridHeight = currHeight - marginTopWidth - marginBottomWidth;
+        float   minYco = marginTopWidth;
+        gridRect = 
+            new Rectangle2D.Float( minXco, minYco, gridWidth, gridHeight );
+
+        drawGridLines();
+        drawMinorTics();
+        drawMajorTics();
         drawAxes();
+        drawHorizontalLabels();
+        drawVerticalLabels();
         paintMargins();
+        
+        ////////////////////////////////////////////////////////////
+        // BEGIN TEMPORARY CODE FOR PLOTTING FUNCTIONS
+        // These bits of code can be used to plot a function on the
+        // Cartesian plane. They are considered temporary, and will
+        // not be present in future versions of this class.
+        ///////////////////////////////////////////////////////////
+        if ( plot != null )
+        {
+            Ellipse2D   circle  = new Ellipse2D.Float();
+            float       centerX = (float)gridRect.getCenterX();
+            float       centerY = (float)gridRect.getCenterY();
+            gtx.setColor( Color.BLACK );
+            for ( Point2D point : plot )
+            {
+                float   plotXco     = (float)point.getX();
+                float   plotYco     = (float)point.getY();
+                float   pixelXco    = centerX + plotXco * gridUnit;
+                float   pixelYco    = centerY - plotYco * gridUnit;
+                circle.setFrame( pixelXco, pixelYco, 3, 3 );
+                gtx.fill( circle );
+            }
+        }
+        ///////////////////////////////////////////////////////////
+        // END TEMPORARY CODE
+        ///////////////////////////////////////////////////////////
         
         // begin boilerplate
         gtx.dispose();
         // end boilerplate
     }
     
-    private void drawGrid()
-    {
-        gtx.setColor( gridLineColor );
-        gtx.setStroke( new BasicStroke( gridLineWeight ) );
-        float   gridSpacing = gridUnit / gridLineLPU;
-        
-        float   numLeft = (float)Math.floor( gridWidth / 2 / gridSpacing );
-        float   leftXco = centerXco - numLeft * gridSpacing;
-        for ( float xco = leftXco ; xco <= maxXco ; xco += gridSpacing )
-        {
-            Line2D  gridLine    = 
-                new Line2D.Float( xco, minYco, xco, maxYco );
-            gtx.draw( gridLine );
-        }
-        
-        float   numTop  = (float)Math.floor( gridHeight / 2f / gridSpacing );
-        float   topYco  = centerYco - numTop * gridSpacing;
-        for ( float yco = topYco ; yco <= maxYco ; yco += gridSpacing )
-        {
-            Line2D  gridLine    = 
-                new Line2D.Float( minXco, yco, maxXco, yco );
-            gtx.draw( gridLine );
-        }
-    }
-    
     private void drawAxes()
     {
         gtx.setColor( axisColor );
         gtx.setStroke( new BasicStroke( axisWeight ) );
-        Line2D  line    = new Line2D.Float();
         
-        // x axis
-        line.setLine( centerXco, minYco, centerXco, maxYco );
-        gtx.draw( line );
+        // Set the gridUnit to the width of the grid...
+        // ... set the LPU to 1...
+        // ... LineGenerator will iterate lines only for the axes.
+        float   gridUnit    = (float)gridRect.getWidth();
+        LineGenerator   lineGen = 
+            new LineGenerator( gridRect, gridUnit, 1 );
+        for ( Line2D line : lineGen )
+            gtx.draw( line );
+    }
+    
+    private void drawGridLines()
+    {
+        if ( gridLineDraw )
+        {
+            LineGenerator   lineGen = 
+                new LineGenerator( gridRect, gridUnit, gridLineLPU );
+            gtx.setStroke( new BasicStroke( gridLineWeight ) );
+            gtx.setColor( gridLineColor );
+            for ( Line2D line : lineGen )
+                gtx.draw( line );
+        }
+    }
+    
+    private void drawMinorTics()
+    {
+        if ( ticMinorDraw )
+        {
+            LineGenerator   lineGen = 
+                new LineGenerator( 
+                    gridRect, 
+                    gridUnit, 
+                    ticMinorMPU,
+                    ticMinorLen,
+                    LineGenerator.BOTH
+                );
+            gtx.setStroke( new BasicStroke( ticMinorWeight ) );
+            gtx.setColor( ticMinorColor );
+            for ( Line2D line : lineGen )
+                gtx.draw( line );
+        }
+    }
+    
+    private void drawMajorTics()
+    {
+        if ( ticMajorDraw )
+        {
+            LineGenerator   lineGen = 
+                new LineGenerator( 
+                    gridRect, 
+                    gridUnit, 
+                    ticMajorMPU,
+                    ticMajorLen,
+                    LineGenerator.BOTH
+                );
+            gtx.setStroke( new BasicStroke( ticMajorWeight ) );
+            gtx.setColor( ticMajorColor );
+            for ( Line2D line : lineGen )
+                gtx.draw( line );
+        }
+    }
+    
+    /**
+     * Draw the labels on the horizontal tic marks
+     * (top to bottom of y-axis).
+     */
+    private void drawHorizontalLabels()
+    {
+        // padding between tic mark and label
+        final int   labelPadding    = 3;
         
-        // y axis
-        line.setLine( minXco, centerYco, maxXco, centerYco );
-        gtx.draw( line );
+        LineGenerator   lineGen = 
+            new LineGenerator( 
+                gridRect, 
+                gridUnit, 
+                ticMajorMPU,
+                ticMajorLen,
+                LineGenerator.HORIZONTAL
+            );
+        int         numAbove    = 
+            (int)(lineGen.getTotalHorizontalLines() / 2);
+        float       labelIncr   = 1 / ticMajorMPU;
+        float       nextLabel   = numAbove * labelIncr;
+        for ( Line2D line : lineGen )
+        {
+            // Don't draw a label at the origin
+            if ( !equal( nextLabel, 0 ) )
+            {
+                String      label   = String.format( "%3.2f", nextLabel );
+                TextLayout  layout  = 
+                    new TextLayout( label, labelFont, labelFRC );
+                Rectangle2D bounds  = layout.getBounds();
+                float       yOffset = (float)(bounds.getHeight() / 2);
+                float       xco     = (float)line.getX2() + labelPadding;
+                float       yco     = (float)line.getY2() + yOffset;
+                layout.draw( gtx, xco, yco );
+            }
+            nextLabel -= labelIncr;
+        }
+    }
+    
+    /**
+     * Draw the labels on the vertical tic marks
+     * (left to right on x-axis).
+     */
+    private void drawVerticalLabels()
+    {
+        // padding between tic mark and label
+        final int   labelPadding    = 3;
+        
+        LineGenerator   lineGen = 
+            new LineGenerator( 
+                gridRect, 
+                gridUnit, 
+                ticMajorMPU,
+                ticMajorLen,
+                LineGenerator.VERTICAL
+            );
+        int         numLeft     = 
+            (int)(lineGen.getTotalVerticalLines() / 2);
+        float       labelIncr   = 1 / ticMajorMPU;
+        float       nextLabel   = -numLeft * labelIncr;
+        for ( Line2D line : lineGen )
+        {
+            // Don't draw a label at the origin
+            if ( !equal( nextLabel, 0 ) )
+            {
+                String      label   = String.format( "%3.2f", nextLabel );
+                TextLayout  layout  = 
+                    new TextLayout( label, labelFont, labelFRC );
+                Rectangle2D bounds  = layout.getBounds();
+                float       yOffset = 
+                    (float)(bounds.getHeight() + labelPadding);
+                float       xOffset = (float)(bounds.getWidth() / 2);
+                float       xco     = (float)line.getX2() - xOffset;
+                float       yco     = (float)line.getY2() + yOffset;
+                layout.draw( gtx, xco, yco );
+            }
+            nextLabel += labelIncr;
+        }
+    }
+    
+    private static boolean equal( float fVal1, float fVal2 )
+    {
+        final float epsilon = .0001f;
+        float       diff    = Math.abs( fVal1 - fVal2 );
+        boolean     equal   = diff < epsilon;
+        return equal;
     }
     
     private void paintMargins()
@@ -253,10 +421,6 @@ public class CartesianPlane extends JPanel
     }
 
     /**
-     * Gets the current grid unit.
-     * The grid unit describes the number of pixels
-     * alloted to each "unit" as defined by the user.
-     * 
      * @return the gridUnit
      */
     public float getGridUnit()
