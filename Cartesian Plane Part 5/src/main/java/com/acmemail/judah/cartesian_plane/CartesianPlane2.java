@@ -8,39 +8,60 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.JPanel;
 
+/**
+ * This class encapsulates the display of a Cartesian plane.
+ * The plane consists of the following components,
+ * each of which is customizable by the user.
+ * 
+ * <img 
+ *     src="doc-files/SamplePlane.png" 
+ *     alt="Sample Plane"
+ *     width = "25%"
+ * />
+ * 
+ * <table style="border-collapse: collapse; border: .25em solid black; max-width: 50em;">
+ *     <caption>Summary of Properties</caption>
+ *     <tr>
+ *         <th style="border: .25em solid black; padding: .2em;">
+ *             Property
+ *         </th>
+ *         <th style="border: .25em solid black; padding: .2em;">
+ *             Type
+ *         </th>
+ *         <th style="border: .25em solid black; padding: .2em;">
+ *             Description
+ *         </th>
+ *     </tr>
+ *     <tr>
+ *         <td style="border: .25em solid black; padding: .2em;">
+ *             gridUnit
+ *         </td>
+ *         <td style="border: .25em solid black; padding: .2em;">
+ *             float
+ *         </td>
+ *         <td style="border: .25em solid black; padding: .2em;">
+ *             The grid unit, 
+ *             in pixels per unit.
+ *             If this property has a value of 25
+ *             each unit of display
+ *             will have span 25 pixels.
+ *             The grid unit 
+ *             is always the same
+ *             for both the x- and y-axes.
+ *         </td>
+ *     </tr>
+ * </table>
+ * 
+ * @author Jack Straub
+ */
 @SuppressWarnings("serial")
-public class CartesianPlaneTemp extends JPanel
+public class CartesianPlane2 extends JPanel
 {
-    ////////////////////////////////////////////////////////////
-    // BEGIN TEMPORARY CODE FOR PLOTTING FUNCTIONS
-    // These bits of code can be used to plot a function on the
-    // Cartesian plane. They are considered temporary, and will
-    // not be present in future versions of this class.
-    ///////////////////////////////////////////////////////////
-    private List<Point2D>   plot    = null;
-    
-    public void setPlot( List<Point2D> plot )
-    {
-        this.plot = new ArrayList<Point2D>( plot );
-    }
-    
-    public void clearPlot()
-    {
-        plot = null;
-    }
-    ///////////////////////////////////////////////////////////
-    // END TEMPORARY CODE
-    ///////////////////////////////////////////////////////////
-    
     private static final int    mainWindowWidthDV   =
         CPConstants.asInt( CPConstants.MW_WIDTH_DV );
     private static final int    mainWindowHeightDV   =
@@ -154,12 +175,12 @@ public class CartesianPlaneTemp extends JPanel
     private Font                labelFont;
     private FontRenderContext   labelFRC;
         
-    public CartesianPlaneTemp()
+    public CartesianPlane2()
     {
         this( mainWindowWidthDV, mainWindowHeightDV );
     }
     
-    public CartesianPlaneTemp( int width, int height )
+    public CartesianPlane2( int width, int height )
     {
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );
@@ -207,32 +228,6 @@ public class CartesianPlaneTemp extends JPanel
         drawHorizontalLabels();
         drawVerticalLabels();
         paintMargins();
-        
-        ////////////////////////////////////////////////////////////
-        // BEGIN TEMPORARY CODE FOR PLOTTING FUNCTIONS
-        // These bits of code can be used to plot a function on the
-        // Cartesian plane. They are considered temporary, and will
-        // not be present in future versions of this class.
-        ///////////////////////////////////////////////////////////
-        if ( plot != null )
-        {
-            Ellipse2D   circle  = new Ellipse2D.Float();
-            float       centerX = (float)gridRect.getCenterX();
-            float       centerY = (float)gridRect.getCenterY();
-            gtx.setColor( Color.BLACK );
-            for ( Point2D point : plot )
-            {
-                float   plotXco     = (float)point.getX();
-                float   plotYco     = (float)point.getY();
-                float   pixelXco    = centerX + plotXco * gridUnit;
-                float   pixelYco    = centerY - plotYco * gridUnit;
-                circle.setFrame( pixelXco, pixelYco, 3, 3 );
-                gtx.fill( circle );
-            }
-        }
-        ///////////////////////////////////////////////////////////
-        // END TEMPORARY CODE
-        ///////////////////////////////////////////////////////////
         
         // begin boilerplate
         gtx.dispose();

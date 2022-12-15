@@ -3,6 +3,12 @@ package com.acmemail.judah.cartesian_plane;
 import java.awt.Color;
 import java.awt.Font;
 
+/**
+ * The class contains the declarations
+ * of all constants for the Cartesian Plane project.
+ * 
+ * @author Jack Straub
+ */
 public class CPConstants
 {
     /////////////////////////////////////////////////
@@ -14,7 +20,6 @@ public class CPConstants
     /////////////////////////////////////////////////
     //   Main window properties
     /////////////////////////////////////////////////
-    /** Grid units (pixels-per-unit) default value: float. */
     /** Main window width default value: int. */
     public static final String  MW_WIDTH_DV         = "500";
     /** Main window height default value: int. */

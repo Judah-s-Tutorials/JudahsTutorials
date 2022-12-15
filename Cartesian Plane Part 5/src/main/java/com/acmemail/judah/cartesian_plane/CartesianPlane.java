@@ -13,6 +13,52 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
+/**
+ * This class encapsulates the display of a Cartesian plane.
+ * The plane consists of the following components,
+ * each of which is customizable by the user.
+ * 
+ * <img 
+ *     src="doc-files/SamplePlane.png" 
+ *     alt="Sample Plane"
+ *     width = "25%"
+ * />
+ * 
+ * <table class="vanilla">
+ *     <caption>Summary of Properties</caption>
+ *     <tr>
+ *         <th class="vanilla">
+ *             Property
+ *         </th>
+ *         <th class="vanilla">
+ *             Type
+ *         </th>
+ *         <th class="vanilla">
+ *             Description
+ *         </th>
+ *     </tr>
+ *     <tr>
+ *         <td class="vanilla">
+ *             gridUnit
+ *         </td>
+ *         <td class="vanilla">
+ *             float
+ *         </td>
+ *         <td class="vanilla">
+ *             The grid unit, 
+ *             in pixels per unit.
+ *             If this property has a value of 25
+ *             each unit of display
+ *             will have span 25 pixels.
+ *             The grid unit 
+ *             is always the same
+ *             for both the x- and y-axes.
+ *         </td>
+ *     </tr>
+ * </table>
+ * 
+ * @author Jack Straub
+ */
 @SuppressWarnings("serial")
 public class CartesianPlane extends JPanel
 {

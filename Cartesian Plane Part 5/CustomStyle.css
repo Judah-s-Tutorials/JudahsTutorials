@@ -1,0 +1,12 @@
+table.vanilla
+{
+	border-collapse: collapse; 
+	border: .25em solid black; 
+	max-width: 50em;
+}
+
+th,td.vanilla
+{
+	border: .25em solid black;
+}
+	

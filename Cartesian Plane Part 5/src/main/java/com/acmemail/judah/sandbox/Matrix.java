@@ -68,6 +68,9 @@ public class Matrix
      * @param rowNum    the number of the row to return
      * 
      * @return the given row of the matrix
+     * 
+     * @throws  ArrayIndexOutOfBoundsException
+     *          if the given row number is out of range
      */
     public double[] getRow( int rowNum )
     {
