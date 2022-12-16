@@ -1,12 +1,18 @@
-table.vanilla
+table.js-plain
 {
 	border-collapse: collapse; 
-	border: .25em solid black; 
+	border: .1em solid black; 
 	max-width: 50em;
 }
 
-th,td.vanilla
+th.js-plain,td.js-plain
 {
-	border: .25em solid black;
+	border: .1em solid black;
+	padding: .3em;
 }
-	
+
+tr.js-empty
+{
+	background-color: #CCCCCC;
+	height: 1em;
+}

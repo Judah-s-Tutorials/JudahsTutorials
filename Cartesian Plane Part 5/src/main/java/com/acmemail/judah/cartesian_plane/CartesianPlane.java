@@ -17,45 +17,378 @@ import javax.swing.JPanel;
  * This class encapsulates the display of a Cartesian plane.
  * The plane consists of the following components,
  * each of which is customizable by the user.
- * 
+ * <p>
  * <img 
  *     src="doc-files/SamplePlane.png" 
  *     alt="Sample Plane"
- *     width = "25%"
- * />
+ *     width="25%"
+ * >
+ * </p>
  * 
- * <table class="vanilla">
- *     <caption>Summary of Properties</caption>
- *     <tr>
- *         <th class="vanilla">
- *             Property
- *         </th>
- *         <th class="vanilla">
- *             Type
- *         </th>
- *         <th class="vanilla">
- *             Description
- *         </th>
- *     </tr>
- *     <tr>
- *         <td class="vanilla">
- *             gridUnit
- *         </td>
- *         <td class="vanilla">
- *             float
- *         </td>
- *         <td class="vanilla">
- *             The grid unit, 
- *             in pixels per unit.
- *             If this property has a value of 25
- *             each unit of display
- *             will have span 25 pixels.
- *             The grid unit 
- *             is always the same
- *             for both the x- and y-axes.
- *         </td>
- *     </tr>
- * </table>
+ *    <table class="js-plain">
+ *         <caption>Summary of Properties</caption>
+ *         <tr>
+ *             <th class="js-plain">
+ *                 Property
+ *             </th>
+ *             <th class="js-plain">
+ *                 Type
+ *             </th>
+ *             <th class="js-plain">
+ *                 Description
+ *             </th>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 gridUnit
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The grid unit, 
+ *                 in pixels per unit.
+ *                 If this property has a value of 25
+ *                 each unit of display
+ *                 will have span 25 pixels.
+ *                 The grid unit 
+ *                 is always the same
+ *                 for both the x- and y-axes.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 mwBGColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The background color of the main window.
+ *             </td>
+ *         </tr>
+ *         <tr class="js-empty"><td></td><td></td><td></td></tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 marginTopWidth
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The width of the top margin.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 marginTopBGColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The background color of the top margin.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 marginRightWidth
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The width of the right margin.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 marginRightBGColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The background color of the right margin.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 marginBottomWidth
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The width of the bottom margin.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 marginBottomBGColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The background color of the bottom margin.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 marginLeftWidth
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The width of the left margin.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 marginLeftBGColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The background color of the left margin.
+ *             </td>
+ *         </tr>
+ *         <tr class="js-empty"><td></td><td></td><td></td></tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMinorColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The color of the minor tic marks.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMinorWeight
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The weight of the minor tic marks.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMinorLen
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The length of the minor tic marks.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMinorMPU
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The number of minor tic marks per unit.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMinorDraw
+ *             </td>
+ *             <td class="js-plain">
+ *                 boolean
+ *             </td>
+ *             <td class="js-plain">
+ *                 True to include the minor tic marks
+ *                 in the graphic,
+ *                 false to omit them.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMajorColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The color of the major tic marks.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMajorWeight
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The weight of the major tic marks.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMajorLen
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The length of the major tic marks.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMajorMPU
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The number of major tic marks per unit.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 ticMajorDraw
+ *             </td>
+ *             <td class="js-plain">
+ *                 boolean
+ *             </td>
+ *             <td class="js-plain">
+ *                 True to include the major tic marks
+ *                 in the graphic,
+ *                 false to omit them.
+ *             </td>
+ *         </tr>
+ *         <tr class="js-empty"><td></td><td></td><td></td></tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 gridLineColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The color of the grid lines.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 gridLineWeight
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The weight of the grid lines.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 gridLineLPU
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The number of grid lines per unit.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 gridLineDraw
+ *             </td>
+ *             <td class="js-plain">
+ *                 boolean
+ *             </td>
+ *             <td class="js-plain">
+ *                 True to include the grid lines
+ *                 in the graphic,
+ *                 false to omit them.
+ *             </td>
+ *         </tr>
+ *         <tr class="js-empty"><td></td><td></td><td></td></tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 axisColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The color of the x- and y-axes.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 gridLineWeight
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The weight of the x- and y-axes.
+ *             </td>
+ *         </tr>
+ *         <tr class="js-empty"><td></td><td></td><td></td></tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 labelFontColor
+ *             </td>
+ *             <td class="js-plain">
+ *                 Color
+ *             </td>
+ *             <td class="js-plain">
+ *                 The color used to draw the labels on the x- and y-axes.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 labelFontName
+ *             </td>
+ *             <td class="js-plain">
+ *                 String
+ *             </td>
+ *             <td class="js-plain">
+ *                 The name of the font used to draw the labels on the x- and y-axes.
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 labelFontStyle
+ *             </td>
+ *             <td class="js-plain">
+ *                 int
+ *             </td>
+ *             <td class="js-plain">
+ *                 The style of the font used to draw the labels on the x- and y-axes
+ *                 (from the Font class,
+ *                 e.g. Font.PLAIN).
+ *             </td>
+ *         </tr>
+ *         <tr>
+ *             <td class="js-plain">
+ *                 labelFontSize
+ *             </td>
+ *             <td class="js-plain">
+ *                 float
+ *             </td>
+ *             <td class="js-plain">
+ *                 The size of the font used to draw the labels on the x- and y-axes.
+ *             </td>
+ *         </tr>
+ *    </table>
  * 
  * @author Jack Straub
  */
@@ -175,11 +508,22 @@ public class CartesianPlane extends JPanel
     private Font                labelFont;
     private FontRenderContext   labelFRC;
         
+    /**
+     * Constructor.
+     * Builds a CartesianPlane with a default width and height.
+     */
     public CartesianPlane()
     {
         this( mainWindowWidthDV, mainWindowHeightDV );
     }
     
+    /**
+     * Constructor.
+     * Builds a CartesianPlane with a given width and height.
+     *
+     * @param width     the given width
+     * @param height    the given height
+     */
     public CartesianPlane( int width, int height )
     {
         Dimension   dim = new Dimension( width, height );
@@ -416,7 +760,10 @@ public class CartesianPlane extends JPanel
     }
 
     /**
-     * @return the gridUnit
+     * Gets the value of the grid unit
+     * (the number of pixels consumed per unit).
+     * 
+     * @return the grid unit
      */
     public float getGridUnit()
     {
@@ -424,7 +771,11 @@ public class CartesianPlane extends JPanel
     }
 
     /**
-     * @param gridUnit the gridUnit to set
+     * Sets the grid unit
+     * (the number of pixels consumed per unit)
+     * to the given value.
+     * 
+     * @param gridUnit the given value
      */
     public void setGridUnit(float gridUnit)
     {
