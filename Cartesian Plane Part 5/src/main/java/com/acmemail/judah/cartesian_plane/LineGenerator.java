@@ -1,10 +1,90 @@
 package com.acmemail.judah.cartesian_plane;
 
+import java.awt.BasicStroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
+/**
+ * An instance of this class
+ * is used to generate the 
+ * horizontal and/or vertical lines in a grid.
+ * <div>
+ * <img 
+ *     src="doc-files/LineGeneratorFigure.png" 
+ *     alt="LineGenerator Demo"
+ *     style="float:right; width:15%; height:auto;"
+ * >
+ * Given a bounding rectangle for a grid,
+ * one vertical line is always generated
+ * at the horizontal center of the grid
+ * (as though it were the y-axis
+ * of a Cartesian plane).
+ * A horizontal line is always generated
+ * at the vertical center of the grid
+ * (as though it were the x-axis
+ * of a Cartesian plane).
+ * <p>
+ * The grid is divided into <em>units</em>
+ * (the <em>gridUnit</em>),
+ * where <em>1 unit = gridUnit pixels</em>.
+ * The number of lines generated
+ * is determined by a given 
+ * number of lines per unit (the <em>lpu</em>).
+ * The <em>gridUnit</em> and <em>lpu</em>
+ * are provided by the user
+ * in the constructor.
+ * Users also specify,
+ * via the constructor,
+ * whether they want to generate
+ * horizontal lines, vertical lines or both.
+ * Once constructed,
+ * the user can obtain an Iterator&lt;Line2D&gt;
+ * to generate the lines
+ * or use a for-each loop.
+ * </p>
+ * <p>
+ * It is guaranteed that 
+ * horizontal line are generated sequentially,
+ * from the top of the grid to the bottom,
+ * and vertical lines are generated sequentially
+ * from left to right.
+ * </p>
+ * </div>
+ * <p>
+ * Following is a code sample
+ * that was used to generate the lines
+ * in the figure at the right.
+ * </p>
+ * <div class="js-codeblock" style="max-width: 35em;">
+ * LineGenerator   hlGen   = 
+    new LineGenerator( 
+        boundingRect,
+        gridUnit,
+        lpu,
+        -1,
+        LineGenerator.HORIZONTAL
+    );
+gtx.setStroke( new BasicStroke( lineWeight ));
+gtx.setColor( hlColor );
+for ( Line2D line : hlGen )
+    gtx.draw( line );
+
+LineGenerator   vlGen   = 
+    new LineGenerator( 
+        boundingRect,
+        gridUnit,
+        lpu,
+        -1,
+        LineGenerator.VERTICAL
+    );
+gtx.setColor( vlColor );
+for ( Line2D line : vlGen )
+    gtx.draw( line );
+</div>
+ * @author Jack Straub
+ */
 public class LineGenerator implements Iterable<Line2D>
 {
     public static final int HORIZONTAL  = 1;

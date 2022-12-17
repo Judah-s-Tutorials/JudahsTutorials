@@ -50,3 +50,7 @@ hs_err_pid*
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
 /.recommenders/
+
+# blog backups
+Blog-backups
+

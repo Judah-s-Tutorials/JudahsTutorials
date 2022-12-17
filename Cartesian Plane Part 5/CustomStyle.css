@@ -16,3 +16,15 @@ tr.js-empty
 	background-color: #CCCCCC;
 	height: 1em;
 }
+
+.js-codeblock
+{
+	margin-top: 1em;
+	margin-left: 5em;
+	padding: 1em;
+	border: .1em solid black;
+	background-color: #EEEEEE;
+	color: black;
+	white-space: pre;
+	font-family: "courier new", monospace;
+}

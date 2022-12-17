@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * An instance of the class encapsulates a matrix.
  * 
- * @author johns
+ * @author Jack Straub
  *
  */
 public class Matrix

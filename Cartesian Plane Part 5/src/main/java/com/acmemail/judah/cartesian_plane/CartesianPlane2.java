@@ -393,7 +393,7 @@ import javax.swing.JPanel;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class CartesianPlane extends JPanel
+public class CartesianPlane2 extends JPanel
 {
     private static final int    mainWindowWidthDV   =
         CPConstants.asInt( CPConstants.MW_WIDTH_DV );
@@ -512,7 +512,7 @@ public class CartesianPlane extends JPanel
      * Constructor.
      * Builds a CartesianPlane with a default width and height.
      */
-    public CartesianPlane()
+    public CartesianPlane2()
     {
         this( mainWindowWidthDV, mainWindowHeightDV );
     }
@@ -524,7 +524,7 @@ public class CartesianPlane extends JPanel
      * @param width     the given width
      * @param height    the given height
      */
-    public CartesianPlane( int width, int height )
+    public CartesianPlane2( int width, int height )
     {
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );
