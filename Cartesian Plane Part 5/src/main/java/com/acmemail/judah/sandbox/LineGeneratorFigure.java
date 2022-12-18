@@ -11,7 +11,7 @@ import java.awt.geom.Rectangle2D;
 import javax.swing.JPanel;
 
 import com.acmemail.judah.cartesian_plane.LineGenerator;
-import com.acmemail.judah.cartesian_plane.Root;
+import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
 /**
  * This class for inclusion in the LineGenerator documentation.

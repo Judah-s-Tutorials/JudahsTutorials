@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane;
+package com.acmemail.judah.cartesian_plane.graphics_utils;
 
 
 import java.awt.BorderLayout;
@@ -38,12 +38,12 @@ public class Root implements Runnable
     }
     
     /**
-     * Display the frame.
+     * Start the event gathering loop and display the frame.
      */
     public void start()
     {
     	/* 
-    	 * The invokeLater method display the window
+    	 * The invokeLater method displays the window
     	 * and activates the process for managing things
     	 * like button clicks, window resizing and 
     	 * window minimization/maximization.
@@ -55,9 +55,9 @@ public class Root implements Runnable
     }
     
     /**
-     * Required by the Runnable interface.
      * This method is the place where the initial content
      * of the frame must be configured.
+     * Required by the Runnable interface.
      */
     public void run()
     {
