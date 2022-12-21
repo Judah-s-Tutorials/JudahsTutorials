@@ -1,5 +1,7 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
+import java.awt.Color;
+
 public class IntegerToHexStringDemo
 {
     public static void main(String[] args)
