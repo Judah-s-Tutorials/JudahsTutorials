@@ -14,7 +14,7 @@ import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class LineGeneratorTest
+class LineGeneratorTestTemp
 {
     private static final Random randy           = new Random( 5 );
     private static final float  minRectXco      = 0;
@@ -140,7 +140,7 @@ class LineGeneratorTest
         // did we get the expected number of lines?
         float   expNumLines = defMetrics.vLines.size();
         float   actNumLines = gen.getTotalVerticalLines();
-        assertEquals( expNumLines, actNumLines );
+//        assertEquals( expNumLines, actNumLines );
         
         // do we get at least one line?
         Iterator<Line2D>    iter    = gen.iterator();
@@ -160,11 +160,14 @@ class LineGeneratorTest
         assertEquals( expLen, actLen );
         
         // are only vertical lines generated?
+        int count = 1;
         while ( iter.hasNext() )
         {
             Line2D  next    = iter.next();
             assertEquals( next.getX1(), next.getX2() );
+            ++count;
         }
+        System.out.println( "count = " + count );
     }
 
     /**
@@ -200,25 +203,9 @@ class LineGeneratorTest
     }
 
     @Test
-    void testIteratorH()
+    void testIterator()
     {
-        LineGenerator   gen     =
-            new LineGenerator(
-                defRect,
-                defGridUnit,
-                defLPU,
-                -1,
-                LineGenerator.VERTICAL
-            );
-        for ( Line2D line : gen )
-        {
-            float   maxXco  = defRectXco + defRectWidth;
-            float   maxYco  = defRectYco + defRectHeight;
-            assertFloatGE( (float)line.getX1(), defRectXco, "X" );
-            assertFloatLT( (float)line.getX2(), maxXco, "X" );
-            assertFloatGE( (float)line.getY1(), defRectYco, "Y" );
-            assertFloatLT( (float)line.getY2(), maxYco, "Y" );
-        }
+        fail("Not yet implemented");
     }
 
     @Test
@@ -233,7 +220,7 @@ class LineGeneratorTest
         fail("Not yet implemented");
     }
     
-    private void assertLinesEqual( Line2D line1, Line2D line2 )
+    private void assertLinesEquals( Line2D line1, Line2D line2 )
     {
         final float epsilon = .001f;
         assertEquals( line1.getX1(), line2.getX1(), epsilon );
@@ -251,22 +238,6 @@ class LineGeneratorTest
         assertTrue( next >= min );
         assertTrue( next < max );
         return next;
-    }
-    
-    private static void assertFloatGE( float fVal1, float fVal2, String tag )
-    {
-        final double    epsilon = .001f;
-        String          msg     = tag + 1 + "=" + fVal1 + ", " + tag + 2 + "=" + fVal2;
-        double          diff    = fVal1 - fVal2;
-        assertTrue( diff >= -epsilon, msg );
-    }
-    
-    private static void assertFloatLT( float fVal1, float fVal2, String tag )
-    {
-        final double    epsilon = .001f;
-        String          msg     = tag + 1 + "=" + fVal1 + ", " + tag + 2 + "=" + fVal2;
-        double          diff    = fVal1 - fVal2;
-        assertTrue( diff < epsilon, msg );
     }
     
     private static boolean doubleEquals( double fVal1, double fVal2 )
@@ -297,6 +268,9 @@ class LineGeneratorTest
             float   topYco          = (float)rect.getY();
             float   bottomYco       = (float)rect.getHeight() + topYco;
             float   pixelsPerLine   = pixelsPerUnit / linesPerUnit;
+            
+            String  fmt = "w=%f, h=%f, ppu=%f, lpu=%f, ppl=%f%n";
+            System.out.printf( fmt, rect.getWidth(), rect.getHeight(), pixelsPerUnit, linesPerUnit, pixelsPerLine );
             
             // generate vertical lines left of Y axis
             for ( float xco = hCenterXco ; 

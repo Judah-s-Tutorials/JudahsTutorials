@@ -178,8 +178,10 @@ public class LineGenerator implements Iterable<Line2D>
         this.orientation = orientation;
 
         gridSpacing = gridUnit / lpu;
-        totalVerLines = (float)Math.floor( gridWidth / gridSpacing );
-        totalHorLines = (float)Math.floor( gridHeight / gridSpacing );
+        System.out.println( gridWidth /gridSpacing );
+        System.out.println( gridHeight /gridSpacing );
+        totalVerLines = (float)Math.round( gridWidth / gridSpacing );
+        totalHorLines = (float)Math.round( gridHeight / gridSpacing );
     }
 
     /**
@@ -324,7 +326,7 @@ public class LineGenerator implements Iterable<Line2D>
         @Override
         public Line2D next()
         {
-            if ( yco > maxYco )
+            if ( yco >= maxYco )
             {
                 String  msg = "Grid bounds exceeded at y = " + yco;
                 throw new NoSuchElementException( msg ); 
