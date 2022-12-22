@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 
 class LineGeneratorTest
@@ -199,7 +200,7 @@ class LineGeneratorTest
         assertTrue( iter.hasNext() );
     }
 
-    @Test
+    @RepeatedTest(1000)
     void testIteratorH()
     {
         LineGenerator   gen     =
@@ -210,13 +211,17 @@ class LineGeneratorTest
                 -1,
                 LineGenerator.VERTICAL
             );
-        for ( Line2D line : gen )
+        System.out.printf( "gridUnit = %06.3f%n", defRect.getWidth() );
+        float   rectXco = roundToHundredths( defRectXco );
+        float   rectYco = roundToHundredths( defRectYco );
+        float   maxXco  = roundToHundredths( defRectXco + defRectWidth );
+        float   maxYco  = roundToHundredths( defRectYco + defRectHeight );
+        for ( Line2D lineNext : gen )
         {
-            float   maxXco  = defRectXco + defRectWidth;
-            float   maxYco  = defRectYco + defRectHeight;
-            assertFloatGE( (float)line.getX1(), defRectXco, "X" );
+            Line2D  line    = roundToHundredths( lineNext );
+            assertFloatGE( (float)line.getX1(), rectXco, "X" );
             assertFloatLT( (float)line.getX2(), maxXco, "X" );
-            assertFloatGE( (float)line.getY1(), defRectYco, "Y" );
+            assertFloatGE( (float)line.getY1(), rectYco, "Y" );
             assertFloatLT( (float)line.getY2(), maxYco, "Y" );
         }
     }
@@ -253,20 +258,24 @@ class LineGeneratorTest
         return next;
     }
     
-    private static void assertFloatGE( float fVal1, float fVal2, String tag )
+    private static void assertFloatGE( double fVal1, double fVal2, String tag )
     {
         final double    epsilon = .001f;
         String          msg     = tag + 1 + "=" + fVal1 + ", " + tag + 2 + "=" + fVal2;
-        double          diff    = fVal1 - fVal2;
-        assertTrue( diff >= -epsilon, msg );
+//        double          diff    = fVal1 - fVal2;
+//        assertTrue( diff >= -epsilon, msg );
+        double  dVal1   = roundToHundredths( fVal1 );
+        double  dVal2   = roundToHundredths( fVal2 );
+        assertTrue( dVal1 >= dVal2, msg );
     }
     
-    private static void assertFloatLT( float fVal1, float fVal2, String tag )
+    private static void assertFloatLT( double fVal1, double fVal2, String tag )
     {
         final double    epsilon = .001f;
         String          msg     = tag + 1 + "=" + fVal1 + ", " + tag + 2 + "=" + fVal2;
         double          diff    = fVal1 - fVal2;
         assertTrue( diff < epsilon, msg );
+//        assertTrue( fVal1 < fVal2, msg );
     }
     
     private static boolean doubleEquals( double fVal1, double fVal2 )
@@ -275,6 +284,23 @@ class LineGeneratorTest
         double          diff    = Math.abs( fVal1 - fVal2 );
         boolean         result  = diff < epsilon;
         return result;
+    }
+    
+    private static Line2D roundToHundredths( Line2D lineIn )
+    {
+        float   xco1    = roundToHundredths( lineIn.getX1() );
+        float   yco1    = roundToHundredths( lineIn.getY1() );
+        float   xco2    = roundToHundredths( lineIn.getX2() );
+        float   yco2    = roundToHundredths( lineIn.getY2() );
+        Line2D  lineOut = new Line2D.Float( xco1, yco1, xco2, yco2 );
+        return lineOut;
+    }
+    
+    private static float roundToHundredths( double fVar )
+    {
+        float   varOut  = (int)(fVar * 100 + .5);
+        varOut /= 100;
+        return varOut;
     }
 
     private static class LineMetrics

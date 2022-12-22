@@ -180,8 +180,8 @@ public class LineGenerator implements Iterable<Line2D>
         gridSpacing = gridUnit / lpu;
         System.out.println( gridWidth /gridSpacing );
         System.out.println( gridHeight /gridSpacing );
-        totalVerLines = (float)Math.round( gridWidth / gridSpacing );
-        totalHorLines = (float)Math.round( gridHeight / gridSpacing );
+        totalVerLines = (float)Math.floor( gridWidth / gridSpacing );
+        totalHorLines = (float)Math.floor( gridHeight / gridSpacing );
     }
 
     /**
