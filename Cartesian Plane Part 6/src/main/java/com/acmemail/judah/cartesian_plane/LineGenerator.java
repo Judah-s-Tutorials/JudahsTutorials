@@ -103,9 +103,9 @@ public class LineGenerator implements Iterable<Line2D>
     private final float centerYco;      // center y-coordinate
     private final float maxYco;         // bottom-most y-coordinate
     
-    private final float gridUnit;       // pixels per unit
+    private final int   gridUnit;       // pixels per unit
     
-    private final float lpu;            // lines per unit
+    private final int   lpu;            // lines per unit
     private final float length;         // the length of a line
     private final int   orientation;    // HORIZONTAL, VERTICAL or BOTH
     
@@ -129,7 +129,7 @@ public class LineGenerator implements Iterable<Line2D>
      * @param gridUnit  the given grid unit
      * @param lpu       the given lines-per-unit
      */
-    public LineGenerator( Rectangle2D rect, float gridUnit, float lpu )
+    public LineGenerator( Rectangle2D rect, int gridUnit, int lpu )
     {
         this( rect, gridUnit, lpu, -1, BOTH );
     }
@@ -159,8 +159,8 @@ public class LineGenerator implements Iterable<Line2D>
      */
     public LineGenerator( 
         Rectangle2D rect, 
-        float       gridUnit,
-        float       lpu,
+        int         gridUnit,
+        int         lpu,
         float       length, 
         int         orientation
     )
@@ -177,11 +177,13 @@ public class LineGenerator implements Iterable<Line2D>
         this.length = length;
         this.orientation = orientation;
 
-        gridSpacing = gridUnit / lpu;
+        gridSpacing = (float)gridUnit / lpu;
         System.out.println( gridWidth /gridSpacing );
         System.out.println( gridHeight /gridSpacing );
         totalVerLines = (float)Math.floor( gridWidth / gridSpacing );
-        totalHorLines = (float)Math.floor( gridHeight / gridSpacing );
+        float   halfLines   = (float)Math.floor( gridHeight / 2f / gridSpacing );
+        totalHorLines = 2 * halfLines + 1;
+//        totalHorLines = (float)Math.floor( gridHeight / gridSpacing );
     }
 
     /**
@@ -310,7 +312,7 @@ public class LineGenerator implements Iterable<Line2D>
         {
             float   actLength = length >= 0 ? length : gridWidth;
             float   numTop  = (float)Math.floor( totalHorLines / 2 );
-            gridSpacing = gridUnit / lpu;
+            gridSpacing = (float)gridUnit / lpu;
             xco1 = centerXco - actLength / 2;
             xco2 = xco1 + actLength;
             yco = centerYco - numTop * gridSpacing;

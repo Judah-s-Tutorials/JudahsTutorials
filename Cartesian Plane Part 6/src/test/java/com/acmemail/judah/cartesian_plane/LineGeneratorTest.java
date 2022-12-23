@@ -27,17 +27,17 @@ class LineGeneratorTest
     private static final float  minRectHeight   = 300;
     private static final float  maxRectHeight   = 3000;
     
-    private static final float  minGridUnit     = 5;
-    private static final float  maxGridUnit     = 50;
-    private static final float  minLPU          = 1;
+    private static final int    minGridUnit     = 5;
+    private static final int    maxGridUnit     = 50;
+    private static final int    minLPU          = 1;
     
     private float       defRectXco;
     private float       defRectYco;
     private float       defRectWidth;
     private float       defRectHeight;
     private Rectangle2D defRect;
-    private float       defLPU;
-    private float       defGridUnit;
+    private int         defLPU;
+    private int         defGridUnit;
     private LineMetrics defMetrics;
     
     @BeforeEach
@@ -56,8 +56,8 @@ class LineGeneratorTest
         
         // Don't generate more lines-per-unit than
         // there are pixels-per-unit.
-        defGridUnit = nextFloat( minGridUnit, maxGridUnit );
-        defLPU = nextFloat( minLPU, defGridUnit );
+        defGridUnit = randy.nextInt( minGridUnit, maxGridUnit );
+        defLPU = randy.nextInt( minLPU, defGridUnit );
         
         defMetrics = new LineMetrics( defRect, defGridUnit, defLPU );
     }
@@ -200,7 +200,7 @@ class LineGeneratorTest
         assertTrue( iter.hasNext() );
     }
 
-    @RepeatedTest(1000)
+    @RepeatedTest(100)
     void testIteratorH()
     {
         LineGenerator   gen     =
@@ -211,14 +211,13 @@ class LineGeneratorTest
                 -1,
                 LineGenerator.VERTICAL
             );
-        System.out.printf( "gridUnit = %06.3f%n", defRect.getWidth() );
-        float   rectXco = roundToHundredths( defRectXco );
-        float   rectYco = roundToHundredths( defRectYco );
-        float   maxXco  = roundToHundredths( defRectXco + defRectWidth );
-        float   maxYco  = roundToHundredths( defRectYco + defRectHeight );
+        float   rectXco = round( defRectXco );
+        float   rectYco = round( defRectYco );
+        float   maxXco  = round( defRectXco + defRectWidth );
+        float   maxYco  = round( defRectYco + defRectHeight );
         for ( Line2D lineNext : gen )
         {
-            Line2D  line    = roundToHundredths( lineNext );
+            Line2D  line    = round( lineNext );
             assertFloatGE( (float)line.getX1(), rectXco, "X" );
             assertFloatLT( (float)line.getX2(), maxXco, "X" );
             assertFloatGE( (float)line.getY1(), rectYco, "Y" );
@@ -226,10 +225,37 @@ class LineGeneratorTest
         }
     }
 
-    @Test
+    @RepeatedTest(100)
     void testGetTotalHorizontalLines()
     {
-        fail("Not yet implemented");
+        LineGenerator   gen     =
+            new LineGenerator(
+                defRect,
+                defGridUnit,
+                defLPU,
+                -1,
+                LineGenerator.HORIZONTAL
+            );
+        float   exp = defMetrics.hLines.size();
+        float   act = gen.getTotalHorizontalLines();
+        assertEquals( exp, act, ()->supplier() );
+    }
+    
+    private String supplier()
+    {
+        String  fmt =
+            "rectXco=%f, rectYco=%f, rectWidth=%f, rectHeight=%f%n"
+            + "gridUnit=%d, lpu=%d%n";
+        System.out.printf(
+            fmt,
+            defRect.getX(),
+            defRect.getY(),
+            defRect.getWidth(),
+            defRect.getHeight(),
+            defGridUnit,
+            defLPU
+        );
+        return "";
     }
 
     @Test
@@ -264,8 +290,8 @@ class LineGeneratorTest
         String          msg     = tag + 1 + "=" + fVal1 + ", " + tag + 2 + "=" + fVal2;
 //        double          diff    = fVal1 - fVal2;
 //        assertTrue( diff >= -epsilon, msg );
-        double  dVal1   = roundToHundredths( fVal1 );
-        double  dVal2   = roundToHundredths( fVal2 );
+        double  dVal1   = round( fVal1 );
+        double  dVal2   = round( fVal2 );
         assertTrue( dVal1 >= dVal2, msg );
     }
     
@@ -286,20 +312,19 @@ class LineGeneratorTest
         return result;
     }
     
-    private static Line2D roundToHundredths( Line2D lineIn )
+    private static Line2D round( Line2D lineIn )
     {
-        float   xco1    = roundToHundredths( lineIn.getX1() );
-        float   yco1    = roundToHundredths( lineIn.getY1() );
-        float   xco2    = roundToHundredths( lineIn.getX2() );
-        float   yco2    = roundToHundredths( lineIn.getY2() );
+        float   xco1    = round( lineIn.getX1() );
+        float   yco1    = round( lineIn.getY1() );
+        float   xco2    = round( lineIn.getX2() );
+        float   yco2    = round( lineIn.getY2() );
         Line2D  lineOut = new Line2D.Float( xco1, yco1, xco2, yco2 );
         return lineOut;
     }
     
-    private static float roundToHundredths( double fVar )
+    private static float round( double fVar )
     {
-        float   varOut  = (int)(fVar * 100 + .5);
-        varOut /= 100;
+        float   varOut  = (int)(fVar + .5);
         return varOut;
     }
 
@@ -367,6 +392,9 @@ class LineGeneratorTest
                     new Line2D.Float( leftXco, yco, rightXco, yco );
                 hLines.add( line );
             }
+            Line2D  line    = hLines.get( hLines.size() - 1 );
+//            System.out.printf( "topYco = %.3f, bottomYco = %.3f, height=%.3f%n", topYco, bottomYco, rect.getHeight() );
+//            System.out.printf( "yco = %.3f%n", line.getY1() );
         }
         
         public Line2D getLineSegment( Line2D lineIn, float len )

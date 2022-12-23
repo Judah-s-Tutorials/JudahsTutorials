@@ -404,8 +404,8 @@ public class CartesianPlane extends JPanel
     //   General grid properties
     /////////////////////////////////////////////////
     /** Grid units (pixels-per-unit) default value: float. */
-    private float   gridUnit            = 
-        CPConstants.asFloat( CPConstants.GRID_UNIT_DV );
+    private int     gridUnit            = 
+        CPConstants.asInt( CPConstants.GRID_UNIT_DV );
 
     /////////////////////////////////////////////////
     //   Main window properties
@@ -447,8 +447,8 @@ public class CartesianPlane extends JPanel
         CPConstants.asFloat( CPConstants.TIC_MINOR_WEIGHT_DV );
     private float   ticMinorLen         =
         CPConstants.asFloat( CPConstants.TIC_MINOR_LEN_DV );
-    private float   ticMinorMPU         =
-        CPConstants.asFloat( CPConstants.TIC_MINOR_MPU_DV );
+    private int     ticMinorMPU         =
+        CPConstants.asInt( CPConstants.TIC_MINOR_MPU_DV );
     private boolean ticMinorDraw        =
         CPConstants.asBoolean( CPConstants.TIC_MINOR_DRAW_DV );
     private Color   ticMajorColor       =
@@ -457,8 +457,8 @@ public class CartesianPlane extends JPanel
         CPConstants.asFloat( CPConstants.TIC_MAJOR_WEIGHT_DV );
     private float   ticMajorLen         =
         CPConstants.asFloat( CPConstants.TIC_MAJOR_LEN_DV );
-    private float   ticMajorMPU         =
-        CPConstants.asFloat( CPConstants.TIC_MAJOR_MPU_DV );
+    private int     ticMajorMPU         =
+        CPConstants.asInt( CPConstants.TIC_MAJOR_MPU_DV );
     private boolean ticMajorDraw        =
         CPConstants.asBoolean( CPConstants.TIC_MAJOR_DRAW_DV );
 
@@ -469,8 +469,8 @@ public class CartesianPlane extends JPanel
         CPConstants.asColor( CPConstants.GRID_LINE_COLOR_DV );
     private float   gridLineWeight      = 
         CPConstants.asFloat( CPConstants.GRID_LINE_WEIGHT_DV );
-    private float   gridLineLPU         = 
-        CPConstants.asFloat( CPConstants.GRID_LINE_LPU_DV );
+    private int     gridLineLPU         = 
+        CPConstants.asInt( CPConstants.GRID_LINE_LPU_DV );
     private boolean gridLineDraw        =
         CPConstants.asBoolean( CPConstants.GRID_LINE_DRAW_DV );
 
@@ -586,7 +586,7 @@ public class CartesianPlane extends JPanel
         // Set the gridUnit to the width of the grid...
         // ... set the LPU to 1...
         // ... LineGenerator will iterate lines only for the axes.
-        float   gridUnit    = (float)gridRect.getWidth();
+        int     gridUnit    = (int)gridRect.getWidth();
         LineGenerator   lineGen = 
             new LineGenerator( gridRect, gridUnit, 1 );
         for ( Line2D line : lineGen )
@@ -663,7 +663,7 @@ public class CartesianPlane extends JPanel
             );
         int         numAbove    = 
             (int)(lineGen.getTotalHorizontalLines() / 2);
-        float       labelIncr   = 1 / ticMajorMPU;
+        float       labelIncr   = 1f / ticMajorMPU;
         float       nextLabel   = numAbove * labelIncr;
         for ( Line2D line : lineGen )
         {
@@ -702,7 +702,7 @@ public class CartesianPlane extends JPanel
             );
         int         numLeft     = 
             (int)(lineGen.getTotalVerticalLines() / 2);
-        float       labelIncr   = 1 / ticMajorMPU;
+        float       labelIncr   = 1f / ticMajorMPU;
         float       nextLabel   = -numLeft * labelIncr;
         for ( Line2D line : lineGen )
         {
@@ -765,7 +765,7 @@ public class CartesianPlane extends JPanel
      * 
      * @return the grid unit
      */
-    public float getGridUnit()
+    public int getGridUnit()
     {
         return gridUnit;
     }
@@ -777,7 +777,7 @@ public class CartesianPlane extends JPanel
      * 
      * @param gridUnit the given value
      */
-    public void setGridUnit(float gridUnit)
+    public void setGridUnit(int gridUnit)
     {
         this.gridUnit = gridUnit;
     }
@@ -977,7 +977,7 @@ public class CartesianPlane extends JPanel
     /**
      * @return the ticMinorMPU
      */
-    public float getTicMinorMPU()
+    public int getTicMinorMPU()
     {
         return ticMinorMPU;
     }
@@ -985,7 +985,7 @@ public class CartesianPlane extends JPanel
     /**
      * @param ticMinorMPU the ticMinorMPU to set
      */
-    public void setTicMinorMPU(float ticMinorMPU)
+    public void setTicMinorMPU(int ticMinorMPU)
     {
         this.ticMinorMPU = ticMinorMPU;
     }
@@ -1057,7 +1057,7 @@ public class CartesianPlane extends JPanel
     /**
      * @return the ticMajorMPU
      */
-    public float getTicMajorMPU()
+    public int getTicMajorMPU()
     {
         return ticMajorMPU;
     }
@@ -1065,7 +1065,7 @@ public class CartesianPlane extends JPanel
     /**
      * @param ticMajorMPU the ticMajorMPU to set
      */
-    public void setTicMajorMPU(float ticMajorMPU)
+    public void setTicMajorMPU(int ticMajorMPU)
     {
         this.ticMajorMPU = ticMajorMPU;
     }
@@ -1121,7 +1121,7 @@ public class CartesianPlane extends JPanel
     /**
      * @return the gridLineLPU
      */
-    public float getGridLineLPU()
+    public int getGridLineLPU()
     {
         return gridLineLPU;
     }
@@ -1129,7 +1129,7 @@ public class CartesianPlane extends JPanel
     /**
      * @param gridLineLPU the gridLineLPU to set
      */
-    public void setGridLineLPU(float gridLineLPU)
+    public void setGridLineLPU(int gridLineLPU)
     {
         this.gridLineLPU = gridLineLPU;
     }
