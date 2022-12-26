@@ -46,7 +46,7 @@ class LineGeneratorTestTemp2
         defRectXco = 22.925919f;
         defRectYco = 58.901428f;
         defRectWidth = 1298.028564f;
-        defRectHeight = 2035.339233f;
+        defRectHeight = 500f;
         defRect = new Rectangle2D.Float( 
             defRectXco, 
             defRectYco, 
@@ -55,7 +55,7 @@ class LineGeneratorTestTemp2
         );
         
         defGridUnit = 30;
-        defLPU = 26;
+        defLPU = 5;
         
         defMetrics = new LineMetrics( defRect, defGridUnit, defLPU );
     }
@@ -225,6 +225,18 @@ class LineGeneratorTestTemp2
 
 //    @RepeatedTest(100)
     @Test
+    public void testy()
+    {
+        float   testHeight  = defRectHeight;
+        while ( testHeight < 2000 )
+        {
+            defRect.setFrame( defRectXco, defRectYco, defRectWidth, testHeight );
+            defMetrics = new LineMetrics( defRect, defGridUnit, defLPU );  
+            System.out.println( "testHeight=" + testHeight );
+            testGetTotalHorizontalLines();
+            testHeight += .01;
+        }
+    }
     void testGetTotalHorizontalLines()
     {
         LineGenerator   gen     =
@@ -237,7 +249,14 @@ class LineGeneratorTestTemp2
             );
         float   exp = defMetrics.hLines.size();
         float   act = gen.getTotalHorizontalLines();
-        assertEquals( exp, act );
+//        assertEquals( exp, act );
+        Iterator<Line2D>    iter    = gen.iterator();
+        String fmt  = "xco=%f, yco=%f%n";
+        Line2D  line    = iter.next();
+//        System.out.printf( fmt, line.getX1(), line.getY1() );
+        while ( iter.hasNext() )
+            line = iter.next();
+//        System.out.printf( fmt, line.getX1(), line.getY1() );
     }
 
 //    @Test
@@ -353,16 +372,20 @@ class LineGeneratorTestTemp2
                 vLines.add( line );
             }
             
+//            System.out.println( "vCenterYco=" + vCenterYco );
             // generate horizontal lines above X axis
+            int count   = 0;
             for ( float yco = vCenterYco ; 
                   yco >= topYco          ;
                   yco -= pixelsPerLine
                 )
             {
+                count++;
                 Line2D  line    = 
                     new Line2D.Float( leftXco, yco, rightXco, yco );
                 hLines.add( 0, line );
             }
+//            System.out.println( count );
             
             // generate horizontal lines below X axis
             for ( float yco = vCenterYco + pixelsPerLine ;
@@ -375,16 +398,16 @@ class LineGeneratorTestTemp2
                 hLines.add( line );
             }
             Line2D  line    = hLines.get( 0 );
-            print( rect, pixelsPerUnit, linesPerUnit, line );
+//            print( rect, pixelsPerUnit, linesPerUnit, pixelsPerLine, line );
             line    = hLines.get( hLines.size() - 1 );
-            print( rect, pixelsPerUnit, linesPerUnit, line );
+//            print( rect, pixelsPerUnit, linesPerUnit, pixelsPerLine, line );
         }
         
-        private static void print( Rectangle2D defRect, float defGridUnit, float defLPU, Line2D line )
+        private static void print( Rectangle2D defRect, float defGridUnit, float defLPU, float gridSpacing, Line2D line )
         {
             String  fmt =
                 "rectXco=%f, rectYco=%f, rectWidth=%f, rectHeight=%f%n"
-                + "gridUnit=%f, lpu=%f%n";
+                + "gridUnit=%f, lpu=%f, gridSpacing=%f%n";
             System.out.printf(
                 fmt,
                 defRect.getX(),
@@ -392,7 +415,8 @@ class LineGeneratorTestTemp2
                 defRect.getWidth(),
                 defRect.getHeight(),
                 defGridUnit,
-                defLPU
+                defLPU,
+                gridSpacing
             );
             fmt = "xco1 = %f, yco1 = %f, xco2=%f, yco2=%f%n";
             System.out.printf( fmt, line.getX1(), line.getY1(), line.getX2(), line.getY2() );
