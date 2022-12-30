@@ -1,4 +1,4 @@
-package com.acmemail.judah.sandbox.doc_related;
+package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -17,27 +17,96 @@ import javax.swing.JPanel;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
 /**
- * This is a simple class to provide boilerplate for a generic
- * graphics application in Java. To use it, make a copy of it
- * and modify the paintComponent method.
+ * This class demonstrates how a grid
+ * representing the Cartesian plane
+ * is laid out
+ * using the algorithm specified
+ * by the LineGenerator class.
+ * Specifically:
+ * 
+ * <div style="max-width: 50em;">
+ * <ul>
+ * <li>
+ *     The width of the grid is set to 512 pixels. 
+ *     This puts the y-axis at x = (512 - 1)/2 = 255.5.
+ *     That leaves 255.5 pixels to the left of the y-axis
+ *     and 255.5 to the right 
+ *     (we always want the same number of pixels
+ *     to the left and right of the y-axis).
+ * </li>
+ * <li>
+ *     The height of the grid is set to 256 pixels. 
+ *     This puts the x-axis at y = (256 - 1)/2 = 127.5.
+ *     That leaves 127.5 pixels above the x-axis
+ *     and 127.5 below 
+ *     (we always want the same number of pixels
+ *     above and below the x-axis).
+ * </li>
+ * <li>
+ *     The grid unit is set to 32 pixels.
+ *     That puts unit divisions at:
+ *     <ul style="list-style-type: lower-alpha;">
+ *         <li>
+ *             From the y-axis to the left, 
+ *             x = 255.5, 191.5, 127.5, 64.5 and -.5.
+ *         </li>
+ *         <li>
+ *             From the y-axis to the right, 
+ *             x = 255.5, 319.5, 383.5, 447.5 and 511.5.
+ *         </li>
+ *         <li>
+ *             From the x-axis to the top, 
+ *             x = 127.5, 63.5 and -.5.
+ *         </li>
+ *         <li>
+ *             From the x-axis to the bottom, 
+ *             x = 127.5, 191.5 and 255.5.
+ *         </li>
+ *     </ul>
+ * </li>
+ * <li>
+ *     The grid lines-per-unit is set to 2.
+ *     That puts grid lines every 32 pixels, at:
+ *     <ul style="list-style-type: lower-alpha;">
+ *         <li>
+ *             From the y-axis to the left, 
+ *             x = 255.5, 223.5, 191.5, ... -.5.
+ *         </li>
+ *         <li>
+ *             From the y-axis to the right, 
+ *             x = 255.5, 287.5, 318.5, ... 511.5.
+ *         </li>
+ *         <li>
+ *             From the x-axis to the top, 
+ *             x = 127.5, 95.5, 63.5 ... -.5.
+ *         </li>
+ *         <li>
+ *             From the x-axis to the bottom, 
+ *             x = 127.5, 159.5, 191.5 ... 255.5.
+ *         </li>
+ *     </ul>
+ * </li>
+ * </ul>
+ * </div>
+ * <p>
+ * This data is intended
+ * to be used as a base case
+ * for validating the output
+ * from the LineGenerator iterators.
+ * </p>
  * 
  * @author Jack Straub
  * 
- * @see <a href="https://judahstutorials.blogspot.com/p/java-project-graphics-bootstrap.html">
- * Graphics Bootstrap
- * </a>
+ * @see LineGenerator
  *
  */
 @SuppressWarnings("serial")
-public class Canvas extends JPanel
+public class GridLayoutDemo extends JPanel
 {
-    private final Color     bgColor     = new Color( .9f, .9f, .9f );
-    private final Color     fillColor   = Color.BLUE;
-    private final Color     edgeColor   = Color.BLACK;
-    private final int       edgeWidth   = 3;
+    private final Color         bgColor     = new Color( .9f, .9f, .9f );
     
-    private final float         xlateXco     = 50;
-    private final float         xlateYco     = 50;
+    private final float         xlateXco    = 35;
+    private final float         xlateYco    = 35;
     private final float         gridWidth   = 512;
     private final float         gridHeight  = 256;
     private final float         xAxisYco    = (gridHeight - 1) / 2;
@@ -64,8 +133,8 @@ public class Canvas extends JPanel
     
     public static void main( String[] args )
     {
-        Canvas  canvas  = new Canvas( 1200, 800 );
-        Root    root    = new Root( canvas );
+        GridLayoutDemo  canvas  = new GridLayoutDemo();
+        Root            root    = new Root( canvas );
         root.start();
     }
     
@@ -73,12 +142,13 @@ public class Canvas extends JPanel
      * Constructor. Sets the initial height and width of this Canvas.
      * Note that the user can always change the geometry after the
      * window is displayed.
-     * 
-     * @param width		initial width of this window
-     * @param height	initial height of this window
      */
-    public Canvas( int width, int height )
+    public GridLayoutDemo()
     {
+        // set width and height so that demo grid + surrounding text 
+        // will be roughly centered in the window
+        int width   = (int)(gridWidth + 3 * xlateXco );
+        int height  = (int)(gridHeight + 2 * xlateYco );
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );
     }
@@ -115,7 +185,6 @@ public class Canvas extends JPanel
         // get the FontRenderContext
         frc = gtx.getFontRenderContext();
                 
-        // Fill the rectangle
         gtx.setColor( gridColor );
         gtx.fill( grid );
         drawAxes();
@@ -159,7 +228,7 @@ public class Canvas extends JPanel
         }
         System.out.println( "**********" );
 
-        System.out.println( "yAxisyco = " + yAxisXco );
+        System.out.println( "yAxisXco = " + yAxisXco );
         for ( int inx = -4 ; inx <= 4 ; ++inx )
         {
             float   xco     = yAxisXco + inx * ppu;

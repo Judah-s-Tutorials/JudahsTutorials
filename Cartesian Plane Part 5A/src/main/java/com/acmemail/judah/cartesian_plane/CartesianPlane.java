@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
@@ -566,19 +565,10 @@ public class CartesianPlane extends JPanel
         gridRect = 
             new Rectangle2D.Float( minXco, minYco, gridWidth, gridHeight );
 
-        // Set the clip region to the rectangle bounding the grid before
-        // drawing any lines. Don't forget to restore the original clip
-        // region after drawing the lines.
-        Shape   origClip    = gtx.getClip();
-        gtx.setClip( gridRect );
-
         drawGridLines();
         drawMinorTics();
         drawMajorTics();
         drawAxes();
-        
-        gtx.setClip( origClip );
-
         drawHorizontalLabels();
         drawVerticalLabels();
         paintMargins();
