@@ -43,7 +43,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  *     above and below the x-axis).
  * </li>
  * <li>
- *     The grid unit is set to 32 pixels.
+ *     The grid unit is set to 64 pixels.
  *     That puts unit divisions at:
  *     <ul style="list-style-type: lower-alpha;">
  *         <li>
@@ -66,7 +66,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  * </li>
  * <li>
  *     The grid lines-per-unit is set to 2.
- *     That puts grid lines every 32 pixels, at:
+ *     That puts grid lines every 64 pixels, at:
  *     <ul style="list-style-type: lower-alpha;">
  *         <li>
  *             From the y-axis to the left, 
@@ -131,6 +131,11 @@ public class GridLayoutDemo extends JPanel
     private int             currHeight;
     private Graphics2D      gtx;
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments, not used
+     */
     public static void main( String[] args )
     {
         GridLayoutDemo  canvas  = new GridLayoutDemo();
@@ -154,16 +159,7 @@ public class GridLayoutDemo extends JPanel
     }
     
     /**
-     * This method is where you do all your drawing.
-     * Note the the window must be COMPLETELY redrawn
-     * every time this method is called;
-     * Java does not remember anything you previously drew.
-     * 
-     * This simple example merely draws and fills a rectangle
-     * which occupies some proportion of the window.
-     * To substitute your own work, KEEP THE CODE THAT IS
-     * MARKED BOILERPLATE, and substitute your code
-     * for the code that displays the rectangle.
+     * Draws/redraws this window as necessary.
      * 
      * @param graphics  Graphics context, for doing all drawing.
      */
@@ -196,6 +192,9 @@ public class GridLayoutDemo extends JPanel
         // end boilerplate
     }
     
+    /**
+     * Draw the axes in the demo grid.
+     */
     private void drawAxes()
     {
         gtx.setColor( axisColor );
@@ -210,6 +209,9 @@ public class GridLayoutDemo extends JPanel
         gtx.draw( yAxis );
     }
     
+    /**
+     * Draw the unit divisions in the demo grid.
+     */
     private void drawUnits()
     {
         gtx.setColor( unitColor );
@@ -239,6 +241,9 @@ public class GridLayoutDemo extends JPanel
         }
     }
     
+    /**
+     * Draw the grid lines in the demo grid.
+     */
     private void drawGridLines()
     {
         gtx.setColor( glColor );
@@ -268,7 +273,17 @@ public class GridLayoutDemo extends JPanel
         }
     }
     
-    private void labelVerticalLine( Line2D line, int column )
+    /**
+     * Draw a label below the grid, 
+     * indicating the position of a given vertical line.
+     * The label is drawn in a given row
+     * below the grid. 
+     * The first row is #0.
+     * 
+     * @param line  the given line
+     * @param row   the given row
+     */
+    private void labelVerticalLine( Line2D line, int row )
     {
         float       xco1    = (float)line.getX1();
         String      label   = String.format( "%3.1f", xco1 );
@@ -276,13 +291,23 @@ public class GridLayoutDemo extends JPanel
         Rectangle2D bounds  = layout.getBounds();
         float       leading = layout.getLeading();
         float       yOffset = 
-            (column + 1) * ((float)bounds.getHeight() + 5) + column * leading;
+            (row + 1) * ((float)bounds.getHeight() + 5) + row * leading;
         float       xOffset = (float)bounds.getWidth() / 2;
         float       xco     = (float)line.getX1() - xOffset;
         float       yco     = (float)line.getY2() + yOffset;
         layout.draw( gtx, xco, yco );
     }
     
+    /**
+     * Draw a label to the right of the grid, 
+     * indicating the position of a given horizontal line.
+     * The label is drawn in a given column
+     * next to the grid. 
+     * The first column is #0.
+     * 
+     * @param line  the given line
+     * @param row   the given row
+     */
     private void labelHorizontalLine( Line2D line, int column )
     {
         float       yco1    = (float)line.getY1();

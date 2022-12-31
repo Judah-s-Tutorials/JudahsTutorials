@@ -159,13 +159,13 @@ for ( Line2D line : vlGen )
  *     </li>
  *     <li>
  *     The coordinates of the x-axis
- *     are given by <em>y = recHeight / 2 (centerYco)</em>
+ *     are given by <em>y = (recHeight - 1) / 2</em> (centerYco)
  *     for x in the range
  *     [rectXco, rectXco + rectWidth).
  *     </li>
  *     <li>
  *     The coordinates of the y-axis
- *     are given by <em>x = recWidth / 2 (centerXco)</em>
+ *     are given by <em>x = (recWidth - 1) / 2</em> (centerXco)
  *     for y in the range
  *     [rectYco, rectYco + rectHeight).
  *     </li>
@@ -249,12 +249,11 @@ public class LineGenerator implements Iterable<Line2D>
     private final float gridHeight;     // height of the rectangle
     private final float centerXco;      // center x-coordinate
     private final float maxXco;         // right-most x-coordinate
+    private final float minXco;         // left-most x-coordinate
     private final float centerYco;      // center y-coordinate
     private final float maxYco;         // bottom-most y-coordinate
+    private final float minYco;         // left-most x-coordinate
     
-    private final float gridUnit;       // pixels per unit
-    
-    private final float lpu;            // lines per unit
     private final float length;         // the length of a line
     private final int   orientation;    // HORIZONTAL, VERTICAL or BOTH
     
@@ -318,13 +317,13 @@ public class LineGenerator implements Iterable<Line2D>
     {
         gridWidth = (float)rect.getWidth();
         gridHeight = (float)rect.getHeight();
-        centerXco = (float)rect.getCenterX();
-        maxXco = (float)rect.getMaxX();
-        centerYco = (float)rect.getCenterY();
-        maxYco = (float)rect.getMaxY();
-        this.gridUnit = gridUnit;
+        minXco = (float)rect.getX();
+        maxXco = minXco + gridWidth;
+        centerXco = (float)rect.getX() + (gridWidth - 1) / 2;
+        minYco = (float)rect.getY();
+        maxYco = minYco + gridHeight;
+        centerYco = (float)rect.getY() + (gridHeight - 1) / 2;
         
-        this.lpu = lpu;
         this.length = length;
         this.orientation = orientation;
 
@@ -358,6 +357,7 @@ public class LineGenerator implements Iterable<Line2D>
     public Iterator<Line2D> iterator()
     {
         Iterator<Line2D>    iter    = null;
+        System.out.println( "check" );
         switch ( orientation )
         {
         case HORIZONTAL:
@@ -437,13 +437,17 @@ public class LineGenerator implements Iterable<Line2D>
             // note that this will be to the left of the y-axis.
             next    = -halfNum;
             
-            // The actual length is the length passed by the user, or,
-            // if the user passed a negative value, the height of the grid.
-            float   actLength   = length >= 0 ? length : gridHeight;
-            
-            // Calculate the top (yco1) and bottom (yco2) of the line
-            yco1 = centerYco - actLength / 2;
-            yco2 = yco1 + actLength;
+            if ( length < 0 )
+            {
+                yco1 = minYco;
+                yco2 = maxYco;
+            }
+            else
+            {
+                // Calculate the top (yco1) and bottom (yco2) of the line
+                yco1 = centerYco - length / 2;
+                yco2 = yco1 + length;
+            }
         }
         
         @Override
@@ -526,9 +530,16 @@ public class LineGenerator implements Iterable<Line2D>
             // Calculate the number of the first horizontal line to draw;
             // note that this will above the x-axis.
             next    = -halfNum;
-            float   actLength = length >= 0 ? length : gridWidth;
-            xco1 = centerXco - actLength / 2;
-            xco2 = xco1 + actLength;
+            if ( length < 0 )
+            {
+                xco1 = minXco;
+                xco2 = maxXco;
+            }
+            else
+            {
+                xco1 = centerXco - length / 2;
+                xco2 =   xco1 + length;
+            }
         }
         
         @Override
