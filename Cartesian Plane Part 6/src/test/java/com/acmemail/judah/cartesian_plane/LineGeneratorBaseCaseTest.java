@@ -10,6 +10,8 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import util.LineMetrics;
+
 /**
  * 
  * <p>
@@ -62,6 +64,9 @@ import org.junit.jupiter.api.Test;
  */
 public class LineGeneratorBaseCaseTest
 {
+    /** Tolerance for testing the equality of 2 decimal numbers. */
+    private static final float          epsilon         =.001f;
+    
     private static final float          gridWidth       = 512;
     private static final float          gridHeight      = 256;
     private static final float          gridUnit        = 64;
@@ -133,7 +138,7 @@ public class LineGeneratorBaseCaseTest
         for ( Line2D actLine : gen )
         {
             Line2D  expLine = horizLines.get( count++ );
-            assertLineEquals( expLine, actLine );
+            LineMetrics.assertLineEquals( expLine, actLine, epsilon );
         }
         
         assertEquals( count, expNumHorizLines );
@@ -161,52 +166,9 @@ public class LineGeneratorBaseCaseTest
         for ( Line2D actLine : gen )
         {
             Line2D  expLine = vertLines.get( count++ );
-            assertLineEquals( expLine, actLine );
+            LineMetrics.assertLineEquals( expLine, actLine, epsilon );
         }
         
         assertEquals( count, expNumVertLines );
-    }
-    
-    /**
-     * Verify that two lines have the same end points,
-     * within a given tolerance.
-     * 
-     * @param expLine     the expected line
-     * @param actLine     the actual line
-     * @param epsilon   the given tolerance
-     */
-    private void assertLineEquals( Line2D expLine, Line2D actLine )
-    {
-        final float epsilon = .001f;
-        
-        float   expLineXco1 = (float)expLine.getX1();
-        float   expLineYco1 = (float)expLine.getY1();
-        float   expLineXco2 = (float)expLine.getX2();
-        float   expLineYco2 = (float)expLine.getY2();
-        
-        float   actLineXco1 = (float)actLine.getX1();
-        float   actLineYco1 = (float)actLine.getY1();
-        float   actLineXco2 = (float)actLine.getX2();
-        float   actLineYco2 = (float)actLine.getY2();
-        
-        String  fmt         =
-            "Expected: Line2D(%.1f,%.1f,%.1f,%.1f) "
-            + "Actual: Line2D(%.1f,%.1f,%.1f,%.1f)";
-        String  msg         =
-            String.format(
-                fmt,
-                expLineXco1,
-                expLineYco1,
-                expLineXco2,
-                expLineYco2,
-                actLineXco1,
-                actLineYco1,
-                actLineXco2,
-                actLineYco2
-            );
-        assertEquals( expLineXco1, actLineXco1, epsilon, msg );
-        assertEquals( expLineYco1, actLineYco1, epsilon, msg );
-        assertEquals( expLineXco2, actLineXco2, epsilon, msg );
-        assertEquals( expLineYco2, actLineYco2, epsilon, msg );
     }
 }

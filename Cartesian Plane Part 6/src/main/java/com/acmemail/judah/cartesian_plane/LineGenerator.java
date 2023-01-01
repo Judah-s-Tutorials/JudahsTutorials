@@ -121,6 +121,11 @@ for ( Line2D line : vlGen )
  * </div>
  * <ol style="font-family: Tahoma, Helvetica, sans-serif; max-width: 30em;">
  *     <li>
+ *     <b>[rule: boundingRect]</b>
+ *     The rectangle bounding the grid
+ *     is given by the user of this class.
+ *     </li>
+ *     <li>
  *     The left-bound of the rectangle (rectXco)
  *     is inside the rectangle.
  *     </li>
@@ -139,6 +144,7 @@ for ( Line2D line : vlGen )
  *     is outside the rectangle.
  *     </li>
  *     <li>
+ *     <b>[rule: gridUnit]</b>
  *     The grid unit (gridUnit),
  *     is given by the user of this class;
  *     it is the number of pixels
@@ -146,36 +152,42 @@ for ( Line2D line : vlGen )
  *     allocated to the length of a unit.
  *     </li>
  *     <li>
+ *     <b>[rule: lpu]</b>
  *     The lines-per-unit (lpu),
  *     is given by the user of this class;
  *     it is the number of lines
  *     to be drawn for each unit.
  *     </li>
  *     <li>
+ *     <b>[rule: gridSpacing]</b>
  *     The distance 
  *     between two consecutive grid lines (gridSpacing)
  *     is given by 
  *     <em>gridSpacing = gridUnit / lpu.</em>
  *     </li>
  *     <li>
+ *     <b>[rule: xAxis]</b>
  *     The coordinates of the x-axis
- *     are given by <em>y = (recHeight - 1) / 2</em> (centerYco)
+ *     are given by <em>y = rectYco + (rectHeight - 1) / 2</em> (centerYco)
  *     for x in the range
  *     [rectXco, rectXco + rectWidth).
  *     </li>
  *     <li>
+ *     <b>[rule: yAxis]</b>
  *     The coordinates of the y-axis
- *     are given by <em>x = (recWidth - 1) / 2</em> (centerXco)
+ *     are given by <em>x = rectXco + (rectWidth - 1) / 2</em> (centerXco)
  *     for y in the range
  *     [rectYco, rectYco + rectHeight).
  *     </li>
  *     <li>
+ *     <b>[rule: numHLinesAbove]</b>
  *     The number of horizontal lines
  *     above the x-axis
  *     is calculated as
  *     <em>floor(rectHeight / 2 / gridSpacing)</em>.
  *     </li>
  *     <li>
+ *     <b>[rule: numHLinesBelow]</b>
  *     The number of horizontal lines
  *     below the x-axis
  *     is always the same
@@ -183,17 +195,20 @@ for ( Line2D line : vlGen )
  *     above the x-axis.
  *     </li>
  *     <li>
+ *     <b>[rule: numHLinesTotal]</b>
  *     The total number of horizontal lines
  *     is calculated as
  *     <em>2 * floor(rectHeight / 2 / gridSpacing) + 1</em>.
  *     </li>
  *     <li>
+ *     <b>[rule: numVLinesLeft]</b>
  *     The number of vertical lines
  *     left of the y-axis
  *     is calculated as
  *     <em>floor(rectWidth / 2 / gridSpacing)</em>.
  *     </li>
  *     <li>
+ *     <b>[rule: numVLinesRight]</b>
  *     The number of vertical lines
  *     right of the y-axis
  *     is always the same
@@ -201,37 +216,143 @@ for ( Line2D line : vlGen )
  *     left of the y-axis.
  *     </li>
  *     <li>
+ *     <b>[rule: numVLinesTotal]</b>
  *     The total number of vertical lines
  *     is calculated as
  *     <em>2 * floor(rectWidth / 2 / gridSpacing) + 1</em>.
  *     </li>
  *     <li>
- *         The y-coordinate 
- *         of the <em>n<sup>th</sup></em> horizontal line
- *         above the x-axis
- *         is given by <em>-n * gridSpacing</em>.
+ *     <b>[rule: nthHLineAbove]</b>
+ *     The y-coordinate 
+ *     of the <em>n<sup>th</sup></em> horizontal line
+ *     above the x-axis
+ *     is given by <em>-n * gridSpacing</em>.
  *     </li>
  *     <li>
- *         The y-coordinate 
- *         of the <em>n<sup>th</sup></em> horizontal line
- *         below the x-axis
- *         is given by <em>n * gridSpacing</em>.
+ *     <b>[rule: nthHLineBelow]</b>
+ *     The y-coordinate 
+ *     of the <em>n<sup>th</sup></em> horizontal line
+ *     below the x-axis
+ *     is given by <em>n * gridSpacing</em>.
  *     </li>
  *     <li>
- *         The x-coordinate 
- *         of the <em>n<sup>th</sup></em> vertical line
- *         left of the y-axis
- *         is given by <em>-n * gridSpacing</em>.
+ *     <b>[rule: nthVLineLeft]</b>
+ *     The x-coordinate 
+ *     of the <em>n<sup>th</sup></em> vertical line
+ *     left of the y-axis
+ *     is given by <em>-n * gridSpacing</em>.
  *     </li>
  *     <li>
- *         The x-coordinate 
- *         of the <em>n<sup>th</sup></em> vertical line
- *         right of the y-axis
- *         is given by <em>n * gridSpacing</em>.
+ *     <b>[rule: nthVLineBelow]</b>
+ *     The x-coordinate 
+ *     of the <em>n<sup>th</sup></em> vertical line
+ *     right of the y-axis
+ *     is given by <em>n * gridSpacing</em>.
+ *     </li>
+ *     <li>
+ *     A <em>line segment</em>
+ *     is defined as a horizontal or vertical line
+ *     with a specific length <em>n</em>
+ *     (i.e. the line
+ *     does not span the width or height
+ *     of the bounding rectangle).
+ *     </li>
+ *     <li>
+ *     <b>[rule: hLineSegmentXco1]</b>
+ *     The left x-coordinate 
+ *     of a horizontal line segment of length <em>n</em>
+ *     is the x-coordinate of the y-axis
+ *     minus <em>n / 2</em>.
+ *     </li>
+ *     <li>
+ *     <b>[rule: hLineSegmentXco2]</b>
+ *     The right x-coordinate 
+ *     of a horizontal line segment of length <em>n</em>
+ *     left x-coordinate plus <em>n</em>.
+ *     </li>
+ *     <li>
+ *     <b>[rule: vLineSegmentYco1]</b>
+ *     The upper y-coordinate 
+ *     of a vertical line segment of length <em>n</em>
+ *     is the y-coordinate of the x-axis
+ *     minus <em>n / 2</em>.
+ *     </li>
+ *     <li>
+ *     <b>[rule: vLineSegmentYco2]</b>
+ *     The lower y-coordinate 
+ *     of a vertical line segment of length <em>n</em>
+ *     upper y-coordinate plus <em>n</em>.
  *     </li>
  * </ol>
+ * <p>
+ * Following are some assumptions
+ * that the user can make
+ * given the above 
+ * constraints and parameters.
+ * </p>
+ * <div style="left-margin: 3em;">
+ * <ol style="font-family: Tahoma, Helvetica, sans-serif; max-width: 30em;">
+ *     <li>
+ *     <b>[rule: halfLineCount]</b>
+ *     The number of horizontal lines
+ *     above the x-axis
+ *     is given by <em>(int)(total-horizontal-lines / 2)</em>;
+ *     the number of vertical lines
+ *     left of the y-axis
+ *     is given by <em>(int)(total-vertical-lines / 2)</em>.
+ *     This can be useful
+ *     for calculating x- and y- Cartesian coordinates
+ *     corresponding to horizontal and vertical lines.
+ *     </li>
+ * </ol>
+ * </div>
+ * <p>
+ * Disclaimers:
+ * </p>
+ * <div style="left-margin: 3em;">
+ * <ol style="font-family: Tahoma, Helvetica, sans-serif; max-width: 30em;">
+ *     <li>
+ *     <b>[rule: cumulativeRoundingErrors]</b>
+ *     Given:
+ *     <ol style="list-style-type: lower-alpha">
+ *     <li>
+ *         The possibility of cumulative rounding errors;
+ *     </li>
+ *     <li>
+ *         The fact that calculations 
+ *         by the AWT are not always
+ *         the most helpful to line positioning;
+ *     </li>
+ *     <li>
+ *         The difficulties inherent
+ *         in converting user coordinates
+ *         to device coordinates
+ *         (see the documentation for <em>java.awt.Graphics2D</em>);
+ *     </li>
+ *     </ol>
+ *     line-drawing may occasionally
+ *     be less than perfect.
+ *     In particular lines may be calculated
+ *     that are outside of the grid's
+ *     bounding rectangle 
+ *     (usually by one pixel or less).
+ *     For the purpose of testing
+ *     such anomalies should be ignored.
+ *     Correction for stray marks at runtime
+ *     can be avoided by the user
+ *     by setting a clip region
+ *     to the shape of the bounding rectangle.
+ *     </li>
+ *     <li>
+ *     <b>[rule: clipRegionErrors]</b>
+ *     The clip-region processing by the AWT
+ *     is occasionally off by a pixel.
+ *     From a testing and validation point of view
+ *     this should be tolerated.
+ *     </li>
+ * </ol>
+ * </div>
  * @author Jack Straub
- * @see com.acmemail.judah.sandbox.Rect2DEdgeDemo
  */
 public class LineGenerator implements Iterable<Line2D>
 {
