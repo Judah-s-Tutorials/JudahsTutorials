@@ -307,7 +307,7 @@ for ( Line2D line : vlGen )
  * </ol>
  * </div>
  * <p>
- * Disclaimers:
+ * Caveats:
  * </p>
  * <div style="left-margin: 3em;">
  * <ol style="font-family: Tahoma, Helvetica, sans-serif; max-width: 30em;">
