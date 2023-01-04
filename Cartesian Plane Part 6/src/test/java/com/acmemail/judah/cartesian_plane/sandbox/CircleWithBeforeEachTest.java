@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CircleJUnit2Test
+class CircleWithBeforeEachTest
 {
-    private static final double epsilon = .001;
+    private static final double epsilon     = .001;
     private static final double defXco      = 10;
     private static final double defYco      = 2 * defXco;
     private static final double defRadius   = 2 * defYco;
@@ -28,8 +28,8 @@ class CircleJUnit2Test
         double  actYco      = circle.getYco();
         double  actRadius   = circle.getRadius();
         
-        assertEquals( defXco, actXco );
-        assertEquals( defYco, actYco );
+        assertEquals( defXco, actXco, epsilon );
+        assertEquals( defYco, actYco, epsilon );
         assertEquals( defRadius, actRadius, epsilon );
     }
 

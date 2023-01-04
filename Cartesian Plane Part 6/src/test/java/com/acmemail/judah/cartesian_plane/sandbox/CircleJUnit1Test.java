@@ -1,6 +1,6 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
