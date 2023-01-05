@@ -55,6 +55,20 @@ public class Root implements Runnable
     }
     
     /**
+     * Indicates whether this instance has been started or not.
+     * The instance is considered <em>started</em>
+     * if the underlying JFrame is visible.
+     * 
+     * @return  true if this instance has been started
+     * 
+     * @see #start()
+     */
+    public boolean isStarted()
+    {
+        return frame.isVisible();
+    }
+    
+    /**
      * This method is the place where the initial content
      * of the frame must be configured.
      * Required by the Runnable interface.

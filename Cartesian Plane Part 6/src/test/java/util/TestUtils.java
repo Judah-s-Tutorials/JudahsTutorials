@@ -24,4 +24,24 @@ public class TestUtils
         // implementation to be provided at a later time
         return null;
     }
+    
+    /**
+     * Put the current thread to sleep
+     * for a given number of milliseconds.
+     * An InterruptedException may occur;
+     * if it does it will be ignored.
+     * 
+     * @param millis    the given number of milliseconds
+     */
+    public static void pause( long millis )
+    {
+        try
+        {
+            Thread.sleep( millis );
+        }
+        catch ( InterruptedException exc )
+        {
+            // ignore exception
+        }
+    }
 }
