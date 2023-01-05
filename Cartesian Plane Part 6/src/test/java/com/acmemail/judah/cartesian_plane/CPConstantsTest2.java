@@ -1,13 +1,14 @@
 package com.acmemail.judah.cartesian_plane;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.awt.Color;
 import java.awt.Font;
 
 import org.junit.jupiter.api.Test;
 
-class CPConstantsTest
+class CPConstantsTest2
 {
     @Test
     void testAsInt()
@@ -18,6 +19,11 @@ class CPConstantsTest
             int actVal  = CPConstants.asInt( "" + val );
             assertEquals( val, actVal );
         }
+        
+        // Go-wrong path: verify that NumberFormatException is thrown
+        // if a non-numeric string is passed.
+        Class<NumberFormatException>    clazz   = NumberFormatException.class;
+        assertThrows( clazz, () -> CPConstants.asInt( "five" ) );
     }
 
     @Test
@@ -29,6 +35,11 @@ class CPConstantsTest
             float   actVal  = CPConstants.asFloat( "" + val );
             assertEquals( val, actVal, .001 );
         }
+        
+        // Go-wrong path: verify that NumberFormatException is thrown
+        // if a non-numeric string is passed.
+        Class<NumberFormatException>    clazz   = NumberFormatException.class;
+        assertThrows( clazz, () -> CPConstants.asInt( "five" ) );
     }
 
     @Test
@@ -90,8 +101,22 @@ class CPConstantsTest
         assertEquals( Font.BOLD, bValLower );
         int iValLower   = CPConstants.asFontStyle( "italic" );
         assertEquals( Font.ITALIC, iValLower );
+        
+        // Test go-wrong path
+        Class<IllegalArgumentException> clazz   =
+            IllegalArgumentException.class;
+        assertThrows( clazz, () -> CPConstants.asFontStyle( "INVALID" ) );
     }
     
+    /**
+     * "Test" default constructor just to get test coverage.
+     */
+    @Test
+    public void CPConstantsTest()
+    {
+        new CPConstants();
+    }
+
     /**
      * Compares an integer value to a Color converted to an integer.
      * The alpha bits in the Color value are suppressed
