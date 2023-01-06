@@ -559,10 +559,10 @@ public class CartesianPlane extends JPanel
         labelFRC = gtx.getFontRenderContext();
 
         // Describe the rectangle containing the grid
-        float   gridWidth = currWidth - marginLeftWidth - marginRightWidth;
-        float   minXco = marginLeftWidth;
-        float   gridHeight = currHeight - marginTopWidth - marginBottomWidth;
-        float   minYco = marginTopWidth;
+        float   gridWidth   = currWidth - marginLeftWidth - marginRightWidth;
+        float   minXco      = marginLeftWidth;
+        float   gridHeight  = currHeight - marginTopWidth - marginBottomWidth;
+        float   minYco      = marginTopWidth;
         gridRect = 
             new Rectangle2D.Float( minXco, minYco, gridWidth, gridHeight );
 
