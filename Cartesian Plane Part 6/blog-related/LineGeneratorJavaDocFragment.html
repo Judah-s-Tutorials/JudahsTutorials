@@ -1,0 +1,258 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<title>LineGenerator</title>
+</head>
+<body>
+	<p style = "font-size: 130%; font-weight: bold;" id="algorithm">
+	Line Generation Algorithm
+	</p>
+	<p>
+	Following are the constraints
+	and parameters
+	governing the generation
+	of lines within the bounds
+	of a given rectangle.
+	</p>
+	<div style="margin-left: 3em;">
+		<p><b>Given:</b></p>
+		<ul>
+			<li>
+				<b>rectXco:</b>
+				The x-coordinate 
+				of the upper left corner
+				of the rectangle.
+			</li>
+			<li>
+				<b>rectYco:</b>
+				The y-coordinate 
+				of the upper left corner
+				of the rectangle.
+			</li>
+			<li>
+				<b>rectWidth:</b>
+				The width 
+				of the rectangle.
+			</li>
+			<li>
+				<b>rectHeight:</b>
+				The height 
+				of the rectangle.
+			</li>
+		</ul>
+	</div>
+	<div style="margin-left: 1.5em">
+		<ol style="font-family: Tahoma, Helvetica, sans-serif; max-width: 30em;">
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: boundingRect]</b>
+			The rectangle bounding the grid
+			is given by the user of this class.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			The left-bound of the rectangle (rectXco)
+			is inside the rectangle.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			The upper-bound of the rectangle (rectYco)
+			is inside the rectangle.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			The right-bound of the rectangle,
+			given by rectXco + rectWidth,
+			is outside the rectangle.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			The lower-bound of the rectangle,
+			given by rectYco + rectHeight,
+			is outside the rectangle.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: gridUnit]</b>
+			The grid unit (gridUnit),
+			is given by the user of this class;
+			it is the number of pixels
+			(pixels-per-unit or PPU)
+			allocated to the length of a unit.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: lpu]</b>
+			The lines-per-unit (lpu),
+			is given by the user of this class;
+			it is the number of lines
+			to be drawn for each unit.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: gridSpacing]</b>
+			The distance 
+			between two consecutive grid lines (gridSpacing)
+			is given by 
+			<em>gridSpacing = gridUnit / lpu.</em>
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: xAxis]</b>
+			The coordinates of the x-axis
+			are given by <em>y = rectYco + (rectHeight - 1) / 2</em> (centerYco)
+			for x in the range
+			[rectXco, rectXco + rectWidth).
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: yAxis]</b>
+			The coordinates of the y-axis
+			are given by <em>x = rectXco + (rectWidth - 1) / 2</em> (centerXco)
+			for y in the range
+			[rectYco, rectYco + rectHeight).
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: numHLinesAbove]</b>
+			The number of horizontal lines
+			above the x-axis
+			is calculated as
+			<em>floor(rectHeight / 2 / gridSpacing)</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: numHLinesBelow]</b>
+			The number of horizontal lines
+			below the x-axis
+			is always the same
+			as the number of horizontal lines
+			above the x-axis.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: numHLinesTotal]</b>
+			The total number of horizontal lines
+			is calculated as
+			<em>2floor(rectHeight / 2 / gridSpacing) + 1</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: numVLinesLeft]</b>
+			The number of vertical lines
+			left of the y-axis
+			is calculated as
+			<em>floor(rectWidth / 2 / gridSpacing)</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: numVLinesRight]</b>
+			The number of vertical lines
+			right of the y-axis
+			is always the same
+			as the number of vertical lines
+			left of the y-axis.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: numVLinesTotal]</b>
+			The total number of vertical lines
+			is calculated as
+			<em>2floor(rectWidth / 2 / gridSpacing) + 1</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: nthHLineAbove]</b>
+			The y-coordinate 
+			of the <em>n<sup>th</sup></em> horizontal line
+			above the x-axis
+			is given by <em>-ngridSpacing</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: nthHLineBelow]</b>
+			The y-coordinate 
+			of the <em>n<sup>th</sup></em> horizontal line
+			below the x-axis
+			is given by <em>ngridSpacing</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: nthVLineLeft]</b>
+			The x-coordinate 
+			of the <em>n<sup>th</sup></em> vertical line
+			left of the y-axis
+			is given by <em>-ngridSpacing</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: nthVLineRight]</b>
+			The x-coordinate 
+			of the <em>n<sup>th</sup></em> vertical line
+			right of the y-axis
+			is given by <em>ngridSpacing</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			A <em>line segment</em>
+			is defined as a horizontal or vertical line
+			with a specific length <em>n</em>
+			(i.e. the line
+			does not span the width or height
+			of the bounding rectangle).
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: hLineSegmentXco1]</b>
+			The left x-coordinate 
+			of a horizontal line segment of length <em>n</em>
+			is the x-coordinate of the y-axis
+			minus <em>n / 2</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: hLineSegmentXco2]</b>
+			The right x-coordinate 
+			of a horizontal line segment of length <em>n</em>
+			left x-coordinate plus <em>n</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: vLineSegmentYco1]</b>
+			The upper y-coordinate 
+			of a vertical line segment of length <em>n</em>
+			is the y-coordinate of the x-axis
+			minus <em>n / 2</em>.
+			</li>
+			<li style="margin-top: .2em; margin-bottom: .2em">
+			<b>[rule: vLineSegmentYco2]</b>
+			The lower y-coordinate 
+			of a vertical line segment of length <em>n</em>
+			upper y-coordinate plus <em>n</em>.
+			</li>
+		</ol>
+		</div>
+		<p>
+		Caveats:
+		</p>
+		<div>
+		<ol style="font-family: Tahoma, Helvetica, sans-serif; max-width: 30em;">
+			<li>
+			<b>[rule: cumulativeRoundingErrors]</b>
+			Given:
+			<ol style="list-style-type: lower-alpha">
+			<li>
+				The possibility of cumulative rounding errors;
+			</li>
+			<li>
+				The fact that calculations 
+				by the AWT are not always
+				the most helpful to line positioning;
+			</li>
+			<li>
+				The difficulties inherent
+				in converting user coordinates
+				to device coordinates
+				(see the documentation for <em>java.awt.Graphics2D</em>);
+			</li>
+			</ol>
+			line-drawing may occasionally
+			be less than perfect.
+			In particular lines may be calculated
+			that are outside of the grid's
+			bounding rectangle 
+			(usually by one pixel or less).
+			For the purpose of testing
+			such anomalies should be ignored.
+			Correction for stray marks at runtime
+			can be avoided by the user
+			by setting a clip region
+			to the shape of the bounding rectangle.
+			</li>
+			<li>
+			<b>[rule: clipRegionErrors]</b>
+			The clip-region processing by the AWT
+			is occasionally off by a pixel.
+			From a testing and validation point of view
+			this should be tolerated.
+			</li>
+		</ol>
+	</div>
+</body>
+</html>

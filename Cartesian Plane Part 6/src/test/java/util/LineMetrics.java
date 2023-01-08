@@ -19,6 +19,53 @@ import com.acmemail.judah.cartesian_plane.LineGenerator;
  * See <em>Line Generation Algorithm</em>"
  * in the LineGenerator class description.
  * 
+ * 
+ * <p>
+ * <span style="font-size: 110%; font-weight: bold;" id="TestValueCoordination">
+ *     About Coordinating Test Values for Grid Unit and LPU<br>
+ * </span>
+ * Values such as those 
+ * for the rectangle bounding the grid,
+ * grid unit and LPU
+ * are often generated randomly. 
+ * When doing so,
+ * value generation must be designed
+ * with the following constraints:
+ * </p>
+ * <ol>
+ * <li>
+ *     A bounding rectangle
+ *     will always have a width and height
+ *     that are at least 10 pixels.
+ * </li>
+ * <li>
+ *     There will always be
+ *     more than one unit
+ *     on either side of the x- and y-axes
+ *     (the "more than one" constraint
+ *     can be satisfied by
+ *     fractional values
+ *     such as 1.1).
+ * </li>
+ * <li>
+ *     The grid unit 
+ *     and LPU values must be chosen
+ *     so that there is never
+ *     more than one grid line
+ *     per pixel.
+ * </li>
+ * </ol>
+ * <p>
+ * Note that one consequence of the above constraints
+ * is that a test rectangle
+ * will always be suitable
+ * for containing at least 6 visible lines;
+ * the x- and y-axes,
+ * and at least one grid line
+ * on either side
+ * of the x- and y-axes.
+ * </p>
+ * 
  * @author Jack Straub
  * 
  * @see LineGenerator

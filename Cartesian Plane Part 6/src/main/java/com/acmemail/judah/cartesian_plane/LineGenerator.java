@@ -243,7 +243,7 @@ for ( Line2D line : vlGen )
  *     is given by <em>-n * gridSpacing</em>.
  *     </li>
  *     <li>
- *     <b>[rule: nthVLineBelow]</b>
+ *     <b>[rule: nthVLineRight]</b>
  *     The x-coordinate 
  *     of the <em>n<sup>th</sup></em> vertical line
  *     right of the y-axis
@@ -290,7 +290,7 @@ for ( Line2D line : vlGen )
  * given the above 
  * constraints and parameters.
  * </p>
- * <div style="left-margin: 3em;">
+ * <div>
  * <ol style="font-family: Tahoma, Helvetica, sans-serif; max-width: 30em;">
  *     <li>
  *     <b>[rule: halfLineCount]</b>
@@ -440,21 +440,34 @@ public class LineGenerator implements Iterable<Line2D>
         gridHeight = (float)rect.getHeight();
         minXco = (float)rect.getX();
         maxXco = minXco + gridWidth;
+
+        // See description of line generation algorithm, above.
+        // [rule: yAxis]
         centerXco = (float)rect.getX() + (gridWidth - 1) / 2;
         minYco = (float)rect.getY();
         maxYco = minYco + gridHeight;
+        
+        // See description of line generation algorithm, above.
+        // [rule: xAxis]
         centerYco = (float)rect.getY() + (gridHeight - 1) / 2;
         
         this.length = length;
         this.orientation = orientation;
 
+        // See description of line generation algorithm, above.
+        // [rule: gridSpacing] 
         gridSpacing = gridUnit / lpu;
         
         // See description of line generation algorithm, above.
-        // # lines left of y-axis 
-        float   halfVerLines    = (float)Math.floor(gridWidth / 2 / gridSpacing);
+        // [rule: numHLinesAbove]
+        // [rule: numVLinesLeft]
+        // [rule: numHLinesTotal] 
+        // [rule: numVLinesTotal]
+        float   halfVerLines    = 
+            (float)Math.floor((gridWidth - 1) / 2 / gridSpacing);
         totalVerLines = 2 * halfVerLines + 1;
-        float   halfHorLines    = (float)Math.floor(gridHeight / 2 / gridSpacing);
+        float   halfHorLines    = 
+            (float)Math.floor((gridHeight - 1) / 2 / gridSpacing);
         totalHorLines = 2 * halfHorLines + 1;
     }
 
@@ -552,12 +565,16 @@ public class LineGenerator implements Iterable<Line2D>
         public Line2DVerticalIterator()
         {
             // Number of lines left or right of y-axis
+            // See description of line generation algorithm, above.
+            // [rule: numVLinesLeft] 
             halfNum = (float)Math.floor( totalVerLines / 2 );
             
             // Calculate the number of the first vertical line to draw;
             // note that this will be to the left of the y-axis.
             next    = -halfNum;
             
+            // Determine the y-coordinates of each vertical line; a length < 0
+            // means the line spans the height of the bounding rectangle
             if ( length < 0 )
             {
                 yco1 = minYco;
@@ -566,6 +583,9 @@ public class LineGenerator implements Iterable<Line2D>
             else
             {
                 // Calculate the top (yco1) and bottom (yco2) of the line
+                // See description of line generation algorithm, above.
+                // [rule: vLineSegmentYco1]
+                // [rule: vLineSegmentYco2]
                 yco1 = centerYco - length / 2;
                 yco2 = yco1 + length;
             }
@@ -606,6 +626,11 @@ public class LineGenerator implements Iterable<Line2D>
                 String  msg = "Grid bounds exceeded at next = " + next;
                 throw new NoSuchElementException( msg );
             }
+
+            // Calculate the x-coordinate of the nex vertical line.
+            // See description of line generation algorithm, above.
+            // [rule: nthVLineLeft]
+            // [rule: nthVLineRight]
             float   xco = centerXco + next++ * gridSpacing;
             Line2D  line    = 
                 new Line2D.Float( xco, yco1, xco, yco2 );
@@ -645,12 +670,19 @@ public class LineGenerator implements Iterable<Line2D>
          */
         public Line2DHorizontalIterator()
         {
-            // Number of lines left or right of y-axis
+            // Number of lines above or below x-axis
+            // See description of line generation algorithm, above.
+            // [rule: numHLinesAbove] 
+            // [rule: numHLinesBelow] 
             halfNum = (float)Math.floor( totalHorLines / 2 );
             
             // Calculate the number of the first horizontal line to draw;
             // note that this will above the x-axis.
             next    = -halfNum;
+            
+            // Determine the x coordinates of the endpoints of the line.
+            // Note that length < 0 means that lines will spane the width
+            // of the grid's bounding rectangl.
             if ( length < 0 )
             {
                 xco1 = minXco;
@@ -658,6 +690,9 @@ public class LineGenerator implements Iterable<Line2D>
             }
             else
             {
+                // See description of line generation algorithm, above.
+                // [rule: hLineSegmentXco1] 
+                // [rule: hLineSegmentXco2] 
                 xco1 = centerXco - length / 2;
                 xco2 =   xco1 + length;
             }
@@ -695,6 +730,11 @@ public class LineGenerator implements Iterable<Line2D>
                 String  msg = "Grid bounds exceeded at line #" + next;
                 throw new NoSuchElementException( msg ); 
             }
+
+            // Calculate the y-coordinate of the next horizontal line.
+            // See description of line generation algorithm, above.
+            // [rule: nthHLineAbove] 
+            // [rule: nthHLineBelow] 
             float   yco = centerYco + next++ * gridSpacing;
             Line2D  line    = 
                 new Line2D.Float( xco1, yco, xco2, yco );

@@ -13,75 +13,64 @@ import org.junit.jupiter.api.Test;
 import util.LineMetrics;
 
 /**
+ * This class represents a base case test
+ * for the line generation algorithm
+ * (see {@link LineGenerator}).
+ * Configuration parameters are chosen
+ * so that the expected coordinates of grid lines
+ * can be easily verified by hand.
+ * Grid line generation rules
+ * are then applied to obtain expected values
+ * which are then compared to the actual values
+ * produced by LineGenerator.
+ * Some of the expected values are:
+ * <p>
+ * Given:
+ * </p>
+ * <ul>
+ * <li>bounding rectangle coordinates = (0, 0)</li>
+ * <li>grid width = 512</li>
+ * <li>grid height = 256</li>
+ * <li>grid unit = 64</li>
+ * <li>lines-per-unit = 2
+ * </ul>
+ * <p>
+ * Expected:
+ * <li>Y-axis is given by x = 255.5</li>
+ * <li>X-axis is given by y = 127.5</li>
+ * <li>grid spacing (pixels-per-line or ppl) == 64 / 2 = 32</li>
+ * <li>
+ *     Number of vertical lines left of y-axis = 
+ *     <em>floor( (512 - 1) / 2 / 32) = 7
+ * </p>
  * 
- * <p>
- * <span style="font-size: 110%; font-weight: bold;" id="TestValueCoordination">
- *     About Coordinating Test Values for Grid Unit and LPU<br>
- * </span>
- * Values such as those 
- * for the rectangle bounding the grid,
- * grid unit and LPU
- * are often generated randomly. 
- * When doing so,
- * value generation must be designed
- * with the following constraints:
- * </p>
- * <ol>
- * <li>
- *     A bounding rectangle
- *     will always have a width and height
- *     that are at least 10 pixels.
- * </li>
- * <li>
- *     There will always be
- *     more than one unit
- *     on either side of the x- and y-axes
- *     (the "more than one" constraint
- *     can be satisfied by
- *     fractional values
- *     such as 1.1).
- * </li>
- * <li>
- *     The grid unit 
- *     and LPU values must be chosen
- *     so that there is never
- *     more than one grid line
- *     per pixel.
- * </li>
- * </ol>
- * <p>
- * Note that one consequence of the above constraints
- * is that a test rectangle
- * will always be suitable
- * for containing at least 6 visible lines;
- * the x- and y-axes,
- * and at least one grid line
- * on either side
- * of the x- and y-axes.
- * </p>
  * @author Jack Straub
+ * 
+ * @see LineGenerator
  *
  */
 public class LineGeneratorBaseCaseTest
 {
     /** Tolerance for testing the equality of 2 decimal numbers. */
-    private static final float          epsilon         =.001f;
+    private static final float          epsilon         = .001f;
     
+    private static final float          gridXco         = 0;
+    private static final float          gridYco         = 0;
     private static final float          gridWidth       = 512;
     private static final float          gridHeight      = 256;
     private static final float          gridUnit        = 64;
     private static final float          linesPerUnit    = 2;
     private static final Rectangle2D    gridRect        =
-        new Rectangle2D.Float( 0, 0, gridWidth, gridHeight );
+        new Rectangle2D.Float( gridXco, gridYco, gridWidth, gridHeight );
     
     /** Expected y-coordinate of the first horizontal line. */
     private static final float          firstYco        = -.5f;
     /** Expected x-coordinate of the first vertical line. */
     private static final float          firstXco        = -.5f;
     /** Expected number of horizontal lines. */
-    private static final int            numHorizLines   = 9;
+    private static final int            numHorizLines   = 7;
     /** Expected number of vertical lines. */
-    private static final int            numVertLines    = 17;
+    private static final int            numVertLines    = 15;
     
     /** List of all horizontal lines, in order. Initialized in beforAll(). */
     private static final List<Line2D>   horizLines      = new ArrayList<>();
