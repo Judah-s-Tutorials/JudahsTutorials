@@ -198,14 +198,14 @@ for ( Line2D line : vlGen )
  *     <b>[rule: numHLinesTotal]</b>
  *     The total number of horizontal lines
  *     is calculated as
- *     <em>2 * floor(rectHeight / 2 / gridSpacing) + 1</em>.
+ *     <em>2 * floor((rectHeight - 1) / 2 / gridSpacing) + 1</em>.
  *     </li>
  *     <li>
  *     <b>[rule: numVLinesLeft]</b>
  *     The number of vertical lines
  *     left of the y-axis
  *     is calculated as
- *     <em>floor(rectWidth / 2 / gridSpacing)</em>.
+ *     <em>floor((rectWidth - 1) / 2 / gridSpacing)</em>.
  *     </li>
  *     <li>
  *     <b>[rule: numVLinesRight]</b>

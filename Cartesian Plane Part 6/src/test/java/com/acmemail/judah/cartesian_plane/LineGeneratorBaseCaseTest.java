@@ -2,6 +2,11 @@ package com.acmemail.judah.cartesian_plane;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static util.BaseCaseParameters.BASE_GRID_HEIGHT;
+import static util.BaseCaseParameters.BASE_GRID_UNIT;
+import static util.BaseCaseParameters.BASE_GRID_WIDTH;
+import static util.BaseCaseParameters.BASE_LINES_PER_UNIT;
+
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -15,62 +20,35 @@ import util.LineMetrics;
 /**
  * This class represents a base case test
  * for the line generation algorithm
- * (see {@link LineGenerator}).
+ * (see {@linkplain LineGenerator}).
  * Configuration parameters are chosen
  * so that the expected coordinates of grid lines
- * can be easily verified by hand.
+ * can be easily verified by hand
+ * {@linkplain BaseCaseParameters}).
  * Grid line generation rules
- * are then applied to obtain expected values
+ * are applied to obtain expected values
  * which are then compared to the actual values
  * produced by LineGenerator.
- * Some of the expected values are:
- * <p>
- * Given:
- * </p>
- * <ul>
- * <li>bounding rectangle coordinates = (0, 0)</li>
- * <li>grid width = 512</li>
- * <li>grid height = 256</li>
- * <li>grid unit = 64</li>
- * <li>lines-per-unit = 2
- * </ul>
- * <p>
- * Expected:
- * <li>Y-axis is given by x = 255.5</li>
- * <li>X-axis is given by y = 127.5</li>
- * <li>grid spacing (pixels-per-line or ppl) == 64 / 2 = 32</li>
- * <li>
- *     Number of vertical lines left of y-axis = 
- *     <em>floor( (512 - 1) / 2 / 32) = 7
- * </p>
  * 
  * @author Jack Straub
  * 
+ * @see BaseCaseParameters
  * @see LineGenerator
  *
  */
 public class LineGeneratorBaseCaseTest
 {
-    /** Tolerance for testing the equality of 2 decimal numbers. */
+    /** Tolerance for testing the approximate equality of 2 decimal numbers. */
     private static final float          epsilon         = .001f;
     
     private static final float          gridXco         = 0;
     private static final float          gridYco         = 0;
-    private static final float          gridWidth       = 512;
-    private static final float          gridHeight      = 256;
-    private static final float          gridUnit        = 64;
-    private static final float          linesPerUnit    = 2;
+    private static final float          gridWidth       = BASE_GRID_WIDTH;
+    private static final float          gridHeight      = BASE_GRID_HEIGHT;
+    private static final float          gridUnit        = BASE_GRID_UNIT;
+    private static final float          gridLPU         = BASE_LINES_PER_UNIT;
     private static final Rectangle2D    gridRect        =
         new Rectangle2D.Float( gridXco, gridYco, gridWidth, gridHeight );
-    
-    /** Expected y-coordinate of the first horizontal line. */
-    private static final float          firstYco        = -.5f;
-    /** Expected x-coordinate of the first vertical line. */
-    private static final float          firstXco        = -.5f;
-    /** Expected number of horizontal lines. */
-    private static final int            numHorizLines   = 7;
-    /** Expected number of vertical lines. */
-    private static final int            numVertLines    = 15;
     
     /** List of all horizontal lines, in order. Initialized in beforAll(). */
     private static final List<Line2D>   horizLines      = new ArrayList<>();
@@ -88,18 +66,28 @@ public class LineGeneratorBaseCaseTest
     @BeforeAll
     public static void beforeAll()
     {
-        float   ppl     = gridUnit / linesPerUnit;
+        // grid spacing; pixels-per-line
+        float   gridSpacing = gridUnit / gridLPU;
+        // Horizontal lines in half the grid (not including x-axis)
+        int     halfHoriz   = (int)Math.floor( (gridHeight - 1) / 2 / gridSpacing );
+        // Vertical lines in half the grid (not including y-axis)
+        int     halfVert    = (int)Math.floor( (gridWidth - 1) / 2 / gridSpacing );
+        // Y-coordinate of the x-axis
+        float   xAxisYco    = (gridHeight - 1) / 2;
+        // X-coordinate of the y-axis
+        float   yAxisXco    = (gridWidth - 1) / 2;
         
-        for ( int inx = 0 ; inx < numHorizLines ; ++inx )
+        
+        for ( int inx = -halfHoriz ; inx <= halfHoriz ; ++inx )
         {
-            float   yco     = firstYco + inx * ppl;
+            float   yco     = xAxisYco + inx * gridSpacing;
             Line2D  line    = new Line2D.Float( 0, yco, gridWidth, yco );
             horizLines.add( line );
         }
         
-        for ( int inx = 0 ; inx < numVertLines ; ++inx )
+        for ( int inx = -halfVert ; inx <= halfVert ; ++inx )
         {
-            float   xco     = firstXco + inx * ppl;
+            float   xco     = yAxisXco + inx * gridSpacing;
             Line2D  line    = new Line2D.Float( xco, 0, xco, gridHeight );
             vertLines.add( line );
         }
@@ -115,7 +103,7 @@ public class LineGeneratorBaseCaseTest
             new LineGenerator(
                 gridRect,
                 gridUnit,
-                linesPerUnit,
+                gridLPU,
                 -1,
                 LineGenerator.HORIZONTAL
             );
@@ -143,7 +131,7 @@ public class LineGeneratorBaseCaseTest
             new LineGenerator(
                 gridRect,
                 gridUnit,
-                linesPerUnit,
+                gridLPU,
                 -1,
                 LineGenerator.VERTICAL
             );
