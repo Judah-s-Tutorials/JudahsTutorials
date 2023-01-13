@@ -109,26 +109,27 @@ public class LineMetrics
      */
     private final float         xAxisYco;
     
-//    private final float         floorMinXco;
-//    private final float         floorMinYco;
-//    private final float         maxXco;
-//    private final float         maxYco;
-//    private final float         ceilMaxXco;
-//    private final float         ceilMaxYco;
-    
+    /**
+     * Constructor.
+     * Initializes all parameters.
+     * 
+     * @param rect          bounding rectangle for grid
+     * @param gridUnit      pixels per unit
+     * @param linesPerUnit  lines-per-unit
+     */
     public LineMetrics(
         Rectangle2D rect,
-        float       pixelsPerUnit, 
+        float       gridUnit, 
         float       linesPerUnit
     )
     {
         this.boundingRect = rect;
-        this.gridUnit = pixelsPerUnit;
+        this.gridUnit = gridUnit;
         this.lpu = linesPerUnit;
         
         // see LineGenerator rule: gridSpacing
         // pixels between lines
-        this.gridSpacing = pixelsPerUnit / linesPerUnit;
+        this.gridSpacing = gridUnit / linesPerUnit;
         
         float   minXco = (float)rect.getX();
         float   maxXco = (float)rect.getWidth() + minXco;
@@ -140,19 +141,16 @@ public class LineMetrics
         yAxisXco = minXco +((float)rect.getWidth() - 1) / 2;
         // determines location of x-axis
         xAxisYco = minYco + ((float)rect.getHeight() - 1) / 2;
-        
-//        floorMinXco = floor( minXco );
-//        floorMinYco = floor( minYco );
-//        ceilMaxXco = ceil( maxXco );
-//        ceilMaxYco = ceil( maxYco );
 
         // see LineGenerator rule: numHLinesAbove
+        // see LineGenerator rule: numHLinesBelow
         // horizontal lines above or below x-axis
         float   halfHoriz   = 
-            (float)Math.floor( rect.getHeight() / 2 / gridSpacing);
+            (float)Math.floor( (rect.getHeight() - 1) / 2 / gridSpacing);
         // see LineGenerator rule: numVLinesLeft
+        // see LineGenerator rule: numVLinesRight
         float   halfVert    = 
-            (float)Math.floor( rect.getWidth() / 2 / gridSpacing);
+            (float)Math.floor( (rect.getWidth() - 1) / 2 / gridSpacing);
 
         // see LineGenerator rule: nthVLineLeft
         // see LineGenerator rule: nthVLineRight
@@ -192,7 +190,8 @@ public class LineMetrics
         Line2D  lineOut;
         
         float   lineInXco1  = (float)lineIn.getX1();
-        if ( doubleEquals( lineInXco1, lineIn.getX2() ) )
+        float   lineInXco2  = (float)lineIn.getX2();
+        if ( floatEquals( lineInXco1, lineInXco2 ) )
         {
             // if x1 == x2 this is a vertical line
             float   xco     = lineInXco1;
@@ -323,43 +322,20 @@ public class LineMetrics
         assertEquals( expLineYco2, actLineYco2, epsilon, msg );
     }
 
-//    private void validateEndpoints( Line2D line )
-//    {
-//        assertGE( ceil( line.getX1() ), floorMinXco );
-//        assertGE( ceil( line.getY1() ), floorMinYco );
-//        assertLT( floor( line.getX2() ), ceilMaxXco );
-//        assertLT( floor( line.getY2() ), ceilMaxYco );
-//    }
-//    
-//    private static float floor( double valIn )
-//    {
-//        float   valOut  = (float)Math.floor( valIn );
-//        return valOut;
-//    }
-//    
-//    private static float ceil( double valIn )
-//    {
-//        float   valOut  = (float)Math.ceil( valIn );
-//        return valOut;
-//    }
-//    
-    private static boolean doubleEquals( double fVal1, double fVal2 )
+    /**
+     * Determine if two decimal values are approximately equal
+     * within a tolerance of .001.
+     * 
+     * @param dVal1 first decimal value
+     * @param dVal2 second decimal value
+     * 
+     * @return  true if the two decimal values are approximately equal
+     */
+    private static boolean floatEquals( float dVal1, float dVal2 )
     {
-        final double    epsilon = .001f;
-        double          diff    = Math.abs( fVal1 - fVal2 );
+        final float     epsilon = .001f;
+        float           diff    = Math.abs( dVal1 - dVal2 );
         boolean         result  = diff < epsilon;
         return result;
     }
-//    
-//    private static void assertGE( float leftVal, float rightVal )
-//    {
-//        String  msg     = "Testing " + leftVal + " >= " + rightVal;
-//        assertTrue( leftVal >= rightVal, msg );
-//    }
-//    
-//    private static void assertLT( float leftVal, float rightVal )
-//    {
-//        String  msg     = "Testing " + leftVal + " >= " + rightVal;
-//        assertTrue( leftVal < rightVal, msg );
-//    }
 }

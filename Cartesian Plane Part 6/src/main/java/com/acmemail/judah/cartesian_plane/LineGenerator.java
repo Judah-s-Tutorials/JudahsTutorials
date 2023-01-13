@@ -491,7 +491,6 @@ public class LineGenerator implements Iterable<Line2D>
     public Iterator<Line2D> iterator()
     {
         Iterator<Line2D>    iter    = null;
-        System.out.println( "check" );
         switch ( orientation )
         {
         case HORIZONTAL:

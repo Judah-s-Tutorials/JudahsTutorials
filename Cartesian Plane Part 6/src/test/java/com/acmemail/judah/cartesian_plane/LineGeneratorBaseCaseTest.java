@@ -24,21 +24,27 @@ import util.LineMetrics;
  * Configuration parameters are chosen
  * so that the expected coordinates of grid lines
  * can be easily verified by hand
- * {@linkplain BaseCaseParameters}).
+ * {@linkplain util.BaseCaseParameters}).
  * Grid line generation rules
  * are applied to obtain expected values
  * which are then compared to the actual values
  * produced by LineGenerator.
+ * <p>
+ * This is <em>note</em> intended to be
+ * a thorough unit test for the LineGenerator class;
+ * see {@linkplain LineGeneratorTest}.
+ * </p>
  * 
  * @author Jack Straub
  * 
- * @see BaseCaseParameters
+ * @see util.BaseCaseParameters
  * @see LineGenerator
+ * @see LineGeneratorTest
  *
  */
 public class LineGeneratorBaseCaseTest
 {
-    /** Tolerance for testing the approximate equality of 2 decimal numbers. */
+    /** Tolerance for testing the approx. equality of 2 decimal numbers. */
     private static final float          epsilon         = .001f;
     
     private static final float          gridXco         = 0;
@@ -66,18 +72,26 @@ public class LineGeneratorBaseCaseTest
     @BeforeAll
     public static void beforeAll()
     {
-        // grid spacing; pixels-per-line
+        // All of the following calculations assume that the coordinates
+        // of the bounding rectangle are (0, 0)
+        
+        // grid spacing; pixels-per-line [rule: gridSpacing]
         float   gridSpacing = gridUnit / gridLPU;
         // Horizontal lines in half the grid (not including x-axis)
-        int     halfHoriz   = (int)Math.floor( (gridHeight - 1) / 2 / gridSpacing );
+        // [rule: numHLinesAbove]
+        int     halfHoriz   = 
+            (int)Math.floor( (gridHeight - 1) / 2 / gridSpacing );
         // Vertical lines in half the grid (not including y-axis)
-        int     halfVert    = (int)Math.floor( (gridWidth - 1) / 2 / gridSpacing );
-        // Y-coordinate of the x-axis
+        // [rule: numVLinesLeft]
+        int     halfVert    = 
+            (int)Math.floor( (gridWidth - 1) / 2 / gridSpacing );
+        // Y-coordinate of the x-axis [rule: xAxis] 
         float   xAxisYco    = (gridHeight - 1) / 2;
-        // X-coordinate of the y-axis
+        // X-coordinate of the y-axis [rule: yAxis] 
         float   yAxisXco    = (gridWidth - 1) / 2;
         
-        
+        // Calculate all horizontal lines 
+        //[rule: nthHLineAbove], [rule: nthHLineAbove]
         for ( int inx = -halfHoriz ; inx <= halfHoriz ; ++inx )
         {
             float   yco     = xAxisYco + inx * gridSpacing;
@@ -85,6 +99,8 @@ public class LineGeneratorBaseCaseTest
             horizLines.add( line );
         }
         
+        // Calculate all the vertical lines 
+        //[rule: nthVLineLeft], [rule: nthVLineRight]
         for ( int inx = -halfVert ; inx <= halfVert ; ++inx )
         {
             float   xco     = yAxisXco + inx * gridSpacing;

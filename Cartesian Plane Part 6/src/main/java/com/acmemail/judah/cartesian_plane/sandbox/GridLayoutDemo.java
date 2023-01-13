@@ -97,7 +97,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  * 
  * @author Jack Straub
  * 
- * @see LineGenerator
+ * @see com.acmemail.judah.cartesian_plane.LineGenerator
  *
  */
 @SuppressWarnings("serial")

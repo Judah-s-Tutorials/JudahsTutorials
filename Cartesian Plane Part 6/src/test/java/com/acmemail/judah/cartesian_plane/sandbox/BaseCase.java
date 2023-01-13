@@ -13,7 +13,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
 /**
  * Displays a grid representing the <em>base case</em>, 
- * as determined by the figures in {@linkplain BaseCaseParameters}.
+ * as determined by the figures in {@linkplain util BaseCaseParameters}.
  * 
  * @author Jack Straub
  */
