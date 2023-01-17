@@ -10,7 +10,7 @@ import java.awt.Color;
  * @author Jack Straub
  *
  */
-public class ValidateColorAsInt
+public class ValidateTestColorAsInt
 {
     /**
      * Application entry point.

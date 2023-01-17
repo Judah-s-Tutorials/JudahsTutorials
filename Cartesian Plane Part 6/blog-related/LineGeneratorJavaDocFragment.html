@@ -107,7 +107,7 @@
 			The number of horizontal lines
 			above the x-axis
 			is calculated as
-			<em>floor(rectHeight / 2 / gridSpacing)</em>.
+			<em>floor((rectHeight - 1) / 2 / gridSpacing)</em>.
 			</li>
 			<li style="margin-top: .2em; margin-bottom: .2em">
 			<b>[rule: numHLinesBelow]</b>
@@ -121,14 +121,14 @@
 			<b>[rule: numHLinesTotal]</b>
 			The total number of horizontal lines
 			is calculated as
-			<em>2floor(rectHeight / 2 / gridSpacing) + 1</em>.
+			<em>2 * floor((rectHeight - 1) / 2 / gridSpacing) + 1</em>.
 			</li>
 			<li style="margin-top: .2em; margin-bottom: .2em">
 			<b>[rule: numVLinesLeft]</b>
 			The number of vertical lines
 			left of the y-axis
 			is calculated as
-			<em>floor(rectWidth / 2 / gridSpacing)</em>.
+			<em>floor((rectWidth - 1) / 2 / gridSpacing)</em>.
 			</li>
 			<li style="margin-top: .2em; margin-bottom: .2em">
 			<b>[rule: numVLinesRight]</b>
@@ -142,7 +142,7 @@
 			<b>[rule: numVLinesTotal]</b>
 			The total number of vertical lines
 			is calculated as
-			<em>2floor(rectWidth / 2 / gridSpacing) + 1</em>.
+			<em>2 * floor((rectWidth - 1) / 2 / gridSpacing) + 1</em>.
 			</li>
 			<li style="margin-top: .2em; margin-bottom: .2em">
 			<b>[rule: nthHLineAbove]</b>
