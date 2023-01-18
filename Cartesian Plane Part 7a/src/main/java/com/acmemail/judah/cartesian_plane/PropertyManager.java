@@ -526,11 +526,18 @@ public enum PropertyManager
     /**
      * This method is called to get the initial value
      * of a named property.
-     * The value is obtained by:
+     * The value is obtained
+     * according to the algorithm
+     * described in the class header.
+     * 
      * @param propName  property name
      * @param defValue  default value to be applied if necessary
      * 
      * @return  the value of the given property
+     * 
+     * @see <a href="#initialValues">
+     *      Establishing the Initial Values of Properties
+     *      </a>
      */
     private String getProperty( String propName, String defValue )
     {
