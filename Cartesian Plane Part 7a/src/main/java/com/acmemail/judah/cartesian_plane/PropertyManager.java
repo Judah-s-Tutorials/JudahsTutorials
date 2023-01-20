@@ -507,7 +507,7 @@ public enum PropertyManager
                 CPConstants.USER_PROPERTIES_DV
             );
         
-        if ( propsFile != null )
+        if ( propsFile != null && !propsFile.isEmpty() )
         {
             try ( FileInputStream inStream = new FileInputStream( propsFile ) )
             {

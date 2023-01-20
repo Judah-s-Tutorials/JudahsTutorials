@@ -10,7 +10,7 @@ import java.awt.Font;
  * @author Jack Straub
  */
 public class CPConstants
-{
+{ 
     /////////////////////////////////////////////////
     //   General grid properties
     /////////////////////////////////////////////////
