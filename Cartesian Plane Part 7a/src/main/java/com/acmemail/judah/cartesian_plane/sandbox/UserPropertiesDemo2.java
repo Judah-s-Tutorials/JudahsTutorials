@@ -10,18 +10,14 @@ import com.acmemail.judah.cartesian_plane.CPConstants;
  * This class demonstrates 
  * how to load a properties file
  * from a given path.
- * The strategy employed
- * uses the most traditional
- * IO error processing.
- * There's another example,
- * {@linkplain UserPropertiesDemo2},
- * that uses the "try with resources" strategy.
+ * using the "try with resources" strategy.
  * 
  * @author Jack Straub
  *
  * @see UserPropertiesDemo2
+ * @see AppPropertiesDemo
  */
-public class UserPropertiesDemo1
+public class UserPropertiesDemo2
 {
     /**
      * Application entry point.
@@ -40,34 +36,18 @@ public class UserPropertiesDemo1
         else
         {
             System.out.println( "Attempting to load " + propFile );
-            // This variable needs to be declared before the try block
-            // because its scope must extend to the finally block.
-            FileInputStream inStream    = null;
-            try
+            // IMPORTANT! the inStream variable MUST be declared
+            // INSIDE the parentheses.
+            try ( FileInputStream inStream = new FileInputStream( propFile ) )
             {
-                // Once opened we must remember to eventually close the
-                // input stream. This is done in the finally block which
-                // is executed regardless of whether an exception is thrown.
-                inStream = new FileInputStream( propFile );
+                // Because inStream is declared within the parentheses
+                // following try, inStream.close() will be invoked
+                // regardless of whether an exception is thrown.
                 props.load( inStream );
             }
             catch ( IOException exc )
             {
                 System.err.println( "Open file error: " + exc.getMessage() );
-            }
-            finally
-            {
-                // Annoyingly, closing a stream might also cause an
-                // IOException, which must be caught.
-                try
-                {
-                    if ( inStream != null )
-                        inStream.close();
-                }
-                catch ( IOException exc )
-                {
-                    System.err.println( "Close file error: " + exc.getMessage() );
-                }
             }
             for ( Object name : props.keySet() )
             {

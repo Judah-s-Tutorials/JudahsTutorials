@@ -116,11 +116,6 @@ public class CPConstants
     public static final String  LABEL_FONT_STYLE_DV     = "PLAIN";
     /** Label font size default value: float. */
     public static final String  LABEL_FONT_SIZE_DV      = "8";
-    /**
-     *  Label font units default value: String.
-     *  em or px.
-     */
-    public static final String  LABEL_FONT_UNITS_DV     = "em";
     
     /** Location of user properties file property name. */
     public static final String  USER_PROPERTIES_PN      = "userProperties";

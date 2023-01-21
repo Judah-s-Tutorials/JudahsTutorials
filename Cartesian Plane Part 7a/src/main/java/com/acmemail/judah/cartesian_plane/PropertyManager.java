@@ -110,10 +110,7 @@ public enum PropertyManager
      * The name of the default properties file.
      */
     private static final String         appPropertiesName   = 
-        "appProperties.ini";
-    
-    /** Map of property names to property values. */
-    private final Map<String,String>    propertyMap     = new HashMap<>();
+        "AppProperties.ini";
     /** 
      * Property name/value pairs from the user's properties file.
      * Used only during initialization.
@@ -124,6 +121,9 @@ public enum PropertyManager
      * Used only during initialization.
      */
     private final Properties            appProperties   = new Properties();
+    
+    /** Map of property names to property values. */
+    private final Map<String,String>    propertyMap     = new HashMap<>();
     
     /** List of property listeners. */
     private final List<PropertyChangeListener>  propertyListeners   =
@@ -458,46 +458,46 @@ public enum PropertyManager
         return iVal;
     }
 
-    private void getAppProperties()
+private void getAppProperties()
+{
+    ClassLoader loader      = PropertyManager.class.getClassLoader();
+    InputStream inStream    = loader.getResourceAsStream( appPropertiesName );
+    if ( inStream == null )
     {
-        ClassLoader loader      = PropertyManager.class.getClassLoader();
-        InputStream inStream    = loader.getResourceAsStream( appPropertiesName );
-        if ( inStream == null )
+        String  msg = "System properties file \"" 
+            + appPropertiesName + "\" not found";
+        System.err.println( msg );
+    }
+    else
+    {
+        try
         {
-            String  msg = "System properties file \"" 
-                + appPropertiesName + "\" not found";
+            appProperties.load( inStream );
+        }
+        catch ( IOException exc )
+        {
+            String  msg = "Error reading system properties file: \""
+                + appPropertiesName + "\"";
             System.err.println( msg );
-        }
-        else
-        {
-            try
-            {
-                appProperties.load( inStream );
-            }
-            catch ( IOException exc )
-            {
-                String  msg = "Error reading system properties file: \""
-                    + appPropertiesName + "\"";
-                System.err.println( msg );
-                System.err.println( exc.getMessage() );
-            }
-        }
-        
-        if ( inStream != null )
-        {
-            try
-            {
-                inStream.close();
-            }
-            catch ( IOException exc )
-            {
-                String  msg = "Error closing system properties file: \""
-                    + appPropertiesName + "\"";
-                System.err.println( msg );
-                System.err.println( exc.getMessage() );
-            }
+            System.err.println( exc.getMessage() );
         }
     }
+    
+    if ( inStream != null )
+    {
+        try
+        {
+            inStream.close();
+        }
+        catch ( IOException exc )
+        {
+            String  msg = "Error closing system properties file: \""
+                + appPropertiesName + "\"";
+            System.err.println( msg );
+            System.err.println( exc.getMessage() );
+        }
+    }
+}
     
     private void getUserProperties()
     {
