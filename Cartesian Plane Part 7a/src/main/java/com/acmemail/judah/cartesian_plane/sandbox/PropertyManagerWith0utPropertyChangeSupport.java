@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.acmemail.judah.cartesian_plane;
+package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
+import com.acmemail.judah.cartesian_plane.CPConstants;
 
 /**
  * Manage the properties for this application.
@@ -101,7 +103,7 @@ import java.util.Properties;
  * @see #addPropertyChangeListener(PropertyChangeListener)
  * @see #addPropertyChangeListener(String, PropertyChangeListener)
  */
-public enum PropertyManager
+public enum PropertyManagerWith0utPropertyChangeSupport
 {
     /** The single instance of this class. */
     INSTANCE;
@@ -143,7 +145,7 @@ public enum PropertyManager
      *      Establishing the Initial Values of Properties
      *      </a>
      */
-    private PropertyManager()
+    private PropertyManagerWith0utPropertyChangeSupport()
     {
         String  val = null;
         
@@ -470,7 +472,7 @@ public enum PropertyManager
      */
     private void getAppProperties()
     {
-        ClassLoader loader      = PropertyManager.class.getClassLoader();
+        ClassLoader loader      = PropertyManagerWith0utPropertyChangeSupport.class.getClassLoader();
         InputStream inStream    = loader.getResourceAsStream( appPropertiesName );
         if ( inStream == null )
         {
