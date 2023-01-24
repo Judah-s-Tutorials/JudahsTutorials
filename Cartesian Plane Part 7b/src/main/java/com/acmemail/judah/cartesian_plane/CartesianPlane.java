@@ -396,17 +396,23 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class CartesianPlane extends JPanel
 {
+    /** 
+     * This declaration is just for convenience; it saves
+     * having to write "PropertyManager.INSTANCE" over and over.
+     */
+    private static final PropertyManager pmgr   = PropertyManager.INSTANCE;
+    
     private static final int    mainWindowWidthDV   =
-        CPConstants.asInt( CPConstants.MW_WIDTH_DV );
+        pmgr.asInt( CPConstants.MW_WIDTH_PN );
     private static final int    mainWindowHeightDV   =
-        CPConstants.asInt( CPConstants.MW_HEIGHT_DV );
+        pmgr.asInt( CPConstants.MW_HEIGHT_PN );
     
     /////////////////////////////////////////////////
     //   General grid properties
     /////////////////////////////////////////////////
     /** Grid units (pixels-per-unit) default value: float. */
     private float   gridUnit            = 
-        CPConstants.asFloat( CPConstants.GRID_UNIT_DV );
+        pmgr.asFloat( CPConstants.GRID_UNIT_PN );
 
     /////////////////////////////////////////////////
     //   Main window properties
@@ -417,84 +423,84 @@ public class CartesianPlane extends JPanel
     //   See the default constructor.
     /////////////////////////////////////////////////
     private Color   mwBGColor           = 
-        CPConstants.asColor( CPConstants.MW_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MW_BG_COLOR_PN );
     
     /////////////////////////////////////////////////
     //   Margin properties
     /////////////////////////////////////////////////
     private float   marginTopWidth      =
-        CPConstants.asFloat( CPConstants.MARGIN_TOP_WIDTH_DV );
+        pmgr.asFloat( CPConstants.MARGIN_TOP_WIDTH_PN );
     private Color   marginTopBGColor    =
-        CPConstants.asColor( CPConstants.MARGIN_TOP_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MARGIN_TOP_BG_COLOR_PN );
     private float   marginRightWidth      =
-        CPConstants.asFloat( CPConstants.MARGIN_RIGHT_WIDTH_DV );
+        pmgr.asFloat( CPConstants.MARGIN_RIGHT_WIDTH_PN );
     private Color   marginRightBGColor    =
-        CPConstants.asColor( CPConstants.MARGIN_RIGHT_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MARGIN_RIGHT_BG_COLOR_PN );
     private float   marginBottomWidth      =
-        CPConstants.asFloat( CPConstants.MARGIN_BOTTOM_WIDTH_DV );
+        pmgr.asFloat( CPConstants.MARGIN_BOTTOM_WIDTH_PN );
     private Color   marginBottomBGColor    =
-        CPConstants.asColor( CPConstants.MARGIN_BOTTOM_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MARGIN_BOTTOM_BG_COLOR_PN );
     private float   marginLeftWidth      =
-        CPConstants.asFloat( CPConstants.MARGIN_LEFT_WIDTH_DV );
+        pmgr.asFloat( CPConstants.MARGIN_LEFT_WIDTH_PN );
     private Color   marginLeftBGColor    =
-        CPConstants.asColor( CPConstants.MARGIN_LEFT_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MARGIN_LEFT_BG_COLOR_PN );
     
     /////////////////////////////////////////////////
     //   Tic mark properties
     /////////////////////////////////////////////////
     private Color   ticMinorColor       =
-        CPConstants.asColor( CPConstants.TIC_MINOR_COLOR_DV );
+        pmgr.asColor( CPConstants.TIC_MINOR_COLOR_PN );
     private float   ticMinorWeight      =
-        CPConstants.asFloat( CPConstants.TIC_MINOR_WEIGHT_DV );
+        pmgr.asFloat( CPConstants.TIC_MINOR_WEIGHT_PN );
     private float   ticMinorLen         =
-        CPConstants.asFloat( CPConstants.TIC_MINOR_LEN_DV );
+        pmgr.asFloat( CPConstants.TIC_MINOR_LEN_PN );
     private float   ticMinorMPU         =
-        CPConstants.asFloat( CPConstants.TIC_MINOR_MPU_DV );
+        pmgr.asFloat( CPConstants.TIC_MINOR_MPU_PN );
     private boolean ticMinorDraw        =
-        CPConstants.asBoolean( CPConstants.TIC_MINOR_DRAW_DV );
+        pmgr.asBoolean( CPConstants.TIC_MINOR_DRAW_PN );
     private Color   ticMajorColor       =
-        CPConstants.asColor( CPConstants.TIC_MAJOR_COLOR_DV );
+        pmgr.asColor( CPConstants.TIC_MAJOR_COLOR_PN );
     private float   ticMajorWeight      =
-        CPConstants.asFloat( CPConstants.TIC_MAJOR_WEIGHT_DV );
+        pmgr.asFloat( CPConstants.TIC_MAJOR_WEIGHT_PN );
     private float   ticMajorLen         =
-        CPConstants.asFloat( CPConstants.TIC_MAJOR_LEN_DV );
+        pmgr.asFloat( CPConstants.TIC_MAJOR_LEN_PN );
     private float   ticMajorMPU         =
-        CPConstants.asFloat( CPConstants.TIC_MAJOR_MPU_DV );
+        pmgr.asFloat( CPConstants.TIC_MAJOR_MPU_PN );
     private boolean ticMajorDraw        =
-        CPConstants.asBoolean( CPConstants.TIC_MAJOR_DRAW_DV );
+        pmgr.asBoolean( CPConstants.TIC_MAJOR_DRAW_PN );
 
     /////////////////////////////////////////////////
     //   Grid line properties
     /////////////////////////////////////////////////
     private Color   gridLineColor       = 
-        CPConstants.asColor( CPConstants.GRID_LINE_COLOR_DV );
+        pmgr.asColor( CPConstants.GRID_LINE_COLOR_PN );
     private float   gridLineWeight      = 
-        CPConstants.asFloat( CPConstants.GRID_LINE_WEIGHT_DV );
+        pmgr.asFloat( CPConstants.GRID_LINE_WEIGHT_PN );
     private float   gridLineLPU         = 
-        CPConstants.asFloat( CPConstants.GRID_LINE_LPU_DV );
+        pmgr.asFloat( CPConstants.GRID_LINE_LPU_PN );
     private boolean gridLineDraw        =
-        CPConstants.asBoolean( CPConstants.GRID_LINE_DRAW_DV );
+        pmgr.asBoolean( CPConstants.GRID_LINE_DRAW_PN );
 
     /////////////////////////////////////////////////
     //   Axis properties
     /////////////////////////////////////////////////
     private Color   axisColor           = 
-        CPConstants.asColor( CPConstants.AXIS_COLOR_DV );
+        pmgr.asColor( CPConstants.AXIS_COLOR_PN );
     private float   axisWeight          = 
-        CPConstants.asFloat( CPConstants.AXIS_WEIGHT_DV );
+        pmgr.asFloat( CPConstants.AXIS_WEIGHT_PN );
 
     /////////////////////////////////////////////////
     //   Label properties (these are the labels that
     //   go on the x- and y-axes, e.g., 1.1, 1.2)
     /////////////////////////////////////////////////
     private Color   labelFontColor      =
-        CPConstants.asColor( CPConstants.LABEL_FONT_COLOR_DV );
+        pmgr.asColor( CPConstants.LABEL_FONT_COLOR_PN );
     private String  labelFontName       =
-        CPConstants.LABEL_FONT_NAME_DV;
+        pmgr.asString( CPConstants.LABEL_FONT_NAME_PN );
     private int     labelFontStyle      =
-        CPConstants.asFontStyle( CPConstants.LABEL_FONT_STYLE_DV );
+        pmgr.asFontStyle( CPConstants.LABEL_FONT_STYLE_PN );
     private float   labelFontSize       = 
-        CPConstants.asFloat( CPConstants.LABEL_FONT_SIZE_DV );
+        pmgr.asFloat( CPConstants.LABEL_FONT_SIZE_PN );
 
     ///////////////////////////////////////////////////////
     //

@@ -1,6 +1,3 @@
-/**
- * 
- */
 package com.acmemail.judah.cartesian_plane;
 
 import java.awt.Color;
@@ -10,6 +7,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -143,28 +141,66 @@ public enum PropertyManager
     private PropertyManager()
     {
         changeSupport = new PropertyChangeSupport( this );
-        String  val = null;
-        
+
+        // Compile the properties stored in the application ini file.
         getAppProperties();
+        // Merge the properties from the user's ini file, if any;
+        // note that anything in the user's ini file will overwrite
+        // with a matching property name.
         getUserProperties();
         
-        val = getProperty( 
-            CPConstants.TIC_MAJOR_COLOR_PN, 
-            CPConstants.TIC_MAJOR_COLOR_DV
-        );
-        propertyMap.put( CPConstants.TIC_MAJOR_COLOR_PN, val );
-        
-        val = getProperty( 
-            CPConstants.TIC_MAJOR_WEIGHT_PN, 
-            CPConstants.TIC_MAJOR_WEIGHT_DV
-        );
-        propertyMap.put( CPConstants.TIC_MAJOR_WEIGHT_PN, val );
-        
-        val = getProperty( 
-            CPConstants.TIC_MAJOR_LEN_PN, 
-            CPConstants.TIC_MAJOR_LEN_DV
-        );
-        propertyMap.put( CPConstants.TIC_MAJOR_LEN_PN, val );
+        // Get all property names and their default values.
+        for ( Field pnField : CPConstants.class.getFields() )
+        {
+            String  fieldName   = pnField.getName();
+            if ( fieldName.endsWith( "_PN" ) )
+            {
+                // derive the name of the associated DV field...
+                // ... get the name of the PN field
+                int     pNameLen    = fieldName.length();
+                // ... get the start of the PN field name (without the _PN)
+                String  pNamePrefix = fieldName.substring( 0, pNameLen );
+                // ... construct the name of the DV field
+                String  dvName      = pNamePrefix + "_DV";
+                
+                String  propName    = "";
+                String  propDefault = "";
+                try
+                {
+                    // Get the field that describes the default value
+                    // must be inside a try block because getField
+                    // throws a checked exception.
+                    Field   dvField = CPConstants.class.getField( dvName );
+                    
+                    // Because we are interrogating a class field
+                    // (declared static) we don't need to pass an
+                    // object to the Field.get method.
+                    // Must be inside a try block because get
+                    // throws a checked exception.
+                    propName = (String)pnField.get( null );
+                    propDefault = (String)dvField.get( null );
+                }
+                catch ( NoSuchFieldException exc )
+                {
+                    // This exception indicates a programming error,
+                    // but there's no reason for it to be fatal.
+                    String  msg = dvName + ": field not found";
+                    System.err.println( msg );
+                }
+                catch ( IllegalAccessException exc )
+                {
+                    // this is a wholly unexpected error;
+                    // print an error and exit.
+                    exc.printStackTrace();
+                    System.exit( 1 );
+                }
+                
+                // Interrogate command line, environment, and
+                // ini files for a value overriding the default.
+                String  finalVal    = getProperty( propName, propDefault );
+                propertyMap.put( propName, finalVal );
+            }
+        }
     }
     
     /**
@@ -233,7 +269,7 @@ public enum PropertyManager
      * @throws  NumberFormatException if the value associated with propName
      *          cannot be converted to an Integer
      */
-    public Integer asInteger( String propName )
+    public Integer asInt( String propName )
     {
         Integer iVal    = null;
         String  sVal    = propertyMap.get( propName );

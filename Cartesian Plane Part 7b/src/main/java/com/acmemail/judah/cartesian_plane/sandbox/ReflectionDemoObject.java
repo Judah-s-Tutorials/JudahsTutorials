@@ -1,8 +1,24 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
+/**
+ * This class represents a set of field names
+ * and associated getters
+ * for the purpose of demonstrating
+ * various aspects of reflection.
+ * Each field is one of three types
+ * (int, String or float)
+ * and is declared with some mixture of the modifiers
+ * public, private, static and final.
+ * All fields are explicitly initialized
+ * in their declarations
+ * except for iVar, sVar and fVar,
+ * which are initialized from parameters
+ * in the sole constructor.
+ * 
+ * @author Jack Straub
+ * 
+ * @see #ReflectionDemoObject(int, String, float)
+ */
 public class ReflectionDemoObject
 {
     public int                  pimiVar1    = 10;
@@ -26,7 +42,7 @@ public class ReflectionDemoObject
     public static final float   pcffVar1    = 7.14f;
     
     private static final int    rcfiVar1    = 60;
-    private static final String rcfsVar1    = "Fox";
+    private static final String rcfsVar1    = "Foxtrot";
     private static final float  rcffVar1    = 8.14f;
     
     private final int           iVar1;
@@ -137,49 +153,49 @@ public class ReflectionDemoObject
     }
 
     /**
-     * @return the pcfivar1
+     * @return the pcfiVar1
      */
-    public static int getPcfivar1()
+    public static int getPcfiVar1()
     {
         return pcfiVar1;
     }
 
     /**
-     * @return the pcfsvar1
+     * @return the pcfsVar1
      */
-    public static String getPcfsvar1()
+    public static String getPcfsVar1()
     {
         return pcfsVar1;
     }
 
     /**
-     * @return the pcffvar1
+     * @return the pcffVar1
      */
-    public static float getPcffvar1()
+    public static float getPcffVar1()
     {
         return pcffVar1;
     }
 
     /**
-     * @return the rcfivar1
+     * @return the rcfiVar1
      */
-    public static int getRcfivar1()
+    public static int getRcfiVar1()
     {
         return rcfiVar1;
     }
 
     /**
-     * @return the rcfsvar1
+     * @return the rcfsVar1
      */
-    public static String getRcfsvar1()
+    public static String getRcfsVar1()
     {
         return rcfsVar1;
     }
 
     /**
-     * @return the rcffvar1
+     * @return the rcffVar1
      */
-    public static float getRcffvar1()
+    public static float getRcffVar1()
     {
         return rcffVar1;
     }
@@ -187,7 +203,7 @@ public class ReflectionDemoObject
     /**
      * @return the iVar1
      */
-    public int getiVar1()
+    public int getIVar1()
     {
         return iVar1;
     }
@@ -195,7 +211,7 @@ public class ReflectionDemoObject
     /**
      * @return the sVar1
      */
-    public String getsVar1()
+    public String getSVar1()
     {
         return sVar1;
     }
@@ -203,7 +219,7 @@ public class ReflectionDemoObject
     /**
      * @return the fVar1
      */
-    public float getfVar1()
+    public float getFVar1()
     {
         return fVar1;
     }

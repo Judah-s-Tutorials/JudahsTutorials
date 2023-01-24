@@ -46,8 +46,16 @@ class PropertyManagerTest
         assertEquals( "" + expOldValue, listener.getOldVal() );
         assertEquals( "" + expNewValue, listener.getNewVal() );
         assertEquals( pmgr, listener.getSource() );
+        assertEquals( expName, listener.getName() );
     }
     
+    /**
+     * Keeps track of the contents
+     * of a property change event
+     * when it is fired.
+     * 
+     * @author Jack Straub
+     */
     private static class TestListener implements PropertyChangeListener
     {
         private Object  source  = null;
