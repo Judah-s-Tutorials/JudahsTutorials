@@ -182,10 +182,11 @@ public enum PropertyManager
                 }
                 catch ( NoSuchFieldException exc )
                 {
-                    // This exception indicates a programming error,
-                    // but there's no reason for it to be fatal.
+                    // This exception indicates a programming error.
                     String  msg = dvName + ": field not found";
                     System.err.println( msg );
+                    exc.printStackTrace();
+                    System.exit( 1 );
                 }
                 catch ( IllegalAccessException exc )
                 {

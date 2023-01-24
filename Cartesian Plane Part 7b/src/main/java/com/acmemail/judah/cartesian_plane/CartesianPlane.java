@@ -11,6 +11,8 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 import javax.swing.JPanel;
 
@@ -394,7 +396,8 @@ import javax.swing.JPanel;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class CartesianPlane extends JPanel
+public class CartesianPlane 
+    extends JPanel implements PropertyChangeListener
 {
     /** 
      * This declaration is just for convenience; it saves
@@ -594,6 +597,141 @@ public class CartesianPlane extends JPanel
         // end boilerplate
     }
     
+    public void propertyChange( PropertyChangeEvent evt )
+    {
+        String  pName   = evt.getPropertyName();
+        String  newVal  = (String)evt.getNewValue();
+        switch ( pName )
+        {
+        case CPConstants.GRID_UNIT_PN:
+            gridUnit = asFloat( newVal );
+            break;
+        case CPConstants.MW_BG_COLOR_PN:
+            mwBGColor = asColor( newVal );
+            break;
+        case CPConstants.MARGIN_TOP_WIDTH_PN:
+            marginTopWidth = asFloat( newVal );
+            break;
+        case CPConstants.MARGIN_TOP_BG_COLOR_PN:
+            marginTopBGColor = asColor( newVal );
+            break;
+        case CPConstants.MARGIN_RIGHT_WIDTH_PN:
+            marginRightWidth = asFloat( newVal );
+            break;
+        case CPConstants.MARGIN_RIGHT_BG_COLOR_PN:
+            marginRightBGColor = asColor( newVal );
+            break;
+        case CPConstants.MARGIN_BOTTOM_WIDTH_PN:
+            marginBottomWidth = asFloat( newVal );
+            break;
+        case CPConstants.MARGIN_BOTTOM_BG_COLOR_PN:
+            marginBottomBGColor = asColor( newVal );
+            break;
+        case CPConstants.MARGIN_LEFT_WIDTH_PN:
+            marginLeftWidth = asFloat( newVal );
+            break;
+        case CPConstants.MARGIN_LEFT_BG_COLOR_PN:
+            marginLeftBGColor = asColor( newVal );
+            break;
+        case CPConstants.TIC_MINOR_COLOR_PN:
+            ticMinorColor = asColor( newVal );
+            break;
+        case CPConstants.TIC_MINOR_WEIGHT_PN:
+            ticMinorWeight = asFloat( newVal );
+            break;
+        case CPConstants.TIC_MINOR_LEN_PN:
+            ticMinorLen = asFloat( newVal );
+            break;
+        case CPConstants.TIC_MINOR_MPU_PN:
+            ticMinorMPU = asFloat( newVal );
+            break;
+        case CPConstants.TIC_MINOR_DRAW_PN:
+            ticMinorDraw = asBoolean( newVal );
+            break;
+        case CPConstants.TIC_MAJOR_COLOR_PN:
+            ticMajorColor = asColor( newVal );
+            break;
+        case CPConstants.TIC_MAJOR_WEIGHT_PN:
+            ticMajorWeight = asFloat( newVal );
+            break;
+        case CPConstants.TIC_MAJOR_LEN_PN:
+            ticMajorLen = asFloat( newVal );
+            break;
+        case CPConstants.TIC_MAJOR_MPU_PN:
+            ticMajorMPU = asFloat( newVal );
+            break;
+        case CPConstants.TIC_MAJOR_DRAW_PN:
+            ticMajorDraw = asBoolean( newVal );
+            break;
+        case CPConstants.GRID_LINE_COLOR_PN:
+            gridLineColor = asColor( newVal );
+            break;
+        case CPConstants.GRID_LINE_WEIGHT_PN:
+            gridLineWeight = asFloat( newVal );
+            break;
+        case CPConstants.GRID_LINE_LPU_PN:
+            gridLineLPU = asFloat( newVal );
+            break;
+        case CPConstants.GRID_LINE_DRAW_PN:
+            gridLineDraw = asBoolean( newVal );
+            break;
+        case CPConstants.AXIS_COLOR_PN:
+            axisColor = asColor( newVal );
+            break;
+        case CPConstants.AXIS_WEIGHT_PN:
+            axisWeight = asFloat( newVal );
+            break;
+        case CPConstants.LABEL_FONT_COLOR_PN:
+            labelFontColor = asColor( newVal );
+            break;
+        case CPConstants.LABEL_FONT_NAME_PN:
+            labelFontName = asString( newVal );
+            break;
+        case CPConstants.LABEL_FONT_STYLE_PN:
+            labelFontStyle = asFontStyle( newVal );
+            break;
+        case CPConstants.LABEL_FONT_SIZE_PN:
+            labelFontSize = asFloat( newVal );
+            break;
+        }
+    }
+    
+    private Color asColor( String str )
+    {
+        int     iVal    = Integer.decode( str );
+        Color   val     = new Color( iVal );
+        return val;
+    }
+    
+    private String asString( String str )
+    {
+        return str;
+    }
+    
+    private float asFloat( String str )
+    {
+        float   val = Float.parseFloat( str );
+        return val;
+    }
+    
+    private boolean asBoolean( String str )
+    {
+        boolean val = Boolean.parseBoolean( str );
+        return val;
+    }
+    
+    private int asFontStyle( String str )
+    {
+        int val = Font.PLAIN;
+        if ( str.equalsIgnoreCase( "italic" ) )
+            val = Font.ITALIC;
+        else if ( str.equalsIgnoreCase( "bold" ) )
+            val = Font.BOLD;
+        else
+            ;
+        return val;
+    }
+    
     private void drawAxes()
     {
         gtx.setColor( axisColor );
@@ -773,492 +911,5 @@ public class CartesianPlane extends JPanel
         rect.setRect( 0, 0, marginLeftWidth, currHeight );
         gtx.setColor( marginLeftBGColor );
         gtx.fill( rect );
-    }
-
-    /**
-     * Gets the value of the grid unit
-     * (the number of pixels consumed per unit).
-     * 
-     * @return the grid unit
-     */
-    public float getGridUnit()
-    {
-        return gridUnit;
-    }
-
-    /**
-     * Sets the grid unit
-     * (the number of pixels consumed per unit)
-     * to the given value.
-     * 
-     * @param gridUnit the given value
-     */
-    public void setGridUnit(float gridUnit)
-    {
-        this.gridUnit = gridUnit;
-    }
-
-    /**
-     * @return the mwBGColor
-     */
-    public Color getMwBGColor()
-    {
-        return mwBGColor;
-    }
-
-    /**
-     * @param mwBGColor the mwBGColor to set
-     */
-    public void setMwBGColor(Color mwBGColor)
-    {
-        this.mwBGColor = mwBGColor;
-    }
-
-    /**
-     * @return the marginTopWidth
-     */
-    public float getMarginTopWidth()
-    {
-        return marginTopWidth;
-    }
-
-    /**
-     * @param marginTopWidth the marginTopWidth to set
-     */
-    public void setMarginTopWidth(float marginTopWidth)
-    {
-        this.marginTopWidth = marginTopWidth;
-    }
-
-    /**
-     * @return the marginTopBGColor
-     */
-    public Color getMarginTopBGColor()
-    {
-        return marginTopBGColor;
-    }
-
-    /**
-     * @param marginTopBGColor the marginTopBGColor to set
-     */
-    public void setMarginTopBGColor(Color marginTopBGColor)
-    {
-        this.marginTopBGColor = marginTopBGColor;
-    }
-
-    /**
-     * @return the marginRightWidth
-     */
-    public float getMarginRightWidth()
-    {
-        return marginRightWidth;
-    }
-
-    /**
-     * @param marginRightWidth the marginRightWidth to set
-     */
-    public void setMarginRightWidth(float marginRightWidth)
-    {
-        this.marginRightWidth = marginRightWidth;
-    }
-
-    /**
-     * @return the marginRightBGColor
-     */
-    public Color getMarginRightBGColor()
-    {
-        return marginRightBGColor;
-    }
-
-    /**
-     * @param marginRightBGColor the marginRightBGColor to set
-     */
-    public void setMarginRightBGColor(Color marginRightBGColor)
-    {
-        this.marginRightBGColor = marginRightBGColor;
-    }
-
-    /**
-     * @return the marginBottomWidth
-     */
-    public float getMarginBottomWidth()
-    {
-        return marginBottomWidth;
-    }
-
-    /**
-     * @param marginBottomWidth the marginBottomWidth to set
-     */
-    public void setMarginBottomWidth(float marginBottomWidth)
-    {
-        this.marginBottomWidth = marginBottomWidth;
-    }
-
-    /**
-     * @return the marginBottomBGColor
-     */
-    public Color getMarginBottomBGColor()
-    {
-        return marginBottomBGColor;
-    }
-
-    /**
-     * @param marginBottomBGColor the marginBottomBGColor to set
-     */
-    public void setMarginBottomBGColor(Color marginBottomBGColor)
-    {
-        this.marginBottomBGColor = marginBottomBGColor;
-    }
-
-    /**
-     * @return the marginLeftWidth
-     */
-    public float getMarginLeftWidth()
-    {
-        return marginLeftWidth;
-    }
-
-    /**
-     * @param marginLeftWidth the marginLeftWidth to set
-     */
-    public void setMarginLeftWidth(float marginLeftWidth)
-    {
-        this.marginLeftWidth = marginLeftWidth;
-    }
-
-    /**
-     * @return the marginLeftBGColor
-     */
-    public Color getMarginLeftBGColor()
-    {
-        return marginLeftBGColor;
-    }
-
-    /**
-     * @param marginLeftBGColor the marginLeftBGColor to set
-     */
-    public void setMarginLeftBGColor(Color marginLeftBGColor)
-    {
-        this.marginLeftBGColor = marginLeftBGColor;
-    }
-
-    /**
-     * @return the ticMinorColor
-     */
-    public Color getTicMinorColor()
-    {
-        return ticMinorColor;
-    }
-
-    /**
-     * @param ticMinorColor the ticMinorColor to set
-     */
-    public void setTicMinorColor(Color ticMinorColor)
-    {
-        this.ticMinorColor = ticMinorColor;
-    }
-
-    /**
-     * @return the ticMinorWeight
-     */
-    public float getTicMinorWeight()
-    {
-        return ticMinorWeight;
-    }
-
-    /**
-     * @param ticMinorWeight the ticMinorWeight to set
-     */
-    public void setTicMinorWeight(float ticMinorWeight)
-    {
-        this.ticMinorWeight = ticMinorWeight;
-    }
-
-    /**
-     * @return the ticMinorLen
-     */
-    public float getTicMinorLen()
-    {
-        return ticMinorLen;
-    }
-
-    /**
-     * @param ticMinorLen the ticMinorLen to set
-     */
-    public void setTicMinorLen(float ticMinorLen)
-    {
-        this.ticMinorLen = ticMinorLen;
-    }
-
-    /**
-     * @return the ticMinorMPU
-     */
-    public float getTicMinorMPU()
-    {
-        return ticMinorMPU;
-    }
-
-    /**
-     * @param ticMinorMPU the ticMinorMPU to set
-     */
-    public void setTicMinorMPU(float ticMinorMPU)
-    {
-        this.ticMinorMPU = ticMinorMPU;
-    }
-
-    /**
-     * @return the ticMinorDraw
-     */
-    public boolean isTicMinorDraw()
-    {
-        return ticMinorDraw;
-    }
-
-    /**
-     * @param ticMinorDraw the ticMinorDraw to set
-     */
-    public void setTicMinorDraw(boolean ticMinorDraw)
-    {
-        this.ticMinorDraw = ticMinorDraw;
-    }
-
-    /**
-     * @return the ticMajorColor
-     */
-    public Color getTicMajorColor()
-    {
-        return ticMajorColor;
-    }
-
-    /**
-     * @param ticMajorColor the ticMajorColor to set
-     */
-    public void setTicMajorColor(Color ticMajorColor)
-    {
-        this.ticMajorColor = ticMajorColor;
-    }
-
-    /**
-     * @return the ticMajorWeight
-     */
-    public float getTicMajorWeight()
-    {
-        return ticMajorWeight;
-    }
-
-    /**
-     * @param ticMajorWeight the ticMajorWeight to set
-     */
-    public void setTicMajorWeight(float ticMajorWeight)
-    {
-        this.ticMajorWeight = ticMajorWeight;
-    }
-
-    /**
-     * @return the ticMajorLen
-     */
-    public float getTicMajorLen()
-    {
-        return ticMajorLen;
-    }
-
-    /**
-     * @param ticMajorLen the ticMajorLen to set
-     */
-    public void setTicMajorLen(float ticMajorLen)
-    {
-        this.ticMajorLen = ticMajorLen;
-    }
-
-    /**
-     * @return the ticMajorMPU
-     */
-    public float getTicMajorMPU()
-    {
-        return ticMajorMPU;
-    }
-
-    /**
-     * @param ticMajorMPU the ticMajorMPU to set
-     */
-    public void setTicMajorMPU(float ticMajorMPU)
-    {
-        this.ticMajorMPU = ticMajorMPU;
-    }
-
-    /**
-     * @return the ticMajorDraw
-     */
-    public boolean isTicMajorDraw()
-    {
-        return ticMajorDraw;
-    }
-
-    /**
-     * @param ticMajorDraw the ticMajorDraw to set
-     */
-    public void setTicMajorDraw(boolean ticMajorDraw)
-    {
-        this.ticMajorDraw = ticMajorDraw;
-    }
-
-    /**
-     * @return the gridLineColor
-     */
-    public Color getGridLineColor()
-    {
-        return gridLineColor;
-    }
-
-    /**
-     * @param gridLineColor the gridLineColor to set
-     */
-    public void setGridLineColor(Color gridLineColor)
-    {
-        this.gridLineColor = gridLineColor;
-    }
-
-    /**
-     * @return the gridLineWeight
-     */
-    public float getGridLineWeight()
-    {
-        return gridLineWeight;
-    }
-
-    /**
-     * @param gridLineWeight the gridLineWeight to set
-     */
-    public void setGridLineWeight(float gridLineWeight)
-    {
-        this.gridLineWeight = gridLineWeight;
-    }
-
-    /**
-     * @return the gridLineLPU
-     */
-    public float getGridLineLPU()
-    {
-        return gridLineLPU;
-    }
-
-    /**
-     * @param gridLineLPU the gridLineLPU to set
-     */
-    public void setGridLineLPU(float gridLineLPU)
-    {
-        this.gridLineLPU = gridLineLPU;
-    }
-
-    /**
-     * @return the gridLineDraw
-     */
-    public boolean isGridLineDraw()
-    {
-        return gridLineDraw;
-    }
-
-    /**
-     * @param gridLineDraw the gridLineDraw to set
-     */
-    public void setGridLineDraw(boolean gridLineDraw)
-    {
-        this.gridLineDraw = gridLineDraw;
-    }
-
-    /**
-     * @return the axisColor
-     */
-    public Color getAxisColor()
-    {
-        return axisColor;
-    }
-
-    /**
-     * @param axisColor the axisColor to set
-     */
-    public void setAxisColor(Color axisColor)
-    {
-        this.axisColor = axisColor;
-    }
-
-    /**
-     * @return the axisWeight
-     */
-    public float getAxisWeight()
-    {
-        return axisWeight;
-    }
-
-    /**
-     * @param axisWeight the axisWeight to set
-     */
-    public void setAxisWeight(float axisWeight)
-    {
-        this.axisWeight = axisWeight;
-    }
-
-    /**
-     * @return the labelFontColor
-     */
-    public Color getLabelFontColor()
-    {
-        return labelFontColor;
-    }
-
-    /**
-     * @param labelFontColor the labelFontColor to set
-     */
-    public void setLabelFontColor(Color labelFontColor)
-    {
-        this.labelFontColor = labelFontColor;
-    }
-
-    /**
-     * @return the labelFontName
-     */
-    public String getLabelFontName()
-    {
-        return labelFontName;
-    }
-
-    /**
-     * @param labelFontName the labelFontName to set
-     */
-    public void setLabelFontName(String labelFontName)
-    {
-        this.labelFontName = labelFontName;
-    }
-
-    /**
-     * @return the labelFontStyle
-     */
-    public int getLabelFontStyle()
-    {
-        return labelFontStyle;
-    }
-
-    /**
-     * @param labelFontStyle the labelFontStyle to set
-     */
-    public void setLabelFontStyle(int labelFontStyle)
-    {
-        this.labelFontStyle = labelFontStyle;
-    }
-
-    /**
-     * @return the labelFontSize
-     */
-    public float getLabelFontSize()
-    {
-        return labelFontSize;
-    }
-
-    /**
-     * @param labelFontSize the labelFontSize to set
-     */
-    public void setLabelFontSize(float labelFontSize)
-    {
-        this.labelFontSize = labelFontSize;
     }
 }
