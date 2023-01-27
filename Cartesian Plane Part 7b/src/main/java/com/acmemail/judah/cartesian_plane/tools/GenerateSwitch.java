@@ -110,6 +110,8 @@ public class GenerateSwitch
         bldr.append( asType )
             .append( "( newVal );" )
             .append( endl )
+            .append( "        repaint();" )
+            .append( endl )
             .append( "        break;" );
         writer.println( bldr );
     }

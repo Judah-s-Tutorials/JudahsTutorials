@@ -1,5 +1,8 @@
 package com.acmemail.judah.cartesian_plane;
 
+import java.awt.Color;
+import java.awt.Font;
+
 /**
  * The class contains the declarations
  * of all constants for the Cartesian Plane project.
@@ -180,4 +183,108 @@ public class CPConstants
     public static final String  USER_PROPERTIES_PN      = "userProperties";
     /** Location of user properties file default value. */
     public static final String  USER_PROPERTIES_DV      = null;
+    
+    /**
+     * Convert a String to an int and return the int.
+     * 
+     * @param sVal  the String to convert
+     * 
+     * @return the converted int
+     * 
+     * @throws  NumberFormatException if sVal
+     *          cannot be converted to an int
+     */
+    public static int asInt( String sVal )
+    {
+        int iVal    = Integer.parseInt( sVal );
+        return iVal;
+    }
+    
+    /**
+     * Convert a String to an float and return the float.
+     * 
+     * @param sVal  the String to convert
+     * 
+     * @return the converted float
+     * 
+     * @throws  NumberFormatException if sVal
+     *          cannot be converted to a float
+     */
+    public static float asFloat( String sVal )
+    {
+        float fVal    = Float.parseFloat( sVal );
+        return fVal;
+    }
+    
+    /**
+     * Convert a String to a boolean and return the boolean.
+     * The operation is case-insensitive.
+     * Any value other than "true" is converted to false.
+     * 
+     * @param sVal  the String to convert
+     * 
+     * @return the converted boolean
+     */
+    public static boolean asBoolean( String sVal )
+    {
+        boolean bVal    = Boolean.parseBoolean( sVal );
+        return bVal;
+    }
+    
+    /**
+     * Convert a String to a Color and return the Color.
+     * The String must be encoded as an integer value.
+     * Decimal integer and Hexadecimal integer values
+     * are accepted.
+     * (A hexadecimal string value begins with "0x" or "#".)
+     * 
+     * @param sVal  the String to convert
+     * 
+     * @return the converted Color
+     * 
+     * @throws  NumberFormatException if sVal
+     *          cannot be converted to an integer
+     */
+    public static Color asColor( String sVal )
+    {
+        int     iVal    = Integer.decode( sVal );
+        Color   cVal    = new Color( iVal );
+        return cVal;
+    }
+    
+    /**
+     * Convert a String to a font style and return the result.
+     * Integer values for font styles are defined in the Font class.
+     * Input is case-insensitive; valid values are 
+     * PLAIN, BOLD and ITALIC.
+     * 
+     * @param sVal  the String to convert
+     * 
+     * @return the converted Color
+     * 
+     * @throws  IllegalArgumentException if sVal
+     *          cannot be converted to a font style.
+     */
+    public static int asFontStyle( String sVal )
+    {
+        String  cisVal  = sVal.toUpperCase();
+        int     iVal    = -1;
+        switch ( cisVal )
+        {
+        case "PLAIN":
+            iVal = Font.PLAIN;
+            break;
+        case "BOLD":
+            iVal = Font.BOLD;
+            break;
+        case "ITALIC":
+            iVal = Font.ITALIC;
+            break;
+        default:
+            String  err = 
+                "\"" + sVal + "\"" + "is not a valid font style";
+            throw new IllegalArgumentException( err );
+        }
+        return iVal;
+    }
 }

@@ -538,6 +538,7 @@ public class CartesianPlane
     {
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );
+        pmgr.addPropertyChangeListener( this );
     }
     
     /**
@@ -604,132 +605,126 @@ public class CartesianPlane
         switch ( pName )
         {
         case CPConstants.GRID_UNIT_PN:
-            gridUnit = asFloat( newVal );
+            gridUnit = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.MW_BG_COLOR_PN:
-            mwBGColor = asColor( newVal );
+            mwBGColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.MARGIN_TOP_WIDTH_PN:
-            marginTopWidth = asFloat( newVal );
+            marginTopWidth = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.MARGIN_TOP_BG_COLOR_PN:
-            marginTopBGColor = asColor( newVal );
+            marginTopBGColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.MARGIN_RIGHT_WIDTH_PN:
-            marginRightWidth = asFloat( newVal );
+            marginRightWidth = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.MARGIN_RIGHT_BG_COLOR_PN:
-            marginRightBGColor = asColor( newVal );
+            marginRightBGColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.MARGIN_BOTTOM_WIDTH_PN:
-            marginBottomWidth = asFloat( newVal );
+            marginBottomWidth = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.MARGIN_BOTTOM_BG_COLOR_PN:
-            marginBottomBGColor = asColor( newVal );
+            marginBottomBGColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.MARGIN_LEFT_WIDTH_PN:
-            marginLeftWidth = asFloat( newVal );
+            marginLeftWidth = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.MARGIN_LEFT_BG_COLOR_PN:
-            marginLeftBGColor = asColor( newVal );
+            marginLeftBGColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MINOR_COLOR_PN:
-            ticMinorColor = asColor( newVal );
+            ticMinorColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MINOR_WEIGHT_PN:
-            ticMinorWeight = asFloat( newVal );
+            ticMinorWeight = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MINOR_LEN_PN:
-            ticMinorLen = asFloat( newVal );
+            ticMinorLen = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MINOR_MPU_PN:
-            ticMinorMPU = asFloat( newVal );
+            ticMinorMPU = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MINOR_DRAW_PN:
-            ticMinorDraw = asBoolean( newVal );
+            ticMinorDraw = CPConstants.asBoolean( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MAJOR_COLOR_PN:
-            ticMajorColor = asColor( newVal );
+            ticMajorColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MAJOR_WEIGHT_PN:
-            ticMajorWeight = asFloat( newVal );
+            ticMajorWeight = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MAJOR_LEN_PN:
-            ticMajorLen = asFloat( newVal );
+            ticMajorLen = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MAJOR_MPU_PN:
-            ticMajorMPU = asFloat( newVal );
+            ticMajorMPU = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.TIC_MAJOR_DRAW_PN:
-            ticMajorDraw = asBoolean( newVal );
+            ticMajorDraw = CPConstants.asBoolean( newVal );
+            repaint();
             break;
         case CPConstants.GRID_LINE_COLOR_PN:
-            gridLineColor = asColor( newVal );
+            gridLineColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.GRID_LINE_WEIGHT_PN:
-            gridLineWeight = asFloat( newVal );
+            gridLineWeight = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.GRID_LINE_LPU_PN:
-            gridLineLPU = asFloat( newVal );
+            gridLineLPU = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.GRID_LINE_DRAW_PN:
-            gridLineDraw = asBoolean( newVal );
+            gridLineDraw = CPConstants.asBoolean( newVal );
+            repaint();
             break;
         case CPConstants.AXIS_COLOR_PN:
-            axisColor = asColor( newVal );
+            axisColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.AXIS_WEIGHT_PN:
-            axisWeight = asFloat( newVal );
+            axisWeight = CPConstants.asFloat( newVal );
+            repaint();
             break;
         case CPConstants.LABEL_FONT_COLOR_PN:
-            labelFontColor = asColor( newVal );
+            labelFontColor = CPConstants.asColor( newVal );
+            repaint();
             break;
         case CPConstants.LABEL_FONT_NAME_PN:
-            labelFontName = asString( newVal );
+            labelFontName = newVal;
+            repaint();
             break;
         case CPConstants.LABEL_FONT_STYLE_PN:
-            labelFontStyle = asFontStyle( newVal );
+            labelFontStyle = CPConstants.asFontStyle( newVal );
+            repaint();
             break;
         case CPConstants.LABEL_FONT_SIZE_PN:
-            labelFontSize = asFloat( newVal );
+            labelFontSize = CPConstants.asFloat( newVal );
+            repaint();
             break;
         }
-    }
-    
-    private Color asColor( String str )
-    {
-        int     iVal    = Integer.decode( str );
-        Color   val     = new Color( iVal );
-        return val;
-    }
-    
-    private String asString( String str )
-    {
-        return str;
-    }
-    
-    private float asFloat( String str )
-    {
-        float   val = Float.parseFloat( str );
-        return val;
-    }
-    
-    private boolean asBoolean( String str )
-    {
-        boolean val = Boolean.parseBoolean( str );
-        return val;
-    }
-    
-    private int asFontStyle( String str )
-    {
-        int val = Font.PLAIN;
-        if ( str.equalsIgnoreCase( "italic" ) )
-            val = Font.ITALIC;
-        else if ( str.equalsIgnoreCase( "bold" ) )
-            val = Font.BOLD;
-        else
-            ;
-        return val;
     }
     
     private void drawAxes()
