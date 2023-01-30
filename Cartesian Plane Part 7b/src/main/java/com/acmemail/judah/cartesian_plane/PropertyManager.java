@@ -159,7 +159,7 @@ public enum PropertyManager
                 // ... get the name of the PN field
                 int     pNameLen    = fieldName.length();
                 // ... get the start of the PN field name (without the _PN)
-                String  pNamePrefix = fieldName.substring( 0, pNameLen );
+                String  pNamePrefix = fieldName.substring( 0, pNameLen - 3 );
                 // ... construct the name of the DV field
                 String  dvName      = pNamePrefix + "_DV";
                 

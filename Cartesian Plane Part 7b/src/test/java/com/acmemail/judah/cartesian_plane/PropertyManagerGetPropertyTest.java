@@ -71,7 +71,7 @@ class PropertyManagerGetPropertyTest
         allProps.add( getNameDValuePair( "MW_HEIGHT" ) );
         allProps.add( getNameDValuePair( "MW_BG_COLOR" ) );
         allProps.add( getNameDValuePair( "GRID_UNIT" ) );
-        allProps.add( getNameDValuePair( "AXIS_COLOR" ) );
+        allProps.add( getNameDValuePair( "LABEL_FONT_COLOR" ) );
         allProps.add( getNameDValuePair( "AXIS_WEIGHT" ) );
         
         // put about 2/3 of them in the environment with unique values
@@ -103,7 +103,6 @@ class PropertyManagerGetPropertyTest
         // start the child process; interrogate PropertyManager
         Class<?>    clazz   = PropertyTesterApp.class;
         startChildProcess( clazz, envProps, clProps );
-        TestUtils.pause( 1000 );
         for ( Pair pair : allProps )
         {
             String  propName    = pair.propName;    
@@ -129,7 +128,6 @@ class PropertyManagerGetPropertyTest
      */
     private String getPropVal( String propName )
     {
-        System.err.println( childProcess.isAlive() );
         String  propVal = null;
         try
         {
@@ -273,7 +271,6 @@ class PropertyManagerGetPropertyTest
             // Get an output stream to write to child's stdin
             OutputStream        outStream  = childProcess.getOutputStream();
             childStdin = new PrintWriter( outStream, true );
-            System.err.println( childProcess.isAlive() );
         }
         catch ( IOException exc )
         {
@@ -282,7 +279,6 @@ class PropertyManagerGetPropertyTest
             exc.printStackTrace();
             fail( msg );
         }
-        System.err.println( childProcess.isAlive() );
     }
     
     private void killChildProcess()
