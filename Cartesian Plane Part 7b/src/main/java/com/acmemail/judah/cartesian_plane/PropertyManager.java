@@ -106,7 +106,7 @@ public enum PropertyManager
      * The name of the default properties file.
      */
     private static final String         appPropertiesName   = 
-        "AppProperties.ini";
+        CPConstants.APP_PROPERTIES_NAME;
     /** 
      * Property name/value pairs from the user's properties file.
      * Used only during initialization.

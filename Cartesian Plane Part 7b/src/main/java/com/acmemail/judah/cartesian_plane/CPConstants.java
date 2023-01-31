@@ -12,6 +12,12 @@ import java.awt.Font;
 public class CPConstants
 { 
     /////////////////////////////////////////////////
+    //   Miscellaneous constants
+    /////////////////////////////////////////////////
+    /** The name of the application ini file. */
+    public static final String  APP_PROPERTIES_NAME = "AppProperties.ini";
+    
+    /////////////////////////////////////////////////
     //   General grid properties
     /////////////////////////////////////////////////
     /** Grid units (pixels-per-unit) property name */
@@ -182,7 +188,7 @@ public class CPConstants
     /** Location of user properties file property name */
     public static final String  USER_PROPERTIES_PN      = "userProperties";
     /** Location of user properties file default value. */
-    public static final String  USER_PROPERTIES_DV      = null;
+    public static final String  USER_PROPERTIES_DV      = "null";
     
     /**
      * Convert a String to an int and return the int.

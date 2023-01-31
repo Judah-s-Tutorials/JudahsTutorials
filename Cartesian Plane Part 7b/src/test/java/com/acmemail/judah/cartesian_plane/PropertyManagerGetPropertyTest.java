@@ -2,6 +2,8 @@ package com.acmemail.judah.cartesian_plane;
 
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
@@ -20,23 +22,106 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import util.PropertyTesterApp;
 
+/**
+ * This test is strictly to verify that the PropertyManager
+ * initializes properties correctly. 
+ * In particular:
+ * <ul>
+ * <li>
+ * Any property declared
+ * in the application's ini file
+ * takes precedence over
+ * a property's default value.
+ * </li>
+ * <li>
+ * Any property declared
+ * in the user's ini file
+ * takes precedence over
+ * properties declared
+ * in the application ini file.
+ * </li>
+ * <li>
+ * Any property declared
+ * in the environment
+ * takes precedence over
+ * properties declared
+ * in the user's ini file.
+ * </li>
+ * <li>
+ * Any property declared
+ * on the command line
+ * takes precedence over
+ * properties declared
+ * anywhere else.
+ * </li>
+ * </ul>
+ * <p>
+ * Note that no effort is made
+ * to verify the type
+ * of a property's value.
+ * In fact, for convenince,
+ * every property's value
+ * is treated as a string.
+ * </p>
+ * 
+ * @author Jack Straub
+ */
 class PropertyManagerGetPropertyTest
 {
+    /** 
+     * Class path separator (usually ":" or ";");
+     * declared here for convenience.
+     */
+    private static final String     classPathSep    =
+        System.getProperty( "path.separator" );
+    
     /** Prefix for creating temporary ini file. */
-    private static final String     tempFilePrefix  =
+    private static final String     userFilePrefix  =
         "CartesianPlaneTempFile";
     /** Suffix for creating temporary ini file. */
-    private static final String     tempFileSuffix  = ".ini";
+    private static final String     userFileSuffix  = "Ini.tmp";
+    
+    /** 
+     * Suffix to ensure that the value of a property declared 
+     * on the command line is unique.
+     */
+    private static final String     cmdIdent        = "_cmd";
+    /** 
+     * Suffix to ensure that the value of a property declared 
+     * in the environment is unique.
+     */
+    private static final String     envIdent        = "_env";
+    /** 
+     * Suffix to ensure that the value of a property declared 
+     * in the user ini file is unique.
+     */
+    private static final String     userIdent       = "_user";
+    /** 
+     * Suffix to ensure that the value of a property declared 
+     * in the app ini file is unique.
+     */
+    private static final String     appIdent        = "_app";
+    
     /*
      * Encapsulates the user's ini file in the system's
      * temp directory.
      */
-    private File                    userIniFile     = null;
+    private static File             userIniFile     = null;
+    
+    /*
+     * Encapsulates the app's ini file; created in the same directory
+     * as the users's ini file.
+     */
+    private static File             appIniFile      = null;
+    
+    /** Directory in which user and app ini files reside. */
+    private static String           iniDir      = null;
     
     /** 
      * Length of time to wait for the child process to exit.
@@ -50,9 +135,50 @@ class PropertyManagerGetPropertyTest
      */
     private static final TimeUnit   waitForTimeUnit = TimeUnit.MILLISECONDS;
     
+    /** 
+     * All CPConstants and their default values.
+     * Declared here for the convenience of methods
+     * that need test data.
+     */
+    private static final List<Pair> allProps        = new ArrayList<>();
+    
+    /** Encapsulate the child process used in testing. */
     private Process         childProcess    = null;
+    /** Pipe from the child process's stdout. */
     private BufferedReader  childStdout     = null;
+    /** Pipe to the child process's stdin. */
     private PrintWriter     childStdin      = null;
+    
+    /**
+     * Executed before any test.
+     * Responsible for overall initialization tasks,
+     * particularly creation of the temporary user 
+     * and app ini files.
+     * IOExceptions are treated as fatal errors;
+     * test will be terminated.
+     * 
+     * @throws IOException  if an error is encountered
+     *                      during ini file creation
+     */
+    @BeforeAll
+    public static void beforeAll() throws IOException
+    {
+        // Create the user ini file
+        userIniFile = File.createTempFile( userFilePrefix, userFileSuffix );
+        userIniFile.deleteOnExit();
+        
+        // get the path to the temporary dir
+        iniDir = userIniFile.getParent();
+        
+        // create the app ini file
+        appIniFile = new File( iniDir, CPConstants.APP_PROPERTIES_NAME );
+        if ( !appIniFile.exists() )
+            appIniFile.createNewFile();
+        appIniFile.deleteOnExit();
+        
+        // initialize test data
+        initTestData();
+    }
     
     @BeforeEach
     public void beforeEach() throws Exception
@@ -60,7 +186,10 @@ class PropertyManagerGetPropertyTest
     }
     
     /**
-     * 
+     * Performs cleanup after each test.
+     * In particular,
+     * terminates the child process and 
+     * closes the pipes to/from the child.
      */
     @AfterEach
     public void afterEach()
@@ -72,39 +201,35 @@ class PropertyManagerGetPropertyTest
         childStdin = null;
     }
     
+    /**
+     * Can we read from the user's ini file.
+     */
     @Test
     public void testUserIniFile()
     {
-        List<Pair>  allProps    = new ArrayList<>();
-        allProps.add( getNameDValuePair( "MW_WIDTH" ) );
-        allProps.add( getNameDValuePair( "MW_HEIGHT" ) );
-        allProps.add( getNameDValuePair( "MW_BG_COLOR" ) );
-        allProps.add( getNameDValuePair( "GRID_UNIT" ) );
-        allProps.add( getNameDValuePair( "LABEL_FONT_COLOR" ) );
-        allProps.add( getNameDValuePair( "AXIS_WEIGHT" ) );
-        allProps.add( getNameDValuePair( "TIC_MAJOR_WEIGHT" ) );
+        ChildProcess    childProcess    = new ChildProcess();
+        
+        // all properties under test
+        List<Pair>      testProps       = new ArrayList<>();
+        int             numAllProps     = allProps.size();
+        int             numTestProps    = 10 < numAllProps ? 10 : numAllProps;
+        for ( int inx = 0 ; inx > numTestProps ; ++inx )
+            testProps.add( allProps.get( inx ) );
         
         List<Pair>  userProps   = new ArrayList<>();
-        for ( Pair pair : allProps )
+        for ( Pair pair : testProps )
         {
-            String  userVal     = pair.propValue + "_env";
+            String  userVal     = pair.propValue + appIdent;
             Pair    userPair    = new Pair( pair.propName, userVal );
             userProps.add( userPair );
         }
         makeUserIniFile( userProps );
-        System.out.println( userIniFile.getAbsolutePath() );
-        
-        List<Pair>  cmdLinePairs     = new ArrayList<>();
-        String      userFilePath    = userIniFile.getAbsolutePath();
-        Pair        userFileOption  = 
-            new Pair(
-                CPConstants.USER_PROPERTIES_PN,
-                userFilePath
-        );
-        cmdLinePairs.add( userFileOption );
+
+        // add the -D option that identifies the location
+        // of the user's ini file
+        childProcess.addUserIniOption();
         // start the child process; interrogate PropertyManager
-        Class<?>    clazz   = PropertyTesterApp.class;
-        startChildProcess( clazz, null, cmdLinePairs );
+        childProcess.startChildProcess();
 
         for ( Pair pair : userProps )
         {
@@ -112,61 +237,409 @@ class PropertyManagerGetPropertyTest
             assertEquals( pair.propValue, actVal );
         }
     }
-
+    
+    /**
+     * Can we read from the application's ini file.
+     */
     @Test
-    void testEnvAndCommandLine()
+    public void testAppIniFile()
     {
-        // List of all propertied under test and their default values
-        // from CPConstants; must be at least 6.
-        List<Pair>  allProps    = new ArrayList<>();
-        allProps.add( getNameDValuePair( "MW_WIDTH" ) );
-        allProps.add( getNameDValuePair( "MW_HEIGHT" ) );
-        allProps.add( getNameDValuePair( "MW_BG_COLOR" ) );
-        allProps.add( getNameDValuePair( "GRID_UNIT" ) );
-        allProps.add( getNameDValuePair( "LABEL_FONT_COLOR" ) );
-        allProps.add( getNameDValuePair( "AXIS_WEIGHT" ) );
-        allProps.add( getNameDValuePair( "TIC_MAJOR_WEIGHT" ) );
+        ChildProcess    childProcess    = new ChildProcess();
+        List<Pair>      testProps       = new ArrayList<>();
+        int             numAllProps     = allProps.size();
+        int             numTestProps    = 10 < numAllProps ? 10 : numAllProps;
+        for ( int inx = 0 ; inx > numTestProps ; ++inx )
+            testProps.add( allProps.get( inx ) );
         
-        // put about 2/3 of them in the environment with unique values
-        List<Pair>  envProps    = new ArrayList<>();
-        int lastEnv = 2 * allProps.size() / 3;
-        for ( int inx = 0 ; inx < lastEnv ; ++inx )
+        List<Pair>  appProps    = new ArrayList<>();
+        for ( Pair pair : testProps )
         {
-            Pair    pair    = allProps.get( inx );
-            String  newVal  = pair.propName + "_ENV";
-            Pair    newPair = new Pair( pair.propName, newVal );
+            String  appVal      = pair.propValue + appIdent;
+            Pair    appPair     = new Pair( pair.propName, appVal );
+            appProps.add( appPair );
+        }
+        makeAppIniFile( appProps );
+        System.out.println( userIniFile.getAbsolutePath() );
+
+        // start the child process; interrogate PropertyManager
+        childProcess.startChildProcess();
+
+        for ( Pair pair : appProps )
+        {
+            String  actVal  = getPropVal( pair.propName );
+            assertEquals( pair.propValue, actVal );
+        }
+    }
+    
+    /**
+     * Properties declared in user ini file
+     * take precedence app ini file.
+     */
+    @Test
+    public void testUserOverAppIniFile()
+    {
+        ChildProcess    childProcess    = new ChildProcess();
+        
+        // all properties under test
+        List<Pair>      testProps       = new ArrayList<>();
+        int             numAllProps     = allProps.size();
+        int             numTestProps    = 20 < numAllProps ? 20 : numAllProps;
+        for ( int inx = 0 ; inx > numTestProps ; ++inx )
+            testProps.add( allProps.get( inx ) );
+        
+        // Declare all properties in app ini file
+        List<Pair>  appProps    = new ArrayList<>();
+        for ( Pair pair : testProps )
+        {
+            String  userVal     = pair.propValue + appIdent;
+            Pair    userPair    = new Pair( pair.propName, userVal );
+            appProps.add( userPair );
+        }
+        makeUserIniFile( appProps );
+        
+        // Declare about half the properties in the user ini file
+        int         half        = testProps.size() / 2;
+        List<Pair>  userProps   = new ArrayList<>();
+        for ( int inx = 0 ; inx < half ; ++inx )
+        {
+            Pair    pair        = testProps.get( inx );
+            String  userVal     = pair.propValue + userIdent;
+            Pair    userPair    = new Pair( pair.propName, userVal );
+            userProps.add( userPair );
+        }
+        makeUserIniFile( userProps );
+
+        // add the -D option that identifies the location
+        // of the user's ini file
+        childProcess.addUserIniOption();
+        // start the child process; interrogate PropertyManager
+        childProcess.startChildProcess();
+
+        // make some maps for convenience
+        Map<String,String>  userMap = cvtListToMap( userProps );
+        Map<String,String>  appMap  = cvtListToMap( appProps );
+        for ( Pair pair : testProps )
+        {
+            String  actVal      = getPropVal( pair.propName );
+            String  expVal      = userMap.get( pair.propName );
+            if ( expVal != null )
+                assertEquals( expVal, actVal );
+            else
+            {
+                expVal = appMap.get( pair.propName );
+                assertEquals( expVal, actVal );
+            }
+        }
+    }
+    
+    /**
+     * Properties declared in environment
+     * take precedence over ini files.
+     */
+    @Test
+    public void testEnvOverIniFiles()
+    {
+        ChildProcess    childProcess    = new ChildProcess();
+        
+        // all properties under test
+        List<Pair>      testProps       = new ArrayList<>();
+        int             numAllProps     = allProps.size();
+        int             numTestProps    = 20 < numAllProps ? 20 : numAllProps;
+        for ( int inx = 0 ; inx > numTestProps ; ++inx )
+            testProps.add( allProps.get( inx ) );
+        
+        // Declare all properties in app ini file
+        List<Pair>  appProps    = new ArrayList<>();
+        for ( Pair pair : testProps )
+        {
+            String  userVal     = pair.propValue + appIdent;
+            Pair    userPair    = new Pair( pair.propName, userVal );
+            appProps.add( userPair );
+        }
+        makeUserIniFile( appProps );
+        
+        // Declare all properties in the user ini file
+        List<Pair>  userProps   = new ArrayList<>();
+        for ( Pair pair : testProps )
+        {
+            String  userVal     = pair.propValue + userIdent;
+            Pair    userPair    = new Pair( pair.propName, userVal );
+            userProps.add( userPair );
+        }
+        makeUserIniFile( userProps );
+        
+        // Declare about half the properties in the environment
+        int         half        = testProps.size() / 2;
+        List<Pair>  envProps    = new ArrayList<>();
+        for ( int inx = 0 ; inx < half ; ++inx )
+        {
+            Pair    pair        = testProps.get( inx );
+            String  envVal      = pair.propValue + envIdent;
+            Pair    envPair     = new Pair( pair.propName, envVal );
+            envProps.add( envPair );
+        }
+        childProcess.addEnvProperties( envProps );
+
+        // add the -D option that identifies the location
+        // of the user's ini file
+        childProcess.addUserIniOption();
+        // start the child process; interrogate PropertyManager
+        childProcess.startChildProcess();
+
+        // make some maps for convenience
+        Map<String,String>  userMap = cvtListToMap( userProps );
+        Map<String,String>  envMap  = cvtListToMap( envProps );
+        for ( Pair pair : testProps )
+        {
+            // If it's not declared in the environment
+            // it must come from the user ini file
+            String  actVal      = getPropVal( pair.propName );
+            String  expVal      = envMap.get( pair.propName );
+            if ( expVal != null )
+                assertEquals( expVal, actVal );
+            else
+            {
+                expVal = userMap.get( pair.propName );
+                assertEquals( expVal, actVal );
+            }
+        }
+    }
+    
+    /**
+     * Properties declared on command line
+     * take precedence over environment.
+     */
+    @Test
+    public void testCmdOverEnv()
+    {
+        ChildProcess    childProcess    = new ChildProcess();
+        
+        // all properties under test
+        List<Pair>      testProps       = new ArrayList<>();
+        int             numAllProps     = allProps.size();
+        int             numTestProps    = 20 < numAllProps ? 20 : numAllProps;
+        for ( int inx = 0 ; inx > numTestProps ; ++inx )
+            testProps.add( allProps.get( inx ) );
+        
+        // Declare all properties in the environment
+        List<Pair>  envProps    = new ArrayList<>();
+        for ( Pair pair : testProps )
+        {
+            String  envVal      = pair.propValue + envIdent;
+            Pair    envPair     = new Pair( pair.propName, envVal );
+            envProps.add( envPair );
+        }
+        childProcess.addEnvProperties( envProps );
+        
+        // Declare about half the properties on the command line
+        int         half        = testProps.size() / 2;
+        List<Pair>  cmdProps     = new ArrayList<>();
+        for ( int inx = 0 ; inx < half ; ++inx )
+        {
+            Pair    pair        = testProps.get( inx );
+            String  cmdVal      = pair.propValue + envIdent;
+            Pair    clPair      = new Pair( pair.propName, cmdVal );
+            cmdProps.add( clPair );
+        }
+        childProcess.addCmdProperties( cmdProps );
+
+        // add the -D option that identifies the location
+        // of the user's ini file
+        childProcess.addUserIniOption();
+        // start the child process; interrogate PropertyManager
+        childProcess.startChildProcess();
+
+        // make some maps for convenience
+        Map<String,String>  cmdMap  = cvtListToMap( cmdProps );
+        Map<String,String>  envMap  = cvtListToMap( envProps );
+        for ( Pair pair : testProps )
+        {
+            // If it's not declared on the command line
+            // it must come from the environment
+            String  actVal      = getPropVal( pair.propName );
+            String  expVal      = cmdMap.get( pair.propName );
+            if ( expVal != null )
+                assertEquals( expVal, actVal );
+            else
+            {
+                expVal = envMap.get( pair.propName );
+                assertEquals( expVal, actVal );
+            }
+        }
+    }
+    
+    /**
+     * Comprehensive test.
+     * Properties with unique values are declared
+     * in both ini files, the environment 
+     * and on the command line.
+     * Some property values are allowed to default.
+     * Verify that their values
+     * are picked up 
+     * according to the priority
+     * of their residence.
+     * For this test to be effective
+     * there must be at least 5 properties.
+     */
+    @Test
+    void testComprehensive()
+    {
+        assertTrue( allProps.size() >= 5 );
+        ChildProcess    childProcess    = new ChildProcess();
+        
+        // Partition allProps into 5 chunks; the first chunk
+        // is all props itself.
+        int chunkSize   = allProps.size() / 5;
+        
+        // Second chunk: first 4/5 of properties go into app ini file
+        int last    = chunkSize * 4;
+        List<Pair>  appProps    = new ArrayList<>();
+        for ( int inx = 0 ; inx < last ; ++inx )
+        {
+            Pair    startPair   = allProps.get( inx );
+            String  name        = startPair.propName;
+            String  value       = startPair.propValue + appIdent;
+            Pair    newPair     = new Pair( name, value );
+            appProps.add( newPair );
+        }
+        makeAppIniFile( appProps );
+        
+        // Third chunk: first 3/5 of properties go into user ini file
+        last = chunkSize * 3;
+        List<Pair>  userProps   = new ArrayList<>();
+        for ( int inx = 0 ; inx < last ; ++inx )
+        {
+            Pair    startPair   = allProps.get( inx );
+            String  name        = startPair.propName;
+            String  value       = startPair.propValue + userIdent;
+            Pair    newPair     = new Pair( name, value );
+            userProps.add( newPair );
+        }
+        makeUserIniFile( userProps );
+        
+        // Fourth chunk: first 2/5 of properties go into user environment
+        last = chunkSize * 2;
+        List<Pair>  envProps    = new ArrayList<>();
+        for ( int inx = 0 ; inx < last ; ++inx )
+        {
+            Pair    startPair   = allProps.get( inx );
+            String  name        = startPair.propName;
+            String  value       = startPair.propValue + envIdent;
+            Pair    newPair     = new Pair( name, value );
             envProps.add( newPair );
         }
+        childProcess.addEnvProperties( envProps );
         
-        // put half of those on the command line with unique values
-        List<Pair>  clProps = new ArrayList<>();
-        int         lastCL  = envProps.size() / 2;
-        for ( int inx = 0 ; inx < lastCL ; ++inx )
+        // Fifth chunk: first 1/5 of properties go onto command line
+        last = chunkSize * 1;
+        List<Pair>  cmdProps    = new ArrayList<>();
+        for ( int inx = 0 ; inx < last ; ++inx )
         {
-            Pair    pair    = envProps.get( inx );
-            String  newVal  = pair.propName + "_CL";
-            Pair    newPair = new Pair( pair.propName, newVal );
-            clProps.add( newPair );
+            Pair    startPair   = allProps.get( inx );
+            String  name        = startPair.propName;
+            String  value       = startPair.propValue + cmdIdent;
+            Pair    newPair     = new Pair( name, value );
+            cmdProps.add( newPair );
         }
+        childProcess.addCmdProperties( cmdProps );
         
+        // sanity check
+        int allSize     = allProps.size();
+        int appSize     = appProps.size();
+        int userSize    = userProps.size();
+        int envSize     = envProps.size();
+        int cmdSize     = cmdProps.size();
+        assertTrue( allSize > 0 && allSize > appSize  );
+        assertTrue( appSize > userSize  );
+        assertTrue( userSize > envSize  );
+        assertTrue( envSize > cmdSize  );
+        assertTrue( appProps.get( 0 ).propValue.endsWith( appIdent ) );
+        assertTrue( userProps.get( 0 ).propValue.endsWith( userIdent ) );
+        assertTrue( envProps.get( 0 ).propValue.endsWith( envIdent ) );
+        assertTrue( cmdProps.get( 0 ).propValue.endsWith( cmdIdent ) );
+
         // make some maps for convenience
+        Map<String,String>  allMap  = cvtListToMap( allProps );
+        Map<String,String>  appMap  = cvtListToMap( appProps );
+        Map<String,String>  userMap = cvtListToMap( userProps );
         Map<String,String>  envMap  = cvtListToMap( envProps );
-        Map<String,String>  clMap   = cvtListToMap( clProps );
+        Map<String,String>  cmdMap  = cvtListToMap( cmdProps );
+        
+        // add the location of the user ini file to the command line options
+        childProcess.addUserIniOption();
+        // since we explicitly add the user-ini-file property to
+        // to the command line, make sure that's where we look for it
+        // during the verification process.
+        cmdMap.put( 
+            CPConstants.USER_PROPERTIES_PN, 
+            userIniFile.getAbsolutePath()
+        );
         
         // start the child process; interrogate PropertyManager
-        Class<?>    clazz   = PropertyTesterApp.class;
-        startChildProcess( clazz, envProps, clProps );
+        childProcess.startChildProcess();
+        
         for ( Pair pair : allProps )
         {
             String  propName    = pair.propName;    
             String  pmVal       = getPropVal( propName );
+            System.out.println( propName + "->" + pmVal );
             String  expVal      = null;
-            if ( (expVal = clMap.get( propName )) != null )
+            if ( (expVal = cmdMap.get( propName )) != null )
                 assertEquals( expVal, pmVal );
             else if ( (expVal = envMap.get( propName )) != null )
                 assertEquals( expVal, pmVal );
+            else if ( (expVal = userMap.get( propName )) != null )
+                assertEquals( expVal, pmVal );
+            else if ( (expVal = appMap.get( propName )) != null )
+                assertEquals( expVal, pmVal );
+            else if ( (expVal = allMap.get( propName )) != null )
+                assertEquals( expVal, pmVal );
             else
-                assertEquals( pair.propValue, pmVal );
+            {
+                // This is a test malfunction; we should have been able
+                // to find the property in one of the maps.
+                String  msg     = propName + ": not found";
+                fail( msg );
+            }
+        }
+    }
+    
+    /**
+     * Initialize allProps with the names and 
+     * default values of all properties.
+     * The intent is to have test data available
+     * for each test.
+     */
+    private static void initTestData()
+    {
+        // Get all property names and their default values.
+        for ( Field pnField : CPConstants.class.getFields() )
+        {
+            String  fieldName   = pnField.getName();
+            if ( fieldName.endsWith( "_PN" ) )
+            {
+                int     pNameLen    = fieldName.length();
+                String  pNamePrefix = fieldName.substring( 0, pNameLen - 3 );
+                String  dvName      = pNamePrefix + "_DV";
+                
+                String  propName    = "";
+                String  propDefault = "";
+                try
+                {
+                    Field   dvField = CPConstants.class.getField( dvName );
+                    propName = (String)pnField.get( null );
+                    propDefault = (String)dvField.get( null );
+                    allProps.add( new Pair( propName, propDefault ) );
+                }
+                catch ( NoSuchFieldException | IllegalAccessException exc )
+                {
+                    // These exceptions are fatal.
+                    String  msg = dvName + ": field not found";
+                    System.err.println( msg );
+                    exc.printStackTrace();
+                    System.exit( 1 );
+                }
+            }
         }
     }
     
@@ -197,6 +670,14 @@ class PropertyManagerGetPropertyTest
         return propVal;
     }
     
+    /**
+     * Convert a list of name/value pairs
+     * to a Map that maps name to value.
+     * 
+     * @param list  list to convert
+     * 
+     * @return the converted map
+     */
     private Map<String,String> cvtListToMap( List<Pair> list )
     {
         Map<String,String>  map = new HashMap<>();
@@ -206,134 +687,9 @@ class PropertyManagerGetPropertyTest
     }
     
     /**
-     * Convenience method to get the name of a property
-     * and its default value from CPConstants.
-     * Given a prefix such as AXIS_COLOR,
-     * returns the equivalent of 
-     * <em>new Pair(AXIS_COLOR_PN, AXIS_COLOR_DV ).</em>
-     * 
-     * @param prefix    the given prefix
-     * 
-     * @return  a Pair representing the name and default value
-     *          of the property beginning with <em>prefix</em>
+     * Sends the exit command to the child process (if any)
+     * and waits for it to terminate.
      */
-    private Pair getNameDValuePair( String prefix )
-    {
-        Pair    nameValPair     = null;
-        String  expNameVar      = prefix + "_PN";
-        String  expDValueVar    = prefix + "_DV";
-        try
-        {
-            Field   expNameField    = 
-                CPConstants.class.getField( expNameVar );
-            Field   expDValueField  = 
-                CPConstants.class.getField( expDValueVar );
-            String  expName         = (String)expNameField.get( null );
-            String  expDValue       = (String)expDValueField.get( null );
-            nameValPair = new Pair( expName, expDValue );
-        }
-        catch ( NoSuchFieldException| IllegalAccessException exc )
-        {
-            String  msg =
-                "Reflection failure: "
-                + exc.getClass().getName()
-                + ", "
-                + exc.getMessage();
-            fail( msg );
-        }
-        return nameValPair;
-    }
-    
-    /**
-     * Start a child process, 
-     * applying the give environment variables
-     * and properties.
-     * Child input/output streams 
-     * are established in instance variables.
-     * It is a fatal mistake
-     * to attempt to start a child
-     * when another child instance
-     * is being executed.
-     * 
-     * @param clazz     Class class containing 
-     *                  the main method of the child process
-     * @param envVars   name/value pairs to place in child environment
-     * @param props     name/value pairs to define as options
-     *                  on the command line that starts the child
-     */
-    private void 
-    startChildProcess( Class<?> clazz, List<Pair> envVars, List<Pair> props )
-    {
-        assertNull( childProcess );
-        assertNull( childStdin );
-        assertNull( childStdout );
-        
-        // Find the java executable to start the child process
-        String          javaHome    = System.getProperty( "java.home" );
-        StringBuilder   bldr        = new StringBuilder( javaHome );
-        bldr.append( File.separator ).append( "bin" )
-            .append( File.separator ).append( "java" );
-        String          javaBin     = bldr.toString();
-        
-        // Get the classpath to use to start the child process
-        String          classpath   = System.getProperty( "java.class.path" );
-        
-        // Get the name of the class the encapsulates the child process
-        String          className   = clazz.getName();
-        
-        // Initiate the list that will encapsulate the command used to execute
-        // the child process. Each token in the list will wind up as an.
-        // argument on the command line, for example:
-        //     JAVA_HONME\bin\java --class-path .;lib/toots.jar SampleChildClass
-        List<String>    command     = new ArrayList<>();
-        command.add( javaBin );
-        command.add(  "--class-path" );
-        command.add( classpath );
-        
-        // Add all the property declarations to the command line list
-        if ( props != null )
-            for ( Pair pair : props )
-            {
-                StringBuilder   prop    = 
-                    new StringBuilder( "-D" ).append( pair );
-                command.add( prop.toString() );
-            }
-        // Name of class to execute is last on command line
-        command.add( className );
-        
-        // Create the process builder and configure the environment
-        // that will be used when the child process is executed.
-        ProcessBuilder builder = new ProcessBuilder(command);
-        Map<String, String> env = builder.environment();
-        env.clear();
-        if ( envVars != null )
-            for ( Pair pair : envVars )
-                env.put( pair.propName, pair.propValue );
-        
-        try
-        {
-            // Start the child process. Note that the start method can
-            // throw an IOEception.
-            childProcess = builder.start();
-        
-            // Get an input stream to read the child process's stdout.
-            InputStream         inStream    = childProcess.getInputStream();
-            InputStreamReader   inReader    = new InputStreamReader( inStream );
-            childStdout = new BufferedReader( inReader );
-            
-            // Get an output stream to write to child's stdin
-            OutputStream        outStream  = childProcess.getOutputStream();
-            childStdin = new PrintWriter( outStream, true );
-        }
-        catch ( IOException exc )
-        {
-            String  msg =
-                "Failed to create child process " + exc.getMessage();
-            exc.printStackTrace();
-            fail( msg );
-        }
-    }
-    
     private void killChildProcess()
     {
         if ( childProcess != null )
@@ -355,6 +711,13 @@ class PropertyManagerGetPropertyTest
         }
     }
 
+    /**
+     * Close a given resource.
+     * The given resource may be null,
+     * in which case the operation is skipped.
+     * 
+     * @param closeable the given resource; may be null.
+     */
     private void closeResource( AutoCloseable closeable )
     {
         try
@@ -373,38 +736,239 @@ class PropertyManagerGetPropertyTest
     }
     
     /**
-     * Given a list of property pairs,
-     * initializes the user ini file in the system's
-     * temp directory.
-     * If the file doesn't exist
-     * it will be created.
-     * If the file does exist
-     * its previous contents are lost.
+     * Given a list of name/value property pairs,
+     * initializes the user ini file.
+     * To initial the file to an empty state
+     * pass an empty list.
+     * <p>
+     * Precondition: 
+     * the file exists and is writable.
+     * </p>
      * 
-     * @param properties    the list of property pairs
+     * @param properties    the given list of property pairs
      */
     private void makeUserIniFile( List<Pair> properties )
     {
-        try
+        assertNotNull( userIniFile );
+        assertTrue( userIniFile.exists() );
+        assertTrue( userIniFile.canWrite() );
+        try ( 
+            FileOutputStream  outStream   = 
+                new FileOutputStream( userIniFile );
+            PrintWriter writer = new PrintWriter( outStream )
+        )
         {
-            if ( userIniFile == null )
-                userIniFile = File.createTempFile( tempFilePrefix, tempFileSuffix );
-            try ( 
-                FileOutputStream  outStream   = 
-                    new FileOutputStream( userIniFile );
-                PrintWriter writer = new PrintWriter( outStream )
-            )
-            {
-                for ( Pair pair : properties )
-                    writer.println( pair );
-            }
+            for ( Pair pair : properties )
+                writer.println( pair );
         }
         catch ( IOException exc )
         {
             exc.printStackTrace();
             String  msg = 
-                "Create app ini file failure: " + exc.getMessage();
+                "Initialize app ini file failure: " + exc.getMessage();
             fail( msg );
+        }
+    }
+    
+    /**
+     * Given a list of name/value property pairs,
+     * initializes the user ini file.
+     * To initial the file to an empty state
+     * pass an empty list.
+     * <p>
+     * Precondition: 
+     * the file exists and is writable.
+     * </p>
+     * 
+     * @param properties    the given list of property pairs
+     */
+    private void makeAppIniFile( List<Pair> properties )
+    {
+        assertNotNull( appIniFile );
+        assertTrue( appIniFile.exists() );
+        assertTrue( appIniFile.canWrite() );
+        try ( 
+            FileOutputStream  outStream   = 
+                new FileOutputStream( appIniFile );
+            PrintWriter writer = new PrintWriter( outStream )
+        )
+        {
+            for ( Pair pair : properties )
+                writer.println( pair );
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            String  msg = 
+                "Initialize user ini file failure: " + exc.getMessage();
+            fail( msg );
+        }
+    }
+    
+    /**
+     * Encapsulates a child process.
+     * This includes the command line options
+     * to pass to the child,
+     * the environment within which
+     * the child is started,
+     * and the class path
+     * to add to the child's command line.
+     * 
+     * @author Jack Straub
+     */
+    private class ChildProcess
+    {
+        private List<Pair>      cmdPairs        = new ArrayList<>();
+        private List<Pair>      envPairs        = new ArrayList<>();
+        private String          classPath       =
+            System.getProperty( "java.class.path" );
+        private StringBuilder   classPathBldr   =
+            new StringBuilder( classPath );
+        
+        /**
+         * Adds a list of name/value pairs
+         * to be defined as system properties
+         * on the child process's command line.
+         * 
+         * @param pairs the name/value pairs to add
+         */
+        public void addCmdProperties( List<Pair> pairs )
+        {
+            for ( Pair pair : pairs )
+                cmdPairs.add( pair );
+        }
+        
+        /**
+         * Adds a list of name/value pairs
+         * to be defined in child process's environment.
+         * 
+         * @param pairs the name/value pairs to add
+         */
+        public void addEnvProperties( List<Pair> pairs )
+        {            
+            for ( Pair pair : pairs )
+                envPairs.add( pair );
+        }
+        
+        /**
+         * Adds a file path 
+         * to the <em>beginning of the class path</em>
+         * under which to start the child process.
+         * 
+         * @param path  the file path to add
+         */
+        public void addClassPath( String path )
+        {
+            classPathBldr.insert( 0, classPathSep );
+            classPathBldr.insert( 0, path );
+        }
+        
+        /**
+         * Convenience method 
+         * to add the location
+         * of the user's ini file
+         * as an option
+         * on the child process's command line.
+         */
+        public void addUserIniOption()
+        {
+            Pair    pair    =
+                new Pair( CPConstants.USER_PROPERTIES_PN,
+                          userIniFile.getAbsolutePath()
+                        );
+            cmdPairs.add( pair );
+        }
+        
+        /**
+         * Starts the PropertyTesterApp as a child process.
+         * 
+         * @see #startChildProcess(Class)
+         */
+        public void startChildProcess()
+        {
+            startChildProcess( PropertyTesterApp.class );
+        }
+        
+        /**
+         * Start a child process, 
+         * applying the give environment variables
+         * and properties.
+         * Child input/output streams 
+         * are established in instance variables.
+         * It is a fatal mistake
+         * to attempt to start a child
+         * when another child instance
+         * is being executed.
+         * 
+         * @param clazz     Class class containing 
+         *                  the main method of the child process
+         */
+        public void startChildProcess( Class<?> clazz )
+        {
+            assertNull( childProcess );
+            assertNull( childStdin );
+            assertNull( childStdout );
+            
+            // Find the java executable to start the child process
+            String          javaHome    = System.getProperty( "java.home" );
+            StringBuilder   bldr        = new StringBuilder( javaHome );
+            bldr.append( File.separator ).append( "bin" )
+                .append( File.separator ).append( "java" );
+            String          javaBin     = bldr.toString();
+            
+            // Add the temp dir to the class path so that the app ini
+            // file that it contains will take procedence over the 
+            // normal app ini file.
+            addClassPath( iniDir );
+            
+            // Initiate the list that will encapsulate the command used to execute
+            // the child process. Each token in the list will wind up as an.
+            // argument on the command line, for example:
+            //     JAVA_HONME\bin\java --class-path .;lib/toots.jar SampleChildClass
+            List<String>    command     = new ArrayList<>();
+            command.add( javaBin );
+            command.add(  "--class-path" );
+            command.add( classPathBldr.toString() );
+            
+            // Add all the property declarations to the command line list
+            for ( Pair pair : cmdPairs  )
+            {
+                StringBuilder   prop    = 
+                    new StringBuilder( "-D" ).append( pair );
+                command.add( prop.toString() );
+            }
+            // Name of class to execute is last on command line
+            command.add( clazz.getName() );
+            
+            // Create the process builder and configure the environment
+            // that will be used when the child process is executed.
+            ProcessBuilder procBldr = new ProcessBuilder(command);
+            Map<String, String> env = procBldr.environment();
+            env.clear();
+            for ( Pair pair : envPairs )
+                env.put( pair.propName, pair.propValue );
+            try
+            {
+                // Start the child process. Note that the start method can
+                // throw an IOEception.
+                childProcess = procBldr.start();
+            
+                // Get an input stream to read the child process's stdout.
+                InputStream         inStream    = childProcess.getInputStream();
+                InputStreamReader   inReader    = new InputStreamReader( inStream );
+                childStdout = new BufferedReader( inReader );
+                
+                // Get an output stream to write to child's stdin
+                OutputStream        outStream  = childProcess.getOutputStream();
+                childStdin = new PrintWriter( outStream, true );
+            }
+            catch ( IOException exc )
+            {
+                String  msg =
+                    "Failed to create child process " + exc.getMessage();
+                exc.printStackTrace();
+                fail( msg );
+            }
         }
     }
     
