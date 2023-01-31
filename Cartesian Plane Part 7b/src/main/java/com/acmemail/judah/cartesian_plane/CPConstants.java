@@ -103,7 +103,7 @@ public class CPConstants
     /** Major tic mark weight property name */
     public static final String  TIC_MAJOR_WEIGHT_PN         = "ticMajorWeight";
     /** Major tic mark weight default value: float. */
-    public static final String  TIC_MAJOR_WEIGHT_DV         = "2";
+    public static final String  TIC_MAJOR_WEIGHT_DV         = "5";
     
     /** Major tic mark length property name */
     public static final String  TIC_MAJOR_LEN_PN            = "ticMajorLen";

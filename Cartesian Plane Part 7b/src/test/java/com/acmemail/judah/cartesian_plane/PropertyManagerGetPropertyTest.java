@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -23,10 +24,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import util.PropertyTesterApp;
-import util.TestUtils;
 
 class PropertyManagerGetPropertyTest
 {
+    /** Prefix for creating temporary ini file. */
+    private static final String     tempFilePrefix  =
+        "CartesianPlaneTempFile";
+    /** Suffix for creating temporary ini file. */
+    private static final String     tempFileSuffix  = ".ini";
+    /*
+     * Encapsulates the user's ini file in the system's
+     * temp directory.
+     */
+    private File                    userIniFile     = null;
+    
     /** 
      * Length of time to wait for the child process to exit.
      * Must be coordinated with {@linkplain #waitForTimeUnit}.
@@ -60,9 +71,50 @@ class PropertyManagerGetPropertyTest
         closeResource( childStdin );
         childStdin = null;
     }
+    
+    @Test
+    public void testUserIniFile()
+    {
+        List<Pair>  allProps    = new ArrayList<>();
+        allProps.add( getNameDValuePair( "MW_WIDTH" ) );
+        allProps.add( getNameDValuePair( "MW_HEIGHT" ) );
+        allProps.add( getNameDValuePair( "MW_BG_COLOR" ) );
+        allProps.add( getNameDValuePair( "GRID_UNIT" ) );
+        allProps.add( getNameDValuePair( "LABEL_FONT_COLOR" ) );
+        allProps.add( getNameDValuePair( "AXIS_WEIGHT" ) );
+        allProps.add( getNameDValuePair( "TIC_MAJOR_WEIGHT" ) );
+        
+        List<Pair>  userProps   = new ArrayList<>();
+        for ( Pair pair : allProps )
+        {
+            String  userVal     = pair.propValue + "_env";
+            Pair    userPair    = new Pair( pair.propName, userVal );
+            userProps.add( userPair );
+        }
+        makeUserIniFile( userProps );
+        System.out.println( userIniFile.getAbsolutePath() );
+        
+        List<Pair>  cmdLinePairs     = new ArrayList<>();
+        String      userFilePath    = userIniFile.getAbsolutePath();
+        Pair        userFileOption  = 
+            new Pair(
+                CPConstants.USER_PROPERTIES_PN,
+                userFilePath
+        );
+        cmdLinePairs.add( userFileOption );
+        // start the child process; interrogate PropertyManager
+        Class<?>    clazz   = PropertyTesterApp.class;
+        startChildProcess( clazz, null, cmdLinePairs );
+
+        for ( Pair pair : userProps )
+        {
+            String  actVal  = getPropVal( pair.propName );
+            assertEquals( pair.propValue, actVal );
+        }
+    }
 
     @Test
-    void test()
+    void testEnvAndCommandLine()
     {
         // List of all propertied under test and their default values
         // from CPConstants; must be at least 6.
@@ -73,6 +125,7 @@ class PropertyManagerGetPropertyTest
         allProps.add( getNameDValuePair( "GRID_UNIT" ) );
         allProps.add( getNameDValuePair( "LABEL_FONT_COLOR" ) );
         allProps.add( getNameDValuePair( "AXIS_WEIGHT" ) );
+        allProps.add( getNameDValuePair( "TIC_MAJOR_WEIGHT" ) );
         
         // put about 2/3 of them in the environment with unique values
         List<Pair>  envProps    = new ArrayList<>();
@@ -238,14 +291,13 @@ class PropertyManagerGetPropertyTest
         command.add( classpath );
         
         // Add all the property declarations to the command line list
-        for ( Pair pair : props )
-        {
-            StringBuilder   prop    = new StringBuilder( "-D" );
-            prop.append( pair.propName )
-                .append( "=" )
-                .append( pair.propValue );
-            command.add( prop.toString() );
-        }
+        if ( props != null )
+            for ( Pair pair : props )
+            {
+                StringBuilder   prop    = 
+                    new StringBuilder( "-D" ).append( pair );
+                command.add( prop.toString() );
+            }
         // Name of class to execute is last on command line
         command.add( className );
         
@@ -254,8 +306,9 @@ class PropertyManagerGetPropertyTest
         ProcessBuilder builder = new ProcessBuilder(command);
         Map<String, String> env = builder.environment();
         env.clear();
-        for ( Pair pair : envVars )
-            env.put( pair.propName, pair.propValue );
+        if ( envVars != null )
+            for ( Pair pair : envVars )
+                env.put( pair.propName, pair.propValue );
         
         try
         {
@@ -320,6 +373,42 @@ class PropertyManagerGetPropertyTest
     }
     
     /**
+     * Given a list of property pairs,
+     * initializes the user ini file in the system's
+     * temp directory.
+     * If the file doesn't exist
+     * it will be created.
+     * If the file does exist
+     * its previous contents are lost.
+     * 
+     * @param properties    the list of property pairs
+     */
+    private void makeUserIniFile( List<Pair> properties )
+    {
+        try
+        {
+            if ( userIniFile == null )
+                userIniFile = File.createTempFile( tempFilePrefix, tempFileSuffix );
+            try ( 
+                FileOutputStream  outStream   = 
+                    new FileOutputStream( userIniFile );
+                PrintWriter writer = new PrintWriter( outStream )
+            )
+            {
+                for ( Pair pair : properties )
+                    writer.println( pair );
+            }
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            String  msg = 
+                "Create app ini file failure: " + exc.getMessage();
+            fail( msg );
+        }
+    }
+    
+    /**
      * Encapsulates a property name/value pair.
      * 
      * @author Jack Straub
@@ -342,6 +431,15 @@ class PropertyManagerGetPropertyTest
         {
             this.propName = propName;
             this.propValue = propValue;
+        }
+        
+        @Override
+        public String toString()
+        {
+            StringBuilder   bldr    = 
+                new StringBuilder( propName )
+                    .append( "=" ).append( propValue );
+            return bldr.toString();
         }
     }
 }
