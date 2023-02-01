@@ -24,7 +24,6 @@ import java.util.Map;
  */
 public class IPCParentSimpleDemo
 {
-
     /** 
      * Application entry point.
      * 
@@ -93,10 +92,12 @@ public class IPCParentSimpleDemo
         // process's stdout. Try-with-resources is used in order to
         // facilitate closing the input stream. Note that when using
         // a try-with-resources statement a catch bloc is optional
-        try ( InputStream childStdout = process.getInputStream(); )
-        {
+        try ( 
+            InputStream childStdout = process.getInputStream();
             InputStreamReader   inReader    = new InputStreamReader( childStdout );
             BufferedReader      bufReader   = new BufferedReader( inReader );
+        )
+        {
             String              line        = null;
             while ( (line = bufReader.readLine()) != null )
                 System.out.println( "from target process: " + line );

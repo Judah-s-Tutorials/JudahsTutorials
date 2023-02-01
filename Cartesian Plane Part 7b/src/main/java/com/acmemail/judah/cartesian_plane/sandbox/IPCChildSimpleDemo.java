@@ -1,7 +1,6 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
 
 /**

@@ -71,15 +71,15 @@ public class PropertyTesterApp
     public static void main(String[] args)
     {
         System.err.println( "child: main" );
-        try ( Reader reader  = new InputStreamReader( System.in ); )
-        {
+        try ( 
+            Reader reader  = new InputStreamReader( System.in );
             BufferedReader  bufReader   = new BufferedReader( reader );
+        )
+        {
             String          propName    = "";
             while ( !(propName = bufReader.readLine()).equals( EXIT_COMMAND ) )
             {
-                System.err.println( "child: " + propName );
                 String  propValue   = pMgr.asString( propName );
-                System.err.println( "child: " + propName + "->" + propValue );
                 System.out.println( propValue );
             }
         }
@@ -90,6 +90,4 @@ public class PropertyTesterApp
         }
         System.exit( EXIT_SUCCESS );
     }
-    
-    
 }

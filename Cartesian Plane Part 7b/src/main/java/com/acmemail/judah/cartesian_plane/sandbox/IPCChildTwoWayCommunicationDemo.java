@@ -32,9 +32,11 @@ public class IPCChildTwoWayCommunicationDemo
      */
     public static void main(String[] args)
     {
-        try ( Reader reader  = new InputStreamReader( System.in ); )
-        {
+        try ( 
+            Reader reader  = new InputStreamReader( System.in ); 
             BufferedReader  bufReader   = new BufferedReader( reader );
+        )
+        {
             String  response    = "";
             do
             {

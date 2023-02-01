@@ -95,12 +95,12 @@ public class IPCParentTwoWayCommunicationDemo
         Process process = builder.start();
         try ( 
             InputStream childStdOut = process.getInputStream();
+            InputStreamReader inReader = new InputStreamReader( childStdOut );
+            BufferedReader bufReader = new BufferedReader( inReader );
             OutputStream childStdIn = process.getOutputStream();
+            PrintWriter printer     = new PrintWriter( childStdIn, true );
         )
         {
-            PrintWriter         printer     = new PrintWriter( childStdIn, true );
-            InputStreamReader   inReader    = new InputStreamReader( childStdOut );
-            BufferedReader      bufReader   = new BufferedReader( inReader );
             for ( String envName : envQueries )
             {
                 printer.println( "getEnv " + envName );

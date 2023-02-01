@@ -180,11 +180,6 @@ class PropertyManagerGetPropertyTest
         initTestData();
     }
     
-    @BeforeEach
-    public void beforeEach() throws Exception
-    {
-    }
-    
     /**
      * Performs cleanup after each test.
      * In particular,

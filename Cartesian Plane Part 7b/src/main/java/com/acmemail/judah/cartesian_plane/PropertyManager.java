@@ -594,11 +594,6 @@ public enum PropertyManager
      *      Establishing the Initial Values of Properties
      *      </a>
      */
-    /**
-     * @param propName
-     * @param defValue
-     * @return
-     */
     private String getProperty( String propName, String defValue )
     {
         String  val = null;
