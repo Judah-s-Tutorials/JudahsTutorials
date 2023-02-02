@@ -577,7 +577,6 @@ class PropertyManagerGetPropertyTest
         {
             String  propName    = pair.propName;    
             String  pmVal       = getPropVal( propName );
-            System.out.println( propName + "->" + pmVal );
             String  expVal      = null;
             if ( (expVal = cmdMap.get( propName )) != null )
                 assertEquals( expVal, pmVal );
@@ -813,11 +812,11 @@ class PropertyManagerGetPropertyTest
      */
     private class ChildProcess
     {
-        private List<Pair>      cmdPairs        = new ArrayList<>();
-        private List<Pair>      envPairs        = new ArrayList<>();
-        private String          classPath       =
+        private final List<Pair>    cmdPairs        = new ArrayList<>();
+        private final List<Pair>    envPairs        = new ArrayList<>();
+        private final String        classPath       =
             System.getProperty( "java.class.path" );
-        private StringBuilder   classPathBldr   =
+        private final StringBuilder classPathBldr   =
             new StringBuilder( classPath );
         
         /**
@@ -912,7 +911,7 @@ class PropertyManagerGetPropertyTest
             String          javaBin     = bldr.toString();
             
             // Add the temp dir to the class path so that the app ini
-            // file that it contains will take procedence over the 
+            // file that it contains will take precedence over the 
             // normal app ini file.
             addClassPath( iniDir );
             

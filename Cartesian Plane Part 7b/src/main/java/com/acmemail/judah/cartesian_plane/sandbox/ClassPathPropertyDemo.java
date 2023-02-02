@@ -8,6 +8,7 @@ public class ClassPathPropertyDemo
     {
         String  separator   = System.getProperty( "path.separator" );
         String  classPath   = System.getProperty( "java.class.path" );
+        System.out.println( classPath );
         
         StringTokenizer tizer   = new StringTokenizer( classPath, separator );
         while ( tizer.hasMoreTokens() )
