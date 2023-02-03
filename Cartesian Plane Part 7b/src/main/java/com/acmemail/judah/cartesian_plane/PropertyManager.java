@@ -470,10 +470,6 @@ public enum PropertyManager
      * @throws  IllegalArgumentException if the property value
      *          cannot be converted to a font style.
      */
-    /**
-     * @param propName
-     * @return
-     */
     public Integer asFontStyle( String propName )
     {
         Integer iVal    = null;
