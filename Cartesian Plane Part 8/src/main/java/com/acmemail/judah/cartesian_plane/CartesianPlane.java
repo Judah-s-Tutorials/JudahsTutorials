@@ -13,8 +13,14 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.Collection;
+import java.util.List;
 
 import javax.swing.JPanel;
+
+import com.acmemail.judah.cartesian_plane.temp.ChangeColor;
+import com.acmemail.judah.cartesian_plane.temp.DrawFunction;
+import com.acmemail.judah.cartesian_plane.temp.SetPoint;
 
 /**
  * This class encapsulates the display of a Cartesian plane.
@@ -504,6 +510,16 @@ public class CartesianPlane
         pmgr.asFontStyle( CPConstants.LABEL_FONT_STYLE_PN );
     private float   labelFontSize       = 
         pmgr.asFloat( CPConstants.LABEL_FONT_SIZE_PN );
+    
+    private List<PlotCommand>   userCommands = null;
+    
+    /////////////////////////////////////////////////
+    //   Plot properties (properties to use
+    //   when plotting a point on the grid)
+    /////////////////////////////////////////////////
+    private Color   plotColor           =
+        pmgr.asColor( CPConstants.PLOT_COLOR_DV );
+    private PlotShape  plotShape       = new PointShape();
 
     ///////////////////////////////////////////////////////
     //
@@ -517,6 +533,10 @@ public class CartesianPlane
     private Rectangle2D         gridRect;
     private Font                labelFont;
     private FontRenderContext   labelFRC;
+    private Color               currPlotColor;
+    private PlotShape           currPlotShape;
+    private double              xOffset;
+    private double              yOffset;
         
     /**
      * Constructor.
@@ -576,16 +596,31 @@ public class CartesianPlane
         gridRect = 
             new Rectangle2D.Float( minXco, minYco, gridWidth, gridHeight );
 
+
         // Set the clip region to the rectangle bounding the grid before
         // drawing any lines. Don't forget to restore the original clip
         // region after drawing the lines.
         Shape   origClip    = gtx.getClip();
         gtx.setClip( gridRect );
+        
+        // The plot color and plot shape are set to defaults
+        // each time paintComponent is invoked. The user can
+        // change the values but they will only be in effect
+        // for the duration of one paintComponent execute; with
+        // the next paintComponent execution they will return
+        // to their default values.
+        currPlotColor = plotColor;
+        currPlotShape = plotShape;
+        
+        // Values to use in mapping Cartesian coordinates to pixel coorinates
+        xOffset = gridRect.getX() + (gridRect.getWidth() - 1) / 2;
+        yOffset = gridRect.getY() + (gridRect.getHeight() - 1) / 2;
 
         drawGridLines();
         drawMinorTics();
         drawMajorTics();
         drawAxes();
+        drawUserPoints();
         
         gtx.setClip( origClip );
 
@@ -596,6 +631,36 @@ public class CartesianPlane
         // begin boilerplate
         gtx.dispose();
         // end boilerplate
+    }
+    
+    public void plotPoint( float userXco, float userYco )
+    {
+        double  xco = userXco * gridUnit + xOffset;
+        double  yco = -userYco * gridUnit + yOffset;
+        Shape   shape   = currPlotShape.getShape( xco, yco );
+        gtx.draw( shape );
+    }
+    
+    /**
+     * Sets the color to use to draw plot points for
+     * the duration of one execution of paintComponent.
+     * 
+     * @param color the color to use to draw plot points
+     */
+    public void setPlotColor( Color color )
+    {
+        gtx.setColor( color );
+    }
+    
+    /**
+     * Sets the shape to use to draw plot points for
+     * the duration of one execution of paintComponent.
+     * 
+     * @param plotShape the shape to use to draw plot points
+     */
+    public void setPlotShape( PlotShape plotShape )
+    {
+        currPlotShape = plotShape;
     }
     
     public void propertyChange( PropertyChangeEvent evt )
@@ -724,6 +789,22 @@ public class CartesianPlane
             labelFontSize = CPConstants.asFloat( newVal );
             repaint();
             break;
+        }
+    }
+    
+    public void setUserCommands( List<PlotCommand> commands )
+    {
+        this.userCommands  = commands;
+    }
+    
+    private void drawUserPoints()
+    {
+        if ( userCommands == null )
+            return;
+        Line2D  line    = new Line2D.Float();
+        for ( PlotCommand command : userCommands )
+        {
+            command.execute();
         }
     }
     

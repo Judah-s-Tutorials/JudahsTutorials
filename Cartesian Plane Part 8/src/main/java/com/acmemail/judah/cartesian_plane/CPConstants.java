@@ -190,6 +190,14 @@ public class CPConstants
     /** Location of user properties file default value. */
     public static final String  USER_PROPERTIES_DV      = "null";
     
+    /////////////////////////////////////////////////
+    //   Plot properties
+    /////////////////////////////////////////////////
+    /** Color to use when plotting a point on the grid. */
+    public static final String  PLOT_COLOR_PN           = "plotColor";
+    /** Default value of color to use when plotting a point on the grid. */
+    public static final String  PLOT_COLOR_DV           = "20";
+    
     /**
      * Convert a String to an int and return the int.
      * 
