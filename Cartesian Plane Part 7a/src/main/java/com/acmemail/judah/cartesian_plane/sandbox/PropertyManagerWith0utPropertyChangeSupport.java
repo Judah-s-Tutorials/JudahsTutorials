@@ -130,7 +130,7 @@ public enum PropertyManagerWith0utPropertyChangeSupport
     /** List of property listeners. */
     private final List<PropertyChangeListener>  propertyListeners   =
         new ArrayList<>();
-    /** Collection of per-property listeners. */
+    /** Map of per-property listeners. */
     private final Map<String,List<PropertyChangeListener>>
         perPropertyListeners    = new HashMap<>();
     
@@ -577,22 +577,27 @@ public enum PropertyManagerWith0utPropertyChangeSupport
     private Object propagatePropertyChange( String propName, String newVal )
     {
         Object  oldVal  = propertyMap.put( propName, newVal );
-        PropertyChangeEvent eventObj    = 
-            new PropertyChangeEvent(
-                INSTANCE,
-                propName,
-                oldVal,
-                newVal
-            );
-        for ( PropertyChangeListener listener : propertyListeners )
-            listener.propertyChange( eventObj );
-        
-        List<PropertyChangeListener>    list    = 
-            perPropertyListeners.get( propName );
-        if ( list != null )
+        // Don't propagate a property change event unless the
+        // value of the property has actually changed.
+        if ( !oldVal.equals( newVal ) )
         {
+            PropertyChangeEvent eventObj    = 
+                new PropertyChangeEvent(
+                    INSTANCE,
+                    propName,
+                    oldVal,
+                    newVal
+                );
             for ( PropertyChangeListener listener : propertyListeners )
                 listener.propertyChange( eventObj );
+            
+            List<PropertyChangeListener>    list    = 
+                perPropertyListeners.get( propName );
+            if ( list != null )
+            {
+                for ( PropertyChangeListener listener : propertyListeners )
+                    listener.propertyChange( eventObj );
+            }
         }
         
         return oldVal;
