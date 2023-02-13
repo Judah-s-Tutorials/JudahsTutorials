@@ -138,7 +138,7 @@ public class LineGeneratorBaseCaseTest
     }
     
     /**
-     * Verify that the expected horizontal lines are generated.
+     * Verify that the expected vertical lines are generated.
      */
     @Test
     public void testLineGeneratorVert()

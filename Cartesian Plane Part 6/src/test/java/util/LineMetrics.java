@@ -289,7 +289,8 @@ public class LineMetrics
      * @param actLine     the actual line
      * @param epsilon     the given tolerance
      */
-    public static void assertLineEquals( Line2D expLine, Line2D actLine, float epsilon )
+    public static void 
+    assertLineEquals( Line2D expLine, Line2D actLine, float epsilon )
     {
         float   expLineXco1 = (float)expLine.getX1();
         float   expLineYco1 = (float)expLine.getY1();
