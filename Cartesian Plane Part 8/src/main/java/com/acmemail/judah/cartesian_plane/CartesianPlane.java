@@ -13,14 +13,10 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import javax.swing.JPanel;
-
-import com.acmemail.judah.cartesian_plane.temp.ChangeColor;
-import com.acmemail.judah.cartesian_plane.temp.DrawFunction;
-import com.acmemail.judah.cartesian_plane.temp.SetPoint;
 
 /**
  * This class encapsulates the display of a Cartesian plane.
@@ -801,11 +797,7 @@ public class CartesianPlane
     {
         if ( userCommands == null )
             return;
-        Line2D  line    = new Line2D.Float();
-        for ( PlotCommand command : userCommands )
-        {
-            command.execute();
-        }
+        userCommands.forEach( c -> c.execute() );
     }
     
     private void drawAxes()
@@ -850,8 +842,9 @@ public class CartesianPlane
                 );
             gtx.setStroke( new BasicStroke( ticMinorWeight ) );
             gtx.setColor( ticMinorColor );
-            for ( Line2D line : lineGen )
-                gtx.draw( line );
+            lineGen.forEach( gtx::draw );
+//            for ( Line2D line : lineGen )
+//                gtx.draw( line );
         }
     }
     
