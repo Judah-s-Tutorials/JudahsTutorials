@@ -148,10 +148,11 @@ public class VLine extends TLine
         for ( int xco = firstXco ; xco <= lastXco ; ++xco )
         {
             // yco1 and/or yco2 may or may not be interior
-            for ( int yco = yco1 + 1 ; yco < yco2 ; ++yco )
-                list.add( new Point( xco, yco ) );
+            list.add( new Point( xco, yco1 + 1 ) );
+            list.add( new Point( xco, yco2 - 1 ) );
         }
         
+        list.forEach( System.out::println );
         return list;
     }
     
@@ -186,11 +187,12 @@ public class VLine extends TLine
             list.add( new Point( xco, yco2 + 1 ) );
         }
         
-        list.add( new Point( firstXco, yco1 + 1 ) );
-        list.add( new Point( lastXco, yco1 + 1 ) );
-        list.add( new Point( firstXco, yco2 - 1 ) );
-        list.add( new Point( lastXco, yco2 - 1 ) );
+//        list.add( new Point( firstXco, yco1 + 1 ) );
+//        list.add( new Point( lastXco, yco1 + 1 ) );
+//        list.add( new Point( firstXco, yco2 - 1 ) );
+//        list.add( new Point( lastXco, yco2 - 1 ) );
         
+        list.forEach( System.out::println );
         return list;
     }
 }
