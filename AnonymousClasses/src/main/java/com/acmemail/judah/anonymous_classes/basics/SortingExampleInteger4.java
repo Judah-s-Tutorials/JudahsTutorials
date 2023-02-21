@@ -5,7 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
-public class SortingExampleInteger2
+public class SortingExampleInteger4
 {
     public static void main(String[] args)
     {
@@ -14,17 +14,10 @@ public class SortingExampleInteger2
         for ( int inx = 0 ; inx < 100 ; ++inx )
             randomList.add( randy.nextInt( 100 ) );
         
-        Comparator<Integer> comp    = 
-            new Comparator<Integer>()
-            {
-                public int compare( Integer num1, Integer num2 )
-                {
-                    int     rcode   = num2 - num1;
-                    return rcode;
-                }
-            };
+    randomList.sort(new Comparator<Integer>(){
+        public int compare( Integer num1, Integer num2 ){
+        int     rcode   = num2 - num1; return rcode;}});
         
-        randomList.sort( comp );
         for ( Integer num : randomList )
             System.out.println( num );
     }

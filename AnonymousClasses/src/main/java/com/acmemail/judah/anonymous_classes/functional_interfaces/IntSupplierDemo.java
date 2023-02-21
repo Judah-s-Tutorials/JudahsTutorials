@@ -12,47 +12,26 @@ public class IntSupplierDemo
             System.out.println( supplier.getAsInt() );
     }
 
-    private static class PrimeSupplier implements IntSupplier
+    private static class OddSupplier implements IntSupplier
     {
-        int next    = 2;
+        private int next;
+        
+        public OddSupplier()
+        {
+            this( 1 );
+        }
+        
+        public OddSupplier( int start )
+        {
+            next = start;
+        }
         
         @Override
         public int getAsInt()
         {
             int result  = next;
-            nextPrime();
+            next += 2;
             
-            return result;
-        }
-        
-        private void nextPrime()
-        {
-            if ( next == 2 )
-                next = 3;
-            else
-            {
-                int test;
-                for ( test = next + 2 ; !isPrime( test ) ; test += 2 )
-                    ;
-                next = test;
-            }
-        }
-        
-        private static boolean isPrime( int num )
-        {
-            boolean result  = true;
-            if ( num < 2 )
-                result = false;
-            else if ( num == 2 )
-                result = true;
-            else if ( num % 2 == 0 )
-                result = false;
-            else
-            {
-                int limit   = (int)Math.sqrt( num ) + 1;
-                for ( int test = 3 ; result && test <= limit ; test += 2 )
-                    result = num % test != 0;
-            }
             return result;
         }
     }
