@@ -3,21 +3,19 @@ package lambdas;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MethodReferenceExample2
+public class MethodReferenceExample5
 {    
     public static void main(String[] args)
     {
         List<ShowDog>    list    = getList();
 
         System.out.println( "*** sort by age ***" );
-        list.sort( (d1, d2) -> ShowDog.sortByAge( d1, d2 ) );
-        for ( ShowDog dog : list )
-            System.out.println( dog );
+        list.sort( ShowDog::sortByAge );
+        list.forEach( System.out::println );
         
         System.out.println( "*** sort by breed ***" );
-        list.sort( (d1,d2) -> ShowDog.sortByBreed(d1, d2) );
-        for ( ShowDog dog : list )
-            System.out.println( dog );
+        list.sort( ShowDog::sortByBreed );
+        list.forEach( System.out::println );
     }
 
     private static List<ShowDog> getList()

@@ -7,7 +7,8 @@ public class IntSupplierDemo
 
     public static void main(String[] args)
     {
-        PrimeSupplier   supplier    = new PrimeSupplier();
+        // Print a list of the first 100 prime numbers
+        IntSupplier supplier    = new PrimeSupplier();
         for ( int inx = 0 ; inx < 100 ; ++inx )
             System.out.println( supplier.getAsInt() );
     }
