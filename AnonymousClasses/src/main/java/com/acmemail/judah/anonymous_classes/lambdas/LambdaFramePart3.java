@@ -1,4 +1,4 @@
-package lambdas;
+package com.acmemail.judah.anonymous_classes.lambdas;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -9,22 +9,19 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class LambdaFramePart1
+public class LambdaFramePart3
 {
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( new Root() );
+        SwingUtilities.invokeLater( () -> buildGUI() );
     }
     
-    private static class Root implements Runnable
+    private static void buildGUI()
     {
-        public void run()
-        {
-            JFrame  frame   = new JFrame();
-            frame.setContentPane( new Canvas() );
-            frame.pack();
-            frame.setVisible( true );
-        }
+        JFrame  frame   = new JFrame();
+        frame.setContentPane( new Canvas() );
+        frame.pack();
+        frame.setVisible( true );
     }
 
     @SuppressWarnings("serial")

@@ -1,21 +1,21 @@
-package lambdas;
+package com.acmemail.judah.anonymous_classes.lambdas;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MethodReferenceExample3
+public class MethodReferenceExample2
 {    
     public static void main(String[] args)
     {
         List<ShowDog>    list    = getList();
 
         System.out.println( "*** sort by age ***" );
-        list.sort( ShowDog::sortByAge );
+        list.sort( (d1, d2) -> ShowDog.sortByAge( d1, d2 ) );
         for ( ShowDog dog : list )
             System.out.println( dog );
         
         System.out.println( "*** sort by breed ***" );
-        list.sort( ShowDog::sortByBreed );
+        list.sort( (d1,d2) -> ShowDog.sortByBreed(d1, d2) );
         for ( ShowDog dog : list )
             System.out.println( dog );
     }

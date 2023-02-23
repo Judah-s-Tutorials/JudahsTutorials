@@ -1,4 +1,4 @@
-package lambdas;
+package com.acmemail.judah.anonymous_classes.lambdas;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -11,7 +11,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class LambdaFramePart5
+public class LambdaFramePart4
 {
     public static void main(String[] args)
     {
@@ -21,16 +21,24 @@ public class LambdaFramePart5
     private static void buildGUI()
     {
         JFrame  frame   = new JFrame();
-        frame.addPropertyChangeListener( e -> 
-            System.out.println( 
-                e.getPropertyName() + 
-                " changed from " + e.getOldValue() +
-                " to " + e.getNewValue()
-            )
-        );
+        frame.addPropertyChangeListener( new PropertyMonitor() );
         frame.setContentPane( new Canvas() );
         frame.pack();
         frame.setVisible( true );
+    }
+    
+    private static class PropertyMonitor implements PropertyChangeListener
+    {
+        @Override
+        public void propertyChange(PropertyChangeEvent evt)
+        {
+            System.out.println( 
+                evt.getPropertyName() + 
+                " changed from " + evt.getOldValue() +
+                " to " + evt.getNewValue()
+            );
+            
+        }
     }
 
     @SuppressWarnings("serial")

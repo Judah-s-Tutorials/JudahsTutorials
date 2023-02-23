@@ -1,9 +1,9 @@
-package lambdas;
+package com.acmemail.judah.anonymous_classes.lambdas;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MethodReferenceExample4
+public class MethodReferenceExample3
 {    
     public static void main(String[] args)
     {
@@ -11,11 +11,13 @@ public class MethodReferenceExample4
 
         System.out.println( "*** sort by age ***" );
         list.sort( ShowDog::sortByAge );
-        list.forEach( dog -> System.out.println( dog ) );
+        for ( ShowDog dog : list )
+            System.out.println( dog );
         
         System.out.println( "*** sort by breed ***" );
         list.sort( ShowDog::sortByBreed );
-        list.forEach( dog -> System.out.println( dog ) );
+        for ( ShowDog dog : list )
+            System.out.println( dog );
     }
 
     private static List<ShowDog> getList()
