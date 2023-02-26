@@ -3,7 +3,7 @@ package com.acmemail.judah.anonymous_classes.functional_interfaces;
 import java.util.Random;
 import java.util.function.DoubleToIntFunction;
 
-public class DoubleToFunctionDemo
+public class DoubleToIntFunctionDemo
 {
     private static final Random randy   = new Random( 1 );
     
