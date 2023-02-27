@@ -1,11 +1,10 @@
-package com.acmemail.judah.anonymous_classes.functional_interfaces;
+package com.acmemail.judah.anonymous_classes.streams;
 import java.util.List;
 import java.util.function.Predicate;
 
 import com.acmemail.judah.anonymous_classes.lambdas.ShowDog;
-import com.acmemail.judah.anonymous_classes.streams.ShowDogGenerator;
 
-public class PredicateStaticMethodDemo
+public class PredicateStaticMethodDemo3
 {
     private static final List<ShowDog>  showDogs    = 
         ShowDogGenerator.getShowDogs( 10 );
