@@ -8,6 +8,19 @@ import java.util.Properties;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+/**
+ * This is an application 
+ * to read a file of name/value pairs 
+ * and produce a Properties object.
+ * In addition to name/value pairs,
+ * the file contains blank space,
+ * blank lines and comments,
+ * which must be ignored.
+ * Name/value pairs are written in the form:
+ * <em>name=value</em>.
+ * 
+ * @author Jack Straub
+ */
 public class PropertiesFileParser
 {
     private final File      inputPath;
@@ -52,7 +65,7 @@ public class PropertiesFileParser
     
     /**
      * Parse the properties file
-     * referenced by the give stream,
+     * referenced by a given BufferedReader,
      * producing a Properties object
      * as a result.
      * Discards all blank lines and comments,
@@ -63,21 +76,23 @@ public class PropertiesFileParser
      * (i.e., the name/value pair
      * may be expressed as <em>name = value</em>).
      * 
-     * @param bReader
+     * @param bReader   the given BufferedReader 
      * 
-     * @return
+     * @return  the generated Properties object
      */
     private Properties getProperties( BufferedReader bReader )
     {
         Properties  props   = new Properties();
-        props.putAll( bReader.lines()
-            .map( String::trim )
-            .filter( Predicate.not( String::isBlank ) )
-            .filter( Predicate.not( s -> s.startsWith( "#" ) ) )
-            .map( s -> s.split( "=" ) )
-            .filter( a -> a.length == 2 )
-            .map( a -> {a[0]=a[0].trim(); a[1]=a[1].trim(); return a;} )
-            .collect( Collectors.toMap( a -> a[0], a -> a[1] ) ) );
+        props.putAll( 
+            bReader.lines()
+                .map( String::trim )
+                .filter( Predicate.not( String::isBlank ) )
+                .filter( Predicate.not( s -> s.startsWith( "#" ) ) )
+                .map( s -> s.split( "=" ) )
+                .filter( a -> a.length == 2 )
+                .map( a -> {a[0]=a[0].trim(); a[1]=a[1].trim(); return a;} )
+                .collect( Collectors.toMap( a -> a[0], a -> a[1] ) )
+        );
         return props;
     }
 }

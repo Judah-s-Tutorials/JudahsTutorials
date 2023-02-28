@@ -1,6 +1,7 @@
 package com.acmemail.judah.anonymous_classes.functional_interfaces;
 
 import java.util.function.IntSupplier;
+import java.util.stream.IntStream;
 
 public class IntSupplierDemo
 {

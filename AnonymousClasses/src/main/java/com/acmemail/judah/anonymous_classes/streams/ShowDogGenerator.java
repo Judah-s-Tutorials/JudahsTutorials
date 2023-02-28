@@ -55,9 +55,9 @@ public class ShowDogGenerator
     
     public static List<ShowDog> getShowDogs( int maxCount )
     {
-        final   int     numNames    = names.length;
-        final   int     numBreeds   = breeds.length;
-        final   int     ageRange    = maxAge - minAge;
+        final int       numNames    = names.length;
+        final int       numBreeds   = breeds.length;
+        final int       ageRange    = maxAge - minAge;
         final Random    randy       = new Random( 0 );
         
         List<ShowDog>   list    =

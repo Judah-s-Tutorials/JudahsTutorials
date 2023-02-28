@@ -2,7 +2,7 @@ package com.acmemail.judah.anonymous_classes.functional_interfaces;
 
 import java.util.function.IntSupplier;
 
-class PrimeSupplier implements IntSupplier
+public class PrimeSupplier implements IntSupplier
 {
     private int next    = 2;
     

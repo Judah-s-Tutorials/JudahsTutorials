@@ -4,13 +4,15 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import com.acmemail.judah.anonymous_classes.lambdas.ShowDog;
+import com.acmemail.judah.anonymous_classes.streams.ShowDogGenerator;
 
 /**
- * Simple application to demonstrate the use of the
- * Predicate interface <em>or</em>
+ * This is a simple application to demonstrate how
+ * a method can return a functional interface.
+ * 
  * @author Jack Straub
  */
-public class PredicateStaticMethodDemo1
+public class ReturnFunctionalInterfaceDemo1
 {
     private static final List<ShowDog>  showDogs    = getList();
     
@@ -24,25 +26,54 @@ public class PredicateStaticMethodDemo1
         showDogs.forEach( System.out::println );
         System.out.println( "****************" );
         
-        Predicate<ShowDog>  lessThan    = d -> d.getAge() < 6;
-        Predicate<ShowDog>  breedEquals = d -> d.getBreed().equals( "Collie" );
-        
-        // Get the first ShowDog that is less than 6,
-        // or which is a Collie.
+        Predicate<ShowDog>  lessThan    = ageLessThan( 6 );
+        Predicate<ShowDog>  breedEquals = breedEquals( "collie" );
         ShowDog showDog = getShowDog( lessThan.or( breedEquals ) );
         System.out.println( showDog );
     }
     
     /**
-     * Returns the first show dog in the list
-     * that satisfies the given predicate.
-     * Returns null if no such show dog is found.
+     * Returns a Predicate asserting
+     * that a ShowDog is less than a given age.
      * 
-     * @param tester    the given predicate
+     * @param age   the given age
      * 
-     * @return
-     *      the first show dog in the list that satisfies the given predicate,
-     *      or null if none found
+     * @return  
+     *      a Predicate asserting
+     *      that a ShowDog is less than a given age
+     */
+    private static Predicate<ShowDog> ageLessThan( int age )
+    {
+        Predicate<ShowDog>  pred    = d -> d.getAge() < age;
+        return pred;
+    }
+    
+    
+    /**
+     * Returns a Predicate asserting
+     * that a ShowDog belongs to a given breed
+     * 
+     * @param age   the given age
+     * 
+     * @return  
+     *      a Predicate asserting
+     *      that a ShowDog belongs to a given breed
+     */
+    private static Predicate<ShowDog> breedEquals( String breed )
+    {
+        Predicate<ShowDog>  pred    = d -> d.getBreed().equals( breed );
+        return pred;
+    }
+    
+    /**
+     * Returns the first ShowDog that passes a given Predicate,
+     * or null if there is no such ShowDog.
+     * 
+     * @param tester    the given Predicate
+     * 
+     * @return  
+     *      the first ShowDog that passes a given Predicate,
+     *      or null if there is no such ShowDog
      */
     private static ShowDog  getShowDog( Predicate<ShowDog> tester )
     {
