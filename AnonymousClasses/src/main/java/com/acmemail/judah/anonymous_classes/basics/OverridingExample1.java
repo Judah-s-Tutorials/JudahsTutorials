@@ -4,6 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * This is a simple application to demonstrate
+ * overloading of a method in an anonymous class.
+ * In this example,
+ * <em>processQueue</em> is an instance
+ * of an anonymous class
+ * which is a subclass of <em>ArrayList</em>. 
+ * It overrides the <em>add</em> and <em>remove</em> methods
+ * for the purpose of logging 
+ * each occurrence of their invocation.
+ * 
+ * @author Jack Straub
+ */
 public class OverridingExample1
 {
     @SuppressWarnings("serial")
@@ -25,6 +38,11 @@ public class OverridingExample1
         }
     };
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         Random  randy   = new Random( 0 );

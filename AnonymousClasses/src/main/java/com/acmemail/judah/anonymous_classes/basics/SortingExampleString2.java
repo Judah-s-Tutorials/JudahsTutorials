@@ -5,8 +5,28 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * This is a simple application to demonstrate
+ * the use of an anonymous class
+ * as a <em>Comparator.</em>
+ * This example builds on sample application
+ * {@linkplain SortingExampleString1}.
+ * In this example,
+ * the explicit class declaration in the precursor,
+ * {@linkplain SortingExampleString1},
+ * is replaced with an anonymous class.
+ * 
+ * @author Jack Straub
+ * 
+ * @see SortingExampleString1
+ */
 public class SortingExampleString2
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         List<String>    randomList  = new ArrayList<>();

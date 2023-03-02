@@ -3,8 +3,29 @@ package com.acmemail.judah.anonymous_classes.lambdas;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This application is part of a
+ * demonstration of the use of method reference.
+ * In this example
+ * a list is sorted two different ways
+ * using lambda syntax such as:<br>
+ * <pre>    (d1, d2) -&gt; ShowDog.sortByAge( d1, d2 )</pre>
+ * The next example, 
+ * {@linkplain MethodReferenceExample3},
+ * replaces the lambdas incorporated here
+ * with method references.
+ * 
+ * @author Jack Straub
+ *
+ *@see MethodReferenceExample3
+ */
 public class MethodReferenceExample2
 {    
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         List<ShowDog>    list    = getList();
@@ -20,6 +41,12 @@ public class MethodReferenceExample2
             System.out.println( dog );
     }
 
+    /**
+     * Gets a list of ShowDogs
+     * for demonstration purposes.
+     *  
+     * @return  a list of ShowDogs
+     */
     private static List<ShowDog> getList()
     {
         List<ShowDog>    list    = new ArrayList<>();

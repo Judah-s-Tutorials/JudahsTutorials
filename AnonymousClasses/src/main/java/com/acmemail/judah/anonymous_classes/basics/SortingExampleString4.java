@@ -5,8 +5,23 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * This is a simple application to demonstrate
+ * how to instantiate an anonymous class directly
+ * as an argument to a method.
+ *
+ * @author Jack Straub
+ *
+ * @see SortingExampleString2
+ * @see SortingExampleString3
+ */
 public class SortingExampleString4
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         List<String>    randomList  = new ArrayList<>();

@@ -4,8 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * This is a simple application 
+ * that demonstrates how to declare a comparator
+ * using a lambda.
+ * The comparator is declared
+ * directly as an argument
+ * to a sort method.
+ * 
+ * @author Jack Straub
+ */
 public class LambdaExample4
 {        
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main( String[] args )
     {
         List<Integer>   randomList  = new ArrayList<>();
@@ -13,6 +28,8 @@ public class LambdaExample4
         for ( int inx = 0 ; inx < 100 ; ++inx )
             randomList.add( randy.nextInt( 100 ) );
         
+        // Sort the list of integers in such a way that all
+        // even numbers appear greater than all odd numbers.
         randomList.sort( 
             (num1, num2) ->
             {

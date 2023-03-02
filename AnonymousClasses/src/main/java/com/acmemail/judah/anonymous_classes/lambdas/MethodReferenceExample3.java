@@ -3,8 +3,26 @@ package com.acmemail.judah.anonymous_classes.lambdas;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This application is
+ * a revision of the previous example,
+ * {@linkplain MethodReferenceExample2}.
+ * In this example
+ * the lambdas used in the prior example
+ * are replaced with lambdas
+ * using method references.
+ * 
+ * @author Jack Straub
+ *
+ *@see MethodReferenceExample2
+ */
 public class MethodReferenceExample3
 {    
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         List<ShowDog>    list    = getList();
@@ -20,6 +38,12 @@ public class MethodReferenceExample3
             System.out.println( dog );
     }
 
+    /**
+     * Gets a list of ShowDogs
+     * for demonstration purposes.
+     *  
+     * @return  a list of ShowDogs
+     */
     private static List<ShowDog> getList()
     {
         List<ShowDog>    list    = new ArrayList<>();

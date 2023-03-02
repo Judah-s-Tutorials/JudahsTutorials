@@ -1,23 +1,43 @@
 package com.acmemail.judah.anonymous_classes.lambdas;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+/**
+ * This application demonstrates the implementation
+ * of a <em>PropertyChangeListener.</em>
+ * In this example 
+ * the listener is implemented as
+ * an explicitly declared class.
+ * The next example,
+ * {@linkplain LambdaFramePart5}
+ * replaces the explicit declaration
+ * with a lambda.
+ * 
+ * @author Jack Straub
+ * 
+ * @see LambdaFramePart5 
+ */
 public class LambdaFramePart4
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         SwingUtilities.invokeLater( () -> buildGUI() );
     }
     
+    /**
+     * Instantiates and configures
+     * the sample window
+     * displayed by this application.
+     */
     private static void buildGUI()
     {
         JFrame  frame   = new JFrame();
@@ -27,6 +47,11 @@ public class LambdaFramePart4
         frame.setVisible( true );
     }
     
+    /**
+     * Used to monitor changes to properties.
+     * 
+     * @author Jack Straub
+     */
     private static class PropertyMonitor implements PropertyChangeListener
     {
         @Override
@@ -38,22 +63,6 @@ public class LambdaFramePart4
                 " to " + evt.getNewValue()
             );
             
-        }
-    }
-
-    @SuppressWarnings("serial")
-    private static class Canvas extends JPanel
-    {
-        public Canvas()
-        {
-            setPreferredSize( new Dimension( 500, 600 ) );
-        }
-        
-        public void paintComponent( Graphics graphics )
-        {
-            Graphics2D  gtx = (Graphics2D)graphics.create();
-            gtx.setColor( Color.blue );
-            gtx.fillRect( 0,  0, getWidth(), getHeight() );
         }
     }
 }

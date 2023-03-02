@@ -1,16 +1,29 @@
 package com.acmemail.judah.anonymous_classes.lambdas;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+/**
+ * This is a simple application
+ * that demonstrates how to replace
+ * the explicit class declaration
+ * in the previous example,
+ * {@linkplain LambdaFramePart1},
+ * with an anonymous class
+ * declared/instantiated using a lambda.
+ * 
+ * @author Jack Straub
+ * 
+ * @see LambdaFramePart1
+ * @see LambdaFramePart3
+ */
 public class LambdaFramePart2
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         SwingUtilities.invokeLater( () ->
@@ -21,21 +34,5 @@ public class LambdaFramePart2
                 frame.setVisible( true );
             }
         );
-    }
-
-    @SuppressWarnings("serial")
-    private static class Canvas extends JPanel
-    {
-        public Canvas()
-        {
-            setPreferredSize( new Dimension( 500, 600 ) );
-        }
-        
-        public void paintComponent( Graphics graphics )
-        {
-            Graphics2D  gtx = (Graphics2D)graphics.create();
-            gtx.setColor( Color.blue );
-            gtx.fillRect( 0,  0, getWidth(), getHeight() );
-        }
     }
 }

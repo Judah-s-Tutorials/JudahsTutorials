@@ -3,8 +3,27 @@ package com.acmemail.judah.anonymous_classes.lambdas;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This application is
+ * a revision of the previous example,
+ * {@linkplain MethodReferenceExample3}.
+ * In this example
+ * the for loops used
+ * to print out the sorted list
+ * are replaced with lambdas of the form:
+ * <pre>    dog -&gt; System.out.println( dog )</pre>
+ * 
+ * @author Jack Straub
+ *
+ * @see MethodReferenceExample3
+ */
 public class MethodReferenceExample4
 {    
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         List<ShowDog>    list    = getList();
@@ -18,6 +37,12 @@ public class MethodReferenceExample4
         list.forEach( dog -> System.out.println( dog ) );
     }
 
+    /**
+     * Gets a list of ShowDogs
+     * for demonstration purposes.
+     *  
+     * @return  a list of ShowDogs
+     */
     private static List<ShowDog> getList()
     {
         List<ShowDog>    list    = new ArrayList<>();

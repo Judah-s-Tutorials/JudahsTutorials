@@ -5,8 +5,35 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * This is a precursor
+ * to a simple application to demonstrate
+ * the use of an anonymous class
+ * as a <em>Comparator.</em>
+ * This example uses
+ * an instance of
+ * an explicitly declared class (<em>PreferEvenSorter</em>)
+ * for sorting a list of integers
+ * in such a way
+ * that all even numbers
+ * are ordered after all odd numbers.
+ * The goal is to replace
+ * the explicit declaration
+ * with an anonymous class.
+ * This goal is accomplished in
+ * {@linkplain SortingExampleInteger6}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see SortingExampleInteger6
+ */
 public class SortingExampleInteger5
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         List<Integer>   randomList  = new ArrayList<>();
