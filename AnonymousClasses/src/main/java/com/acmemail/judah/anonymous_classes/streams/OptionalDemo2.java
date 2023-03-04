@@ -1,16 +1,24 @@
-package com.acmemail.judah.anonymous_classes.functional_interfaces;
+package com.acmemail.judah.anonymous_classes.streams;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.acmemail.judah.anonymous_classes.lambdas.ShowDog;
 
 /**
- * Simple application to demonstrate the use of the
- * Predicate interface <em>or</em>
+ * This application is a revision
+ * of the previous application,
+ * {@linkplain OptionalDemo1}.
+ * The for loop
+ * in the <em>getShowDog</em> method
+ * of the previous application
+ * is replaced with
+ * a streaming operation.
+ * 
  * @author Jack Straub
  */
-public class PredicateStaticMethodDemo1
+public class OptionalDemo2
 {
     private static final List<ShowDog>  showDogs    = getList();
     
@@ -29,28 +37,32 @@ public class PredicateStaticMethodDemo1
         
         // Get the first ShowDog that is less than 6,
         // or which is a Collie.
-        ShowDog showDog = getShowDog( lessThan.or( breedEquals ) );
-        System.out.println( showDog );
+        Optional<ShowDog>   showDogOpt  = getShowDog( lessThan.or( breedEquals ) );
+        if ( showDogOpt.isEmpty() )
+            System.out.println( "no suitable ShowDog found" );
+        else
+            System.out.println( showDogOpt.get() );
     }
     
     /**
-     * Returns the first show dog in the list
+     * Returns an Optional 
+     * containing the first show dog in the list
      * that satisfies the given predicate.
-     * Returns null if no such show dog is found.
+     * Returns an empty Optional
+     * if no such show dog is found.
      * 
      * @param tester    the given predicate
      * 
      * @return
-     *      the first show dog in the list that satisfies the given predicate,
-     *      or null if none found
+     *      Optional containing the first show dog in the list 
+     *      that satisfies the given predicate,
+     *      or an empty Optional if none found
      */
-    private static ShowDog  getShowDog( Predicate<ShowDog> tester )
+    private static Optional<ShowDog> getShowDog( Predicate<ShowDog> tester )
     {
-        for ( ShowDog showDog : showDogs )
-            if ( tester.test( showDog ) )
-                return showDog;
+        Optional<ShowDog>   firstShowDog    = showDogs.stream().findFirst();
         
-        return null;
+        return firstShowDog;
     }
     
     /**
@@ -70,4 +82,5 @@ public class PredicateStaticMethodDemo1
         
         return list;
     }
+
 }

@@ -1,20 +1,16 @@
-package com.acmemail.judah.anonymous_classes.streams;
+package com.acmemail.judah.anonymous_classes.functional_interfaces;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Predicate;
 
 import com.acmemail.judah.anonymous_classes.lambdas.ShowDog;
 
 /**
  * Simple application to demonstrate the use of the
- * Optional class.
- * 
+ * Predicate interface <em>or</em>
  * @author Jack Straub
- * 
- * @see OptionalDemo2
  */
-public class OptionalDemo1
+public class PredicateDefaultMethodDemo1
 {
     private static final List<ShowDog>  showDogs    = getList();
     
@@ -33,38 +29,28 @@ public class OptionalDemo1
         
         // Get the first ShowDog that is less than 6,
         // or which is a Collie.
-        Optional<ShowDog>   showDogOpt  = getShowDog( lessThan.or( breedEquals ) );
-        if ( showDogOpt.isEmpty() )
-            System.out.println( "no suitable ShowDog found" );
-        else
-            System.out.println( showDogOpt.get() );
+        ShowDog showDog = getShowDog( lessThan.or( breedEquals ) );
+        System.out.println( showDog );
     }
     
     /**
-     * Returns an Optional 
-     * containing the first show dog in the list
+     * Returns the first show dog in the list
      * that satisfies the given predicate.
-     * Returns an empty Optional
-     * if no such show dog is found.
+     * Returns null if no such show dog is found.
      * 
      * @param tester    the given predicate
      * 
      * @return
-     *      Optional containing the first show dog in the list 
-     *      that satisfies the given predicate,
-     *      or an empty Optional if none found
+     *      the first show dog in the list that satisfies the given predicate,
+     *      or null if none found
      */
-    private static Optional<ShowDog> getShowDog( Predicate<ShowDog> tester )
+    private static ShowDog  getShowDog( Predicate<ShowDog> tester )
     {
-        Optional<ShowDog>   firstShowDog    = Optional.empty();
         for ( ShowDog showDog : showDogs )
             if ( tester.test( showDog ) )
-            {
-                firstShowDog = Optional.of( showDog );
-                break;
-            }
+                return showDog;
         
-        return firstShowDog;
+        return null;
     }
     
     /**
@@ -84,5 +70,4 @@ public class OptionalDemo1
         
         return list;
     }
-
 }

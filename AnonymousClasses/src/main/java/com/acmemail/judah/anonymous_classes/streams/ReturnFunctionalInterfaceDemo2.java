@@ -10,15 +10,17 @@ import com.acmemail.judah.anonymous_classes.lambdas.ShowDog;
  * 
  * @author Jack Straub
  */
-/**
- * @author Jack Straub
- *
- */
 public class ReturnFunctionalInterfaceDemo2
 {
+    /** List of ShowDogs for demonstration purposes.  */
     private static final List<ShowDog>  showDogs    = 
         ShowDogGenerator.getShowDogs( 10 );
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         showDogs.forEach( System.out::println );

@@ -3,6 +3,15 @@ import java.util.stream.IntStream;
 
 import com.acmemail.judah.anonymous_classes.functional_interfaces.PrimeSupplier;
 
+
+/**
+ * This application demonstrates
+ * the use of the <em>Supplier</em> functional interface
+ * in conjunction with 
+ * the <em>generate</em> stream operation.
+ * 
+ * @author Jack Straub
+ */
 public class StreamFromIntSupplierDemo
 {
     /**

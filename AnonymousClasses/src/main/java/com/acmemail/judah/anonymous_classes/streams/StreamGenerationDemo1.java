@@ -4,7 +4,7 @@ import java.util.stream.IntStream;
 
 /**
  * This is a simple application demonstrating 
- * how to generate a <em>Stream<Integer></em>
+ * how to generate a <em>Stream&lt;Integer&gt;</em>
  * using the <em>IntStream.range</em> method.
  * 
  * @author Jack Straub

@@ -1,0 +1,8 @@
+Note:
+<span style="margin-left: 2em;padding: .5em 1em .5em 1em;background-color: #EEEEEE;border: 2px solid black;">
+selector { 
+background-color: #EEEEEE;
+border: 2px solid black;
+padding-left: .5em;
+}
+
