@@ -1,0 +1,14 @@
+10,000,000 values
+100 iterations
+
+Averaging
+         sequen  parall 
+Minimum:     34       5
+Maximum:     41      10
+Average:  36.08    6.57
+
+Sorting
+         sequen  parall 
+Minimum:    623     198
+Maximum:   1201     301
+Average: 684.34  226.28
