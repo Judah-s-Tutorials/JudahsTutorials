@@ -154,11 +154,11 @@ public class StreamTimer
      * of double values in an array,
      * and recording
      * the minimum, maximum and average time.
-     * A sequential (non-parallel) traversal is employed.
+     * A serial (non-parallel) traversal is employed.
      * 
      * @return  the computed average
      */
-    public double sequentialAverage()
+    public double serialAverage()
     {
         init( false );
         double  totalTime       = 0;
@@ -187,9 +187,9 @@ public class StreamTimer
      * double values in an array,
      * and recording
      * the minimum, maximum and average time.
-     * A sequential (non-parallel) traversal is employed.
+     * A serial (non-parallel) traversal is employed.
      */
-    public void sequentialSort()
+    public void serialSort()
     {
         init( false );
         double  totalTime       = 0;

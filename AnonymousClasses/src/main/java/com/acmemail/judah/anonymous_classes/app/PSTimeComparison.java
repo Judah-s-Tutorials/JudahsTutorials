@@ -4,7 +4,7 @@ package com.acmemail.judah.anonymous_classes.app;
  * This application executes tests
  * comparing the time required
  * to execute a parallel algorithm
- * and a sequential algorithm.
+ * and a serial algorithm.
  * 
  * @author Jack Straub
  * 
@@ -19,18 +19,18 @@ public class PSTimeComparison
      */
     public static void main(String[] args)
     {
-        StreamTimer seqTimer    = new StreamTimer();
+        StreamTimer serTimer    = new StreamTimer();
         StreamTimer parTimer    = new StreamTimer();
         
-        seqTimer.sequentialAverage();
+        serTimer.serialAverage();
         parTimer.parallelAverage();
         String  report          = 
-            seqTimer.toReportString( "Averaging", parTimer );
+            serTimer.toReportString( "Averaging", parTimer );
         System.out.println( report );
         
-        seqTimer.sequentialSort();
+        serTimer.serialSort();
         parTimer.parallelSort();
-        report = seqTimer.toReportString( "Sorting", parTimer );
+        report = serTimer.toReportString( "Sorting", parTimer );
         System.out.print( report );
     }
 
