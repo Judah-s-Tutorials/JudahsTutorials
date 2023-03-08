@@ -33,5 +33,4 @@ public class PSTimeComparison
         report = serTimer.toReportString( "Sorting", parTimer );
         System.out.print( report );
     }
-
 }
