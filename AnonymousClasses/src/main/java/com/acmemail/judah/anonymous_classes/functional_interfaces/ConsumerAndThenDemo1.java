@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 /**
  * This is a simple demonstration of how 
- * the Consumer <em>adThen</em> default method
+ * the Consumer <em>andThen</em> default method
  * can be used to chain several Consumer.accept() invocations
  * as a single lambda.
  * 

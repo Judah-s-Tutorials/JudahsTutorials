@@ -4,7 +4,7 @@ import java.util.stream.IntStream;
 
 /**
  * Application to demonstrate 
- * the <em>Stream.forEach(Consumer<T>)</em> method.
+ * the <em>Stream.forEach(Consumer&lt;T&gt;)</em> method.
  * 
  * @author Jack Straub
  */

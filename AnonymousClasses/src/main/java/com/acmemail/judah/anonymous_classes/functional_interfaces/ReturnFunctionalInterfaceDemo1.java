@@ -53,7 +53,7 @@ public class ReturnFunctionalInterfaceDemo1
      * Returns a Predicate asserting
      * that a ShowDog belongs to a given breed
      * 
-     * @param age   the given age
+     * @param breed the given breed
      * 
      * @return  
      *      a Predicate asserting

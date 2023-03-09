@@ -6,7 +6,7 @@ import java.util.stream.DoubleStream;
 
 /**
  * Simple application to demonstrate 
- * the use of the <em>Stream.reduce(BinaryOperator<T> accumulator)</em>
+ * the use of the <em>Stream.reduce(BinaryOperator&lt;T&gt; accumulator)</em>
  * method.
  * 
  * @author Jack Straub

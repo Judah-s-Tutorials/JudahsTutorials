@@ -10,7 +10,7 @@ import com.acmemail.judah.anonymous_classes.lambdas.ShowDog;
  * of the default <em>or</em> method
  * of the <em>Predicate</em> interface.
  * It's the same as
- * {@linkplain PredicateDefaultMethodDemo1}
+ * {@linkplain com.acmemail.judah.anonymous_classes.functional_interfaces.PredicateDefaultMethodDemo1}
  * except that the for loop
  * in the previous demo
  * is replaced with a streaming operation.

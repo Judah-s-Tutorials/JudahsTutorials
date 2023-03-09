@@ -48,8 +48,19 @@ public class SortingExampleInteger5
             System.out.println( num );
     }
     
+    /**
+     * This class
+     * is an implementation of Comparator<Integer>
+     * that sorts a list of integers
+     * so that 
+     * all even numbers
+     * come later than all odd numbers.
+     * 
+     * @author Jack Straub
+     */
     private static class PreferEvenSorter implements Comparator<Integer>
     {
+        @Override
         public int compare( Integer num1, Integer num2 )
         {
             boolean isEven1 = num1 % 2 == 0;

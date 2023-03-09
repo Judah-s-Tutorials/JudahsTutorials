@@ -44,6 +44,9 @@ public class PropertiesFileParser
      * and initiate file processing.
      * Methods called from here may safely throw IOException.
      * Files are closed after processing is complete.
+     * The generated Properties object is returned.
+     * 
+     * @return the generated Properties object
      */
     public Properties getProperties()
     {
@@ -71,7 +74,7 @@ public class PropertiesFileParser
      * Discards all blank lines and comments,
      * and ignores any other line
      * that is not expressed as <em>name=value</em>.
-     * Whitespace between <em>name</em> and </em> value
+     * Whitespace between <em>name</em> and <em>value</em>
      * is ignored
      * (i.e., the name/value pair
      * may be expressed as <em>name = value</em>).

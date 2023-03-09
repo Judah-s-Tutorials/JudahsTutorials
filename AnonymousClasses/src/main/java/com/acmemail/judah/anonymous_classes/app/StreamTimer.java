@@ -55,17 +55,17 @@ public class StreamTimer
     private static final String newl        = System.lineSeparator();
     /** 
      * Label for the minimum result in the report produced by
-     * {@inkplain #toReportString(StreamTimer)}.
+     * {@linkplain #toReportString(String, StreamTimer)}.
      */
     private static final String minLabel    = "Minimum: ";
     /** 
      * Label for the maximum result in the report produced by
-     * {@inkplain #toReportString(StreamTimer)}.
+     * {@linkplain #toReportString(String, StreamTimer)}.
      */
     private static final String maxLabel    = "Maximum: ";
     /** 
      * Label for the maximum result in the report produced by
-     * {@inkplain #toReportString(StreamTimer)}.
+     * {@linkplain #toReportString(String, StreamTimer)}.
      */
     private static final String avgLabel    = "Average: ";
     
@@ -274,6 +274,7 @@ public class StreamTimer
      * in another StreamTimer.
      * 
      * @param other the other StreamTimer
+     * @param lead  the lead sentence to start the report
      * 
      * @return  
      *      a report comparing the timings
@@ -337,7 +338,7 @@ public class StreamTimer
      * the minimum, maximum and average values,
      * in that order,
      * in the report produced by
-     * {@linkplain #toReportString(StreamTimer)};
+     * {@linkplain #toReportString(String, StreamTimer)};
      * Each value 
      * is formatted in such a way
      * that each String will be
@@ -377,7 +378,7 @@ public class StreamTimer
     /** 
      * Merge two streams of Strings,
      * returning a single String result.
-     * The user provides a BinaryOperator<String>
+     * The user provides a BinaryOperator&lt;String&gt;
      * which determines
      * how corresponding elements
      * of the two streams are to be combined.
@@ -435,9 +436,9 @@ public class StreamTimer
         int             col2Start   = col1Start + (int)(itemLen / 2.0 + .5);
         StringBuilder   bldr        = new StringBuilder();
         bldr.append( spaces.substring( 0, col1Start ) );
-        bldr.append( isParallel ? "parall " : "sequen  " );
+        bldr.append( isParallel ? "parall " : "serial  " );
         bldr.append( spaces.substring( 0, col2Start - bldr.length() + 1 ) );
-        bldr.append( other.isParallel ? "parall " : "sequen  " );
+        bldr.append( other.isParallel ? "parall " : "serial  " );
         
         return bldr.toString();
     }
