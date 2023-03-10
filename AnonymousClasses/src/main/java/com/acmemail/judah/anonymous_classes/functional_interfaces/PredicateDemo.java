@@ -5,14 +5,34 @@ import java.util.List;
 import java.util.Random;
 import java.util.function.IntPredicate;
 
+/**
+ * Simple application to demonstrate
+ * the use of the <em>Predicate</em> functional interface.
+ * 
+ * @author Jack Straub
+ */
 public class PredicateDemo
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         List<Integer>   scores  = getScores( 25 );
         score( scores, i -> i >= 65 );
     }
     
+    /**
+     * Prints "pass" or "fail"
+     * for each score in a list.
+     * Pass/fail is determined by
+     * a given Predicate.
+     * 
+     * @param scores    the scores to examine
+     * @param pred      the given predicate
+     */
     private static void score( List<Integer> scores, IntPredicate pred )
     {
         for ( int score : scores )
@@ -22,6 +42,14 @@ public class PredicateDemo
         }
     }
 
+    /**
+     * Generates a list of random scores
+     * between 60 and 100.
+     * 
+     * @param numScores the number of scores to generate
+     * 
+     * @return  the generated list of scores
+     */
     private static List<Integer> getScores( int numScores )
     {
         List<Integer>   scores  = new ArrayList<>();

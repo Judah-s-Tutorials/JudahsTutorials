@@ -7,7 +7,8 @@ import com.acmemail.judah.anonymous_classes.lambdas.ShowDog;
 
 /**
  * Simple application to demonstrate the use of the
- * Predicate interface <em>or</em>
+ * Predicate interface <em>not</em> static method.
+ * 
  * @author Jack Straub
  */
 public class PredicateStaticMethodDemo2
@@ -24,8 +25,7 @@ public class PredicateStaticMethodDemo2
         showDogs.forEach( System.out::println );
         System.out.println( "****************" );
         
-        // Get the first ShowDog that is less than 6,
-        // or which is a Collie.
+        // Get the first ShowDog that is not a Collie
         ShowDog showDog = getShowDog( 
             Predicate.not( d -> d.getBreed().equals( "Collie" ) )
         );

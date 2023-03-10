@@ -3,7 +3,22 @@ package com.acmemail.judah.anonymous_classes.streams;
 import java.util.Arrays;
 import java.util.Random;
 
-public class SequentialStreamDemo
+/**
+ * This is a simple application
+ * to demonstrate how to generate
+ * a serial stream.
+ * Compare this application to
+ * {@linkplain ParallelStreamDemo}.
+ * It repeatedly computes the average
+ * of an array of double values,
+ * and documents the 
+ * minimum, maximum and average time of execution.
+ * 
+ * @author Jack Straub
+ * 
+ * @see ParallelStreamDemo
+ */
+public class SerialStreamDemo
 {
     public static void main(String[] args)
     {

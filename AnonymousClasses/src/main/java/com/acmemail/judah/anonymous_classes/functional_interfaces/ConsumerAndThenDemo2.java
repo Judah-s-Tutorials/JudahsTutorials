@@ -81,14 +81,14 @@ public class ConsumerAndThenDemo2
     }
     
     /**
-     * Gets a Consumer<String> functional interface
+     * Gets a Consumer&lt;String&gt; functional interface
      * encapsulating all current recipients.
      * Each destination in the online list is included.
      * If indicated,
      * each message is sent to 
      * the system log.
      * 
-     * @return  a Consumer<String> functional interface
+     * @return  a Consumer&gt;String&lt; functional interface
      *          encapsulating all current recipients
      */
     private static Consumer<String> getSendToRecipients()

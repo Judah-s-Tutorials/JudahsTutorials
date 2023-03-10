@@ -50,7 +50,7 @@ public class SortingExampleInteger5
     
     /**
      * This class
-     * is an implementation of Comparator<Integer>
+     * is an implementation of Comparator&lt;Integer&gt;
      * that sorts a list of integers
      * so that 
      * all even numbers

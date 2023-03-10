@@ -2,6 +2,14 @@ package com.acmemail.judah.anonymous_classes.functional_interfaces;
 
 import java.util.function.IntSupplier;
 
+/**
+ * Sample implementation of the
+ * <em>IntSupplier</em> functional interface.
+ * Generates an effectively infinite
+ * sequence of prime numbers.
+ * 
+ * @author Jack Straub
+ */
 public class PrimeSupplier implements IntSupplier
 {
     private int next    = 2;
@@ -15,6 +23,9 @@ public class PrimeSupplier implements IntSupplier
         return result;
     }
     
+    /**
+     * Finds the next prime number in the sequence.
+     */
     private void nextPrime()
     {
         if ( next == 2 )
@@ -28,6 +39,14 @@ public class PrimeSupplier implements IntSupplier
         }
     }
     
+    /**
+     * Determines whether or not
+     * a given number is prime.
+     * 
+     * @param num   the given number
+     * 
+     * @return  true if the given number is prime
+     */
     private static boolean isPrime( int num )
     {
         boolean result  = true;

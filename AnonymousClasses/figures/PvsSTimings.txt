@@ -2,13 +2,13 @@
 100 iterations
 
 Averaging
-         sequen  parall 
+         serial  parall 
 Minimum:     34       5
 Maximum:     41      10
 Average:  36.08    6.57
 
 Sorting
-         sequen  parall 
+         serial  parall 
 Minimum:    623     198
 Maximum:   1201     301
 Average: 684.34  226.28

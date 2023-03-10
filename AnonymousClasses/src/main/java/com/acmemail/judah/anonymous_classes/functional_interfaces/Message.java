@@ -1,5 +1,15 @@
 package com.acmemail.judah.anonymous_classes.functional_interfaces;
 
+/**
+ * The class is used
+ * as part of a demonstration
+ * of how to use a <em>Consumer</em> functional interface.
+ * It encapsulates a message
+ * to be sent to any of 
+ * a variety of destinations.
+ * 
+ * @author Jack Straub
+ */
 public class Message
 {
     private final String    source;
@@ -11,6 +21,16 @@ public class Message
     private String          checksumAlgo;
     private String          checksum;
     
+    /**
+     * Constructor.
+     * Establishes the source,
+     * destination and content
+     * of a message to be transmitted.
+     * 
+     * @param source        the source of the message
+     * @param destination   the destination of the message
+     * @param content       the content of the message
+     */
     public Message( String source, String destination, String content )
     {
         this.source = source;
@@ -19,7 +39,11 @@ public class Message
     }
 
     /**
-     * @return the encoding
+     * Gets the format
+     * in which this message was encoded,
+     * e.g. "utf-16".
+     * 
+     * @return the format in which this message was encoded
      */
     public String getEncoding()
     {
@@ -27,7 +51,11 @@ public class Message
     }
 
     /**
-     * @param encoding the encoding to set
+     * Sets the format
+     * in which this message was encoded,
+     * e.g. "utf-16".
+     * 
+     * @param encoding the message encoding
      */
     public void setEncoding(String encoding)
     {
@@ -35,7 +63,10 @@ public class Message
     }
 
     /**
-     * @return the dateTimeUTC
+     * Gets the time/date stamp
+     * of this message in UTC.
+     * 
+     * @return the time/date stamp of this message in UTC
      */
     public String getDateTimeUTC()
     {
@@ -43,7 +74,10 @@ public class Message
     }
 
     /**
-     * @param dateTimeUTC the dateTimeUTC to set
+     * Gets the time/date stamp
+     * of this message in UTC.
+     * 
+     * @param dateTimeUTC the date/time stamp for this message
      */
     public void setDateTimeUTC(String dateTimeUTC)
     {
@@ -51,7 +85,10 @@ public class Message
     }
 
     /**
-     * @return the assembledBy
+     * Gets the name of the facility
+     * that assembled/formatted this message.
+     * 
+     * @return name of the facility that assembled/formatted this message
      */
     public String getAssembledBy()
     {
@@ -59,7 +96,10 @@ public class Message
     }
 
     /**
-     * @param assembledBy the assembledBy to set
+     * Sets the name of the facility
+     * that assembled/formatted this message.
+     *
+     * @param assembledBy the name of the assembling facility
      */
     public void setAssembledBy(String assembledBy)
     {
@@ -67,7 +107,9 @@ public class Message
     }
 
     /**
-     * @return the source
+     * Gets the source of the message.
+     * 
+     * @return the source of this message
      */
     public String getSource()
     {
@@ -75,7 +117,9 @@ public class Message
     }
 
     /**
-     * @return the destination
+     * Gets the destination of this message.
+     * 
+     * @return the destination of this message
      */
     public String getDestination()
     {
@@ -83,7 +127,9 @@ public class Message
     }
 
     /**
-     * @return the content
+     * Gets the content of this message.
+     * 
+     * @return the content of this message
      */
     public String getContent()
     {
@@ -91,7 +137,13 @@ public class Message
     }
 
     /**
-     * @return the checksumAlgo
+     * Gets the name of the algorithm
+     * used to generate the checksum
+     * for this message. 
+     * 
+     * @return 
+     *      the name of the algorithm used to generate the checksum
+     *      for this message
      */
     public String getChecksumAlgo()
     {
@@ -99,7 +151,11 @@ public class Message
     }
 
     /**
-     * @param checksumAlgo the checksumAlgo to set
+     * Sets the name of the algorithm
+     * used to generate the checksum
+     * for this message. 
+     * 
+     * @param checksumAlgo the name of the checksum algorithm
      */
     public void setChecksumAlgo(String checksumAlgo)
     {
@@ -107,7 +163,9 @@ public class Message
     }
 
     /**
-     * @return the checksum
+     * Gets the checksum for this message.
+     * 
+     * @return the checksum for this message
      */
     public String getChecksum()
     {
@@ -115,6 +173,8 @@ public class Message
     }
 
     /**
+     * Sets the checksum for this message.
+     * 
      * @param checksum the checksum to set
      */
     public void setChecksum(String checksum)

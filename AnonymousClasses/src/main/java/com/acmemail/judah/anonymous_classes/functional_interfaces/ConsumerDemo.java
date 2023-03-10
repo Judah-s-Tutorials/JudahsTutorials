@@ -1,7 +1,23 @@
 package com.acmemail.judah.anonymous_classes.functional_interfaces;
 
+/**
+ * Simple application to exercise
+ * the {@linkplain LocalDispatchService}
+ * which demonstrates the use
+ * of the <em>Consumer&lt;T&gt;</em> functional interface.
+ * 
+ * @author Jack Straub
+ * 
+ * @see LocalDispatchService
+ *
+ */
 public class ConsumerDemo
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main( String[] args )
     {
         String  src = "accounting@judah.com";
