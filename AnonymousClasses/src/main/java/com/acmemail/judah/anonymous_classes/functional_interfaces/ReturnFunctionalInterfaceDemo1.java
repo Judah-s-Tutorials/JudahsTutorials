@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.function.Predicate;
 
 import com.acmemail.judah.anonymous_classes.lambdas.ShowDog;
-import com.acmemail.judah.anonymous_classes.streams.ShowDogGenerator;
 
 /**
  * This is a simple application to demonstrate how
