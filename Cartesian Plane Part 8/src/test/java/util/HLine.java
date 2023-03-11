@@ -170,4 +170,11 @@ public class HLine extends TLine
         
         return list;
     }
+    
+    @Override
+    public String toString()
+    {
+        String  str = toString( "HLine" );
+        return str;
+    }
 }

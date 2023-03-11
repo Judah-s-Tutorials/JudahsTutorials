@@ -109,4 +109,17 @@ public abstract class TLine
     {
         return line;
     }
+    
+    public String toString( String prefix )
+    {
+        StringBuilder   bldr    = 
+            new StringBuilder( prefix )
+            .append( ": (" )
+            .append( (int)line.getX1() ).append( "," )
+            .append( (int)line.getY1() ).append( ")->(" )
+            .append( (int)line.getX2() ).append( "," )
+            .append( (int)line.getY2() ).append( ")" )
+            .append( ",w=" ).append( width );
+        return bldr.toString();
+    }
 }

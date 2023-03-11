@@ -187,12 +187,14 @@ public class VLine extends TLine
             list.add( new Point( xco, yco2 + 1 ) );
         }
         
-//        list.add( new Point( firstXco, yco1 + 1 ) );
-//        list.add( new Point( lastXco, yco1 + 1 ) );
-//        list.add( new Point( firstXco, yco2 - 1 ) );
-//        list.add( new Point( lastXco, yco2 - 1 ) );
-        
         list.forEach( System.out::println );
         return list;
+    }
+    
+    @Override
+    public String toString()
+    {
+        String  str = toString( "VLine" );
+        return str;
     }
 }
