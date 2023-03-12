@@ -1,5 +1,10 @@
 package util;
 
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Frame;
+import java.util.function.Predicate;
+
 import javax.swing.JFrame;
 
 /**
@@ -23,6 +28,51 @@ public class TestUtils
     {
         // implementation to be provided at a later time
         return null;
+    }
+    
+    public static void disableFrames()
+    {
+        for ( Frame frame : Frame.getFrames() )
+            frame.setEnabled( false );
+    }
+    
+    public static Component
+    getComponent( Predicate<Component> pred )
+    {
+        Frame[]     frames  = Frame.getFrames();
+        Component   result  = null;
+        for ( int inx = 0 ; inx < frames.length && result == null ; ++inx )
+        {
+            Frame   frame   = frames[inx];
+            if  ( frame.isEnabled() )
+            {
+                if ( pred.test( frame ) )
+                    result = frame;
+                else if ( frame instanceof JFrame )
+                    result = getComponent( ((JFrame)frame).getContentPane(), pred );
+                else
+                    ;
+            }
+        }
+        return result;
+    }
+    
+    public static Component 
+    getComponent( Container container, Predicate<Component> pred )
+    {
+        Component   result      = pred.test( container ) ? container : null;
+        Component[] children    = container.getComponents();
+        for ( int inx = 0 ; inx < children.length && result == null ; ++inx )
+        {
+            Component   child   = children[inx];
+            if ( pred.test( child ) )
+                result = child;
+            else if ( child instanceof Container )
+                result = getComponent( (Container)child, pred );
+            else
+                ;
+        }
+        return result;
     }
     
     /**
