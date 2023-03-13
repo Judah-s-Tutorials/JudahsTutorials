@@ -184,6 +184,10 @@ public class CPConstants
     public static final String  LABEL_FONT_SIZE_PN      = "labelFontSize";
     /** Label font size default value: float. */
     public static final String  LABEL_FONT_SIZE_DV      = "8";
+    /** Draw label property name */
+    public static final String  LABEL_DRAW_PN           = "labelDraw";
+    /** Draw label default value: boolean. */
+    public static final String  LABEL_DRAW_DV           = "true";
     
     /** Location of user properties file property name */
     public static final String  USER_PROPERTIES_PN      = "userProperties";

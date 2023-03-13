@@ -506,6 +506,8 @@ public class CartesianPlane
         pmgr.asFontStyle( CPConstants.LABEL_FONT_STYLE_PN );
     private float   labelFontSize       = 
         pmgr.asFloat( CPConstants.LABEL_FONT_SIZE_PN );
+    private boolean labelDraw           = 
+        pmgr.asBoolean( CPConstants.LABEL_DRAW_PN );
     
     private List<PlotCommand>   userCommands = null;
     
@@ -620,8 +622,12 @@ public class CartesianPlane
         
         gtx.setClip( origClip );
 
-        drawHorizontalLabels();
-        drawVerticalLabels();
+        if ( labelDraw )
+        {
+            gtx.setColor( labelFontColor );
+            drawHorizontalLabels();
+            drawVerticalLabels();
+        }
         paintMargins();
         
         // begin boilerplate
@@ -783,6 +789,10 @@ public class CartesianPlane
             break;
         case CPConstants.LABEL_FONT_SIZE_PN:
             labelFontSize = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.LABEL_DRAW_PN:
+            labelDraw = CPConstants.asBoolean( newVal );
             repaint();
             break;
         }

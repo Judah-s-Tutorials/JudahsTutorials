@@ -167,9 +167,14 @@ public class LinePropertyTester
         pmgr.setProperty( CPConstants.MARGIN_LEFT_WIDTH_PN, "0" );
         pmgr.setProperty( CPConstants.MARGIN_RIGHT_WIDTH_PN, "0" );
         
-        Graphics    graphics    = image.getGraphics();
+        pmgr.setProperty( CPConstants.LABEL_DRAW_PN, "false" );
         
-        plane.paintComponent( graphics );
+//        Graphics    graphics    = image.getGraphics();
+//        
+//        plane = (CartesianPlane)TestUtils
+//            .getComponent( c -> c instanceof CartesianPlane );
+//        if ( plane != null )
+//            plane.paintComponent( graphics );
     }
     
     public BufferedImage getBufferedImage()
