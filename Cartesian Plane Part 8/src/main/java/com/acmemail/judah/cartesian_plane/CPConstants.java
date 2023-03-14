@@ -202,6 +202,12 @@ public class CPConstants
     /** Default value of color to use when plotting a point on the grid. */
     public static final String  PLOT_COLOR_DV           = "20";
     
+    /////////////////////////////////////////////////
+    //   Notification properties
+    /////////////////////////////////////////////////
+    /** Notifies the application that the graphic must be redrawn. */
+    public static final String  REDRAW_NP               = "redraw";
+    
     /**
      * Convert a String to an int and return the int.
      * 

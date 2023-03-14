@@ -20,10 +20,10 @@ public enum NotificationManager
     /** The single instance associated with this class. */
     INSTANCE;
     
-    /** List of NotificationListeners */
+    /** List of NotificationListeners. */
     private final List<NotificationListener>  notificationListeners = 
         new ArrayList<>();
-    /** map notification listeners to a specific property */
+    /** map of property to list of notification listeners. */
     private final Map<String, List<NotificationListener>> 
         notificationPropertyMap = new HashMap<>();
     

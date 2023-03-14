@@ -557,6 +557,12 @@ public class CartesianPlane
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );
         pmgr.addPropertyChangeListener( this );
+        
+        // Register listener for redraw notifications
+        NotificationManager.INSTANCE.addNotificationListener(
+            CPConstants.REDRAW_NP,
+            e -> repaint()
+        );
     }
     
     /**

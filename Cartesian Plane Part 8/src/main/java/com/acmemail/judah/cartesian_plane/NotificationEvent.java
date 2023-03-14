@@ -43,7 +43,7 @@ public class NotificationEvent
     
     /**
      * Constructor. 
-     * Initializes the source and propety fields
+     * Initializes the source and property fields
      * to the give data.
      * The data field is set to null.
      * 
