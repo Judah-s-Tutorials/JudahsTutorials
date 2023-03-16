@@ -28,5 +28,4 @@ public class PointShape implements PlotShape
         shape.setLine( xco, yco, xco, yco );
         return shape;
     }
-
 }

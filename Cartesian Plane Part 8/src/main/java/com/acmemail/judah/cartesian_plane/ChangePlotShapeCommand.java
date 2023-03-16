@@ -1,7 +1,5 @@
 package com.acmemail.judah.cartesian_plane;
 
-import java.awt.Color;
-
 /**
  * Command to describe the coordinates
  * of a point plotted in the Cartesian plane.
@@ -35,5 +33,4 @@ public class ChangePlotShapeCommand implements PlotCommand
         plane.setPlotShape( shape );
 
     }
-
 }

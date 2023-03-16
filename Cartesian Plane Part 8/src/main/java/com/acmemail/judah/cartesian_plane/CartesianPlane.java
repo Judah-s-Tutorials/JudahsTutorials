@@ -13,8 +13,8 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import javax.swing.JPanel;
 
@@ -509,14 +509,19 @@ public class CartesianPlane
     private boolean labelDraw           = 
         pmgr.asBoolean( CPConstants.LABEL_DRAW_PN );
     
-    private List<PlotCommand>   userCommands = null;
+    /** 
+     * List of user commands for drawing plot.
+     * We always want the list to be non-null,
+     * even if it's empty.
+     */
+    private List<PlotCommand>   userCommands = new ArrayList<>();
     
     /////////////////////////////////////////////////
     //   Plot properties (properties to use
     //   when plotting a point on the grid)
     /////////////////////////////////////////////////
     private Color   plotColor           =
-        pmgr.asColor( CPConstants.PLOT_COLOR_DV );
+        pmgr.asColor( CPConstants.PLOT_COLOR_PN );
     private PlotShape  plotShape       = new PointShape();
 
     ///////////////////////////////////////////////////////
@@ -531,7 +536,6 @@ public class CartesianPlane
     private Rectangle2D         gridRect;
     private Font                labelFont;
     private FontRenderContext   labelFRC;
-    private Color               currPlotColor;
     private PlotShape           currPlotShape;
     private double              xOffset;
     private double              yOffset;
@@ -613,7 +617,6 @@ public class CartesianPlane
         // for the duration of one paintComponent execute; with
         // the next paintComponent execution they will return
         // to their default values.
-        currPlotColor = plotColor;
         currPlotShape = plotShape;
         
         // Values to use in mapping Cartesian coordinates to pixel coorinates
@@ -804,13 +807,24 @@ public class CartesianPlane
         }
     }
     
+    /**
+     * Sets the list of user commands
+     * for plotting a curve.
+     * 
+     * @param commands  the list of user commands
+     */
     public void setUserCommands( List<PlotCommand> commands )
     {
-        this.userCommands  = commands;
+        // never allow this list to be null
+        if ( commands == null )
+            this.userCommands = new ArrayList<>();
+        else
+            this.userCommands  = commands;
     }
     
     private void drawUserPoints()
     {
+        gtx.setColor( plotColor );
         if ( userCommands == null )
             return;
         userCommands.forEach( c -> c.execute() );

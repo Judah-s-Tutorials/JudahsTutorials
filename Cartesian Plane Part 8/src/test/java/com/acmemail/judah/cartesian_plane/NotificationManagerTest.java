@@ -33,7 +33,7 @@ class NotificationManagerTest
         TestListener    testProp2   = new TestListener();
         
         String          prop1       = "prop1";
-        String          prop2       = prop1 + "___";
+        String          prop2       = "prop2";
         
         nMgr.addNotificationListener( testAll );
         nMgr.addNotificationListener( prop1, testProp1_1 );
@@ -65,15 +65,13 @@ class NotificationManagerTest
         assertTrue( test1.invoked );
         assertTrue( test2.invoked );
         
-        test1.invoked = false;
-        test2.invoked = false;
+        resetTesters( test1, test2 );
         nMgr.removeNotificationListener( test2 );
         nMgr.propagateNotification( property );
         assertTrue( test1.invoked );
         assertFalse( test2.invoked );
         
-        test1.invoked = false;
-        test2.invoked = false;
+        resetTesters( test1, test2 );
         nMgr.removeNotificationListener( test1 );
         nMgr.propagateNotification( property );
         assertFalse( test1.invoked );
@@ -83,30 +81,46 @@ class NotificationManagerTest
     @Test
     void testRemoveNotificationListenerNotificationListenerString()
     {
+        TestListener    testAll     = new TestListener();
         TestListener    testProp1_1 = new TestListener();
         TestListener    testProp1_2 = new TestListener();
+        TestListener    testProp2   = new TestListener();
         String          prop1       = "prop1";
+        String          prop2       = "prop2";
         
+        nMgr.addNotificationListener( testAll );
         nMgr.addNotificationListener( prop1, testProp1_1 );
         nMgr.addNotificationListener( prop1, testProp1_2 );
-        
+        nMgr.addNotificationListener( prop2, testProp2 );
+
         nMgr.propagateNotification( prop1 );
+        assertTrue( testAll.invoked );
         assertTrue( testProp1_1.invoked );
         assertTrue( testProp1_2.invoked );
-        
-        testProp1_1.invoked = false;
-        testProp1_2.invoked = false;
+        assertFalse( testProp2.invoked );
+
+        resetTesters( testAll, testProp1_1, testProp1_2, testProp2 );
         nMgr.removeNotificationListener( prop1, testProp1_2 );
         nMgr.propagateNotification( prop1 );
+        assertTrue( testAll.invoked );
         assertTrue( testProp1_1.invoked );
         assertFalse( testProp1_2.invoked );
+        assertFalse( testProp2.invoked );
         
-        testProp1_1.invoked = false;
-        testProp1_2.invoked = false;
+        resetTesters( testAll, testProp1_1, testProp1_2, testProp2 );
         nMgr.removeNotificationListener( prop1, testProp1_1 );
         nMgr.propagateNotification( prop1 );
+        assertTrue( testAll.invoked );
         assertFalse( testProp1_1.invoked );
         assertFalse( testProp1_2.invoked );
+        assertFalse( testProp2.invoked );
+        
+        resetTesters( testAll, testProp1_1, testProp1_2, testProp2 );
+        nMgr.propagateNotification( prop2 );
+        assertTrue( testAll.invoked );
+        assertFalse( testProp1_1.invoked );
+        assertFalse( testProp1_2.invoked );
+        assertTrue( testProp2.invoked );
     }
 
     @Test
@@ -170,6 +184,17 @@ class NotificationManagerTest
         assertEquals( source, listener.source );
         assertEquals( property, listener.property );
         assertEquals( data, listener.data );
+    }
+    
+    private static void resetTesters( TestListener... listeners )
+    {
+        for ( TestListener listener : listeners )
+        {
+            listener.invoked = false;
+            listener.source = null;
+            listener.property = null;
+            listener.data = null;
+        }
     }
     
     private static class TestListener implements NotificationListener

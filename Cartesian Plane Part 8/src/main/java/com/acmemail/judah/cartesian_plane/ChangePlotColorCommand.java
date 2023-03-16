@@ -32,6 +32,5 @@ public class ChangePlotColorCommand implements PlotCommand
     public void execute()
     {
         plane.setPlotColor( color );
-
     }
 }

@@ -3,10 +3,6 @@ package com.acmemail.judah.cartesian_plane;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
 
-import static com.acmemail.judah.cartesian_plane.CPConstants.TIC_MINOR_MPU_PN;
-import static com.acmemail.judah.cartesian_plane.CPConstants.TIC_MAJOR_LEN_PN;
-import static com.acmemail.judah.cartesian_plane.CPConstants.GRID_UNIT_PN;
-
 /**
  * Encapsulates a Shape to use
  * to plot points
@@ -23,7 +19,8 @@ public class DiamondShape implements PlotShape
      * PropertyManager instance.
      * Declared here for convenience.
      */
-    private final PropertyManager   pmgr    = PropertyManager.INSTANCE;
+    private static final PropertyManager    pmgr    = 
+        PropertyManager.INSTANCE;
     
     /** Shape to use to plot a point. */
     private final Path2D    shape           = new Path2D.Float();
@@ -43,7 +40,10 @@ public class DiamondShape implements PlotShape
      */
     public DiamondShape()
     {
-        this( 0, 0 );
+        this(
+            pmgr.asFloat( CPConstants.TIC_MINOR_MPU_PN ) * 2,
+            pmgr.asFloat( CPConstants.TIC_MAJOR_LEN_PN )
+        );
     }
     
     /**
@@ -57,14 +57,6 @@ public class DiamondShape implements PlotShape
     {
         float   rWidth  = rectWidth;
         float   rHeight = rectHeight;
-        if ( rWidth <= 0 )
-        {
-            float   gridUnit    = pmgr.asFloat( GRID_UNIT_PN );
-            float   ticMPU      = pmgr.asFloat( TIC_MINOR_MPU_PN );
-            rWidth = 2f * gridUnit / ticMPU;
-        }
-        if ( rHeight <= 0 )
-            rHeight = 2f * pmgr.asFloat( TIC_MAJOR_LEN_PN );
         
         this.rectWidth = rWidth;
         this.rectHeight = rHeight;
