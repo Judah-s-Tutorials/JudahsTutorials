@@ -10,6 +10,8 @@ import java.awt.Color;
  */
 public class PlotCoordinatesCommand implements PlotCommand
 {
+    private static final String     format  = "PlotCommand: (%4.2f,%4.2f)";
+    
     private final CartesianPlane    plane;
     private final float             xco;
     private final float             yco;
@@ -27,6 +29,13 @@ public class PlotCoordinatesCommand implements PlotCommand
         this.plane = plane;
         this.xco = xco;
         this.yco = yco;
+    }
+    
+    @Override
+    public String toString()
+    {
+        String  str = String.format( format, xco, yco );
+        return str;
     }
     
     @Override

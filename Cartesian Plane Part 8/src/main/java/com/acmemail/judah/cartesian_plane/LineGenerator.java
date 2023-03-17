@@ -356,6 +356,9 @@ for ( Line2D line : vlGen )
  */
 public class LineGenerator implements Iterable<Line2D>
 {
+    /** Epsilon to determine if 2 float values are approximately equal. */
+    private static final double epsilon = .0001f;
+    
     /** Indicates that the iterable generates horizontal lines. */
     public static final int HORIZONTAL  = 1;
     /** Indicates that the iterable generates vertical lines. */
@@ -529,6 +532,58 @@ public class LineGenerator implements Iterable<Line2D>
     public float getTotalVerticalLines()
     {
         return totalVerLines;
+    }
+    
+    /**
+     * Determines whether the given line
+     * lies on the x-axis.
+     * 
+     * @param line  the given line
+     * 
+     * @return true if the given line lies on the x-axis
+     */
+    public boolean isXAxis( Line2D line )
+    {
+        double  yco1    = line.getY1();
+        double  yco2    = line.getY2();
+        boolean result  = 
+            equals( yco1, yco2 )            // is this a horizontal line?
+            && equals( yco1, centerYco );   // does it fall on the x-axis?
+        return result;
+    }
+    
+    /**
+     * Determines whether the given line
+     * lies on the y-axis.
+     * 
+     * @param line  the given line
+     * 
+     * @return true if the given line lies on the x-axis
+     */
+    public boolean isYAxis( Line2D line )
+    {
+        double  xco1    = line.getX1();
+        double  xco2    = line.getX2();
+        boolean result  = 
+            equals( xco1, xco2 )            // is this a vertical line?
+            && equals( xco1, centerXco );   // does it fall on the x-axis?
+        return result;
+    }
+    
+    /**
+     * Uses the epsilon test to determine whether
+     * two float values are approximately equal.
+     * 
+     * @param val1  the first value to compare
+     * @param val2  the second value to compare
+     * 
+     * @return true if the two given values are approximately equal
+     */
+    private boolean equals( double val1, double val2 )
+    {
+        double  diff    = Math.abs( val1 - val2 );
+        boolean result  = diff < epsilon;
+        return result;
     }
 
     /**

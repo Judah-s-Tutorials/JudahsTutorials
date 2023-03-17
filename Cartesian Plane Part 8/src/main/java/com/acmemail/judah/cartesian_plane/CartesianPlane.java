@@ -15,6 +15,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.swing.JPanel;
 
@@ -514,7 +518,8 @@ public class CartesianPlane
      * We always want the list to be non-null,
      * even if it's empty.
      */
-    private List<PlotCommand>   userCommands = new ArrayList<>();
+    private List<PlotCommand>       userCommands    = new ArrayList<>();
+    private Supplier<PlotCommand>   commandSupplier = null;
     
     /////////////////////////////////////////////////
     //   Plot properties (properties to use
@@ -619,7 +624,7 @@ public class CartesianPlane
         // to their default values.
         currPlotShape = plotShape;
         
-        // Values to use in mapping Cartesian coordinates to pixel coorinates
+        // Values to use in mapping Cartesian coordinates to pixel coordinates
         xOffset = gridRect.getX() + (gridRect.getWidth() - 1) / 2;
         yOffset = gridRect.getY() + (gridRect.getHeight() - 1) / 2;
 
@@ -822,12 +827,26 @@ public class CartesianPlane
             this.userCommands  = commands;
     }
     
+    /**
+     * Sets the supplier
+     * that will deliver commands
+     * for plotting a curve.
+     * 
+     * @param supplier  the command supplier
+     */
+    public void setSupplier( Supplier<PlotCommand> supplier )
+    {
+        this.commandSupplier  = supplier;
+    }
+    
     private void drawUserPoints()
     {
         gtx.setColor( plotColor );
-        if ( userCommands == null )
-            return;
         userCommands.forEach( c -> c.execute() );
+        if ( commandSupplier != null )
+            Stream.generate( commandSupplier )
+                .takeWhile( c -> c != null )
+                .forEach( c -> c.execute() );
     }
     
     private void drawAxes()
@@ -841,8 +860,7 @@ public class CartesianPlane
         float   gridUnit    = (float)gridRect.getWidth();
         LineGenerator   lineGen = 
             new LineGenerator( gridRect, gridUnit, 1 );
-        for ( Line2D line : lineGen )
-            gtx.draw( line );
+        lineGen.forEach( gtx::draw );
     }
     
     private void drawGridLines()
@@ -853,8 +871,7 @@ public class CartesianPlane
                 new LineGenerator( gridRect, gridUnit, gridLineLPU );
             gtx.setStroke( new BasicStroke( gridLineWeight ) );
             gtx.setColor( gridLineColor );
-            for ( Line2D line : lineGen )
-                gtx.draw( line );
+            lineGen.forEach( gtx::draw );
         }
     }
     
@@ -872,9 +889,11 @@ public class CartesianPlane
                 );
             gtx.setStroke( new BasicStroke( ticMinorWeight ) );
             gtx.setColor( ticMinorColor );
-            lineGen.forEach( gtx::draw );
-//            for ( Line2D line : lineGen )
-//                gtx.draw( line );
+          StreamSupport
+              .stream( lineGen.spliterator(), false )
+              .filter( Predicate.not(lineGen::isXAxis) )
+              .filter( Predicate.not(lineGen::isYAxis) )
+              .forEach( gtx:: draw );
         }
     }
     
@@ -892,8 +911,12 @@ public class CartesianPlane
                 );
             gtx.setStroke( new BasicStroke( ticMajorWeight ) );
             gtx.setColor( ticMajorColor );
-            for ( Line2D line : lineGen )
-                gtx.draw( line );
+//            lineGen.forEach( gtx::draw );
+            StreamSupport
+                .stream( lineGen.spliterator(), false )
+                .filter( Predicate.not(lineGen::isXAxis) )
+                .filter( Predicate.not(lineGen::isYAxis) )
+                .forEach( gtx:: draw );
         }
     }
     
