@@ -14,6 +14,7 @@ import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -519,7 +520,8 @@ public class CartesianPlane
      * even if it's empty.
      */
     private List<PlotCommand>       userCommands    = new ArrayList<>();
-    private Supplier<PlotCommand>   commandSupplier = null;
+    private Iterator<PlotCommand>   commandIterator = null;
+    private Supplier<Stream<PlotCommand>>   streamSupplier  = null;
     
     /////////////////////////////////////////////////
     //   Plot properties (properties to use
@@ -827,26 +829,32 @@ public class CartesianPlane
             this.userCommands  = commands;
     }
     
+    public void setStreamSupplier( Supplier<Stream<PlotCommand>> supplier )
+    {
+        this.streamSupplier = supplier;
+    }
+    
     /**
      * Sets the supplier
      * that will deliver commands
      * for plotting a curve.
      * 
-     * @param supplier  the command supplier
+     * @param iterator  the command supplier
      */
-    public void setSupplier( Supplier<PlotCommand> supplier )
+    public void setIterator( Iterator<PlotCommand> iterator )
     {
-        this.commandSupplier  = supplier;
+        this.commandIterator  = iterator;
     }
     
     private void drawUserPoints()
     {
         gtx.setColor( plotColor );
         userCommands.forEach( c -> c.execute() );
-        if ( commandSupplier != null )
-            Stream.generate( commandSupplier )
-                .takeWhile( c -> c != null )
-                .forEach( c -> c.execute() );
+        if ( commandIterator != null )
+            commandIterator
+                .forEachRemaining( c -> c.execute() );
+        if ( streamSupplier != null )
+            streamSupplier.get().forEach( c -> c.execute() );
     }
     
     private void drawAxes()

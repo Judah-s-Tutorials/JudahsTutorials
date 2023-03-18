@@ -9,7 +9,7 @@ import java.awt.Color;
  * @author Jack Straub
  *
  */
-public class ChangePlotColorCommand implements PlotCommand
+public class PlotColorCommand implements PlotCommand
 {
     private final CartesianPlane    plane;
     private final Color             color;
@@ -22,7 +22,7 @@ public class ChangePlotColorCommand implements PlotCommand
      * @param plane the plane in which the plot color is to be set
      * @param color the color to set the plot color to.
      */
-    public ChangePlotColorCommand( CartesianPlane plane, Color color )
+    public PlotColorCommand( CartesianPlane plane, Color color )
     {
         this.plane = plane;
         this.color = color;

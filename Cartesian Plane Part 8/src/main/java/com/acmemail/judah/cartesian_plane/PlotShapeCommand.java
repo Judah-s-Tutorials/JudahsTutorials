@@ -7,7 +7,7 @@ package com.acmemail.judah.cartesian_plane;
  * @author Jack Straub
  *
  */
-public class ChangePlotShapeCommand implements PlotCommand
+public class PlotShapeCommand implements PlotCommand
 {
     private final CartesianPlane    plane;
     private final PlotShape         shape;
@@ -21,7 +21,7 @@ public class ChangePlotShapeCommand implements PlotCommand
      * @param plane the Cartesian plane in which the shape is to be used
      * @param shape the shape to use
      */
-    public ChangePlotShapeCommand( CartesianPlane plane, PlotShape shape )
+    public PlotShapeCommand( CartesianPlane plane, PlotShape shape )
     {
         this.plane = plane;
         this.shape = shape;

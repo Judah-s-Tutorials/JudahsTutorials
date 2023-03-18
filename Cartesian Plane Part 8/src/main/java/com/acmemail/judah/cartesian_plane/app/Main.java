@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
-import com.acmemail.judah.cartesian_plane.ChangePlotColorCommand;
-import com.acmemail.judah.cartesian_plane.ChangePlotShapeCommand;
+import com.acmemail.judah.cartesian_plane.PlotColorCommand;
+import com.acmemail.judah.cartesian_plane.PlotShapeCommand;
 import com.acmemail.judah.cartesian_plane.DiamondShape;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
 import com.acmemail.judah.cartesian_plane.PlotCoordinatesCommand;
@@ -49,12 +49,12 @@ public class Main
             {
                 currSign = thisSign; 
                 currColor = thisSign < 0 ? negColor : posColor;
-                commands.add( new ChangePlotColorCommand( canvas, currColor ) );
+                commands.add( new PlotColorCommand( canvas, currColor ) );
             }
             if ( isZero( yco ) )
             {
-                commands.add( new ChangePlotShapeCommand( canvas, diaShape ) );
-                commands.add( new ChangePlotColorCommand( canvas, shapeColor) );
+                commands.add( new PlotShapeCommand( canvas, diaShape ) );
+                commands.add( new PlotColorCommand( canvas, shapeColor) );
                 isDiamond = true;
             }
             PlotCoordinatesCommand  coords  = 
@@ -62,8 +62,8 @@ public class Main
             commands.add( coords );
             if ( isDiamond )
             {
-                commands.add( new ChangePlotShapeCommand( canvas, pointShape ) );
-                commands.add( new ChangePlotColorCommand( canvas, currColor) );
+                commands.add( new PlotShapeCommand( canvas, pointShape ) );
+                commands.add( new PlotColorCommand( canvas, currColor) );
             }
         }
         canvas.setUserCommands( commands );

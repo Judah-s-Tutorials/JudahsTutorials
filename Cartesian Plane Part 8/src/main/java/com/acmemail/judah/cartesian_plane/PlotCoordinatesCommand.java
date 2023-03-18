@@ -1,7 +1,5 @@
 package com.acmemail.judah.cartesian_plane;
 
-import java.awt.Color;
-
 /**
  * Command to plot a point in the Cartesian plane.
  * 
