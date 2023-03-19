@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
+import com.acmemail.judah.cartesian_plane.CircleShape;
 import com.acmemail.judah.cartesian_plane.PlotColorCommand;
-import com.acmemail.judah.cartesian_plane.PlotShapeCommand;
-import com.acmemail.judah.cartesian_plane.DiamondShape;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
 import com.acmemail.judah.cartesian_plane.PlotCoordinatesCommand;
-import com.acmemail.judah.cartesian_plane.PointShape;
+import com.acmemail.judah.cartesian_plane.PlotShape;
+import com.acmemail.judah.cartesian_plane.PlotShapeCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
 /**
@@ -19,7 +19,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  *
  * @author Jack Straub
  */
-public class Main
+public class ListCoordinatesPlot
 {
     /**
      * Application entry point.
@@ -32,14 +32,10 @@ public class Main
         Root            root    = new Root( canvas );
         root.start();
         
-        DiamondShape        diaShape    = new DiamondShape();
-        PointShape          pointShape  = new PointShape();
-        Color               shapeColor  = Color.GREEN;
         Color               posColor    = Color.RED;
         Color               negColor    = Color.BLUE;
         Color               currColor   = posColor;
         double              currSign    = 0;
-        boolean             isDiamond   = false;
         List<PlotCommand>   commands  = new ArrayList<>();
         for ( float xco = -10 ; xco <= 10 ; xco += .005f )
         {
@@ -51,29 +47,32 @@ public class Main
                 currColor = thisSign < 0 ? negColor : posColor;
                 commands.add( new PlotColorCommand( canvas, currColor ) );
             }
-            if ( isZero( yco ) )
-            {
-                commands.add( new PlotShapeCommand( canvas, diaShape ) );
-                commands.add( new PlotColorCommand( canvas, shapeColor) );
-                isDiamond = true;
-            }
             PlotCoordinatesCommand  coords  = 
                 new PlotCoordinatesCommand( canvas, xco, yco );
             commands.add( coords );
-            if ( isDiamond )
-            {
-                commands.add( new PlotShapeCommand( canvas, pointShape ) );
-                commands.add( new PlotColorCommand( canvas, currColor) );
-            }
         }
-        canvas.setUserCommands( commands );
-        canvas.repaint();
+        float[] roots   = getRoots( 1, 0, -3 );
+        if ( roots !=  null )
+        {
+            PlotShape   circle  = new CircleShape( 7 );
+            commands.add( new PlotColorCommand( canvas, Color.GREEN ) );
+            commands.add( new PlotShapeCommand( canvas, circle ) );
+            commands.add( new PlotCoordinatesCommand( canvas, roots[0], 0 ) );
+            commands.add( new PlotCoordinatesCommand( canvas, roots[1], 0 ) );
+        }
+        canvas.setStreamSupplier( () -> commands.stream() );
     }
     
-    private static boolean isZero( float num )
+    private static float[] getRoots( double coefA, double coefB, double coefC )
     {
-        float   diff    = Math.abs( num );
-        boolean result  = diff < .008;
-        return result;
+        float[] roots   = null;
+        double  discr   = coefB * coefB - 4 * coefA * coefC;
+        if ( discr>= 0 )
+        {
+            roots = new float[2];
+            roots[0] = (float)((-coefB - Math.sqrt( discr )) / (2 * coefA));
+            roots[1] = (float)((-coefB + Math.sqrt( discr )) / (2 * coefA));
+        }
+        return roots;
     }
 }

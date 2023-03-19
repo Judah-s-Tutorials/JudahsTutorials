@@ -15,7 +15,7 @@ import com.acmemail.judah.cartesian_plane.PlotCoordinatesCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
-public class StreamSupplierDemo1
+public class StreamSupplierDemo3
 {
     private static final CartesianPlane plane   = new CartesianPlane();
     

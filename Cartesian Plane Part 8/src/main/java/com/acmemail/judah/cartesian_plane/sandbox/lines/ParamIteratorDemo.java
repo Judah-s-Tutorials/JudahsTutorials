@@ -3,7 +3,10 @@ package com.acmemail.judah.cartesian_plane.sandbox.lines;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.DoubleFunction;
+import java.util.stream.StreamSupport;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
@@ -29,8 +32,14 @@ public class ParamIteratorDemo
         Root    root    = new Root( plane );
         root.start();
         
-        ParamCircle circle  = new ParamCircle( 3 );
-        plane.setIterator( new CommandIterator( circle, 0, 2 * Math.PI, .05 ) );
+        ParamCircle                 circle      = new ParamCircle( 3 );
+        Iterator<PlotCommand>       iter        = 
+            new CommandIterator( circle, 0, 2 * Math.PI, .05 );
+        Spliterator<PlotCommand>    splitter    = 
+            Spliterators.spliteratorUnknownSize( iter, 0 );
+        plane.setStreamSupplier( 
+            () -> StreamSupport.stream( splitter, false )
+        );
     }
 
     private static class CommandIterator implements Iterator<PlotCommand>

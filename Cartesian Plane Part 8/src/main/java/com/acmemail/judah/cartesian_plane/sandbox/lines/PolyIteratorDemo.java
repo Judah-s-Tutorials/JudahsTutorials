@@ -3,18 +3,18 @@ package com.acmemail.judah.cartesian_plane.sandbox.lines;
 import java.awt.Color;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.function.DoubleUnaryOperator;
+import java.util.stream.StreamSupport;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
-import com.acmemail.judah.cartesian_plane.CircleShape;
 import com.acmemail.judah.cartesian_plane.PlotColorCommand;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
 import com.acmemail.judah.cartesian_plane.PlotCoordinatesCommand;
-import com.acmemail.judah.cartesian_plane.PlotShapeCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
-import com.acmemail.judah.cartesian_plane.sandbox.lines.Polynomial;
 
 public class PolyIteratorDemo
 {
@@ -33,28 +33,31 @@ public class PolyIteratorDemo
         Root    root    = new Root( plane );
         root.start();
         
-        Polynomial  poly    = new Polynomial( -2, 4, 0, -1 );
-        plane.setIterator( new CommandIterator( poly, -2, 3.001f, .005f ) );
+        Polynomial                  poly        = 
+            new Polynomial( -2, 4, 0, -1 );
+        Iterator<PlotCommand>       iter    =
+            new CommandIterator( poly, -2, 3.001f, .005f );
+        Spliterator<PlotCommand>    splitter    =
+            Spliterators.spliteratorUnknownSize( iter, 0 );
+        plane.setStreamSupplier( 
+            () -> StreamSupport.stream( splitter, false )
+        );
     }
 
     private static class CommandIterator implements Iterator<PlotCommand>
     {
-        private final PlotCommand   shapeCmd        = 
-            new PlotShapeCommand( plane, new CircleShape( 3 ) );
         private final PlotCommand   negColorCmd     = 
             new PlotColorCommand( plane, Color.RED );
         private final PlotCommand   posColorCmd     = 
             new PlotColorCommand( plane, Color.BLUE );
         
         private final DoubleUnaryOperator   funk;
-        private final float                 first;
         private final float                 last;
         private final float                 incr;
         private float                       xco;
         private PlotCommand                 pendingCmd  = null;
         private int                         lastSign    = 1;
         private boolean                     setColor    = false;
-        private boolean                     setShape    = false;
         
         public CommandIterator( 
             DoubleUnaryOperator oper, 
@@ -64,7 +67,6 @@ public class PolyIteratorDemo
         )
         {
             this.funk = oper;
-            this.first = first;
             this.last = last;
             this.incr = incr;
             this.xco = first;

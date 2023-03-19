@@ -11,10 +11,13 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 /**
  * This class encapsulates logic to instantiate
  * and display a CartesianPlane.
+ * It create a list of PlotCommands,
+ * and then obtains a stream by invoking
+ * the <em>stream</em> method of the <em>List</em> interface.
  *
  * @author Jack Straub
  */
-public class Example1
+public class SimpleCoordinatesPlot
 {
     /**
      * Application entry point.
@@ -36,7 +39,6 @@ public class Example1
                 new PlotCoordinatesCommand( canvas, xco, yco );
             commands.add( coords );
         }
-        canvas.setUserCommands( commands );
-        canvas.repaint();
+        canvas.setStreamSupplier( () -> commands.stream() );
     }
 }

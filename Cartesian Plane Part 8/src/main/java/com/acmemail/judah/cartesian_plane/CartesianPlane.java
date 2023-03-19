@@ -13,9 +13,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -515,13 +512,11 @@ public class CartesianPlane
         pmgr.asBoolean( CPConstants.LABEL_DRAW_PN );
     
     /** 
-     * List of user commands for drawing plot.
-     * We always want the list to be non-null,
-     * even if it's empty.
+     * Supplier, set by the user,
+     * to obtain a stream of PlotCommands.
      */
-    private List<PlotCommand>       userCommands    = new ArrayList<>();
-    private Iterator<PlotCommand>   commandIterator = null;
-    private Supplier<Stream<PlotCommand>>   streamSupplier  = null;
+    private Supplier<Stream<PlotCommand>>   streamSupplier  = 
+        () -> Stream.empty();
     
     /////////////////////////////////////////////////
     //   Plot properties (properties to use
@@ -634,7 +629,7 @@ public class CartesianPlane
         drawMinorTics();
         drawMajorTics();
         drawAxes();
-        drawUserPoints();
+        drawUserPlot();
         
         gtx.setClip( origClip );
 
@@ -815,48 +810,33 @@ public class CartesianPlane
     }
     
     /**
-     * Sets the list of user commands
+     * Sets the supplier
+     * that will fetch a stream
+     * to deliver commands
      * for plotting a curve.
      * 
-     * @param commands  the list of user commands
+     * @param supplier  the stream supplier
      */
-    public void setUserCommands( List<PlotCommand> commands )
-    {
-        // never allow this list to be null
-        if ( commands == null )
-            this.userCommands = new ArrayList<>();
-        else
-            this.userCommands  = commands;
-    }
-    
     public void setStreamSupplier( Supplier<Stream<PlotCommand>> supplier )
     {
-        this.streamSupplier = supplier;
+        if ( supplier != null )
+            streamSupplier = supplier;
+        else
+            streamSupplier = () -> Stream.empty();
     }
     
     /**
-     * Sets the supplier
-     * that will deliver commands
-     * for plotting a curve.
-     * 
-     * @param iterator  the command supplier
+     * Draws the user plot.
      */
-    public void setIterator( Iterator<PlotCommand> iterator )
-    {
-        this.commandIterator  = iterator;
-    }
-    
-    private void drawUserPoints()
+    private void drawUserPlot()
     {
         gtx.setColor( plotColor );
-        userCommands.forEach( c -> c.execute() );
-        if ( commandIterator != null )
-            commandIterator
-                .forEachRemaining( c -> c.execute() );
-        if ( streamSupplier != null )
-            streamSupplier.get().forEach( c -> c.execute() );
+        streamSupplier.get().forEach( c -> c.execute() );
     }
     
+    /**
+     * Draws the x- and y-axes on the graph.
+     */
     private void drawAxes()
     {
         gtx.setColor( axisColor );
@@ -871,6 +851,9 @@ public class CartesianPlane
         lineGen.forEach( gtx::draw );
     }
     
+    /**
+     * Draws the grid lines on the graph.
+     */
     private void drawGridLines()
     {
         if ( gridLineDraw )
@@ -883,6 +866,9 @@ public class CartesianPlane
         }
     }
     
+    /**
+     * Draws the minor tics on the graph.
+     */
     private void drawMinorTics()
     {
         if ( ticMinorDraw )
@@ -905,6 +891,9 @@ public class CartesianPlane
         }
     }
     
+    /**
+     * Draws the major tics on the graph.
+     */
     private void drawMajorTics()
     {
         if ( ticMajorDraw )
@@ -919,12 +908,11 @@ public class CartesianPlane
                 );
             gtx.setStroke( new BasicStroke( ticMajorWeight ) );
             gtx.setColor( ticMajorColor );
-//            lineGen.forEach( gtx::draw );
             StreamSupport
                 .stream( lineGen.spliterator(), false )
                 .filter( Predicate.not(lineGen::isXAxis) )
                 .filter( Predicate.not(lineGen::isYAxis) )
-                .forEach( gtx:: draw );
+                .forEach( gtx::draw );
         }
     }
     
@@ -1008,6 +996,15 @@ public class CartesianPlane
         }
     }
     
+    /**
+     * Determines whether two floating point values
+     * are approximately equal.
+     * 
+     * @param fVal1 the first floating point value
+     * @param fVal2 the second floating point value
+     * 
+     * @return true if the given values are approximately equal
+     */
     private static boolean equal( float fVal1, float fVal2 )
     {
         final float epsilon = .0001f;
@@ -1016,6 +1013,9 @@ public class CartesianPlane
         return equal;
     }
     
+    /**
+     * Draws the margins on the graph.
+     */
     private void paintMargins()
     {
         Rectangle2D rect    = new Rectangle2D.Float();
