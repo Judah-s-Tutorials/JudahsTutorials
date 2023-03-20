@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.lines;
+package com.acmemail.judah.cartesian_plane.temp2;
 
 import java.awt.Color;
 import java.util.Iterator;
@@ -12,9 +12,10 @@ import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PlotColorCommand;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
-import com.acmemail.judah.cartesian_plane.PlotCoordinatesCommand;
+import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
+import com.acmemail.judah.cartesian_plane.sandbox.Polynomial;
 
 public class PolyIteratorDemo
 {
@@ -36,7 +37,7 @@ public class PolyIteratorDemo
         Polynomial                  poly        = 
             new Polynomial( -2, 4, 0, -1 );
         Iterator<PlotCommand>       iter    =
-            new CommandIterator( poly, -2, 3.001f, .005f );
+            new CommandIterator( poly, -2, 3, .005f );
         Spliterator<PlotCommand>    splitter    =
             Spliterators.spliteratorUnknownSize( iter, 0 );
         plane.setStreamSupplier( 
@@ -101,7 +102,7 @@ public class PolyIteratorDemo
             {
                 float   yco         = (float)funk.applyAsDouble( xco );
                 int     currSign    = (int)Math.signum( yco );
-                cmd = new PlotCoordinatesCommand( plane, xco, yco );
+                cmd = new PlotPointCommand( plane, xco, yco );
                 if ( currSign != lastSign )
                 {
                     lastSign = currSign;

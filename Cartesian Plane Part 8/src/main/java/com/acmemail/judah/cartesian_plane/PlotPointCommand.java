@@ -6,7 +6,7 @@ package com.acmemail.judah.cartesian_plane;
  * @author Jack Straub
  *
  */
-public class PlotCoordinatesCommand implements PlotCommand
+public class PlotPointCommand implements PlotCommand
 {
     private static final String     format  = "PlotCommand: (%4.2f,%4.2f)";
     
@@ -22,7 +22,7 @@ public class PlotCoordinatesCommand implements PlotCommand
      * @param plane the plane in which the plot color is to be set
      * @param color the color to set the plot color to.
      */
-    public PlotCoordinatesCommand( CartesianPlane plane, float xco, float yco )
+    public PlotPointCommand( CartesianPlane plane, float xco, float yco )
     {
         this.plane = plane;
         this.xco = xco;

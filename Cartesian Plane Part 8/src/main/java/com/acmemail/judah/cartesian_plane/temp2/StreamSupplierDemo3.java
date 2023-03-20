@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.lines;
+package com.acmemail.judah.cartesian_plane.temp2;
 
 import java.awt.geom.Point2D;
 import java.util.Iterator;
@@ -11,11 +11,12 @@ import java.util.stream.StreamSupport;
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
-import com.acmemail.judah.cartesian_plane.PlotCoordinatesCommand;
+import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
+import com.acmemail.judah.cartesian_plane.sandbox.ParamCircle;
 
-public class StreamSupplierDemo1
+public class StreamSupplierDemo3
 {
     private static final CartesianPlane plane   = new CartesianPlane();
     
@@ -75,7 +76,7 @@ public class StreamSupplierDemo1
                 throw new NoSuchElementException();
             }
             Point2D point   = funk.apply( angle );
-            cmd = new PlotCoordinatesCommand(
+            cmd = new PlotPointCommand(
                 plane,
                 (float)point.getX(),
                 (float)point.getY()

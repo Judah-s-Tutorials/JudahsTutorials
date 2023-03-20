@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.lines;
+package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
@@ -59,29 +59,5 @@ public class Polynomial implements DoubleUnaryOperator
         for ( double coeff : coefficients )
             yval += coeff * Math.pow( xval, degree-- );
         return yval;
-    }
-    
-    /**
-     * Compiles a list of (x,y) pairs
-     * by evaluating a sequence of <em>x</em> values
-     * according to the encapsulated polynomial.
-     * 
-     * @param numPoints the number of points to compile
-     * @param supplier  source of the sequence of <em>x</em> values
-     * 
-     * @return  the compiled list
-     */
-    public List<Point2D> plot( int numPoints, DoubleSupplier supplier )
-    {
-        List<Point2D>   points  = new ArrayList<>();
-        
-        for ( int inx = 0  ; inx < numPoints ; ++inx )
-        {
-            double  xval    = supplier.getAsDouble();
-            double  yval    = applyAsDouble( xval );
-            points.add( new Point2D.Double( xval, yval ) );
-        }
-        
-        return points;
     }
 }

@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
-import com.acmemail.judah.cartesian_plane.PlotCoordinatesCommand;
+import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
 /**
@@ -35,8 +35,8 @@ public class SimpleCoordinatesPlot
         {
             float   yco     = 
                 (float)(Math.pow( xco, 3 ) + 2 * Math.pow( xco, 2 ) - 1);
-            PlotCoordinatesCommand  coords  = 
-                new PlotCoordinatesCommand( canvas, xco, yco );
+            PlotPointCommand  coords  = 
+                new PlotPointCommand( canvas, xco, yco );
             commands.add( coords );
         }
         canvas.setStreamSupplier( () -> commands.stream() );
