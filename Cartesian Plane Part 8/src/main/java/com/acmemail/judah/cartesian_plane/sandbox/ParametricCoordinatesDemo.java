@@ -5,14 +5,26 @@ import java.util.function.DoubleFunction;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
-import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.app.FIUtils;
+import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
+/**
+ * Simple application that uses a parametric equation
+ * to plot a rose.
+ * 
+ * @author Jack Straub
+ */
 public class ParametricCoordinatesDemo
 {
     private static final CartesianPlane plane   = new CartesianPlane();
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         PropertyManager pmgr    = PropertyManager.INSTANCE;
@@ -26,6 +38,9 @@ public class ParametricCoordinatesDemo
         Root    root    = new Root( plane );
         root.start();
         
+        ToPlotPointCommand      toPlotPoint = 
+            FIUtils.toPlotPointCommand( plane );
+        
         DoubleFunction<Point2D> rose    = t ->
             new Point2D.Double(
                 Math.cos( t ) * Math.sin( 4 * t ),
@@ -35,23 +50,7 @@ public class ParametricCoordinatesDemo
             new ParametricCoordinates( rose, 0, 2 * Math.PI, .005 );
         plane.setStreamSupplier( 
             () -> coords.stream()
-                .map( ParametricCoordinatesDemo::toPointCommand )
+                .map( toPlotPoint::of )
         );
-    }
-    
-    /**
-     * Helper method to make a PlotPointCommand object
-     * from a given Point2D.
-     * 
-     * @param point the given Point2D
-     * 
-     * @return  the derived PlotPointCommand
-     */
-    private static PlotPointCommand toPointCommand( Point2D point )
-    {
-        float   xco = (float)point.getX();
-        float   yco = (float)point.getY();
-        PlotPointCommand    cmd = new PlotPointCommand( plane, xco, yco );
-        return cmd;
     }
 }

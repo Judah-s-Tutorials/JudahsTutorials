@@ -13,12 +13,32 @@ import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PlotColorCommand;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.app.FIUtils;
+import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
+/**
+ * This is a simple application
+ * that demonstrates the use
+ * of stream concatenation.
+ * It plots two different functions
+ * using different colors.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Polynomial
+ * @see FunctionIterator
+ * @see ParametricCoordinates
+ */
 public class TwoPlotDemo
 {
     private static final CartesianPlane plane   = new CartesianPlane();
     
+    /**
+     * Application entry point.
+     * 
+     * @param args command line arguments; not used
+     */
     public static void main(String[] args)
     {
         PropertyManager pmgr    = PropertyManager.INSTANCE;
@@ -32,7 +52,8 @@ public class TwoPlotDemo
         Root    root    = new Root( plane );
         root.start();
         
-        ToPlotCommand           toPlotCmd   = new ToPlotCommand( plane );
+        ToPlotPointCommand      toPlotPointCmd   = 
+            FIUtils.toPlotPointCommand( plane );
         
         Polynomial              poly        = new Polynomial( 3.5f, -5, 0, 1 );
         FunctionIterator        iter        = 
@@ -41,7 +62,7 @@ public class TwoPlotDemo
             Spliterators.spliteratorUnknownSize( iter, 0 );
         Stream<PlotCommand>     polyStream  = 
             StreamSupport.stream( splitter, false )
-                .map( toPlotCmd::toPlotPointCommand );
+                .map( toPlotPointCmd::of );
 
         DoubleFunction<Point2D> circle  = t ->
             new Point2D.Double(
@@ -51,7 +72,7 @@ public class TwoPlotDemo
         ParametricCoordinates   coords          =
             new ParametricCoordinates( circle, 0, 2 * Math.PI, .005 );
         Stream<PlotCommand>     circleStream    =
-            coords.stream().map( toPlotCmd::toPlotPointCommand );
+            coords.stream().map( toPlotPointCmd::of );
 
         PlotCommand         redCmd      = new PlotColorCommand( plane, Color.RED );
         PlotCommand         blueCmd     = new PlotColorCommand( plane, Color.BLUE );
