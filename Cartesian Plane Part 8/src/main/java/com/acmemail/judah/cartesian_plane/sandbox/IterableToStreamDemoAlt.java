@@ -8,8 +8,11 @@ import java.util.stream.StreamSupport;
  * Simple application that demonstrates
  * how to use generate a Stream
  * from an Iterable.
+ * Compare to {@linkplain IterableToStreamDemo}.
  * 
  * @author Jack Straub
+ * 
+ * @see IteratorToStreamDemo
  */
 public class IterableToStreamDemoAlt
 {

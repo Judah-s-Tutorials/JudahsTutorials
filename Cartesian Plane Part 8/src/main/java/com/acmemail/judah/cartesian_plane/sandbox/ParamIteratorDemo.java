@@ -15,10 +15,21 @@ import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
+/**
+ * Simple application that demonstrates
+ * how to produce a stream from an iterator.
+ * 
+ * @author Jack Straub
+ */
 public class ParamIteratorDemo
 {
     private static final CartesianPlane plane   = new CartesianPlane();
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         PropertyManager pmgr    = PropertyManager.INSTANCE;
@@ -42,6 +53,15 @@ public class ParamIteratorDemo
         );
     }
 
+    /**
+     * Implementation of an Iterator<PlotCommand>.
+     * Iterates over a sequence of doubles
+     * producing a result by applying
+     * a given <em>DoubleFunction&lt;Point2D&gt;
+     * functional interface.
+     * 
+     * @author Jack Straub
+     */
     private static class CommandIterator implements Iterator<PlotCommand>
     {
         private final DoubleFunction<Point2D>   funk;
@@ -49,14 +69,26 @@ public class ParamIteratorDemo
         private final double                    incr;
         private double                          angle;
         
+        /**
+         * Constructor.
+         * Establishes the range to iterate over
+         * and the given  <em>DoubleFunction&lt;Point2D&gt;
+         * functional interface.
+         * 
+         * @param funk      the given functional interface
+         * @param first     the first element in the sequence (inclusive)
+         * @param last      the last element in the sequence (inclusive)
+         * @param incr      the increment used to produce the "next"
+         *                  element in the sequence
+         */
         public CommandIterator( 
-            DoubleFunction<Point2D> oper, 
+            DoubleFunction<Point2D> funk, 
             double first, 
             double last, 
             double incr 
         )
         {
-            this.funk = oper;
+            this.funk = funk;
             this.last = last;
             this.incr = incr;
             this.angle = first;

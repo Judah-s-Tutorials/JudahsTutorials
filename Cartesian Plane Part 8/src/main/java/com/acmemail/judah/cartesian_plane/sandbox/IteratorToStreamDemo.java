@@ -11,6 +11,8 @@ import java.util.stream.StreamSupport;
  * from an Iterator.
  * 
  * @author Jack Straub
+ * 
+ * @see IterableToStreamDemo
  */
 public class IteratorToStreamDemo
 {

@@ -31,6 +31,5 @@ public class PlotShapeCommand implements PlotCommand
     public void execute()
     {
         plane.setPlotShape( shape );
-
     }
 }

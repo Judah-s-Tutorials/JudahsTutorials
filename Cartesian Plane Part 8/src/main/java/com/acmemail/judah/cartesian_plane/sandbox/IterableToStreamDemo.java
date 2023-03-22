@@ -6,10 +6,13 @@ import java.util.stream.StreamSupport;
 
 /**
  * Simple application that demonstrates
- * how to use generate a Stream
- * from an Iterable.
+ * how to generate a Stream
+ * from an iterable.
+ * Compare to {@linkplain IterableToStreamDemoAlt}.
  * 
  * @author Jack Straub
+ * 
+ * @see IteratorToStreamDemo
  */
 public class IterableToStreamDemo
 {

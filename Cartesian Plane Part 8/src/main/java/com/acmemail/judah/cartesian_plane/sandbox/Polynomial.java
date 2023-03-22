@@ -1,27 +1,16 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.function.DoubleSupplier;
 import java.util.function.DoubleUnaryOperator;
 
 /**
- * This class is part of a demonstration
- * of the use of the <em>Supplier</em> functional interface.
- * It encapsulates a polynomial 
+ * This class encapsulates a polynomial 
  * of a fixed degree.
  * The degree of the polynomial
- * is fixed in the constructor.
- * The {@linkplain #plot(int, DoubleSupplier)} method
- * is an example of a method
- * that has a parameter
- * of type <em>Supplier</em>
+ * is determined by the constructor.
  * 
  * @author Jack Straub
- * 
- * @see #plot(int, DoubleSupplier)
  */
 public class Polynomial implements DoubleUnaryOperator
 {
