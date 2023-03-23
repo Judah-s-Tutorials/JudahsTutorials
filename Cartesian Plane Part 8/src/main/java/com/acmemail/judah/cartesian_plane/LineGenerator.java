@@ -558,7 +558,7 @@ public class LineGenerator implements Iterable<Line2D>
      * 
      * @param line  the given line
      * 
-     * @return true if the given line lies on the x-axis
+     * @return true if the given line lies on the y-axis
      */
     public boolean isYAxis( Line2D line )
     {
@@ -566,7 +566,7 @@ public class LineGenerator implements Iterable<Line2D>
         double  xco2    = line.getX2();
         boolean result  = 
             equals( xco1, xco2 )            // is this a vertical line?
-            && equals( xco1, centerXco );   // does it fall on the x-axis?
+            && equals( xco1, centerXco );   // does it fall on the y-axis?
         return result;
     }
     
