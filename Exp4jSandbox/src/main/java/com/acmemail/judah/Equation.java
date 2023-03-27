@@ -1,11 +1,9 @@
 package com.acmemail.judah;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
@@ -55,6 +53,7 @@ public class Equation
     {
         initMap();
         setXExpression( expr );
+        setYExpression( yExprStr );
     }
     
     /**
@@ -112,64 +111,6 @@ public class Equation
         return val;
     }
     
-    /**
-     * Parse an expression string.
-     * A valid expression is one of:
-     * <ul>
-     * <li>
-     *      "x=</em>non-empty string</em>"
-     *      (whitespace ignored):
-     *      the x-expression will be set to
-     *      the non-empty string
-     * </li>
-     * <li>
-     *      "y=</em>non-empty string</em>"
-     *      (whitespace ignored):
-     *      the y-expression will be set to
-     *      the non-empty string
-     * </li>
-     * <li>
-     *      All others (whitespace ignored):
-     *      the x-expression will be set to
-     *      the given expression
-     * </li>
-     * </ul>
-     * <p>
-     * A value describing the result of the operation
-     * is returned.
-     * </p>
-     * 
-     * @param expr  the given expression string
-     * 
-     * @return  a value describing the result of the operation
-     */
-    public ValidationResult parseExpression( String expr )
-    {
-        ValidationResult    result  = ValidationResult.SUCCESS;
-        int                 split   = expr.indexOf( '=' );
-        if ( split > 0 )
-        {
-            String  varPart     = expr.substring( 0, split ).trim();
-            String  exprPart    = expr.substring( split + 1 ).trim();
-            if ( !exprPart.isEmpty() )
-                result = setXExpression( expr.trim() );
-            else if ( varPart.equals( "x" ) )
-                result = setXExpression( exprPart.trim() );
-            else if ( varPart.equals( "y" ) )
-                result = setYExpression( exprPart.trim() );
-            else
-            {
-                String  error   =
-                    "\"" + expr + "\"" + ": invalid expression";
-                result = new ValidationResult( false, List.of( error ) );
-            }
-        }
-        else
-            result = setXExpression( expr.trim() );
-        
-        return result;
-    }
-    
     public ValidationResult parseFunction( String funk )
     {
         ValidationResult    result  =
@@ -194,7 +135,7 @@ public class Equation
         Expression expr = new ExpressionBuilder( exprStr )
             .variables( vars.keySet() )
             .build();
-        ValidationResult    result  = expr.validate();
+        ValidationResult    result  = expr.validate( false );
         if ( result == ValidationResult.SUCCESS )
         {
             this.xExprStr = exprStr;
@@ -217,6 +158,7 @@ public class Equation
      */
     public ValidationResult setYExpression( String exprStr )
     {
+        System.out.println( vars.keySet() );
         Expression expr = new ExpressionBuilder( exprStr )
             .variables( vars.keySet() )
             .build();
@@ -259,6 +201,7 @@ public class Equation
     public Stream<Point2D> streamXY()
     {
         xExpr.setVariables( vars );
+        yExpr.setVariables( vars );
         ValidationResult    validationResult    = xExpr.validate( true );
         if ( validationResult != ValidationResult.SUCCESS )
             throw new InvalidExpressionException( validationResult );
@@ -268,97 +211,6 @@ public class Equation
             .peek( t -> yExpr.setVariable( param, t ) )
             .mapToObj( t -> new Point2D.Double( xExpr.evaluate(), yExpr.evaluate() ) );
         return stream;
-    }
-    
-    /**
-     * Parses a string consisting of
-     * a comma-separated list of variable specifications.
-     * A valid variable specification 
-     * consists of a valid variable name alone,
-     * or valid variable name/value pair
-     * separated by an equal sign (=).
-     * A variable name is valid
-     * if it begins with an underscore or letter,
-     * and otherwise consists solely 
-     * of alphanumeric characters and underscores.
-     * A valid value string
-     * is any string that can be converted 
-     * to a double.
-     * Whitespace is ignored.
-     * A result is returned
-     * describing the status of the operation.
-     * <p>
-     * Examples:
-     * </p>
-     * <p style="margin-left: 2em;">
-     * <code>a=5.1,b=-2.5 , c = -1, x,y,t</code><br>
-     * <code>a=5.1</code><br>
-     * <code>t</code>
-     * </p>
-     * 
-     * @param varStr    the string to parse
-     * 
-     * @return  the result of the operation
-     */
-    public ValidationResult parseVars( String varStr )
-    {
-        List<String>    errors  = new ArrayList<>();
-        StringTokenizer tizer   = new StringTokenizer( varStr );
-        while ( tizer.hasMoreElements() )
-        {
-            String      varPair = tizer.nextToken();
-            String[]    parts   = varPair.split( "=" );
-            errors.addAll( parseVarPair( varPair ) );
-        }
-        
-        ValidationResult    result  =
-            errors.isEmpty() ? 
-                ValidationResult.SUCCESS : 
-                new ValidationResult( false, errors );
-        return result;
-    }
-    
-    private List<String> parseVarPair( String varPair )
-    {
-        List<String>    errors  = new ArrayList<>();
-        String[]        parts   = varPair.split( "=" );
-        
-        // var spec must be either "var" or "var=val" 
-        if ( parts.length < 1 || parts.length > 2 )
-        {
-            String  err =
-                "\"" + varPair + "\""  
-                + " is not a valid variable specification";
-            errors.add( err );
-        }
-        else
-        {
-            String  name    = parts[0].trim();
-            String  valStr  = 
-                parts.length == 1 ? "0" : parts[1].trim();
-            
-            if ( !isValidName( name ) )
-            {
-                String  err = 
-                    varPair + ": \"" + name + "\""
-                    + " is not a valid variable name";
-                errors.add( err );
-            }
-            else if ( !isValidValue( valStr ) )
-            {
-                String  err = 
-                    varPair + ": \"" + valStr + "\""
-                    + " is not a valid variable value";
-                errors.add( err );
-            }
-            else
-            {
-                double  val = Double.parseDouble( valStr );
-                vars.put( name, val );
-            }
-        }
-        
-        return errors;
     }
     
     /**
@@ -500,7 +352,7 @@ public class Equation
      * 
      * @return  true if the given string is a valid double value
      */
-    private boolean isValidValue( String valStr )
+    public static boolean isValidValue( String valStr )
     {
         boolean result  = false;
         try
@@ -555,14 +407,6 @@ public class Equation
         return result;
     }
     
-    private double getVal( String[] arr )
-    {
-        double  val = 0;
-        if ( arr.length > 1 )
-            val = Double.parseDouble( arr[1] );
-        return val;
-    }
-    
     /**
      * Initializes the variable map
      * to the default values; see {@linkplain Equation}.
@@ -572,6 +416,7 @@ public class Equation
     private void initMap()
     {
         vars.put( "x",  0. );
+        vars.put( "y",  0. );
         vars.put( "a",  0. );
         vars.put( "b",  0. );
         vars.put( "c",  0. );

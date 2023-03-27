@@ -5,11 +5,22 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
+import java.util.stream.Stream;
+
+import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.CartesianPlane;
+import com.acmemail.judah.cartesian_plane.NotificationManager;
+import com.acmemail.judah.cartesian_plane.PlotCommand;
+import com.acmemail.judah.cartesian_plane.app.FIUtils;
+import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
+import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
 import net.objecthunter.exp4j.ValidationResult;
 
-public class EquationDemo1
+public class EquationDemo2
 {
+    private final CartesianPlane    plane       = new CartesianPlane();
+    private final Root              root        = new Root( plane );
     private final InputParser       parser      = new InputParser();
     private final String            prompt      = "Enter a command: ";
     private final BufferedReader    reader;
@@ -23,7 +34,7 @@ public class EquationDemo1
             BufferedReader bufReader = new BufferedReader( inReader );
         )
         {
-            EquationDemo1   demo    = new EquationDemo1( bufReader );
+            EquationDemo2   demo    = new EquationDemo2( bufReader );
             demo.execute();
         }
         catch ( IOException exc )
@@ -32,9 +43,10 @@ public class EquationDemo1
         }
     }
 
-    public EquationDemo1( BufferedReader reader )
+    public EquationDemo2( BufferedReader reader )
     {
         this.reader = reader;
+        root.start();
     }
     
     public void execute() throws IOException
@@ -52,10 +64,16 @@ public class EquationDemo1
     
     private void evaluate()
     {
+        ToPlotPointCommand   toPlotPointCommand =
+            FIUtils.toPlotPointCommand( plane );
         try
         {
-            parser.getEquation().streamY()
-                .forEach( System.out::println );
+            Stream<PlotCommand> stream  =
+                parser.getEquation().streamY()
+                    .map( toPlotPointCommand::of );
+            plane.setStreamSupplier( () -> stream );
+            NotificationManager.INSTANCE.
+                propagateNotification( CPConstants.REDRAW_NP );
         }
         catch ( InvalidExpressionException exc )
         {
@@ -94,7 +112,11 @@ public class EquationDemo1
             }
             cmd = Command.toCommand( cmdString );
             if ( cmd == Command.INVALID )
+            {
                 System.err.println( cmdString + ": unrecognized command" );
+                System.err.println( Command.usage() );
+                cmd = Command.NONE;
+            }
         }
         
         return cmd;

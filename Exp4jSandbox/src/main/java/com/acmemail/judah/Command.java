@@ -2,10 +2,27 @@ package com.acmemail.judah;
 
 import java.util.Arrays;
 
+/**
+ * Encapsulation of commands
+ * used to configure and evaluate
+ * a Exp4j expressions.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Equation
+ */
 public enum Command
 {
     EQUATION( "Describes an equation of the form y = f(x)." ),
-    EXPRESSION( "Describes any well-formed expression" ),
+    EXPRESSION( "Synonym for \"X_EXPRESSION\"" ),
+    X_EXPRESSION( 
+        "Describes any well-formed expression for the evaluation of \"x\" "
+        + "in the coordinate pair \"(x,y)\""
+    ),
+    Y_EXPRESSION( 
+        "Describes any well-formed expression for the evaluation of \"y\" "
+        + "in the coordinate pair \"(x,y)\""
+    ),
     FUNCTION( "Describes any well-formed function" ),
     VARIABLES( 
         "Describes a comma-separated list of "
@@ -18,7 +35,9 @@ public enum Command
         + "for traversing iteration range"
     ),
     PARAM( "Describes the name of the parameter in a parametric equation" ),
-    EVALUATE( "The command that begins evaluation of the expression" ),
+    Y_STREAM( "Generate a stream of the form (x,y) = f(x)" ),
+    XY_STREAM( "Generate a stream of the form (x,y) = f(t)" ),
+    STREAM( "Synonyn for STREAM_X" ),
     EXIT( "Exit from the current operation" ),
     INVALID( "Designates an invalid command." ),
     NONE( "Identifies an empty command string" );
