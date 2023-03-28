@@ -16,7 +16,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
-public class Main3
+public class Main3Save
 {
     private static final    CartesianPlane    plane   = new CartesianPlane();
     
@@ -25,7 +25,7 @@ public class Main3
         Root    root    = new Root( plane );
         root.start();
         
-        Expression e = new ExpressionBuilder("4  x^2 + 3 * x - 2" )
+        Expression e = new ExpressionBuilder("4x^2 + 3 * x - 2" )
             .variables("x")
             .build();
         
@@ -33,7 +33,7 @@ public class Main3
             DoubleStream.iterate( -1, d -> d <= .5, d -> d + .005 )
                 .peek( d -> e.setVariable( "x", d ) )
                 .mapToObj( d -> calc( e, d ) )
-                .map( Main3::toPlotPoint );
+                .map( Main3Save::toPlotPoint );
         plane.setStreamSupplier( () -> stream );
         NotificationManager.INSTANCE.propagateNotification( CPConstants.REDRAW_NP );
     }

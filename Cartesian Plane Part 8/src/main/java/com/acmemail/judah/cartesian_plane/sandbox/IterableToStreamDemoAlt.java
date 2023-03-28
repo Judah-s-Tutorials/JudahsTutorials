@@ -1,7 +1,6 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.util.Spliterator;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**

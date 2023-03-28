@@ -17,8 +17,8 @@ public class Equation
     private double                      rStart      = -1;
     private double                      rEnd        = 1;
     private double                      rStep       = .05;
-    private String                      xExprStr    = "x";
-    private String                      yExprStr    = "y";
+    private String                      xExprStr    = "1";
+    private String                      yExprStr    = "1";
     private String                      param       = "t";
     private Expression                  xExpr       = null;
     private Expression                  yExpr       = null;
@@ -52,8 +52,8 @@ public class Equation
     public Equation( String expr )
     {
         initMap();
-        setXExpression( expr );
-        setYExpression( yExprStr );
+        setXExpression( xExprStr );
+        setYExpression( expr );
     }
     
     /**
@@ -67,8 +67,8 @@ public class Equation
      */
     public Equation( Map<String,Double> vars, String expr )
     {
-        vars.putAll( vars );
-        setXExpression( expr );
+        this.vars.putAll( vars );
+        setYExpression( expr );
     }
     
     /**
@@ -162,7 +162,7 @@ public class Equation
         Expression expr = new ExpressionBuilder( exprStr )
             .variables( vars.keySet() )
             .build();
-        ValidationResult    result  = expr.validate();
+        ValidationResult    result  = expr.validate( false );
         if ( result == ValidationResult.SUCCESS )
         {
             this.yExprStr = exprStr;
@@ -180,14 +180,14 @@ public class Equation
      */
     public Stream<Point2D> streamY()
     {
-        xExpr.setVariables( vars );
-        ValidationResult    validationResult    = xExpr.validate( true );
+        yExpr.setVariables( vars );
+        ValidationResult    validationResult    = yExpr.validate( true );
         if ( validationResult != ValidationResult.SUCCESS )
             throw new InvalidExpressionException( validationResult );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x += rStep )
-                .peek( d -> xExpr.setVariable( "x", d ) )
-                .mapToObj( d -> new Point2D.Double( d, xExpr.evaluate() ) );
+                .peek( d -> yExpr.setVariable( "x", d ) )
+                .mapToObj( d -> new Point2D.Double( d, yExpr.evaluate() ) );
         return stream;
     }
     
@@ -211,6 +211,26 @@ public class Equation
             .peek( t -> yExpr.setVariable( param, t ) )
             .mapToObj( t -> new Point2D.Double( xExpr.evaluate(), yExpr.evaluate() ) );
         return stream;
+    }
+    
+    /**
+     * Gets the currently set x-expression.
+     * 
+     * @return  the currently set x-expression
+     */
+    public String getXExpression()
+    {
+        return xExprStr;
+    }
+    
+    /**
+     * Gets the currently set y-expression.
+     * 
+     * @return  the currently set y-expression
+     */
+    public String getYExpression()
+    {
+        return yExprStr;
     }
     
     /**
@@ -288,7 +308,7 @@ public class Equation
      */
     public void setRangeEnd( double rangeEnd )
     {
-        rStart = rangeEnd;
+        rEnd = rangeEnd;
     }
     
     /**
@@ -310,7 +330,7 @@ public class Equation
      */
     public void setRangeStep( double rangeStep )
     {
-        rStart = rangeStep;
+        rStep = rangeStep;
     }
     
 

@@ -43,7 +43,10 @@ public class InputParser
             parseExpression();
             break;
         case X_EXPRESSION:
-            parseArg( equation::setXExpression );
+            if ( argString.isEmpty() )
+                System.out.println( equation.getXExpression() );
+            else
+                parseArg( equation::setXExpression );
             break;
         case Y_EXPRESSION:
             parseArg( equation::setYExpression );
@@ -95,7 +98,8 @@ public class InputParser
             argString.isEmpty() ? 
                 requiresArgument() : 
                 funk.apply( argString );
-        errors.addAll( result.getErrors() );
+        if ( !result.isValid() )
+            errors.addAll( result.getErrors() );
     }
     
     private void parseArg( DoubleConsumer funk )

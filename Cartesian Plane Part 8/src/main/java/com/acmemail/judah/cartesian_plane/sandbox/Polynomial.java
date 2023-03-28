@@ -1,7 +1,6 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.util.Arrays;
-import java.util.function.DoubleSupplier;
 import java.util.function.DoubleUnaryOperator;
 
 /**

@@ -37,7 +37,7 @@ public enum Command
     PARAM( "Describes the name of the parameter in a parametric equation" ),
     Y_STREAM( "Generate a stream of the form (x,y) = f(x)" ),
     XY_STREAM( "Generate a stream of the form (x,y) = f(t)" ),
-    STREAM( "Synonyn for STREAM_X" ),
+    STREAM( "Synonyn for Y_STREAM" ),
     EXIT( "Exit from the current operation" ),
     INVALID( "Designates an invalid command." ),
     NONE( "Identifies an empty command string" );

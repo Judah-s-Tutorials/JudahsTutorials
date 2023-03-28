@@ -3,10 +3,12 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.awt.geom.Point2D;
 import java.util.Spliterator;
 import java.util.Spliterators;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
+import com.acmemail.judah.cartesian_plane.PlotCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.app.FIUtils;
 import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
@@ -67,13 +69,17 @@ public class PolyIteratorDemo
             FIUtils.toPlotPointCommand( plane );
         
         Polynomial              poly        = new Polynomial( 3.5f, -5, 0, 1 );
-        FunctionIterator        iter        = 
-            new FunctionIterator( poly, -2, 2.5, .005 );
-        Spliterator<Point2D>    splitter    =
-            Spliterators.spliteratorUnknownSize( iter, 0 );
         plane.setStreamSupplier(
-            () -> StreamSupport.stream( splitter, false )
-                .map( toPlotPointCmd::of )
+            () -> {
+                FunctionIterator        iter        = 
+                    new FunctionIterator( poly, -2, 2.5, .005 );
+                Spliterator<Point2D>    splitter    =
+                    Spliterators.spliteratorUnknownSize( iter, 0 );
+                Stream<PlotCommand>     stream  =
+                    StreamSupport.stream( splitter, false )
+                        .map( toPlotPointCmd::of );
+                return stream;
+            }
         );
     }
 }

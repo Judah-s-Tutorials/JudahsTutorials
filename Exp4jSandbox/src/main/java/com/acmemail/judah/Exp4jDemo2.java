@@ -13,7 +13,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
-public class Main1
+public class Exp4jDemo2
 {
     private static final    CartesianPlane    plane   = new CartesianPlane();
     
@@ -23,12 +23,12 @@ public class Main1
         root.start();
         
         List<PlotCommand>   plot    = new ArrayList<>();
+        Expression e = new ExpressionBuilder("4  x^2 + 3 * x - 2" )
+            .variables("x")
+            .build();
         for ( double xco = -1 ; xco <= .5 ; xco += .005 )
         {
-            Expression e = new ExpressionBuilder("4  x^2 + 3 * x - 2" )
-                .variables("x")
-                .build()
-                .setVariable("x", xco);
+            e.setVariable("x", xco);
             double yco = e.evaluate();
             plot.add( new PlotPointCommand( plane, (float)xco, (float)yco ) );
         }

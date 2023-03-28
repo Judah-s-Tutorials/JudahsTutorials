@@ -52,6 +52,11 @@ public class TwoPlotDemo
         Root    root    = new Root( plane );
         root.start();
         
+        plane.setStreamSupplier( () -> getPlotCommands() );
+    }
+    
+    private static Stream<PlotCommand> getPlotCommands()
+    {
         ToPlotPointCommand      toPlotPointCmd   = 
             FIUtils.toPlotPointCommand( plane );
         
@@ -82,6 +87,6 @@ public class TwoPlotDemo
             Stream.concat( streamA, Stream.of( blueCmd ) );
         Stream<PlotCommand> streamC = 
             Stream.concat( streamB, circleStream );
-        plane.setStreamSupplier( () -> streamC );
+        return streamC;
     }
 }

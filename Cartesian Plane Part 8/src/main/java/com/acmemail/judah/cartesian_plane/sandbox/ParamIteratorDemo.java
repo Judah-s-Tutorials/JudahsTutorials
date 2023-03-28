@@ -44,12 +44,14 @@ public class ParamIteratorDemo
         root.start();
         
         ParamCircle                 circle      = new ParamCircle( 3 );
-        Iterator<PlotCommand>       iter        = 
-            new CommandIterator( circle, 0, 2 * Math.PI, .05 );
-        Spliterator<PlotCommand>    splitter    = 
-            Spliterators.spliteratorUnknownSize( iter, 0 );
         plane.setStreamSupplier( 
-            () -> StreamSupport.stream( splitter, false )
+            () -> {
+                Iterator<PlotCommand>       iter        = 
+                    new CommandIterator( circle, 0, 2 * Math.PI, .05 );
+                Spliterator<PlotCommand>    splitter    = 
+                    Spliterators.spliteratorUnknownSize( iter, 0 );
+                return StreamSupport.stream( splitter, false );
+            }
         );
     }
 
