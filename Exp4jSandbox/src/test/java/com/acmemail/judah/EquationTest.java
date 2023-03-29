@@ -1,19 +1,39 @@
 package com.acmemail.judah;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.awt.geom.Point2D;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import net.objecthunter.exp4j.ValidationResult;
 
 class EquationTest
 {
+    private Equation    equation;
+    
+    @BeforeEach
+    public void beforeEach()
+    {
+        equation = new Equation();
+    }
+    
     @Test
     void testEquation()
     {
-        Equation    equation    = new Equation();
         equation.setRange( 1, 1, 1 );
         
         equation.streamY().forEach(
@@ -34,10 +54,10 @@ class EquationTest
     @Test
     void testEquationString()
     {
-        Equation    equation    = new Equation( "2x" );
-        equation.setRange( 2, 2, 1 );
+        Equation    testEqu = new Equation( "2x" );
+        testEqu.setRange( 2, 2, 1 );
         
-        equation.streamY().forEach(
+        testEqu.streamY().forEach(
             p -> {
                 assertEquals( 2, p.getX(), "X" );
                 assertEquals( 4, p.getY(), "Y" );
@@ -55,13 +75,13 @@ class EquationTest
         Map<String,Double>  map         = new HashMap<>();
         map.put( abcStr, abcVal );
         map.put( defStr, defVal );
-        Equation    equation    = new Equation( map, abcStr );
+        Equation            testEqu     = new Equation( map, abcStr );
 
-        assertEquals( abcVal, equation.getVar( abcStr ) );
-        assertEquals( defVal, equation.getVar( defStr ) );
+        assertEquals( abcVal, testEqu.getVar( abcStr ) );
+        assertEquals( defVal, testEqu.getVar( defStr ) );
         
-        equation.setRange( 2, 2, 1 );
-        equation.streamY().forEach(
+        testEqu.setRange( 2, 2, 1 );
+        testEqu.streamY().forEach(
             p -> {
                 assertEquals( 2, p.getX(), 2 );
                 assertEquals( 4, p.getY(), abcVal );
@@ -76,7 +96,6 @@ class EquationTest
         double      abcVal      = 5;
         String      defStr      = "def";
         double      defVal      = 10;;
-        Equation    equation    = new Equation();
         equation.setVar( abcStr, abcVal );
         equation.setVar( defStr, defVal );
         assertEquals( abcVal, equation.getVar( abcStr ) );
@@ -88,7 +107,6 @@ class EquationTest
     {
         String      abcStr      = "abc";
         double      abcVal      = 5;
-        Equation    equation    = new Equation();
         
         equation.setVar( abcStr, abcVal );
         assertEquals( abcVal, equation.getVar( abcStr ) );
@@ -98,69 +116,129 @@ class EquationTest
     }
 
     @Test
-    void testParseFunction()
-    {
-        fail("Not yet implemented");
-    }
-
-    @Test
     void testSetXExpression()
     {
-        fail("Not yet implemented");
+        // See also: testStreamXY
+        String      xExpr       = "2x";
+        testSetGetVal( 
+            xExpr, 
+            equation::setXExpression, 
+            equation::getXExpression
+        );
+        
+        ValidationResult    result  = equation.setXExpression( "2x" );
+        assertTrue( result.isValid() );
+        result  = equation.setXExpression( "%" );
+        assertFalse( result.isValid() );
     }
 
     @Test
     void testSetYExpression()
     {
-        Equation    equation    = new Equation();
+        // See also: testStreamXY
         String      yExpr       = "2x";
-        equation.setRange( 1, 1, 1 );
-        
-        equation.setYExpression( yExpr );
-        assertEquals( yExpr, equation.getYExpression() );
-        
-        equation.streamY().forEach(
-            p -> {
-                assertEquals( 1, p.getX(), "X" );
-                assertEquals( 2, p.getY(), "Y" );
-            }
+        testSetGetVal( 
+            yExpr, 
+            equation::setYExpression, 
+            equation::getYExpression
         );
+        
+        ValidationResult    result  = equation.setYExpression( "2x" );
+        assertTrue( result.isValid() );
+        result  = equation.setYExpression( "%" );
+        assertFalse( result.isValid() );
     }
 
     @Test
     void testStreamY()
     {
-        fail("Not yet implemented");
+        String          yExpr       = "2x";
+        List<Point2D>   expList     = 
+            IntStream.range( 1, 5 )
+                .mapToObj( i -> new Point2D.Double( i, 2 * i ) )
+                .collect( Collectors.toList() );
+
+        equation.setRange( 1, 4, 1 );        
+        equation.setYExpression( yExpr );
+        
+        List<Point2D>   actList     =
+            equation.streamY().collect( Collectors.toList() );
+        assertEquals( expList, actList );
+    }
+    
+    @Test
+    public void testStreamYGoWrong()
+    {
+        try
+        {
+            equation.setYExpression( "3" );
+            equation.streamY();
+            fail( "expected exception not thrown" );
+        }
+        catch ( InvalidExpressionException exc )
+        {
+            ValidationResult    result  = exc.getValidationResult();
+            assertNotNull( result );
+            List<String>        errors  = result.getErrors();
+            assertNotNull( errors );
+            assertFalse( result.isValid() );
+        }
     }
 
     @Test
     void testStreamXY()
     {
-        fail("Not yet implemented");
-    }
+        String          yExpr       = "2t";
+        String          xExpr       = "3t";
+        List<Point2D>   expList     = 
+            IntStream.range( 1, 5 )
+                .mapToObj( i -> new Point2D.Double( 3 * i, 2 * i ) )
+                .collect( Collectors.toList() );
 
-    @Test
-    void testGetXExpression()
-    {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testGetYExpression()
-    {
-        fail("Not yet implemented");
+        equation.setRange( 1, 4, 1 );        
+        equation.setYExpression( yExpr );
+        equation.setXExpression( xExpr );
+        
+        List<Point2D>   actList     =
+            equation.streamXY().collect( Collectors.toList() );
+        actList.forEach( System.out::println );
+        assertEquals( expList, actList );
     }
 
     @Test
     void testGetParam()
     {
-        fail("Not yet implemented");
+        testSetGetVal( "param", equation::setParam, equation::getParam );
     }
 
     @Test
     void testSetParam()
     {
-        fail("Not yet implemented");
+        String          param       = "param";
+        String          yExpr       = "2" + param;
+        String          xExpr       = "3" + param;
+        List<Point2D>   expList     = 
+            IntStream.range( 1, 5 )
+                .mapToObj( i -> new Point2D.Double( 3 * i, 2 * i ) )
+                .collect( Collectors.toList() );
+
+        equation.setRange( 1, 4, 1 );        
+        equation.setVar( param, 0 );
+        equation.setParam( param );
+        equation.setYExpression( yExpr );
+        equation.setXExpression( xExpr );
+        
+        List<Point2D>   actList     =
+            equation.streamXY().collect( Collectors.toList() );
+        actList.forEach( System.out::println );
+        assertEquals( expList, actList );
+    }
+    
+    @Test
+    public void testParseFunction()
+    {
+        ValidationResult    result  = equation.parseFunction( "" );
+        assertFalse( result.isValid() );
     }
 
     @Test
@@ -169,7 +247,6 @@ class EquationTest
         double      start       = 10;
         double      end         = 2 * start;
         double      incr        = 2 * end;
-        Equation    equation    = new Equation();
         equation.setRange( start, end, incr );
         assertEquals( start, equation.getRangeStart() );
         assertEquals( end, equation.getRangeEnd() );
@@ -179,49 +256,58 @@ class EquationTest
     @Test
     void testSetRangeStart()
     {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testGetRangeStart()
-    {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testGetRangeEnd()
-    {
-        fail("Not yet implemented");
+        testSetGetVal( 5., equation::setRangeStart, equation::getRangeStart );
     }
 
     @Test
     void testSetRangeEnd()
     {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testGetRangeStep()
-    {
-        fail("Not yet implemented");
+        testSetGetVal( 10., equation::setRangeEnd, equation::getRangeEnd );
     }
 
     @Test
     void testSetRangeStep()
     {
-        fail("Not yet implemented");
+        testSetGetVal( 10., equation::setRangeStep, equation::getRangeStep );
     }
 
     @Test
     void testIsValidName()
     {
-        fail("Not yet implemented");
+        String[]    validNames      =
+        { "_", "a", "A", "_0", "a0", "A0", "a_0", "A_0", "abc_123" };
+        String[]    invalidNames    = 
+        { "0", "0a", "0_", "abc%", "abc$", "abc.0" };
+        
+        Arrays.stream( validNames )
+        .forEach( n -> assertTrue( Equation.isValidName( n ), n ) );
+        
+        Arrays.stream( invalidNames )
+        .forEach( n -> assertFalse( Equation.isValidName( n ), n ) );
     }
 
     @Test
     void testIsValidValue()
     {
-        fail("Not yet implemented");
+        String[]    validValues     =
+        { "0", "1", "0.", "1.1", ".1", ".9999999999", "999.999999" };
+        String[]    invalidValues   =
+        { ".", "..1", "1..", "1..0", "a", "1%", "pii", "ee" };
+        
+        Arrays.stream( validValues )
+        .forEach( n -> assertTrue( Equation.isValidValue( n ), n ) );
+        
+        Arrays.stream( invalidValues )
+        .forEach( n -> assertFalse( Equation.isValidValue( n ), n ) );
     }
 
+    private static <T> void testSetGetVal( 
+        T val, 
+        Consumer<T> setter, 
+        Supplier<T> getter
+    )
+    {
+        setter.accept( val );
+        assertEquals( val, getter.get() );
+    }
 }

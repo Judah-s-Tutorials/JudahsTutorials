@@ -1,4 +1,4 @@
-package com.acmemail.judah;
+package com.acmemail.judah.sandbox;
 
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;

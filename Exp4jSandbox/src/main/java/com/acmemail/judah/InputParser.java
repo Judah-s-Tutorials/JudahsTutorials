@@ -39,17 +39,17 @@ public class InputParser
         case EQUATION:
             equation = new Equation();
             break;
-        case EXPRESSION:
-            parseExpression();
-            break;
-        case X_EXPRESSION:
+        case X_EQUALS:
             if ( argString.isEmpty() )
                 System.out.println( equation.getXExpression() );
             else
                 parseArg( equation::setXExpression );
             break;
-        case Y_EXPRESSION:
-            parseArg( equation::setYExpression );
+        case Y_EQUALS:
+            if ( argString.isEmpty() )
+                System.out.println( equation.getYExpression() );
+            else
+                parseArg( equation::setYExpression );
             break;
         case VARIABLES:
             parseVars();
@@ -73,7 +73,6 @@ public class InputParser
         case NONE:
         case Y_STREAM:
         case XY_STREAM:
-        case STREAM:
             // ignore these
             break;
         default:
@@ -194,64 +193,6 @@ public class InputParser
                 equation.setVar( name, val );
             }
         }
-    }
-    
-    /**
-     * Parse an expression string.
-     * A valid expression is one of:
-     * <ul>
-     * <li>
-     *      "x=</em>non-empty string</em>"
-     *      (whitespace ignored):
-     *      the x-expression will be set to
-     *      the non-empty string
-     * </li>
-     * <li>
-     *      "y=</em>non-empty string</em>"
-     *      (whitespace ignored):
-     *      the y-expression will be set to
-     *      the non-empty string
-     * </li>
-     * <li>
-     *      All others (whitespace ignored):
-     *      the x-expression will be set to
-     *      the given expression
-     * </li>
-     * </ul>
-     * <p>
-     * A value describing the result of the operation
-     * is returned.
-     * </p>
-     * 
-     * @param expr  the given expression string
-     * 
-     * @return  a value describing the result of the operation
-     */
-    public void parseExpression()
-    {
-        ValidationResult    result  = ValidationResult.SUCCESS;
-        int                 split   = argString.indexOf( '=' );
-        if ( split > 0 )
-        {
-            String  varPart     = argString.substring( 0, split ).trim();
-            String  exprPart    = argString.substring( split + 1 ).trim();
-            if ( !exprPart.isEmpty() )
-                result = equation.setXExpression( argString.trim() );
-            else if ( varPart.equals( "x" ) )
-                result = equation.setXExpression( exprPart.trim() );
-            else if ( varPart.equals( "y" ) )
-                result = equation.setYExpression( exprPart.trim() );
-            else
-            {
-                formatError( argString, "invalid expression" );
-            }
-        }
-        else
-            result = equation.setXExpression( argString.trim() );
-        
-        List<String>    list    = result.getErrors();
-        if ( list != null )
-            errors.addAll( result.getErrors() );
     }
     
     private void setParameterName()

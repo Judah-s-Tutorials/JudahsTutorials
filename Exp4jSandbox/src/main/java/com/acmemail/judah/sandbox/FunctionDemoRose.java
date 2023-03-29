@@ -1,20 +1,14 @@
-package com.acmemail.judah;
-
-import java.awt.geom.Point2D;
-import java.util.stream.DoubleStream;
+package com.acmemail.judah.sandbox;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.app.FIUtils;
-import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
-import net.objecthunter.exp4j.Expression;
-import net.objecthunter.exp4j.ExpressionBuilder;
+import net.objecthunter.exp4j.function.Function;
 
-public class RationalPolynomialDemo
+public class FunctionDemoRose
 {
     private static final CartesianPlane plane   = new CartesianPlane();
     
@@ -37,21 +31,36 @@ public class RationalPolynomialDemo
         Root    root    = new Root( plane );
         root.start();
         
-        ToPlotPointCommand      toPlotPoint = 
-            FIUtils.toPlotPointCommand( plane );
+        Function    roseX   = new Function( "rosex", 3 ) {
+            @Override
+            public double apply( double... args )
+            {
+                double  t = args[0];
+                double  a = args[1];
+                double  b = args[2];
+                
+                double  x =a * Math.cos( b * t ) * Math.cos( t );
+                return x;
+            }
+        };
         
-        String  numerator   = "(x^3 - 2x)";
-        String  denominator = "(2(x^2 - 5))";
-        String  strExpr     = numerator + "/" + denominator;
-        Expression expr = new ExpressionBuilder( strExpr )
-            .variables("x")
-            .build();
+        Function    roseY   = new Function( "rosey", 3 ) {
+            @Override
+            public double apply( double... args )
+            {
+                double  t = args[0];
+                double  a = args[1];
+                double  b = args[2];
+                
+                double  y =a * Math.cos( b * t ) * Math.sin( t );
+                return y;
+            }
+        };
         
-        plane.setStreamSupplier( () -> 
-            DoubleStream.iterate( -10, x -> x <= 10, x -> x + .005 )
-            .peek( d -> expr.setVariable( "x", d ) )
-            .mapToObj( x -> new Point2D.Double( x, expr.evaluate() ) )
-            .map( toPlotPoint::of ));
+        
+//        plane.setStreamSupplier( () ->
+//            Stream.concat( Stream.of( shape, color), plotStream() )
+//        );
         NotificationManager.INSTANCE.propagateNotification( CPConstants.REDRAW_NP );
     }
 }

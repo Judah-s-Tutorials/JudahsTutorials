@@ -14,12 +14,11 @@ import java.util.Arrays;
 public enum Command
 {
     EQUATION( "Describes an equation of the form y = f(x)." ),
-    EXPRESSION( "Synonym for \"X_EXPRESSION\"" ),
-    X_EXPRESSION( 
+    X_EQUALS( 
         "Describes any well-formed expression for the evaluation of \"x\" "
         + "in the coordinate pair \"(x,y)\""
     ),
-    Y_EXPRESSION( 
+    Y_EQUALS( 
         "Describes any well-formed expression for the evaluation of \"y\" "
         + "in the coordinate pair \"(x,y)\""
     ),
@@ -37,7 +36,6 @@ public enum Command
     PARAM( "Describes the name of the parameter in a parametric equation" ),
     Y_STREAM( "Generate a stream of the form (x,y) = f(x)" ),
     XY_STREAM( "Generate a stream of the form (x,y) = f(t)" ),
-    STREAM( "Synonyn for Y_STREAM" ),
     EXIT( "Exit from the current operation" ),
     INVALID( "Designates an invalid command." ),
     NONE( "Identifies an empty command string" );

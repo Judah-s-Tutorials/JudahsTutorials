@@ -158,7 +158,6 @@ public class Equation
      */
     public ValidationResult setYExpression( String exprStr )
     {
-        System.out.println( vars.keySet() );
         Expression expr = new ExpressionBuilder( exprStr )
             .variables( vars.keySet() )
             .build();
@@ -205,8 +204,10 @@ public class Equation
         ValidationResult    validationResult    = xExpr.validate( true );
         if ( validationResult != ValidationResult.SUCCESS )
             throw new InvalidExpressionException( validationResult );
-        Stream<Point2D> stream  =
-            DoubleStream. iterate( rStart, t -> t <= rEnd, t -> t += rStep )
+        validationResult    = yExpr.validate( true );
+        if ( validationResult != ValidationResult.SUCCESS )
+            throw new InvalidExpressionException( validationResult );Stream<Point2D> stream  =
+        DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t += rStep )
             .peek( t -> xExpr.setVariable( param, t ) )
             .peek( t -> yExpr.setVariable( param, t ) )
             .mapToObj( t -> new Point2D.Double( xExpr.evaluate(), yExpr.evaluate() ) );

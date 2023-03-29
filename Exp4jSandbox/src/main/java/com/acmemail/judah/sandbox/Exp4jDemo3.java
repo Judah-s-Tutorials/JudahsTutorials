@@ -1,4 +1,4 @@
-package com.acmemail.judah;
+package com.acmemail.judah.sandbox;
 
 import java.awt.geom.Point2D;
 import java.util.stream.DoubleStream;
