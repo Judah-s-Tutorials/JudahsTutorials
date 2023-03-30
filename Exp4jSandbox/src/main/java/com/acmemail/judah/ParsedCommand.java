@@ -1,5 +1,7 @@
 package com.acmemail.judah;
 
+import java.util.Objects;
+
 /**
  * This is a small class to store the result
  * of parsing a command string.
@@ -68,5 +70,46 @@ public class ParsedCommand
     public String getArgString()
     {
         return argString;
+    }
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder   bldr    = new StringBuilder();
+        bldr.append( "cmd=\"" ).append( command )
+            .append( "\",cmdStr=\"" ).append( commandString )
+            .append( "\",argStr=\"" ).append( argString )
+            .append( "\"" );
+        return bldr.toString();
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        int hash    = Objects.hash( command, commandString, argString );
+        return hash;
+    }
+    
+    @Override
+    public boolean equals( Object other )
+    {
+        boolean result  = false;
+        if ( this == other )
+            result = true;
+        else if ( other == null )
+            result = false;
+        else if ( !(other instanceof ParsedCommand ) )
+            result = false;
+        else
+        {
+            ParsedCommand   that    = (ParsedCommand)other;
+            if ( getCommand() != that.getCommand() )
+                result = false;
+            else if ( !getCommandString().equals( that.getCommandString() ) )
+                result = false;
+            else
+                result = getArgString().equals( that.getArgString() );
+        }
+        return result;
     }
 }

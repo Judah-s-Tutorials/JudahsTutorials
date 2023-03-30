@@ -58,10 +58,10 @@ public class CommandStringReader
         ParsedCommand   parsedCommand   = null;
         while ( parsedCommand == null )
         {
-            String  line    = reader.readLine().trim();
+            String  line    = reader.readLine();
             if ( line == null )
                 parsedCommand = new ParsedCommand( Command.NONE, "", "" );
-            else if ( line.isEmpty() )
+            else if ( (line = line.trim()).isEmpty() )
                 ;
             else if ( line.startsWith( "#" ) )
                 ;
