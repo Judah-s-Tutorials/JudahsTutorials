@@ -82,7 +82,6 @@ public class InputParser
         
         ValidationResult    result  = errors.isEmpty() ? 
             ValidationResult.SUCCESS : new ValidationResult( false, errors );
-//        reportResult( result );
         return result;
     }
     
