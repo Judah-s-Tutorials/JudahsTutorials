@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import net.objecthunter.exp4j.ValidationResult;
 
@@ -40,28 +41,22 @@ public class InputParser
             equation = new Equation();
             break;
         case X_EQUALS:
-            if ( argString.isEmpty() )
-                System.out.println( equation.getXExpression() );
-            else
-                parseArg( equation::setXExpression );
+            parseArg( equation::setXExpression, equation::getXExpression );
             break;
         case Y_EQUALS:
-            if ( argString.isEmpty() )
-                System.out.println( equation.getYExpression() );
-            else
-                parseArg( equation::setYExpression );
+            parseArg( equation::setYExpression, equation::getYExpression );
             break;
         case VARIABLES:
             parseVars();
             break;
         case START:
-            parseArg( equation::setRangeStart );
+            parseArg( equation::setRangeStart, equation::getRangeStart );
             break;
         case END:
-            parseArg( equation::setRangeEnd );
+            parseArg( equation::setRangeEnd, equation::getRangeEnd );
             break;
-        case INCREMENT:
-            parseArg( equation::setRangeStep );
+        case STEP:
+            parseArg( equation::setRangeStep, equation::getRangeStep );
             break;
         case PARAM:
             setParameterName();
@@ -89,27 +84,36 @@ public class InputParser
     {
         return equation;
     }
-    
-    private void parseArg( Function<String,ValidationResult> funk )
-    {
-        ValidationResult    result  = 
-            argString.isEmpty() ? 
-                requiresArgument() : 
-                funk.apply( argString );
-        if ( !result.isValid() )
-            errors.addAll( result.getErrors() );
+ 
+    private void parseArg( 
+        Function<String,ValidationResult> setter,
+        Supplier<Object> getter
+    )
+    {   if ( argString.isEmpty() )
+            System.out.println( getter.get() );
+        else
+        {
+            ValidationResult    result  = setter.apply( argString );
+            if ( !result.isValid() )
+                errors.addAll( result.getErrors() );
+        }
     }
     
-    private void parseArg( DoubleConsumer funk )
+    private void parseArg( DoubleConsumer setter, Supplier<Object> getter )
     {
-        try
+        if ( argString.isBlank() )
+            System.out.println( getter.get() );
+        else
         {
-            double  val = Double.parseDouble( argString.trim() );
-            funk.accept( val );
-        }
-        catch ( NumberFormatException exc )
-        {
-            formatError( argString, "is not a valid value" );
+            try
+            {
+                double  val = Double.parseDouble( argString );
+                setter.accept( val );
+            }
+            catch ( NumberFormatException exc )
+            {
+                formatError( argString, "is not a valid value" );
+            }
         }
     }
     
@@ -196,11 +200,10 @@ public class InputParser
     
     private void setParameterName()
     {
-        String  trimmed = argString.trim();
-        if ( !Equation.isValidName( trimmed ) )
-        {
+        if ( !Equation.isValidName( argString ) )
             formatError( argString, "is not a valid variable name" );
-        }
+        else
+            equation.setParam( argString );
     }
     
     private void invalidCommand()

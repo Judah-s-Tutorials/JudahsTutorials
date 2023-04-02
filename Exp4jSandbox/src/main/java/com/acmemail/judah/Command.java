@@ -29,7 +29,7 @@ public enum Command
     ),
     START( "Describes the start value in the iteration range" ),
     END( "Describes the end value in the iteration range" ),
-    INCREMENT( 
+    STEP( 
         "Describes the increment value "
         + "for traversing iteration range"
     ),

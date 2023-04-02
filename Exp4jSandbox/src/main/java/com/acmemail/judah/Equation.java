@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
@@ -99,15 +100,15 @@ public class Equation
      * Gets the value of the variable
      * with the given name.
      * If the name is not found
-     * 0 is returned.
+     * null is returned.
      * 
      * @param name  the given name
      * 
      * @return  the value of the variable with the given name
      */
-    public double getVar( String name )
+    public Double getVar( String name )
     {
-        double  val = vars.getOrDefault( name, 0. );
+        Double  val = vars.get( name );
         return val;
     }
     
@@ -132,15 +133,9 @@ public class Equation
      */
     public ValidationResult setXExpression( String exprStr )
     {
-        Expression expr = new ExpressionBuilder( exprStr )
-            .variables( vars.keySet() )
-            .build();
-        ValidationResult    result  = expr.validate( false );
+        ValidationResult    result  = validateExpr( exprStr, e -> xExpr = e );
         if ( result == ValidationResult.SUCCESS )
-        {
             this.xExprStr = exprStr;
-            this.xExpr = expr;
-        }
         return result;
     }
     
@@ -158,15 +153,9 @@ public class Equation
      */
     public ValidationResult setYExpression( String exprStr )
     {
-        Expression expr = new ExpressionBuilder( exprStr )
-            .variables( vars.keySet() )
-            .build();
-        ValidationResult    result  = expr.validate( false );
+        ValidationResult    result  = validateExpr( exprStr, e -> yExpr = e );
         if ( result == ValidationResult.SUCCESS )
-        {
             this.yExprStr = exprStr;
-            this.yExpr = expr;
-        }
         return result;
     }
     
@@ -176,6 +165,8 @@ public class Equation
      * derived from an equation of the form <em>y=f(x)</em>.
      * 
      * @return the (x,y) coordinates derived from a parametric equation
+     * 
+     * @throws InvalidExpressionException if the equation is invalid
      */
     public Stream<Point2D> streamY()
     {
@@ -196,6 +187,8 @@ public class Equation
      * derived from a parametric equation.
      * 
      * @return the (x,y) coordinates derived from a parametric equation
+     * 
+     * @throws InvalidExpressionException if the equation is invalid
      */
     public Stream<Point2D> streamXY()
     {
@@ -206,7 +199,8 @@ public class Equation
             throw new InvalidExpressionException( validationResult );
         validationResult    = yExpr.validate( true );
         if ( validationResult != ValidationResult.SUCCESS )
-            throw new InvalidExpressionException( validationResult );Stream<Point2D> stream  =
+            throw new InvalidExpressionException( validationResult );
+        Stream<Point2D> stream  =
         DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t += rStep )
             .peek( t -> xExpr.setVariable( param, t ) )
             .peek( t -> yExpr.setVariable( param, t ) )
@@ -332,6 +326,57 @@ public class Equation
     public void setRangeStep( double rangeStep )
     {
         rStep = rangeStep;
+    }
+    
+    /**
+     * Generate and validate an exp4j Expression
+     * from a given string.
+     * Validation takes place
+     * by attempting to build an expression
+     * using ExpressionBuilder.
+     * This can result in an 
+     * undocumented exception being thrown,
+     * in which case a ValidationResult
+     * describing the exception is returned.
+     * If no exception is thrown
+     * the Expression <em>validate<em> method is invoked;
+     * if this indicates an error,
+     * the ValidationResult
+     * obtained from the <em>validate<em> method
+     * is returned.
+     * If no error is detected,
+     * the generated Expression 
+     * is stored at the given destination
+     * and ValidationResult.SUCCESS is returned.
+     * 
+     * @param exprStr
+     * @param destination
+     * @return
+     */
+    private ValidationResult 
+    validateExpr( String exprStr, Consumer<Expression> destination )
+    {
+        ValidationResult    result  = null;
+        try
+        {
+            Expression expr = new ExpressionBuilder( exprStr )
+                .variables( vars.keySet() )
+                .build();
+            result = expr.validate( false );
+            if ( result == ValidationResult.SUCCESS )
+                destination.accept( expr );
+        }
+        catch ( Exception exc )
+        {
+            List<String>    list    =
+                List.of( 
+                    "Unexpected exception",
+                    exc.getClass().getName(),
+                    exc.getMessage()
+                );
+            result = new ValidationResult( false, list );
+        }
+        return result;
     }
     
 

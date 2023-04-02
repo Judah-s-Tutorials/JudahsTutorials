@@ -68,7 +68,7 @@ class CommandStringReaderTest
     void testSimpleCommandWithoutArg()
     {
         List<String>    input   = 
-            Stream.of( Command.END, Command.EXIT, Command.INCREMENT )
+            Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, "", true ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
                 .toList();
@@ -94,7 +94,7 @@ class CommandStringReaderTest
     public void testSimpleCommandWithArg()
     {
         List<String>    input   = 
-            Stream.of( Command.END, Command.EXIT, Command.INCREMENT )
+            Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, getArg(), true ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
                 .toList();
@@ -122,7 +122,7 @@ class CommandStringReaderTest
     public void testLeadingTrailingSpaces()
     {
         List<String>    input   = 
-            Stream.of( Command.END, Command.EXIT, Command.INCREMENT )
+            Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, getArg(), true ) )
                 .map( p -> 
                     "   " + p.getCommandString() + 
@@ -199,7 +199,7 @@ class CommandStringReaderTest
         // Mix lines representing concrete, valid commands with lines
         // representing comments, empty lines and in valid arguments.
         List<String>    input   = 
-            Stream.of( Command.END, Command.EXIT, Command.INCREMENT )
+            Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, getArg(), true ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
                 .flatMap( s ->

@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.geom.Point2D;
 import java.util.Arrays;
@@ -167,22 +166,27 @@ class EquationTest
     }
     
     @Test
-    public void testStreamYGoWrong()
+    public void testsetYExpressionGoWrong()
     {
-        try
-        {
-            equation.setYExpression( "3" );
-            equation.streamY();
-            fail( "expected exception not thrown" );
-        }
-        catch ( InvalidExpressionException exc )
-        {
-            ValidationResult    result  = exc.getValidationResult();
-            assertNotNull( result );
-            List<String>        errors  = result.getErrors();
-            assertNotNull( errors );
-            assertFalse( result.isValid() );
-        }
+        ValidationResult    result  = 
+            equation.setYExpression( "badexpression" );
+        assertNotNull( result );
+        List<String>        errors  = result.getErrors();
+        assertNotNull( errors );
+        assertFalse( errors.isEmpty() );
+        assertFalse( result.isValid() );
+    }
+    
+    @Test
+    public void testsetXExpressionGoWrong()
+    {
+        ValidationResult    result  = 
+            equation.setXExpression( "badexpression" );
+        assertNotNull( result );
+        List<String>        errors  = result.getErrors();
+        assertNotNull( errors );
+        assertFalse( errors.isEmpty() );
+        assertFalse( result.isValid() );
     }
 
     @Test
@@ -277,7 +281,7 @@ class EquationTest
         String[]    validNames      =
         { "_", "a", "A", "_0", "a0", "A0", "a_0", "A_0", "abc_123" };
         String[]    invalidNames    = 
-        { "0", "0a", "0_", "abc%", "abc$", "abc.0" };
+        { "0", "0a", "0_", "abc%", "abc$", "abc.0", "" };
         
         Arrays.stream( validNames )
         .forEach( n -> assertTrue( Equation.isValidName( n ), n ) );
