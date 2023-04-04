@@ -38,7 +38,9 @@ public enum Command
     XY_STREAM( "Generate a stream of the form (x,y) = f(t)" ),
     EXIT( "Exit from the current operation" ),
     INVALID( "Designates an invalid command." ),
-    NONE( "Identifies an empty command string" );
+    NONE( "Identifies an empty command string" ),
+    OPEN( "Application specific; probably \"open equation file\""),
+    SAVE( "Application specific; probably \"save equation file\"");
     
     /** Line separator for the current platform. */
     private static final String lineSep         = System.lineSeparator();

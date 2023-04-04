@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayOutputStream;
@@ -52,6 +53,13 @@ class InputParserTest
             parser.parseInput( Command.END, "" + newVal );
         assertTrue( result.isValid() );
         assertEquals( newVal, equation.getRangeEnd() );
+        
+        // test invalid input
+        result = parser.parseInput( Command.END, "%invalidvalue%" );
+        assertFalse( result.isValid() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.END, "" + newVal );
     }
 
     @Test
@@ -85,7 +93,11 @@ class InputParserTest
         ValidationResult    result      = 
             parser.parseInput( Command.STEP, "" + newVal );
         assertTrue( result.isValid() );
-        assertEquals( newVal, equation.getRangeStep() );        
+        assertEquals( newVal, equation.getRangeStep() );
+        
+        // test invalid value
+        result = parser.parseInput( Command.STEP, "invalidvalue" );
+        assertFalse( result.isValid() );
         
         // test no-arg option
         testEmptyArg( parser, Command.STEP, "" + newVal );
@@ -120,6 +132,13 @@ class InputParserTest
             parser.parseInput( Command.PARAM, newVal );
         assertTrue( result.isValid() );
         assertEquals( newVal, equation.getParam() );        
+        
+        // test invalid input
+        result = parser.parseInput( Command.PARAM, "%invalidname%" );
+        assertFalse( result.isValid() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.PARAM, "" + newVal );
     }
 
     @Test
@@ -133,6 +152,13 @@ class InputParserTest
             parser.parseInput( Command.START, "" + newVal );
         assertTrue( result.isValid() );
         assertEquals( newVal, equation.getRangeStart() );        
+        
+        // test invalid value
+        result = parser.parseInput( Command.START, "invalidvalue" );
+        assertFalse( result.isValid() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.START, "" + newVal );
     }
 
     @Test
@@ -155,7 +181,14 @@ class InputParserTest
             parser.parseInput( Command.X_EQUALS, newVal );
         assertTrue( result.isValid() );
         assertEquals( newVal, equation.getXExpression() );        
-    }
+        
+        // test invalid value
+        result = parser.parseInput( Command.X_EQUALS, "invalidexpression" );
+        assertFalse( result.isValid() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.X_EQUALS, "" + newVal );
+}
     
     @Test
     public void testParseInputY_EQUALS()
@@ -168,6 +201,13 @@ class InputParserTest
             parser.parseInput( Command.Y_EQUALS, newVal );
         assertTrue( result.isValid() );
         assertEquals( newVal, equation.getYExpression() );        
+        
+        // test invalid value
+        result = parser.parseInput( Command.Y_EQUALS, "invalidexpression" );
+        assertFalse( result.isValid() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.Y_EQUALS, "" + newVal );
     }
 
     @Test
@@ -256,7 +296,7 @@ class InputParserTest
     @ParameterizedTest
     @ValueSource( strings= 
         { "p=.", "p=.,q=%", " a = 5..0 , b = ..6 , c  =  %7  ,  d = 8$  ",
-          "abc = 55.x , def = x 6, ghi = 5 5"
+          "abc = 55.x , def = x 6, ghi = 5 5 jkl = 5 6"
         })
     void testParseVarsWithBadValues( String str )
     {
@@ -295,6 +335,17 @@ class InputParserTest
         
         // ... but r should not
         assertNull( rVal );
+    }
+    
+    @Test
+    public void testIllegalArgumentException()
+    {
+        Class<IllegalArgumentException> clazz   =
+            IllegalArgumentException.class;
+        InputParser         parser      = new InputParser();
+        
+        assertThrows( clazz, () -> 
+            parser.parseInput( Command.VARIABLES, null ) );
     }
     
     private void 

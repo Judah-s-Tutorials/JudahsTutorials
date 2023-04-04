@@ -39,7 +39,7 @@ public class FunctionDemoRose
                 double  a = args[1];
                 double  b = args[2];
                 
-                double  x =a * Math.cos( b * t ) * Math.cos( t );
+                double  x = a * Math.cos( b * t ) * Math.cos( t );
                 return x;
             }
         };

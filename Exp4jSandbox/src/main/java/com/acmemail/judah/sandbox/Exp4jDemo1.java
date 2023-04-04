@@ -25,7 +25,7 @@ public class Exp4jDemo1
         List<PlotCommand>   plot    = new ArrayList<>();
         for ( double xco = -1 ; xco <= .5 ; xco += .005 )
         {
-            Expression e = new ExpressionBuilder("4  x^2 + 3 * x - 2" )
+            Expression e = new ExpressionBuilder("4x^2 + 3 * x - 2" )
                 .variables("x")
                 .build()
                 .setVariable("x", xco);

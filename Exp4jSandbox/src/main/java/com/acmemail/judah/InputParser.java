@@ -68,6 +68,8 @@ public class InputParser
         case NONE:
         case Y_STREAM:
         case XY_STREAM:
+        case OPEN:
+        case SAVE:
             // ignore these
             break;
         default:
@@ -124,7 +126,7 @@ public class InputParser
      * @see #parseVarPair(String)
      * 
      */
-    public void parseVars()
+    private void parseVars()
     {
         StringTokenizer tizer   = new StringTokenizer( argString, "," );
         while ( tizer.hasMoreElements() )
@@ -169,7 +171,7 @@ public class InputParser
         String[]        parts   = varPair.split( "=" );
         
         // var spec must be either "var" or "var=val" 
-        if ( parts.length < 1 || parts.length > 2 )
+        if ( parts.length > 2 )
         {
             String  err =
                 "\"" + varPair + "\""  
@@ -200,29 +202,31 @@ public class InputParser
     
     private void setParameterName()
     {
-        if ( !Equation.isValidName( argString ) )
+        if ( argString.isEmpty() )
+            System.out.println( equation.getParam() );
+        else if ( !Equation.isValidName( argString ) )
             formatError( argString, "is not a valid variable name" );
         else
             equation.setParam( argString );
     }
     
+    /**
+     * Report an invalid command.
+     */
     private void invalidCommand()
     {
         formatError( "is not a valid command in this context" );
     }
     
+    /**
+     * Report that a malfunction has occurred.
+     * 
+     * @param msg   text to add to tail of error message
+     */
     private void malfunction( String msg )
     {
         String  error   = "Malfunction: " + msg;
         errors.add( error );
-    }
-    
-    private ValidationResult requiresArgument()
-    {
-        String              error   = command + ": missing required argument";
-        ValidationResult    result  = 
-            new ValidationResult( false, List.of( error ) );
-        return result;
     }
     
     /**
