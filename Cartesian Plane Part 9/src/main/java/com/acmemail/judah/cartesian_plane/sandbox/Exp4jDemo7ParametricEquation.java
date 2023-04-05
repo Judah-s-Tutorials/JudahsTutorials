@@ -8,7 +8,6 @@ import java.util.stream.DoubleStream;
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.NotificationManager;
-import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.app.FIUtils;
 import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
@@ -17,13 +16,12 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
 /**
- * Example of using an exp4j expression
- * to plot a quadratic
- * using the <em>CartesianPlane</em> class.
+ * Example of using two exp4j expressions
+ * to plot a parametric equation.
  * 
  * @author Jack Straub
  */
-public class Exp4jDemo6PlottingPoints
+public class Exp4jDemo7ParametricEquation
 {
     private static final CartesianPlane plane   = new CartesianPlane();
     
@@ -39,24 +37,34 @@ public class Exp4jDemo6PlottingPoints
         
         Map<String,Double>  vars    = new HashMap<>();
         
-        vars.put( "a", 5. );
-        vars.put( "b", -1. );
-        vars.put( "c", -2. );
-        vars.put( "x", 0. );
+        vars.put( "a", 3. );
+        vars.put( "n", 4. );
+        vars.put( "t", 0. );
     
-        Expression  expr    = 
-            new ExpressionBuilder( "ax^2 + bx + c" )
+        Expression  roseExprX   =
+            new ExpressionBuilder( "a sin(nt)cos(t)" )
+                .variables( vars.keySet() )
+                .build();
+        
+        Expression  roseExprY   =
+            new ExpressionBuilder( "a sin(nt)sin(t)" )
                 .variables( vars.keySet() )
                 .build();
 
         ToPlotPointCommand  toPlotPointCommand =
             FIUtils.toPlotPointCommand( plane );
 
-        expr.setVariables( vars );
+        roseExprX.setVariables( vars );
+        roseExprY.setVariables( vars );
         plane.setStreamSupplier( () ->
-            DoubleStream.iterate( -1, d -> d <= 1, d -> d + .005 )
-                .peek( d -> expr.setVariable( "x", d ) )
-                .mapToObj( x -> new Point2D.Double( x, expr.evaluate() ) )
+            DoubleStream.iterate( 0, t -> t < 2 * Math.PI, t -> t + .001 )
+                .peek( t -> roseExprX.setVariable( "t", t ) )
+                .peek( t -> roseExprY.setVariable( "t", t ) )
+                .mapToObj( t -> 
+                    new Point2D.Double( 
+                        roseExprX.evaluate(), 
+                        roseExprY.evaluate() 
+                 ))
                 .map( toPlotPointCommand::of )
         );
         NotificationManager.INSTANCE

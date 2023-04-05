@@ -13,3 +13,16 @@ Jack Straub, pbvfZN9m2Ca2&QOn
 client #560481
 invoice #4398606, $130.09
 domain judahstutorials.com
+
+start 0
+end 7
+step .005
+variables a=3,n=4,t
+x_expr a sin(nt)cos(t)
+y_expr a sin(nt)sin(t)
+
+start 0
+end 7
+variables a=3,n=5,t=0
+x_expr a * cos(bt)* cos(t)
+y_expr a * cos(bt) * sin(t) 
