@@ -25,4 +25,4 @@ start 0
 end 7
 variables a=3,n=5,t=0
 x_expr a * cos(bt)* cos(t)
-y_expr a * cos(bt) * sin(t) 
+y_expr a * cos(bt) * sin(t)
