@@ -26,3 +26,9 @@ end 7
 variables a=3,n=5,t=0
 x_expr a * cos(bt)* cos(t)
 y_expr a * cos(bt) * sin(t)
+
+
+
+This ticket can also be reviewed on HostPapa Dashboard -> My Support
+Here is an article on how to review an existing ticket from your dashboard: 
+https://hostpapasupport.com/how-to-open-and-access-support-tickets/
