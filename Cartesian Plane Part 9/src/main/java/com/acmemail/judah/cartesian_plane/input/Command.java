@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.exp4j;
+package com.acmemail.judah.cartesian_plane.input;
 
 import java.util.Arrays;
 
@@ -9,7 +9,7 @@ import java.util.Arrays;
  * 
  * @author Jack Straub
  * 
- * @see Equation
+ * @see Expr4Equation
  */
 public enum Command
 {
@@ -29,7 +29,7 @@ public enum Command
     START( 
         "Expression that describes the start value "
             + "of the iteration range" ),
-    END( "Describes the end value in the iteration range" ),
+    END( "Expression that describes the end value in the iteration range" ),
     STEP( 
         "Expression that describes the increment value "
             + "for traversing iteration range"

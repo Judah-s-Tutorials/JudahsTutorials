@@ -4,6 +4,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.cartesian_plane.input.Command;
+import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
+
 class ParsedCommandTest
 {
     @Test

@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.cartesian_plane.input.Command;
+
 class CommandTest
 {
     @Test

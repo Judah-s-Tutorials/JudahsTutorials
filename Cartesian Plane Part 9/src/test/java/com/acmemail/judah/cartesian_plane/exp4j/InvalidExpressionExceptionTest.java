@@ -8,6 +8,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.cartesian_plane.input.InvalidExpressionException;
+
 import net.objecthunter.exp4j.ValidationResult;
 
 class InvalidExpressionExceptionTest

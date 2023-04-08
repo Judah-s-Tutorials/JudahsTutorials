@@ -1,6 +1,6 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import com.acmemail.judah.cartesian_plane.exp4j.Command;
+import com.acmemail.judah.cartesian_plane.input.Command;
 
 /**
  * Application to demonstrate the <em>usage</em> method

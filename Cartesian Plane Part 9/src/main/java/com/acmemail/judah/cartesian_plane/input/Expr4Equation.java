@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.exp4j;
+package com.acmemail.judah.cartesian_plane.input;
 
 import java.awt.geom.Point2D;
 import java.util.HashMap;
@@ -12,7 +12,7 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ValidationResult;
 
-public class Equation
+public class Expr4Equation implements Equation
 {
     private final Map<String,Double>    vars        = new HashMap<>();
     private double                      rStart      = -1;
@@ -31,11 +31,11 @@ public class Equation
      * to the constant expression "1" 
      * (<em>f(x) = 1, f(y) = 1</em>).
      * A default set of variables
-     * is registered; see {@linkplain Equation}.
+     * is registered; see {@linkplain Expr4Equation}.
      * 
-     * @see Equation
+     * @see Expr4Equation
      */
-    public Equation()
+    public Expr4Equation()
     {
         initMap();
         setXExpression( xExprStr );
@@ -47,11 +47,11 @@ public class Equation
      * Establishes the expression 
      * associated with the equation <em>y=f(x)</em>.
      * A default set of variables
-     * is registered; see {@linkplain Equation}.
+     * is registered; see {@linkplain Expr4Equation}.
      * 
      * @param expr  the expression associated with the equation
      */
-    public Equation( String expr )
+    public Expr4Equation( String expr )
     {
         initMap();
         setXExpression( xExprStr );
@@ -67,7 +67,7 @@ public class Equation
      * @param vars  the associated set of variables
      * @param expr  the associated expression
      */
-    public Equation( Map<String,Double> vars, String expr )
+    public Expr4Equation( Map<String,Double> vars, String expr )
     {
         this.vars.putAll( vars );
         setXExpression( xExprStr );
@@ -80,6 +80,7 @@ public class Equation
      * @param name  the name of the variable
      * @param val   the given value
      */
+    @Override
     public void setVar( String name, double val )
     {
         vars.put( name, val );
@@ -93,6 +94,7 @@ public class Equation
      * 
      * @param name  the given name
      */ 
+    @Override
     public void removeVar( String name )
     {
         vars.remove( name );
@@ -108,12 +110,14 @@ public class Equation
      * 
      * @return  the value of the variable with the given name
      */
+    @Override
     public Double getVar( String name )
     {
         Double  val = vars.get( name );
         return val;
     }
     
+    @Override
     public ValidationResult parseFunction( String funk )
     {
         ValidationResult    result  =
@@ -133,6 +137,7 @@ public class Equation
      * 
      * @return  the status of the operation
      */
+    @Override
     public ValidationResult setXExpression( String exprStr )
     {
         ValidationResult    result  = validateExpr( exprStr, e -> xExpr = e );
@@ -153,6 +158,7 @@ public class Equation
      * 
      * @return  the status of the operation
      */
+    @Override
     public ValidationResult setYExpression( String exprStr )
     {
         ValidationResult    result  = validateExpr( exprStr, e -> yExpr = e );
@@ -170,6 +176,7 @@ public class Equation
      * 
      * @throws InvalidExpressionException if the equation is invalid
      */
+    @Override
     public Stream<Point2D> streamY()
     {
         yExpr.setVariables( vars );
@@ -192,6 +199,7 @@ public class Equation
      * 
      * @throws InvalidExpressionException if the equation is invalid
      */
+    @Override
     public Stream<Point2D> streamXY()
     {
         xExpr.setVariables( vars );
@@ -215,6 +223,7 @@ public class Equation
      * 
      * @return  the currently set x-expression
      */
+    @Override
     public String getXExpression()
     {
         return xExprStr;
@@ -225,6 +234,7 @@ public class Equation
      * 
      * @return  the currently set y-expression
      */
+    @Override
     public String getYExpression()
     {
         return yExprStr;
@@ -236,6 +246,7 @@ public class Equation
      * 
      * @return the name of the parameter
      */
+    @Override
     public String getParam()
     {
         return param;
@@ -247,6 +258,7 @@ public class Equation
      * 
      * @param param the name of the parameter
      */
+    @Override
     public void setParam( String param )
     {
         this.param = param;
@@ -260,6 +272,7 @@ public class Equation
      * @param end   the end of the iteration range
      * @param step  the increment to use when traversing the iteration range
      */
+    @Override
     public void setRange( double start, double end, double step )
     {
         setRangeStart( start );
@@ -272,6 +285,7 @@ public class Equation
      * 
      * @param rangeStart   iteration range start
      */
+    @Override
     public void setRangeStart( double rangeStart )
     {
         rStart = rangeStart;
@@ -282,6 +296,7 @@ public class Equation
      * 
      * @return the start of the iteration range
      */
+    @Override
     public double getRangeStart()
     {
         return rStart;
@@ -292,6 +307,7 @@ public class Equation
      * 
      * @return the end of the iteration range
      */
+    @Override
     public double getRangeEnd()
     {
         return rEnd;
@@ -303,6 +319,7 @@ public class Equation
      * 
      * @param rangeEnd  iteration range end
      */
+    @Override
     public void setRangeEnd( double rangeEnd )
     {
         rEnd = rangeEnd;
@@ -314,6 +331,7 @@ public class Equation
      * 
      * @return the start of the iteration range
      */
+    @Override
     public double getRangeStep()
     {
         return rStep;
@@ -325,63 +343,12 @@ public class Equation
      * 
      * @param rangeStep   iteration range increment
      */
+    @Override
     public void setRangeStep( double rangeStep )
     {
         rStep = rangeStep;
     }
     
-    /**
-     * Generate and validate an exp4j Expression
-     * from a given string.
-     * Validation takes place
-     * by attempting to build an expression
-     * using ExpressionBuilder.
-     * This can result in an 
-     * undocumented exception being thrown,
-     * in which case a ValidationResult
-     * describing the exception is returned.
-     * If no exception is thrown
-     * the Expression <em>validate<em> method is invoked;
-     * if this indicates an error,
-     * the ValidationResult
-     * obtained from the <em>validate<em> method
-     * is returned.
-     * If no error is detected,
-     * the generated Expression 
-     * is stored at the given destination
-     * and ValidationResult.SUCCESS is returned.
-     * 
-     * @param exprStr
-     * @param destination
-     * @return
-     */
-    private ValidationResult 
-    validateExpr( String exprStr, Consumer<Expression> destination )
-    {
-        ValidationResult    result  = null;
-        try
-        {
-            Expression expr = new ExpressionBuilder( exprStr )
-                .variables( vars.keySet() )
-                .build();
-            result = expr.validate( false );
-            if ( result == ValidationResult.SUCCESS )
-                destination.accept( expr );
-        }
-        catch ( Exception exc )
-        {
-            List<String>    list    =
-                List.of( 
-                    "Unexpected exception",
-                    exc.getClass().getName(),
-                    exc.getMessage()
-                );
-            result = new ValidationResult( false, list );
-        }
-        return result;
-    }
-    
-
     /**
      * Determines if a given string
      * is a valid variable name.
@@ -437,6 +404,57 @@ public class Equation
     }
     
     /**
+     * Generate and validate an exp4j Expression
+     * from a given string.
+     * Validation takes place
+     * by attempting to build an expression
+     * using ExpressionBuilder.
+     * This can result in an 
+     * undocumented exception being thrown,
+     * in which case a ValidationResult
+     * describing the exception is returned.
+     * If no exception is thrown
+     * the Expression <em>validate<em> method is invoked;
+     * if this indicates an error,
+     * the ValidationResult
+     * obtained from the <em>validate<em> method
+     * is returned.
+     * If no error is detected,
+     * the generated Expression 
+     * is stored at the given destination
+     * and ValidationResult.SUCCESS is returned.
+     * 
+     * @param exprStr
+     * @param destination
+     * @return
+     */
+    private ValidationResult 
+    validateExpr( String exprStr, Consumer<Expression> destination )
+    {
+        ValidationResult    result  = null;
+        try
+        {
+            Expression expr = new ExpressionBuilder( exprStr )
+                .variables( vars.keySet() )
+                .build();
+            result = expr.validate( false );
+            if ( result == ValidationResult.SUCCESS )
+                destination.accept( expr );
+        }
+        catch ( Exception exc )
+        {
+            List<String>    list    =
+                List.of( 
+                    "Unexpected exception",
+                    exc.getClass().getName(),
+                    exc.getMessage()
+                );
+            result = new ValidationResult( false, list );
+        }
+        return result;
+    }
+    
+    /**
      * Determine if a given character is alphabetic:
      * _, or [a-z] or [A-Z].
      * 
@@ -477,9 +495,9 @@ public class Equation
     
     /**
      * Initializes the variable map
-     * to the default values; see {@linkplain Equation}.
+     * to the default values; see {@linkplain Expr4Equation}.
      * 
-     * @see Equation
+     * @see Expr4Equation
      */
     private void initMap()
     {

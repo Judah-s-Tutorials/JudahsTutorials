@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.exp4j;
+package com.acmemail.judah.cartesian_plane.input;
 
 import java.util.ArrayList;
 import java.util.List;

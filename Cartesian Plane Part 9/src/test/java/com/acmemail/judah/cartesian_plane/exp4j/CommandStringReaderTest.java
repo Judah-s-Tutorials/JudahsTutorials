@@ -18,6 +18,10 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.cartesian_plane.input.Command;
+import com.acmemail.judah.cartesian_plane.input.CommandStringReader;
+import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
+
 class CommandStringReaderTest
 {
     /**

@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.exp4j;
+package com.acmemail.judah.cartesian_plane.input;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -147,7 +147,7 @@ public class CommandStringReader
      * 
      * @author Jack Straub
      */
-    public static class Shortcut
+    private static class Shortcut
     {
         /** Short name for command. */
         public final String     shortStr;
