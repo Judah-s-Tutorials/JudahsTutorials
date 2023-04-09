@@ -172,5 +172,29 @@ public interface Equation
      * @param rangeStep   iteration range increment
      */
     void setRangeStep(double rangeStep);
+    
+    /**
+     * Determines if a given string
+     * is a valid variable name.
+     * Given that underscore is an alphabetic character,
+     * a valid variable name is one that
+     * begins with an alphabetic character,
+     * and whose remaining are characters alphanumeric.
+     * 
+     * @param name  the given string
+     * 
+     * @return  true if the given string is a valid variable name
+     */
+    boolean isValidName( String name );
 
+    
+    /**
+     * Determines if a given string
+     * is a valid double value.
+     * 
+     * @param valStr  the given string
+     * 
+     * @return  true if the given string is a valid double value
+     */
+    boolean isValidValue( String valStr );
 }

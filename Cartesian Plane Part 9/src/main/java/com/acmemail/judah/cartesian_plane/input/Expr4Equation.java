@@ -361,7 +361,7 @@ public class Expr4Equation implements Equation
      * 
      * @return  true if the given string is a valid variable name
      */
-    public static boolean isValidName( String name )
+    public boolean isValidName( String name )
     {
         boolean status  = false;
         int     len     = name.length();
@@ -387,7 +387,7 @@ public class Expr4Equation implements Equation
      * 
      * @return  true if the given string is a valid double value
      */
-    public static boolean isValidValue( String valStr )
+    public boolean isValidValue( String valStr )
     {
         boolean result  = false;
         try
