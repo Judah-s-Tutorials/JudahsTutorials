@@ -75,6 +75,16 @@ public class Expr4Equation implements Equation
     }
     
     /**
+     * Returns a newly initialized Equation.
+     * 
+     * @return  a newly initialized Equation
+     */
+    public Equation newEquation()
+    {
+        return new Expr4Equation();
+    }
+    
+    /**
      * Sets the value of a variable to a given value.
      * 
      * @param name  the name of the variable
@@ -118,10 +128,10 @@ public class Expr4Equation implements Equation
     }
     
     @Override
-    public ValidationResult parseFunction( String funk )
+    public Result parseFunction( String funk )
     {
-        ValidationResult    result  =
-            new ValidationResult( false, List.of( "NOT IMPLEMENTED") );
+        Result    result  =
+            new Result( false, List.of( "NOT IMPLEMENTED") );
         return result;
     }
     
@@ -131,17 +141,17 @@ public class Expr4Equation implements Equation
      * to the given value.
      * If a parsing error occurs
      * a description of the error is returned,
-     * otherwise ValidationResult.SUCCESS is returned.
+     * otherwise Result.SUCCESS is returned.
      * 
      * @param exprStr   the given value
      * 
      * @return  the status of the operation
      */
     @Override
-    public ValidationResult setXExpression( String exprStr )
+    public Result setXExpression( String exprStr )
     {
-        ValidationResult    result  = validateExpr( exprStr, e -> xExpr = e );
-        if ( result == ValidationResult.SUCCESS )
+        Result    result  = validateExpr( exprStr, e -> xExpr = e );
+        if ( result == new Result( true ) )
             this.xExprStr = exprStr;
         return result;
     }
@@ -152,17 +162,17 @@ public class Expr4Equation implements Equation
      * to the given value.
      * If a parsing error occurs
      * a description of the error is returned,
-     * otherwise ValidationResult.SUCCESS is returned.
+     * otherwise Result.SUCCESS is returned.
      * 
      * @param exprStr   the given value
      * 
      * @return  the status of the operation
      */
     @Override
-    public ValidationResult setYExpression( String exprStr )
+    public Result setYExpression( String exprStr )
     {
-        ValidationResult    result  = validateExpr( exprStr, e -> yExpr = e );
-        if ( result == ValidationResult.SUCCESS )
+        Result    result  = validateExpr( exprStr, e -> yExpr = e );
+        if ( result.isSuccess() )
             this.yExprStr = exprStr;
         return result;
     }
@@ -180,9 +190,12 @@ public class Expr4Equation implements Equation
     public Stream<Point2D> streamY()
     {
         yExpr.setVariables( vars );
-        ValidationResult    validationResult    = yExpr.validate( true );
-        if ( validationResult != ValidationResult.SUCCESS )
-            throw new InvalidExpressionException( validationResult );
+        ValidationResult    result    = yExpr.validate( true );
+        if ( result != ValidationResult.SUCCESS )
+        {
+            String  message = "Unexpected expression validation failure.";
+            throw new InvalidExpressionException( message );
+        }
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x += rStep )
                 .peek( d -> yExpr.setVariable( "x", d ) )
@@ -202,14 +215,21 @@ public class Expr4Equation implements Equation
     @Override
     public Stream<Point2D> streamXY()
     {
-        xExpr.setVariables( vars );
         yExpr.setVariables( vars );
-        ValidationResult    validationResult    = xExpr.validate( true );
-        if ( validationResult != ValidationResult.SUCCESS )
-            throw new InvalidExpressionException( validationResult );
-        validationResult    = yExpr.validate( true );
-        if ( validationResult != ValidationResult.SUCCESS )
-            throw new InvalidExpressionException( validationResult );
+        ValidationResult    result    = xExpr.validate( true );
+        if ( !result.isValid() )
+        {
+            String  message = "Unexpected x-expression validation failure.";
+            throw new InvalidExpressionException( message );
+        }
+        xExpr.setVariables( vars );
+        result = yExpr.validate( true );
+        if ( !result.isValid() )
+        {
+            String  message = "Unexpected y-expression validation failure.";
+            throw new InvalidExpressionException( message );
+        }
+        
         Stream<Point2D> stream  =
         DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t += rStep )
             .peek( t -> xExpr.setVariable( param, t ) )
@@ -411,35 +431,40 @@ public class Expr4Equation implements Equation
      * using ExpressionBuilder.
      * This can result in an 
      * undocumented exception being thrown,
-     * in which case a ValidationResult
+     * in which case a Result
      * describing the exception is returned.
      * If no exception is thrown
      * the Expression <em>validate<em> method is invoked;
      * if this indicates an error,
-     * the ValidationResult
+     * the Result
      * obtained from the <em>validate<em> method
      * is returned.
      * If no error is detected,
      * the generated Expression 
      * is stored at the given destination
-     * and ValidationResult.SUCCESS is returned.
+     * and Result.SUCCESS is returned.
      * 
      * @param exprStr
      * @param destination
      * @return
      */
-    private ValidationResult 
+    private Result 
     validateExpr( String exprStr, Consumer<Expression> destination )
     {
-        ValidationResult    result  = null;
+        Result    result  = null;
         try
         {
             Expression expr = new ExpressionBuilder( exprStr )
                 .variables( vars.keySet() )
                 .build();
-            result = expr.validate( false );
-            if ( result == ValidationResult.SUCCESS )
+            ValidationResult    expr4jResult = expr.validate( false );
+            if ( expr4jResult == ValidationResult.SUCCESS )
                 destination.accept( expr );
+            
+            result = new Result( 
+                expr4jResult.isValid(), 
+                expr4jResult.getErrors()
+            );
         }
         catch ( Exception exc )
         {
@@ -449,7 +474,7 @@ public class Expr4Equation implements Equation
                     exc.getClass().getName(),
                     exc.getMessage()
                 );
-            result = new ValidationResult( false, list );
+            result = new Result( false, list );
         }
         return result;
     }

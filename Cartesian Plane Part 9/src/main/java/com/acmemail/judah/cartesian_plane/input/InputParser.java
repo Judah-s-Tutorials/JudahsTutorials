@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 import net.objecthunter.exp4j.ValidationResult;
 
 /**
- * TODO add default methods to interface
  * @author Jack Straub
  */
 public class InputParser
@@ -31,7 +30,7 @@ public class InputParser
         this.equation = equation != null ? equation : new Expr4Equation();
     }
     
-    public ValidationResult parseInput( Command command, String argString )
+    public Result parseInput( Command command, String argString )
     {
         if ( argString == null )
             throw new IllegalArgumentException( "argString may not be null" );
@@ -42,7 +41,7 @@ public class InputParser
         switch ( command )
         {
         case EQUATION:
-            equation = new Expr4Equation();
+            equation = equation.newEquation();
             break;
         case XEQUALS:
             parseArg( equation::setXExpression, equation::getXExpression );
@@ -81,8 +80,8 @@ public class InputParser
             break;
         }
         
-        ValidationResult    result  = errors.isEmpty() ? 
-            ValidationResult.SUCCESS : new ValidationResult( false, errors );
+        Result  result  = errors.isEmpty() ? 
+            new Result( true ) : new Result( false, errors );
         return result;
     }
     
@@ -92,16 +91,16 @@ public class InputParser
     }
  
     private void parseArg( 
-        Function<String,ValidationResult> setter,
+        Function<String,Result> setter,
         Supplier<Object> getter
     )
     {   if ( argString.isEmpty() )
             System.out.println( getter.get() );
         else
         {
-            ValidationResult    result  = setter.apply( argString );
-            if ( !result.isValid() )
-                errors.addAll( result.getErrors() );
+            Result  result  = setter.apply( argString );
+            if ( !result.isSuccess() )
+                errors.addAll( result.getMessages() );
         }
     }
     
@@ -188,11 +187,11 @@ public class InputParser
             String  valStr  = 
                 parts.length == 1 ? "0" : parts[1].trim();
             
-            if ( !Expr4Equation.isValidName( name ) )
+            if ( !equation.isValidName( name ) )
             {
                 formatError( name, "is not a valid variable name" );
             }
-            else if ( !Expr4Equation.isValidValue( valStr ) )
+            else if ( !equation.isValidValue( valStr ) )
             {
                 formatError( valStr, "is not a valid variable value" );
             }
@@ -208,7 +207,7 @@ public class InputParser
     {
         if ( argString.isEmpty() )
             System.out.println( equation.getParam() );
-        else if ( !Expr4Equation.isValidName( argString ) )
+        else if ( !equation.isValidName( argString ) )
             formatError( argString, "is not a valid variable name" );
         else
             equation.setParam( argString );

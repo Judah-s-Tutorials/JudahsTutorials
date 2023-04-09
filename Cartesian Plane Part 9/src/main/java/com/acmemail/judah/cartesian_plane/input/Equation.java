@@ -3,11 +3,35 @@ package com.acmemail.judah.cartesian_plane.input;
 import java.awt.geom.Point2D;
 import java.util.stream.Stream;
 
-import net.objecthunter.exp4j.ValidationResult;
-
+/**
+ * This interface describes the facilities necessary
+ * to manage an <em>equation</em>.
+ * An <em>equation</em> is a set of resources
+ * that define a simple function (<code>y = f(x)</code>)
+ * or a parametric equation (<code>(x,y) = f(t)</code>).
+ * These resources include:
+ * <ul>
+ *      <li>
+ *          Expressions for the calculation 
+ *          of y values in a simple function,
+ *          or the calculation of (x,y) values
+ *          an a parametric equation;
+ *      </li>
+ *      <li>The declaration of variables used in the expression(s); and</li>
+ *      <li>A range for producing a plot.</li>
+ * </ul>
+ *
+ * @author Jack Straub
+ */
 public interface Equation
 {
-
+    /**
+     * Returns a newly initialized Equation.
+     * 
+     * @return  a newly initialized Equation
+     */
+    Equation newEquation();
+    
     /**
      * Sets the value of a variable to a given value.
      * 
@@ -38,7 +62,7 @@ public interface Equation
      */
     Double getVar(String name);
 
-    ValidationResult parseFunction(String funk);
+    Result parseFunction(String funk);
 
     /**
      * Parses the expression used to derive
@@ -46,13 +70,13 @@ public interface Equation
      * to the given value.
      * If a parsing error occurs
      * a description of the error is returned,
-     * otherwise ValidationResult.SUCCESS is returned.
+     * otherwise Result.SUCCESS is returned.
      * 
      * @param exprStr   the given value
      * 
      * @return  the status of the operation
      */
-    ValidationResult setXExpression(String exprStr);
+    Result setXExpression(String exprStr);
 
     /**
      * Parses the expression used to derive
@@ -60,13 +84,13 @@ public interface Equation
      * to the given value.
      * If a parsing error occurs
      * a description of the error is returned,
-     * otherwise ValidationResult.SUCCESS is returned.
+     * otherwise Result.SUCCESS is returned.
      * 
      * @param exprStr   the given value
      * 
      * @return  the status of the operation
      */
-    ValidationResult setYExpression(String exprStr);
+    Result setYExpression(String exprStr);
 
     /**
      * Iterates over the encapsulated range,
