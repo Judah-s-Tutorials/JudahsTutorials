@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import java.awt.geom.Point2D;
+import java.util.Map;
 import java.util.stream.Stream;
 
 /**
@@ -62,6 +63,17 @@ public interface Equation
      */
     Double getVar(String name);
 
+    /**
+     * Returns an unmodifiable map
+     * describing all declared variables 
+     * and their values.
+     * 
+     * @param name  the given name
+     * 
+     * @return  the value of the variable with the given name
+     */
+    Map<String,Double> getVars();
+
     Result parseFunction(String funk);
 
     /**
@@ -93,28 +105,6 @@ public interface Equation
     Result setYExpression(String exprStr);
 
     /**
-     * Iterates over the encapsulated range,
-     * generating the (x,y) coordinates 
-     * derived from an equation of the form <em>y=f(x)</em>.
-     * 
-     * @return the (x,y) coordinates derived from a parametric equation
-     * 
-     * @throws InvalidExpressionException if the equation is invalid
-     */
-    Stream<Point2D> streamY();
-
-    /**
-     * Iterates over the encapsulated range,
-     * generating the (x,y) coordinates 
-     * derived from a parametric equation.
-     * 
-     * @return the (x,y) coordinates derived from a parametric equation
-     * 
-     * @throws InvalidExpressionException if the equation is invalid
-     */
-    Stream<Point2D> streamXY();
-
-    /**
      * Gets the currently set x-expression.
      * 
      * @return  the currently set x-expression
@@ -127,6 +117,28 @@ public interface Equation
      * @return  the currently set y-expression
      */
     String getYExpression();
+
+    /**
+     * Iterates over the encapsulated range,
+     * generating the (x,y) coordinates 
+     * derived from an equation of the form <em>y=f(x)</em>.
+     * 
+     * @return the (x,y) coordinates derived from a parametric equation
+     * 
+     * @throws InvalidExpressionException if the equation is invalid
+     */
+    Stream<Point2D> YPlot();
+
+    /**
+     * Iterates over the encapsulated range,
+     * generating the (x,y) coordinates 
+     * derived from a parametric equation.
+     * 
+     * @return the (x,y) coordinates derived from a parametric equation
+     * 
+     * @throws InvalidExpressionException if the equation is invalid
+     */
+    Stream<Point2D> XYPlot();
 
     /**
      * Gets the name of the parameter

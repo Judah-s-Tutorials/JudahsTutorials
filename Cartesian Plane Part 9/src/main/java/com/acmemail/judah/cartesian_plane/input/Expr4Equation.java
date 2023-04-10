@@ -128,6 +128,13 @@ public class Expr4Equation implements Equation
     }
     
     @Override
+    public Map<String,Double> getVars()
+    {
+        Map<String,Double>  varsRet = Map.copyOf( vars );
+        return varsRet;
+    }
+    
+    @Override
     public Result parseFunction( String funk )
     {
         Result    result  =
@@ -187,14 +194,14 @@ public class Expr4Equation implements Equation
      * @throws InvalidExpressionException if the equation is invalid
      */
     @Override
-    public Stream<Point2D> streamY()
+    public Stream<Point2D> YPlot()
     {
         yExpr.setVariables( vars );
         ValidationResult    result    = yExpr.validate( true );
         if ( result != ValidationResult.SUCCESS )
         {
             String  message = "Unexpected expression validation failure.";
-            throw new InvalidExpressionException( message );
+            throw new ValidationException( message );
         }
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x += rStep )
@@ -213,21 +220,21 @@ public class Expr4Equation implements Equation
      * @throws InvalidExpressionException if the equation is invalid
      */
     @Override
-    public Stream<Point2D> streamXY()
+    public Stream<Point2D> XYPlot()
     {
         yExpr.setVariables( vars );
         ValidationResult    result    = xExpr.validate( true );
         if ( !result.isValid() )
         {
             String  message = "Unexpected x-expression validation failure.";
-            throw new InvalidExpressionException( message );
+            throw new ValidationException( message );
         }
         xExpr.setVariables( vars );
         result = yExpr.validate( true );
         if ( !result.isValid() )
         {
             String  message = "Unexpected y-expression validation failure.";
-            throw new InvalidExpressionException( message );
+            throw new ValidationException( message );
         }
         
         Stream<Point2D> stream  =
