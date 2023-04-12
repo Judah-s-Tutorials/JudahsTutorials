@@ -24,7 +24,6 @@ public class Result
      * and an empty list of messages.
      * 
      * @param success   the given status
-     * @param messages  the given list
      */
     public Result( boolean success )
     {

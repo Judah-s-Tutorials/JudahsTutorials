@@ -2,34 +2,75 @@ package com.acmemail.judah.cartesian_plane.input;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import net.objecthunter.exp4j.ValidationResult;
-
 /**
+ * Interprets an executes a command in the context
+ * of an <em>Equation.</em>
+ * 
  * @author Jack Straub
+ * @see Equation
  */
 public class InputParser
 {
+    /** 
+     * List of error message associated
+     * with an attempted operation.
+     * Cleared at the start of every operation.
+     */
     private final List<String>  errors      = new ArrayList<>();
     
+    /** Encapsulated Equation. */
     private Equation            equation    = null;
+    /** Command currently being processed. Set by parseInput method. */
     private Command             command     = Command.NONE;
+    /** Argument currently being processed. Set by parseInput method. */
     private String              argString   = "";
     
+    /**
+     * Default constructor.
+     * Creates and initializes a default Equation object.
+     */
     public InputParser()
     {
         this( null );
     }
     
+    /**
+     * Constructor.
+     * Established the encapsulated Equation.
+     * 
+     * @param equation  the encapsulated equation; may be null,
+     *                  in which case a default will be instantiated
+     */
     public InputParser( Equation equation )
     {
-        this.equation = equation != null ? equation : new Expr4Equation();
+        this.equation = equation != null ? equation : new Exp4jEquation();
     }
     
+    /**
+     * Interprets and executes a command
+     * and associated argument, if any.
+     * The execution of each possible command
+     * is described by the {@linkplain Equation} interface.
+     * A Result object
+     * describing the outcome of the operation
+     * is returned.
+     * 
+     * @param command       command to execute 
+     * @param argString     associated argument, may not be null
+     * 
+     * @return  Result object describing the outcome of the operation
+     * 
+     * @see Equation
+     * @see Result
+     */
     public Result parseInput( Command command, String argString )
     {
         if ( argString == null )
@@ -53,13 +94,13 @@ public class InputParser
             parseVars();
             break;
         case START:
-            parseArg( equation::setRangeStart, equation::getRangeStart );
+            parseExpression( equation::setRangeStart, equation::getRangeStart );
             break;
         case END:
-            parseArg( equation::setRangeEnd, equation::getRangeEnd );
+            parseExpression( equation::setRangeEnd, equation::getRangeEnd );
             break;
         case STEP:
-            parseArg( equation::setRangeStep, equation::getRangeStep );
+            parseExpression( equation::setRangeStep, equation::getRangeStep );
             break;
         case PARAM:
             setParameterName();
@@ -85,11 +126,31 @@ public class InputParser
         return result;
     }
     
+    /**
+     * Returns the encapsulated equation.
+     * 
+     * @return  the encapsulated equation
+     */
     public Equation getEquation()
     {
         return equation;
     }
  
+    /**
+     * Sets the value of a String resource
+     * in the encapsulated Equation
+     * from the current argument.
+     * If the argument is empty,
+     * prints the current value of the resource
+     * to stdout.
+     * If an error occurs
+     * associated error messages
+     * are stored in the <em>errors</em> list.
+     * 
+     * @param setter    method to invoke to set the resource
+     * @param getter    method to invoke to obtain the current value
+     *                  of the resource
+     */
     private void parseArg( 
         Function<String,Result> setter,
         Supplier<Object> getter
@@ -104,39 +165,77 @@ public class InputParser
         }
     }
     
-    private void parseArg( DoubleConsumer setter, Supplier<Object> getter )
+    /**
+     * Interprets the current argument as an expression,
+     * converts it to a double
+     * and sets the value in the encapsulated Equation.
+     * If the argument string is empty
+     * the current value of the resource
+     * is printed to stdout.
+     * If an error occurs
+     * associated messages 
+     * are stored in the <em>errors</em> list.
+     * 
+     * @param setter    method to set the converted value
+     * @param getter    method to obtain the current value
+     *                  of the indicated resource
+     */
+    private void parseExpression( DoubleConsumer setter, Supplier<Object> getter )
     {
         if ( argString.isBlank() )
             System.out.println( getter.get() );
         else
         {
-            try
-            {
-                double  val = Double.parseDouble( argString );
-                setter.accept( val );
-            }
-            catch ( NumberFormatException exc )
-            {
+            Optional<Double>    opt     = equation.evaluate( argString );
+            if ( opt.isPresent() )
+                setter.accept( opt.get() );
+            else
                 formatError( argString, "is not a valid value" );
+        }
+    }
+    
+    /**
+     * Interprets the current argument
+     * as a comma-separated list of variable specifications,
+     * parses them,
+     * and sets the results in the encapsulated Equation.
+     * If the current argument is empty
+     * prints the names and values 
+     * of all currently declared variables
+     * to stdout.
+     * Messages associated with errors
+     * are stored in the <em>errors</em> list.
+     * 
+     * @see #parseVarPair(String)
+     */
+    private void parseVars()
+    {
+        if ( argString.isEmpty() )
+            printVars();
+        else
+        {
+            StringTokenizer tizer   = new StringTokenizer( argString, "," );
+            while ( tizer.hasMoreElements() )
+            {
+                String      varPair = tizer.nextToken();
+                parseVarPair( varPair );
             }
         }
     }
     
     /**
-     * Parses a string consisting of
-     * a comma-separated list of variable specifications.
-     * 
-     * @see #parseVarPair(String)
-     * 
+     * Prints the name and value
+     * of all currently declared variables
+     * to stdout.
      */
-    private void parseVars()
+    private void printVars()
     {
-        StringTokenizer tizer   = new StringTokenizer( argString, "," );
-        while ( tizer.hasMoreElements() )
-        {
-            String      varPair = tizer.nextToken();
-            parseVarPair( varPair );
-        }
+         final String    format  = "%s=%f%n";
+        Set<Map.Entry<String,Double>>   entries =
+            equation.getVars().entrySet();
+        entries.forEach( 
+            e -> System.out.printf( format, e.getKey(), e.getValue() )
+        );
     }
     
     /**
@@ -151,23 +250,25 @@ public class InputParser
      * if it begins with an underscore or letter,
      * and otherwise consists solely 
      * of alphanumeric characters and underscores.
-     * A valid value string
-     * is any string that can be converted 
-     * to a double.
+     * A value consists of any valid expression
+     * in the context of the current equation.
      * Whitespace is ignored.
      * If necessary,
-     * parsing error are recorded
-     * in the instance <em>errors</em> list.
+     * parsing errors are recorded
+     * in the <em>errors</em> list.
      * <p>
      * Examples:
      * </p>
      * <p style="margin-left: 2em;">
      * <code>a=5.1,b=-2.5 , c = -1, x,y,t</code><br>
      * <code>a=5.1</code><br>
+     * <code>end=2pi</code><br>
+     * <code>a=14.739,b=-17.2713,sum=a+b</code><br>
+     * <code>side=4,hyp=5,theta=acos(side/hyp)</code><br>
      * <code>t</code>
      * </p>
      * 
-     * @param varPair
+     * @param varPair   the name/value pair to parse
      */
     private void parseVarPair( String varPair )
     {
@@ -191,18 +292,31 @@ public class InputParser
             {
                 formatError( name, "is not a valid variable name" );
             }
-            else if ( !equation.isValidValue( valStr ) )
-            {
-                formatError( valStr, "is not a valid variable value" );
-            }
             else
             {
-                double  val = Double.parseDouble( valStr );
-                equation.setVar( name, val );
+                Optional<Double>    optVal  = 
+                    equation.evaluate( valStr );
+                if ( optVal.isPresent() )
+                {
+                    double  val = Double.parseDouble( valStr );
+                    equation.setVar( name, val );
+                }
+                else
+                    formatError( valStr, "is not a valid value" );
             }
         }
     }
     
+    /**
+     * Sets the name of the parameter
+     * in a parametric equation
+     * to the current argument.
+     * If the argument is empty
+     * the current name of the parameter
+     * is printed to stdout.
+     * If the argument is not a valid variable name
+     * an error is stored in the <em>errors</em> list.
+     */
     private void setParameterName()
     {
         if ( argString.isEmpty() )
@@ -238,7 +352,7 @@ public class InputParser
      * The error message is of the form:<br>
      * &nbsp;&nbsp;&nbsp;&nbsp;"command" message<br>
      * for example:
-     * <pre>    "VARIABLES" missing argument</pre>
+     * <pre>    "PARAM" invalid name</pre>
      * 
      * @param message   the message to follow "command"
      */
@@ -255,8 +369,9 @@ public class InputParser
      * The error message is of the form:<br>
      * &nbsp;&nbsp;&nbsp;&nbsp;command: "arg" message<br>
      * for example:
-     * <pre>    VARIABLES: "3..114" is not a valid value</pre>
+     * <pre>    SET: "3..114" is not a valid value</pre>
      * 
+     * @param arg       the argument to include in the message
      * @param message   the message to follow "command"
      */
     private void formatError( String arg, String message )

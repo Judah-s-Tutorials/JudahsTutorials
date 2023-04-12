@@ -4,6 +4,8 @@ import java.awt.geom.Point2D;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
@@ -12,7 +14,31 @@ import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ValidationResult;
 
-public class Expr4Equation implements Equation
+/**
+ * Implementation of the Equation interface
+ * using the exp4j API.
+ * Upon instantiation
+ * simple expressions for evaluating x and y
+ * are set to "1",
+ * the iteration range is 
+ * initialized to valid values
+ * and the following
+ * variables are declared:
+ * <em>x, y, a, b, c</em> and <em>t</em>.
+ * The default parameter name
+ * for parametric equations is <em>t</em>.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Equation
+ * @see <a href="https://www.objecthunter.net/exp4j/apidocs/index.html">
+ *          exp4j API Documentation
+ *      </a>
+ * @see <a href="https://www.objecthunter.net/exp4j/">
+ *          exp4j Introduction
+ *      </a>
+ */
+public class Exp4jEquation implements Equation
 {
     private final Map<String,Double>    vars        = new HashMap<>();
     private double                      rStart      = -1;
@@ -31,11 +57,11 @@ public class Expr4Equation implements Equation
      * to the constant expression "1" 
      * (<em>f(x) = 1, f(y) = 1</em>).
      * A default set of variables
-     * is registered; see {@linkplain Expr4Equation}.
+     * is registered; see {@linkplain Exp4jEquation}.
      * 
-     * @see Expr4Equation
+     * @see Exp4jEquation
      */
-    public Expr4Equation()
+    public Exp4jEquation()
     {
         initMap();
         setXExpression( xExprStr );
@@ -47,11 +73,11 @@ public class Expr4Equation implements Equation
      * Establishes the expression 
      * associated with the equation <em>y=f(x)</em>.
      * A default set of variables
-     * is registered; see {@linkplain Expr4Equation}.
+     * is registered; see {@linkplain Exp4jEquation}.
      * 
      * @param expr  the expression associated with the equation
      */
-    public Expr4Equation( String expr )
+    public Exp4jEquation( String expr )
     {
         initMap();
         setXExpression( xExprStr );
@@ -67,9 +93,10 @@ public class Expr4Equation implements Equation
      * @param vars  the associated set of variables
      * @param expr  the associated expression
      */
-    public Expr4Equation( Map<String,Double> vars, String expr )
+    public Exp4jEquation( Map<String,Double> vars, String expr )
     {
         this.vars.putAll( vars );
+        initMap();
         setXExpression( xExprStr );
         setYExpression( expr );
     }
@@ -81,7 +108,7 @@ public class Expr4Equation implements Equation
      */
     public Equation newEquation()
     {
-        return new Expr4Equation();
+        return new Exp4jEquation();
     }
     
     /**
@@ -121,10 +148,13 @@ public class Expr4Equation implements Equation
      * @return  the value of the variable with the given name
      */
     @Override
-    public Double getVar( String name )
+    public Optional<Double> getVar( String name )
     {
-        Double  val = vars.get( name );
-        return val;
+        Optional<Double>    result  = Optional.empty();
+        Double              val     = vars.get( name );
+        if ( val != null )
+            result = Optional.of( val );
+        return result;
     }
     
     @Override
@@ -132,14 +162,6 @@ public class Expr4Equation implements Equation
     {
         Map<String,Double>  varsRet = Map.copyOf( vars );
         return varsRet;
-    }
-    
-    @Override
-    public Result parseFunction( String funk )
-    {
-        Result    result  =
-            new Result( false, List.of( "NOT IMPLEMENTED") );
-        return result;
     }
     
     /**
@@ -158,7 +180,7 @@ public class Expr4Equation implements Equation
     public Result setXExpression( String exprStr )
     {
         Result    result  = validateExpr( exprStr, e -> xExpr = e );
-        if ( result == new Result( true ) )
+        if ( result.isSuccess() )
             this.xExprStr = exprStr;
         return result;
     }
@@ -191,10 +213,10 @@ public class Expr4Equation implements Equation
      * 
      * @return the (x,y) coordinates derived from a parametric equation
      * 
-     * @throws InvalidExpressionException if the equation is invalid
+     * @throws ValidationException if the equation is invalid
      */
     @Override
-    public Stream<Point2D> YPlot()
+    public Stream<Point2D> yPlot()
     {
         yExpr.setVariables( vars );
         ValidationResult    result    = yExpr.validate( true );
@@ -217,19 +239,19 @@ public class Expr4Equation implements Equation
      * 
      * @return the (x,y) coordinates derived from a parametric equation
      * 
-     * @throws InvalidExpressionException if the equation is invalid
+     * @throws ValidationException if the equation is invalid
      */
     @Override
-    public Stream<Point2D> XYPlot()
+    public Stream<Point2D> xyPlot()
     {
-        yExpr.setVariables( vars );
+        xExpr.setVariables( vars );
         ValidationResult    result    = xExpr.validate( true );
         if ( !result.isValid() )
         {
             String  message = "Unexpected x-expression validation failure.";
             throw new ValidationException( message );
         }
-        xExpr.setVariables( vars );
+        yExpr.setVariables( vars );
         result = yExpr.validate( true );
         if ( !result.isValid() )
         {
@@ -398,10 +420,11 @@ public class Expr4Equation implements Equation
             ; // invalid
         else
         {   
-            int inx = 1;
-            while ( inx < len && isAlphaNumeric( name.charAt( inx ) ) )
-                ++inx;
-            status = (inx == len);
+            OptionalInt optional    =
+                name.chars()
+                .filter( c -> !isAlphanumeric( c ) )
+                .findAny();
+            status = optional.isEmpty();
         }
         return status;
     }
@@ -416,17 +439,33 @@ public class Expr4Equation implements Equation
      */
     public boolean isValidValue( String valStr )
     {
-        boolean result  = false;
+        Optional<Double>    result  = evaluate( valStr );
+        
+        return result.isPresent();
+    }
+    
+    @Override
+    public Optional<Double> evaluate( String exprStr )
+    {
+        Optional<Double>    result  = Optional.empty();
         try
         {
-            Double.parseDouble( valStr );
-            result = true;
+            Expression  expr    =
+                new ExpressionBuilder( exprStr )
+                    .variables( vars.keySet() )
+                    .build();
+            if ( !expr.validate( true ).isValid() )
+                throw new ValidationException();
+            double      val     = expr.evaluate();
+            result = Optional.of(val );
         }
-        catch ( NumberFormatException exc )
+        catch ( Exception exc )
         {
-            result = false;
+            // Exactly how we get here is unclear. If everything's
+            // working correctly we shouldn't get here at all, but
+            // sometimes ExpressionBuilder throws an undocumented
+            // exception in the face of an invalid expression.
         }
-        
         return result;
     }
     
@@ -441,19 +480,20 @@ public class Expr4Equation implements Equation
      * in which case a Result
      * describing the exception is returned.
      * If no exception is thrown
-     * the Expression <em>validate<em> method is invoked;
+     * the Expression <em>validate</em> method is invoked;
      * if this indicates an error,
      * the Result
-     * obtained from the <em>validate<em> method
+     * obtained from the <em>validate</em> method
      * is returned.
      * If no error is detected,
      * the generated Expression 
      * is stored at the given destination
      * and Result.SUCCESS is returned.
      * 
-     * @param exprStr
-     * @param destination
-     * @return
+     * @param exprStr       source string for generated expression
+     * @param destination   destination for generated expression
+     * 
+     * @return  Result object describing the result of the operation
      */
     private Result 
     validateExpr( String exprStr, Consumer<Expression> destination )
@@ -512,10 +552,8 @@ public class Expr4Equation implements Equation
      * @param ccc   the given character
      * 
      * @return  true if the given character is alphanumeric.
-     * 
-     *
      */
-    private static boolean isAlphaNumeric( char ccc )
+    private static boolean isAlphanumeric( int ccc )
     {
         boolean result  =
             ccc == '_'
@@ -527,9 +565,9 @@ public class Expr4Equation implements Equation
     
     /**
      * Initializes the variable map
-     * to the default values; see {@linkplain Expr4Equation}.
+     * to the default values; see {@linkplain Exp4jEquation}.
      * 
-     * @see Expr4Equation
+     * @see Exp4jEquation
      */
     private void initMap()
     {

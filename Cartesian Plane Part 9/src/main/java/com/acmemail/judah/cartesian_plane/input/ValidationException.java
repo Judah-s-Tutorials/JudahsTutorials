@@ -1,5 +1,11 @@
 package com.acmemail.judah.cartesian_plane.input;
 
+/**
+ * Describes an expression validation failure
+ * in the <em>input</em> module.
+ * 
+ * @author Jack Straub
+ */
 public class ValidationException extends RuntimeException
 {
     /** Generated serial version UID */

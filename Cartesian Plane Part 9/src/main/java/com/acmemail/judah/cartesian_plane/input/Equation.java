@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.input;
 
 import java.awt.geom.Point2D;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 /**
@@ -52,29 +53,29 @@ public interface Equation
     void removeVar(String name);
 
     /**
-     * Gets the value of the variable
+     * Gets an Optional object
+     * containing the value of the variable
      * with the given name.
      * If the name is not found
-     * null is returned.
+     * an empty Optional is returned.
      * 
      * @param name  the given name
      * 
-     * @return  the value of the variable with the given name
+     * @return  
+     *      an Optional object
+     *      containing the value of the variable
+     *      with the given name
      */
-    Double getVar(String name);
+    Optional<Double> getVar(String name);
 
     /**
      * Returns an unmodifiable map
      * describing all declared variables 
      * and their values.
      * 
-     * @param name  the given name
-     * 
-     * @return  the value of the variable with the given name
+     * @return an unmodifiable map describing all declared variables
      */
     Map<String,Double> getVars();
-
-    Result parseFunction(String funk);
 
     /**
      * Parses the expression used to derive
@@ -125,9 +126,9 @@ public interface Equation
      * 
      * @return the (x,y) coordinates derived from a parametric equation
      * 
-     * @throws InvalidExpressionException if the equation is invalid
+     * @throws ValidationException if the equation is invalid
      */
-    Stream<Point2D> YPlot();
+    Stream<Point2D> yPlot();
 
     /**
      * Iterates over the encapsulated range,
@@ -136,9 +137,9 @@ public interface Equation
      * 
      * @return the (x,y) coordinates derived from a parametric equation
      * 
-     * @throws InvalidExpressionException if the equation is invalid
+     * @throws ValidationException if the equation is invalid
      */
-    Stream<Point2D> XYPlot();
+    Stream<Point2D> xyPlot();
 
     /**
      * Gets the name of the parameter
@@ -227,10 +228,48 @@ public interface Equation
     /**
      * Determines if a given string
      * is a valid double value.
+     * Consider preferring {@linkplain #evaluate(String)}
+     * to this method.
      * 
      * @param valStr  the given string
      * 
      * @return  true if the given string is a valid double value
+     * 
+     * @see #evaluate(String)
      */
     boolean isValidValue( String valStr );
+    
+    /**
+     * Parses and evaluates an expression in the context
+     * of the current equation.
+     * Declared variables and functions are recognized;
+     * use of undeclared variables or functions
+     * will result in evaluation failure.
+     * If <em>a</em>, <em>b</em> and <em>theta</em>
+     * are declared variables,
+     * the following are all considered valid expressions.
+     * <ul>
+     *     <li>3</li>
+     *     <li>.5^3</li>
+     *     <li>e^2</li>
+     *     <li>3 * cos( pi / 7 )</li>
+     *     <li>3 * a * b</li>
+     *     <li>a * sin(theta)</li>
+     * </ul>
+     * <p>
+     * If evaluation of the expression is successful
+     * an Optional object containing the result
+     * is returned.
+     * If evaluation is not successful
+     * an empty Optional is returned.
+     * 
+     * </p>
+     * 
+     * @param exprStr   the expression to evaluate
+     * 
+     * @return  
+     *      an Optional containing the result of the evaluation,
+     *      or an empty Optional if an error occurred
+     */
+    Optional<Double> evaluate( String exprStr );
 }

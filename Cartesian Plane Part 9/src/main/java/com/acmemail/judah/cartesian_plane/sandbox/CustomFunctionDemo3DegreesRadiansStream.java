@@ -1,7 +1,5 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.Stream;
 
 import net.objecthunter.exp4j.Expression;

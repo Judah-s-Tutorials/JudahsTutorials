@@ -9,41 +9,56 @@ import java.util.Arrays;
  * 
  * @author Jack Straub
  * 
- * @see Expr4Equation
+ * @see Exp4jEquation
  */
 public enum Command
 {
-    EQUATION( "Describes an equation of the form y = f(x)." ),
+    /** Creates a new equation. */
+    EQUATION( "Creates a new equation" ),
+    /** Establishes the expression for generating an x-coordinate. */
     XEQUALS( 
         "Describes any well-formed expression for the evaluation of \"x\" "
         + "in the coordinate pair \"(x,y)\""
     ),
+    /** Establishes the expression for generating a y-coordinate. */
     YEQUALS( 
         "Describes any well-formed expression for the evaluation of \"y\" "
         + "in the coordinate pair \"(x,y)\""
     ),
+    /** Declares one or more variables. */
     SET( 
         "Describes a comma-separated list of "
-        + "variables of the form name[=value]" 
+        + "variables of the form name[=expression]" 
     ),
+    /** Sets the start of the iteration range. */
     START( 
         "Expression that describes the start value "
             + "of the iteration range" ),
+    /** Sets the end of the iteration range. */
     END( "Expression that describes the end value in the iteration range" ),
+    /** Sets the increment value for traversing the iteration range. */
     STEP( 
         "Expression that describes the increment value "
             + "for traversing iteration range"
     ),
+    /** Sets the name of the parameter in a parametric equatin. */
     PARAM( "Describes the name of the parameter in a parametric equation" ),
-    YPLOT( "Generate a plot of the form (x,y) = f(x)" ),
-    XYPLOT( "Generate a plot of the form (x,y) = f(t)" ),
+    /** Generates the plot of the function y=f(x). */
+    YPLOT( "Generates a plot of the form (x,y) = f(x)" ),
+    /** Generates the plot of the parametric equation (x,y)=f(t). */
+    XYPLOT( "Generates a plot of the form (x,y) = f(t)" ),
+    /** Identifies and empty command string. */
     NONE( "Identifies an empty command string" ),
+    /** Identifies an invalid command. */
     INVALID( "Designates an invalid command." ),
+    /** Exit the current operation. */
     EXIT( 
         "Application specific; probably "
         + "\"Exit from the current operation\""
     ),
+    /** Open a file. */
     OPEN( "Application specific; probably \"open equation file\""),
+    /** Save a file. */
     SAVE( "Application specific; probably \"save equation file\"");
     
     /** Line separator for the current platform. */
