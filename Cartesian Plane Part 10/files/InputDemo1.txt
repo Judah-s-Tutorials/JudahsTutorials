@@ -1,0 +1,6 @@
+start 0
+end 2pi
+step .005
+set a=3,n=4,t
+x= a sin(nt)cos(t)
+y= a sin(nt)sin(t)
