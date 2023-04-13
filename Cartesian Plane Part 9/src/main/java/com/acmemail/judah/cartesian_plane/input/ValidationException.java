@@ -48,22 +48,4 @@ public class ValidationException extends RuntimeException
     {
         super(message, cause);
     }
-
-    /**
-     * Constructor.
-     * 
-     * @param message               message associated with exception
-     * @param cause                 cause that triggered this exception
-     * @param enableSuppression     see documentation for RuntimeException
-     * @param writableStackTrace    see documentation for RuntimeException
-     */
-    public ValidationException(
-        String message, 
-        Throwable cause, 
-        boolean enableSuppression, 
-        boolean writableStackTrace
-    )
-    {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }

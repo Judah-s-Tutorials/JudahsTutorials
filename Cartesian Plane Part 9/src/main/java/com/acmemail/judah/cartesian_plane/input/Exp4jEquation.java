@@ -505,7 +505,7 @@ public class Exp4jEquation implements Equation
                 .variables( vars.keySet() )
                 .build();
             ValidationResult    expr4jResult = expr.validate( false );
-            if ( expr4jResult == ValidationResult.SUCCESS )
+            if ( expr4jResult.isValid() )
                 destination.accept( expr );
             
             result = new Result( 

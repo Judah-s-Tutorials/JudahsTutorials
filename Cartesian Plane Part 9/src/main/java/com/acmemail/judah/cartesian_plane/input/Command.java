@@ -39,7 +39,7 @@ public enum Command
     /** Sets the increment value for traversing the iteration range. */
     STEP( 
         "Expression that describes the increment value "
-            + "for traversing iteration range"
+            + "for traversing the iteration range"
     ),
     /** Sets the name of the parameter in a parametric equatin. */
     PARAM( "Describes the name of the parameter in a parametric equation" ),

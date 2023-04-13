@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.exp4j;
+package com.acmemail.judah.cartesian_plane.input;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
-
-import com.acmemail.judah.cartesian_plane.input.Command;
 
 class CommandTest
 {

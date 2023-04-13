@@ -117,7 +117,9 @@ public class InputParser
             // ignore these
             break;
         default:
-            malfunction( "enum constant not recognized" );
+            String  error   = 
+                "Malfunction: " + "enum constant not recognized";
+            errors.add( error );
             break;
         }
         
@@ -333,17 +335,6 @@ public class InputParser
     private void invalidCommand()
     {
         formatError( "is not a valid command in this context" );
-    }
-    
-    /**
-     * Report that a malfunction has occurred.
-     * 
-     * @param msg   text to add to tail of error message
-     */
-    private void malfunction( String msg )
-    {
-        String  error   = "Malfunction: " + msg;
-        errors.add( error );
     }
     
     /**

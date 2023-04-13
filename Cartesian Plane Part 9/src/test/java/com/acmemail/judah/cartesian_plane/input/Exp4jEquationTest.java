@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane.input;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.geom.Point2D;
@@ -164,6 +165,16 @@ class Exp4jEquationTest
     }
 
     @Test
+    void testSetXExpressionGoWrong()
+    {
+        String  oldXExpr    = equation.getXExpression();
+        String  xExpr       = "notAVar * x";
+        Result  result      = equation.setXExpression( xExpr );
+        assertFalse( result.isSuccess() );
+        assertEquals( oldXExpr, equation.getXExpression() );
+    }
+
+    @Test
     void testSetYExpression()
     {
         double  xier    = 2;
@@ -179,6 +190,16 @@ class Exp4jEquationTest
         // try setting an invalid expression
         result  = equation.setYExpression( "invalid" );
         assertFalse( result.isSuccess() );
+    }
+
+    @Test
+    void testSetYExpressionGoWrong()
+    {
+        String  oldyExpr    = equation.getYExpression();
+        String  yExpr       = "undeclaredVarName * x";
+        Result  result      = equation.setYExpression( yExpr );
+        assertFalse( result.isSuccess() );
+        assertEquals( oldyExpr, equation.getYExpression() );
     }
 
     @Test
@@ -205,6 +226,19 @@ class Exp4jEquationTest
     }
 
     @Test
+    void testYPlotGoWrong()
+    {
+        String  varName = "varName";
+        String  yExpr   = varName + " + x";
+        equation.setVar( varName, 0 );
+        equation.setYExpression( yExpr );
+        equation.removeVar( varName );
+        
+        Class<ValidationException>  clazz   = ValidationException.class;
+        assertThrows( clazz, () -> equation.yPlot() );
+    }
+
+    @Test
     void testXYPlot()
     {
         double  xXier   = 2;
@@ -228,6 +262,30 @@ class Exp4jEquationTest
             .collect( Collectors.toList() );
         
         assertEquals( expPoints, actPoints );
+    }
+
+    @Test
+    void testXYPlotGoWrong()
+    {
+        String  xVarName    = "xVarName";
+        String  yVarName    = "yVarName";
+        String  xExpr       = xVarName + " + t";
+        String  yExpr       = yVarName + " + t";
+        equation.setVar( xVarName, 0 );
+        equation.setVar( yVarName, 0 );
+        equation.setXExpression( xExpr );
+        equation.setYExpression( yExpr );
+        
+        Class<ValidationException>  clazz   = ValidationException.class;
+        
+        // expect x-expression to throw an exception
+        equation.removeVar( xVarName );
+        assertThrows( clazz, () -> equation.xyPlot() );
+        
+        // expect y-expression to throw an exception
+        equation.setVar( xVarName, 0 );
+        equation.removeVar( yVarName );
+        assertThrows( clazz, () -> equation.xyPlot() );
     }
 
     @Test
