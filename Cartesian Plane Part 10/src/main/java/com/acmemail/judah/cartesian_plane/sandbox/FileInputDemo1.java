@@ -54,9 +54,7 @@ public class FileInputDemo1
     private static void exec( CommandReader commandReader )
     {
         InputParser         inputParser     = new InputParser();
-        Stream
-            .generate( () -> nextCommand( commandReader ) )
-            .takeWhile( pc -> pc.getCommand() != Command.NONE )
+        commandReader.stream()
             .forEach( inputParser::parseInput );
         
         ToPlotPointCommand  toPlotPointCommand =
@@ -68,20 +66,5 @@ public class FileInputDemo1
         );
         NotificationManager.INSTANCE
             .propagateNotification( CPConstants.REDRAW_NP );
-    }
-    
-    private static ParsedCommand nextCommand( CommandReader reader )
-    {
-        ParsedCommand   pCommand    = null;
-        try
-        {
-            pCommand = reader.nextCommand();
-        }
-        catch ( IOException exc )
-        {
-            exc.printStackTrace();
-            System.exit( 1 );
-        }
-        return pCommand;
     }
 }

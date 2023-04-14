@@ -13,12 +13,13 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-class CommandStringReaderTest
+class CommandReaderTest
 {
     /**
      * Defines a functional interface
@@ -78,11 +79,11 @@ class CommandStringReaderTest
     private void testSimpleCommandWithoutArg( BufferedReader reader ) throws IOException
     {
         CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand();
+        ParsedCommand       command     = cmdReader.nextCommand( null );
         while ( command.getCommand() != Command.NONE )
         {
             actResults.add( command );
-            command = cmdReader.nextCommand();
+            command = cmdReader.nextCommand( null );
         }
         assertEquals( expResults, actResults );
     }
@@ -104,11 +105,11 @@ class CommandStringReaderTest
     private void testSimpleCommandWithArg( BufferedReader reader ) throws IOException
     {
         CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand();
+        ParsedCommand       command     = cmdReader.nextCommand( null );
         while ( command.getCommand() != Command.NONE )
         {
             actResults.add( command );
-            command = cmdReader.nextCommand();
+            command = cmdReader.nextCommand( null );
         }
         assertEquals( expResults, actResults );
     }
@@ -135,11 +136,11 @@ class CommandStringReaderTest
         throws IOException
     {
         CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand();
+        ParsedCommand       command     = cmdReader.nextCommand( null );
         while ( command.getCommand() != Command.NONE )
         {
             actResults.add( command );
-            command = cmdReader.nextCommand();
+            command = cmdReader.nextCommand( null );
         }
         assertEquals( expResults, actResults );
     }
@@ -168,11 +169,11 @@ class CommandStringReaderTest
         throws IOException
     {
         CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand();
+        ParsedCommand       command     = cmdReader.nextCommand( null );
         while ( command.getCommand() != Command.NONE )
         {
             actResults.add( command );
-            command = cmdReader.nextCommand();
+            command = cmdReader.nextCommand( null );
         }
         assertEquals( expResults, actResults );
     }
@@ -198,7 +199,7 @@ class CommandStringReaderTest
     private void testEmptyLinesAndComments( BufferedReader reader ) throws IOException
     {
         CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand();
+        ParsedCommand       command     = cmdReader.nextCommand( null );
         assert( command.getCommand() == Command.NONE );
         assertTrue( actResults.isEmpty() );
     }
@@ -215,7 +216,7 @@ class CommandStringReaderTest
     private void testEmptyInputStream( BufferedReader reader ) throws IOException
     {
         CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand();
+        ParsedCommand       command     = cmdReader.nextCommand( null );
         assertEquals( Command.NONE, command.getCommand() );
     }
     
@@ -244,13 +245,54 @@ class CommandStringReaderTest
     private void testMixAndMatch( BufferedReader reader ) throws IOException
     {
         CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand();
+        ParsedCommand       command     = cmdReader.nextCommand( null );
         while ( command.getCommand() != Command.NONE )
         {
             if ( command.getCommand() != Command.INVALID )
                 actResults.add( command );
-            command = cmdReader.nextCommand();
+            command = cmdReader.nextCommand( null );
         }
+        assertEquals( expResults, actResults );
+    }
+
+    @Test
+    public void testStream()
+    {
+        expResults =
+            List.of( 
+                new ParsedCommand( Command.END, "end", "endarg" ),
+                new ParsedCommand( Command.START, "start", "startarg" ),
+                new ParsedCommand( Command.STEP, "step", "steparg" ),
+                new ParsedCommand( Command.EQUATION, "equation", "" ),
+                new ParsedCommand( Command.YPLOT, "yplot", "" )
+            );
+        
+        // Mix lines representing concrete, valid commands with lines
+        // representing comments and empty lines.
+        // Don't add NONE command to input; this is produced automatically
+        // by CommandReader.stream().
+        List<String>    input   = 
+            expResults.stream()
+                .map( pc -> "  " + pc.getCommandString() + "   " + pc.getArgString() + "   " )
+                .flatMap( s ->
+                    Stream.of( s, "", "#", "  #  " )
+                )
+                .toList();
+        ioTest( input, this::testStream );
+    }
+
+    @Test
+    public void testEmptyStream()
+    {
+        expResults.clear();
+        actResults.clear();
+        ioTest( new ArrayList<String>(), this::testStream );
+    }
+    
+    private void testStream( BufferedReader reader ) throws IOException
+    {
+        CommandReader   cmdReader   = new CommandReader( reader );
+        actResults = cmdReader.stream().collect( Collectors.toList() );
         assertEquals( expResults, actResults );
     }
     

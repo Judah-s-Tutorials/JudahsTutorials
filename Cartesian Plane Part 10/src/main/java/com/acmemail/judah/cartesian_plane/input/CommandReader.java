@@ -3,6 +3,8 @@ package com.acmemail.judah.cartesian_plane.input;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * An instance of this class is responsible
@@ -70,11 +72,13 @@ public class CommandReader
      *      
      * @throws IOException  if an IO error occurs
      */
-    public ParsedCommand nextCommand() throws IOException
+    public ParsedCommand nextCommand( String prompt ) throws IOException
     {
         ParsedCommand   parsedCommand   = null;
         while ( parsedCommand == null )
         {
+            if ( prompt != null )
+                System.out.print( prompt );
             String  line    = reader.readLine();
             if ( line == null )
                 parsedCommand = new ParsedCommand( Command.NONE, "", "" );
@@ -82,24 +86,67 @@ public class CommandReader
                 ;
             else if ( line.startsWith( "#" ) )
                 ;
-            else if ( (parsedCommand = processShortcuts( line )) != null )
-                ;
-            else
-            {
-                int     split   = line.indexOf( ' ' );
-                String  cmdStr  = line;
-                String  argStr  = "";
-                // If necessary, divide input string into command and argument
-                // (everything after the command, excluding trimmings)
-                if ( split > 0 )
-                {
-                    cmdStr = line.substring( 0, split );
-                    argStr = line.substring( split + 1 ).trim();
-                }
-                Command command = Command.toCommand( cmdStr );
-                parsedCommand = new ParsedCommand( command, cmdStr, argStr );
-            }
+            else 
+                parsedCommand = parseCommand( line );
         }
+        return parsedCommand;
+    }
+    
+    /**
+     * Returns a stream 
+     * consisting of lines of input
+     * converted to ParsedCommands.
+     * Conversion takes place
+     * according to the rules
+     * set forth above;
+     * see {@linkplain CommandReader}.
+     * 
+     * @return  
+     *      a stream of ParsedCommands
+     *      derived from the input source
+     */
+    public Stream<ParsedCommand> stream()
+    {
+        Stream<ParsedCommand>   pcStream    =
+            reader.lines()
+            .map( String::trim )
+            .filter( Predicate.not( String::isEmpty ) )
+            .filter( s -> !s.startsWith( "#" ) )
+            .map( CommandReader::parseCommand );
+        
+        return pcStream;
+    }
+    
+    /**
+     * Parses a given, non-empty line of input
+     * and produces a ParsedCommand object.
+     * 
+     * PRECONDITION: input is not a comment
+     * PRECONDITION: input is a non-empty string
+     * 
+     * @param line  given line of input
+     * 
+     * @return  a ParsedCommand object derived from the given line of input
+     */
+    private static ParsedCommand parseCommand( String line )
+    {
+        ParsedCommand   parsedCommand   = null;
+        if ( (parsedCommand = processShortcuts( line )) == null )
+        {
+            int     split   = line.indexOf( ' ' );
+            String  cmdStr  = line;
+            String  argStr  = "";
+            // If necessary, divide input string into command and argument
+            // (everything after the command, excluding trimmings)
+            if ( split > 0 )
+            {
+                cmdStr = line.substring( 0, split );
+                argStr = line.substring( split + 1 ).trim();
+            }
+            Command command = Command.toCommand( cmdStr );
+            parsedCommand = new ParsedCommand( command, cmdStr, argStr );
+        }
+        
         return parsedCommand;
     }
     

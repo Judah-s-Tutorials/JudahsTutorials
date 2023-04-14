@@ -3,6 +3,8 @@ package com.acmemail.judah.cartesian_plane.input;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * An instance of this class is responsible
@@ -26,7 +28,7 @@ import java.util.Arrays;
  * 
  * @author Jack Straub
  */
-public class CommandStringReader
+public class CommandReader
 {
     /** Describes all known shortcuts, and the commands they map to. */
     private static final Shortcut[] shortcuts   =
@@ -46,7 +48,7 @@ public class CommandStringReader
      * 
      * @param reader    the source of the command lines
      */
-    public CommandStringReader( BufferedReader reader )
+    public CommandReader( BufferedReader reader )
     {
         this.reader = reader;
     }
@@ -82,24 +84,43 @@ public class CommandStringReader
                 ;
             else if ( line.startsWith( "#" ) )
                 ;
-            else if ( (parsedCommand = processShortcuts( line )) != null )
-                ;
-            else
-            {
-                int     split   = line.indexOf( ' ' );
-                String  cmdStr  = line;
-                String  argStr  = "";
-                // If necessary, divide input string into command and argument
-                // (everything after the command, excluding trimmings)
-                if ( split > 0 )
-                {
-                    cmdStr = line.substring( 0, split );
-                    argStr = line.substring( split + 1 ).trim();
-                }
-                Command command = Command.toCommand( cmdStr );
-                parsedCommand = new ParsedCommand( command, cmdStr, argStr );
-            }
+            else 
+                parsedCommand = parseCommand( line );
         }
+        return parsedCommand;
+    }
+    
+    public Stream<ParsedCommand> stream()
+    {
+        Stream<ParsedCommand>   pcStream    =
+            reader.lines()
+            .map( String::trim )
+            .filter( Predicate.not( String::isEmpty ) )
+            .filter( s -> !s.startsWith( "#" ) )
+            .map( CommandReader::parseCommand );
+        
+        return pcStream;
+    }
+    
+    private static ParsedCommand parseCommand( String line )
+    {
+        ParsedCommand   parsedCommand   = null;
+        if ( (parsedCommand = processShortcuts( line )) == null )
+        {
+            int     split   = line.indexOf( ' ' );
+            String  cmdStr  = line;
+            String  argStr  = "";
+            // If necessary, divide input string into command and argument
+            // (everything after the command, excluding trimmings)
+            if ( split > 0 )
+            {
+                cmdStr = line.substring( 0, split );
+                argStr = line.substring( split + 1 ).trim();
+            }
+            Command command = Command.toCommand( cmdStr );
+            parsedCommand = new ParsedCommand( command, cmdStr, argStr );
+        }
+        
         return parsedCommand;
     }
     
