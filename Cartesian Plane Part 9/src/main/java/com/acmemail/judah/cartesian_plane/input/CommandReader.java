@@ -102,7 +102,7 @@ public class CommandReader
         return pcStream;
     }
     
-    private static ParsedCommand parseCommand( String line )
+    public static ParsedCommand parseCommand( String line )
     {
         ParsedCommand   parsedCommand   = null;
         if ( (parsedCommand = processShortcuts( line )) == null )

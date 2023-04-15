@@ -132,7 +132,7 @@ public enum Command
             .forEach( e -> 
                 bldr.append( "    " )
                     .append( e )
-                    .append( ' ' )
+                    .append( ": " )
                     .append( e.desc )
                     .append( lineSep )
             );

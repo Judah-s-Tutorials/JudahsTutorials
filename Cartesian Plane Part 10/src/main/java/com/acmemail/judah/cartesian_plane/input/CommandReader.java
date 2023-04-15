@@ -93,17 +93,14 @@ public class CommandReader
     }
     
     /**
-     * Returns a stream 
-     * consisting of lines of input
-     * converted to ParsedCommands.
-     * Conversion takes place
-     * according to the rules
-     * set forth above;
-     * see {@linkplain CommandReader}.
+     * Generates a stream of ParsedCommands
+     * corresponding to lines from the input source.
+     * Per the specification for parsing input lines,
+     * leading and trailing spaces are discarded, and
+     * blank lines and comments are skipped.
      * 
-     * @return  
-     *      a stream of ParsedCommands
-     *      derived from the input source
+     * @return  a stream of ParsedCommands
+     *          corresponding to lines from the input source
      */
     public Stream<ParsedCommand> stream()
     {
@@ -118,17 +115,15 @@ public class CommandReader
     }
     
     /**
-     * Parses a given, non-empty line of input
-     * and produces a ParsedCommand object.
+     * Converts a given string to a ParsedCommand.
+     * The input string is assumed to be 
+     * non-null, non-empty and trimmed.
      * 
-     * PRECONDITION: input is not a comment
-     * PRECONDITION: input is a non-empty string
+     * @param   line    the given string
      * 
-     * @param line  given line of input
-     * 
-     * @return  a ParsedCommand object derived from the given line of input
+     * @return  a ParsedCommand derived from the given string
      */
-    private static ParsedCommand parseCommand( String line )
+    public static ParsedCommand parseCommand( String line )
     {
         ParsedCommand   parsedCommand   = null;
         if ( (parsedCommand = processShortcuts( line )) == null )

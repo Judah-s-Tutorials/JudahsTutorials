@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class CommandReaderTest
 {
@@ -287,6 +289,56 @@ class CommandReaderTest
         expResults.clear();
         actResults.clear();
         ioTest( new ArrayList<String>(), this::testStream );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings = {"END", "SET", "START"} )
+    public void testParseCommandStringWithArg( String str )
+    {
+        Command         command     = Command.valueOf( str );
+        String          commandStr  = str.toLowerCase();
+        String          arg         = "argument";
+        String          line        = commandStr + "   " + arg;
+        ParsedCommand   parsed      = CommandReader.parseCommand( line );
+        
+        assertEquals( command, parsed.getCommand() );
+        assertEquals( commandStr, parsed.getCommandString() );
+        assertEquals( arg, parsed.getArgString() );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings = {"END", "SET", "START"} )
+    public void testParseCommandStringWithoutArg( String str )
+    {
+        Command         command     = Command.valueOf( str );
+        String          commandStr  = str.toLowerCase();
+        ParsedCommand   parsed      = CommandReader.parseCommand( commandStr );
+        
+        assertEquals( command, parsed.getCommand() );
+        assertEquals( commandStr, parsed.getCommandString() );
+        assertTrue( parsed.getArgString().isEmpty() );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings = {"bad1", "bad2", "bad3"} )
+    public void testParseCommandStringInvalidCommand( String commandStr )
+    {
+        // With argument
+        String          arg         = "argument";
+        String          line        = commandStr + "  " + arg;
+        ParsedCommand   parsed      = CommandReader.parseCommand( line );
+        
+        assertEquals( Command.INVALID, parsed.getCommand() );
+        assertEquals( commandStr, parsed.getCommandString() );
+        assertEquals( arg, parsed.getArgString() );
+        
+        // Without argument
+        parsed = CommandReader.parseCommand( commandStr );
+        
+        assertEquals( Command.INVALID, parsed.getCommand() );
+        assertEquals( commandStr, parsed.getCommandString() );
+        assertTrue( parsed.getArgString().isEmpty() );
+
     }
     
     private void testStream( BufferedReader reader ) throws IOException

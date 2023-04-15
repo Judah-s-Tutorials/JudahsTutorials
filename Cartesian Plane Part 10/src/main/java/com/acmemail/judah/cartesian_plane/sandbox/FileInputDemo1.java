@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.stream.Stream;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
@@ -12,10 +11,8 @@ import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.app.FIUtils;
 import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
-import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
 import com.acmemail.judah.cartesian_plane.input.InputParser;
-import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 
 /**
  * Demonstration of reading equation from a file.
