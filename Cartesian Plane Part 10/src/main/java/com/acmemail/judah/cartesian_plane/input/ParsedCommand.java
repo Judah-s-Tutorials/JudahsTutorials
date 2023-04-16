@@ -22,7 +22,7 @@ public class ParsedCommand
     private final Command   command;
     /** The string that we used to obtain the Command constant. */
     private final String    commandString;
-    /** The argument that was parsed from the original command sgring. */
+    /** The argument that was parsed from the original command string. */
     private final String    argString;
     
     /**
@@ -98,7 +98,7 @@ public class ParsedCommand
             result = true;
         else if ( other == null )
             result = false;
-        else if ( !(other instanceof ParsedCommand ) )
+        else if ( !(other instanceof ParsedCommand) )
             result = false;
         else
         {

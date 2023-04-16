@@ -8,8 +8,7 @@ import java.util.List;
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.NotificationManager;
-import com.acmemail.judah.cartesian_plane.app.FIUtils;
-import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
+import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
@@ -50,6 +49,8 @@ public class ConsoleInputDemo1
             exc.printStackTrace();
             System.exit( 1 );
         }
+        
+        System.exit( 0 );
     }
     
     /**
@@ -71,7 +72,9 @@ public class ConsoleInputDemo1
             parsedCommand = commandReader.nextCommand( prompt );
             command = parsedCommand.getCommand();
             Result  result  = inputParser.parseInput( parsedCommand );
-            if ( !result.isSuccess() )
+            if ( command == Command.INVALID )
+                System.err.println( Command.usage() );
+            else if ( !result.isSuccess() )
                 printError( result );
             else if ( command == Command.YPLOT )
                 plotY( inputParser );
@@ -82,6 +85,13 @@ public class ConsoleInputDemo1
         } while ( command != Command.EXIT );
     }
     
+    /**
+     * Print the messages associated
+     * with a given Result object
+     * to stderr.
+     * 
+     * @param result    the given Result object
+     */
     private static void printError( Result result )
     {
         List<String>    list    = result.getMessages();
@@ -91,27 +101,31 @@ public class ConsoleInputDemo1
             list.forEach( s -> System.out.println( "Error: " + s ) );
     }
     
+    /**
+     * Generate a plot of the form y = f(x).
+     * 
+     * @param parser    the object that encapsulates the equation to plot
+     */
     private static void plotY( InputParser parser )
     {
-        ToPlotPointCommand  toPlotPointCommand =
-            FIUtils.toPlotPointCommand( plane );
-
         plane.setStreamSupplier( () ->
             parser.getEquation().yPlot()
-            .map( toPlotPointCommand::of )
+            .map( p -> PlotPointCommand.of( p, plane) )
         );
         NotificationManager.INSTANCE
             .propagateNotification( CPConstants.REDRAW_NP );
     }
     
+    /**
+     * Generate a plot of parametric equation.
+     * 
+     * @param parser    the object that encapsulates the equation to plot
+     */
     private static void plotXY( InputParser parser )
     {
-        ToPlotPointCommand  toPlotPointCommand =
-            FIUtils.toPlotPointCommand( plane );
-
         plane.setStreamSupplier( () ->
             parser.getEquation().xyPlot()
-            .map( toPlotPointCommand::of )
+            .map( p -> PlotPointCommand.of( p, plane) )
         );
         NotificationManager.INSTANCE
             .propagateNotification( CPConstants.REDRAW_NP );

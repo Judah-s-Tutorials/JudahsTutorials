@@ -65,7 +65,7 @@ public class DialogInputDemo1
     
     private static void execCommand( ParsedCommand parsedCommand )
     {
-        Result      result  = inputParser.parseInput( parsedCyplotommand );
+        Result      result  = inputParser.parseInput( parsedCommand );
         Command     command = parsedCommand.getCommand();
         if ( !result.isSuccess() )
             Utils.showResultPopup( result );

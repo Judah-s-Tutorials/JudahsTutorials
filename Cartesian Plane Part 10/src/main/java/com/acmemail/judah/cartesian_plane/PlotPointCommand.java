@@ -1,5 +1,7 @@
 package com.acmemail.judah.cartesian_plane;
 
+import java.awt.geom.Point2D;
+
 /**
  * Command to plot a point in the Cartesian plane.
  * 
@@ -29,6 +31,22 @@ public class PlotPointCommand implements PlotCommand
         this.yco = yco;
     }
     
+    /**
+     * Generates a PlotPointCommand from a given Point2D object
+     * and CartesianPlane.
+     * 
+     * @param point the given Point2D object
+     * @param plane the given CartesianPlane
+     * @return
+     */
+    public static PlotPointCommand of( Point2D point, CartesianPlane plane )
+    {
+        float   xco = (float)point.getX();
+        float   yco = (float)point.getY();
+        PlotPointCommand    cmd = new PlotPointCommand( plane, xco, yco );
+        return cmd;
+    }
+
     @Override
     public String toString()
     {
