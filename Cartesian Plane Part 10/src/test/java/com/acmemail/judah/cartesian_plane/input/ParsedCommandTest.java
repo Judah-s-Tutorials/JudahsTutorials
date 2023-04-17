@@ -58,9 +58,10 @@ class ParsedCommandTest
         
         assertEquals( pCmdA, pCmdA );
         assertNotEquals( pCmdA, new Object() );
-        
         assertNotEquals( pCmdA, null );
+        
         assertEquals( pCmdA, pCmdB );
+        assertEquals( pCmdB, pCmdA );
         assertEquals( pCmdA.hashCode(), pCmdB.hashCode() );
         
         pCmdB = new ParsedCommand( cmd2, cmdStr1, argStr1 );

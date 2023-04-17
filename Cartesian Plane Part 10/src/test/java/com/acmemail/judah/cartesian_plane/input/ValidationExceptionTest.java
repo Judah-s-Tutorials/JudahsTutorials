@@ -9,6 +9,7 @@ class ValidationExceptionTest
     @Test
     void testValidationException()
     {
+        // This does nothing but get coverage on the default constructor.
         new ValidationException();
     }
 
