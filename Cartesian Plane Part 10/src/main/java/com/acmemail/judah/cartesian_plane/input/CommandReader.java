@@ -125,8 +125,8 @@ public class CommandReader
      */
     public static ParsedCommand parseCommand( String line )
     {
-        ParsedCommand   parsedCommand   = null;
-        if ( (parsedCommand = processShortcuts( line )) == null )
+        ParsedCommand   parsedCommand   = processShortcuts( line );
+        if ( parsedCommand == null )
         {
             int     split   = line.indexOf( ' ' );
             String  cmdStr  = line;
