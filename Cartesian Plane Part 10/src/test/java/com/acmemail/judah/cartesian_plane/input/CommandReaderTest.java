@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -17,6 +18,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,7 +51,7 @@ class CommandReaderTest
             throws IOException;
     }
     
-    private final PrintStream   saveOut = System.out;
+    private final InputStream   saveIn = System.in;
     
     private final String        randStr     =
         "abc def g h ijk l mnopqr st uvw xyz " +
@@ -63,9 +65,14 @@ class CommandReaderTest
     @BeforeEach
     public void beforeEach()
     {
-        System.setOut( saveOut );
         expResults = new ArrayList<>();
         actResults = new ArrayList<>();
+    }
+    
+    @AfterEach
+    public void afterEach()
+    {
+        System.setIn( saveIn );
     }
     
     /**
@@ -432,25 +439,8 @@ class CommandReaderTest
     
     /**
      * Generates sample input from a list
-     * in the form of a BufferedReader.
-     * Uses the Buffered reader
-     * to execute a given consumer.
-     * 
-     * @param list      the list to convert to input
-     * @param tester    the given consumer
-     * 
-     * @see #getByteBuffer(List)
-     * @see #ioTest(byte[], IOConsumer)
-     */
-    private void ioTest( List<String> list, IOConsumer tester )
-    {
-        byte[]  bytes   = getByteBuffer( list );
-        ioTest( bytes, tester );
-    }
-    
-    
-    /**
-     * Transforms a byte buffer into an input stream
+     * in the form of a byte array.
+     * Transforms a byte array into an input stream
      * in the form of a BufferedReader.
      * The byte buffer is assumed to contain
      * only valid Unicode characters,
@@ -459,14 +449,14 @@ class CommandReaderTest
      * Uses the Buffered reader
      * to execute a given consumer.
      * 
-     * @param buff      the source byte buffer
+     * @param list      list of strings to store in byte buffer
      * @param tester    the given consumer
      * 
      * @see #getByteBuffer(List)
-     * @see #ioTest(List, IOConsumer)
      */
-    private void ioTest( byte[] buff, IOConsumer tester )
+    private void ioTest( List<String> list, IOConsumer tester )
     {
+        byte[]  buff    = getByteBuffer( list );
         try (
             ByteArrayInputStream baiStream = new ByteArrayInputStream( buff );
             InputStreamReader strReader = new InputStreamReader( baiStream );
