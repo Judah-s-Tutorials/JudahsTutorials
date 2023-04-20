@@ -8,7 +8,6 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.PrintWriter;
@@ -51,7 +50,7 @@ class CommandReaderTest
             throws IOException;
     }
     
-    private final InputStream   saveIn = System.in;
+    private final PrintStream   saveOut     = System.out;
     
     private final String        randStr     =
         "abc def g h ijk l mnopqr st uvw xyz " +
@@ -72,24 +71,25 @@ class CommandReaderTest
     @AfterEach
     public void afterEach()
     {
-        System.setIn( saveIn );
+        System.setOut( saveOut );
     }
     
     /**
      * Parse lines of the form "command arg" with no extraneous whitespace.
      */
     @Test
-    void testSimpleCommandWithoutArg()
+    public void testSimpleCommandWithoutArg()
     {
         List<String>    input   = 
             Stream.of( Command.END, Command.EXIT, Command.STEP )
-                .map( c -> getExpResult( c, "", true ) )
-                .map( p -> p.getCommandString() + " " + p.getArgString() )
+                .map( c -> getExpResult( c, "" ) )
+                .map( p -> p.getCommandString() )
                 .toList();
         ioTest( input, this::testSimpleCommandWithoutArg );
     }
     
-    private void testSimpleCommandWithoutArg( BufferedReader reader ) throws IOException
+    private void testSimpleCommandWithoutArg( BufferedReader reader ) 
+        throws IOException
     {
         CommandReader cmdReader = new CommandReader( reader );
         ParsedCommand command   = cmdReader.nextCommand( null );
@@ -109,13 +109,14 @@ class CommandReaderTest
     {
         List<String>    input   = 
             Stream.of( Command.END, Command.EXIT, Command.STEP )
-                .map( c -> getExpResult( c, getArg(), true ) )
+                .map( c -> getExpResult( c, getArg() ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
                 .toList();
         ioTest( input, this::testSimpleCommandWithArg );
     }
     
-    private void testSimpleCommandWithArg( BufferedReader reader ) throws IOException
+    private void testSimpleCommandWithArg( BufferedReader reader ) 
+        throws IOException
     {
         CommandReader   cmdReader   = new CommandReader( reader );
         ParsedCommand   command     = cmdReader.nextCommand( null );
@@ -132,7 +133,7 @@ class CommandReaderTest
      * where str is the shortcut for a command.
      */
     @Test
-    public void testShortcutsArg()
+    public void testShortcuts()
     {
         expResults.add( new ParsedCommand( Command.XEQUALS, "x=", "xxx" ) );
         expResults.add( new ParsedCommand( Command.YEQUALS, "y=", "yyy" ) );
@@ -142,10 +143,10 @@ class CommandReaderTest
             expResults.stream()
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
                 .toList();
-        ioTest( input, this::testShortcutsArg );
+        ioTest( input, this::testShortcuts );
     }
     
-    private void testShortcutsArg( BufferedReader reader )
+    private void testShortcuts( BufferedReader reader )
         throws IOException
     {
         CommandReader   cmdReader   = new CommandReader( reader );
@@ -168,7 +169,7 @@ class CommandReaderTest
     {
         List<String>    input   = 
             Stream.of( Command.END, Command.EXIT, Command.STEP )
-                .map( c -> getExpResult( c, getArg(), true ) )
+                .map( c -> getExpResult( c, getArg() ) )
                 .map( p -> 
                     "   " + p.getCommandString() + 
                     "   " + p.getArgString() +
@@ -246,7 +247,7 @@ class CommandReaderTest
         // representing comments, empty lines and in valid arguments.
         List<String>    input   = 
             Stream.of( Command.END, Command.EXIT, Command.STEP )
-                .map( c -> getExpResult( c, getArg(), true ) )
+                .map( c -> getExpResult( c, getArg() ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
                 .flatMap( s ->
                     Stream.of( s, "", "#", "  #  ", "$BadCommand" )
@@ -500,13 +501,11 @@ class CommandReaderTest
      *                      
      * @return  the generated object
      */
-    private ParsedCommand 
-    getExpResult( Command cmd, String arg, boolean addToExpList )
+    private ParsedCommand getExpResult( Command cmd, String arg )
     {
         ParsedCommand   pCmd    =
             new ParsedCommand( cmd, cmd.name(), arg.trim() );
-        if ( addToExpList )
-            expResults.add( pCmd );
+        expResults.add( pCmd );
         return pCmd;
     }
 }
