@@ -54,6 +54,17 @@ public class InputParser
         this.equation = equation != null ? equation : new Exp4jEquation();
     }
     
+    /**
+     * Interprets and executes a command
+     * and associated argument, if any.
+     * For details,
+     * see {@linkplain #parseInput(Command, String)}.
+     * 
+     * @param   pCommand    object encapsulating the command
+     *                      and argument to interpret
+     *                      
+     * @return  Result object describing the outcome of the operation
+     */
     public Result parseInput( ParsedCommand pCommand )
     {
         Result  result  = 
@@ -164,7 +175,8 @@ public class InputParser
         Function<String,Result> setter,
         Supplier<Object> getter
     )
-    {   if ( argString.isEmpty() )
+    {   
+        if ( argString.isEmpty() )
             System.out.println( getter.get() );
         else
         {
@@ -189,9 +201,10 @@ public class InputParser
      * @param getter    method to obtain the current value
      *                  of the indicated resource
      */
-    private void parseExpression( DoubleConsumer setter, Supplier<Object> getter )
+    private void 
+    parseExpression( DoubleConsumer setter, Supplier<Object> getter )
     {
-        if ( argString.isBlank() )
+        if ( argString.isEmpty() )
             System.out.println( getter.get() );
         else
         {
@@ -230,21 +243,6 @@ public class InputParser
                 parseVarPair( varPair );
             }
         }
-    }
-    
-    /**
-     * Prints the name and value
-     * of all currently declared variables
-     * to stdout.
-     */
-    private void printVars()
-    {
-         final String    format  = "%s=%f%n";
-        Set<Map.Entry<String,Double>>   entries =
-            equation.getVars().entrySet();
-        entries.forEach( 
-            e -> System.out.printf( format, e.getKey(), e.getValue() )
-        );
     }
     
     /**
@@ -315,6 +313,21 @@ public class InputParser
             }
         }
     }
+    
+    /**
+     * Prints the name and value
+     * of all currently declared variables
+     * to stdout.
+     */
+private void printVars()
+{
+    final String    format  = "%s=%f%n";
+    Set<Map.Entry<String,Double>>   entries =
+        equation.getVars().entrySet();
+    entries.forEach( 
+        e -> System.out.printf( format, e.getKey(), e.getValue() )
+    );
+}
     
     /**
      * Sets the name of the parameter
