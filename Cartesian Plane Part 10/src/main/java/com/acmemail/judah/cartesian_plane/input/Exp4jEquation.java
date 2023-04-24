@@ -260,10 +260,10 @@ public class Exp4jEquation implements Equation
         }
         
         Stream<Point2D> stream  =
-        DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t += rStep )
-            .peek( t -> xExpr.setVariable( param, t ) )
-            .peek( t -> yExpr.setVariable( param, t ) )
-            .mapToObj( t -> new Point2D.Double( xExpr.evaluate(), yExpr.evaluate() ) );
+            DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t += rStep )
+                .peek( t -> xExpr.setVariable( param, t ) )
+                .peek( t -> yExpr.setVariable( param, t ) )
+                .mapToObj( t -> new Point2D.Double( xExpr.evaluate(), yExpr.evaluate() ) );
         return stream;
     }
     
@@ -454,7 +454,8 @@ public class Exp4jEquation implements Equation
                 new ExpressionBuilder( exprStr )
                     .variables( vars.keySet() )
                     .build();
-            if ( !expr.validate( true ).isValid() )
+            ValidationResult    exp4jResult = expr.validate( true );
+            if ( !exp4jResult.isValid() )
                 throw new ValidationException();
             double      val     = expr.evaluate();
             result = Optional.of(val );
