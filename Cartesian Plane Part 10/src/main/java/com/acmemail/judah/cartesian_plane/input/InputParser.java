@@ -212,7 +212,7 @@ public class InputParser
             if ( opt.isPresent() )
                 setter.accept( opt.get() );
             else
-                formatError( argString, "is not a valid value" );
+                formatError( argString, "is not a valid expression" );
         }
     }
     
