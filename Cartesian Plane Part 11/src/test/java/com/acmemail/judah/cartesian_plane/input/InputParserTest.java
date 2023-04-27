@@ -280,11 +280,11 @@ class InputParserTest
     private void 
     testEmptyArg( Command cmd, String expOutput )
     {
-        String  actOutput   = getStdout( parser, cmd, "" );
+        String  actOutput   = getStdout( cmd, "" );
         assertEquals( expOutput, actOutput );
     }
     
-    private String getStdout( InputParser parser, Command cmd, String arg )
+    private String getStdout( Command cmd, String arg )
     {
         ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
         PrintStream             printStream = new PrintStream( baoStream );
