@@ -118,6 +118,7 @@ public class Exp4jEquation implements Equation
      * 
      * @return  a newly initialized Equation
      */
+    @Override
     public Equation newEquation()
     {
         return new Exp4jEquation();

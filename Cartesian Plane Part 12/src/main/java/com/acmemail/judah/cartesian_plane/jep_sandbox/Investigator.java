@@ -1,35 +1,22 @@
 package com.acmemail.judah.cartesian_plane.jep_sandbox;
 
 import org.nfunk.jep.JEP;
-import org.nfunk.jep.type.Complex;
 
-public class InvestigatorTrig1
+public class Investigator
 {
-    private static final    JEP parser = new JEP();
     public static void main(String[] args)
     {
+        JEP parser = new JEP();
         parser.addStandardConstants();
         parser.addStandardFunctions();
         parser.addComplex();
         parser.setImplicitMul( true );
         
         parser.addVariable( "z", 3, 2 );
-        print( "2 * 3" );
-        print( "2z" );
-        print( "2(3 + 2i)" );
-        print( "cos(z)" );
-        
-        Complex cpx = new Complex( 3, 2 );
-        System.out.println( cpx.cos() );
-    }
-    
-    private static void print( String expr )
-    {
-        parser.parseExpression( expr );
+        parser.parseExpression( "2 * z" );
         if ( parser.hasError() )
             System.out.println( parser.getErrorInfo() );
         else
             System.out.println( parser.getComplexValue() );
     }
 }
-;

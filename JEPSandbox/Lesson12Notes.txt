@@ -1,0 +1,15 @@
+JEP
+Polar
+Equation:
+    tPlot()
+    rPlot()
+    set/getTExpression, t=
+    set/getRExpression, r=
+JEPEquation extends equation
+UsagePopup
+ErrorPopup
+InputDialog
+CommandReader
+    add r=, t=
+
+Optional<Double> -> DoubleOptional

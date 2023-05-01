@@ -5,24 +5,29 @@ import java.util.stream.DoubleStream;
 
 import org.nfunk.jep.type.Complex;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
+import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
+import com.acmemail.judah.cartesian_plane.input.Polar;
 
 /**
  * Application to plot the equation e^z,
  * where: e is Euler's number, ^ is the power operator
  * and z is a complex number.
- * Given: z = (a + bi), 
- * the plot shows a increasing at a constant rate, ra,
- * and b increasing at a rate that is proportional
- * to ra.
+ * Expressed in polar coordinates,
+ * the radius iterates over a range
+ * while the angle remains constant.
  * 
  * @author Jack Straub
  */
-public class PlotEHatZ1
+public class PlotEHatZ2
 {
-    /** Euler's number, expressed in a complex format. */
+    /** Notification manager instance. */
+    private static final NotificationManager    nmgr    = 
+        NotificationManager.INSTANCE;
+    /** Euler's number, expressed in complex format. */
     private static final Complex    ezed    = new Complex( Math.E, 0 );
 
     /**
@@ -36,16 +41,17 @@ public class PlotEHatZ1
         Root            root    = new Root( plane );
         root.start();
         
-        double  rco     = 0;
-        double  ico     = 0;
-        double  xier    = 10.5;
+        double  theta   = Math.PI / 2.1;
         plane.setStreamSupplier( () -> 
-        DoubleStream.iterate( -4, d -> d <= 8, d -> d + .0005 )
-            .mapToObj( d -> new Complex( rco + d, ico + d * xier ) )
-            .map( ezed::power )
-            .map( PlotEHatZ1::toPoint )
+        DoubleStream.iterate( -16, r -> r <= 16, r -> r + .005 )
+            .mapToObj( r -> Polar.of( r, theta ) )
+            .map( prt -> prt.toComplex() )
+            .map( c -> ezed.power( c ) )
+            .map( c -> toPoint( c ) )
             .map( p -> PlotPointCommand.of( p, plane ) )
         );
+        
+        nmgr.propagateNotification( CPConstants.REDRAW_NP );
     }
     
     /**
