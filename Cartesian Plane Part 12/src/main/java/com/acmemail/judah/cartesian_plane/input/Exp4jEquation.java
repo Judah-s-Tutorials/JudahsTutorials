@@ -24,9 +24,13 @@ import net.objecthunter.exp4j.ValidationResult;
  * initialized to valid values
  * and the following
  * variables are declared:
- * <em>x, y, a, b, c</em> and <em>t</em>.
+ * <em>x, y, a, b, c, r</em> and <em>t</em>.
  * The default parameter name
  * for parametric equations is <em>t</em>.
+ * The default radius name
+ * for polar equations is <em>r</em>.
+ * The default angle name
+ * for polar equations is <em>t</em>.
  * 
  * @author Jack Straub
  * 
@@ -675,6 +679,7 @@ public class Exp4jEquation implements Equation
         vars.put( "a",  0. );
         vars.put( "b",  0. );
         vars.put( "c",  0. );
+        vars.put( "r",  0. );
         vars.put( "t",  0. );
     }
 }

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.geom.Point2D;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -186,6 +188,60 @@ class Exp4jEquationTest
     }
 
     @Test
+    public void testSetRExpression()
+    {
+        String  rExpr   = "0 + 1";
+        Result  result  = equation.setRExpression( rExpr );
+        assertTrue( result.isSuccess() );
+        assertEquals( rExpr, equation.getRExpression() );
+        
+        equation.setRange( Math.PI, Math.PI, 1 );
+        equation.rPlot()
+            .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
+        
+        // try setting an invalid expression
+        result  = equation.setRExpression( "invalid" );
+        assertFalse( result.isSuccess() );
+    }
+
+    @Test
+    public void testSetRExpressionGoWrong()
+    {
+        String  oldRExpr    = equation.getRExpression();
+        String  rExpr       = "undeclaredVarName * x";
+        Result  result      = equation.setRExpression( rExpr );
+        assertFalse( result.isSuccess() );
+        assertEquals( oldRExpr, equation.getRExpression() );
+    }
+
+    @Test
+    public void testSetTExpression()
+    {
+        String  tExpr   = "pi";
+        Result  result  = equation.setTExpression( tExpr );
+        assertTrue( result.isSuccess() );
+        assertEquals( tExpr, equation.getTExpression() );
+        
+        equation.setRange( 1, 1, 1 );
+        equation.tPlot()
+            .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
+        
+        // try setting an invalid expression
+        result  = equation.setRExpression( "invalid" );
+        assertFalse( result.isSuccess() );
+    }
+
+    @Test
+    public void testSetTExpressionGoWrong()
+    {
+        String  oldTExpr    = equation.getTExpression();
+        String  tExpr       = "undeclaredVarName * x";
+        Result  result      = equation.setTExpression( tExpr );
+        assertFalse( result.isSuccess() );
+        assertEquals( oldTExpr, equation.getTExpression() );
+    }
+
+    @Test
     public void testYPlot()
     {
         double  xier    = 2;
@@ -272,11 +328,119 @@ class Exp4jEquationTest
     }
 
     @Test
+    public void testRPlot()
+    {
+        // 4 points where unit circle intersects x/y axes
+        List<Point2D>   expPoints   = List.of( 
+            new Point2D.Double( 1, 0 ), 
+            new Point2D.Double( 0, 1 ), 
+            new Point2D.Double( -1, 0 ), 
+            new Point2D.Double( 0, -1 )
+        );
+        
+        equation.setRExpression( "1" );
+        double  start   = 0;
+        double  end     = 3 * Math.PI / 2;
+        double  step    = Math.PI / 2;
+        
+        equation.setRange( start, end, step );
+        List<Point2D>   actPoints   =
+            equation.rPlot()
+            .collect( Collectors.toList() );
+        
+        // Test equality after allowing for rounding errors
+        double  epsilon = .000001;
+        assertEquals( expPoints.size(), actPoints.size() );
+        IntStream.range( 0, 4 ).forEach( i -> {
+            Point2D ePoint  = expPoints.get( i );
+            Point2D aPoint  = actPoints.get( i );
+            assertEquals( ePoint.getX(), aPoint.getX(), epsilon, "" + i );
+            assertEquals( ePoint.getY(), aPoint.getY(), epsilon, "" + i );
+        });
+    }
+
+    @Test
+    public void testRPlotGoWrong()
+    {
+        String  varName = "varName";
+        String  rExpr   = varName + " + x";
+        equation.setVar( varName, 0 );
+        equation.setRExpression( rExpr );
+        equation.removeVar( varName );
+        
+        Class<ValidationException>  clazz   = ValidationException.class;
+        assertThrows( clazz, () -> equation.rPlot() );
+    }
+
+    @Test
+    public void testTPlot()
+    {
+        double  theta   = Math.PI / 2;
+        List<Point2D>   expPoints   = 
+            IntStream.range( 0, 4 )
+            .mapToObj( r -> 
+                new Point2D.Double(
+                        r * Math.cos( theta ),
+                        r * Math.sin( theta )
+                ))
+            .collect( Collectors.toList() );
+        
+        equation.setTExpression( "pi / 2" );
+        double  start   = 0;
+        double  end     = 3;
+        double  step    = 1;
+        
+        equation.setRange( start, end, step );
+        List<Point2D>   actPoints   =
+            equation.tPlot()
+            .collect( Collectors.toList() );
+        
+        // Test equality after allowing for rounding errors
+        double  epsilon = .000001;
+        assertEquals( expPoints.size(), actPoints.size() );
+        IntStream.range( 0, 4 ).forEach( i -> {
+            Point2D ePoint  = expPoints.get( i );
+            Point2D aPoint  = actPoints.get( i );
+            assertEquals( ePoint.getX(), aPoint.getX(), epsilon, "" + i );
+            assertEquals( ePoint.getY(), aPoint.getY(), epsilon, "" + i );
+        });
+    }
+
+    @Test
+    public void testTPlotGoWrong()
+    {
+        String  varName = "varName";
+        String  tExpr   = varName + " + x";
+        equation.setVar( varName, 0 );
+        equation.setTExpression( tExpr );
+        equation.removeVar( varName );
+        
+        Class<ValidationException>  clazz   = ValidationException.class;
+        assertThrows( clazz, () -> equation.tPlot() );
+    }
+
+    @Test
     public void testGetParam()
     {
         String  pName   = "param";
         equation.setParam( pName );
         assertEquals( pName, equation.getParam() );
+    }
+
+    @Test
+    public void testGetRadius()
+    {
+        String  pName   = "radius";
+        equation.setRadius( pName );
+        assertEquals( pName, equation.getRadius() );
+    }
+
+    @Test
+    public void testGetTheta()
+    {
+        String  pName   = "theta";
+        equation.setTheta( pName );
+        assertEquals( pName, equation.getTheta() );
     }
 
     @Test

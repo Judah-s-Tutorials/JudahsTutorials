@@ -5,13 +5,41 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
 import org.nfunk.jep.JEP;
 
+/**
+ * Implementation of the Equation interface
+ * using the Java Expression Parser (JEP) API.
+ * Upon instantiation
+ * simple expressions for evaluating x and y
+ * are set to "1",
+ * the iteration range is 
+ * initialized to valid values
+ * and the following
+ * variables are declared:
+ * <em>x, y, a, b, c, r</em> and <em>t</em>.
+ * The default parameter name
+ * for parametric equations is <em>t</em>.
+ * The default radius name
+ * for polar equations is <em>r</em>.
+ * The default angle name
+ * for polar equations is <em>t</em>.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Equation
+ * @see <a href="http://sens.cse.msu.edu/Software/jep-2.23/doc/website/doc/javadoc/index.html">
+ *          JEP API Documentation
+ *      </a>
+ * @see <a href="http://sens.cse.msu.edu/Software/jep-2.23/doc/website/doc/doc_usage.htm">
+ *          JEP Introduction
+ *      </a>
+ */
 public class JEPEquation implements Equation
 {
     private final Map<String,Double>    vars        = new HashMap<>();
@@ -29,6 +57,43 @@ public class JEPEquation implements Equation
     private JEP                         yExpr       = null;
     private JEP                         tExpr       = null;
     private JEP                         rExpr       = null;
+    
+    /**
+     * Default constructor.
+     */
+    public JEPEquation()
+    {
+        init();
+    }
+    
+    /**
+     * Constructor.
+     * Initializes the y-expression
+     * to a given value.
+     * 
+     * @param yExpression   the given y-expression
+     */
+    public JEPEquation( String yExpression )
+    {
+        init();
+        setYExpression( yExpression );
+    }
+    
+    /**
+     * Constructor.
+     * Initializes the y-expression
+     * to a given value,
+     * and add the given variable declarations
+     * to this equation.
+     * 
+     * @param yExpression   the given y-expression
+     * @param vars          the given variable declarations
+     */
+    public JEPEquation( Map<String,Double> vars, String yExpression )
+    {
+        init();
+        setYExpression( yExpression );
+    }
     
     @Override
     public Equation newEquation()
@@ -166,120 +231,187 @@ public class JEPEquation implements Equation
     @Override
     public Stream<Point2D> tPlot()
     {
-        // TODO Auto-generated method stub
-        return null;
+        Stream<Point2D> stream  =
+            DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r += rStep )
+                .peek( r -> tExpr.addVariable( radius, r ) )
+                .mapToObj( t -> Polar.of( tExpr.getValue(), t ) )
+                .map( p -> p.toPoint() );
+        return stream;
     }
 
     @Override
     public String getParam()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return param;
     }
 
     @Override
     public void setParam(String param)
     {
-        // TODO Auto-generated method stub
-
+        this.param = param;
     }
 
     @Override
     public String getRadius()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return radius;
     }
 
     @Override
     public void setRadius(String radius)
     {
-        // TODO Auto-generated method stub
-
+        this.radius = radius;
     }
 
     @Override
     public String getTheta()
     {
-        // TODO Auto-generated method stub
-        return null;
+        return theta;
     }
 
     @Override
     public void setTheta(String theta)
     {
-        // TODO Auto-generated method stub
-
+        this.theta = theta;
     }
 
     @Override
     public void setRange(double start, double end, double step)
     {
-        // TODO Auto-generated method stub
-
+        this.rStart = start;
+        this.rEnd = end;
+        this.rStep = step;
     }
 
     @Override
     public void setRangeStart(double rangeStart)
     {
-        // TODO Auto-generated method stub
-
+        this.rStart = rangeStart;
     }
 
     @Override
     public double getRangeStart()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return rStart;
     }
 
     @Override
     public double getRangeEnd()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return rEnd;
     }
 
     @Override
     public void setRangeEnd(double rangeEnd)
     {
-        // TODO Auto-generated method stub
-
+        this.rEnd = rangeEnd;
     }
 
     @Override
     public double getRangeStep()
     {
-        // TODO Auto-generated method stub
-        return 0;
+        return rStep;
     }
 
     @Override
     public void setRangeStep(double rangeStep)
     {
-        // TODO Auto-generated method stub
-
+        this.rStep = rangeStep;
     }
 
     @Override
-    public boolean isValidName(String name)
+    public boolean isValidName( String name )
     {
-        // TODO Auto-generated method stub
-        return false;
+        boolean status  = false;
+        int     len     = name.length();
+        if ( len == 0 )
+            ; // invalid
+        else if ( !isAlpha( name.charAt( 0 ) ) )
+            ; // invalid
+        else
+        {   
+            OptionalInt optional    =
+                name.chars()
+                .filter( c -> !isAlphanumeric( c ) )
+                .findAny();
+            status = optional.isEmpty();
+        }
+        return status;
     }
 
     @Override
     public boolean isValidValue(String valStr)
     {
-        // TODO Auto-generated method stub
-        return false;
+        Optional<Double>    result  = evaluate( valStr );
+        
+        return result.isPresent();
     }
 
     @Override
     public Optional<Double> evaluate(String exprStr)
     {
-        // TODO Auto-generated method stub
-        return Optional.empty();
+        Optional<Double>    result  = Optional.empty();
+        JEP parser  = newParser();
+        parser.parseExpression( exprStr );
+        if ( !parser.hasError() )
+            result = Optional.of( parser.getValue() );
+        return result;
+    }
+    
+    /**
+     * Common initializer for constructors.
+     */
+    private void init()
+    {
+        vars.put( "x",  0. );
+        vars.put( "y",  0. );
+        vars.put( "a",  0. );
+        vars.put( "b",  0. );
+        vars.put( "c",  0. );
+        vars.put( "r",  0. );
+        vars.put( "t",  0. );
+        setXExpression( xExprStr );
+        setYExpression( yExprStr );
+        setTExpression( tExprStr );
+        setRExpression( rExprStr );
+
+    }
+    
+    /**
+     * Determine if a given character is alphabetic:
+     * _, or [a-z] or [A-Z].
+     * 
+     * @param ccc   the given character
+     * 
+     * @return  true if the given character is alphabetic.
+     * 
+     *
+     */
+    private static boolean isAlpha( char ccc )
+    {
+        boolean result  =
+            ccc == '_'
+            || (ccc >= 'A' && ccc <= 'Z')
+            || (ccc >= 'a' && ccc <= 'z');
+        return result;
+    }
+    
+    /**
+     * Determine if a given character is alphanumeric:
+     * _, or [a-z], or [A-Z] or [-,9].
+     * 
+     * @param ccc   the given character
+     * 
+     * @return  true if the given character is alphanumeric.
+     */
+    private static boolean isAlphanumeric( int ccc )
+    {
+        boolean result  =
+            ccc == '_'
+            || (ccc >= 'A' && ccc <= 'Z')
+            || (ccc >= 'a' && ccc <= 'z')
+            || (ccc >= '0' && ccc <= '9');
+        return result;
     }
     
     /**

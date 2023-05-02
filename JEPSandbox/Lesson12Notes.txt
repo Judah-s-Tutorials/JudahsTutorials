@@ -1,4 +1,10 @@
 JEP
+    implicit multiplication issues
+    complex numbers
+    vectors
+    strings
+    identifiers
+        assume like Java
 Polar
 Equation:
     tPlot()
