@@ -67,7 +67,7 @@ public class JEPConsoleInputApp
         throws IOException
     {
         JEPEquation         equation        = new JEPEquation();
-        InputParser         inputParser     = new InputParser();
+        InputParser         inputParser     = new InputParser( equation );
         ParsedCommand       parsedCommand   = null;
         Command             command         = Command.NONE;
         do

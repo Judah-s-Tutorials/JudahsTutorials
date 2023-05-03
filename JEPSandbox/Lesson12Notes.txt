@@ -5,6 +5,13 @@ JEP
     strings
     identifiers
         assume like Java
+    log = natural log; compare to ex4j, log = log base 10, ln = natural log
+    testing
+        remove yPlot/xyPlot/rPlot/Plot go-wrong testing
+
+How to Use File Choosers
+    https://docs.oracle.com/javase/tutorial/uiswing/components/filechooser.html        
+
 Polar
 Equation:
     tPlot()

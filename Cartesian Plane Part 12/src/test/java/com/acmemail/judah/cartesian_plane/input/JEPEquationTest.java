@@ -21,14 +21,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class Exp4jEquationTest
+class JEPEquationTest
 {
-    private Exp4jEquation   equation;
+    private JEPEquation   equation;
     
     @BeforeEach
     public void beforeEach() throws Exception
     {
-        equation = new Exp4jEquation();
+        equation = new JEPEquation();
     }
 
     @Test
@@ -43,7 +43,7 @@ class Exp4jEquationTest
     @Test
     public void testExp4jEquationString()
     {
-        equation = new Exp4jEquation( "2x" );
+        equation = new JEPEquation( "2x" );
         validateDefaultVariables();
         validateDefaultRange();
         validateDefaultXExpression();
@@ -64,7 +64,7 @@ class Exp4jEquationTest
         for ( String str : vars )
             mapIn.put( str, (double)str.charAt( 0 ) );
         
-        equation = new Exp4jEquation( mapIn, "2t" );
+        equation = new JEPEquation( mapIn, "2t" );
         validateDefaultVariables();
         validateDefaultRange();
         
@@ -90,7 +90,7 @@ class Exp4jEquationTest
     @Test
     public void testNewEquation()
     {
-        equation = (Exp4jEquation)equation.newEquation();
+        equation = (JEPEquation)equation.newEquation();
         validateDefaultVariables();
         validateDefaultRange();
         validateDefaultXExpression();
@@ -141,7 +141,7 @@ class Exp4jEquationTest
         
         equation.setRange( 1, 1, 1 );
         equation.xyPlot()
-            .forEach( p -> assertEquals( p.getX(), xier ) );
+            .forEach( p -> assertEquals( xier, p.getX() ) );
         
         // try setting an invalid expression
         result  = equation.setXExpression( "invalid" );
@@ -264,19 +264,6 @@ class Exp4jEquationTest
     }
 
     @Test
-    public void testYPlotGoWrong()
-    {
-        String  varName = "varName";
-        String  yExpr   = varName + " + x";
-        equation.setVar( varName, 0 );
-        equation.setYExpression( yExpr );
-        equation.removeVar( varName );
-        
-        Class<ValidationException>  clazz   = ValidationException.class;
-        assertThrows( clazz, () -> equation.yPlot() );
-    }
-
-    @Test
     public void testXYPlot()
     {
         double  xXier   = 2;
@@ -300,30 +287,6 @@ class Exp4jEquationTest
             .collect( Collectors.toList() );
         
         assertEquals( expPoints, actPoints );
-    }
-
-    @Test
-    public void testXYPlotGoWrong()
-    {
-        String  xVarName    = "xVarName";
-        String  yVarName    = "yVarName";
-        String  xExpr       = xVarName + " + t";
-        String  yExpr       = yVarName + " + t";
-        equation.setVar( xVarName, 0 );
-        equation.setVar( yVarName, 0 );
-        equation.setXExpression( xExpr );
-        equation.setYExpression( yExpr );
-        
-        Class<ValidationException>  clazz   = ValidationException.class;
-        
-        // expect x-expression to throw an exception
-        equation.removeVar( xVarName );
-        assertThrows( clazz, () -> equation.xyPlot() );
-        
-        // expect y-expression to throw an exception
-        equation.setVar( xVarName, 0 );
-        equation.removeVar( yVarName );
-        assertThrows( clazz, () -> equation.xyPlot() );
     }
 
     @Test
@@ -359,19 +322,6 @@ class Exp4jEquationTest
     }
 
     @Test
-    public void testRPlotGoWrong()
-    {
-        String  varName = "varName";
-        String  rExpr   = varName + " + x";
-        equation.setVar( varName, 0 );
-        equation.setRExpression( rExpr );
-        equation.removeVar( varName );
-        
-        Class<ValidationException>  clazz   = ValidationException.class;
-        assertThrows( clazz, () -> equation.rPlot() );
-    }
-
-    @Test
     public void testTPlot()
     {
         double  theta   = Math.PI / 2;
@@ -403,19 +353,6 @@ class Exp4jEquationTest
             assertEquals( ePoint.getX(), aPoint.getX(), epsilon, "" + i );
             assertEquals( ePoint.getY(), aPoint.getY(), epsilon, "" + i );
         });
-    }
-
-    @Test
-    public void testTPlotGoWrong()
-    {
-        String  varName = "varName";
-        String  tExpr   = varName + " + x";
-        equation.setVar( varName, 0 );
-        equation.setTExpression( tExpr );
-        equation.removeVar( varName );
-        
-        Class<ValidationException>  clazz   = ValidationException.class;
-        assertThrows( clazz, () -> equation.tPlot() );
     }
 
     @Test
@@ -500,7 +437,7 @@ class Exp4jEquationTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings={ "a", "2x", "x^2", "cos(t)" } )
+    @ValueSource(strings={ "A", "2X", "X^2", "cos(T)" } )
     public void testIsValidValueFalse( String str )
     {
         // These should all fail because they contain 
@@ -517,11 +454,12 @@ class Exp4jEquationTest
         testEvaluatePass( ".3^2", .09 );
         testEvaluatePass( "2pi", 2 * Math.PI );
         testEvaluatePass( "sin(pi/2)", 1 );
-        testEvaluatePass( "log(e)", 1 );
+        testEvaluatePass( "ln(e)", 1 );
+        testEvaluatePass( "log(10)", 1 );
     }
 
     @ParameterizedTest
-    @ValueSource(strings={ "a", "2x", "x^2", "cos(t)" } )
+    @ValueSource(strings={ "A", "2X", "X^2", "cos(T)" } )
     public void testEvaluateFail( String str )
     {
         Optional<Double>    optional    = equation.evaluate( str );

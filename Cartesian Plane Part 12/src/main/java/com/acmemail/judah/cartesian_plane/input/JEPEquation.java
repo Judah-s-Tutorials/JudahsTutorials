@@ -92,6 +92,7 @@ public class JEPEquation implements Equation
     public JEPEquation( Map<String,Double> vars, String yExpression )
     {
         init();
+        this.vars.putAll( vars );
         setYExpression( yExpression );
     }
     
@@ -208,8 +209,8 @@ public class JEPEquation implements Equation
         updateVars( yExpr );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
-                .peek( t -> yExpr.addVariable( "x", t ) )
-                .peek( t -> yExpr.addVariable( "x", t ) )
+                .peek( t -> xExpr.addVariable( "t", t ) )
+                .peek( t -> yExpr.addVariable( "t", t ) )
                 .mapToObj( t -> 
                     new Point2D.Double( xExpr.getValue(), yExpr.getValue() )
                 );
@@ -234,7 +235,7 @@ public class JEPEquation implements Equation
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r += rStep )
                 .peek( r -> tExpr.addVariable( radius, r ) )
-                .mapToObj( t -> Polar.of( tExpr.getValue(), t ) )
+                .mapToObj( r -> Polar.of( r, tExpr.getValue() ) )
                 .map( p -> p.toPoint() );
         return stream;
     }
