@@ -313,7 +313,7 @@ public class InputParser
                     equation.evaluate( valStr );
                 if ( optVal.isPresent() )
                 {
-                    double  val = Double.parseDouble( valStr );
+                    double  val = optVal.get();
                     equation.setVar( name, val );
                 }
                 else

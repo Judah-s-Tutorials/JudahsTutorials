@@ -14,8 +14,15 @@ import javax.swing.JOptionPane;
 
 public class FileManager
 {
-    private static JFileChooser chooser = new JFileChooser();
-    private static List<String> lines       = new ArrayList<>();
+    private static JFileChooser chooser;
+    private static List<String> lines   = new ArrayList<>();
+    
+    static
+    {
+        String  userDir = System.getProperty( "user.dir" );
+        File    baseDir = new File( userDir );
+        chooser = new JFileChooser( baseDir );
+    }
     
     /**
      * Prevent this class from being instantiated.
@@ -96,8 +103,8 @@ public class FileManager
                     + exc.getMessage();
             JOptionPane.showMessageDialog( 
                 null, 
-                "Read File Error", 
                 msg, 
+                "Read File Error", 
                 JOptionPane.ERROR_MESSAGE
             );
         }

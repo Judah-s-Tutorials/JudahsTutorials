@@ -12,6 +12,8 @@ import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
+import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.FileManager;
 import com.acmemail.judah.cartesian_plane.input.InputParser;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
@@ -85,6 +87,14 @@ public class ConsoleInputApp
                 plotR( inputParser );
             else if ( command == Command.TPLOT )
                 plotT( inputParser );
+            else if ( command == Command.OPEN )
+            {
+                String      arg         = parsedCommand.getArgString();
+                Equation    equation    = arg.isEmpty() ? 
+                    FileManager.open() : FileManager.open( arg );
+                if ( equation != null )
+                    inputParser = new InputParser( equation );
+            }
             else
                 ;
         } while ( command != Command.EXIT );
