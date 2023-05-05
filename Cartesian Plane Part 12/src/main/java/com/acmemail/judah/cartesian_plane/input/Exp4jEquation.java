@@ -49,6 +49,7 @@ public class Exp4jEquation implements Equation
         Exp4jFunctions.getFunctions();
     
     private final Map<String,Double>    vars        = new HashMap<>();
+    private String                      name        = "";
     private double                      rStart      = -1;
     private double                      rEnd        = 1;
     private double                      rStep       = .05;
@@ -119,7 +120,19 @@ public class Exp4jEquation implements Equation
         setYExpression( expr );
         setTExpression( tExprStr );
         setTExpression( rExprStr );
-}
+    }
+    
+    @Override
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+    
+    @Override
+    public String getName()
+    {
+        return name;
+    }
     
     /**
      * Returns a newly initialized Equation.

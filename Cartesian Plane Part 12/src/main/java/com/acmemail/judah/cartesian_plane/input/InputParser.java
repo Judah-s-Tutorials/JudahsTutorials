@@ -101,6 +101,7 @@ public class InputParser
         {
         case EQUATION:
             equation = equation.newEquation();
+            equation.setName( argString );
             break;
         case XEQUALS:
             parseArg( equation::setXExpression, equation::getXExpression );
