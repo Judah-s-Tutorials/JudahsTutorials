@@ -109,6 +109,22 @@ class InputParserTest
         String          newVal      = "newParamName";
         testSetString( Command.PARAM, newVal, equation::getParam );
     }
+
+    @Test
+    public void testParseInputRADIUS()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "newRadiusName";
+        testSetString( Command.RADIUS, newVal, equation::getRadius );
+    }
+
+    @Test
+    public void testParseInputTHETA()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "newThetaName";
+        testSetString( Command.THETA, newVal, equation::getTheta );
+    }
     
     @Test
     public void testParseInputXEQUALS()
@@ -216,7 +232,7 @@ class InputParserTest
     @Test
     public void testParseVarsGoodAndBadSpecs()
     {
-        String      strVals = "p=10,q=10,%,r=5 5";
+        String      strVals = "p=10,q=10,%,s=5 5";
         Result      result  = 
             parser.parseInput( Command.SET, strVals );
         assertFalse( result.isSuccess() );
@@ -228,7 +244,7 @@ class InputParserTest
         Equation            equation    = parser.getEquation();
         Optional<Double>    pVal        = equation.getVar( "p" );
         Optional<Double>    qVal        = equation.getVar( "q" );
-        Optional<Double>    rVal        = equation.getVar( "r" );
+        Optional<Double>    sVal        = equation.getVar( "s" );
         
         // p and q should be stored...
         assertTrue( pVal.isPresent() );
@@ -237,7 +253,7 @@ class InputParserTest
         assertEquals( 10, qVal.get() );
         
         // ... but r should not
-        assertFalse( rVal.isPresent() );
+        assertFalse( sVal.isPresent() );
     }
     
     private void testSetDouble( Command cmd, DoubleSupplier getter  )

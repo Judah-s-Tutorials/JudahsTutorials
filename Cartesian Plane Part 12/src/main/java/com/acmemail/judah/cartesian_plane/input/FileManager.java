@@ -114,6 +114,8 @@ public class FileManager
     public static void save( PrintWriter pWriter, Equation equation ) 
         throws IOException
     {
+        lines.clear();
+        lines.add( Command.EQUATION.toString() + " " + equation.getName() );
         writeRange( equation );
         writeVars( equation );
         writeParameterNames( equation );
@@ -153,7 +155,7 @@ public class FileManager
         varMap.forEach( (n,v) -> 
             bldr.append( String.format( "%s=%f,", n, v ) )
         );
-        // delete the las comma
+        // delete the last comma
         bldr.deleteCharAt( bldr.length() - 1 );
         lines.add( bldr.toString() );
     }

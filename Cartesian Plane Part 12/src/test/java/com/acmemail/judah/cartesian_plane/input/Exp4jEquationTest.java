@@ -500,7 +500,7 @@ class Exp4jEquationTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings={ "a", "2x", "x^2", "cos(t)" } )
+    @ValueSource(strings={ "l", "2m", "l^2", "cos(m)" } )
     public void testIsValidValueFalse( String str )
     {
         // These should all fail because they contain 
@@ -521,7 +521,7 @@ class Exp4jEquationTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings={ "a", "2x", "x^2", "cos(t)" } )
+    @ValueSource(strings={ "l", "2m", "l^2", "cos(m)" } )
     public void testEvaluateFail( String str )
     {
         Optional<Double>    optional    = equation.evaluate( str );

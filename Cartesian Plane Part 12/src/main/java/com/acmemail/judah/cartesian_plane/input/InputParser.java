@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -128,7 +129,13 @@ public class InputParser
             parseExpression( equation::setRangeStep, equation::getRangeStep );
             break;
         case PARAM:
-            setParameterName();
+            setName( equation::setParam, equation::getParam );
+            break;
+        case RADIUS:
+            setName( equation::setRadius, equation::getRadius );
+            break;
+        case THETA:
+            setName( equation::setTheta, equation::getTheta );
             break;
         case INVALID:
             invalidCommand();
@@ -328,19 +335,19 @@ public class InputParser
      * of all currently declared variables
      * to stdout.
      */
-private void printVars()
-{
-    final String    format  = "%s=%f%n";
-    Set<Map.Entry<String,Double>>   entries =
-        equation.getVars().entrySet();
-    entries.forEach( 
-        e -> System.out.printf( format, e.getKey(), e.getValue() )
-    );
-}
+    private void printVars()
+    {
+        final String    format  = "%s=%f%n";
+        Set<Map.Entry<String,Double>>   entries =
+            equation.getVars().entrySet();
+        entries.forEach( 
+            e -> System.out.printf( format, e.getKey(), e.getValue() )
+        );
+    }
     
     /**
-     * Sets the name of the parameter
-     * in a parametric equation
+     * Sets one of the parameter names
+     * for a parametric or polar equation 
      * to the current argument.
      * If the argument is empty
      * the current name of the parameter
@@ -348,14 +355,14 @@ private void printVars()
      * If the argument is not a valid variable name
      * an error is stored in the <em>errors</em> list.
      */
-    private void setParameterName()
+    private void setName( Consumer<String> setter, Supplier<String> getter )
     {
         if ( argString.isEmpty() )
-            System.out.println( equation.getParam() );
+            System.out.println( getter.get() );
         else if ( !equation.isValidName( argString ) )
             formatError( argString, "is not a valid variable name" );
         else
-            equation.setParam( argString );
+            setter.accept( argString );
     }
     
     /**

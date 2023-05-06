@@ -405,7 +405,6 @@ public class Exp4jEquation implements Equation
     public void setParam( String param )
     {
         this.param = param;
-        vars.put( param, 0. );
     }
     
     @Override
@@ -417,7 +416,6 @@ public class Exp4jEquation implements Equation
     public void setRadius( String radius )
     {
         this.radius = radius;
-        vars.put( radius, 0. );
     }
     
     @Override
@@ -430,7 +428,6 @@ public class Exp4jEquation implements Equation
     public void setTheta( String theta )
     {
         this.theta = theta;
-        vars.put( theta, 0. );
     }
     
     /**
