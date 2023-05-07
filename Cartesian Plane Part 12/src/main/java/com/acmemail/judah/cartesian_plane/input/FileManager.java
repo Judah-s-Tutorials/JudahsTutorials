@@ -144,8 +144,8 @@ public class FileManager
     private static void writeParameterNames( Equation equation )
     {
         lines.add( "param " + equation.getParam() );
-        lines.add( "radius " + equation.getRadius() );
-        lines.add( "theta " + equation.getTheta() );
+        lines.add( "radius " + equation.getRadiusName() );
+        lines.add( "theta " + equation.getThetaName() );
     }
     
     private static void writeVars( Equation equation )

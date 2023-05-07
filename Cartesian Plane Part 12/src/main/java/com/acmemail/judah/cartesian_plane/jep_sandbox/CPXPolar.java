@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.input;
+package com.acmemail.judah.cartesian_plane.jep_sandbox;
 
 import java.awt.geom.Point2D;
 
@@ -10,7 +10,7 @@ import org.nfunk.jep.type.Complex;
  * 
  * @author Jack Straub
  */
-public class Polar
+public class CPXPolar
 {
     private final double    radius;
     private final double    theta;
@@ -23,10 +23,25 @@ public class Polar
      * @param radius    the given radius
      * @param theta     the given angle
      */
-    private Polar( double radius, double theta )
+    private CPXPolar( double radius, double theta )
     {
         this.radius = radius;
         this.theta = theta;
+    }
+    
+    /**
+     * Converts this object
+     * to a Point2D object
+     * 
+     * @return Point2D object equivalent to this object
+     */
+    public Complex toComplex()
+    {
+        double  real    = radius * Math.cos( theta );
+        double  imag    = radius * Math.sin( theta );
+
+        Complex cpx = new Complex( real, imag );
+        return cpx;
     }
 
     /**
@@ -84,9 +99,9 @@ public class Polar
      * 
      * @return  the created Polar object
      */
-    public static Polar of( Complex zed )
+    public static CPXPolar of( Complex zed )
     {
-        Polar  pzed     = ofXY( zed.re(), zed.im() );
+        CPXPolar  pzed     = ofXY( zed.re(), zed.im() );
         return pzed;
     }
     
@@ -98,9 +113,9 @@ public class Polar
      * 
      * @return  the created Polar object
      */
-    public static Polar of( Point2D point )
+    public static CPXPolar of( Point2D point )
     {
-        Polar  pzed    = ofXY( point.getX(), point.getY() );
+        CPXPolar  pzed    = ofXY( point.getX(), point.getY() );
         return pzed;
     }
     
@@ -113,9 +128,9 @@ public class Polar
      * 
      * @return  the created Polar object
      */
-    public static Polar of( double radius, double theta )
+    public static CPXPolar of( double radius, double theta )
     {
-        Polar   pzed    = new Polar( radius, theta );
+        CPXPolar   pzed    = new CPXPolar( radius, theta );
         return pzed;
     }
     
@@ -128,11 +143,11 @@ public class Polar
      * 
      * @return  the created Polar object
      */
-    public static Polar ofXY( double xco, double yco )
+    public static CPXPolar ofXY( double xco, double yco )
     {
         double  radius  = radiusOfXY( xco, yco );
         double  theta   = thetaOfXY( xco, yco );
-        Polar   pzed    = new Polar( radius, theta );
+        CPXPolar   pzed    = new CPXPolar( radius, theta );
         return pzed;
     }
     

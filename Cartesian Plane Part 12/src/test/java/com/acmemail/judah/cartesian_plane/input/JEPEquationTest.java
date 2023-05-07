@@ -367,16 +367,16 @@ class JEPEquationTest
     public void testGetRadius()
     {
         String  pName   = "radius";
-        equation.setRadius( pName );
-        assertEquals( pName, equation.getRadius() );
+        equation.setRadiusName( pName );
+        assertEquals( pName, equation.getRadiusName() );
     }
 
     @Test
     public void testGetTheta()
     {
         String  pName   = "theta";
-        equation.setTheta( pName );
-        assertEquals( pName, equation.getTheta() );
+        equation.setThetaName( pName );
+        assertEquals( pName, equation.getThetaName() );
     }
 
     @Test

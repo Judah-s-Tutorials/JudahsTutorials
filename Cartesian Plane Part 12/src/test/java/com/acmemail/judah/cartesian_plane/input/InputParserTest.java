@@ -115,7 +115,7 @@ class InputParserTest
     {
         Equation        equation    = parser.getEquation();
         String          newVal      = "newRadiusName";
-        testSetString( Command.RADIUS, newVal, equation::getRadius );
+        testSetString( Command.RADIUS, newVal, equation::getRadiusName );
     }
 
     @Test
@@ -123,7 +123,7 @@ class InputParserTest
     {
         Equation        equation    = parser.getEquation();
         String          newVal      = "newThetaName";
-        testSetString( Command.THETA, newVal, equation::getTheta );
+        testSetString( Command.THETA, newVal, equation::getThetaName );
     }
     
     @Test

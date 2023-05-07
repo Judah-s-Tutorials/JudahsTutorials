@@ -408,24 +408,24 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public String getRadius()
+    public String getRadiusName()
     {
         return radius;
     }
     
-    public void setRadius( String radius )
+    public void setRadiusName( String radius )
     {
         this.radius = radius;
     }
     
     @Override
-    public String getTheta()
+    public String getThetaName()
     {
         return theta;
     }
     
     @Override
-    public void setTheta( String theta )
+    public void setThetaName( String theta )
     {
         this.theta = theta;
     }

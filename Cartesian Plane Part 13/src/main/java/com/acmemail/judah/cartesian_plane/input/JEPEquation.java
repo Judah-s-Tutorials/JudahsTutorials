@@ -43,6 +43,7 @@ import org.nfunk.jep.JEP;
 public class JEPEquation implements Equation
 {
     private final Map<String,Double>    vars        = new HashMap<>();
+    private String                      name        = "";
     private double                      rStart      = -1;
     private double                      rEnd        = 1;
     private double                      rStep       = .05;
@@ -96,6 +97,18 @@ public class JEPEquation implements Equation
         setYExpression( yExpression );
     }
     
+    @Override
+    public void setName( String name )
+    {
+        this.name = name;
+    }
+    
+    @Override
+    public String getName()
+    {
+        return name;
+    }
+
     @Override
     public Equation newEquation()
     {

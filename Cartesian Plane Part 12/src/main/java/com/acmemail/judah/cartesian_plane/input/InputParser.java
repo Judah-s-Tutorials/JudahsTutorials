@@ -132,10 +132,10 @@ public class InputParser
             setName( equation::setParam, equation::getParam );
             break;
         case RADIUS:
-            setName( equation::setRadius, equation::getRadius );
+            setName( equation::setRadiusName, equation::getRadiusName );
             break;
         case THETA:
-            setName( equation::setTheta, equation::getTheta );
+            setName( equation::setThetaName, equation::getThetaName );
             break;
         case INVALID:
             invalidCommand();

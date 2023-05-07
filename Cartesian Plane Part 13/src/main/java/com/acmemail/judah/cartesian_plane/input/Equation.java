@@ -22,11 +22,29 @@ import java.util.stream.Stream;
  *      <li>The declaration of variables used in the expression(s); and</li>
  *      <li>A range for producing a plot.</li>
  * </ul>
+ * <p>
+ * For archival purposes
+ * and equation can optionally have a name.
+ * </p>
  *
  * @author Jack Straub
  */
 public interface Equation
 {
+    /**
+     * Sets the name of this equation.
+     * 
+     * @param name  the name of this equation
+     */
+    void setName( String name );
+    
+    /**
+     * Gets the name of this equation
+     * 
+     * @return  the name of this equation
+     */
+    String getName();
+    
     /**
      * Returns a newly initialized Equation.
      * 

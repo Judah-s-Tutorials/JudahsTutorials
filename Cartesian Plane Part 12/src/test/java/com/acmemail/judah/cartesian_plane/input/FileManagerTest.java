@@ -84,8 +84,8 @@ class FileManagerTest
         testEquation.setRExpression( testREq );
         testEquation.setTExpression( testTEq );
         testEquation.setParam( testParam );
-        testEquation.setRadius( testRadius );
-        testEquation.setTheta( testTheta );
+        testEquation.setRadiusName( testRadius );
+        testEquation.setThetaName( testTheta );
         
         // Destroy pre-existing data
         File    tempFile    = new File( testFilePath );
@@ -184,7 +184,7 @@ class FileManagerTest
         assertEquals( testREq, actVal.getRExpression() );
         assertEquals( testTEq, actVal.getTExpression() );
         assertEquals( testParam, actVal.getParam() );
-        assertEquals( testRadius, actVal.getRadius() );
-        assertEquals( testTheta, actVal.getTheta() );
+        assertEquals( testRadius, actVal.getRadiusName() );
+        assertEquals( testTheta, actVal.getThetaName() );
     }
 }

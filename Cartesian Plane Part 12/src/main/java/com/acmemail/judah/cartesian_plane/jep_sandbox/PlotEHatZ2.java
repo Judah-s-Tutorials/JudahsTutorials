@@ -10,7 +10,6 @@ import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
-import com.acmemail.judah.cartesian_plane.input.Polar;
 
 /**
  * Application to plot the equation e^z,
@@ -44,7 +43,7 @@ public class PlotEHatZ2
         double  theta   = Math.PI / 2.1;
         plane.setStreamSupplier( () -> 
         DoubleStream.iterate( -16, r -> r <= 16, r -> r + .005 )
-            .mapToObj( r -> Polar.of( r, theta ) )
+            .mapToObj( r -> CPXPolar.of( r, theta ) )
             .map( prt -> prt.toComplex() )
             .map( c -> ezed.power( c ) )
             .map( c -> toPoint( c ) )
