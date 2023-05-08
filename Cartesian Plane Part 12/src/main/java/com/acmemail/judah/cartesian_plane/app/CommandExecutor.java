@@ -1,8 +1,10 @@
 package com.acmemail.judah.cartesian_plane.app;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
 
@@ -78,18 +80,83 @@ public class CommandExecutor
             else if ( !result.isSuccess() )
                 showError( result );
             else if ( command == Command.YPLOT )
-                plotY();
+                plot( () -> inputParser.getEquation().yPlot() );
             else if ( command == Command.XYPLOT )
-                plotXY();
+                plot( () -> inputParser.getEquation().xyPlot() );
             else if ( command == Command.RPLOT )
-                plotR();
+                plot( () -> inputParser.getEquation().rPlot() );
             else if ( command == Command.TPLOT )
-                plotT();
+                plot( () -> inputParser.getEquation().tPlot() );
             else if ( command == Command.OPEN )
                 open( parsedCommand.getArgString() );
+            else if ( command == Command.SAVE )
+                save( parsedCommand.getArgString() );
             else
                 ;
         } while ( command != Command.EXIT );
+    }
+    
+    /**
+     * Generate a plot from a given type of equation.
+     * The type of equation is encoded
+     * in the given stream supplier:
+     * <ul>
+     * <li>y = f(x): equation.yPlot()</li>
+     * <li>(x,y) = f(x): equation.xyPlot()</li>
+     * <li>r = f(t): equation.rPlot()</li>
+     * <li>t = f(r): equation.tPlot()</li>
+     * </ul>
+     * 
+     * @param pointStreamSuppier    the given stream supplier
+     */
+    private void plot( Supplier<Stream<Point2D>> pointStreamSuppier )
+    {
+        plane.setStreamSupplier( () ->
+            pointStreamSuppier.get()
+            .map( p -> PlotPointCommand.of( p, plane) )
+        );
+        NotificationManager.INSTANCE
+            .propagateNotification( CPConstants.REDRAW_NP );
+    }
+    
+    /**
+     * Create a new equation from the input file
+     * with the given name.
+     * If the given name is empty,
+     * the operator will be prompted
+     * for the file to read.
+     * 
+     * @param name  the given file name;
+     *              may be empty, may not be null
+     *              
+     * Postcondition: 
+     *     If an equation is successfully derived
+     *     from the input file,
+     *     a new InputParser will be instantiated
+     *     using the derived equation.
+     */
+    private void open( String name )
+    {
+        Equation    equation    = name.isEmpty() ? 
+            FileManager.open() : FileManager.open( name );
+        if ( equation != null )
+            inputParser = new InputParser( equation );
+    }
+    
+    /**
+     * Saves the current equation to the output file
+     * with the given name.
+     * If the given name is empty,
+     * the operator will be prompted
+     * for the file to write.
+     * 
+     * @param name  the given file name;
+     *              may be empty, may not be null
+     */
+    private void save( String name )
+    {
+        Equation    equation    = inputParser.getEquation();
+        FileManager.save( name, equation);
     }
     
     /**
@@ -137,90 +204,5 @@ public class CommandExecutor
             JOptionPane.ERROR_MESSAGE
         );
     }
-    
-    /**
-     * Generate a plot of the form y = f(x).
-     * 
-     * @param parser    the object that encapsulates the equation to plot
-     */
-    private void plotY()
-    {
-        plane.setStreamSupplier( () ->
-            inputParser.getEquation().yPlot()
-            .map( p -> PlotPointCommand.of( p, plane) )
-        );
-        NotificationManager.INSTANCE
-            .propagateNotification( CPConstants.REDRAW_NP );
-    }
-    
-    /**
-     * Generate a plot from a polar equation
-     * r = f(t).
-     * 
-     * @param parser    the object that encapsulates the equation to plot
-     */
-    private void plotR()
-    {
-        plane.setStreamSupplier( () ->
-            inputParser.getEquation().rPlot()
-            .map( p -> PlotPointCommand.of( p, plane) )
-        );
-        NotificationManager.INSTANCE
-            .propagateNotification( CPConstants.REDRAW_NP );
-    }
-    
-    /**
-     * Generate a plot from a polar equation
-     * r = f(t).
-     * 
-     * @param parser    the object that encapsulates the equation to plot
-     */
-    private void plotT()
-    {
-        plane.setStreamSupplier( () ->
-            inputParser.getEquation().tPlot()
-            .map( p -> PlotPointCommand.of( p, plane) )
-        );
-        NotificationManager.INSTANCE
-            .propagateNotification( CPConstants.REDRAW_NP );
-    }
-    
-    /**
-     * Generate a plot of parametric equation.
-     * 
-     * @param parser    the object that encapsulates the equation to plot
-     */
-    private void plotXY()
-    {
-        plane.setStreamSupplier( () ->
-            inputParser.getEquation().xyPlot()
-            .map( p -> PlotPointCommand.of( p, plane) )
-        );
-        NotificationManager.INSTANCE
-            .propagateNotification( CPConstants.REDRAW_NP );
-    }
-    
-    /**
-     * Create a new equation from the input file
-     * with the given name.
-     * If the given name is empty,
-     * the operator will be prompted
-     * for the file to read.
-     * 
-     * @param name  the given file name;
-     *              may be empty, may not be null
-     *              
-     * Postcondition: 
-     *     If an equation is successfully derived
-     *     from the input file,
-     *     a new InputParser will be instantiated
-     *     using the derived equation.
-     */
-    private void open( String name )
-    {
-        Equation    equation    = name.isEmpty() ? 
-            FileManager.open() : FileManager.open( name );
-        if ( equation != null )
-            inputParser = new InputParser( equation );
-    }
+
 }

@@ -338,7 +338,7 @@ public class Exp4jEquation implements Equation
             DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t += rStep )
                 .peek( t -> rExpr.setVariable( theta, t ) )
                 .mapToObj( t -> Polar.of( rExpr.evaluate(), t ) )
-                .map( p -> p.toPoint() );
+                .map( Polar::toPoint );
         return stream;
     }
     
@@ -349,7 +349,7 @@ public class Exp4jEquation implements Equation
         ValidationResult    result    = tExpr.validate( true );
         if ( !result.isValid() )
         {
-            String  message = "Unexpected r-expression validation failure.";
+            String  message = "Unexpected t-expression validation failure.";
             throw new ValidationException( message );
         }
 
@@ -357,7 +357,7 @@ public class Exp4jEquation implements Equation
             DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r += rStep )
                 .peek( r -> tExpr.setVariable( radius, r ) )
                 .mapToObj( r -> Polar.of( r, tExpr.evaluate() ) )
-                .map( p -> p.toPoint() );
+                .map( Polar::toPoint );
         return stream;
     }
     
