@@ -51,7 +51,7 @@ public class UsagePopupDemo2
             .forEach( e -> 
                 bldr.append( "<tr><td>" )
                     .append( e )
-                    .append( "</td><td style='width: 250px;'>" )
+                    .append( "</td><td style='width: 300px;'>" )
                     .append( e.getDescription() )
                     .append( "</td></tr>")
         );
