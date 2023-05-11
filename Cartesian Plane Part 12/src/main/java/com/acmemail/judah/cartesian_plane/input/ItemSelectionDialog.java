@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.input;
 
 import java.awt.BorderLayout;
 import java.awt.Window;
@@ -11,8 +11,8 @@ import javax.swing.JScrollPane;
 
 public class ItemSelectionDialog
 {    
-    public static final int OK_STATUS       = 0;
-    public static final int CANCEL_STATUS   = 1;
+    private static final int OK_STATUS      = 0;
+    private static final int CANCEL_STATUS  = 1;
     
     private final JDialog           dialog;
     private final JList<Object>     jList;
@@ -36,15 +36,15 @@ public class ItemSelectionDialog
         dialog.pack();
     }
     
-    public int show()
-    {
-        closeStatus = CANCEL_STATUS;
-        dialog.setVisible( true );
-        
-        int rval    = 
-            closeStatus == OK_STATUS ? jList.getSelectedIndex() : -1;
-        return rval;
-    }
+public int show()
+{
+    closeStatus = CANCEL_STATUS;
+    dialog.setVisible( true );
+    
+    int rval    = 
+        closeStatus == OK_STATUS ? jList.getSelectedIndex() : -1;
+    return rval;
+}
     
     private JPanel getContentPane()
     {

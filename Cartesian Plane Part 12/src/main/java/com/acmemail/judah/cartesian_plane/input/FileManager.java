@@ -14,8 +14,8 @@ import javax.swing.JOptionPane;
 
 public class FileManager
 {
-    private static JFileChooser chooser;
     private static List<String> lines   = new ArrayList<>();
+    private static JFileChooser chooser;
     
     static
     {

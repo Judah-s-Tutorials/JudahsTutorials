@@ -1,0 +1,7 @@
+    equation mzrgA
+    start 0
+    end 2pi
+    step .001
+    r= 5sin(cos(4t))
+    rplot
+    

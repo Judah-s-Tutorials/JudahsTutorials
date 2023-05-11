@@ -1,5 +1,7 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
+import com.acmemail.judah.cartesian_plane.input.ItemSelectionDialog;
+
 public class CustomDialogDemo
 {
     public static final String[] names =

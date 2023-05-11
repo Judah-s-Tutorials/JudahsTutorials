@@ -156,7 +156,10 @@ public class CommandExecutor
     private void save( String name )
     {
         Equation    equation    = inputParser.getEquation();
-        FileManager.save( name, equation);
+        if ( name.isEmpty() )
+            FileManager.save( equation );
+        else
+            FileManager.save( name, equation);
     }
     
     /**

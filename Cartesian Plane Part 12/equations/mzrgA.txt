@@ -1,0 +1,5 @@
+    equation mzrgA
+    start -3
+    end 3
+    step .001
+    y= abs(sin(x^x))/2^((x^x-pi/2)/pi)
