@@ -128,14 +128,14 @@ public class InputParser
         case STEP:
             parseExpression( equation::setRangeStep, equation::getRangeStep );
             break;
-        case PARAM:
-            setName( equation::setParam, equation::getParam );
-            break;
         case RADIUS:
             setName( equation::setRadiusName, equation::getRadiusName );
             break;
         case THETA:
             setName( equation::setThetaName, equation::getThetaName );
+            break;
+        case PARAM:
+            setName( equation::setParam, equation::getParam );
             break;
         case INVALID:
             invalidCommand();

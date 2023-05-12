@@ -64,9 +64,9 @@ public enum Command
     /** Generates the plot of the parametric equation (x,y)=f(t). */
     XYPLOT( "Generates a plot of the form (x,y) = f(t)" ),
     /** Generates the plot of the polar equation r = f(t). */
-    TPLOT( "Generates a plot of the polar equation r = f(t)" ),
+    RPLOT( "Generates a plot of the polar equation r = f(t)" ),
     /** Generates the plot of the polar equation t = f(r). */
-    RPLOT( "Generates a plot of the polar equation t = f(r)" ),
+    TPLOT( "Generates a plot of the polar equation t = f(r)" ),
     /** Identifies and empty command string. */
     NONE( "Identifies an empty command string" ),
     /** Identifies an invalid command. */
@@ -76,6 +76,8 @@ public enum Command
         "Application specific; probably "
         + "\"Exit from the current operation\""
     ),
+    /** Select an equation from the EquationMap. */
+    SELECT( "Select an equation from a list" ),
     /** Open a file. */
     OPEN( "Application specific; probably \"open equation file\""),
     /** Save a file. */

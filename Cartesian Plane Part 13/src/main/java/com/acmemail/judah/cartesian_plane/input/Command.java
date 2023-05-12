@@ -76,6 +76,8 @@ public enum Command
         "Application specific; probably "
         + "\"Exit from the current operation\""
     ),
+    /** Select an equation from the EquationMap. */
+    SELECT( "Select an equation from a list" ),
     /** Open a file. */
     OPEN( "Application specific; probably \"open equation file\""),
     /** Save a file. */

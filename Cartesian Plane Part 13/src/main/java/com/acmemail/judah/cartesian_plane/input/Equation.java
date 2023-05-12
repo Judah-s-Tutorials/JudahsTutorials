@@ -255,7 +255,7 @@ public interface Equation
      * 
      * @return the name of the radius
      */
-    String getRadius();
+    String getRadiusName();
 
     /**
      * Sets the name of the radius variable
@@ -263,7 +263,7 @@ public interface Equation
      * 
      * @param radius the name of the radius
      */
-    void setRadius(String radius);
+    void setRadiusName(String radius);
 
     /**
      * Gets the name of the angle variable
@@ -271,7 +271,7 @@ public interface Equation
      * 
      * @return the name of the angle variable
      */
-    String getTheta();
+    String getThetaName();
 
     /**
      * Sets the name of the angle variable
@@ -279,7 +279,7 @@ public interface Equation
      * 
      * @param theta the name of the parameter
      */
-    void setTheta(String theta);
+    void setThetaName(String theta);
 
     /**
      * Establishes the iteration range for this Equation.

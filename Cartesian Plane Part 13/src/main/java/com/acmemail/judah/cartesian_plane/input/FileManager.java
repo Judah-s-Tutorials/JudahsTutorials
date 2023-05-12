@@ -14,8 +14,8 @@ import javax.swing.JOptionPane;
 
 public class FileManager
 {
-    private static JFileChooser chooser;
     private static List<String> lines   = new ArrayList<>();
+    private static JFileChooser chooser;
     
     static
     {
@@ -114,6 +114,8 @@ public class FileManager
     public static void save( PrintWriter pWriter, Equation equation ) 
         throws IOException
     {
+        lines.clear();
+        lines.add( Command.EQUATION.toString() + " " + equation.getName() );
         writeRange( equation );
         writeVars( equation );
         writeParameterNames( equation );
@@ -142,8 +144,8 @@ public class FileManager
     private static void writeParameterNames( Equation equation )
     {
         lines.add( "param " + equation.getParam() );
-        lines.add( "radius " + equation.getRadius() );
-        lines.add( "theta " + equation.getTheta() );
+        lines.add( "radius " + equation.getRadiusName() );
+        lines.add( "theta " + equation.getThetaName() );
     }
     
     private static void writeVars( Equation equation )
@@ -153,7 +155,7 @@ public class FileManager
         varMap.forEach( (n,v) -> 
             bldr.append( String.format( "%s=%f,", n, v ) )
         );
-        // delete the las comma
+        // delete the last comma
         bldr.deleteCharAt( bldr.length() - 1 );
         lines.add( bldr.toString() );
     }

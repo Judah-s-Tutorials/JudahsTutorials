@@ -132,10 +132,10 @@ public class InputParser
             setName( equation::setParam, equation::getParam );
             break;
         case RADIUS:
-            setName( equation::setRadius, equation::getRadius );
+            setName( equation::setRadiusName, equation::getRadiusName );
             break;
         case THETA:
-            setName( equation::setTheta, equation::getTheta );
+            setName( equation::setThetaName, equation::getThetaName );
             break;
         case INVALID:
             invalidCommand();
@@ -343,26 +343,6 @@ public class InputParser
         entries.forEach( 
             e -> System.out.printf( format, e.getKey(), e.getValue() )
         );
-    }
-    
-    /**
-     * Sets the name of the parameter
-     * in a parametric equation
-     * to the current argument.
-     * If the argument is empty
-     * the current name of the parameter
-     * is printed to stdout.
-     * If the argument is not a valid variable name
-     * an error is stored in the <em>errors</em> list.
-     */
-    private void setParameterName()
-    {
-        if ( argString.isEmpty() )
-            System.out.println( equation.getParam() );
-        else if ( !equation.isValidName( argString ) )
-            formatError( argString, "is not a valid variable name" );
-        else
-            equation.setParam( argString );
     }
     
     /**
