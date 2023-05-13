@@ -354,6 +354,9 @@ public class InputParser
      * is printed to stdout.
      * If the argument is not a valid variable name
      * an error is stored in the <em>errors</em> list.
+     * 
+     * @param setter    the method to set the name, if valid
+     * @param getter    the getter to provide the current value of the name
      */
     private void setName( Consumer<String> setter, Supplier<String> getter )
     {

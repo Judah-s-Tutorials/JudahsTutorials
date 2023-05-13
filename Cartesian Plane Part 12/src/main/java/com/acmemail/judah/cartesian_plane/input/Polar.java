@@ -6,13 +6,15 @@ import org.nfunk.jep.type.Complex;
 
 /**
  * Polar coordinates
- * of a point on the Cartesian or complex plane.
+ * of a point on the Cartesian plane.
  * 
  * @author Jack Straub
  */
 public class Polar
 {
+    /** The radius of this object. */
     private final double    radius;
+    /** The angle of this object. */
     private final double    theta;
     
     /**

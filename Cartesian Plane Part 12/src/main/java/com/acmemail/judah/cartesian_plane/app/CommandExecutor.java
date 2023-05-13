@@ -1,7 +1,6 @@
 package com.acmemail.judah.cartesian_plane.app;
 
 import java.awt.geom.Point2D;
-import java.io.IOException;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -62,8 +61,6 @@ public class CommandExecutor
      * 
      * @param reader    the given supplier
      * @param equation  the given equation; may be null
-     * 
-     * @throws IOException  if an I/O error occurs
      */
     public void exec( Supplier<ParsedCommand> reader, Equation equation )
     {

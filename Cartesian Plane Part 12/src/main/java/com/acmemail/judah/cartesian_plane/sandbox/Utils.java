@@ -29,8 +29,6 @@ public class Utils
    /**
      * Display a dialog containing
      * all commands and their brief descriptions.
-     * 
-     * @param args  command line arguments; not used
      */
     public static void showUsageDialog()
     {

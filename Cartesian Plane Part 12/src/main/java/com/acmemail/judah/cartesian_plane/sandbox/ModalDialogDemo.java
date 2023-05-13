@@ -31,6 +31,7 @@ public class ModalDialogDemo
         frame.setVisible( true );
     }
     
+    @SuppressWarnings("serial")
     private static class ButtonPanel extends JPanel
     {
         public ButtonPanel()

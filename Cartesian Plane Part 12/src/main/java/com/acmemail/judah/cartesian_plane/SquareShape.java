@@ -32,7 +32,7 @@ public class SquareShape implements PlotShape
      * Sets the side of the square
      * to a given value.
      * 
-     * @param radius    the given value
+     * @param side  the given value
      */
     public SquareShape( float side )
     {

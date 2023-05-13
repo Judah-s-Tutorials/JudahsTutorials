@@ -59,6 +59,7 @@ public class CommandReader
     
     /**
      * Reads the next command from the source.
+     * A prompt is printed to stdout, if provided.
      * Blank lines and lines beginning with '#' are ignored.
      * If EOF is encountered,
      * a ParsedCommand reflecting Command.NONE is returned.
@@ -68,6 +69,10 @@ public class CommandReader
      * (which may be Command.INVALID).
      * The result is stored in a ParsedCommand object
      * and returned to the user.
+     * 
+     * @param   prompt  
+     *      the prompt to display; may be null
+     *      in which case no prompt will be displayed
      * 
      * @return  
      *      a ParsedCommand object representing

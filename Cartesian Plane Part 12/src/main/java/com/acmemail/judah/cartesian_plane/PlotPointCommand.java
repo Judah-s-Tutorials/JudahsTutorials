@@ -18,11 +18,13 @@ public class PlotPointCommand implements PlotCommand
     
     /**
      * Constructor.
-     * Determines the plane in which the plot color 
-     * is to be set and the color to set it to.
+     * Determines the plane in which 
+     * a point is to be plotted,
+     * and the its coordinates in the plane.
      * 
-     * @param plane the plane in which the plot color is to be set
-     * @param color the color to set the plot color to.
+     * @param plane the plane in which the point is to be plotted
+     * @param xco   the x-coordinate of the point
+     * @param yco   the y-coordinate of the point
      */
     public PlotPointCommand( CartesianPlane plane, float xco, float yco )
     {
@@ -37,7 +39,8 @@ public class PlotPointCommand implements PlotCommand
      * 
      * @param point the given Point2D object
      * @param plane the given CartesianPlane
-     * @return
+     * 
+     * @return  the generated PlotPointCommand
      */
     public static PlotPointCommand of( Point2D point, CartesianPlane plane )
     {

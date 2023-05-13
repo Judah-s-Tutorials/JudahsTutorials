@@ -24,7 +24,7 @@ import javax.swing.JFileChooser;
  * which will be ignored.
  * You can also add a single equation 
  * to the map by invoking 
- * <em>parseEquationFile( File file )<em>
+ * <em>parseEquationFile( File file )</em>
  * and passing the name of a text file
  * that contains equation configuration data.
  * 
@@ -147,8 +147,9 @@ public class EquationMap
      *      with a non-empty name.
      * </li>
      * </ul>
-     * @param file
-     * @return
+     * @param file  the given file
+     * 
+     * @return  true, if the given file is an equation file
      */
     public static boolean isEquationFile( File file )
     {
