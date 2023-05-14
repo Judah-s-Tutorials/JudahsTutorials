@@ -4,18 +4,11 @@ import java.awt.AWTException;
 import java.awt.Robot;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
+
+import javax.swing.JFileChooser;
 
 public class RobotDemo2
-{
-    private static final Map<Character,Integer> charMap = new HashMap<>();
-    static
-    {
-        charMap.put( ':', KeyEvent.VK_COLON );
-        charMap.put( '\\', KeyEvent.VK_BACK_QUOTE );
-    }
-    
+{    
     private static final String sep         = File.separator;
     private static final String tempDir     = 
         System.getProperty( "java.io.tmpdir" );
@@ -26,77 +19,90 @@ public class RobotDemo2
     private static final File   tempFile2   =
         new File( tempDir + sep + tempName2 );
     
+    private static int  fileChooserStatus   = -1;
+    private static File fileChooserFile     = null;
+    
     public static void main(String[] args)
     {
-        cleanUp();
-        System.out.println( tempFile1.getAbsolutePath() );
-        System.out.println( tempFile2.getAbsolutePath() );
-//        JFileChooser    chooser = new JFileChooser();
-//        chooser.showOpenDialog(chooser);
-//        pause( 100 );
-        
-        Robot   robot = getRobot();
-        type( tempFile1.getAbsolutePath(), robot );
+        cleanUp();        
+        try
+        {
+            exec();
+        }
+        catch ( InterruptedException | AWTException exc )
+        {
+            System.out.println( exc.getClass().getName() );
+            System.out.println( exc.getMessage() );
+        }
         cleanUp();
     }
     
+    private static void exec()
+       throws AWTException, InterruptedException
+   {
+        Robot   robot = new Robot();
+        Thread  chooserThread   = new Thread( () -> runFileChooser( true ) );
+        chooserThread.start();
+        Thread.sleep( 1000 );
+        
+        type( tempFile1.getAbsolutePath(), robot, KeyEvent.VK_ENTER );
+        chooserThread.join();
+        
+        boolean approved    = 
+            fileChooserStatus == JFileChooser.APPROVE_OPTION;
+        String  selected    = 
+            approved ? fileChooserFile.getAbsolutePath() : "none";
+        System.out.println( "Approved: " + approved );
+        System.out.println( "Selected: " + selected );
+   }
+    
+    private static void runFileChooser( boolean open )
+    {
+        JFileChooser    chooser = new JFileChooser();
+        if ( open )
+            fileChooserStatus = chooser.showOpenDialog(chooser);
+        else
+            fileChooserStatus = chooser.showSaveDialog(chooser);
+
+        if ( fileChooserStatus != JFileChooser.APPROVE_OPTION )
+            fileChooserFile = null;
+        else
+            fileChooserFile  = chooser.getSelectedFile();
+    }
+    
+    private static void type( String str, Robot robot, int lastKey )
+        throws InterruptedException
+    {
+        int     shift   = KeyEvent.VK_SHIFT; 
+        for ( char ccc : str.toCharArray() )
+        {
+            Thread.sleep( 10 );
+            boolean isUpper = Character.isUpperCase( ccc );
+            char    upper   = Character.toUpperCase( ccc );
+            
+            if ( upper == ':' )
+            {
+                upper = ';';
+                isUpper = true;
+            }
+            
+            if ( isUpper )
+                robot.keyPress( shift );
+            robot.keyPress( upper );
+            robot.keyRelease( upper );
+            if ( isUpper )
+                robot.keyRelease( shift );
+        }
+        Thread.sleep( 10 );
+        robot.keyPress( lastKey );
+        robot.keyRelease( lastKey );
+    }
+
     private static void cleanUp()
     {
         if ( tempFile1.exists() )
             tempFile1.delete();
         if ( tempFile2.exists() )
             tempFile2.delete();
-    }
-    
-    private static Robot getRobot() 
-    {
-        try
-        {
-            Robot   robot   = new Robot();
-            return robot;
-        }
-        catch ( AWTException exc )
-        {
-            System.err.println( "Robot exception" );
-            System.err.println( exc.getMessage() );
-            System.exit( 1 );
-        }
-        return null;
-    }
-    
-    private static void type( String str, Robot robot )
-    {
-        int     shift   = KeyEvent.VK_SHIFT; 
-        int     enter   = KeyEvent.VK_ENTER;
-        for ( char ccc : str.toCharArray() )
-        {
-            pause( 10 );
-            boolean isUpper = 
-                ccc == ':' ? true : Character.isUpperCase( ccc );
-            char    upper   = Character.toUpperCase( ccc );
-            int     iKey    = charMap.getOrDefault( upper, (int)upper );
-            
-            if ( isUpper )
-                robot.keyPress( shift );
-                
-            robot.keyPress( iKey );
-            robot.keyRelease( iKey );
-            if ( isUpper )
-                robot.keyRelease( shift );
-        }
-        pause( 10 );
-        robot.keyPress( enter );
-        robot.keyRelease( enter );
-    }
-
-    private static void pause( long millis )
-    {
-        try
-        {
-            Thread.sleep( millis );
-        }
-        catch ( InterruptedException exc )
-        {
-       }
     }
 }
