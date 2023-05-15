@@ -57,7 +57,7 @@ class FileManagerFileChooserTest
         {
             fileChooserTest( true, KeyEvent.VK_ENTER );
         }
-        catch ( InterruptedException | AWTException exc )
+        catch ( InterruptedException exc )
         {
             System.out.println( exc.getClass().getName() );
             fail( exc.getMessage() );
