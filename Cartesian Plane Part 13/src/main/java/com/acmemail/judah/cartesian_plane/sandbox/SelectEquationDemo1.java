@@ -12,17 +12,13 @@ import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
+import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.FileManager;
 import com.acmemail.judah.cartesian_plane.input.InputParser;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
-/**
- * Demonstration of reading operator input
- * from the console.
- * 
- * @author Jack Straub
- */
-public class ConsoleInputDemo1
+public class SelectEquationDemo1
 {
     private static final CartesianPlane plane   = new CartesianPlane();
     private static final String         prompt  = "Enter a command> ";
@@ -34,6 +30,7 @@ public class ConsoleInputDemo1
      */
     public static void main(String[] args)
     {
+        Equation    equation    = FileManager.open();
         Root    root    = new Root( plane );
         root.start();
         try (
@@ -42,29 +39,18 @@ public class ConsoleInputDemo1
         )
         {
             CommandReader reader  = new CommandReader( bufReader );
-            exec( reader );
+            exec( reader, equation );
         }
         catch ( IOException exc )
         {
             exc.printStackTrace();
             System.exit( 1 );
         }
-        
-        System.exit( 0 );
     }
-    
-    /**
-     * Get and execute a command from the console.
-     * Stop on EXIT command.
-     * 
-     * @param commandReader console
-     * 
-     * @throws IOException  if an I/O error occurs
-     */
-    private static void exec( CommandReader commandReader )
+    private static void exec( CommandReader commandReader, Equation equation )
         throws IOException
     {
-        InputParser         inputParser     = new InputParser();
+        InputParser         inputParser     = new InputParser( equation );
         ParsedCommand       parsedCommand   = null;
         Command             command         = Command.NONE;
         do
@@ -131,3 +117,4 @@ public class ConsoleInputDemo1
             .propagateNotification( CPConstants.REDRAW_NP );
     }
 }
+

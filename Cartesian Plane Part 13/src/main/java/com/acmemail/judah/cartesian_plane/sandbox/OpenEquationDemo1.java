@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
@@ -13,7 +14,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
 import com.acmemail.judah.cartesian_plane.input.Equation;
-import com.acmemail.judah.cartesian_plane.input.FileManager;
+import com.acmemail.judah.cartesian_plane.input.EquationMap;
 import com.acmemail.judah.cartesian_plane.input.InputParser;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
@@ -30,9 +31,10 @@ public class OpenEquationDemo1
      */
     public static void main(String[] args)
     {
-        Equation    equation    = FileManager.open();
         Root    root    = new Root( plane );
         root.start();
+        EquationMap.parseEquationFiles( new File( "equations" ) );
+        Equation    equation    = EquationMap.getEquation();
         try (
             InputStreamReader inReader  = new InputStreamReader( System.in );
             BufferedReader bufReader = new BufferedReader( inReader );

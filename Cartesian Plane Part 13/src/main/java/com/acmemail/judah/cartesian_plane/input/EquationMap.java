@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFileChooser;
@@ -193,6 +195,21 @@ public class EquationMap
     public static Equation getEquation( String name )
     {
         Equation    equation    = equationMap.get( name );
+        return equation;
+    }
+    
+    public static Equation getEquation()
+    {
+        Equation        equation    = null;
+        List<String>    keys        = new ArrayList<>();
+        keys.addAll( equationMap.keySet() );
+        keys.sort( (e1, e2) -> e1.compareToIgnoreCase( e2 ) );
+        
+        ItemSelectionDialog dialog  = 
+            new ItemSelectionDialog( "select Equation", keys.toArray() );
+        int                 choice  = dialog.show();
+        if ( choice >= 0 )
+            equation = equationMap.get( keys.get( choice ) );
         return equation;
     }
     

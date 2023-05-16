@@ -417,6 +417,14 @@ class Exp4jEquationTest
         Class<ValidationException>  clazz   = ValidationException.class;
         assertThrows( clazz, () -> equation.tPlot() );
     }
+    
+    @Test
+    public void testGetName()
+    {
+        String  tName   = "testName";
+        equation.setName( tName );
+        assertEquals( tName, equation.getName() );
+    }
 
     @Test
     public void testGetParam()

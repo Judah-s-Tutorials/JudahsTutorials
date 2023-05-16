@@ -52,6 +52,18 @@ class InputParserTest
         assertThrows( clazz, () -> 
             parser.parseInput( Command.SET, null ) );
     }
+    
+    @Test
+    public void testParseInputParsedCommand()
+    {
+        String          expName = "paramName";
+        ParsedCommand   command = 
+            new ParsedCommand( Command.PARAM, "param", expName );
+        parser.parseInput( command );
+        String          actName = parser.getEquation().getParam();
+        assertEquals( expName, actName );
+        
+    }
 
     @Test
     public void testParseInputEQUATION()
@@ -140,6 +152,22 @@ class InputParserTest
         Equation        equation    = parser.getEquation();
         String          newVal      = "a + a + a";
         testSetString( Command.YEQUALS, newVal, equation::getYExpression );
+    }
+    
+    @Test
+    public void testParseInputREQUALS()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "a + a + a";
+        testSetString( Command.REQUALS, newVal, equation::getRExpression );
+    }
+    
+    @Test
+    public void testParseInputTEQUALS()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "a + a + a";
+        testSetString( Command.TEQUALS, newVal, equation::getTExpression );
     }
 
     @ParameterizedTest

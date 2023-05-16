@@ -2,12 +2,19 @@ package com.acmemail.judah.cartesian_plane.input;
 
 import java.awt.BorderLayout;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.ActionMap;
+import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
 
 /**
  * Displays a list of items
@@ -122,6 +129,9 @@ public class ItemSelectionDialog
         cancelButton
             .addActionListener( e -> setAndClose( CANCEL_STATUS ) );
         
+        JRootPane   rootPane    = dialog.getRootPane();
+        rootPane.setDefaultButton( okButton );
+        
         return panel;
     }
     
@@ -141,6 +151,28 @@ public class ItemSelectionDialog
     {
         JScrollPane pane    = new JScrollPane();
         pane.setViewportView( jList );
+
+        // Define action
+        @SuppressWarnings("serial")
+        Action      action      = new AbstractAction() {
+            public void actionPerformed( ActionEvent evt ) {
+                setAndClose( CANCEL_STATUS );
+            }
+        };
+        
+        char        esc         = '\u001b';
+        KeyStroke   keyStroke   = KeyStroke.getKeyStroke( esc );
+        String      key         = "com.acmemail.judah.CancelOnEscape";
+        InputMap    inMap       = jList.getInputMap();
+        ActionMap   actMap      = jList.getActionMap();
+        
+        // At runtime, Swing detects that the escape key has been pressed...
+        // 'esc' is used as a key to the input map to lookup an object...
+        // ... which is used as key to the action map to lookup an Action...
+        // the actionPerformed method of the Action is executed
+        inMap.put( keyStroke, key );
+        actMap.put( key, action );
+
         return pane;
     }
     
