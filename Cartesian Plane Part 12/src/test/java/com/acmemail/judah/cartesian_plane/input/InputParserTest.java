@@ -77,7 +77,9 @@ class InputParserTest
     }
 
     @ParameterizedTest
-    @ValueSource( strings= {"EXIT","NONE","YPLOT","XYPLOT","OPEN","SAVE" } )
+    @ValueSource( strings= 
+        {"EXIT","NONE","YPLOT","XYPLOT","RPLOT","TPLOT","OPEN","SAVE" } 
+    )
     public void testParseInputNOOP( String strCommand )
     {
         Command command = Command.toCommand( strCommand );

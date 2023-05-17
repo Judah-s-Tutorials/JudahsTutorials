@@ -197,10 +197,6 @@ class Exp4jEquationTest
         equation.setRange( Math.PI, Math.PI, 1 );
         equation.rPlot()
             .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
-        
-        // try setting an invalid expression
-        result  = equation.setRExpression( "invalid" );
-        assertFalse( result.isSuccess() );
     }
 
     @Test

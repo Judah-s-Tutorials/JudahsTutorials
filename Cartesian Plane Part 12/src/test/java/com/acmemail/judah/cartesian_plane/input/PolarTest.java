@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.geom.Point2D;
 
 import org.junit.jupiter.api.Test;
-import org.nfunk.jep.type.Complex;
 
 class PolarTest
 {
@@ -20,8 +19,6 @@ class PolarTest
     
     private static final Polar      testPolar   = 
         Polar.of( testRadius, testTheta );
-    private static final Complex    testComplex = 
-        new Complex( testXco, testYco );
     private static final Point2D    testPoint   = 
         new Point2D.Double( testXco, testYco );
 
@@ -62,14 +59,6 @@ class PolarTest
     }
 
     @Test
-    void testOfComplex()
-    {
-        Polar   actPolar    = Polar.of( testComplex );
-        assertEquals( testPolar.getRadius(), actPolar.getRadius(), .0001 );
-        assertEquals( testPolar.getTheta(), actPolar.getTheta(), .0001 );
-    }
-
-    @Test
     void testOfPoint2D()
     {
         Polar   actPolar    = Polar.of( testPoint );
@@ -89,8 +78,8 @@ class PolarTest
     void testOfXY()
     {
         Polar   actPolar    = Polar.of( testRadius, testTheta );
-        assertEquals( testRadius, actPolar.getRadius(), .0001 );
-        assertEquals( testTheta, actPolar.getTheta(), .0001 );
+        assertEquals( testRadius, actPolar.getRadius() );
+        assertEquals( testTheta, actPolar.getTheta() );
     }
 
     @Test
@@ -106,5 +95,4 @@ class PolarTest
         Double  actTheta    = Polar.thetaOfXY( testXco, testYco );
         assertEquals( testTheta, actTheta );
     }
-
 }

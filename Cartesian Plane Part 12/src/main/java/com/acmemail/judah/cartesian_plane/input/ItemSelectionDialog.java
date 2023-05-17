@@ -170,8 +170,8 @@ public class ItemSelectionDialog
         // 'esc' is used as a key to the input map to lookup an object...
         // ... which is used as key to the action map to lookup an Action...
         // the actionPerformed method of the Action is executed
-        inMap.put( keyStroke, key );
         actMap.put( key, action );
+        inMap.put( keyStroke, key );
 
         return pane;
     }
