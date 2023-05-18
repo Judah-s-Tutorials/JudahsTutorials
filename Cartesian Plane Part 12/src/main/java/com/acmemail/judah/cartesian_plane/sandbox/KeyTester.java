@@ -59,6 +59,8 @@ public class KeyTester
             .append( String.format( fmt, "VK_SEMICOLON:", KeyEvent.VK_SEMICOLON ) )
             .append( endl )
             .append( String.format( fmt, "VK_BACK_SLASH:", KeyEvent.VK_BACK_SLASH ) )
+            .append( endl )
+            .append( String.format( fmt, "VK_SLASH:", KeyEvent.VK_SLASH ) )
             .append( endl );
         output.append( bldr.toString() );
     }

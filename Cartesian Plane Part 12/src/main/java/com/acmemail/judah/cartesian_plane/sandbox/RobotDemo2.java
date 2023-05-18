@@ -76,7 +76,6 @@ public class RobotDemo2
         int     shift   = KeyEvent.VK_SHIFT; 
         for ( char ccc : str.toCharArray() )
         {
-            Thread.sleep( 10 );
             boolean isUpper = Character.isUpperCase( ccc );
             char    upper   = Character.toUpperCase( ccc );
             
@@ -93,7 +92,7 @@ public class RobotDemo2
             if ( isUpper )
                 robot.keyRelease( shift );
         }
-        Thread.sleep( 10 );
+        Thread.sleep( 2000 );
         robot.keyPress( lastKey );
         robot.keyRelease( lastKey );
     }

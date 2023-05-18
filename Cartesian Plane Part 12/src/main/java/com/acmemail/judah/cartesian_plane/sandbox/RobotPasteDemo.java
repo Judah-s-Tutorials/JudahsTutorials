@@ -86,19 +86,18 @@ public class RobotPasteDemo
         String  message = 
             "Status: " + status + endl
             + "Selection: " + selection;
-        JOptionPane.showMessageDialog( null, message );
+        System.out.println( message );
     }
     
     private static void runFileChooser( boolean open )
     {
         if ( open )
-            fileChooserStatus = chooser.showOpenDialog(chooser);
+            fileChooserStatus = chooser.showOpenDialog( null );
         else
-            fileChooserStatus = chooser.showSaveDialog(chooser);
+            fileChooserStatus = chooser.showSaveDialog( null );
         fileChooserFile  = chooser.getSelectedFile();
     }
     
-    // https://stackoverflow.com/questions/6710350/copying-text-to-the-clipboard-using-java
     private static void type( String str, int lastKey )
         throws InterruptedException
     {
