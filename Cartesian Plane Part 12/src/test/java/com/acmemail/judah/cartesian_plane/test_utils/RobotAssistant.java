@@ -38,4 +38,28 @@ public class RobotAssistant
         robot.keyPress( lastKey );
         robot.keyRelease( lastKey );
     }
+    
+    public void upArrow()
+    {
+        robot.keyPress( KeyEvent.VK_UP );
+        robot.keyRelease( KeyEvent.VK_UP );
+    }
+    
+    public void downArrow()
+    {
+        robot.keyPress( KeyEvent.VK_DOWN );
+        robot.keyRelease( KeyEvent.VK_DOWN );
+    }
+    
+    public void leftArrow()
+    {
+        robot.keyPress( KeyEvent.VK_LEFT );
+        robot.keyRelease( KeyEvent.VK_LEFT );
+    }
+    
+    public void rightArrow()
+    {
+        robot.keyPress( KeyEvent.VK_RIGHT );
+        robot.keyRelease( KeyEvent.VK_RIGHT );
+    }
 }

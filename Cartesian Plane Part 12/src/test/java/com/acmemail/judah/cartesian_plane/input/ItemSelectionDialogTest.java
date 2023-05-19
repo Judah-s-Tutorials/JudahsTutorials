@@ -1,34 +1,66 @@
 package com.acmemail.judah.cartesian_plane.input;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.jupiter.api.AfterAll;
+import java.awt.AWTException;
+import java.awt.event.KeyEvent;
+
 import org.junit.jupiter.api.Test;
+
+import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
+import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class ItemSelectionDialogTest
 {
-
-    @AfterAll
-    static void tearDownAfterClass() throws Exception
+    private final String[]  names   =
+    { "Sally", "Manny", "Jane", "Moe", "Anapurna", 
+      "Jack", "Alice", "Tweedledee", "Elizabeth", "Tweedledum",
+    };
+    
+    private final ItemSelectionDialog   dialog  =
+        new ItemSelectionDialog( "JUnit Test", names );
+    
+    /** This variable set by show() method. */
+    private int selection   = 0;
+    
+    @Test
+    void testShowOK() 
+        throws AWTException, InterruptedException
     {
+        Thread          thread  = startDialog();
+        RobotAssistant  robot   = new RobotAssistant();
+        robot.downArrow();
+        robot.downArrow();
+        robot.type( "", KeyEvent.VK_ENTER );
+        thread.join();
+        
+        assertEquals( 2, selection );
     }
 
     @Test
-    void testItemSelectionDialogStringObjectArray()
+    void testShowCancel() 
+        throws AWTException, InterruptedException
     {
-        fail("Not yet implemented");
+        Thread          thread  = startDialog();
+        RobotAssistant  robot   = new RobotAssistant();
+        robot.downArrow();
+        robot.type( "", KeyEvent.VK_ESCAPE );
+        thread.join();
+        
+        assertTrue( selection < 0 );
     }
-
-    @Test
-    void testItemSelectionDialogWindowStringObjectArray()
+    
+    private Thread startDialog()
     {
-        fail("Not yet implemented");
+        Thread  thread  = new Thread( () -> show() );
+        thread.start();
+        Utils.pause( 500 );
+        return thread;
     }
-
-    @Test
-    void testShow()
+    
+    private void show()
     {
-        fail("Not yet implemented");
+        selection = dialog.show();
     }
-
 }

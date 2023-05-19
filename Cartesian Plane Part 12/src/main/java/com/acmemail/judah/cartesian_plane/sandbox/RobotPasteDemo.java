@@ -9,7 +9,6 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 
 import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 
 public class RobotPasteDemo
 {    
@@ -101,15 +100,20 @@ public class RobotPasteDemo
     private static void type( String str, int lastKey )
         throws InterruptedException
     {
-        Clipboard       clipboard   = 
+        String      osName          = 
+            System.getProperty( "os.name" ).toLowerCase();
+        int         pasteModifier   =
+            osName.equals( "mac" ) ? KeyEvent.VK_META : KeyEvent.VK_CONTROL;
+
+        Clipboard   clipboard       = 
             Toolkit.getDefaultToolkit().getSystemClipboard();
-        StringSelection selection    = new StringSelection( str );
+        StringSelection selection   = new StringSelection( str );
         clipboard.setContents( selection, null );
         
-        robot.keyPress( KeyEvent.VK_CONTROL );
+        robot.keyPress( pasteModifier );
         robot.keyPress( KeyEvent.VK_V );
         robot.keyRelease( KeyEvent.VK_V );
-        robot.keyRelease( KeyEvent.VK_CONTROL );
+        robot.keyRelease( pasteModifier );
         Thread.sleep( 2000 );
         robot.keyPress( lastKey );
         robot.keyRelease( lastKey );

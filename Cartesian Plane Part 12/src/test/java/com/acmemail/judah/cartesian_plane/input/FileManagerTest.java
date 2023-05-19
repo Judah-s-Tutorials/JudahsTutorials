@@ -69,7 +69,6 @@ class FileManagerTest
         IntStream.range( 'a', 'm' )
             .forEach( c -> temp.put( "" + (char)c, c + 3.1 ) );
         testVarMap = Collections.unmodifiableMap( temp );
-        printVars( testVarMap );
         
         String  tempDir = System.getProperty( "java.io.tmpdir" );
         testFilePath = tempDir + File.separator + testFileName;
@@ -83,8 +82,6 @@ class FileManagerTest
         
         // remove default variables before replacing them
         // with explicit test variables
-//        testEquation.getVars().entrySet()
-//            .forEach( e -> testEquation.removeVar( e.getKey() ));
         testVarMap.entrySet()
             .forEach( e -> testEquation.setVar( e.getKey(), e.getValue() ));
         
@@ -119,16 +116,8 @@ class FileManagerTest
             tempFile.delete();
     }
     
-    private static void printVars( Map<String,Double> map )
-    {
-        map.entrySet().stream()
-            .sorted( (e1,e2) -> e1.getKey().compareTo( e2.getKey() ) )
-            .forEach( e -> System.out.print( e + ",") );
-        System.out.println();
-    }
-    
     @Test
-    void testSaveOpenEquationApprove() 
+    public void testSaveOpenEquationApprove() 
         throws AWTException, InterruptedException
     {
         Thread          thread  = null;
@@ -146,7 +135,7 @@ class FileManagerTest
     }
     
     @Test
-    void testSaveOpenEquationCancel() 
+    public void testSaveOpenEquationCancel() 
         throws AWTException, InterruptedException
     {
         Thread          thread  = null;
@@ -169,25 +158,23 @@ class FileManagerTest
     }
 
     @Test
-    void testSaveOpenStringEquation()
+    public void testSaveOpenStringEquation()
     {
         FileManager.save( testFilePath, testEquation );
         Equation    equation    = FileManager.open( testFilePath );
-        printVars( equation.getVars() );
         assertEqualsDefault( equation );
     }
 
     @Test
     void testSaveOpenFileEquation()
     {
-        File    testFile    = new File( testFilePath );
         FileManager.save( testFile, testEquation );
         Equation    equation    = FileManager.open( testFile );
         assertEqualsDefault( equation );
     }
 
     @Test
-    void testSaveOpenStreamEquation()
+    public void testSaveOpenStreamEquation()
     {
         try (
             PrintWriter printer = new PrintWriter( testFilePath );
@@ -198,7 +185,7 @@ class FileManagerTest
         catch ( IOException exc )
         {
             exc.printStackTrace();
-            fail( "I/O error" );
+            fail( "I/O error", exc );
         }
         
         try (
@@ -212,7 +199,7 @@ class FileManagerTest
         catch ( IOException exc )
         {
             exc.printStackTrace();
-            fail( "I/O error" );
+            fail( "I/O error", exc );
         }
         
     }
@@ -261,7 +248,7 @@ class FileManagerTest
         FileManager.save( testEquation );
     }
 
-    private void assertEqualsDefault( Equation actVal )
+    private static void assertEqualsDefault( Equation actVal )
     {
         assertNotNull( actVal );
         assertEquals( testVarMap, actVal.getVars() );
