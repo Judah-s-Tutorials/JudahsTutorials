@@ -1,14 +1,13 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.jep_sandbox;
 
 import java.awt.AWTException;
 import java.awt.Font;
 import java.awt.Robot;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -18,24 +17,11 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-/**
- * Program to discover the key code/shift mappings 
- * for the first 256 key codes.
- * The assumption is that the first 256 key codes
- * will map roughly to the first 256 Unicode values.
- * On that assumption, 
- * we can discover what combinations of key code and shift
- * can be used to generate the most command characters.
- * 
- * @author Jack Straub
- */
 public class KeyMapper
 {
-    private static final char   downArrow   = '\u2193';
+    private static final char   upArrow     = '\u2191';
     private static final String endl        = System.lineSeparator();
-    private static Robot        robot;
     
-    /** Maps a Unicode value to a key code/shift combination. */
     private static final Map<Character,KeySequence>    mapper  = new HashMap<>();
     
     private final JFrame        outputFrame = new JFrame( "Output Frame" );  
@@ -48,55 +34,18 @@ public class KeyMapper
     {
         KeyMapper   tester  = new KeyMapper();
         SwingUtilities.invokeLater( () -> tester.buildGUI() );
-        
-        robot   = new Robot();
+        Robot   robot   = new Robot();
         pause( 1000 );
         robot.setAutoDelay( 10 );
         System.out.println( robot.getAutoDelay() );
-        mapUnshifted();
-        mapShifted();
-        
-        tester.testMapping();
+        mapUnshifted( robot );
+        mapShifted( robot );
     }
     
-    private void testMapping()
+    private static void mapUnshifted( Robot robot )
     {
-        output.grabFocus();
-    output.setEditable( true );
-    String[]   testLines   =
-    {
-       "(A poem, by L. Carrol)",
-       "The sun was shining on the sea,",
-       "Shining with all his might;",
-       "He did his very best to make",
-       "The billows smooth and bright;",
-       "And this was odd, because it was",
-       "The middle of the night!"
-    };
-    for ( String line : testLines )
-        typeLine( line );
-}
-
-private static void typeLine( String line )
-{
-    for ( char ccc : line.toCharArray() )
-    {
-        KeySequence keySeq  = mapper.get( ccc );
-        if ( keySeq == null )
-            System.err.println( "No mapping for '" + ccc + "'" );
-        else
-            keySeq.type( robot );
-    }
-    robot.keyPress( KeyEvent.VK_ENTER );
-    robot.keyRelease( KeyEvent.VK_ENTER );
-}
-
-    
-    private static void mapUnshifted()
-    {
-        for ( int inx = 0 ; inx <= 0x300 ; ++inx )
+        for ( int inx = 1 ; inx <= 0xff ; ++inx )
         {
-            if ( inx != KeyEvent.VK_WINDOWS )
             try
             {
                 robot.keyPress( inx );
@@ -108,16 +57,12 @@ private static void typeLine( String line )
         }
     }
     
-    private static void mapShifted()
+    private static void mapShifted( Robot robot )
     {
-        // sort on key code to make output easier to examine
-        List<KeySequence>   values  = new ArrayList<>();
+        Collection<KeySequence>    values  = new HashSet<>();
         values.addAll( mapper.values() );
-        values.sort( (ks1,ks2) -> ks1.keyCode - ks2.keyCode );
-        
         for ( KeySequence seq : values )
         {
-//            System.out.printf( "%04x%n", seq.keyCode );
             try
             {
                 robot.keyPress( KeyEvent.VK_SHIFT );
@@ -191,9 +136,9 @@ private static void typeLine( String line )
                 String  keyCodeStr  = String.format( "(int)%04X", keyCode );
                 String  unicodeStr  = String.format( "(\\u%04X)", (int)keyChar );
                 String  keyText     = KeyEvent.getKeyText( keyCode );
-                char    shift       = hasShift ? downArrow : ' ';
-                char    ctrl        = hasCtrl ? downArrow : ' ';
-                char    alt         = hasAlt ? downArrow : ' ';
+                char    shift       = hasShift ? upArrow : ' ';
+                char    ctrl        = hasCtrl ? upArrow : ' ';
+                char    alt         = hasAlt ? upArrow : ' ';
         
                 StringBuilder   bldr    = new StringBuilder( "    " );
                 bldr.append( keyChar ).append( ' ' )
@@ -207,11 +152,8 @@ private static void typeLine( String line )
                 output.append( bldr.toString() );
             }
             
-            
-            if ( keyChar != 0xffffff )
-            {
-                mapper.putIfAbsent( keyChar, new KeySequence( event ) );
-            }
+            if ( keyCode != 0xffffff )
+                mapper.put( keyChar, new KeySequence( event ) );
         }
     }
     
@@ -258,9 +200,9 @@ private static void typeLine( String line )
             String  keyCodeStr  = String.format( "(int)%04X", keyCode );
             String  unicodeStr  = String.format( "(\\u%04X)", (int)unicode );
             String  keyText     = KeyEvent.getKeyText( keyCode );
-            char    shift       = hasShift ? downArrow : ' ';
-            char    ctrl        = hasCtrl ? downArrow : ' ';
-            char    alt         = hasAlt ? downArrow : ' ';
+            char    shift       = hasShift ? upArrow : ' ';
+            char    ctrl        = hasCtrl ? upArrow : ' ';
+            char    alt         = hasAlt ? upArrow : ' ';
     
             StringBuilder   bldr    = new StringBuilder( "    " );
             bldr.append( unicode ).append( ' ' )
@@ -288,10 +230,7 @@ private static void typeLine( String line )
         @Override
         public int compareTo(KeySequence o)
         {
-            int rcode   = unicode - o.unicode;
-            if ( rcode == 0 )
-                rcode = hasShift ? -1 : 1;
-            return rcode;
+            return unicode - o.unicode;
         }
     }
 }

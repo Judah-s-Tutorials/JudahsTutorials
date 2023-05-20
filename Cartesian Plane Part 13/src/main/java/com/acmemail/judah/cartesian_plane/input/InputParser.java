@@ -128,14 +128,14 @@ public class InputParser
         case STEP:
             parseExpression( equation::setRangeStep, equation::getRangeStep );
             break;
-        case PARAM:
-            setName( equation::setParam, equation::getParam );
-            break;
         case RADIUS:
             setName( equation::setRadiusName, equation::getRadiusName );
             break;
         case THETA:
             setName( equation::setThetaName, equation::getThetaName );
+            break;
+        case PARAM:
+            setName( equation::setParam, equation::getParam );
             break;
         case INVALID:
             invalidCommand();
@@ -354,6 +354,9 @@ public class InputParser
      * is printed to stdout.
      * If the argument is not a valid variable name
      * an error is stored in the <em>errors</em> list.
+     * 
+     * @param setter    the method to set the name, if valid
+     * @param getter    the getter to provide the current value of the name
      */
     private void setName( Consumer<String> setter, Supplier<String> getter )
     {

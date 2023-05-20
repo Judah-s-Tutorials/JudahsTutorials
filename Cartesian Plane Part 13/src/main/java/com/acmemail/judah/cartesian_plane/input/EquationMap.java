@@ -4,10 +4,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFileChooser;
@@ -26,7 +24,7 @@ import javax.swing.JFileChooser;
  * which will be ignored.
  * You can also add a single equation 
  * to the map by invoking 
- * <em>parseEquationFile( File file )<em>
+ * <em>parseEquationFile( File file )</em>
  * and passing the name of a text file
  * that contains equation configuration data.
  * 
@@ -149,8 +147,9 @@ public class EquationMap
      *      with a non-empty name.
      * </li>
      * </ul>
-     * @param file
-     * @return
+     * @param file  the given file
+     * 
+     * @return  true, if the given file is an equation file
      */
     public static boolean isEquationFile( File file )
     {
@@ -200,17 +199,8 @@ public class EquationMap
     
     public static Equation getEquation()
     {
-        Equation        equation    = null;
-        List<String>    keys        = new ArrayList<>();
-        keys.addAll( equationMap.keySet() );
-        keys.sort( (e1, e2) -> e1.compareToIgnoreCase( e2 ) );
-        
-        ItemSelectionDialog dialog  = 
-            new ItemSelectionDialog( "select Equation", keys.toArray() );
-        int                 choice  = dialog.show();
-        if ( choice >= 0 )
-            equation = equationMap.get( keys.get( choice ) );
-        return equation;
+        //TODO implement
+        return null;
     }
     
     /**

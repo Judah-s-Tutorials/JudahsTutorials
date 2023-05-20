@@ -42,14 +42,14 @@ public class PlotEHatZ2
         root.start();
         
         double  theta   = Math.PI / 2.1;
-        plane.setStreamSupplier( () -> 
-        DoubleStream.iterate( -16, r -> r <= 16, r -> r + .005 )
-            .mapToObj( r -> Polar.of( r, theta ) )
-            .map( prt -> prt.toComplex() )
-            .map( c -> ezed.power( c ) )
-            .map( c -> toPoint( c ) )
-            .map( p -> PlotPointCommand.of( p, plane ) )
-        );
+//        plane.setStreamSupplier( () -> 
+//        DoubleStream.iterate( -16, r -> r <= 16, r -> r + .005 )
+//            .mapToObj( r -> Polar.of( r, theta ) )
+//            .map( prt -> prt.toComplex() )
+//            .map( c -> ezed.power( c ) )
+//            .map( c -> toPoint( c ) )
+//            .map( p -> PlotPointCommand.of( p, plane ) )
+//        );
         
         nmgr.propagateNotification( CPConstants.REDRAW_NP );
     }

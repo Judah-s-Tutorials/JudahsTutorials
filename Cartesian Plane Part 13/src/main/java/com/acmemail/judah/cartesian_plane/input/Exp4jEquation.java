@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ValidationResult;
-import net.objecthunter.exp4j.function.Function;
 
 /**
  * Implementation of the Equation interface
@@ -45,9 +44,6 @@ import net.objecthunter.exp4j.function.Function;
  */
 public class Exp4jEquation implements Equation
 {
-    private static final List<Function> customFunctions =
-        Exp4jFunctions.getFunctions();
-    
     private final Map<String,Double>    vars        = new HashMap<>();
     private String                      name        = "";
     private double                      rStart      = -1;
@@ -569,7 +565,6 @@ public class Exp4jEquation implements Equation
             Expression  expr    =
                 new ExpressionBuilder( exprStr )
                     .variables( vars.keySet() )
-                    .functions( customFunctions )
                     .build();
             expr.setVariables( vars );
             ValidationResult    exp4jResult = expr.validate( true );
@@ -621,7 +616,6 @@ public class Exp4jEquation implements Equation
         try
         {
             Expression expr = new ExpressionBuilder( exprStr )
-                .functions( customFunctions )
                 .variables( vars.keySet() )
                 .build();
             ValidationResult    expr4jResult = expr.validate( false );

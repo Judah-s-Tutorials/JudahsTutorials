@@ -64,9 +64,9 @@ public enum Command
     /** Generates the plot of the parametric equation (x,y)=f(t). */
     XYPLOT( "Generates a plot of the form (x,y) = f(t)" ),
     /** Generates the plot of the polar equation r = f(t). */
-    TPLOT( "Generates a plot of the polar equation r = f(t)" ),
+    RPLOT( "Generates a plot of the polar equation r = f(t)" ),
     /** Generates the plot of the polar equation t = f(r). */
-    RPLOT( "Generates a plot of the polar equation t = f(r)" ),
+    TPLOT( "Generates a plot of the polar equation t = f(r)" ),
     /** Identifies and empty command string. */
     NONE( "Identifies an empty command string" ),
     /** Identifies an invalid command. */

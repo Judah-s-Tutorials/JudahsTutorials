@@ -6,13 +6,15 @@ import org.nfunk.jep.type.Complex;
 
 /**
  * Polar coordinates
- * of a point on the Cartesian or complex plane.
+ * of a point on the Cartesian plane.
  * 
  * @author Jack Straub
  */
 public class Polar
 {
+    /** The radius of this object. */
     private final double    radius;
+    /** The angle of this object. */
     private final double    theta;
     
     /**
@@ -31,30 +33,16 @@ public class Polar
 
     /**
      * Converts this object
-     * to a Complex object
-     * in the form (a + bi).
-     * 
-     * @return Complex object equivalent to this object
-     */
-    public Complex toComplex()
-    {
-        double  real    = radius * Math.cos( theta );
-        double  imag    = radius * Math.sin( theta );
-        Complex zed     = new Complex( real, imag );
-        return zed;
-    }
-    
-
-    /**
-     * Converts this object
      * to a Point2D object
      * 
      * @return Point2D object equivalent to this object
      */
     public Point2D toPoint()
     {
-        Complex cpx     = toComplex();
-        Point2D point   = new Point2D.Double( cpx.re(), cpx.im() );
+        double  xco = radius * Math.cos( theta );
+        double  yco = radius * Math.sin( theta );
+
+        Point2D point   = new Point2D.Double( xco, yco );
         return point;
     }
     
