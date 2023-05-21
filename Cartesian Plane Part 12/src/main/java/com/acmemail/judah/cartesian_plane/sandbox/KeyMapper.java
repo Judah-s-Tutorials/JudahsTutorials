@@ -6,7 +6,6 @@ import java.awt.Robot;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,10 +21,11 @@ import javax.swing.SwingUtilities;
  * Program to discover the key code/shift mappings 
  * for the first 256 key codes.
  * The assumption is that the first 256 key codes
- * will map roughly to the first 256 Unicode values.
+ * will map roughly to the most common Unicode values
+ * (at least in US English).
  * On that assumption, 
  * we can discover what combinations of key code and shift
- * can be used to generate the most command characters.
+ * can be used to generate the most common characters.
  * 
  * @author Jack Straub
  */
@@ -43,6 +43,13 @@ public class KeyMapper
     private final JTextArea     output      = new JTextArea( 24, 50 );
     private final JTextField    input       = new JTextField( 40 );
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments
+     * 
+     * @throws AWTException if instantiation of Robot fails
+     */
     public static void main(String[] args)
         throws AWTException
     {
@@ -62,39 +69,39 @@ public class KeyMapper
     private void testMapping()
     {
         output.grabFocus();
-    output.setEditable( true );
-    String[]   testLines   =
-    {
-       "(A poem, by L. Carrol)",
-       "The sun was shining on the sea,",
-       "Shining with all his might;",
-       "He did his very best to make",
-       "The billows smooth and bright;",
-       "And this was odd, because it was",
-       "The middle of the night!"
-    };
-    for ( String line : testLines )
-        typeLine( line );
-}
-
-private static void typeLine( String line )
-{
-    for ( char ccc : line.toCharArray() )
-    {
-        KeySequence keySeq  = mapper.get( ccc );
-        if ( keySeq == null )
-            System.err.println( "No mapping for '" + ccc + "'" );
-        else
-            keySeq.type( robot );
+        output.setEditable( true );
+        String[]   testLines   =
+        {
+           "(A poem, by L. Carrol)",
+           "The sun was shining on the sea,",
+           "Shining with all his might;",
+           "He did his very best to make",
+           "The billows smooth and bright;",
+           "And this was odd, because it was",
+           "The middle of the night!"
+        };
+        for ( String line : testLines )
+            typeLine( line );
     }
-    robot.keyPress( KeyEvent.VK_ENTER );
-    robot.keyRelease( KeyEvent.VK_ENTER );
-}
+
+    private static void typeLine( String line )
+    {
+        for ( char ccc : line.toCharArray() )
+        {
+            KeySequence keySeq  = mapper.get( ccc );
+            if ( keySeq == null )
+                System.err.println( "No mapping for '" + ccc + "'" );
+            else
+                keySeq.type( robot );
+        }
+        robot.keyPress( KeyEvent.VK_ENTER );
+        robot.keyRelease( KeyEvent.VK_ENTER );
+    }
 
     
     private static void mapUnshifted()
     {
-        for ( int inx = 0 ; inx <= 0x300 ; ++inx )
+        for ( int inx = 0 ; inx <= 0xFF ; ++inx )
         {
             if ( inx != KeyEvent.VK_WINDOWS )
             try
@@ -117,7 +124,6 @@ private static void typeLine( String line )
         
         for ( KeySequence seq : values )
         {
-//            System.out.printf( "%04x%n", seq.keyCode );
             try
             {
                 robot.keyPress( KeyEvent.VK_SHIFT );

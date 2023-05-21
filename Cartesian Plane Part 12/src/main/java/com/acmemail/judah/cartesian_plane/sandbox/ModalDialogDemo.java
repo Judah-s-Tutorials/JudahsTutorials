@@ -11,8 +11,21 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
+/**
+ * Program to demonstrate that,
+ * when a modal dialog is displayed,
+ * operator interaction with the GUI
+ * is limited to that dialog.
+ * 
+ * @author Jack Straub
+ */
 public class ModalDialogDemo
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         ModalDialogDemo demo    = new ModalDialogDemo();

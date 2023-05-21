@@ -16,6 +16,11 @@ import com.acmemail.judah.cartesian_plane.input.Command;
  */
 public class UsagePopupDemo1
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         String  usage   = Command.usage();

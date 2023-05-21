@@ -10,7 +10,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 /**
- * Program that allows the user
+ * Program that allows users
  * to determine their keyboard mappings.
  * The program displays a single line text box
  * and a multiline text box.

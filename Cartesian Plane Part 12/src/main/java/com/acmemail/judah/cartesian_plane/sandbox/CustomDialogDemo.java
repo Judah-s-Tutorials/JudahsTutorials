@@ -2,8 +2,14 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 
 import com.acmemail.judah.cartesian_plane.input.ItemSelectionDialog;
 
+/**
+ * Program to demonstrate how to use the ItemSelectionDialog.
+ * 
+ * @author Jack Straub
+ */
 public class CustomDialogDemo
 {
+    /** List of items to be presented in the dialog. */
     public static final String[] names =
     {
         "just another list item 1",
@@ -26,6 +32,11 @@ public class CustomDialogDemo
         "just another list item 20",
     };
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main( String[] args )
     {
         String              title   = "Name Selector";

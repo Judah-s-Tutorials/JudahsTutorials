@@ -9,10 +9,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Prints the names and values of key codes
+ * for the most common keyboard characters.
+ * 
+ * @author Jack Straub
+ */
 public class VKMapper
 {
     private static final String fmt = "%-12s  %02x  %c%n";
     private static final Map<Integer,String>    vkMap   = new HashMap<>();
+    
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         initMap();
@@ -24,6 +36,14 @@ public class VKMapper
             .forEach( i -> System.out.printf( fmt, vkMap.get( i ), i, i ) );
     }
 
+    /**
+     * Initializes a map of all VK_... variables
+     * in the KeyEvent class,
+     * where the value of the variable
+     * is the key
+     * and the name of the variable
+     * is the value.
+     */
     private static void initMap()
     {
         Class<KeyEvent> vkClass = KeyEvent.class;

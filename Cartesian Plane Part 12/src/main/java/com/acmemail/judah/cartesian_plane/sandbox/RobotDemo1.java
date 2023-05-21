@@ -107,7 +107,7 @@ public class RobotDemo1
     }
     
     /**
-     * Determines if a character
+     * Determines if a given character
      * can be reliably translated
      * into key-press/key-release events.
      * This will be true
@@ -116,8 +116,9 @@ public class RobotDemo1
      * If the character cannot be translated
      * an error message is printed to stderr.
      * 
-     * @param ccc
-     * @return
+     * @param ccc   the given character
+     * 
+     * @return  true if the given character can be translated
      */
     private static boolean canTranslate( char ccc )
     {

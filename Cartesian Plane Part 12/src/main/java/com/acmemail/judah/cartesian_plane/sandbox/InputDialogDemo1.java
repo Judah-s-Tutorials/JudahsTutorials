@@ -2,8 +2,20 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 
 import javax.swing.JOptionPane;
 
+/**
+ * Simple demonstration of how to display
+ * an input dialog
+ * using the JOptionPane class.
+ * 
+ * @author Jack Straub
+ */
 public class InputDialogDemo1
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         String  name    = 

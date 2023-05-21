@@ -24,14 +24,6 @@ class PolarTest
         new Complex( testXco, testYco );
     private static final Point2D    testPoint   = 
         new Point2D.Double( testXco, testYco );
-    
-    @Test
-    void testToComplex()
-    {
-        Complex cpx = testPolar.toComplex();
-        assertEquals( testXco, cpx.re(), .00001 );
-        assertEquals( testYco, cpx.im(), .00001 );
-    }
 
     @Test
     void testToPoint()

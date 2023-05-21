@@ -6,8 +6,24 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Prints the names and values
+ * of all VK_... class variables
+ * in the KeyEvent class.
+ * 
+ * @author Jack Straub
+ */
 public class VKPrint
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments
+     * 
+     * @throws IllegalAccessException
+     *      if an attempt to access a field
+     *      results in an exception
+     */
     public static void main(String[] args)
         throws IllegalAccessException
     {
@@ -24,11 +40,26 @@ public class VKPrint
         list.forEach( System.out::println );
     }
     
+    /**
+     * Encapsulates the correspondence
+     * between a variable name
+     * to its value.
+     * 
+     * @author Jack Straub
+     */
     private static class VKMap implements Comparable<VKMap>
     {
         final String    name;
         final int       val;
         
+        /**
+         * Constructor.
+         * Establishes the name and value
+         * of a variable.
+         * 
+         * @param name  the name of the encapsulated variable
+         * @param val   the value of the encapsulated variable
+         */
         public VKMap( String name, int val )
         {
             this.name = name;
@@ -43,9 +74,9 @@ public class VKPrint
         }
 
         @Override
-        public int compareTo( VKMap o )
+        public int compareTo( VKMap other )
         {
-            int rcode   = val - o.val;
+            int rcode   = val - other.val;
             return rcode;
         }
     }

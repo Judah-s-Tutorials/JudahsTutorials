@@ -18,6 +18,12 @@ import com.acmemail.judah.cartesian_plane.input.InputParser;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
+/**
+ * Program to demonstrate how to the FileManager
+ * to open and read an equation file.
+ * 
+ * @author Jack Straub
+ */
 public class OpenEquationDemo1
 {
     private static final CartesianPlane plane   = new CartesianPlane();
