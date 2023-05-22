@@ -4,8 +4,23 @@ import java.util.stream.DoubleStream;
 
 import org.nfunk.jep.JEP;
 
-public class Demo2
+/**
+ * Shows how to use JEP
+ * to iteratively evaluate an expression
+ * for a range of values.
+ * Compare to {@linkplain Demo4Exp4jIteration}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Demo4Exp4jIteration
+ */
+public class Demo4JEPIteration
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments, not used
+     */
     public static void main(String[] args)
     {
         JEP parser  = new JEP();

@@ -1,17 +1,17 @@
 package com.acmemail.judah.cartesian_plane.jep_sandbox;
 
-import java.awt.geom.Point2D;
-import java.util.stream.DoubleStream;
-import java.util.stream.Stream;
-
-import com.acmemail.judah.cartesian_plane.CartesianPlane;
-import com.acmemail.judah.cartesian_plane.PlotCommand;
-import com.acmemail.judah.cartesian_plane.PlotPointCommand;
-import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
-
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
+/**
+ * Presents a very simple
+ * operation using Exp4j.
+ * Compare to {@linkplain Demo1JEPBasics}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Demo1JEPBasics
+ */
 public class Demo1Exp4jBasics
 {
     /**

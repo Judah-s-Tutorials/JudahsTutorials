@@ -40,28 +40,11 @@ public class PlotEHatZ1
         double  ico     = 0;
         double  xier    = 10.5;
         plane.setStreamSupplier( () -> 
-        DoubleStream.iterate( -4, d -> d <= 8, d -> d + .0005 )
-            .mapToObj( d -> new Complex( rco + d, ico + d * xier ) )
-            .map( ezed::power )
-            .map( PlotEHatZ1::toPoint )
-            .map( p -> PlotPointCommand.of( p, plane ) )
+            DoubleStream.iterate( -4, d -> d <= 8, d -> d + .0005 )
+                .mapToObj( d -> new Complex( rco + d, ico + d * xier ) )
+                .map( ezed::power )
+                .map( z -> new Point2D.Double( z.re(), z.im() ) )
+                .map( p -> PlotPointCommand.of( p, plane ) )
         );
-    }
-    
-    /**
-     * Convenience method to convert a Complex object
-     * to a Point2D object.
-     * The real and imaginary parts of the Complex object
-     * become the x- and y-coordinates
-     * of the Point2D object.
-     * 
-     * @param zed   the Complex object to convert
-     * 
-     * @return  the resultant Point2D object
-     */
-    private static Point2D toPoint( Complex zed )
-    {
-        Point2D point   = new Point2D.Double( zed.re(), zed.im() );
-        return point;
     }
 }

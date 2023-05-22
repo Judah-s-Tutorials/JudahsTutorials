@@ -12,6 +12,15 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
+/**
+ * Parses and plots an ellipse
+ * using Exp4j.
+ * Compare to {@linkplain Demo2JEPEllipse}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Demo2JEPEllipse
+ */
 public class Demo2Exp4jEllipse
 {
     private static final    CartesianPlane  plane   = new CartesianPlane();
@@ -29,6 +38,12 @@ public class Demo2Exp4jEllipse
         plane.repaint();
     }
     
+    /**
+     * Generates a Stream&lt;PlotCommand&gt;
+     * to plot a parametric equation of an ellipse.
+     * 
+     * @return  a stream that can be used to plot an ellipse
+     */
     private static Stream<PlotCommand> getEllipse()
     {
         Expression xExpr    = new ExpressionBuilder( "a cos(t) + h" )

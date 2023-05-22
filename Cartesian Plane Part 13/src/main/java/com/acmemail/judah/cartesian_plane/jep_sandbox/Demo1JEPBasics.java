@@ -2,6 +2,15 @@ package com.acmemail.judah.cartesian_plane.jep_sandbox;
 
 import org.nfunk.jep.JEP;
 
+/**
+ * Presents a very simple
+ * operation using JEP.
+ * Compare to {@linkplain Demo1Exp4jBasics}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Demo1Exp4jBasics
+ */
 public class Demo1JEPBasics
 {
     /**
@@ -11,7 +20,7 @@ public class Demo1JEPBasics
      */
     public static void main(String[] args)
     {
-        String  str     = "a cos(t) + h";
+        String  str     = "a * cos(t) + h";
         JEP     xExpr   = new JEP();
         xExpr.addStandardConstants();
         xExpr.addStandardFunctions();

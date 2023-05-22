@@ -11,8 +11,20 @@ import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
-public class Demo5YPlot
+/**
+ * Program to use JEP
+ * to plot a linear equation
+ * using the CartesianPlane class.
+ * 
+ * @author Jack Straub
+ */
+public class Demo6YPlot
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         CartesianPlane  plane   = new CartesianPlane();

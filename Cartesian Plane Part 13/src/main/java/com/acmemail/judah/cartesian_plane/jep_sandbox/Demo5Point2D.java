@@ -5,7 +5,7 @@ import java.util.stream.DoubleStream;
 
 import org.nfunk.jep.JEP;
 
-public class Demo3Point2D
+public class Demo5Point2D
 {
     public static void main(String[] args)
     {

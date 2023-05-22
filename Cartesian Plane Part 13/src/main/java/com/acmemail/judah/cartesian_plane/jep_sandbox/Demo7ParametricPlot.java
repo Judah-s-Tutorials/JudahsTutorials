@@ -11,8 +11,20 @@ import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
-public class Demo6XYPlot
+/**
+ * Program to demonstrate 
+ * how to plot a parametric equation
+ * using the CartesianPlane class.
+ * 
+ * @author Jack Straub
+ */
+public class Demo7ParametricPlot
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         CartesianPlane  plane   = new CartesianPlane();
@@ -36,11 +48,16 @@ public class Demo6XYPlot
         roseExpY.addVariable( "n", 4 );
         roseExpY.addVariable( "t", 0 );
         roseExpY.parseExpression( "a sin(n t) sin(t)" );
-        System.out.println( "x: " + roseExpX.hasError() );
-        System.out.println( "x: " + roseExpX.getErrorInfo() );
-        System.out.println( "y: " + roseExpY.hasError() );
-        System.out.println( "y: " + roseExpY.getErrorInfo() );
         
+        if ( roseExpX.hasError() || roseExpY.hasError() )
+        {
+            if ( roseExpX.hasError() )
+                System.out.println( "x: " + roseExpX.getErrorInfo() );
+            if ( roseExpX.hasError() )
+                System.out.println( "y: " + roseExpY.getErrorInfo() );
+            System.exit( 1 );
+        }
+
         plane.setStreamSupplier(  () ->
             DoubleStream.iterate( 0, t -> t < 2 * Math.PI, t -> t + .001 )
                 .peek( t -> roseExpX.addVariable( "t", t ) )

@@ -11,6 +11,15 @@ import com.acmemail.judah.cartesian_plane.PlotCommand;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
+/**
+ * Parses and plots an ellipse
+ * using JEP.
+ * Compare to {@linkplain Demo2Exp4jEllipse}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Demo2Exp4jEllipse
+ */
 public class Demo2JEPEllipse
 {
     private static final    CartesianPlane  plane   = new CartesianPlane();
@@ -27,6 +36,13 @@ public class Demo2JEPEllipse
         plane.setStreamSupplier( Demo2JEPEllipse::getEllipse );
         plane.repaint();
     }
+    
+    /**
+     * Generates a Stream&lt;PlotCommand&gt;
+     * to plot a parametric equation of an ellipse.
+     * 
+     * @return  a stream that can be used to plot an ellipse
+     */
     private static Stream<PlotCommand> getEllipse()
     {
         JEP xExpr  = new JEP();
