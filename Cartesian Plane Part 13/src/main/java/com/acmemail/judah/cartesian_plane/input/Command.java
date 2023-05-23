@@ -76,6 +76,8 @@ public enum Command
         "Application specific; probably "
         + "\"Exit from the current operation\""
     ),
+    /** Load one or more named equations into the EquationMap */
+    LOAD( "Load one or more equations into memory" ),
     /** Select an equation from the EquationMap. */
     SELECT( "Select an equation from a list" ),
     /** Open a file. */

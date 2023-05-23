@@ -84,7 +84,7 @@ public class JEPEquation implements Equation
      * Constructor.
      * Initializes the y-expression
      * to a given value,
-     * and add the given variable declarations
+     * and adds the given variable declarations
      * to this equation.
      * 
      * @param yExpression   the given y-expression
@@ -147,36 +147,32 @@ public class JEPEquation implements Equation
     @Override
     public Result setXExpression(String exprStr)
     {
-        Result    result  = validateExpr( exprStr, e -> xExpr = e );
-        if ( result.isSuccess() )
-            this.xExprStr = exprStr;
+        Result    result  = 
+            validateExpr( exprStr, s -> xExprStr = s, e -> xExpr = e );
         return result;
     }
 
     @Override
     public Result setYExpression(String exprStr)
     {
-        Result    result  = validateExpr( exprStr, e -> yExpr = e );
-        if ( result.isSuccess() )
-            this.yExprStr = exprStr;
+        Result    result  = 
+            validateExpr( exprStr, s -> yExprStr = s, e -> yExpr = e );
         return result;
     }
 
     @Override
     public Result setTExpression(String exprStr)
     {
-        Result    result  = validateExpr( exprStr, e -> tExpr = e );
-        if ( result.isSuccess() )
-            this.tExprStr = exprStr;
+        Result    result  = 
+            validateExpr( exprStr, s -> tExprStr = s, e -> tExpr = e );
         return result;
     }
 
     @Override
     public Result setRExpression(String exprStr)
     {
-        Result    result  = validateExpr( exprStr, e -> rExpr = e );
-        if ( result.isSuccess() )
-            this.rExprStr = exprStr;
+        Result    result  = 
+            validateExpr( exprStr, s -> rExprStr = s, e -> rExpr = e );
         return result;
     }
 
@@ -388,7 +384,6 @@ public class JEPEquation implements Equation
         setYExpression( yExprStr );
         setTExpression( tExprStr );
         setRExpression( rExprStr );
-
     }
     
     /**
@@ -449,13 +444,17 @@ public class JEPEquation implements Equation
      * is stored at the given destination
      * and Result.SUCCESS is returned.
      * 
-     * @param exprStr       source string for generated expression
-     * @param destination   destination for generated expression
+     * @param exprStr   source string for generated expression
+     * @param strDest   destination for expression string representation
+     * @param objDest   destination for generated expression
      * 
      * @return  Result object describing the result of the operation
      */
-    private Result 
-    validateExpr( String exprStr, Consumer<JEP> destination )
+    private Result validateExpr( 
+        String exprStr, 
+        Consumer<String> strDest, 
+        Consumer<JEP> objDest 
+    )
     {
         Result  result  = null;
         JEP parser  = newParser();
@@ -465,11 +464,16 @@ public class JEPEquation implements Equation
         else
         {
             result = new Result( true, null );
-            destination.accept( parser );
+            objDest.accept( parser );
+            strDest.accept( exprStr );
         }
         return result;
     }
     
+    /**
+     * Instantiate and initialize a JEP object.
+     * @return
+     */
     private JEP newParser()
     {
         JEP parser  = new JEP();

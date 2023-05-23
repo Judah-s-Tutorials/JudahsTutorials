@@ -4,8 +4,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JFileChooser;
@@ -197,10 +199,32 @@ public class EquationMap
         return equation;
     }
     
+    /**
+     * Allows the operator
+     * to select an equation
+     * from a list.
+     * The selected equation
+     * (null, if the operator cancels the operation)
+     * is returned.
+     * 
+     * @return  the selected equation, or null, if the operation is cancelled
+     */
     public static Equation getEquation()
     {
-        //TODO implement
-        return null;
+        List<String>        list    = new ArrayList<>( equationMap.keySet() );
+        Collections.sort( list );
+        String[]            names   = list.toArray( new String[0] );
+        ItemSelectionDialog dialog  = 
+            new ItemSelectionDialog( "Select Equation", names );
+        
+        Equation    equation    = null;
+        int         status      = dialog.show();
+        if ( status >= 0 )
+        {
+            String  name    = names[status];
+            equation = equationMap.get( name );
+        }
+        return equation;
     }
     
     /**
