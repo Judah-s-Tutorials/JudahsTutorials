@@ -16,14 +16,15 @@ public class JEPFunctions
 {
     private static final Class<AbstractFunction>    funkClazz   = 
         AbstractFunction.class;
-    private static List<AbstractFunction>           funkList    = 
+    private static final List<AbstractFunction>     funkList    = 
         new ArrayList<>();
     
     static
     {
         Class<JEPFunctions>     clazz   = JEPFunctions.class;
         Class<?>[]              nested  = clazz.getClasses();
-        Arrays.stream( nested ).forEach( JEPFunctions::verifyAndAdd );
+        Arrays.stream( nested )
+            .forEach( JEPFunctions::verifyAndAdd );
     }
     
     public static List<AbstractFunction> getFunctions()
@@ -38,7 +39,8 @@ public class JEPFunctions
         );
     }
     
-    private static abstract class AbstractFunction extends PostfixMathCommand
+    public static abstract class AbstractFunction 
+        extends PostfixMathCommand
     {
         public abstract double evaluate( double param );
         private final String    name;
@@ -77,8 +79,9 @@ public class JEPFunctions
         public ToDegrees()
         {
             super( "toDegrees", 1 );
-            
         }
+        
+        @Override
         public double evaluate( double param )
         {
             double  degrees = param * 180 / Math.PI;
@@ -93,6 +96,8 @@ public class JEPFunctions
             super( "toRadians", 1 );
             
         }
+        
+        @Override
         public double evaluate( double param )
         {
             double  radians = param * Math.PI / 180.;
@@ -107,6 +112,8 @@ public class JEPFunctions
             super( "sec", 1 );
             
         }
+        
+        @Override
         public double evaluate( double param )
         {
             double  secant = 1.0 / Math.cos( param );
@@ -121,6 +128,8 @@ public class JEPFunctions
             super( "csc", 1 );
             
         }
+        
+        @Override
         public double evaluate( double param )
         {
             double  cosecant = 1.0 / Math.sin( param );
@@ -135,6 +144,8 @@ public class JEPFunctions
             super( "cot", 1 );
             
         }
+        
+        @Override
         public double evaluate( double param )
         {
             double  cotan = 1.0 / Math.tan( param );
@@ -147,9 +158,10 @@ public class JEPFunctions
         int     mods        = clazz.getModifiers();
         boolean isPublic    = Modifier.isPublic( mods );
         boolean isStatic    = Modifier.isStatic( mods );
-        boolean isFunction  = clazz.getSuperclass() == funkClazz;
+        boolean isAbstract  = Modifier.isAbstract( mods );
+        boolean isFunction  = funkClazz.isAssignableFrom( clazz );
         
-        if ( isPublic && isStatic && isFunction )
+        if ( isPublic && isStatic && isFunction && !isAbstract )
         {
             try
             {
@@ -167,7 +179,13 @@ public class JEPFunctions
                 | InvocationTargetException exc
             )
             {
-                System.out.println( "*** " + exc.getMessage() );
+                String  className   = exc.getClass().getName();
+                String  message     = 
+                    "Unexpected error: " 
+                        + className + ", " 
+                        + exc.getMessage();
+                System.err.println( message );
+                exc.printStackTrace();
             }
         }
     }

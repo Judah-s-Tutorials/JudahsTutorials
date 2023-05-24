@@ -131,7 +131,11 @@ public class EquationMap
     {
         Equation    equation    = FileManager.open( file );
         if ( equation != null )
-            equationMap.put( equation.getName(), equation );
+        {
+            String  name    = equation.getName();
+            if ( name != null && !name.isEmpty() )
+                equationMap.put( name, equation );
+        }
     }
     
     /**

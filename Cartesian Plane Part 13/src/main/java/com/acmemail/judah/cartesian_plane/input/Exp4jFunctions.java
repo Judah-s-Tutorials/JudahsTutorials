@@ -106,9 +106,10 @@ public class Exp4jFunctions
         int     mods        = clazz.getModifiers();
         boolean isPublic    = Modifier.isPublic( mods );
         boolean isStatic    = Modifier.isStatic( mods );
-        boolean isFunction  = clazz.getSuperclass() == funkClazz;
+        boolean isAbstract  = Modifier.isAbstract( mods );
+        boolean isFunction  = funkClazz.isAssignableFrom( clazz );
         
-        if ( isPublic && isStatic && isFunction )
+        if ( isPublic && isStatic && isFunction && !isAbstract )
         {
             try
             {
@@ -126,7 +127,12 @@ public class Exp4jFunctions
                 | InvocationTargetException exc
             )
             {
-                System.out.println( "*** " + exc.getMessage() );
+                String  className   = exc.getClass().getName();
+                String  message     = 
+                    "Unexpected error: " 
+                        + className + ", " 
+                        + exc.getMessage();
+                System.out.println( message );
             }
         }
     }
