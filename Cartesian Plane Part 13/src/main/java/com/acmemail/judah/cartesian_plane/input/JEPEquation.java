@@ -479,6 +479,7 @@ public class JEPEquation implements Equation
         JEP parser  = new JEP();
         parser.addStandardConstants();
         parser.addStandardFunctions();
+        JEPFunctions.addFunctions( parser );
         parser.setImplicitMul( true );
         updateVars( parser );
         return parser;

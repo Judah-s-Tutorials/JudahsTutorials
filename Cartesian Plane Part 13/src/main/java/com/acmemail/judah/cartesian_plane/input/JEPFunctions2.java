@@ -34,15 +34,15 @@ import org.nfunk.jep.function.PostfixMathCommand;
  *     Compute and return the desired value.
  * </li>
  * <p>
- * See {@link JEPFunctions#ToDegrees} for an example.
+ * See {@link JEPFunctions2#ToDegrees} for an example.
  * </ol>
  * 
  * @author Jack Straub
  * 
- * @see JEPFunctions#AbstractFunction
- * @see JEPFunctions#ToDegrees
+ * @see JEPFunctions2#AbstractFunction
+ * @see JEPFunctions2#ToDegrees
  */
-public class JEPFunctions
+public class JEPFunctions2
 {
     /** 
      * Class class of the nested <em>AbstractFunction</em> class.
@@ -57,10 +57,10 @@ public class JEPFunctions
     static
     {
         // Search every nested class for custom function implementations.
-        Class<JEPFunctions>     clazz   = JEPFunctions.class;
+        Class<JEPFunctions2>     clazz   = JEPFunctions2.class;
         Class<?>[]              nested  = clazz.getClasses();
         Arrays.stream( nested )
-            .forEach( JEPFunctions::verifyAndAdd );
+            .forEach( JEPFunctions2::verifyAndAdd );
     }
     
     /**

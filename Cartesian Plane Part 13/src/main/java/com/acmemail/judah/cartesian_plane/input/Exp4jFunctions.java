@@ -5,6 +5,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import net.objecthunter.exp4j.function.Function;
@@ -23,9 +24,10 @@ public class Exp4jFunctions
     
     public static List<Function> getFunctions()
     {
-        return funkList;
+        List<Function>  list    = Collections.unmodifiableList( funkList );
+        return list;
     }
-    
+
     public static class ToDegrees extends Function
     {
         public ToDegrees()
@@ -71,7 +73,7 @@ public class Exp4jFunctions
         }        
     }
 
-    public class Cotangent extends Function
+    public static class Cotangent extends Function
     {
         public Cotangent()
         {
@@ -86,7 +88,7 @@ public class Exp4jFunctions
         }        
     }
 
-    public class Cosecant extends Function
+    public static class Cosecant extends Function
     {
         public Cosecant()
         {

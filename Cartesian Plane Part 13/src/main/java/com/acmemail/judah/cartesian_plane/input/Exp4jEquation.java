@@ -565,6 +565,7 @@ public class Exp4jEquation implements Equation
             Expression  expr    =
                 new ExpressionBuilder( exprStr )
                     .variables( vars.keySet() )
+                    .functions( Exp4jFunctions.getFunctions() )
                     .build();
             expr.setVariables( vars );
             ValidationResult    exp4jResult = expr.validate( true );
@@ -617,6 +618,7 @@ public class Exp4jEquation implements Equation
         {
             Expression expr = new ExpressionBuilder( exprStr )
                 .variables( vars.keySet() )
+                .functions( Exp4jFunctions.getFunctions() )
                 .build();
             ValidationResult    expr4jResult = expr.validate( false );
             if ( expr4jResult.isValid() )
