@@ -7,11 +7,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Stack;
 
 import org.nfunk.jep.JEP;
-import org.nfunk.jep.ParseException;
-import org.nfunk.jep.function.PostfixMathCommand;
 
 /**
  * Implementation of custom functions in JEP.
@@ -30,7 +27,7 @@ import org.nfunk.jep.function.PostfixMathCommand;
  *     expected by the custom function.
  * </li>
  * <li>
- *     Override the <em>evaluate<double param></em> method.
+ *     Override the <em>evaluate<double params></em> method.
  *     Compute and return the desired value.
  * </li>
  * <p>
@@ -48,10 +45,10 @@ public class JEPFunctions
      * Class class of the nested <em>AbstractFunction</em> class.
      * Declared here for convenience.
      */
-    private static final Class<AbstractFunction>    funkClazz   = 
-        AbstractFunction.class;
+    private static final Class<JEPAbstractFunction>    funkClazz   = 
+        JEPAbstractFunction.class;
     /** List of all detected custom functions. */
-    private static final List<AbstractFunction>     funkList    = 
+    private static final List<JEPAbstractFunction>     funkList    = 
         new ArrayList<>();
     
     static
@@ -72,9 +69,9 @@ public class JEPFunctions
      *      an unmodifiable list of all the custom functions
      *      encapsulated in this class
      */
-    public static List<AbstractFunction> getFunctions()
+    public static List<JEPAbstractFunction> getFunctions()
     {
-        List<AbstractFunction>  list    = 
+        List<JEPAbstractFunction>  list    = 
             Collections.unmodifiableList( funkList );
         return list;
     }
@@ -83,7 +80,7 @@ public class JEPFunctions
      * Add all encapsulated custom functions
      * to a given JEP object.
      * 
-     * @param parser    the given JEP object
+     * @params parser    the given JEP object
      */
     public static void addFunctions( JEP parser )
     {   
@@ -92,48 +89,7 @@ public class JEPFunctions
         );
     }
     
-    /**
-     * Abstract superclass of all classes
-     * encapsulating custom functions.
-     * 
-     * @author Jack Straub
-     */
-    public static abstract class AbstractFunction 
-        extends PostfixMathCommand
-    {
-        public abstract double evaluate( double param );
-        private final String    name;
-        
-        public AbstractFunction( String name, int numParams )
-        {
-            this.name = name;
-            numberOfParameters = numParams;
-        }
-        
-        public String getName()
-        {
-            return name;
-        }
-        
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        @Override
-        public void run( Stack inStack )
-            throws ParseException 
-        {
-            checkStack( inStack );
-            Object  param   = inStack.pop();
-            if ( !(param instanceof Double) )
-            {
-                String  type    = param.getClass().getName();
-                String  msg     = "Invalid parameter type: " + type;
-                throw new ParseException( msg );
-            }
-            double  result  = evaluate( (double)param );
-            inStack.push( result );
-        }
-    }
-    
-    public static class ToDegrees extends AbstractFunction
+    public static class ToDegrees extends JEPAbstractFunction
     {
         public ToDegrees()
         {
@@ -141,14 +97,14 @@ public class JEPFunctions
         }
         
         @Override
-        public double evaluate( double param )
+        public double evaluate( double... params )
         {
-            double  degrees = param * 180 / Math.PI;
+            double  degrees = params[0] * 180 / Math.PI;
             return degrees;
         }
     }
     
-    public static class ToRadians extends AbstractFunction
+    public static class ToRadians extends JEPAbstractFunction
     {
         public ToRadians()
         {
@@ -157,14 +113,14 @@ public class JEPFunctions
         }
         
         @Override
-        public double evaluate( double param )
+        public double evaluate( double... params )
         {
-            double  radians = param * Math.PI / 180.;
+            double  radians = params[0] * Math.PI / 180.;
             return radians;
         }
     }
     
-    public static class Secant extends AbstractFunction
+    public static class Secant extends JEPAbstractFunction
     {
         public Secant()
         {
@@ -173,14 +129,14 @@ public class JEPFunctions
         }
         
         @Override
-        public double evaluate( double param )
+        public double evaluate( double... params )
         {
-            double  secant = 1.0 / Math.cos( param );
+            double  secant = 1.0 / Math.cos( params[0] );
             return secant;
         }
     }
     
-    public static class Cosecant extends AbstractFunction
+    public static class Cosecant extends JEPAbstractFunction
     {
         public Cosecant()
         {
@@ -189,14 +145,14 @@ public class JEPFunctions
         }
         
         @Override
-        public double evaluate( double param )
+        public double evaluate( double... params )
         {
-            double  cosecant = 1.0 / Math.sin( param );
+            double  cosecant = 1.0 / Math.sin( params[0] );
             return cosecant;
         }
     }
     
-    public static class Cotangent extends AbstractFunction
+    public static class Cotangent extends JEPAbstractFunction
     {
         public Cotangent()
         {
@@ -205,9 +161,9 @@ public class JEPFunctions
         }
         
         @Override
-        public double evaluate( double param )
+        public double evaluate( double... params )
         {
-            double  cotan = 1.0 / Math.tan( param );
+            double  cotan = 1.0 / Math.tan( params[0] );
             return cotan;
         }
     }
@@ -225,9 +181,9 @@ public class JEPFunctions
             try
             {
                 @SuppressWarnings("unchecked")
-                Constructor<AbstractFunction>   ctor    = 
-                    (Constructor<AbstractFunction>)clazz.getConstructor();
-                AbstractFunction    funk    = ctor.newInstance();
+                Constructor<JEPAbstractFunction>   ctor    = 
+                    (Constructor<JEPAbstractFunction>)clazz.getConstructor();
+                JEPAbstractFunction    funk    = ctor.newInstance();
                 funkList.add( funk );
             }
             catch ( 

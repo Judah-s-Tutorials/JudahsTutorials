@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.geom.Point2D;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +85,14 @@ class JEPEquationTest
                 assertEquals( 2, p.getY(), "Y" );
             }
         );
+    }
+    
+    @Test
+    public void testSetGetName()
+    {
+        String      name        = "Aristotle";
+        equation.setName( name );
+        assertEquals( name, equation.getName() );
     }
 
     @Test
@@ -426,6 +435,22 @@ class JEPEquationTest
     public void testIsValidNameFalse( String str )
     {
         assertFalse( equation.isValidName( str ), str );
+    }
+    
+    // Trying to squeeze a little more coverage out of isValidName.
+    @Test 
+    public void testIsValidNameFalseMisc()
+    {
+        int[]   invalidCodes    =
+            { '0' - 1, '9' + 1, 'A' - 1, 'Z' + 1, 'a' - 1, 'z' + 1 };
+        Arrays.stream( invalidCodes )
+            .mapToObj( i -> (char)i )
+            .map( c -> "" + c )
+            .forEach( s -> assertFalse( equation.isValidName( s ) ) );
+        Arrays.stream( invalidCodes )
+            .mapToObj( i -> (char)i )
+            .map( c -> "a" + c )
+            .forEach( s -> assertFalse( equation.isValidName( s ) ) );
     }
 
     @ParameterizedTest

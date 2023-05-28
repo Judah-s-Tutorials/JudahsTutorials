@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.input;
+package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.io.File;
 
@@ -7,6 +7,11 @@ import javax.swing.JOptionPane;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.app.CommandExecutor;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
+import com.acmemail.judah.cartesian_plane.input.Command;
+import com.acmemail.judah.cartesian_plane.input.CommandReader;
+import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.EquationMap;
+import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 
 /**
  * Application to read operator input

@@ -45,6 +45,7 @@ public class EquationMap
         String  userDir = System.getProperty( "user.dir" );
         File    baseDir = new File( userDir );
         chooser = new JFileChooser( baseDir );
+        chooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
     }
     
     /**
@@ -58,6 +59,15 @@ public class EquationMap
     }
     
     /**
+     * Returns the equation map
+     * to an empty state.
+     */
+    public static void init()
+    {
+        equationMap.clear();
+    }
+    
+    /**
      * Prompts the operator to select a file
      * to be parsed as an equation file.
      * The operator may choose a directory
@@ -67,7 +77,7 @@ public class EquationMap
      * @see #parseEquationFiles(File)
      * @see #parseEquationFile(File)
      */
-    public void parseEquationFiles()
+    public static void parseEquationFiles()
     {
         int choice  = chooser.showOpenDialog( null );
         if ( choice == JFileChooser.APPROVE_OPTION )

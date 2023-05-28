@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.geom.Point2D;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -491,6 +492,27 @@ class Exp4jEquationTest
     {
         assertFalse( equation.isValidName( str ), str );
     }
+    
+    // Trying to squeeze a little more coverage out of isValidName.
+    @Test 
+    public void testIsValidNameFalseMisc()
+    {
+        int[]   invalidCodes    =
+            { '0' - 1, '9' + 1, 'A' - 1, 'Z' + 1, 'a' - 1, 'z' + 1 };
+        Arrays.stream( invalidCodes )
+            .mapToObj( i -> getString( "", i ) )
+            .forEach( s -> assertFalse( equation.isValidName( s ) ) );
+        Arrays.stream( invalidCodes )
+            .mapToObj( i -> getString( "a", i ) )
+            .forEach( s -> assertFalse( equation.isValidName( s ) ) );
+    }
+    
+    private String getString( String prefix, int encodedChar )
+    {
+        String  result  = prefix + (char)encodedChar;
+        return result;
+    }
+    
 
     @ParameterizedTest
     @ValueSource(strings={ "0", "0.1", "0.", "-.1", "-1.1", "pi", "cos(pi)" } )
@@ -500,7 +522,7 @@ class Exp4jEquationTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings={ "a", "2x", "x^2", "cos(t)" } )
+    @ValueSource(strings={ "a.b", "funk(3)", "qqq" } )
     public void testIsValidValueFalse( String str )
     {
         // These should all fail because they contain 
@@ -521,11 +543,20 @@ class Exp4jEquationTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings={ "a", "2x", "x^2", "cos(t)" } )
+    @ValueSource(strings={ "a.b", "funk(3)", "qqq" } )
     public void testEvaluateFail( String str )
     {
         Optional<Double>    optional    = equation.evaluate( str );
         assertFalse( optional.isPresent() );
+    }
+    
+    @Test
+    public void testSetGetName()
+    {
+        String      name        = "Aristotle";
+        Equation    equation    = new Exp4jEquation();
+        equation.setName( name );
+        assertEquals( name, equation.getName() );
     }
     
     private void testEvaluatePass( String expr, double expVal )

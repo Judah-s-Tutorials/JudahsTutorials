@@ -1,12 +1,11 @@
 package com.acmemail.judah.cartesian_plane.jep_sandbox;
 
 import java.util.Arrays;
-import java.util.Stack;
-import java.util.stream.IntStream;
 
 import org.nfunk.jep.JEP;
 import org.nfunk.jep.ParseException;
-import org.nfunk.jep.function.PostfixMathCommand;
+
+import com.acmemail.judah.cartesian_plane.input.JEPAbstractFunction;
 
 public class CustomFunctionDemo4AbstractHelper
 {
@@ -14,7 +13,7 @@ public class CustomFunctionDemo4AbstractHelper
     public static void main(String[] args)
         throws ParseException
     {
-        AbstractFunction[]  functions   =
+        JEPAbstractFunction[]  functions   =
             { new Cosecant(), new Hypotenuse(), new Average() };
         
         String  strCsc      = "csc( pi / 4 )";
@@ -43,45 +42,7 @@ public class CustomFunctionDemo4AbstractHelper
 
     }
     
-    public static abstract class AbstractFunction extends PostfixMathCommand
-    {
-        public abstract double evaluate( double... param );
-        private final String    name;
-        
-        public AbstractFunction( String name, int numParams )
-        {
-            this.name = name;
-            numberOfParameters = numParams;
-        }
-        
-        public String getName()
-        {
-            return name;
-        }
-        
-        @SuppressWarnings({ "unchecked", "rawtypes" })
-        @Override
-        public void run( Stack inStack )
-            throws ParseException, ClassCastException
-        {
-            // If this number &lt; 0, it means we're evaluating 
-            // a varargs function, and we have to use curNumberOfParameters.
-            // If this number >= 0, curNumberOfParameters is unpredictable
-            int actNumParams    = 
-                numberOfParameters < 0 ? 
-                curNumberOfParameters : 
-                numberOfParameters; 
-
-            checkStack( inStack );
-            double[]    params  = new double[actNumParams];
-            IntStream.range( 0, actNumParams )
-                .forEach( i -> params[i] = (Double)inStack.pop() );
-            double      result  = evaluate( params );
-            inStack.push( result );
-        }
-    }
-    
-    public static class Cosecant extends AbstractFunction
+    public static class Cosecant extends JEPAbstractFunction
     {
         public Cosecant()
         {
@@ -96,7 +57,7 @@ public class CustomFunctionDemo4AbstractHelper
         }
     }
     
-    public static class Hypotenuse extends AbstractFunction
+    public static class Hypotenuse extends JEPAbstractFunction
     {
         public Hypotenuse()
         {
@@ -113,7 +74,7 @@ public class CustomFunctionDemo4AbstractHelper
         }
     }
 
-    public static class Average extends AbstractFunction
+    public static class Average extends JEPAbstractFunction
     {
         public Average()
         {
