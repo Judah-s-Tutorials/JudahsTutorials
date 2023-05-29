@@ -2,6 +2,13 @@ package com.acmemail.judah.cartesian_plane.jep_sandbox;
 
 import org.nfunk.jep.JEP;
 
+/**
+ * Program to demonstrate
+ * how to evaluate a complex expression
+ * using the JEP implementation.
+ * 
+ * @author Jack Straub
+ */
 public class DemoComplex1
 {
     public static void main(String[] args)

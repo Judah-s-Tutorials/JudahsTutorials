@@ -6,9 +6,20 @@ import org.nfunk.jep.JEP;
 import org.nfunk.jep.ParseException;
 import org.nfunk.jep.function.PostfixMathCommand;
 
+/**
+ * Program to investigate
+ * whether JEP builtin functions
+ * can be overridden with a custom function.
+ * 
+ * @author Jack Straub
+ */
 public class OverridingBuiltinFunctionsDemo
 {
-
+    /**
+     * Program entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         String  str     = "log( 2 )";

@@ -6,9 +6,23 @@ import org.nfunk.jep.JEP;
 import org.nfunk.jep.ParseException;
 import org.nfunk.jep.function.PostfixMathCommand;
 
+/**
+ * Program to demonstrate how to write
+ * a varargs custom function in the JEP implementation.
+ * 
+ * @author Jack Straub
+ * 
+ * @see CustomFunctionDemo3Varargs
+ */
 public class CustomFunctionDemo2Varargs
 {
-
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     * @throws ParseException   
+     *      if an error occurs while parsing an expression
+     */
     public static void main(String[] args)
         throws ParseException
     {
@@ -23,6 +37,15 @@ public class CustomFunctionDemo2Varargs
         System.out.println( "average = " + val );
     }
 
+    /**
+     * Custom function to compute the average
+     * of a variable number of arguments.
+     * Uses a traditional for loop
+     * to compute the sum of the arguments
+     * (see the {@link #run(Stack) method}.
+     * 
+     * @author Jack Straub
+     */
     public static class Average extends PostfixMathCommand
     {
         public Average()

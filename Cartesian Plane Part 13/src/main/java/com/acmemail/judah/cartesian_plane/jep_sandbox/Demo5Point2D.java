@@ -5,8 +5,20 @@ import java.util.stream.DoubleStream;
 
 import org.nfunk.jep.JEP;
 
+/**
+ * Program to demonstrate 
+ * how to use a JEP expression
+ * to generate a Cartesian coordinate pair.
+ * 
+ * @author Jack Straub
+ */
 public class Demo5Point2D
 {
+    /**
+     * Program entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         JEP parser  = new JEP();

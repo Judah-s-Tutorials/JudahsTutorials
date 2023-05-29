@@ -9,9 +9,20 @@ import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import com.acmemail.judah.cartesian_plane.input.Polar;
 
+/**
+ * Program to demonstrate how
+ * to plot a polar equation
+ * using our Cartesian plane class.
+ * 
+ * @author Jack Straub
+ */
 public class JEPPolarDemo1
 {
-
+    /**
+     * Program entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         CartesianPlane  plane   = new CartesianPlane();

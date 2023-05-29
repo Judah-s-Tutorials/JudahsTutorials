@@ -15,6 +15,8 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  * Program to use JEP
  * to plot a linear equation
  * using the CartesianPlane class.
+ * A function of the form
+ * y = f(x) is plotted.
  * 
  * @author Jack Straub
  */

@@ -9,10 +9,23 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jFunctions;
 
 import net.objecthunter.exp4j.function.Function;
 
+/**
+ * Program to demonstrate
+ * how to use reflection
+ * to locate all the public nested classes
+ * declared in a class.
+ * 
+ * @author Jack Straub
+ */
 public class GetNestedClassDemo
 {
     private static final Class<Function>    functionClazz   = Function.class;
     
+    /**
+     * Program entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         Class<Exp4jFunctions>   clazz   = Exp4jFunctions.class;

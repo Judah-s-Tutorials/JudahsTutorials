@@ -3,9 +3,23 @@ package com.acmemail.judah.cartesian_plane.jep_sandbox;
 import org.nfunk.jep.JEP;
 import org.nfunk.jep.type.Complex;
 
+/**
+ * A program that evaluates
+ * trigonometric functions
+ * using complex values
+ * as arguments.
+ * 
+ * @author Jack Straub
+ */
 public class InvestigatorTrig1
 {
     private static final    JEP parser = new JEP();
+    
+    /**
+     * Program entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         parser.addStandardConstants();

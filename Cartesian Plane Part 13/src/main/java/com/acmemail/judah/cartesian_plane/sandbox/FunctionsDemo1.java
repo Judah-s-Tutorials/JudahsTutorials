@@ -8,14 +8,30 @@ import com.acmemail.judah.cartesian_plane.input.JEPFunctions;
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 
+/**
+ * Program to demonstrate
+ * how to use the custom functions
+ * declared in the 
+ * JEPFunctions and Exp4jFunctions classes.
+ * 
+ * @author Jack Straub
+ */
 public class FunctionsDemo1
 {
+    /**
+     * Program entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         jepDemo();
         exp4jDemo();
     }
     
+    /**
+     * Demonstrates use of the JEPFunctions class.
+     */
     private static void jepDemo()
     {
         String  exprStr = "csc( pi/4 )";
@@ -33,6 +49,9 @@ public class FunctionsDemo1
         System.out.println( "JEP " + exprStr + ": " + val );
     }
     
+    /**
+     * Demonstrates use of the Exp4jFunctions class.
+     */
     private static void exp4jDemo()
     {
         String  exprStr = "csc( pi/4 )";

@@ -37,7 +37,7 @@ public abstract class JEPAbstractFunction extends PostfixMathCommand
 
         checkStack( inStack );
         double[]    params  = new double[actNumParams];
-        IntStream.range( 0, actNumParams )
+        IntStream.iterate( actNumParams - 1, i -> i >= 0, i -> i - 1 )
             .forEach( i -> params[i] = (Double)inStack.pop() );
         double      result  = evaluate( params );
         inStack.push( result );

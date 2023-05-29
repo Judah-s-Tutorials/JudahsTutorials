@@ -17,7 +17,7 @@ import org.nfunk.jep.JEP;
  * <ol>
  * <li>
  *     Add a <em>public static nested class</em>
- *     that extends {@link JEPFunctions#AbstractFunction>.
+ *     that extends {@link JEPAbstractFunction}.
  * </li>
  * <li>
  *     Add a default constructor
@@ -27,17 +27,17 @@ import org.nfunk.jep.JEP;
  *     expected by the custom function.
  * </li>
  * <li>
- *     Override the <em>evaluate<double params></em> method.
+ *     Override the <em>evaluate( double params )</em> method.
  *     Compute and return the desired value.
  * </li>
- * <p>
- * See {@link JEPFunctions#ToDegrees} for an example.
  * </ol>
+ * <p>
+ * See {@link JEPFunctions.ToDegrees} for an example.
  * 
  * @author Jack Straub
  * 
- * @see JEPFunctions#AbstractFunction
- * @see JEPFunctions#ToDegrees
+ * @see JEPAbstractFunction
+ * @see JEPFunctions.ToDegrees
  */
 public class JEPFunctions
 {
@@ -80,7 +80,7 @@ public class JEPFunctions
      * Add all encapsulated custom functions
      * to a given JEP object.
      * 
-     * @params parser    the given JEP object
+     * @param parser    the given JEP object
      */
     public static void addFunctions( JEP parser )
     {   

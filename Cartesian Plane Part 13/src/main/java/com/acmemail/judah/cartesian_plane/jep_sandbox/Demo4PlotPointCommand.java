@@ -8,8 +8,20 @@ import org.nfunk.jep.JEP;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 
+/**
+ * Program to demonstrate how to use JEP
+ * to plot a function
+ * using our CartesianPlane class.
+ * 
+ * @author Jack Straub
+ */
 public class Demo4PlotPointCommand
 {
+    /**
+     * Program entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
         CartesianPlane  plane   = new CartesianPlane();

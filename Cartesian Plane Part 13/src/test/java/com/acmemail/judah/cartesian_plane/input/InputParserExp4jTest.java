@@ -19,7 +19,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class InputParserTest
+/**
+ * This class tests the InputParser class
+ * using instances of Exp4jEquation whenever
+ * an implementation of the Equation interface is required.
+ * 
+ * @author Jack Straub
+ */
+class InputParserExp4jTest
 {
     private InputParser parser;
     
@@ -216,7 +223,9 @@ class InputParserTest
     @Test
     public void testParseVarsGoodAndBadSpecs()
     {
-        String      strVals = "p=10,q=10,%,r=5 5";
+        // p and q are assigned from valid expressions;
+        // u is not
+        String      strVals = "p=10,q=10,%,u=5;5";
         Result      result  = 
             parser.parseInput( Command.SET, strVals );
         assertFalse( result.isSuccess() );
@@ -228,7 +237,7 @@ class InputParserTest
         Equation            equation    = parser.getEquation();
         Optional<Double>    pVal        = equation.getVar( "p" );
         Optional<Double>    qVal        = equation.getVar( "q" );
-        Optional<Double>    rVal        = equation.getVar( "r" );
+        Optional<Double>    uVal        = equation.getVar( "u" );
         
         // p and q should be stored...
         assertTrue( pVal.isPresent() );
@@ -236,8 +245,8 @@ class InputParserTest
         assertTrue( qVal.isPresent() );
         assertEquals( 10, qVal.get() );
         
-        // ... but r should not
-        assertFalse( rVal.isPresent() );
+        // ... but u should not
+        assertFalse( uVal.isPresent() );
     }
     
     private void testSetDouble( Command cmd, DoubleSupplier getter  )

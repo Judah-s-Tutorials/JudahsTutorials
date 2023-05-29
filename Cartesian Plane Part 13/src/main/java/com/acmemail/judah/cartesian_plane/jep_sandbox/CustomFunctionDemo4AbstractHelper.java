@@ -7,9 +7,26 @@ import org.nfunk.jep.ParseException;
 
 import com.acmemail.judah.cartesian_plane.input.JEPAbstractFunction;
 
+/**
+ * Program to demonstrate how to use
+ * the JEPAbstractFunction class
+ * to implement a custom function
+ * in the JEP implementation.
+ * 
+ * @author Jack Straub
+ * 
+ * @see JEPAbstractFunction
+ */
 public class CustomFunctionDemo4AbstractHelper
 {
-
+    /**
+     * Application entery point.
+     * 
+     * @param args  command line arguments; not used
+     * 
+     * @throws ParseException
+     *      If an error occurs while parsing an expression.
+     */
     public static void main(String[] args)
         throws ParseException
     {
@@ -31,6 +48,15 @@ public class CustomFunctionDemo4AbstractHelper
         print( strAvg, expr );
     }
     
+    /**
+     * Prints an expression as a string,
+     * its value (if any)
+     * and error information (if any).
+     * 
+     * @param strExp    the string expression
+     * @param expr      the JEP object used to evaluate the
+     *                  string expression
+     */
     private static void print( String strExp, JEP expr )
     {
         expr.parseExpression( strExp );
@@ -42,6 +68,12 @@ public class CustomFunctionDemo4AbstractHelper
 
     }
     
+    /**
+     * Sample custom function.
+     * Calculates the cosecant of an angle.
+     * 
+     * @author Jack Straub
+     */
     public static class Cosecant extends JEPAbstractFunction
     {
         public Cosecant()
@@ -57,6 +89,13 @@ public class CustomFunctionDemo4AbstractHelper
         }
     }
     
+    /**
+     * Sample custom function.
+     * Calculates the hypotenuse
+     * of a right triangle.
+     * 
+     * @author Jack Straub
+     */
     public static class Hypotenuse extends JEPAbstractFunction
     {
         public Hypotenuse()
@@ -74,6 +113,13 @@ public class CustomFunctionDemo4AbstractHelper
         }
     }
 
+    /**
+     * Sample custom function.
+     * Calculates the average 
+     * of a series of values. 
+     * 
+     * @author Jack Straub
+     */
     public static class Average extends JEPAbstractFunction
     {
         public Average()

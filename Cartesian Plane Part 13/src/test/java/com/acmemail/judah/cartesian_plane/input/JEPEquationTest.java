@@ -32,7 +32,7 @@ class JEPEquationTest
     }
 
     @Test
-    public void testExp4jEquation()
+    public void testJEPEquation()
     {
         validateDefaultVariables();
         validateDefaultRange();
@@ -41,7 +41,7 @@ class JEPEquationTest
     }
 
     @Test
-    public void testExp4jEquationString()
+    public void testJEPEquationString()
     {
         equation = new JEPEquation( "2x" );
         validateDefaultVariables();
@@ -49,7 +49,7 @@ class JEPEquationTest
         validateDefaultXExpression();
         
         // verify that y expression is set to 2 
-        // (see above "new Exp4jEquation( "2x" )").
+        // (see above "new JEPEquation( "2x" )").
         equation.setRange( 1, 1, 1 );
         equation.yPlot().forEach(
             p -> assertEquals( 2, p.getY(), "Y" ) 
@@ -57,7 +57,7 @@ class JEPEquationTest
     }
 
     @Test
-    public void testExp4jEquationMapOfStringDoubleString()
+    public void testJEPEquationMapOfStringDoubleString()
     {
         Map<String,Double>  mapIn   = new HashMap<>();
         String[]            vars    = { "h", "j", "k", "l" };

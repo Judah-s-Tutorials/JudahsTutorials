@@ -6,7 +6,8 @@ import org.nfunk.jep.type.Complex;
 
 /**
  * Polar coordinates
- * of a point on the Cartesian plane.
+ * of a point on the Cartesian
+ * of complex planes.
  * 
  * @author Jack Straub
  */
