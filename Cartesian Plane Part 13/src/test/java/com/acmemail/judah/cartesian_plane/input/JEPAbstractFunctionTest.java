@@ -21,15 +21,12 @@ class JEPAbstractFunctionTest
     @Test
     void testFixedArgs()
     {
+        JEP         parser  = new JEP();
         FixedArgs   funk    = new FixedArgs();
-        String  exprStr = "div( 10, 2 )";
-        JEP     parser  = new JEP();
         parser.addFunction( funk.getName(), funk );
-        parser.parseExpression( exprStr );
+        parser.parseExpression( "div( 10, 2 )" );
         assertFalse( parser.hasError() );
-        
-        double  val     = parser.getValue();
-        assertEquals( 5, val );
+        assertEquals( 5, parser.getValue() );
     }
 
     /**
@@ -45,7 +42,7 @@ class JEPAbstractFunctionTest
     void testVarArgs( int numParams )
     {
         StringBuilder   bldr    = new StringBuilder( "sub(" );
-        double          expVal  = Integer.MIN_VALUE;      
+        double          expVal  = Double.MIN_VALUE;      
         if ( numParams > 0 )
         {
             expVal = numParams;
@@ -66,7 +63,6 @@ class JEPAbstractFunctionTest
         assertFalse( parser.hasError() );
         
         double  val     = parser.getValue();
-        System.out.println( val );
         assertEquals( expVal, val );
     }
 
@@ -101,7 +97,7 @@ class JEPAbstractFunctionTest
      * add the first n - 1 arguments
      * then subtract the last.
      * If 0 arguments are passed,
-     * returns Integer.MIN_VALUE.
+     * returns Double.MIN_VALUE.
      * 
      * @author Jack Straub
      */
@@ -115,7 +111,7 @@ class JEPAbstractFunctionTest
         @Override 
         public double evaluate( double... args )
         {
-            double  result  = Integer.MIN_VALUE;
+            double  result  = Double.MIN_VALUE;
             int     numArgs = args.length;
             if ( numArgs > 0 )
             {

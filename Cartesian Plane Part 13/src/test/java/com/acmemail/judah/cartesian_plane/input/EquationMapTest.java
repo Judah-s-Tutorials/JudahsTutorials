@@ -28,7 +28,6 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class EquationMapTest
 {
-    private static String[]     testVars        = { "p", "q", "r" };
     private static String[]     testNames       = 
         { "eName1", "eName2", "eName3", "eName4" };
     private static Equation[]   testEquations   = 
@@ -40,19 +39,18 @@ class EquationMapTest
     
     private static String       eqStr1NoName    = "noName.txt";
     private static File         eqFile1NoName   = new File( eqStr1NoName );
-    private static String       eqStr2NotEq     = "noName.txt";
+    private static String       eqStr2NotEq     = "notEq.txt";
     private static File         eqFile2NotEq    = new File( eqStr2NotEq );
     
+    private static String[]     testVars        = { "p", "q", "u" };
     private static Map<String,Equation> testMap = new HashMap<>();
     
     // dialog selection, set by startDialog
     private Equation    selectedEquation;
 
-    
     @BeforeAll
     public static void setUpBeforeClass() throws Exception
     {
-        System.out.println( tempDir.getAbsolutePath() );
         for ( int inx = 0 ; inx < testNames.length ; ++inx  )
         {
             String      name        = testNames[inx];
@@ -66,21 +64,21 @@ class EquationMapTest
             testEquations[inx] = equation;
             testFiles[inx] = file;
             testMap.put( name, equation );
-            
-            // make a file that contains an Equation with no name;
-            // should be recognized as "not an equation file"
-            FileManager.save( eqFile1NoName, new Exp4jEquation() );
-            
-            // make a file that clearly does not contain an equation
-            try ( PrintWriter pWriter = new PrintWriter( eqFile2NotEq ) )
-            {
-                pWriter.println( "not an equation file" );
-            }  
-            catch (IOException exc )
-            {
-                exc.printStackTrace();
-                System.exit( 1 );
-            }
+        }
+        
+        // make a file that contains an Equation with no name;
+        // should be recognized as "not an equation file"
+        FileManager.save( eqFile1NoName, new Exp4jEquation() );
+        
+        // make a file that clearly does not contain an equation
+        try ( PrintWriter pWriter = new PrintWriter( eqFile2NotEq ) )
+        {
+            pWriter.println( "not an equation file" );
+        }  
+        catch (IOException exc )
+        {
+            exc.printStackTrace();
+            System.exit( 1 );
         }
     }
 
@@ -121,67 +119,50 @@ class EquationMapTest
     }
 
     @Test
-    void testParseEquationFilesDir()
+    void testParseEquationFilesFile()
     {
         Map<String,Equation>    map = EquationMap.getEquationMap();
         assertTrue( map.isEmpty() );
         EquationMap.parseEquationFiles( tempDir );
         map = EquationMap.getEquationMap();
         
+        assertEquals( testFiles.length, map.size() );
         Arrays.stream( testNames )
             .forEach( n -> verifyEquation( 
                 testMap.get( n ), EquationMap.getEquation( n )
             ));
     }
 
-    // Call parseEquationFiles passing a directory.
-    // Verify that all equations are loaded.
-    @Test
-    void testParseEquationFilesFile()
-    {
-        EquationMap.parseEquationFiles( tempDir );
-        Map<String,Equation>    map = EquationMap.getEquationMap();
-        assertEquals( testFiles.length, map.size() );
-    }
-
     // Call parseEquationFiles with no arguments.
-    // This will cause a dialog to open; select a directory,
-    // and verify that all equations are loaded.
+    // This will cause a dialog to open; select a file,
+    // and verify that a single equations is loaded.
     @Test
-    void testParseEquationFilesSelectDirApprove() throws AWTException
+    void testParseEquationFilesSelectFileApprove() throws AWTException
     {
-        Map<String,Equation>    map = EquationMap.getEquationMap();
-        assertTrue( map.isEmpty() );
-        
         RobotAssistant  robot   = new RobotAssistant();
         Thread          thread  = startDialog( () -> 
             EquationMap.parseEquationFiles()
         );
         robot.type( testFiles[0].getAbsolutePath(), KeyEvent.VK_ENTER );
         Utils.join( thread );
-        map = EquationMap.getEquationMap();
+        Map<String,Equation>    map = EquationMap.getEquationMap();
         assertEquals( 1, map.size() );
         verifyEquation( testEquations[0], map.get( testNames[0] ) );
     }
 
 
-    // Call parseEquationFiles with no arguments.
-    // This will cause a dialog to open; select a file,
-    // and verify that only the selected file loaded.
+    // Call parseEquationFiles with no arguments. This will
+    // cause a dialog to open; select the temporary directory,
+    // and verify that all equation files are loaded.
     @Test
-    void testParseEquationFilesSelectFileApprove() throws AWTException
+    void testParseEquationFilesSelectDirApprove() throws AWTException
     {
-        Map<String,Equation>    map = EquationMap.getEquationMap();
-        assertTrue( map.isEmpty() );
-        
         RobotAssistant  robot   = new RobotAssistant();
         Thread          thread  = startDialog( () -> 
             EquationMap.parseEquationFiles()
         );
         robot.type( tempDir.getAbsolutePath(), KeyEvent.VK_ENTER );
         Utils.join( thread );
-        map = EquationMap.getEquationMap();
-        
         Arrays.stream( testNames )
             .forEach( n -> verifyEquation( 
                 testMap.get( n ), EquationMap.getEquation( n )
@@ -193,7 +174,7 @@ class EquationMapTest
     // This will cause a dialog to open; cancel the dialog,
     // and verify that no equations are loaded.
     @Test
-    void testParseEquationFilesSelectDirCancel() throws AWTException
+    void testParseEquationFilesCancel() throws AWTException
     {
         RobotAssistant  robot   = new RobotAssistant();
         Thread          thread  = startDialog( () -> 
@@ -236,6 +217,9 @@ class EquationMapTest
         Equation    expEquation     = testEquations[0];
         Equation    actEquation     = EquationMap.getEquation( testNames[0] );
         verifyEquation( expEquation, actEquation );
+        
+        actEquation = EquationMap.getEquation( "Not an equation name" );
+        assertNull( actEquation );
     }
 
     // Call getEquation passing no arguments.
@@ -248,22 +232,16 @@ class EquationMapTest
     // which one is third, we have to make and sort our
     // own list of equation names.
     @Test
-    void testGetEquationEnter() 
-        throws AWTException
+    void testGetEquationEnter() throws AWTException
     {
         EquationMap.parseEquationFiles( tempDir );
         
-        // Figure out which equation will be third in the list
-        Map<String,Equation>    map     = EquationMap.getEquationMap();
-        List<String>            names   = new ArrayList<>( map.keySet() );
-        Collections.sort( names );
-        String      name        = names.get( 2 );
-        Equation    expEquation = map.get( name );
+        List<Equation>  equations   = Arrays.asList( testEquations );
+        equations.sort( (i1, i2) -> i1.getName().compareTo( i2.getName() ) );
+        Equation        expEquation = equations.get( 2 );
         
-        Thread          thread  = null;
-        RobotAssistant  robot   = new RobotAssistant();
-        
-        thread  = startDialog( () ->
+        RobotAssistant  robot       = new RobotAssistant();
+        Thread          thread      = startDialog( () ->
             selectedEquation = EquationMap.getEquation() 
         );
         robot.downArrow(); // select second item in list
@@ -281,10 +259,9 @@ class EquationMapTest
         throws AWTException
     {
         EquationMap.parseEquationFiles( tempDir );
-        Thread          thread  = null;
         RobotAssistant  robot   = new RobotAssistant();
         
-        thread  = startDialog( () ->
+        Thread          thread  = startDialog( () ->
             selectedEquation = EquationMap.getEquation() 
         );
         robot.type( "", KeyEvent.VK_ESCAPE );
@@ -301,7 +278,7 @@ class EquationMapTest
     }
     
     /**
-     * Verify that two given Equations encapsulate the same value.
+     * Verify that two given Equations encapsulate the same data.
      * 
      * @param expEquation   expected value
      * @param actEquation   actual value.

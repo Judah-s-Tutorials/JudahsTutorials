@@ -7,18 +7,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.nfunk.jep.JEP;
 
 class JEPFunctionsTest
 {
     private static final double epsilon = .0001;
-
-    @BeforeEach
-    void setUp() throws Exception
-    {
-    }
     
     @Test
     public void testGetFunctions()

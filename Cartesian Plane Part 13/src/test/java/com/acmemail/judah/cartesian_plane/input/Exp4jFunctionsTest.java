@@ -2,9 +2,6 @@ package com.acmemail.judah.cartesian_plane.input;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import net.objecthunter.exp4j.Expression;
@@ -56,8 +53,6 @@ class Exp4jFunctionsTest
     
     private void evaluate( String exprStr, double expVal )
     {
-        
-        
         Expression  expr    =
             new ExpressionBuilder( exprStr )
                 .functions( Exp4jFunctions.getFunctions() )
