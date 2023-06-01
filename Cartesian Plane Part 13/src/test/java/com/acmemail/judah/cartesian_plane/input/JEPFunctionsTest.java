@@ -43,7 +43,7 @@ class JEPFunctionsTest
     @Test
     void testSecant()
     {
-        evaluate( "sec( pi/4 )", 1 / Math.cos( Math.PI / 4) );
+        evaluate( "sec( pi/4 )", 1 / Math.cos( Math.PI / 4 ) );
     }
 
     @Test
