@@ -262,8 +262,6 @@ class InputParserTest
     @Test
     public void testParseVarsGoodAndBadSpecs()
     {
-        // p and q are assigned from valid expressions;
-        // s is not
         String      strVals = "p=10,q=10,%,s=5 5";
         Result      result  = 
             parser.parseInput( Command.SET, strVals );

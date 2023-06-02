@@ -19,7 +19,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class InputParserTest
+/**
+ * This class tests the InputParser class
+ * using instances of Exp4jEquation whenever
+ * an implementation of the Equation interface is required.
+ * 
+ * @author Jack Straub
+ */
+class InputParserExp4jTest
 {
     private InputParser parser;
     
@@ -78,7 +85,7 @@ class InputParserTest
 
     @ParameterizedTest
     @ValueSource( strings= 
-        {"EXIT","NONE","YPLOT","XYPLOT","RPLOT","TPLOT","OPEN","SAVE" } 
+        {"EXIT","NONE","YPLOT","XYPLOT","RPLOT","TPLOT","OPEN","SAVE","LOAD","SELECT" }
     )
     public void testParseInputNOOP( String strCommand )
     {
@@ -263,8 +270,8 @@ class InputParserTest
     public void testParseVarsGoodAndBadSpecs()
     {
         // p and q are assigned from valid expressions;
-        // s is not
-        String      strVals = "p=10,q=10,%,s=5 5";
+        // u is not
+        String      strVals = "p=10,q=10,%,s=5;5";
         Result      result  = 
             parser.parseInput( Command.SET, strVals );
         assertFalse( result.isSuccess() );

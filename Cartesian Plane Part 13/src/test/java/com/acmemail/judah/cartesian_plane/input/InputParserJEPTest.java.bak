@@ -19,14 +19,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class InputParserTest
+/**
+ * This class tests the InputParser class
+ * using instances of JEPEquation whenever
+ * an implementation of the Equation interface is required.
+ * 
+ * @author Jack Straub
+ */
+class InputParserJEPTest
 {
+    private JEPEquation jepEquation;
     private InputParser parser;
     
     @BeforeEach
     public void beforeEach()
     {
-        parser = new InputParser();
+        jepEquation = new JEPEquation();
+        parser = new InputParser( jepEquation );
     }
     
     @Test
@@ -38,7 +47,7 @@ class InputParserTest
     @Test
     public void testInputParserEquation()
     {
-        Equation    equation    = new Exp4jEquation();
+        Equation    equation    = new JEPEquation();
         InputParser parser      = new InputParser( equation );
         assertEquals( equation, parser.getEquation() );
     }
@@ -78,7 +87,7 @@ class InputParserTest
 
     @ParameterizedTest
     @ValueSource( strings= 
-        {"EXIT","NONE","YPLOT","XYPLOT","RPLOT","TPLOT","OPEN","SAVE" } 
+        {"EXIT","NONE","YPLOT","XYPLOT","RPLOT","TPLOT","OPEN","SAVE","LOAD","SELECT" }
     )
     public void testParseInputNOOP( String strCommand )
     {
@@ -264,7 +273,7 @@ class InputParserTest
     {
         // p and q are assigned from valid expressions;
         // s is not
-        String      strVals = "p=10,q=10,%,s=5 5";
+        String      strVals = "p=10,q=10,%,s=;5";
         Result      result  = 
             parser.parseInput( Command.SET, strVals );
         assertFalse( result.isSuccess() );
@@ -284,7 +293,7 @@ class InputParserTest
         assertTrue( qVal.isPresent() );
         assertEquals( 10, qVal.get() );
         
-        // ... but s should not
+        // ... but u should not
         assertFalse( sVal.isPresent() );
     }
     
