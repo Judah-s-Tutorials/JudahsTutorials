@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.Window;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 import javax.swing.BorderFactory;
@@ -12,6 +13,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
@@ -34,49 +36,23 @@ public class ListFrames
      * 
      * @param args  command line arguments; not used
      */
-    public static void main(String[] args)
+    public static void main(String[] args) throws InterruptedException
     {
-        try
-        {
-            showBackground();
-            root.start();
-            newThread( () -> showDialog( 
-                "Moses", 
-                "Let my people go", 
-                100, 
-                100 
-            ));
-            newThread( () -> showDialog( 
-                "Lincoln", 
-                "Fourscore and seven...", 
-                150, 
-                170 
-            ));
-            newThread( () -> showDialog( 
-                "Roosevelt", 
-                "No one can make you feel inferior ...",
-                200,
-                250 
-            ));
-            newThread( () -> showDialog( 
-                "Ginsburg", 
-                "Fight for the things that you care about, ...",
-                250,
-                325 
-            ));
-            newThread( () -> showDialog( 
-                "Sylvester", 
-                "Sufferin' succotash!",
-                300,
-                400 
-            ));
-            newThread( () -> printTopWindows() );
-            JOptionPane.showMessageDialog( null, "Push me to exit" );
-        }
-        catch ( InterruptedException exc )
-        {
-            exc.printStackTrace();
-        }
+        showBackground();
+        root.start();
+        showDialog( "Moses", "Let my people go", 100, 100 );
+        showDialog( "Lincoln", "Fourscore and seven...", 150, 170 );
+        showDialog( "Roosevelt", "Do one thing every day...", 200, 250 );
+        showDialog( "Ginsburg", "Fight for the things...", 250, 325 );
+        showDialog( "Sylvester", "Sufferin' succotash!", 300, 400 );
+        
+        String          message = "Push me to exit.";
+        Thread          thread  = new Thread( () -> 
+            JOptionPane.showMessageDialog( null, message )
+        );
+        thread.start();
+        printTopWindows();
+        thread.join();
         
         System.exit( 0 );
     }
@@ -100,35 +76,38 @@ public class ListFrames
         dialog.setVisible( true );
     }
     
-    private static void newThread( Runnable runnable )
-        throws InterruptedException
-    {
-            new Thread( runnable ).start();
-            Thread.sleep( 100 );
-    }
-    
     private static void showBackground()
-        throws InterruptedException
     {
-        JFrame  frame   = new JFrame( "Background" );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        JPanel  panel   = new JPanel();
-        panel.setBackground( Color.BLACK );
-        panel.setPreferredSize( new Dimension( 800, 700 ) );
-        frame.setContentPane( panel );
-        frame.pack();
-        frame.setVisible( true );
-        Thread.sleep( 100 );
+        try
+        {
+            SwingUtilities.invokeAndWait( () -> 
+            {
+                JFrame  frame   = new JFrame( "Background" );
+                frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+                JPanel  panel   = new JPanel();
+                panel.setBackground( Color.BLACK );
+                panel.setPreferredSize( new Dimension( 800, 700 ) );
+                frame.setContentPane( panel );
+                frame.pack();
+                frame.setVisible( true );
+            });
+        }
+        catch ( InterruptedException | InvocationTargetException exc )
+        {
+            exc.printStackTrace();
+            System.exit( 1 );
+        }
     }
     
     private static void printTopWindows()
     {
+        Window[]    windows = Window.getWindows();
         try
         {
             Thread.sleep( 500 );
-            Arrays.stream( Frame.getFrames() )
-                .filter( f -> f instanceof JFrame )
-                .map( f -> (JFrame)f )
+            Arrays.stream( windows )
+                .filter( w -> w instanceof JFrame )
+                .map( w -> (JFrame)w )
                 .forEach( jf -> {
                     System.out.println( jf.getClass().getName() );
                     System.out.println( jf.getTitle() );
@@ -136,13 +115,13 @@ public class ListFrames
                     System.out.println();
                 });
              
-            Arrays.stream( Window.getWindows() )
+            Arrays.stream( windows )
                 .filter( w -> w instanceof JDialog )
                 .map( w -> (JDialog)w )
-                .forEach( w -> {
-                System.out.println( w.getClass().getName() );
-                System.out.println( w.getTitle() );
-                System.out.println( w.isVisible() );
+                .forEach( jd -> {
+                System.out.println( jd.getClass().getName() );
+                System.out.println( jd.getTitle() );
+                System.out.println( jd.isVisible() );
                 System.out.println();
             });
         }
@@ -151,6 +130,5 @@ public class ListFrames
             exc.printStackTrace();
             System.exit( 1 );
         }
-
     }
 }
