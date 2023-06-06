@@ -3,15 +3,13 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
@@ -21,12 +19,15 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
 /**
  * Application to demonstrate
- * how to find the top-level windows
- * of an application's window hierarchy.
+ * recursive traversal 
+ * of a window hierarchy.
+ * Display many top-level windows
+ * and prints out details
+ * about the resulting window hierarchy.
  * 
  * @author Jack Straub
  */
-public class ListFrames
+public class RecursiveListComponentsDemo2
 {
     private static final CartesianPlane  plane   = new CartesianPlane();
     private static final Root            root    = new Root( plane );
@@ -45,13 +46,11 @@ public class ListFrames
         showDialog( "Roosevelt", "Do one thing every day...", 200, 250 );
         showDialog( "Ginsburg", "Fight for the things...", 250, 325 );
         showDialog( "Sylvester", "Sufferin' succotash!", 300, 400 );
-        
-        String          message = "Push me to exit.";
-        Thread          thread  = new Thread( () -> 
-            JOptionPane.showMessageDialog( null, message )
-        );
+        JFileChooser    chooser = new JFileChooser();
+        Thread          thread  =
+            new Thread( () -> chooser.showOpenDialog( null ) );
         thread.start();
-        printTopWindows();
+        RecursiveListComponents.dumpWindows();
         thread.join();
         
         System.exit( 0 );
@@ -109,43 +108,6 @@ public class ListFrames
             });
         }
         catch ( InterruptedException | InvocationTargetException exc )
-        {
-            exc.printStackTrace();
-            System.exit( 1 );
-        }
-    }
-    
-    /**
-     * Find all the top-level windows,
-     * and print some of their details.
-     */
-    private static void printTopWindows()
-    {
-        Window[]    windows = Window.getWindows();
-        try
-        {
-            Thread.sleep( 500 );
-            Arrays.stream( windows )
-                .filter( w -> w instanceof JFrame )
-                .map( w -> (JFrame)w )
-                .forEach( jf -> {
-                    System.out.println( jf.getClass().getName() );
-                    System.out.println( jf.getTitle() );
-                    System.out.println( jf.isVisible() );
-                    System.out.println();
-                });
-             
-            Arrays.stream( windows )
-                .filter( w -> w instanceof JDialog )
-                .map( w -> (JDialog)w )
-                .forEach( jd -> {
-                System.out.println( jd.getClass().getName() );
-                System.out.println( jd.getTitle() );
-                System.out.println( jd.isVisible() );
-                System.out.println();
-            });
-        }
-        catch ( InterruptedException exc )
         {
             exc.printStackTrace();
             System.exit( 1 );
