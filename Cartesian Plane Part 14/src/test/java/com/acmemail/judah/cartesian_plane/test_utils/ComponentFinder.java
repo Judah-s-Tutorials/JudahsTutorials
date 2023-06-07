@@ -171,6 +171,56 @@ public class ComponentFinder
     }
 
     /**
+     * Gets the value of the can-be-frame parameter.
+     * 
+     * @return the value of the can-be-frame parameter
+     */
+    public boolean isCanBeFrame()
+    {
+        return canBeFrame;
+    }
+
+    /**
+     * Gets the value of the can-be-dialog parameter.
+     * 
+     * @return the value of the can-be-dialog parameter
+     */
+    public boolean isCanBeDialog()
+    {
+        return canBeDialog;
+    }
+
+    /**
+     * Gets the value of the must-be-visible parameter.
+     * 
+     * @return the value of the must-be-visible parameter
+     */
+    public boolean isMustBeVisible()
+    {
+        return mustBeVisible;
+    }
+
+    /**
+     * Gets the value of the must-be-displayable parameter.
+     * 
+     * @return the value of the must-be-displayable parameter
+     */
+    public boolean isMustBeDisplayable()
+    {
+        return mustBeDisplayable;
+    }
+
+    /**
+     * Gets the value of the top window filter.
+     * 
+     * @return the value of the top window filter
+     */
+    public Predicate<Window> getTopWindowFilter()
+    {
+        return topWindowFilter;
+    }
+
+    /**
      * Sets the top-level window filter.
      * Setting this filter will override
      * any other parameters,
@@ -195,7 +245,7 @@ public class ComponentFinder
      * @return the first top-level window that passes
      *         instance and user filters
      */
-    public Window findTop( Predicate<Window> pred )
+    public Window findWindow( Predicate<Window> pred )
     {
         Window  window  = Arrays.stream( Window.getWindows() )
             .filter( topWindowFilter )
@@ -340,9 +390,9 @@ public class ComponentFinder
         Predicate<Window>   finalPredicate  = w -> true;
         if ( canBeFrame )
         {
-            Predicate<Window>   pred    = isFrame;
+            finalPredicate = isFrame;
             if ( canBeDialog )
-                finalPredicate = pred.or( isDialog );
+                finalPredicate = finalPredicate.or( isDialog );
         }
         else if ( canBeDialog )
             finalPredicate = isDialog;
