@@ -109,8 +109,8 @@ public class ComponentFinder
      * @param mustBeVisible     the must-be-visible value
      */
     public ComponentFinder( 
-        boolean canBeFrame, 
         boolean canBeDialog, 
+        boolean canBeFrame, 
         boolean mustBeVisible
     )
     {
@@ -276,6 +276,7 @@ public class ComponentFinder
        JComponent   comp    =  Arrays.stream( Window.getWindows() )
             .filter( topWindowFilter )
             .map( w -> find( w, pred ) )
+            .filter( c -> c != null )
             .findFirst()
             .orElse( null );
         return comp;
@@ -335,6 +336,7 @@ public class ComponentFinder
             comp = Arrays.stream( container.getComponents() )
                 .filter( isJComponent )
                 .map( c -> find( (JComponent)c, pred ) )
+                .filter( c -> c != null )
                 .findFirst()
                 .orElse( null );
         return comp;
