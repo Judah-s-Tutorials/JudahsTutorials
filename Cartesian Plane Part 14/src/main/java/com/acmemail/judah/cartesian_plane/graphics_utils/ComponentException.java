@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils;
+package com.acmemail.judah.cartesian_plane.graphics_utils;
 
 /**
  * Unchecked exception to be thrown

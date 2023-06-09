@@ -3,18 +3,22 @@ package com.acmemail.judah.cartesian_plane.input;
 import java.awt.BorderLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.util.function.Predicate;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 
 /**
  * Displays a list of items
@@ -66,13 +70,16 @@ public class ItemSelectionDialog
     public ItemSelectionDialog( Window owner, String title, Object[] items )
     {
         jList = new JList<>( items );
-        if ( items.length > 0 )
-            jList.setSelectedIndex( 0 );
-        
         dialog  = new JDialog( owner, title );
         dialog.setModal( true );
         dialog.setContentPane( getContentPane() );
         dialog.pack();
+        
+        if ( items.length > 0 )
+            jList.setSelectedIndex( 0 );
+        else
+            enableOKButton( false );
+        
     }
     
     /**
@@ -174,6 +181,16 @@ public class ItemSelectionDialog
         inMap.put( keyStroke, key );
 
         return pane;
+    }
+    
+    private void enableOKButton( boolean status )
+    {
+        Predicate<JComponent>   pred    = c ->
+            c instanceof JButton &&
+            ((JButton)c).getText().equals( "OK" );
+        JComponent              comp    =
+            ComponentFinder.find( dialog, pred );
+        comp.setEnabled( status );
     }
     
     /**

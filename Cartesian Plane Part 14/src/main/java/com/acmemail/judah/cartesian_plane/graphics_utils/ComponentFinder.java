@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils;
+package com.acmemail.judah.cartesian_plane.graphics_utils;
 
 import java.awt.Container;
 import java.awt.Window;
@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -297,7 +298,8 @@ public class ComponentFinder
      *      the first component, within the given hierarchy
      *      that satisfies the given predicate
      */
-    public JComponent find( Window window, Predicate<JComponent> pred )
+    public static JComponent 
+    find( Window window, Predicate<JComponent> pred )
     {
         JComponent  comp        = null;
         Container   contentPane = getContentPane( window );
@@ -327,7 +329,8 @@ public class ComponentFinder
      *      the first component, within the given hierarchy
      *      that satisfies the given predicate
      */
-    public JComponent find( JComponent container, Predicate<JComponent> pred )
+    public static JComponent 
+    find( JComponent container, Predicate<JComponent> pred )
     {
         JComponent  comp    = null;
         if ( pred.test( container ) )
@@ -340,6 +343,20 @@ public class ComponentFinder
                 .findFirst()
                 .orElse( null );
         return comp;
+    }
+    
+    public static void disposeAll()
+    {
+        Arrays.stream( Window.getWindows() ).forEach( Window::dispose );
+    }
+    
+    public static Predicate<JComponent> getButtonPredicate( String label )
+    {
+        Predicate<JComponent>   isButton    = jc -> jc instanceof JButton;
+        Predicate<JComponent>   hasLabel    = 
+            jc -> ((JButton)jc).getText().equals( label );
+        Predicate<JComponent>   pred        = isButton.and( hasLabel );
+        return pred;
     }
     
     /**
@@ -370,7 +387,7 @@ public class ComponentFinder
      *      the given Window's content pane,
      *      or null if the operation fails
      */
-    private Container getContentPane( Window window )
+    private static Container getContentPane( Window window )
     {
         Container   contentPane;
         if ( window instanceof JDialog )

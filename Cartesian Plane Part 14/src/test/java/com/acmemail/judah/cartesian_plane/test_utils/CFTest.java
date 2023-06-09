@@ -24,6 +24,8 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
+
 class CFTest
 {
     private static final String     frameID             = "Frame";
