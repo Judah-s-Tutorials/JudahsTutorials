@@ -322,6 +322,7 @@ class CFTest
      * Must-be-displayable: true<br>
      * Must-be-visible: true
      */
+    @Test
     public void testAllDialogFrameVisibleWindow()
     {
         List<TestWindow>    shouldFind      =
