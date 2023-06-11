@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.GridLayout;
 import java.awt.Window;
-import java.awt.event.ActionListener;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.List;
@@ -35,7 +34,7 @@ class CFTest
     private static final String     visiblePrefix       = "Visible";
     
     private static final String     titleLabel          = "Title";
-    private static final String     abortLabel          = "Exit";
+    private static final String     abortLabel          = "Abort";
     private static final String     cancelLabel         = "Cancel";
     private static final String     exitLabel           = "Exit";
     private static final String     okLabel             = "OK";
@@ -49,7 +48,7 @@ class CFTest
     private static TestFrame    disposedFrame;
     
     @BeforeAll
-    public static void tearDown() throws Exception
+    public static void beforeAll() throws Exception
     {
         visibleDialog = new TestDialog( visiblePrefix );
         visibleDialog.show();
@@ -64,6 +63,40 @@ class CFTest
         disposedFrame = new TestFrame( disposedPrefix );
         disposedFrame.start( false );
         disposedFrame.dispose();
+    }
+    
+    @Test
+    public void testFindWindowTFFT()
+    {
+        List<String>    successLabels   =
+            getLabels( visibleDialog, notVisibleDialog );
+        List<String>    failLabels      =
+            getLabels( 
+                disposedDialog, 
+                visibleFrame,
+                notVisibleFrame,
+                disposedFrame
+            );
+        
+        ComponentFinder finder  = 
+            new ComponentFinder( true, false, false );
+        for ( String str : successLabels )
+        {
+            Predicate<JComponent>   pred    =
+                ComponentFinder.getButtonPredicate( str );
+            JComponent              jComp   = finder.find( pred );
+            assertNotNull( jComp, str );
+            assertTrue( jComp instanceof JButton, str );
+            assertEquals( str, ((JButton)jComp).getText() );
+        }
+        
+        for ( String str : failLabels )
+        {
+            Predicate<JComponent>   pred    = 
+                ComponentFinder.getButtonPredicate( str );
+            JComponent              jComp   = finder.find( pred );
+            assertNull( jComp, str );
+        }
     }
 
     /**
@@ -605,7 +638,7 @@ class CFTest
             title = thisID + titleLabel;
             dialog = new JDialog( (Window)null, title );
             dialog.setModal( false );
-            contentPane = new TestContentPane( thisID, dialog );
+            contentPane = new TestContentPane( thisID );
             dialog.setContentPane( contentPane );
             
             dialog.pack();
@@ -621,21 +654,25 @@ class CFTest
             dialog.dispose();
         }
         
+        @Override
         public JPanel getContentPane()
         {
             return contentPane;
         }
         
+        @Override
         public String getTitle()
         {
             return title;
         }
         
+        @Override
         public Window getWindow()
         {
             return dialog;
         }
         
+        @Override
         public List<String> getLabels()
         {
             return contentPane.getLabels();
@@ -653,7 +690,7 @@ class CFTest
             String  thisID  = prefix + frameID;
             title = thisID + titleLabel;
             frame = new JFrame( title );
-            contentPane = new TestContentPane( thisID, frame );
+            contentPane = new TestContentPane( thisID );
             frame.setContentPane( contentPane );
         }
         
@@ -672,7 +709,8 @@ class CFTest
                 System.exit( 1 );
             }
         }
-        
+    
+        @Override
         public JPanel getContentPane()
         {
             return contentPane;
@@ -683,16 +721,19 @@ class CFTest
             frame.dispose();
         }
         
+        @Override
         public String getTitle()
         {
             return title;
         }
         
+        @Override
         public Window getWindow()
         {
             return frame;
         }
         
+        @Override
         public List<String> getLabels()
         {
             return contentPane.getLabels();
@@ -709,7 +750,7 @@ class CFTest
         private final JButton           exitButton;
         private final JButton           abortButton;
         
-        public TestContentPane( String prefix, Window window )
+        public TestContentPane( String prefix )
         {
             super( new GridLayout( 2, 1 ) );
             
@@ -726,13 +767,6 @@ class CFTest
             abortButton = new JButton( prefix + abortLabel);
             panel2.add( exitButton );
             panel2.add( abortButton );
-            
-            ActionListener  closeDialog = 
-                e -> window.setVisible( false );
-            okButton.addActionListener( closeDialog );
-            cancelButton.addActionListener( closeDialog );
-            exitButton.addActionListener( closeDialog );
-            abortButton.addActionListener( closeDialog );
         }
         
         public List<String> getLabels()
