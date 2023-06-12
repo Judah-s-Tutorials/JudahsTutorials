@@ -359,6 +359,19 @@ public class ComponentFinder
         return pred;
     }
     
+    public static Predicate<Window> getWindowPredicate( String title )
+    {
+        Predicate<Window>   isDialog        = w -> (w instanceof JDialog);
+        Predicate<Window>   isFrame         = w -> (w instanceof JFrame);
+        Predicate<Window>   isDialogTitle   = w ->
+            title.equals( ((JDialog)w).getTitle() );
+        Predicate<Window>   isFrameTitle    =  w ->
+            title.equals( ((JFrame)w).getTitle() );
+        Predicate<Window>   pred            =
+            (isDialog.and( isDialogTitle )).or(isFrame.and( isFrameTitle ));
+        return pred;
+    }
+    
     /**
      * Convenience method to set a top-level search parameter,
      * and to perform the necessary configuration
