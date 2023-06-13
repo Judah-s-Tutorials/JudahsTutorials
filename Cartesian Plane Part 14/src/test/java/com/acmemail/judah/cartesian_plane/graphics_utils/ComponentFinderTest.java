@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.GridLayout;
 import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -103,7 +103,122 @@ class ComponentFinderTest
         testFindPredicateOfJComponent( 
             successWindows, 
             failWindows, 
-            p -> finder.find( p )
+            finder
+        );
+    }
+    
+    @Test
+    public void testFindPredicateFTFT()
+    {
+        testFindPredicate( false, true, false, true );
+    }
+    
+    @Test
+    public void testFindPredicateTTFT()
+    {
+        testFindPredicate( true, true, false, true );
+    }
+    
+    @Test
+    public void testFindPredicateTTTT()
+    {
+        testFindPredicate( true, true, true, true );
+    }
+    
+    @Test
+    public void testFindPredicateTFTT()
+    {
+        testFindPredicate( true, false, true, true );
+    }
+    
+    @Test
+    public void testFindPredicateTTFF()
+    {
+        testFindPredicate( true, true, true, true );
+    }
+    
+    @Test
+    public void testFindWindowTFFT()
+    {
+        List<TestWindow>    successWindows  =
+            List.of( 
+                visibleDialog, 
+                notVisibleDialog 
+            );
+        List<TestWindow>    failWindows     =
+            List.of( 
+                disposedDialog, 
+                visibleFrame,
+                notVisibleFrame,
+                disposedFrame
+            );
+        
+        ComponentFinder finder  = 
+            new ComponentFinder( true, false, false );
+        testFindWindowPredicateOfWindow( 
+            successWindows, 
+            failWindows, 
+            p -> finder.findWindow( p )
+        );
+    }
+
+    private void testFindPredicate( 
+        boolean canBeDialog, 
+        boolean canBeFrame, 
+        boolean mustBeVisible,
+        boolean mustBeDisplayable
+    )
+    {
+        List<TestWindow>    successWindows  = new ArrayList<>();
+        List<TestWindow>    failWindows     = new ArrayList<>();
+        
+        if ( canBeDialog )
+        {
+            successWindows.add( visibleDialog );
+            if ( mustBeVisible )
+                failWindows.add( notVisibleDialog );
+            else
+                successWindows.add( notVisibleDialog );
+            
+            if ( mustBeDisplayable )
+                failWindows.add( disposedDialog );
+            else
+                successWindows.add( disposedDialog );
+        }
+        else
+        {
+            failWindows.add( visibleDialog );
+            failWindows.add( notVisibleDialog );
+            failWindows.add( disposedDialog );
+        }
+        
+        if ( canBeFrame )
+        {
+            successWindows.add( visibleFrame );
+            if ( !mustBeVisible )
+                successWindows.add( notVisibleFrame );
+            else
+                failWindows.add( notVisibleFrame );
+            
+            if ( !mustBeDisplayable )
+                successWindows.add( disposedFrame );
+            else
+                failWindows.add( disposedFrame );
+        }
+        else
+        {
+            failWindows.add( visibleFrame );
+            failWindows.add( notVisibleFrame );
+            failWindows.add( disposedFrame );
+        }
+        
+        ComponentFinder finder  = 
+            new ComponentFinder( canBeDialog, canBeFrame, mustBeVisible );
+        finder.setMustBeDisplayable( mustBeDisplayable );
+        testFindPredicateOfJComponent( 
+            successWindows, 
+            failWindows, 
+            finder
         );
         testFindWindowPredicateOfWindow( 
             successWindows, 
@@ -327,6 +442,69 @@ class ComponentFinderTest
         JPanel getContentPane();
         Window getWindow();
     }
+    
+    private void testFindPredicateOfJComponent( 
+        List<TestWindow>  expSuccessWindows,
+        List<TestWindow>  expFailWindows,
+        ComponentFinder   finder
+    )
+    {
+        TestWindow[]    successArray    =
+            expSuccessWindows.toArray( new TestWindow[0] );
+        TestWindow[]    failArray       =
+            expFailWindows.toArray( new TestWindow[0] );
+        List<String>    successLabels   = getLabels( successArray );
+        List<String>    failLabels      = getLabels( failArray );
+        
+        for ( String str : successLabels )
+        {
+            Predicate<JComponent>   pred    =
+                ComponentFinder.getButtonPredicate( str );
+            JComponent              jComp   = finder.find( pred );
+            assertNotNull( jComp, str );
+            assertTrue( jComp instanceof JButton, str );
+            assertEquals( str, ((JButton)jComp).getText() );
+        }
+        
+        for ( String str : failLabels )
+        {
+            Predicate<JComponent>   pred    = 
+                ComponentFinder.getButtonPredicate( str );
+            JComponent              jComp   = finder.find( pred );
+            assertNull( jComp, str );
+        }
+    }
+    
+    private void testFindWindowPredicateOfWindow( 
+        List<TestWindow>     expSuccessWindows,
+        List<TestWindow>     expFailWindows,
+        Function<Predicate<Window>, Window> finder
+    )
+    {        
+        for ( TestWindow testWindow : expSuccessWindows )
+        {
+            String              expTitle    = testWindow.getTitle();
+            Predicate<Window>   pred        =
+                ComponentFinder.getWindowPredicate( expTitle );
+            Window              window        = finder.apply( pred );
+            assertNotNull( window, expTitle );
+            assertEquals( testWindow.getWindow(), window );
+        }
+        
+        for ( TestWindow window : expFailWindows )
+        {
+            String              expTitle    = window.getTitle();
+            Predicate<Window>   dialogPred  = w ->
+                (w instanceof JDialog) && 
+                ((JDialog)w).getTitle().equals( expTitle );
+            Predicate<Window>   framePred   = w ->
+                (w instanceof JFrame) && 
+                ((JFrame)w).getTitle().equals( expTitle );
+            Predicate<Window>   pred        = dialogPred.or( framePred );
+            Window              wind        = finder.apply( pred );
+            assertNull( wind, expTitle );
+        }
+    }
 
     @SuppressWarnings("serial")
     public static class TestContentPane extends JPanel
@@ -366,69 +544,6 @@ class ComponentFinderTest
                 abortButton.getText()
             );
             return list;
-        }
-    }
-    
-    private void testFindPredicateOfJComponent( 
-        List<TestWindow>     expSuccessWindows,
-        List<TestWindow>     expFailWindows,
-        Function<Predicate<JComponent>, JComponent> finder
-    )
-    {
-        TestWindow[]    successArray    =
-            expSuccessWindows.toArray( new TestWindow[0] );
-        TestWindow[]    failArray       =
-            expFailWindows.toArray( new TestWindow[0] );
-        List<String>    successLabels   = getLabels( successArray );
-        List<String>    failLabels      = getLabels( failArray );
-        
-        for ( String str : successLabels )
-        {
-            Predicate<JComponent>   pred    =
-                ComponentFinder.getButtonPredicate( str );
-            JComponent              jComp   = finder.apply( pred );
-            assertNotNull( jComp, str );
-            assertTrue( jComp instanceof JButton, str );
-            assertEquals( str, ((JButton)jComp).getText() );
-        }
-        
-        for ( String str : failLabels )
-        {
-            Predicate<JComponent>   pred    = 
-                ComponentFinder.getButtonPredicate( str );
-            JComponent              jComp   = finder.apply( pred );
-            assertNull( jComp, str );
-        }
-    }
-    
-    private void testFindWindowPredicateOfWindow( 
-        List<TestWindow>     expSuccessWindows,
-        List<TestWindow>     expFailWindows,
-        Function<Predicate<Window>, Window> finder
-    )
-    {        
-        for ( TestWindow testWindow : expSuccessWindows )
-        {
-            String              expTitle    = testWindow.getTitle();
-            Predicate<Window>   pred        =
-                ComponentFinder.getWindowPredicate( expTitle );
-            Window              window        = finder.apply( pred );
-            assertNotNull( window, expTitle );
-            assertEquals( testWindow.getWindow(), window );
-        }
-        
-        for ( TestWindow window : expFailWindows )
-        {
-            String              expTitle    = window.getTitle();
-            Predicate<Window>   dialogPred  = w ->
-                (w instanceof JDialog) && 
-                ((JDialog)w).getTitle().equals( expTitle );
-            Predicate<Window>   framePred   = w ->
-                (w instanceof JFrame) && 
-                ((JFrame)w).getTitle().equals( expTitle );
-            Predicate<Window>   pred        = dialogPred.or( framePred );
-            Window              wind        = finder.apply( pred );
-            assertNull( wind, expTitle );
         }
     }
 

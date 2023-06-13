@@ -70,6 +70,40 @@ class CFTest
     @Test
     public void testFindPredicateTFFT()
     {
+        List<String>    successLabels   =
+            getLabels( visibleDialog, notVisibleDialog );
+        List<String>    failLabels      =
+            getLabels( 
+                disposedDialog, 
+                visibleFrame,
+                notVisibleFrame,
+                disposedFrame
+            );
+        
+        ComponentFinder finder  = 
+            new ComponentFinder( true, false, false );
+        for ( String str : successLabels )
+        {
+            Predicate<JComponent>   pred    = 
+                ComponentFinder.getButtonPredicate( str );
+            JComponent              jComp   = finder.find( pred );
+            assertNotNull( jComp, str );
+            assertTrue( jComp instanceof JButton, str );
+            assertEquals( str, ((JButton)jComp).getText() );
+        }
+        
+        for ( String str : failLabels )
+        {
+            Predicate<JComponent>   pred    = 
+                ComponentFinder.getButtonPredicate( str );
+            JComponent              jComp   = finder.find( pred );
+            assertNull( jComp, str );
+        }
+    }
+    
+    @Test
+    public void testFindPredicateTFFT2()
+    {
         List<TestWindow>    successWindows  =
             List.of( 
                 visibleDialog, 
@@ -90,6 +124,31 @@ class CFTest
             failWindows, 
             p -> finder.find( p )
         );
+        testFindWindowPredicateOfWindow( 
+            successWindows, 
+            failWindows, 
+            p -> finder.findWindow( p )
+        );
+    }
+    
+    @Test
+    public void testFindWindowTFFT()
+    {
+        List<TestWindow>    successWindows  =
+            List.of( 
+                visibleDialog, 
+                notVisibleDialog 
+            );
+        List<TestWindow>    failWindows     =
+            List.of( 
+                disposedDialog, 
+                visibleFrame,
+                notVisibleFrame,
+                disposedFrame
+            );
+        
+        ComponentFinder finder  = 
+            new ComponentFinder( true, false, false );
         testFindWindowPredicateOfWindow( 
             successWindows, 
             failWindows, 
