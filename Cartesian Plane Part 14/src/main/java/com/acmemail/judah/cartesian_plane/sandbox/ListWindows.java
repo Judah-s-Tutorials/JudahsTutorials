@@ -26,7 +26,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  * 
  * @author Jack Straub
  */
-public class ListFrames
+public class ListWindows
 {
     private static final CartesianPlane  plane   = new CartesianPlane();
     private static final Root            root    = new Root( plane );
