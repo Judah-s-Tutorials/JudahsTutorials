@@ -78,8 +78,7 @@ public class ItemSelectionDialog
         if ( items.length > 0 )
             jList.setSelectedIndex( 0 );
         else
-            enableOKButton( false );
-        
+            enableOKButton( false );        
     }
     
     /**
@@ -183,11 +182,15 @@ public class ItemSelectionDialog
         return pane;
     }
     
+    /**
+     * Enable or disable the OK button.
+     * 
+     * @param status true to enable the OK button, false to disable it
+     */
     private void enableOKButton( boolean status )
     {
-        Predicate<JComponent>   pred    = c ->
-            c instanceof JButton &&
-            ((JButton)c).getText().equals( "OK" );
+        Predicate<JComponent>   pred    = 
+            ComponentFinder.getButtonPredicate( "OK" );
         JComponent              comp    =
             ComponentFinder.find( dialog, pred );
         comp.setEnabled( status );

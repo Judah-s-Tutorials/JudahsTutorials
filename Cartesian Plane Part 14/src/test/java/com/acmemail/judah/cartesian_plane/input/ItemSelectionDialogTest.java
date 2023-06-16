@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.AWTException;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.List;
@@ -60,9 +61,6 @@ class ItemSelectionDialogTest
         actListItems = IntStream.range( 0, size )
             .mapToObj( model::getElementAt )
             .collect( Collectors.toList() );
-        
-        Arrays.stream( names )
-            .forEach( n -> assertTrue( actListItems.contains( n ) ) );
     }
     
     private static JButton getButton( ComponentFinder finder, String text )
@@ -72,7 +70,16 @@ class ItemSelectionDialogTest
         JComponent  comp    = finder.find( pred );
         assertNotNull( comp );
         assertTrue( comp instanceof JButton );
+        assertEquals( text, ((JButton)comp).getText() );
         return (JButton)comp;
+    }
+    
+    @Test
+    public void testListItems()
+    {
+        assertEquals( names.length, actListItems.size() );
+        Arrays.stream( names )
+            .forEach( n -> assertTrue( actListItems.contains( n ) ) );
     }
     
     @Test
@@ -129,17 +136,25 @@ class ItemSelectionDialogTest
     public void testEmptyList()
         throws InterruptedException
     {
+        String              title   = "Empty String Tester";
         ItemSelectionDialog dialog  = 
-            new ItemSelectionDialog( "Empty String Tester", new String[0] );
+            new ItemSelectionDialog( title, new String[0] );
         Thread              thread          = startDialog( dialog );
-        ComponentFinder     finder          = new ComponentFinder();
+        ComponentFinder     finder          = 
+            new ComponentFinder( true, false, true );
         JButton             okButton        = getButton( finder, "OK" );
         JButton             cancelButton    = getButton( finder, "Cancel" );
         assertFalse( okButton.isEnabled() );
         cancelButton.doClick();
         thread.join();
-        
+
         assertTrue( selection < 0 );
+        Predicate<Window>   pred            = 
+            ComponentFinder.getWindowPredicate( title );
+        finder.setMustBeVisible(false);
+        Window              dialogWindow    = finder.findWindow( pred );
+        assertNotNull( dialogWindow );
+        dialogWindow.dispose();
     }
 
     private Thread startDialog()
