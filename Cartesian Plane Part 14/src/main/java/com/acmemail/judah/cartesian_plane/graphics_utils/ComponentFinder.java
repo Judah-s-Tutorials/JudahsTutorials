@@ -45,9 +45,6 @@ import javax.swing.JFrame;
 /**
  * @author Jack Straub
  */
-/**
- * @author Jack Straub
- */
 public class ComponentFinder
 {   
     /** 
