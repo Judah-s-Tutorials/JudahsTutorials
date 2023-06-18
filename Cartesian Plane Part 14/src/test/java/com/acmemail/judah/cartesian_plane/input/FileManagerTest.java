@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.AWTException;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
@@ -17,12 +18,19 @@ import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
+
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JTextField;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
@@ -55,6 +63,19 @@ class FileManagerTest
     private Equation    testEquation;
     // set by execOpenCommand
     private Equation    openEquation;
+    
+    /////////////////////////////////////////
+    //
+    // JFileChooser components.
+    // Reset to null in beforeEach method.
+    // Set in startDialog method.
+    //
+    /////////////////////////////////////////
+    private JDialog     jDialog;
+    private JButton     saveButton;
+    private JButton     openButton;
+    private JButton     cancelButton;
+    private JTextField  pathTextField;
     
     static
     {
@@ -101,11 +122,20 @@ class FileManagerTest
         // if the test is successful.
         openEquation = null;
         
+        // Make sure the test file is writable, in case it was
+        // changed in the course of executing a test.
         testFile.setWritable( true );
         
         // Destroy pre-existing data
         if ( testFile.exists() )
             testFile.delete();
+        
+        // Reset the JFileChooser component ids.
+        jDialog = null;
+        saveButton = null;
+        openButton = null;
+        cancelButton = null;
+        pathTextField = null;
     }
     
     @AfterAll
@@ -235,6 +265,12 @@ class FileManagerTest
         Thread  thread  = new Thread( runner );
         thread.start();
         Utils.pause( 500 );
+        
+        jDialog = getJDialog();
+        saveButton = getButton( "Save" );
+        openButton = getButton( "Open" );
+        cancelButton = getButton( "Cancel" );
+        pathTextField = getTextField();
         return thread;
     }
     
@@ -246,6 +282,50 @@ class FileManagerTest
     private void execSaveCommand()
     {
         FileManager.save( testEquation );
+    }
+    
+    private void expectErrorDialog()
+    {
+        Utils.pause( 250 );
+        ComponentFinder finder  = new ComponentFinder( true, false, true );
+        Window          window  = finder.findWindow( w -> true );
+    }
+    
+    private JDialog getJDialog()
+    {
+        ComponentFinder finder  = new ComponentFinder( true, false, true );
+        Window          window  = finder.findWindow( w -> true );
+        JDialog         dialog  = null;
+        if ( window != null && window instanceof JDialog )
+            dialog = (JDialog)window;
+        return dialog;
+    }
+    
+    private JButton getButton( String text )
+    {
+        JButton                 button  = null;
+        Predicate<JComponent>   pred    = 
+            ComponentFinder.getButtonPredicate( text );
+        if ( jDialog != null )
+        {
+            JComponent  comp    = ComponentFinder.find( jDialog, pred );
+            if ( comp != null && comp instanceof JButton )
+                button = (JButton)comp;
+        }
+        return button;
+    }
+    
+    private JTextField getTextField()
+    {
+        JTextField              textField   = null;
+        Predicate<JComponent>   pred        = c -> (c instanceof JTextField);
+        if ( jDialog != null )
+        {
+            JComponent  comp    = ComponentFinder.find( jDialog, pred );
+            if ( comp != null && comp instanceof JTextField )
+                textField = (JTextField)comp;
+        }
+        return textField;
     }
 
     private static void assertEqualsDefault( Equation actVal )

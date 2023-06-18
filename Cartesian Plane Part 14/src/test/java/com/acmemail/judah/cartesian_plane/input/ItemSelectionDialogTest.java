@@ -16,7 +16,6 @@ import java.util.stream.IntStream;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.ListModel;
 
@@ -29,7 +28,6 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class ItemSelectionDialogTest
 {
-    private static JDialog  jDialog;
     private static JList<?> jList;
     private static List<?>  actListItems;
     private static JButton  okButton;
@@ -51,10 +49,6 @@ class ItemSelectionDialogTest
     {
         ComponentFinder finder  =
             new ComponentFinder( true, false, false );
-        Window  window  = finder.findWindow( w -> (w instanceof JDialog) );
-        assertNotNull( window );
-        assertTrue( window instanceof JDialog );
-        jDialog = (JDialog)window;
         
         okButton = getButton( finder, "OK" );
         cancelButton = getButton( finder, "Cancel" );
@@ -68,8 +62,6 @@ class ItemSelectionDialogTest
         actListItems = IntStream.range( 0, size )
             .mapToObj( model::getElementAt )
             .collect( Collectors.toList() );
-        
-        dialog.show();
     }
     
     private static JButton getButton( ComponentFinder finder, String text )
@@ -93,7 +85,7 @@ class ItemSelectionDialogTest
     
     @Test
     void testShowOK() 
-        throws AWTException, InterruptedException
+        throws InterruptedException
     {
         Thread          thread          = startDialog();
         int             expSelection    = 2;
@@ -106,7 +98,7 @@ class ItemSelectionDialogTest
 
     @Test
     void testShowCancel() 
-        throws AWTException, InterruptedException
+        throws InterruptedException
     {
         Thread          thread  = startDialog();
         cancelButton.doClick();
@@ -122,7 +114,6 @@ class ItemSelectionDialogTest
         Thread          thread          = startDialog();
         RobotAssistant  robot           = new RobotAssistant();
         int             expSelection    = 2;
-        requestFocus();
         jList.setSelectedIndex( expSelection );
         robot.type( "", KeyEvent.VK_ENTER );
         thread.join();
@@ -136,11 +127,18 @@ class ItemSelectionDialogTest
     {
         Thread          thread          = startDialog();
         RobotAssistant  robot           = new RobotAssistant();
-        requestFocus();
-        robot.type( "", KeyEvent.VK_ESCAPE );
+                robot.type( "", KeyEvent.VK_ESCAPE );
         thread.join();
         
         assertTrue( selection < 0 );
+    }
+    
+    @Test
+    public void testDialogContent()
+    {
+        assertEquals( names.length, actListItems.size() );
+        Arrays.stream( names )
+            .forEach( n -> assertTrue( actListItems.contains( n ) ) );
     }
     
     @Test
@@ -158,8 +156,8 @@ class ItemSelectionDialogTest
         assertFalse( okButton.isEnabled() );
         cancelButton.doClick();
         thread.join();
-
         assertTrue( selection < 0 );
+
         Predicate<Window>   pred            = 
             ComponentFinder.getWindowPredicate( title );
         finder.setMustBeVisible(false);
@@ -185,13 +183,5 @@ class ItemSelectionDialogTest
     private void show( ItemSelectionDialog dialog )
     {
         selection = dialog.show();
-    }
-
-    private void requestFocus()
-    {
-        jDialog.requestFocus();
-        Utils.pause( 100 );
-        jList.requestFocus();
-        Utils.pause( 100 );
     }
 }

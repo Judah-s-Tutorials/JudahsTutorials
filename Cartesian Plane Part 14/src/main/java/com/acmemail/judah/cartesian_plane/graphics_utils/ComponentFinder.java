@@ -351,7 +351,7 @@ public class ComponentFinder
     {
         Predicate<JComponent>   isButton    = jc -> jc instanceof JButton;
         Predicate<JComponent>   hasLabel    = 
-            jc -> ((JButton)jc).getText().equals( label );
+            jc -> label.equals( ((JButton)jc).getText() );
         Predicate<JComponent>   pred        = isButton.and( hasLabel );
         return pred;
     }

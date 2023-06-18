@@ -12,8 +12,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
-import com.acmemail.judah.cartesian_plane.input.ItemSelectionDialog;
-
 /**
  * Utility to traverse an application's window hierarchy.
  * 
