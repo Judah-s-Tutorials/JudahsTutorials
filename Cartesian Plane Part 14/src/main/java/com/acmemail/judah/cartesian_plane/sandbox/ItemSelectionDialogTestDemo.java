@@ -28,9 +28,6 @@ import com.acmemail.judah.cartesian_plane.input.ItemSelectionDialog;
  * 
  * @author Jack Straub
  */
-/**
- * @author Jack Straub
- */
 public class ItemSelectionDialogTestDemo
 {
     private static JComponent       contentPane;

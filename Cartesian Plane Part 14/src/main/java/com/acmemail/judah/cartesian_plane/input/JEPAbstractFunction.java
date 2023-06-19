@@ -6,17 +6,48 @@ import java.util.stream.IntStream;
 import org.nfunk.jep.ParseException;
 import org.nfunk.jep.function.PostfixMathCommand;
 
+/**
+ * Abstract class that encapsulates
+ * a JEP custom function.
+ * implements PostfixMathCommand
+ * as required by JEP.
+ * 
+ * @author Jack Straub
+ */
 public abstract class JEPAbstractFunction extends PostfixMathCommand
 {
+    /**
+     * Method to evaluate a JEP function
+     * based on a given array of values.
+     * 
+     * @param param the given array of values.
+     * 
+     * @return  the result of the evaluation
+     */
     public abstract double evaluate( double... param );
+    
+    /** The name of the function. */
     private final String    name;
     
+    /**
+	 * Constructor.
+	 * Establishes the name of the function
+	 * and the number of required arguments.
+	 * 
+     * @param name      the name of the function    
+     * @param numParams the number of required arguments
+     */
     public JEPAbstractFunction( String name, int numParams )
     {
         this.name = name;
         numberOfParameters = numParams;
     }
     
+    /**
+     * Gets the name of the function.
+     * 
+     * @return  the name of the function
+     */
     public String getName()
     {
         return name;

@@ -89,8 +89,18 @@ public class JEPFunctions
         );
     }
     
+    /**
+     * JEP custom function to convert radians to degrees.
+     * 
+     * @author Jack Straub
+     */
     public static class ToDegrees extends JEPAbstractFunction
     {
+        /**
+         * Constructor.
+         * Establishes the name of the custom function,
+         * and the number of required arguments.
+         */
         public ToDegrees()
         {
             super( "toDegrees", 1 );
@@ -104,8 +114,18 @@ public class JEPFunctions
         }
     }
     
+    /**
+     * JEP custom function to convert degrees to radians.
+     * 
+     * @author Jack Straub
+     */
     public static class ToRadians extends JEPAbstractFunction
     {
+        /**
+         * Constructor.
+         * Establishes the name of the custom function,
+         * and the number of required arguments.
+         */
         public ToRadians()
         {
             super( "toRadians", 1 );
@@ -120,12 +140,22 @@ public class JEPFunctions
         }
     }
     
+    /**
+     * Exp4j custom function to calculate the
+     * secant of a triangle.
+     * 
+     * @author Jack Straub
+     */
     public static class Secant extends JEPAbstractFunction
     {
+        /**
+         * Constructor.
+         * Establishes the name of the custom function,
+         * and the number of required arguments.
+         */
         public Secant()
         {
-            super( "sec", 1 );
-            
+            super( "sec", 1 );            
         }
         
         @Override
@@ -136,8 +166,19 @@ public class JEPFunctions
         }
     }
     
+    /**
+     * Exp4j custom function to calculate the
+     * cosecant of a triangle.
+     * 
+     * @author Jack Straub
+     */
     public static class Cosecant extends JEPAbstractFunction
     {
+        /**
+         * Constructor.
+         * Establishes the name of the custom function,
+         * and the number of required arguments.
+         */
         public Cosecant()
         {
             super( "csc", 1 );
@@ -152,12 +193,22 @@ public class JEPFunctions
         }
     }
     
+    /**
+     * Exp4j custom function to calculate the
+     * cotangent of a triangle.
+     * 
+     * @author Jack Straub
+     */
     public static class Cotangent extends JEPAbstractFunction
     {
+        /**
+         * Constructor.
+         * Establishes the name of the custom function,
+         * and the number of required arguments.
+         */
         public Cotangent()
         {
-            super( "cot", 1 );
-            
+            super( "cot", 1 );            
         }
         
         @Override
@@ -168,6 +219,17 @@ public class JEPFunctions
         }
     }
     
+    /**
+     * Verifies that a given class
+     * encapsulates a JEP custom function
+     * and, if verified,
+     * instantiates the class
+     * and adds the instantiated object
+     * to the list of functions
+     * encapsulated  by this module.
+     * 
+     * @param clazz the given class
+     */
     private static void verifyAndAdd( Class<?> clazz )
     {
         int     mods        = clazz.getModifiers();

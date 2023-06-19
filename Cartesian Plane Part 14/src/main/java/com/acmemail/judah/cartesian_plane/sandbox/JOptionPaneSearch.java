@@ -9,17 +9,37 @@ import javax.swing.JOptionPane;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 
+/**
+ * Program to display a JOptionPane message dialog,
+ * and search it for the contained message
+ * and OK button. 
+ * Diagnostics are printed to stdout.
+ * The dialog remains displayed for three seconds
+ * before being dismissed.
+ * 
+ * @author Jack Straub
+ */
 public class JOptionPaneSearch
 {
+    /** Component finder for searching for components. */
     private static final ComponentFinder    finder  = new ComponentFinder();
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     * 
+     * @throws InterruptedException
+     *      if raised during one of the Thread operations
+     *      sleep or join
+     */
     public static void main(String[] args) throws InterruptedException
     {
         Thread  thread  = start( () -> showErrorDialog() );
         JButton button  = getButton( "OK" );
-        JLabel  label   = getLabel( "error" );
+        getLabel( "error" );
         System.out.println( button );
-        Thread.sleep( 2000 );
+        Thread.sleep( 3000 );
         
         if ( button != null )
             button.doClick();
@@ -27,6 +47,19 @@ public class JOptionPaneSearch
         System.exit( 0 );
     }
         
+    /**
+     * Searches the application window hierarchy
+     * for the first JButton
+     * with the given text.
+     * Prints an identifying message
+     * to stdout.
+     * 
+     * @param   text    the given text
+     * 
+     * @return
+     *      the first button with the given text found,
+     *      or null if none
+     */
     private static JButton getButton( String text )
     {
         Predicate<JComponent>   pred    =
@@ -49,6 +82,19 @@ public class JOptionPaneSearch
         return button;
     }
     
+    /**
+     * Searches the application window hierarchy
+     * for the first JLabel
+     * containing the given text.
+     * Prints an identifying message
+     * to stdout.
+     * 
+     * @param   containedText    the given text
+     * 
+     * @return
+     *      the first button with the given text found,
+     *      or null if none
+     */
     private static JLabel getLabel( String containedText )
     {
         Predicate<JComponent>   notNull     = jc -> jc != null;
@@ -67,6 +113,21 @@ public class JOptionPaneSearch
         return label;
     }
     
+    /**
+     * Convenience method to indicate
+     * whether a given string (container)
+     * contains another given string (contained).
+     * If either parameter is null
+     * false will be returned.
+     * 
+     * @param contained     the text that might be found in the container
+     * @param container     the container to search
+     * 
+     * @return 
+     *      true if the given strings are not null
+     *      and the <em>container</em> string contains
+     *      the <em>contained</em> string.
+     */
     private static boolean contains( String contained, String container )
     {
         boolean result  = false;
@@ -75,6 +136,20 @@ public class JOptionPaneSearch
         return result;
     }
     
+    /**
+     * Starts the given Runnable
+     * in a dedicated thread.
+     * Pauses before returning
+     * to allow the new thread
+     * to initialize and execute.
+     * 
+     * @param funk  the given Runnable
+     * 
+     * @return  the created thread
+     * 
+     * @throws InterruptedException
+     *      if raised by a Thread operation
+     */
     private static Thread start( Runnable funk )
         throws InterruptedException
     {
@@ -85,6 +160,9 @@ public class JOptionPaneSearch
         return thread;
     }
     
+    /**
+     * Displays a message dialog.
+     */
     private static void showErrorDialog()
     {
         String  message = "This is an error message";

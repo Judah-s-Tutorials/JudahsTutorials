@@ -36,6 +36,9 @@ public class RecursiveListComponentsDemo2
      * Application entry point.
      * 
      * @param args  command line arguments; not used
+     * 
+     * @throws InterruptedException
+     *      if raised by a Thread operation
      */
     public static void main(String[] args) throws InterruptedException
     {

@@ -36,6 +36,22 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class FileManagerTest
 {
+    /** 
+     * How long in milliseconds,
+     * the {@linkplain #expectErrorDialog()} pauses before
+     * looking for a visible message dialog. Note that the method
+     * may wait multiple times.
+     * @see #expDialogMaxWaitMillis
+     */
+    private static final long   expDialogPauseMillis    = 250;
+    /**
+     * The maximum amount of time, in milliseconds,
+     * that the {@linkplain #expectErrorDialog()}
+     * for a message to become visible.
+     * @see #expDialogMaxWaitMillis
+     */
+    private static final long   expDialogMaxWaitMillis  = 2000;
+    
     /** Unmodifiable map of test variables to values */
     private static final Map<String,Double> testVarMap;
     
@@ -235,7 +251,7 @@ class FileManagerTest
     }
     
     @Test
-    public void saveWithIOError()
+    public void testSaveWithIOError() throws InterruptedException
     {
         FileManager.save( testFilePath, testEquation );
         assertTrue( testFile.exists() );
@@ -245,8 +261,16 @@ class FileManagerTest
         Equation    newEquation = new Exp4jEquation();
         newEquation.setName( oldName + "_test" );
         
+        // start new thread to wait for error message dialog
+        Thread      thread      = new Thread( () -> expectErrorDialog() );
+        thread.start();
+        
         // try to save new equation
         FileManager.save( testFilePath, newEquation );
+        
+        // wait for error dialog to be dismissed
+        thread.join();
+        
         // verify save failed
         newEquation = FileManager.open( testFilePath );
         assertNotNull( newEquation );
@@ -254,9 +278,12 @@ class FileManagerTest
     }
     
     @Test
-    public void openWithIOError()
+    public void testOpenWithIOError() throws InterruptedException
     {
+        Thread      thread      = new Thread( () -> expectErrorDialog() );
+        thread.start();
         Equation    equation    = FileManager.open( "nobodyhome" );
+        thread.join();
         assertNull( equation );
     }
     
@@ -284,11 +311,41 @@ class FileManagerTest
         FileManager.save( testEquation );
     }
     
+    /**
+     * Waits for a message dialog to become visible, 
+     * then dismisses it.
+     * Waits in a loop for {@linkplain #expDialogPauseMillis}
+     * milliseconds at a time,
+     * but not for longer than an aggregate
+     * of {@linkplain #expDialogMaxWaitMillis} milliseconds.
+     */
     private void expectErrorDialog()
     {
-        Utils.pause( 250 );
-        ComponentFinder finder  = new ComponentFinder( true, false, true );
-        Window          window  = finder.findWindow( w -> true );
+        long    startMillis = System.currentTimeMillis();
+        long    totalMillis = 0;
+        JButton okButton    = null;
+        do
+        {
+            Utils.pause( expDialogPauseMillis );
+            okButton = getErrorDialogOKButton();
+            totalMillis = System.currentTimeMillis() - startMillis;
+        } while ( okButton == null && totalMillis < expDialogMaxWaitMillis );
+        assertNotNull( okButton,"timeout waiting for error dialog" );
+        
+        okButton.doClick();
+    }
+    
+    private JButton getErrorDialogOKButton()
+    {
+        ComponentFinder         finder  = 
+            new ComponentFinder( true, false, true );
+        Predicate<JComponent>   pred    =
+            ComponentFinder.getButtonPredicate( "OK" );
+        JComponent              comp    = finder.find( pred );
+        JButton                 button  = null;
+        if ( comp instanceof JButton )
+            button = (JButton)comp;
+        return button;
     }
     
     private JDialog getJDialog()

@@ -472,7 +472,8 @@ public class JEPEquation implements Equation
     
     /**
      * Instantiate and initialize a JEP object.
-     * @return
+     * 
+     * @return  the new JEP object
      */
     private JEP newParser()
     {
@@ -485,6 +486,12 @@ public class JEPEquation implements Equation
         return parser;
     }
     
+    /**
+     * Add all existing variables
+     * to the given parser.
+     * 
+     * @param parser    the given parser
+     */
     private void updateVars( JEP parser )
     {
         vars.forEach( (s,d) -> parser.addVariable( s,  d ) );
