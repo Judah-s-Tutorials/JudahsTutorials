@@ -10,10 +10,10 @@
     <properties>
         <teacher>StraubJW</teacher>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>14</java.version>
+        <java.version>17</java.version>
         <maven.compiler.version>3.11.0</maven.compiler.version>
-        <maven.compiler.source>14</maven.compiler.source>
-        <maven.compiler.target>14</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
     <dependencies>
 		<dependency>

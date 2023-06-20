@@ -89,6 +89,7 @@ class FileManagerTest
     /////////////////////////////////////////
     private JDialog     jDialog;
     private JButton     saveButton;
+    @SuppressWarnings("unused")
     private JButton     openButton;
     private JButton     cancelButton;
     private JTextField  pathTextField;
@@ -162,35 +163,74 @@ class FileManagerTest
             tempFile.delete();
     }
     
+    /**
+     * Maintenance note:
+     * Attempted to remove use of robot from this code.
+     * Substituted textField.setText() and openButton.doClick().
+     * The doClick() results in a null-pointer exception
+     * deep in the JList code.
+     * Problem persists when executing this test alone.
+     * Can't figure out why,
+     * can't find a way around it 
+     * by shaking up the GUI,
+     * can't reproduce the problem
+     * in a stand-alone program.
+     * Workaround is to eliminate openButton.doClick(),
+     * and substitute "enter" key-press using robot
+     * to activate the open button.
+     * 
+     * @throws AWTException
+     * @throws InterruptedException
+     */
     @Test
-    public void testSaveOpenEquationApprove() 
+    public void testOpenEquationApprove() 
         throws AWTException, InterruptedException
     {
         Thread          thread  = null;
         RobotAssistant  robot   = new RobotAssistant();
         
-        thread  = startDialog( () -> execSaveCommand() );
-        robot.type( testFilePath, KeyEvent.VK_ENTER );
-        thread.join();
-        assertTrue( testFile.exists() );
-        
+        FileManager.save( testFile, testEquation );
+        assertTrue( testFile.exists() );        
         thread  = startDialog( () -> execOpenCommand() );
-        robot.type( testFilePath, KeyEvent.VK_ENTER );
+        pathTextField.setText( testFilePath );
+        robot.type( "", KeyEvent.VK_ENTER );
+//        openButton.doClick();
         thread.join();
         assertEqualsDefault( openEquation );
     }
     
     @Test
-    public void testSaveOpenEquationCancel() 
+    public void testSaveEquationApprove() 
         throws AWTException, InterruptedException
     {
         Thread          thread  = null;
-        RobotAssistant  robot   = new RobotAssistant();
+        
+        assertFalse( testFile.exists() );
+        thread  = startDialog( () -> execSaveCommand() );
+        pathTextField.setText( testFilePath );
+        saveButton.doClick();
+        thread.join();
+        assertTrue( testFile.exists() );
+    }
+    
+    @Test
+    public void testSaveEquationCancel() 
+        throws AWTException, InterruptedException
+    {
+        Thread          thread  = null;
         
         thread  = startDialog( () -> execSaveCommand() );
-        robot.type( testFilePath, KeyEvent.VK_ESCAPE );
+        pathTextField.setText( testFilePath );
+        cancelButton.doClick();
         thread.join();
         assertFalse( testFile.exists() );
+    }
+    
+    @Test
+    public void testOpenEquationCancel() 
+        throws AWTException, InterruptedException
+    {
+        Thread          thread  = null;
         
         // put equation out there...
         // start to open the equation...
@@ -198,7 +238,8 @@ class FileManagerTest
         // verify equation is not read.
         FileManager.save( testFilePath, testEquation );
         thread  = startDialog( () -> execOpenCommand() );
-        robot.type( testFilePath, KeyEvent.VK_ESCAPE );
+        pathTextField.setText( testFilePath );
+        cancelButton.doClick();
         thread.join();
         assertNull( openEquation );
     }
