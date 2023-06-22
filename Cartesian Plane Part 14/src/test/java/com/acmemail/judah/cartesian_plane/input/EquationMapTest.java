@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.AWTException;
+import java.awt.TextField;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
@@ -15,12 +17,21 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
+
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JList;
+import javax.swing.JTextField;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
@@ -45,6 +56,27 @@ class EquationMapTest
     
     // dialog selection, set by startDialog
     private Equation    selectedEquation;
+    
+    /////////////////////////////////////////////////////////////////
+    //
+    // Dialog components. The variables are set in the startDialog
+    // method, and reset to null in the beforeEach method. "Dialog"
+    // may refer to the JFileChooser dialog that some EquationMap
+    // methods open, or the ItemSelectionDialog opened by others.
+    // The startDialog method goes looking for all of them, and,
+    // depending on which dialog is displayed, some of them won't
+    // actually be found. For example, JFileChooser doesn't have an
+    // OK button, and ItemSelectionDialog doesn't have save or open
+    // buttons.
+    //
+    /////////////////////////////////////////////////////////////////
+    private JDialog     jDialog;
+    private JList<?>    jList;
+    private JButton     saveButton;
+    private JButton     openButton;
+    private JButton     cancelButton;
+    private JButton     okButton;
+    private JTextField  pathTextField;
 
     @BeforeAll
     public static void setUpBeforeClass() throws Exception
@@ -90,6 +122,20 @@ class EquationMapTest
             eqFile1NoName.delete();
         if ( eqFile2NotEq.exists() )
             eqFile2NotEq.delete();
+    }
+    
+    @BeforeEach
+    public void beforeEach()
+    {
+        
+        // Reset the JFileChooser component ids.
+        jDialog = null;
+        jList = null;
+        okButton = null;
+        saveButton = null;
+        openButton = null;
+        cancelButton = null;
+        pathTextField = null;
     }
 
     @AfterEach
@@ -141,7 +187,9 @@ class EquationMapTest
         Thread          thread  = startDialog( () -> 
             EquationMap.parseEquationFiles()
         );
-        robot.type( testFiles[0].getAbsolutePath(), KeyEvent.VK_ENTER );
+//        robot.type( testFiles[0].getAbsolutePath(), KeyEvent.VK_ENTER );
+        pathTextField.setText( testFiles[0].getAbsolutePath() );
+        openButton.doClick();
         Utils.join( thread );
         Map<String,Equation>    map = EquationMap.getEquationMap();
         assertEquals( 1, map.size() );
@@ -304,6 +352,64 @@ class EquationMapTest
         Thread  thread  = new Thread( runner );
         thread.start();
         Utils.pause( 500 );
+        
+        jDialog = getJDialog();
+        jList = getJList();
+        saveButton = getButton( "Save" );
+        openButton = getButton( "Open" );
+        cancelButton = getButton( "Cancel" );
+        okButton = getButton( "OK" );
+        pathTextField = getTextField();
         return thread;
+    }
+    
+    private JDialog getJDialog()
+    {
+        ComponentFinder finder  = new ComponentFinder( true, false, true );
+        Window          window  = finder.findWindow( w -> true );
+        JDialog         dialog  = null;
+        if ( window != null && window instanceof JDialog )
+            dialog = (JDialog)window;
+        return dialog;
+    }
+    
+    private JButton getButton( String text )
+    {
+        JButton                 button  = null;
+        Predicate<JComponent>   pred    = 
+            ComponentFinder.getButtonPredicate( text );
+        if ( jDialog != null )
+        {
+            JComponent  comp    = ComponentFinder.find( jDialog, pred );
+            if ( comp != null && comp instanceof JButton )
+                button = (JButton)comp;
+        }
+        return button;
+    }
+    
+    private JTextField getTextField()
+    {
+        JTextField              textField   = null;
+        Predicate<JComponent>   pred        = c -> (c instanceof JTextField);
+        if ( jDialog != null )
+        {
+            JComponent  comp    = ComponentFinder.find( jDialog, pred );
+            if ( comp != null && comp instanceof JTextField )
+                textField = (JTextField)comp;
+        }
+        return textField;
+    }
+    
+    private JList<?> getJList()
+    {
+        JList<?>                list    = null;
+        Predicate<JComponent>   pred    = c -> (c instanceof JList);
+        if ( jDialog != null )
+        {
+            JComponent  comp    = ComponentFinder.find( jDialog, pred );
+            if ( comp != null && comp instanceof JList )
+                list = (JList<?>)comp;
+        }
+        return list;
     }
 }

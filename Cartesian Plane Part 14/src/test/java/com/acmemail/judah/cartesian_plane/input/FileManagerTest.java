@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.AWTException;
 import java.awt.Window;
-import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -24,6 +23,7 @@ import java.util.stream.IntStream;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 
 import org.junit.jupiter.api.AfterAll;
@@ -31,7 +31,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
-import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class FileManagerTest
@@ -54,6 +53,12 @@ class FileManagerTest
     
     /** Unmodifiable map of test variables to values */
     private static final Map<String,Double> testVarMap;
+
+    /** Path to temporary directory as a string.  */
+    private static final String tempDirStr  = 
+        System.getProperty( "java.io.tmpdir" );
+    /** Path to temporary directory as a File.  */
+    private static final File   tempDir     = new File( tempDirStr );
     
     /** Test file name **/
     private static final String testFileName    = "FileManagerTest.tmp";
@@ -78,7 +83,7 @@ class FileManagerTest
     // initialized in beforeEach
     private Equation    testEquation;
     // set by execOpenCommand
-    private Equation    openEquation;
+    private static Equation    openEquation;
     
     /////////////////////////////////////////
     //
@@ -108,11 +113,44 @@ class FileManagerTest
             .forEach( c -> temp.put( "" + (char)c, c + 3.1 ) );
         testVarMap = Collections.unmodifiableMap( temp );
         
-        String  tempDir = System.getProperty( "java.io.tmpdir" );
-        testFilePath = tempDir + File.separator + testFileName;
+        testFilePath = tempDirStr + File.separator + testFileName;
         testFile = new File( testFilePath );
     }
+
+    private static boolean done = false;
     
+    /**
+     * Problem: in Windows (at least)
+     * setting a path that begins with root (\)
+     * then selecting open button with doClick
+     * causes a null pointer exception
+     * in Swing code. The workaround is...
+     * <p>
+     * ... set the current directory in the JFileChooser
+     * to the system temp directory before it becomes visible.
+     * Note that:
+     * <ul>
+     * <li>
+     *      I tried doing this in a @BeforeAll method
+     *      and I got strange reflection errors,
+     *      that's why I put it in the @BeforeEach method
+     *      in an if(!done) wrapper.
+     * </li>
+     * <li>
+     *     Setting the current directory to temp
+     *     after the dialog becomes visible
+     *     doesn't help.
+     * </li>
+     *     Once the current directory is set
+     *     it doesn't matter whether the path
+     *     that gets set in the text field
+     *     starts with the root or not.
+     * </li>
+     * </ul>
+     * <p>
+     * This procedure must be executed before
+     * the JFileChooser becomes visible.
+     */
     @BeforeEach
     public void beforeEach()
     {
@@ -153,6 +191,21 @@ class FileManagerTest
         openButton = null;
         cancelButton = null;
         pathTextField = null;
+
+        if ( !done )
+        {
+            Thread  thread  = startDialog( () -> execOpenCommand() );
+            Utils.pause( 250 );
+            JComponent  comp    = 
+                ComponentFinder.find( jDialog, c -> (c instanceof JFileChooser) );
+            assertNotNull( comp );
+            assertTrue( comp instanceof JFileChooser );
+            Utils.pause( 2000 );
+            cancelButton.doClick();
+            Utils.join( thread );
+            ((JFileChooser)comp).setCurrentDirectory( tempDir );
+            done = true;
+        }
     }
     
     @AfterAll
@@ -187,14 +240,12 @@ class FileManagerTest
         throws AWTException, InterruptedException
     {
         Thread          thread  = null;
-        RobotAssistant  robot   = new RobotAssistant();
         
         FileManager.save( testFile, testEquation );
         assertTrue( testFile.exists() );        
         thread  = startDialog( () -> execOpenCommand() );
         pathTextField.setText( testFilePath );
-        robot.type( "", KeyEvent.VK_ENTER );
-//        openButton.doClick();
+        openButton.doClick();
         thread.join();
         assertEqualsDefault( openEquation );
     }
@@ -202,6 +253,7 @@ class FileManagerTest
     @Test
     public void testSaveEquationApprove() 
         throws AWTException, InterruptedException
+        
     {
         Thread          thread  = null;
         
@@ -342,7 +394,7 @@ class FileManagerTest
         return thread;
     }
     
-    private void execOpenCommand()
+    private static void execOpenCommand()
     {
         openEquation = FileManager.open();
     }

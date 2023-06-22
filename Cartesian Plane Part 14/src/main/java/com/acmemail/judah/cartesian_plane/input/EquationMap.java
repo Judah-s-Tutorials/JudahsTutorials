@@ -10,7 +10,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JList;
+import javax.swing.JTextField;
 
 /**
  * Utility class that
@@ -47,7 +51,7 @@ public class EquationMap
         chooser = new JFileChooser( baseDir );
         chooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
     }
-    
+
     /**
      * Default constructor.
      * Private to prevent instantiation

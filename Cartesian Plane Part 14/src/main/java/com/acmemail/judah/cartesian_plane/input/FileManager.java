@@ -22,9 +22,9 @@ import javax.swing.JOptionPane;
 public class FileManager
 {
     /** Used to assemble lines to be written to an output file. */
-    private static List<String> lines   = new ArrayList<>();
+    private static final List<String> lines   = new ArrayList<>();
     /** Used to prompt operator to select a file. */
-    private static JFileChooser chooser;
+    public static final JFileChooser chooser;
     
     // Instantiate and configure the JFileChooser.
     static
