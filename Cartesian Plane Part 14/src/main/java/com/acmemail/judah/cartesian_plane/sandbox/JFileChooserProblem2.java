@@ -10,6 +10,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 public class JFileChooserProblem2
 {
@@ -34,7 +35,7 @@ public class JFileChooserProblem2
         textField.setText( "\\Users\\johns\\test.txt" );
 //        openButton.setText( "O" );
         Thread.sleep( 2000 );
-//        openButton.doClick();
+        SwingUtilities.invokeLater( () -> openButton.doClick() );
         thread.join();
         
         System.out.println( chooser.getSelectedFile().getName() );

@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JViewport;
 import javax.swing.ListModel;
+import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.input.ItemSelectionDialog;
 
@@ -26,6 +27,9 @@ import com.acmemail.judah.cartesian_plane.input.ItemSelectionDialog;
  * for the ItemSelectionDialog class
  * might be developed.
  * 
+ * @author Jack Straub
+ */
+/**
  * @author Jack Straub
  */
 public class ItemSelectionDialogTestDemo
@@ -70,7 +74,7 @@ public class ItemSelectionDialogTestDemo
         
         int selectedIndex   = 2;
         jList.setSelectedIndex( selectedIndex );
-        okButton.doClick();
+        clickOKButton();
         showThread.join();
 
         Object  expItem     = listItems.get( selectedIndex );
@@ -224,5 +228,32 @@ public class ItemSelectionDialogTestDemo
         dialogStatus = dialog.show();
         if ( dialogStatus >= 0 )
             dialogItem = items[dialogStatus];
+    }
+    
+    /**
+     * Clicks the OK button.
+     * Normally this operation 
+     * wouldn't rate an entire helper method,
+     * but I wanted to isolate the code
+     * so that it could be discussed 
+     * in its own context in the notes.
+     * The issue has to do 
+     * with forcing events 
+     * to be issued from the
+     * <em>Event Dispatch Loop (EDT).</em>
+     * For more informations
+     * consult the following pages:
+     * 
+     * @see <a href="https://docs.oracle.com/javase/tutorial/uiswing/concurrency/index.html">
+     *          Concurrency in Swing
+     *      </a>
+     * @see <a href="https://docs.oracle.com/javase/tutorial/uiswing/concurrency/dispatch.html">
+     *          The Event Dispatch Thread
+     *      </a>
+     *      
+     */
+    private static void clickOKButton()
+    {
+        SwingUtilities.invokeLater( () -> okButton.doClick() );
     }
 }
