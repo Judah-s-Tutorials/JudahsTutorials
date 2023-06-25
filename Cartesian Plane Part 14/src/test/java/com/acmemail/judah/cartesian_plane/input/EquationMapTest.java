@@ -7,9 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.AWTException;
-import java.awt.TextField;
 import java.awt.Window;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,6 +22,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -32,7 +31,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
-import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class EquationMapTest
@@ -72,7 +70,6 @@ class EquationMapTest
     /////////////////////////////////////////////////////////////////
     private JDialog     jDialog;
     private JList<?>    jList;
-    private JButton     saveButton;
     private JButton     openButton;
     private JButton     cancelButton;
     private JButton     okButton;
@@ -130,12 +127,11 @@ class EquationMapTest
         
         // Reset the JFileChooser component ids.
         jDialog = null;
-        jList = null;
         okButton = null;
-        saveButton = null;
         openButton = null;
         cancelButton = null;
         pathTextField = null;
+        jList = null;
     }
 
     @AfterEach
@@ -181,15 +177,13 @@ class EquationMapTest
     // This will cause a dialog to open; select a file,
     // and verify that a single equations is loaded.
     @Test
-    void testParseEquationFilesSelectFileApprove() throws AWTException
+    void testParseEquationFilesSelectFileApprove()
     {
-        RobotAssistant  robot   = new RobotAssistant();
         Thread          thread  = startDialog( () -> 
             EquationMap.parseEquationFiles()
         );
-//        robot.type( testFiles[0].getAbsolutePath(), KeyEvent.VK_ENTER );
         pathTextField.setText( testFiles[0].getAbsolutePath() );
-        openButton.doClick();
+        SwingUtilities.invokeLater( () -> openButton.doClick() );
         Utils.join( thread );
         Map<String,Equation>    map = EquationMap.getEquationMap();
         assertEquals( 1, map.size() );
@@ -203,11 +197,12 @@ class EquationMapTest
     @Test
     void testParseEquationFilesSelectDirApprove() throws AWTException
     {
-        RobotAssistant  robot   = new RobotAssistant();
-        Thread          thread  = startDialog( () -> 
+        Thread      thread      = startDialog( () -> 
             EquationMap.parseEquationFiles()
         );
-        robot.type( tempDir.getAbsolutePath(), KeyEvent.VK_ENTER );
+        String      tempPath    = tempDir.getAbsolutePath();
+        SwingUtilities.invokeLater( () -> pathTextField.setText( tempPath ) );
+        SwingUtilities.invokeLater( () -> openButton.doClick() );
         Utils.join( thread );
         Arrays.stream( testNames )
             .forEach( n -> verifyEquation( 
@@ -220,13 +215,12 @@ class EquationMapTest
     // This will cause a dialog to open; cancel the dialog,
     // and verify that no equations are loaded.
     @Test
-    void testParseEquationFilesCancel() throws AWTException
+    void testParseEquationFilesCancel()
     {
-        RobotAssistant  robot   = new RobotAssistant();
         Thread          thread  = startDialog( () -> 
             EquationMap.parseEquationFiles()
         );
-        robot.type( tempDir.getAbsolutePath(), KeyEvent.VK_ESCAPE );
+        SwingUtilities.invokeLater( () -> cancelButton.doClick() );
         Utils.join( thread );
         Map<String,Equation>    map = EquationMap.getEquationMap();
         assertTrue( map.isEmpty() );
@@ -278,7 +272,7 @@ class EquationMapTest
     // which one is third, we have to make and sort our
     // own list of equation names.
     @Test
-    void testGetEquationEnter() throws AWTException
+    void testGetEquationOK()
     {
         EquationMap.parseEquationFiles( tempDir );
         
@@ -286,13 +280,11 @@ class EquationMapTest
         equations.sort( (i1, i2) -> i1.getName().compareTo( i2.getName() ) );
         Equation        expEquation = equations.get( 2 );
         
-        RobotAssistant  robot       = new RobotAssistant();
         Thread          thread      = startDialog( () ->
             selectedEquation = EquationMap.getEquation() 
         );
-        robot.downArrow(); // select second item in list
-        robot.downArrow(); // select third item in list
-        robot.type( "", KeyEvent.VK_ENTER );
+        jList.setSelectedIndex( 2 );
+        SwingUtilities.invokeLater( () -> okButton.doClick() );
         Utils.join( thread );
         verifyEquation( expEquation, selectedEquation );
     }
@@ -302,15 +294,14 @@ class EquationMapTest
     // cancel the dialog and verify that null is returned.
     @Test
     void testGetEquationCancel() 
-        throws AWTException
     {
         EquationMap.parseEquationFiles( tempDir );
-        RobotAssistant  robot   = new RobotAssistant();
         
         Thread          thread  = startDialog( () ->
             selectedEquation = EquationMap.getEquation() 
         );
-        robot.type( "", KeyEvent.VK_ESCAPE );
+        SwingUtilities.invokeLater( () -> cancelButton.doClick() );
+
         Utils.join( thread );
         assertNull( selectedEquation );
     }
@@ -354,12 +345,11 @@ class EquationMapTest
         Utils.pause( 500 );
         
         jDialog = getJDialog();
-        jList = getJList();
-        saveButton = getButton( "Save" );
         openButton = getButton( "Open" );
         cancelButton = getButton( "Cancel" );
         okButton = getButton( "OK" );
         pathTextField = getTextField();
+        jList = getJList();
         return thread;
     }
     

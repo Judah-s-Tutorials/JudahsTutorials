@@ -18,6 +18,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.ListModel;
+import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -90,7 +91,7 @@ class ItemSelectionDialogTest
         Thread          thread          = startDialog();
         int             expSelection    = 2;
         jList.setSelectedIndex( expSelection );
-        okButton.doClick();
+        SwingUtilities.invokeLater( () -> okButton.doClick() );
         thread.join();
         
         assertEquals( expSelection, selection );
@@ -101,7 +102,7 @@ class ItemSelectionDialogTest
         throws InterruptedException
     {
         Thread          thread  = startDialog();
-        cancelButton.doClick();
+        SwingUtilities.invokeLater( () -> cancelButton.doClick() );
         thread.join();
         
         assertTrue( selection < 0 );
@@ -154,7 +155,7 @@ class ItemSelectionDialogTest
         JButton             okButton        = getButton( finder, "OK" );
         JButton             cancelButton    = getButton( finder, "Cancel" );
         assertFalse( okButton.isEnabled() );
-        cancelButton.doClick();
+        SwingUtilities.invokeLater( () -> cancelButton.doClick() );
         thread.join();
         assertTrue( selection < 0 );
 
