@@ -1,6 +1,5 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.lang.reflect.InvocationTargetException;

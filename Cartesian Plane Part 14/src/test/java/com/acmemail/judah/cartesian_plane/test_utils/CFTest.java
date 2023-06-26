@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.swing.JButton;
@@ -601,7 +600,8 @@ class CFTest
      * is a custom predicate,
      * one that overrides all defaults.
      */
-    private void testCustomPredicate()
+    @Test
+    public void testCustomPredicate()
     {
         List<TestWindow>    shouldFind      = 
             List.of(
@@ -659,21 +659,22 @@ class CFTest
                 notVisibleFrame,
                 disposedFrame
             );
-        ComponentFinder finder  = new ComponentFinder();
         for ( TestWindow window : allWindows )
         {
             Window  top = window.getWindow();
             for ( String label : window.getLabels() )
             {
                 Predicate<JComponent>   pred    = getButtonPredicate( label );
-                JComponent              comp    = finder.find( top, pred );
+                JComponent              comp    = 
+                    ComponentFinder.find( top, pred );
                 assertNotNull( comp );
                 assertTrue( comp instanceof JButton );
                 assertEquals( label, ((JButton)comp).getText() );
             }
             String                  label   = "not found";
             Predicate<JComponent>   pred    = getButtonPredicate( label );
-            JComponent              comp    = finder.find( top, pred );
+            JComponent              comp    = 
+                ComponentFinder.find( top, pred );
             assertNull( comp );
         }
     }
@@ -692,21 +693,22 @@ class CFTest
                 notVisibleFrame,
                 disposedFrame
             );
-        ComponentFinder finder  = new ComponentFinder();
         for ( TestWindow window : allWindows )
         {
             JComponent  pane    = window.getContentPane();
             for ( String label : window.getLabels() )
             {
                 Predicate<JComponent>   pred    = getButtonPredicate( label );
-                JComponent              comp    = finder.find( pane, pred );
+                JComponent              comp    = 
+                    ComponentFinder.find( pane, pred );
                 assertNotNull( comp );
                 assertTrue( comp instanceof JButton );
                 assertEquals( label, ((JButton)comp).getText() );
             }
             String                  label   = "not found";
             Predicate<JComponent>   pred    = getButtonPredicate( label );
-            JComponent              comp    = finder.find( pane, pred );
+            JComponent              comp    = 
+                ComponentFinder.find( pane, pred );
             assertNull( comp );
         }
     }
