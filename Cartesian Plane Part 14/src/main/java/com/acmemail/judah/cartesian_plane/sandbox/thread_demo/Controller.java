@@ -8,6 +8,7 @@ import java.awt.event.ActionEvent;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -40,6 +41,13 @@ import javax.swing.border.Border;
  * passing a parameter of the selected type.
  * All activity will be logged
  * in a separate window.
+ * <p>
+ * When the operator pushes the exit button
+ * the demo will terminate.
+ * The application 
+ * will continue to display the execution log
+ * until the operator dismisses
+ * one of the application windows.
  * 
  * @author Jack Straub
  */
@@ -79,6 +87,12 @@ public class Controller
     private Element     selectedParam;
     /** Reference to the object that encapsulates the log display. */
     private LogDisplay  logDisplay      = new LogDisplay();
+    
+    /**
+     * When true, demonstration is in progress.
+     * Once false, all threads should exit.
+     */
+    private boolean     inProgress      = true;
     
     /**
      * Application entry point.
@@ -172,7 +186,7 @@ public class Controller
         // The object that encapsulates this thread. Used as a
         // mutex for controlling thread execution.
         Thread  thread  = Thread.currentThread();
-        while ( true )
+        while ( inProgress )
         {
             // "Seize" the mutex before waiting on it. This is
             // a requirement of the Thread API.
@@ -186,12 +200,80 @@ public class Controller
                 catch ( InterruptedException exc )
                 {
                 }
+            }
+            if ( inProgress )
+            {
                 if ( selectedClass == null || selectedParam == null )
                     throw new RuntimeException( "invalid state" );
                 ExecLog.add( new ExecLog( "WAKING" ) );
-
                 selectedClass.getFunk().accept( selectedParam );
             }
+        }
+        ExecLog.add( new ExecLog( "TERMINATING" ) );
+    }
+    
+    /**
+     * Processes an action event
+     * raised by the application's
+     * exit button.
+     * Marks the application as shutting down;
+     * wakes all threads;
+     * waits for all threads to terminate.
+     * 
+     * @param event encapsulates the ActionEvent being processed; not used
+     */
+    private void exit( ActionEvent event )
+    {
+        // Indicate shutdown in progress.
+        inProgress = false;
+        
+        Collection<Thread> threads  = threadMap.values();
+        // Wake all threads so they an see the new state of inProgress.
+        System.out.println( "Waking" );
+        threads.stream().forEach( this::notify );
+        
+        // Wait for all threads to complete.
+        System.out.println( "Waiting" );
+        threads.stream().forEach( this::join );
+        
+        System.out.println( "Done" );
+
+    }
+    
+    /**
+     * Synchronizes on the given Thread object,
+     * then signals it, 
+     * all threads waiting on it.
+     * 
+     * @param thread    the given Thread object
+     */
+    private void notify( Thread thread )
+    {
+        synchronized ( thread )
+        {
+            thread.notify();
+        }
+    }
+    
+    /**
+     * Joins the given thread,
+     * catching InterruptedException, if necessary.
+     * If InterrupteException is raised,
+     * prints a diagnostic
+     * and terminates the application.
+     * 
+     * @param thread    the given thread
+     */
+    private void join( Thread thread )
+    {
+        try
+        {
+            thread.join();
+        }
+        catch ( InterruptedException exc )
+        {
+            exc.printStackTrace();
+            System.exit( 1 );
         }
     }
     
@@ -430,7 +512,7 @@ public class Controller
             // which is an inner class nested inside of the Controller class...
             // ... "Controller.this" refers to the instance of the parent
             // this ButtonPanel is linked to.
-            exit.addActionListener( e -> System.exit( 0 ) );
+            exit.addActionListener( Controller.this::exit );
             exec.addActionListener( Controller.this::exec );
         }
     }
