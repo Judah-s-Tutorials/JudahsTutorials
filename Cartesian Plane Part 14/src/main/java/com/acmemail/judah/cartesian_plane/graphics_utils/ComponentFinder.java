@@ -272,7 +272,6 @@ public class ComponentFinder
     public JComponent find( Predicate<JComponent> pred )
     {
        JComponent   comp    =  Arrays.stream( Window.getWindows() )
-           .peek( System.out::println )
             .filter( topWindowFilter )
             .map( w -> find( w, pred ) )
             .filter( c -> c != null )
