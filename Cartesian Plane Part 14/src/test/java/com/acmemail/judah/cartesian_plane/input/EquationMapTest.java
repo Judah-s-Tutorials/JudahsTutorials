@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.awt.AWTException;
 import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
@@ -182,7 +181,8 @@ class EquationMapTest
         Thread          thread  = startDialog( () -> 
             EquationMap.parseEquationFiles()
         );
-        pathTextField.setText( testFiles[0].getAbsolutePath() );
+        SwingUtilities.invokeLater( 
+            () -> pathTextField.setText( testFiles[0].getAbsolutePath() ) );
         SwingUtilities.invokeLater( () -> openButton.doClick() );
         Utils.join( thread );
         Map<String,Equation>    map = EquationMap.getEquationMap();
@@ -195,7 +195,7 @@ class EquationMapTest
     // cause a dialog to open; select the temporary directory,
     // and verify that all equation files are loaded.
     @Test
-    void testParseEquationFilesSelectDirApprove() throws AWTException
+    void testParseEquationFilesSelectDirApprove()
     {
         Thread      thread      = startDialog( () -> 
             EquationMap.parseEquationFiles()

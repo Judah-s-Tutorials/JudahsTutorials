@@ -8,6 +8,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 
@@ -102,10 +103,12 @@ public class JFileChooserSearch
         getButton( "Open" );
         System.out.println( "====================" );
         
-        textField.setText( "Path goes here: " + ++count );
+        SwingUtilities.invokeLater( () -> 
+            textField.setText( "Path goes here: " + ++count )
+        );
         Thread.sleep( 3000 );
         if ( cancelButton != null )
-            cancelButton.doClick();
+            SwingUtilities.invokeLater( () -> cancelButton.doClick() );
         thread.join();
     }
     

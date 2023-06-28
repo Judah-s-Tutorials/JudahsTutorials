@@ -86,51 +86,47 @@ class ItemSelectionDialogTest
     
     @Test
     void testShowOK() 
-        throws InterruptedException
     {
         Thread          thread          = startDialog();
         int             expSelection    = 2;
         jList.setSelectedIndex( expSelection );
         SwingUtilities.invokeLater( () -> okButton.doClick() );
-        thread.join();
+        Utils.join( thread );
         
         assertEquals( expSelection, selection );
     }
 
     @Test
     void testShowCancel() 
-        throws InterruptedException
     {
         Thread          thread  = startDialog();
         SwingUtilities.invokeLater( () -> cancelButton.doClick() );
-        thread.join();
+        Utils.join( thread );
         
         assertTrue( selection < 0 );
     }
     
     @Test
     public void testEnterKeyboardAction() 
-        throws InterruptedException, AWTException
+        throws AWTException
     {
         Thread          thread          = startDialog();
         RobotAssistant  robot           = new RobotAssistant();
         int             expSelection    = 2;
         jList.setSelectedIndex( expSelection );
         robot.type( "", KeyEvent.VK_ENTER );
-        thread.join();
-        
+        Utils.join( thread );        
         assertEquals( expSelection, selection );
     }
     
     @Test
     public void testEscapeKeyboardAction() 
-        throws InterruptedException, AWTException
+        throws AWTException
     {
         Thread          thread          = startDialog();
         RobotAssistant  robot           = new RobotAssistant();
                 robot.type( "", KeyEvent.VK_ESCAPE );
-        thread.join();
-        
+                Utils.join( thread );        
         assertTrue( selection < 0 );
     }
     
@@ -144,7 +140,6 @@ class ItemSelectionDialogTest
     
     @Test
     public void testEmptyList()
-        throws InterruptedException
     {
         String              title   = "Empty String Tester";
         ItemSelectionDialog dialog  = 
@@ -156,7 +151,7 @@ class ItemSelectionDialogTest
         JButton             cancelButton    = getButton( finder, "Cancel" );
         assertFalse( okButton.isEnabled() );
         SwingUtilities.invokeLater( () -> cancelButton.doClick() );
-        thread.join();
+        Utils.join( thread );        
         assertTrue( selection < 0 );
 
         Predicate<Window>   pred            = 

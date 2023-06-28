@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.awt.AWTException;
 import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.File;
@@ -166,62 +165,53 @@ class FileManagerTest
     
     @Test
     public void testOpenEquationApprove() 
-        throws InterruptedException
     {
-        Thread          thread  = null;
-        
         FileManager.save( testFile, testEquation );
         assertTrue( testFile.exists() );        
-        thread  = startDialog( () -> execOpenCommand() );
-        pathTextField.setText( testFilePath );
+        Thread  thread  = startDialog( () -> execOpenCommand() );
+        SwingUtilities.invokeLater( 
+            () -> pathTextField.setText( testFilePath ) );
         SwingUtilities.invokeLater( () -> openButton.doClick() );
-        thread.join();
+        Utils.join( thread );
         assertEqualsDefault( openEquation );
     }
     
     @Test
     public void testSaveEquationApprove() 
-        throws AWTException, InterruptedException
-        
     {
-        Thread          thread  = null;
-        
         assertFalse( testFile.exists() );
-        thread  = startDialog( () -> execSaveCommand() );
-        pathTextField.setText( testFilePath );
+        Thread  thread  = startDialog( () -> execSaveCommand() );
+        SwingUtilities.invokeLater(
+            () -> pathTextField.setText( testFilePath ) );
         SwingUtilities.invokeLater( () -> saveButton.doClick() );
-        thread.join();
+        Utils.join( thread );
         assertTrue( testFile.exists() );
     }
     
     @Test
     public void testSaveEquationCancel() 
-        throws AWTException, InterruptedException
     {
-        Thread          thread  = null;
-        
-        thread  = startDialog( () -> execSaveCommand() );
-        pathTextField.setText( testFilePath );
+        Thread  thread  = startDialog( () -> execSaveCommand() );
+        SwingUtilities.invokeLater( 
+            () -> pathTextField.setText( testFilePath ) );
         SwingUtilities.invokeLater( () -> cancelButton.doClick() );
-        thread.join();
+        Utils.join( thread );
         assertFalse( testFile.exists() );
     }
     
     @Test
     public void testOpenEquationCancel() 
-        throws AWTException, InterruptedException
     {
-        Thread          thread  = null;
-        
         // put equation out there...
         // start to open the equation...
         // cancel open dialog...
         // verify equation is not read.
         FileManager.save( testFilePath, testEquation );
-        thread  = startDialog( () -> execOpenCommand() );
-        pathTextField.setText( testFilePath );
+        Thread  thread  = startDialog( () -> execOpenCommand() );
+        SwingUtilities.invokeLater( 
+            () -> pathTextField.setText( testFilePath ) );
         SwingUtilities.invokeLater( () -> cancelButton.doClick() );
-        thread.join();
+        Utils.join( thread );
         assertNull( openEquation );
     }
 
@@ -273,7 +263,7 @@ class FileManagerTest
     }
     
     @Test
-    public void testSaveWithIOError() throws InterruptedException
+    public void testSaveWithIOError()
     {
         FileManager.save( testFilePath, testEquation );
         assertTrue( testFile.exists() );
@@ -291,7 +281,7 @@ class FileManagerTest
         FileManager.save( testFilePath, newEquation );
         
         // wait for error dialog to be dismissed
-        thread.join();
+        Utils.join( thread );
         
         // verify save failed
         newEquation = FileManager.open( testFilePath );
@@ -300,12 +290,12 @@ class FileManagerTest
     }
     
     @Test
-    public void testOpenWithIOError() throws InterruptedException
+    public void testOpenWithIOError()
     {
         Thread      thread      = new Thread( () -> expectErrorDialog() );
         thread.start();
         Equation    equation    = FileManager.open( "nobodyhome" );
-        thread.join();
+        Utils.join( thread );
         assertNull( equation );
     }
     
