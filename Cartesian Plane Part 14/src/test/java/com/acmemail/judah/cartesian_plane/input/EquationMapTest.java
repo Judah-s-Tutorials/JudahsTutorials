@@ -283,7 +283,7 @@ class EquationMapTest
         Thread          thread      = startDialog( () ->
             selectedEquation = EquationMap.getEquation() 
         );
-        jList.setSelectedIndex( 2 );
+        SwingUtilities.invokeLater( () -> jList.setSelectedIndex( 2 ) );
         SwingUtilities.invokeLater( () -> okButton.doClick() );
         Utils.join( thread );
         verifyEquation( expEquation, selectedEquation );
