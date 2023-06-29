@@ -73,7 +73,7 @@ public class ItemSelectionDialogTestDemo
         getCancelButton();
         
         int selectedIndex   = 2;
-        jList.setSelectedIndex( selectedIndex );
+        selectJListItem( selectedIndex );
         clickOKButton();
         showThread.join();
 
@@ -231,6 +231,33 @@ public class ItemSelectionDialogTestDemo
     }
     
     /**
+     * Selects an item in the JList.
+     * Normally this operation 
+     * wouldn't rate an entire helper method,
+     * but I wanted to isolate the code
+     * so that it could be discussed 
+     * in its own context in the notes.
+     * The issue has to do 
+     * with forcing events 
+     * to be issued from the
+     * <em>Event Dispatch Loop (EDT).</em>
+     * For more informations
+     * consult the following pages:
+     * 
+     * @see <a href="https://docs.oracle.com/javase/tutorial/uiswing/concurrency/index.html">
+     *          Concurrency in Swing
+     *      </a>
+     * @see <a href="https://docs.oracle.com/javase/tutorial/uiswing/concurrency/dispatch.html">
+     *          The Event Dispatch Thread
+     *      </a>
+     * @see #clickOKButton()
+     */
+    private static void selectJListItem( int index )
+    {
+        SwingUtilities.invokeLater( () -> jList.setSelectedIndex( index ) );
+    }
+    
+    /**
      * Clicks the OK button.
      * Normally this operation 
      * wouldn't rate an entire helper method,
@@ -250,7 +277,7 @@ public class ItemSelectionDialogTestDemo
      * @see <a href="https://docs.oracle.com/javase/tutorial/uiswing/concurrency/dispatch.html">
      *          The Event Dispatch Thread
      *      </a>
-     *      
+     * @see #selectJListItem(int)
      */
     private static void clickOKButton()
     {
