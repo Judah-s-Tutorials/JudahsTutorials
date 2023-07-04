@@ -6,7 +6,7 @@ import java.util.OptionalInt;
 
 public class LinePropertySet
 {
-	private final PropertyManager	pMgr	= new PropertyManager();
+	private final PropertyManager	pMgr	= PropertyManager.instanceOf();
     private final String    major;
     private OptionalInt     stroke;
     private OptionalInt     length;
@@ -16,10 +16,7 @@ public class LinePropertySet
     public LinePropertySet( String major )
     {
         this.major = major;
-        stroke = pMgr.getAsInt( major, PropertyManager.STROKE );
-        length = pMgr.getAsInt( major, PropertyManager.LENGTH );
-        spacing = pMgr.getAsInt( major, PropertyManager.SPACING );
-        color = pMgr.getAsColor( major, PropertyManager.COLOR );
+        reset();
     }
     
     public void apply()
@@ -32,6 +29,14 @@ public class LinePropertySet
             pMgr.put( major, PropertyManager.SPACING, spacing.getAsInt() );
         if ( hasColor() )
             pMgr.put( major, PropertyManager.COLOR, color.get() );
+    }
+    
+    public void reset()
+    {
+        stroke = pMgr.getAsInt( major, PropertyManager.STROKE );
+        length = pMgr.getAsInt( major, PropertyManager.LENGTH );
+        spacing = pMgr.getAsInt( major, PropertyManager.SPACING );
+        color = pMgr.getAsColor( major, PropertyManager.COLOR );
     }
     
     public boolean hasStroke()
@@ -61,12 +66,12 @@ public class LinePropertySet
     
     public int getLength()
     {
-        return stroke.orElse( -1 );
+        return length.orElse( -1 );
     }
     
     public int getSpacing()
     {
-        return stroke.orElse( -1 );
+        return spacing.orElse( -1 );
     }
     
     public Color getColor()

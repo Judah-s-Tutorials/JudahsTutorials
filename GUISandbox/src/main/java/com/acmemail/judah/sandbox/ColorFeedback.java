@@ -6,22 +6,27 @@ import java.awt.Graphics2D;
 import java.util.Optional;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
+@SuppressWarnings("serial")
 public class ColorFeedback extends JLabel
 {
     private final   JTextField  input;
     private String  colorText   =   "";
     
-    public ColorFeedback( JTextField input, String colorProperty )
+    public ColorFeedback( JTextField input, JComponent label )
     {
         this.input = input;
-        colorText = colorProperty;
-        input.setText( colorText );
+//        input.setText( colorText );
         Border  border  = BorderFactory.createLineBorder( Color.BLACK );
         setBorder( border );
+        
+        this.addPropertyChangeListener( e -> 
+            Feedback.setEnabled( this, input, label )
+        );
     }
     
     public void paintComponent( Graphics graphics )

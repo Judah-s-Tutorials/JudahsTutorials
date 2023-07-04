@@ -9,7 +9,6 @@ import static com.acmemail.judah.sandbox.PropertyManager.MINOR;
 import static com.acmemail.judah.sandbox.PropertyManager.SPACING;
 import static com.acmemail.judah.sandbox.PropertyManager.STROKE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Color;
 import java.util.Optional;
@@ -19,7 +18,7 @@ import org.junit.jupiter.api.Test;
 
 class LinePropertySetTest
 {
-    private final PropertyManager   pMgr    = new PropertyManager();
+    private final PropertyManager   pMgr    = PropertyManager.instanceOf();
     
 	@Test
 	void testLinePropertySet()
@@ -34,8 +33,8 @@ class LinePropertySetTest
 	{
 	    Optional<Color>     color       = pMgr.getAsColor( major, COLOR );
         OptionalInt         length      = pMgr.getAsInt( major, LENGTH );
-        OptionalInt         spacing     = pMgr.getAsInt( major, LENGTH );
-        OptionalInt         stroke      = pMgr.getAsInt( major, LENGTH );
+        OptionalInt         spacing     = pMgr.getAsInt( major, SPACING );
+        OptionalInt         stroke      = pMgr.getAsInt( major, STROKE );
         LinePropertySet     set         = new LinePropertySet( major );
         
         assertEquals( color.isPresent(), set.hasColor(), major );
@@ -44,78 +43,159 @@ class LinePropertySetTest
         assertEquals( stroke.isPresent(), set.hasStroke(), major );
         
         if ( color.isPresent() )
-            assertEquals( color.get(), pMgr.getAsColor( major, COLOR ) );
+            assertEquals( color.get(), set.getColor() );
         if ( length.isPresent() )
-            assertEquals( length.getAsInt(), pMgr.getAsInt( major, LENGTH ) );
+            assertEquals( length.getAsInt(), set.getLength(), major );
         if ( spacing.isPresent() )
-            assertEquals( spacing.getAsInt(), pMgr.getAsInt( major, SPACING ) );
+            assertEquals( spacing.getAsInt(), set.getSpacing(), major );
         if ( stroke.isPresent() )
-            assertEquals( stroke.getAsInt(), pMgr.getAsInt( major, STROKE ) );
+            assertEquals( stroke.getAsInt(), set.getStroke(), major );
 	}
 
 	@Test
-	void testApply() {
-		fail("Not yet implemented");
+	void testApply()
+	{
+        testApply( AXIS );
+//        testApply( MAJOR );
+//        testApply( MINOR );
+//        testApply( GRID );
+	}
+    
+    private void testApply( String major )
+    {
+        Optional<Color>     color       = pMgr.getAsColor( major, COLOR );
+        OptionalInt         length      = pMgr.getAsInt( major, LENGTH );
+        OptionalInt         spacing     = pMgr.getAsInt( major, SPACING );
+        OptionalInt         stroke      = pMgr.getAsInt( major, STROKE );
+        LinePropertySet     set         = new LinePropertySet( major );
+        
+        Color               expColor    = 
+            getUniqueColor( color.orElse( Color.WHITE ) );
+        int                 expLength   = length.orElse( 0 ) + 5;
+        int                 expSpacing  = spacing.orElse( 0 ) + 5;
+        int                 expStroke   = stroke.orElse( 0 ) + 5;
+        
+        set.setColor( expColor );
+        set.setLength( expLength );
+        set.setSpacing( expSpacing );
+        set.setStroke( expStroke );
+        set.apply();
+        
+        Optional<Color>     actColor    = pMgr.getAsColor( major, COLOR );
+        OptionalInt         actLength   = pMgr.getAsInt( major, LENGTH );
+        OptionalInt         actSpacing  = pMgr.getAsInt( major, SPACING );
+        OptionalInt         actStroke   = pMgr.getAsInt( major, STROKE );
+        
+        assertEquals( color.isPresent(), actColor.isPresent() );
+        assertEquals( length.isPresent(), actLength.isPresent() );
+        assertEquals( spacing.isPresent(), actSpacing.isPresent() );
+        assertEquals( stroke.isPresent(), actStroke.isPresent() );
+        
+        if ( color.isPresent() )
+            assertEquals( expColor, actColor.get(), major );
+        if ( length.isPresent() )
+            assertEquals( expLength, actLength.getAsInt(), major );
+        if ( spacing.isPresent() )
+            assertEquals( expSpacing, actSpacing.getAsInt(), major );
+        if ( length.isPresent() )
+            assertEquals( expStroke, actStroke.getAsInt(), major );
+    }
+
+	@Test
+	void testGetStroke()
+	{
+        testGetStroke( AXIS );
+        testGetStroke( MAJOR );
+        testGetStroke( MINOR );
+        testGetStroke( GRID );
+	}
+	
+	private void testGetStroke( String major )
+	{
+	    LinePropertySet    set     = new LinePropertySet( major );
+        OptionalInt        stroke  = pMgr.getAsInt( major, STROKE );
+        if ( stroke.isPresent() )
+        {
+            int init    = set.getStroke();
+            int exp     = init += 5;
+            set.setStroke( exp );
+            assertEquals( exp, set.getStroke() );
+        }
 	}
 
 	@Test
-	void testHasStroke() {
-		fail("Not yet implemented");
+	void testGetLength()
+	{
+        testGetLength( AXIS );
+        testGetLength( MAJOR );
+        testGetLength( MINOR );
+        testGetLength( GRID );
 	}
+    
+    private void testGetLength( String major )
+    {
+        LinePropertySet    set     = new LinePropertySet( major );
+        OptionalInt        length  = pMgr.getAsInt( major, LENGTH );
+        if ( length.isPresent() )
+        {
+            int init    = set.getLength();
+            int exp     = init += 5;
+            set.setLength( exp );
+            assertEquals( exp, set.getLength() );
+        }
+    }
 
-	@Test
-	void testHasLength() {
-		fail("Not yet implemented");
-	}
+    @Test
+    void testGetSpacing()
+    {
+        testGetSpacing( AXIS );
+        testGetSpacing( MAJOR );
+        testGetSpacing( MINOR );
+        testGetSpacing( GRID );
+    }
+    
+    private void testGetSpacing( String major )
+    {
+        LinePropertySet    set     = new LinePropertySet( major );
+        OptionalInt        spacing = pMgr.getAsInt( major, LENGTH );
+        if ( spacing.isPresent() )
+        {
+            int init    = set.getSpacing();
+            int exp     = init += 5;
+            set.setSpacing( exp );
+            assertEquals( exp, set.getSpacing() );
+        }
+    }
 
-	@Test
-	void testHasSpacing() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testHasColor() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testGetStroke() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testGetLength() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testGetSpacing() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testGetColor() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testSetStroke() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testSetLength() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testSetSpacing() {
-		fail("Not yet implemented");
-	}
-
-	@Test
-	void testSetColor() {
-		fail("Not yet implemented");
-	}
-
+    @Test
+    void testGetColor()
+    {
+        testGetColor( AXIS );
+        testGetColor( MAJOR );
+        testGetColor( MINOR );
+        testGetColor( GRID );
+    }
+    
+    private void testGetColor( String major )
+    {
+        LinePropertySet    set     = new LinePropertySet( major );
+        Optional<Color>    color   = pMgr.getAsColor( major, COLOR );
+        if ( color.isPresent() )
+        {
+            Color   initColor       = set.getColor();
+            Color   expColor        = getUniqueColor( initColor );
+            set.setColor( expColor );
+            assertEquals( expColor, set.getColor() );
+        }
+    }
+    
+    private Color getUniqueColor( Color initColor )
+    {
+        int     initColorInt    = initColor.getRGB();
+        int     blue            = initColorInt & 0x000000FF;
+        int     newColorInt     = initColorInt + 
+            blue < 0xFF ? 1 : -1;
+        Color   newColor        = new Color( newColorInt );
+        return newColor;
+    }
 }

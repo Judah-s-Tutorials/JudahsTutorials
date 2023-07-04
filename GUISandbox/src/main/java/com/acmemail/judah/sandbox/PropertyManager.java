@@ -19,23 +19,32 @@ public class PropertyManager extends HashMap<String,Object>
     public static final String  SPACING     = "spacing";
     public static final String  COLOR       = "color";
     
-    public PropertyManager()
+    public static PropertyManager   instance    = null;
+    
+    public static synchronized PropertyManager instanceOf()
     {
-        put( AXIS, STROKE, 5 );
-        put( AXIS, COLOR, Color.BLACK );
+        if ( instance == null )
+            instance = new PropertyManager();
+        return instance;
+    }
+    
+    private PropertyManager()
+    {
+        put( AXIS, STROKE, 7 );
+        put( AXIS, COLOR, Color.RED );
         
         put( MAJOR, STROKE, 5 );
         put( MAJOR, LENGTH, 11 );
         put( MAJOR, SPACING, 10 );
-        put( MAJOR, COLOR, Color.BLACK );
+        put( MAJOR, COLOR, Color.BLUE );
         
         put( MINOR, STROKE, 3 );
         put( MINOR, LENGTH, 5 );
         put( MINOR, SPACING, 5 );
-        put( MINOR, COLOR, Color.BLACK );
+        put( MINOR, COLOR, Color.CYAN );
         
-        put( GRID, STROKE, 5 );
-        put( GRID, COLOR, Color.LIGHT_GRAY );
+        put( GRID, STROKE, 1 );
+        put( GRID, COLOR, Color.GREEN );
     }
     
     public OptionalInt getAsInt( String major, String minor )

@@ -7,6 +7,7 @@ import java.awt.Graphics2D;
 import java.util.OptionalInt;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.border.Border;
@@ -14,13 +15,17 @@ import javax.swing.border.Border;
 @SuppressWarnings("serial")
 public class LengthFeedback extends JLabel
 {
-    private final JSpinner  spinner;
+    private final JSpinner      spinner;
     
-    public LengthFeedback( JSpinner spinner )
+    public LengthFeedback( JSpinner spinner, JComponent label )
     {
         this.spinner = spinner;
         Border  border  = BorderFactory.createLineBorder( Color.BLACK );
         setBorder( border );
+        
+        addPropertyChangeListener( e ->
+            Feedback.setEnabled( this, spinner, label )
+        );
     }
     
     public void paintComponent( Graphics graphics )

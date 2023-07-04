@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import javax.swing.JComponent;
 import javax.swing.JSpinner;
 
 public class Feedback
@@ -67,5 +68,13 @@ public class Feedback
         int yco = height / 2 + 5;
         gtx.drawString( ERR_TEXT, xco, yco );
         gtx.setColor( origColor );
+    }
+    
+    public static void 
+    setEnabled( JComponent source, JComponent dest1, JComponent dest2 )
+    {
+        boolean currVal = source.isEnabled();
+        dest1.setEnabled( currVal );
+        dest2.setEnabled( currVal );
     }
 }
