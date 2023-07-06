@@ -379,9 +379,9 @@ public class LinePanel extends JPanel
         private void apply( ActionEvent evt )
         {
             Collections.list( lineGroup.getElements() )
-            .stream()
-            .map( LinePanel.this::getPropertySet )
-            .forEach( LinePropertySet::apply );
+                .stream()
+                .map( LinePanel.this::getPropertySet )
+                .forEach( LinePropertySet::apply );
         }
         
         private void reset( ActionEvent evt )
