@@ -13,10 +13,12 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
-import java.util.function.IntConsumer;
-import java.util.function.IntSupplier;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import javax.swing.AbstractButton;
@@ -43,9 +45,18 @@ import javax.swing.border.Border;
 @SuppressWarnings("serial")
 public class LinePanel extends JPanel
 {
-    private static final String STATUS_KEY      =
+    /** Identifies the stroke spinner.  */
+    public static final String  STROKE_SPINNER_CN   = "StrokeSpinner";
+    /** Identifies the length spinner.  */
+    public static final String  LENGTH_SPINNER_CN   = "LengthSpinner";
+    /** Identifies the spacing spinner.  */
+    public static final String  SPACING_SPINNER_CN  = "SpacingSpinner";
+    /** Identifies the color text field.  */
+    public static final String  COLOR_FIELD_CN      = "ColorField";
+    
+    private static final String STATUS_KEY          =
         "judah.JColorChooserDemo.status";
-    private static final String TYPE_KEY        =
+    public static final  String TYPE_KEY            =
         "judah.property_type";
     
     private final ButtonGroup   lineGroup   = new ButtonGroup();
@@ -187,10 +198,10 @@ public class LinePanel extends JPanel
     private class PropertiesPanel extends JPanel 
         implements ItemListener
     {
-        private static final int    defVal      = 1;
-        private static final int    defMin      = 0;
-        private static final int    defMax      = 500;
-        private static final int    defStep     = 1;
+        private static final float  defVal      = 1.0f;
+        private static final float  defMin      = 0.0f;
+        private static final float  defMax      = 500.0f;
+        private static final float  defStep     = .1f;
         
         private static final String stroke      = "Stroke";
         private static final String length      = "Length";
@@ -231,21 +242,25 @@ public class LinePanel extends JPanel
             add( strokeLabel );
             add( strokeSpinner );
             add( strokeFB );
+            strokeSpinner.setName( STROKE_SPINNER_CN );
             strokeSpinner.addChangeListener( e -> strokeFB.repaint() );
             
             add( lengthLabel );
             add( lengthSpinner );
             add( lengthFB );
+            lengthSpinner.setName( LENGTH_SPINNER_CN );
             lengthSpinner.addChangeListener( e -> lengthFB.repaint() );
             
             add( spacingLabel );
             add( spacingSpinner );
             add( spacingFB );
+            spacingSpinner.setName( SPACING_SPINNER_CN );
             spacingSpinner.addChangeListener( e -> spacingFB.repaint() );
             
             add( colorButton );
             add( colorField );
             add( colorFB );
+            colorField.setName( COLOR_FIELD_CN );
             colorField.addActionListener( e -> colorFB.repaint() );
             colorButton.addActionListener( e -> showColorDialog() );
             
@@ -282,13 +297,38 @@ public class LinePanel extends JPanel
         @Override
         public void itemStateChanged( ItemEvent evt )
         {
-            Object  source  = evt.getSource();
+            Object  source      = evt.getSource();
+            int     stateChange = evt.getStateChange();
+            
             if ( source instanceof JRadioButton )
             {
                 JRadioButton    button  = (JRadioButton)source;
-                if ( button.isSelected() )
+                LinePropertySet set     = getPropertySet( button );
+                if ( stateChange == ItemEvent.DESELECTED )
                 {
-                    LinePropertySet set = getPropertySet( button );
+                    storeProperty(
+                        strokeSpinner,
+                        set::hasStroke,
+                        set::setStroke
+                    );
+                    storeProperty(
+                        lengthSpinner,
+                        set::hasLength,
+                        set::setLength
+                    );
+                    storeProperty(
+                        spacingSpinner,
+                        set::hasSpacing,
+                        set::setSpacing
+                    );
+                    storeProperty(
+                        colorField,
+                        set::hasColor,
+                        set::setColor
+                    );
+                }
+                else if ( stateChange == ItemEvent.SELECTED )
+                {
                     configureProperty(
                         strokeFB,
                         set::hasStroke,
@@ -320,8 +360,8 @@ public class LinePanel extends JPanel
         private void configureProperty(
             JComponent fbComp,
             BooleanSupplier hasProp,
-            IntSupplier getter,
-            IntConsumer setter
+            DoubleSupplier getter,
+            DoubleConsumer setter
         )
         {
             if ( !hasProp.getAsBoolean() )
@@ -331,7 +371,7 @@ public class LinePanel extends JPanel
             else
             {
                 fbComp.setEnabled( true );
-                int val = getter.getAsInt();
+                double  val = getter.getAsDouble();
                 setter.accept( val );
             }
         }
@@ -349,6 +389,35 @@ public class LinePanel extends JPanel
             {
                 fbComp.setEnabled( true );
                 setter.accept( getter.get() );
+            }
+        }
+        
+        private void storeProperty(
+            JSpinner spinner,
+            BooleanSupplier hasProp,
+            DoubleConsumer setter
+        )
+        {
+            if ( hasProp.getAsBoolean() )
+            {
+                OptionalDouble  optVal  = Feedback.getValue( spinner );
+                if ( optVal.isPresent() )
+                    setter.accept( optVal.getAsDouble() );
+            }
+        }
+        
+        private void storeProperty(
+            JTextField source,
+            BooleanSupplier hasProp,
+            Consumer<Color> setter
+        )
+        {
+            if ( hasProp.getAsBoolean() )
+            {
+                String          text        = source.getText();
+                Optional<Color> colorOpt    = Feedback.getColor( text );
+                if ( colorOpt.isPresent() )
+                    setter.accept( colorOpt.get() );
             }
         }
         

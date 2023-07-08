@@ -4,7 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -31,17 +31,17 @@ public class LengthFeedback extends JLabel
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        Graphics2D  gtx         = (Graphics2D)graphics.create();
-        int         width       = getWidth();
-        int         height      = getHeight();
-        OptionalInt optValue    = Feedback.getValue( spinner );
+        Graphics2D      gtx         = (Graphics2D)graphics.create();
+        int             width       = getWidth();
+        int             height      = getHeight();
+        OptionalDouble  optValue    = Feedback.getValue( spinner );
         if ( optValue.isEmpty() )
             Feedback.showError( gtx, width, height );
         else
         {
             int     yco         = height / 2;
             int     midPoint    = width / 2;
-            int     halfLen     = optValue.getAsInt() / 2;
+            int     halfLen     = (int)(optValue.getAsDouble() / 2.);
             int     xco1        = midPoint - halfLen;
             int     xco2        = midPoint + halfLen;
             gtx.setColor( Feedback.DEF_BACKGROUND );

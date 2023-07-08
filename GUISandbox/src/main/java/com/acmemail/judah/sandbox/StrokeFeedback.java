@@ -4,7 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -31,20 +31,20 @@ public class StrokeFeedback extends JLabel
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        Graphics2D  gtx         = (Graphics2D)graphics.create();
-        int         width       = getWidth();
-        int         height      = getHeight();
-        OptionalInt optValue    = Feedback.getValue( spinner );
+        Graphics2D      gtx         = (Graphics2D)graphics.create();
+        int             width       = getWidth();
+        int             height      = getHeight();
+        OptionalDouble  optValue    = Feedback.getValue( spinner );
         if ( optValue.isEmpty() )
             Feedback.showError( gtx, width, height );
         else
         {
             int     yco         = height / 2;
-            int     intVal      = optValue.getAsInt();
+            double  dblVal      = optValue.getAsDouble();
             gtx.setColor( Feedback.DEF_BACKGROUND );
             gtx.fillRect( 0, 0, width, height );
             gtx.setColor( Feedback.DEF_FOREGROUND );
-            gtx.setStroke( new BasicStroke( intVal ) );
+            gtx.setStroke( new BasicStroke( (float)dblVal ) );
             gtx.drawLine( 5, yco, width - 5, yco );
             paintBorder( gtx );
         }

@@ -19,7 +19,7 @@ public class PropertyManager extends HashMap<String,Object>
     public static final String  SPACING     = "spacing";
     public static final String  COLOR       = "color";
     
-    public static PropertyManager   instance    = null;
+    private static PropertyManager   instance    = null;
     
     public static synchronized PropertyManager instanceOf()
     {
@@ -30,20 +30,20 @@ public class PropertyManager extends HashMap<String,Object>
     
     private PropertyManager()
     {
-        put( AXIS, STROKE, 7 );
+        put( AXIS, STROKE, 7.0 );
         put( AXIS, COLOR, Color.RED );
         
-        put( MAJOR, STROKE, 5 );
-        put( MAJOR, LENGTH, 11 );
-        put( MAJOR, SPACING, 10 );
+        put( MAJOR, STROKE, 5.0 );
+        put( MAJOR, LENGTH, 11.0 );
+        put( MAJOR, SPACING, 10.0 );
         put( MAJOR, COLOR, Color.BLUE );
         
-        put( MINOR, STROKE, 3 );
-        put( MINOR, LENGTH, 5 );
-        put( MINOR, SPACING, 5 );
+        put( MINOR, STROKE, 3.0 );
+        put( MINOR, LENGTH, 5.0 );
+        put( MINOR, SPACING, 5.0 );
         put( MINOR, COLOR, Color.CYAN );
         
-        put( GRID, STROKE, 1 );
+        put( GRID, STROKE, 1.0 );
         put( GRID, COLOR, Color.GREEN );
     }
     

@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.text.ParseException;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 
 import javax.swing.JComponent;
 import javax.swing.JSpinner;
@@ -17,15 +17,15 @@ public class Feedback
     public static final Color     ERR_FOREGROUND    = Color.BLACK;
     public static final String    ERR_TEXT          = "Error";
     
-    public static OptionalInt getValue( JSpinner spinner )
+    public static OptionalDouble getValue( JSpinner spinner )
     {
-        OptionalInt value   = OptionalInt.empty();
+        OptionalDouble  value   = OptionalDouble.empty();
         try
         {
             spinner.commitEdit();
-            Integer intVal  = (Integer)spinner.getValue();
-            if ( intVal != null )
-                value = OptionalInt.of( intVal );
+            Double  doubleVal   = (Double)spinner.getValue();
+            if ( doubleVal != null )
+                value = OptionalDouble.of( doubleVal );
         }
         catch ( ParseException exc )
         {

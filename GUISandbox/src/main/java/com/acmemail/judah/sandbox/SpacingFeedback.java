@@ -4,7 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -31,10 +31,10 @@ public class SpacingFeedback extends JLabel
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        Graphics2D  gtx         = (Graphics2D)graphics.create();
-        int         width       = getWidth();
-        int         height      = getHeight();
-        OptionalInt optValue    = Feedback.getValue( spinner );
+        Graphics2D      gtx         = (Graphics2D)graphics.create();
+        int             width       = getWidth();
+        int             height      = getHeight();
+        OptionalDouble  optValue    = Feedback.getValue( spinner );
         if ( optValue.isEmpty() )
             Feedback.showError( gtx, width, height );
         else
@@ -44,7 +44,7 @@ public class SpacingFeedback extends JLabel
             int     offset      = (int)((height - verticalLen) / 2f);
             int     yco         = height / 2;
             int     midPoint    = width / 2;
-            int     halfSpacing = optValue.getAsInt() / 2;
+            double  halfSpacing = optValue.getAsDouble() / 2;
             gtx.setColor( Feedback.DEF_BACKGROUND );
             gtx.fillRect( 0, 0, width, height );
             gtx.setColor( Feedback.DEF_FOREGROUND );
@@ -53,10 +53,10 @@ public class SpacingFeedback extends JLabel
             gtx.setStroke( new BasicStroke( 1 ) );
             gtx.drawLine( 5, yco, width - 5, yco );
             
-            // draw 2 vertical lines, len pixels apart,
-            // equidistant from the midpoint
-            int     xcoLeft     = midPoint - halfSpacing;
-            int     xcoRight    = midPoint + halfSpacing;
+            // draw 2 vertical lines, len pixels apart, equidistant
+            // from the midpoint; disregard rounding errors 
+            int     xcoLeft     = (int)(midPoint - halfSpacing);
+            int     xcoRight    = (int)(midPoint + halfSpacing);
             int     ycoTop      = offset;
             int     ycoBottom   = height - offset;
             gtx.setStroke( new BasicStroke( 3 ) );

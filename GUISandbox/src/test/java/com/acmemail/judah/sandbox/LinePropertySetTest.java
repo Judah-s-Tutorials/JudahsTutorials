@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.Color;
 import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
 
 import org.junit.jupiter.api.Test;
@@ -32,9 +33,9 @@ class LinePropertySetTest
 	private void testLinePropertySet( String major )
 	{
 	    Optional<Color>     color       = pMgr.getAsColor( major, COLOR );
-        OptionalInt         length      = pMgr.getAsInt( major, LENGTH );
-        OptionalInt         spacing     = pMgr.getAsInt( major, SPACING );
-        OptionalInt         stroke      = pMgr.getAsInt( major, STROKE );
+        OptionalDouble      length      = pMgr.getAsDouble( major, LENGTH );
+        OptionalDouble      spacing     = pMgr.getAsDouble( major, SPACING );
+        OptionalDouble      stroke      = pMgr.getAsDouble( major, STROKE );
         LinePropertySet     set         = new LinePropertySet( major );
         
         assertEquals( color.isPresent(), set.hasColor(), major );
@@ -45,11 +46,11 @@ class LinePropertySetTest
         if ( color.isPresent() )
             assertEquals( color.get(), set.getColor() );
         if ( length.isPresent() )
-            assertEquals( length.getAsInt(), set.getLength(), major );
+            assertEquals( length.getAsDouble(), set.getLength(), major );
         if ( spacing.isPresent() )
-            assertEquals( spacing.getAsInt(), set.getSpacing(), major );
+            assertEquals( spacing.getAsDouble(), set.getSpacing(), major );
         if ( stroke.isPresent() )
-            assertEquals( stroke.getAsInt(), set.getStroke(), major );
+            assertEquals( stroke.getAsDouble(), set.getStroke(), major );
 	}
 
 	@Test
@@ -113,11 +114,11 @@ class LinePropertySetTest
 	private void testGetStroke( String major )
 	{
 	    LinePropertySet    set     = new LinePropertySet( major );
-        OptionalInt        stroke  = pMgr.getAsInt( major, STROKE );
+        OptionalDouble     stroke  = pMgr.getAsDouble( major, STROKE );
         if ( stroke.isPresent() )
         {
-            int init    = set.getStroke();
-            int exp     = init += 5;
+            double  init    = set.getStroke();
+            double  exp     = init += 5;
             set.setStroke( exp );
             assertEquals( exp, set.getStroke() );
         }
@@ -135,11 +136,11 @@ class LinePropertySetTest
     private void testGetLength( String major )
     {
         LinePropertySet    set     = new LinePropertySet( major );
-        OptionalInt        length  = pMgr.getAsInt( major, LENGTH );
+        OptionalDouble     length  = pMgr.getAsDouble( major, LENGTH );
         if ( length.isPresent() )
         {
-            int init    = set.getLength();
-            int exp     = init += 5;
+            double  init    = set.getLength();
+            double  exp     = init += 5;
             set.setLength( exp );
             assertEquals( exp, set.getLength() );
         }
@@ -157,11 +158,11 @@ class LinePropertySetTest
     private void testGetSpacing( String major )
     {
         LinePropertySet    set     = new LinePropertySet( major );
-        OptionalInt        spacing = pMgr.getAsInt( major, LENGTH );
+        OptionalDouble     spacing = pMgr.getAsDouble( major, LENGTH );
         if ( spacing.isPresent() )
         {
-            int init    = set.getSpacing();
-            int exp     = init += 5;
+            double  init    = set.getSpacing();
+            double  exp     = init += 5;
             set.setSpacing( exp );
             assertEquals( exp, set.getSpacing() );
         }

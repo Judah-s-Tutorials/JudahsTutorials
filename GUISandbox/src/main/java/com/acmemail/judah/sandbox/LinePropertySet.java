@@ -2,15 +2,15 @@ package com.acmemail.judah.sandbox;
 
 import java.awt.Color;
 import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.OptionalDouble;
 
 public class LinePropertySet
 {
 	private final PropertyManager	pMgr	= PropertyManager.instanceOf();
     private final String    major;
-    private OptionalInt     stroke;
-    private OptionalInt     length;
-    private OptionalInt     spacing;
+    private OptionalDouble  stroke;
+    private OptionalDouble  length;
+    private OptionalDouble  spacing;
     private Optional<Color> color;
     
     public LinePropertySet( String major )
@@ -22,21 +22,26 @@ public class LinePropertySet
     public void apply()
     {
         if ( hasStroke() )
-            pMgr.put( major, PropertyManager.STROKE, stroke.getAsInt() );
+            pMgr.put( major, PropertyManager.STROKE, stroke.getAsDouble() );
         if ( hasLength() )
-            pMgr.put( major, PropertyManager.LENGTH, length.getAsInt() );
+            pMgr.put( major, PropertyManager.LENGTH, length.getAsDouble() );
         if ( hasSpacing() )
-            pMgr.put( major, PropertyManager.SPACING, spacing.getAsInt() );
+            pMgr.put( major, PropertyManager.SPACING, spacing.getAsDouble() );
         if ( hasColor() )
             pMgr.put( major, PropertyManager.COLOR, color.get() );
     }
     
     public void reset()
     {
-        stroke = pMgr.getAsInt( major, PropertyManager.STROKE );
-        length = pMgr.getAsInt( major, PropertyManager.LENGTH );
-        spacing = pMgr.getAsInt( major, PropertyManager.SPACING );
+        stroke = pMgr.getAsDouble( major, PropertyManager.STROKE );
+        length = pMgr.getAsDouble( major, PropertyManager.LENGTH );
+        spacing = pMgr.getAsDouble( major, PropertyManager.SPACING );
         color = pMgr.getAsColor( major, PropertyManager.COLOR );
+    }
+    
+    public String getMajorCategory()
+    {
+        return major;
     }
     
     public boolean hasStroke()
@@ -59,17 +64,17 @@ public class LinePropertySet
         return color.isPresent();
     }
     
-    public int getStroke()
+    public double getStroke()
     {
         return stroke.orElse( -1 );
     }
     
-    public int getLength()
+    public double getLength()
     {
         return length.orElse( -1 );
     }
     
-    public int getSpacing()
+    public double getSpacing()
     {
         return spacing.orElse( -1 );
     }
@@ -79,22 +84,22 @@ public class LinePropertySet
         return color.orElse( null );
     }
     
-    public void setStroke( int stroke )
+    public void setStroke( double stroke )
     {
         if ( hasStroke() )
-            this.stroke = OptionalInt.of( stroke );
+            this.stroke = OptionalDouble.of( stroke );
     }
     
-    public void setLength( int length )
+    public void setLength( double length )
     {
         if ( hasLength() )
-            this.length = OptionalInt.of( length );
+            this.length = OptionalDouble.of( length );
     }
     
-    public void setSpacing( int spacing )
+    public void setSpacing( double spacing )
     {
         if ( hasSpacing() )
-            this.spacing = OptionalInt.of( spacing );
+            this.spacing = OptionalDouble.of( spacing );
     }
     
     public void setColor( Color color )
