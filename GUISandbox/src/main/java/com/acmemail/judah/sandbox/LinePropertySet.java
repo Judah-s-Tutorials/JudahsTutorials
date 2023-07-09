@@ -4,10 +4,14 @@ import java.awt.Color;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
+import javax.swing.JComponent;
+
 public class LinePropertySet
 {
+    public static final  String TYPE_KEY    = "judah.property_type";
+
 	private final PropertyManager	pMgr	= PropertyManager.instanceOf();
-    private final String    major;
+    private final String            major;
     private OptionalDouble  stroke;
     private OptionalDouble  length;
     private OptionalDouble  spacing;
@@ -106,5 +110,23 @@ public class LinePropertySet
     {
         if ( hasColor() )
             this.color = Optional.of( color );
+    }
+    
+    public static LinePropertySet getPropertySet( JComponent comp )
+    {
+        Object  value   = comp.getClientProperty( TYPE_KEY );
+        if ( (value != null) && !(value instanceof LinePropertySet) )
+        {
+            String  message =
+                "Expected LinePropertySet, was "
+                + value.getClass().getName();
+            throw new ComponentException( message );
+        }
+        return (LinePropertySet)value;
+    }
+    
+    public static void putPropertySet( JComponent comp, LinePropertySet set )
+    {
+        comp.putClientProperty( TYPE_KEY, set );
     }
 }

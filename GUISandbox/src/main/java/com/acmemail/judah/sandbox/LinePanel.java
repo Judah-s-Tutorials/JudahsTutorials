@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.text.ParseException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -56,8 +57,6 @@ public class LinePanel extends JPanel
     
     private static final String STATUS_KEY          =
         "judah.JColorChooserDemo.status";
-    public static final  String TYPE_KEY            =
-        "judah.property_type";
     
     private final ButtonGroup   lineGroup   = new ButtonGroup();
     private final JColorChooser colorPane   = new JColorChooser();
@@ -71,6 +70,9 @@ public class LinePanel extends JPanel
             e -> setAndClose( JOptionPane.CANCEL_OPTION )
         );
     
+    private final RadioBoxPanel     radioBoxPanel   = new RadioBoxPanel();
+    private final PropertiesPanel   propertiesPanel = new PropertiesPanel();
+    
     public static void main(String[] args)
     {
         SwingUtilities.invokeLater( () -> build() );
@@ -83,6 +85,18 @@ public class LinePanel extends JPanel
         frame.setContentPane( new LinePanel() );
         frame.pack();
         frame.setVisible( true );
+    }
+    
+    private JRadioButton getSelectedButton()
+    {
+        JRadioButton    button  =
+            Collections.list( lineGroup.getElements() )
+            .stream()
+            .filter( b -> b.isSelected() )
+            .findFirst()
+            .map( b -> (JRadioButton)b )
+            .orElse( null );
+        return button;
     }
     
     private void setAndClose( int choice )
@@ -112,21 +126,6 @@ public class LinePanel extends JPanel
             nextElement().
             setSelected( true );
     }
-    
-    private LinePropertySet getPropertySet( AbstractButton button )
-    {
-        Object  value   = button.getClientProperty( TYPE_KEY );
-        if ( value == null )
-            throw new RuntimeException( "LinePropertySet not found" );
-        if ( !(value instanceof LinePropertySet) )
-        {
-            String  message =
-                "Expected LinePropertySet, was "
-                + value.getClass().getName();
-            throw new RuntimeException( message );
-        }
-        return (LinePropertySet)value;
-    }
 
     private class MainPanel extends JPanel
     {
@@ -137,13 +136,13 @@ public class LinePanel extends JPanel
                 Box.createRigidArea( new Dimension( 50, 0 ) );
             
             setLayout( layout );
-            add( new RadioBoxPanel() );
+            add( radioBoxPanel );
             add( horSpace );
-            add( new PropertiesPanel() );
+            add( propertiesPanel );
         }
     }
     
-    private class RadioBoxPanel extends JPanel implements ActionListener
+    private class RadioBoxPanel extends JPanel 
     {
         private static final String minorTics   = "Minor Tics";
         private static final String majorTics   = "Major Tics";
@@ -168,21 +167,7 @@ public class LinePanel extends JPanel
             Arrays.stream( labels )
                 .map( this::newRadioButton )
                 .peek( this::add )
-                .peek( b -> b.addActionListener( this ) )
                 .forEach( b -> lineGroup.add( b ) );
-        }
-
-        @Override
-        public void actionPerformed( ActionEvent evt )
-        {
-            Object  source  = evt.getSource();
-            if ( !(source instanceof JRadioButton ) )
-                System.err.println( "Expected radio button, got..." );
-            else
-            {
-                String  text    = ((JRadioButton)source).getText();
-                System.out.println( "Radio button: " + text );
-            }
         }
         
         private JRadioButton newRadioButton( String label )
@@ -190,7 +175,7 @@ public class LinePanel extends JPanel
             JRadioButton    button  = new JRadioButton( label );
             String          type    = typeMap.get( label );
             LinePropertySet set     = new LinePropertySet( type );
-            button.putClientProperty( TYPE_KEY, set );
+            LinePropertySet.putPropertySet( button, set );
             return button;
         }
     }
@@ -303,32 +288,12 @@ public class LinePanel extends JPanel
             if ( source instanceof JRadioButton )
             {
                 JRadioButton    button  = (JRadioButton)source;
-                LinePropertySet set     = getPropertySet( button );
                 if ( stateChange == ItemEvent.DESELECTED )
-                {
-                    storeProperty(
-                        strokeSpinner,
-                        set::hasStroke,
-                        set::setStroke
-                    );
-                    storeProperty(
-                        lengthSpinner,
-                        set::hasLength,
-                        set::setLength
-                    );
-                    storeProperty(
-                        spacingSpinner,
-                        set::hasSpacing,
-                        set::setSpacing
-                    );
-                    storeProperty(
-                        colorField,
-                        set::hasColor,
-                        set::setColor
-                    );
-                }
+                    commit( button );
                 else if ( stateChange == ItemEvent.SELECTED )
                 {
+                    LinePropertySet set = 
+                        LinePropertySet.getPropertySet( button );
                     configureProperty(
                         strokeFB,
                         set::hasStroke,
@@ -355,6 +320,39 @@ public class LinePanel extends JPanel
                     );
                 }
             }
+        }
+        
+        /**
+         * Copies the current operator input
+         * into the LinePropertySet object
+         * of a given button.
+         * 
+         * @param button    the given button
+         */
+        private void commit( JRadioButton button )
+        {
+            LinePropertySet set = 
+                LinePropertySet.getPropertySet( button );
+            storeProperty(
+                strokeSpinner,
+                set::hasStroke,
+                set::setStroke
+            );
+            storeProperty(
+                lengthSpinner,
+                set::hasLength,
+                set::setLength
+            );
+            storeProperty(
+                spacingSpinner,
+                set::hasSpacing,
+                set::setSpacing
+            );
+            storeProperty(
+                colorField,
+                set::hasColor,
+                set::setColor
+            );
         }
         
         private void configureProperty(
@@ -400,9 +398,20 @@ public class LinePanel extends JPanel
         {
             if ( hasProp.getAsBoolean() )
             {
-                OptionalDouble  optVal  = Feedback.getValue( spinner );
-                if ( optVal.isPresent() )
-                    setter.accept( optVal.getAsDouble() );
+                try
+                {
+                    // Make sure operator input is committed.
+                    // If commit fails (with a ParseException) abandon the store
+                    // operation; leave LinePropertySet unchanged.
+                    spinner.commitEdit();
+                    OptionalDouble  optVal  = Feedback.getValue( spinner );
+                    if ( optVal.isPresent() )
+                        setter.accept( optVal.getAsDouble() );
+                }
+                catch ( ParseException exc )
+                {
+                    System.err.println( exc.getMessage() );
+                }
             }
         }
         
@@ -447,9 +456,15 @@ public class LinePanel extends JPanel
         
         private void apply( ActionEvent evt )
         {
+            // If necessary, commit the most recent changes
+            JRadioButton    currButton  = getSelectedButton();
+            if ( currButton == null )
+                throw new ComponentException( "No category selected" );
+            propertiesPanel.commit( currButton );
+            
             Collections.list( lineGroup.getElements() )
                 .stream()
-                .map( LinePanel.this::getPropertySet )
+                .map( LinePropertySet::getPropertySet )
                 .forEach( LinePropertySet::apply );
         }
         
@@ -457,7 +472,7 @@ public class LinePanel extends JPanel
         {
             Collections.list( lineGroup.getElements() )
             .stream()
-            .map( LinePanel.this::getPropertySet )
+            .map( LinePropertySet::getPropertySet )
             .forEach( LinePropertySet::reset );
         }
     }

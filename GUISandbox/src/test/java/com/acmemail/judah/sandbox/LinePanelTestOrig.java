@@ -1,29 +1,19 @@
 package com.acmemail.judah.sandbox;
 
+import static com.acmemail.judah.sandbox.PropertyManager.AXIS;
+import static com.acmemail.judah.sandbox.PropertyManager.GRID;
+import static com.acmemail.judah.sandbox.PropertyManager.MAJOR;
+import static com.acmemail.judah.sandbox.PropertyManager.MINOR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import static com.acmemail.judah.sandbox.PropertyManager.AXIS;
-import static com.acmemail.judah.sandbox.PropertyManager.MAJOR;
-import static com.acmemail.judah.sandbox.PropertyManager.MINOR;
-import static com.acmemail.judah.sandbox.PropertyManager.GRID;
-
-import static com.acmemail.judah.sandbox.PropertyManager.STROKE;
-import static com.acmemail.judah.sandbox.PropertyManager.SPACING;
-import static com.acmemail.judah.sandbox.PropertyManager.LENGTH;
-import static com.acmemail.judah.sandbox.PropertyManager.COLOR;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.function.Predicate;
 
 import javax.swing.AbstractButton;
@@ -39,11 +29,10 @@ import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.Test;
 
-class LinePanelTest
+import com.acmemail.judah.sandbox.test_utils.LineTestData;
+
+class LinePanelTestOrig
 {
-    private static final PropertyManager pMgr   = 
-        PropertyManager.instanceOf();
-    
     private JFrame          frame;
     private LinePanel       linePanel;
     
@@ -94,36 +83,81 @@ class LinePanelTest
         verifyProperties( gridRB );
     }
     
+    @Test
+    public void testSelection()
+    {
+        postFrame();
+        
+        // Assume that "Axes" is initially selected
+        testSelection( majorRB );
+        testSelection( minorRB );
+        testSelection( gridRB );
+        testSelection( axisRB );
+    }
+    
+    private void testSelection( JRadioButton nextSelected )
+    {
+        // Make sure all new data has been entered for the currently 
+        // selected button.
+        JRadioButton    origSelected    = getSelectedButton();
+        System.out.println( "O: " + origSelected.getText() + ", N: " + nextSelected.getText() );
+        LineTestData    oldData         = LineTestData.of( origSelected );
+        LineTestData    newData         = oldData.getUniqueData();
+        setCurrInput( newData );
+        
+        // Select the next button. Verify that data for the previously
+        // selected button has been committed, and data from the
+        // newly selected button has been used to update the UI.
+        invokeAndWait( () -> nextSelected.doClick() );
+        LineTestData    currData       = getCurrInput();
+        newData.assertMapsTo( origSelected );
+        currData.assertMapsTo( nextSelected );
+    }
+    
+    @Test
+    public void testSelectMajorTics() throws InterruptedException
+    {
+        postFrame();
+        testSelectCategory( majorRB );
+    }
+    
+    @Test
+    public void testSelectMinorTics() throws InterruptedException
+    {
+        postFrame();
+        testSelectCategory( minorRB );
+    }
+    
+    @Test
+    public void testSelectGrid() throws InterruptedException
+    {
+        postFrame();
+        testSelectCategory( gridRB );
+    }
+    
+    @Test
+    public void testApplyAxis()
+    {
+        postFrame();
+    }
+    
+    private void testSelectCategory( JRadioButton button )
+    {
+        invokeAndWait( () -> button.doClick() );
+        verifySelected( button );
+    }
+    
     private void verifyMajorCategory( JRadioButton button, String expMajor )
     {
-        LinePropertySet set = getPropertySet( button );
+        LinePropertySet set = LinePropertySet.getPropertySet( button );
         assertEquals( expMajor, set.getMajorCategory() );
     }
     
     private void verifyProperties( JRadioButton button )
     {
-        LinePropertySet set         = getPropertySet( button );
-        String          majorCat    = set.getMajorCategory();
-        OptionalDouble  stroke = 
-            pMgr.getAsDouble( majorCat, STROKE );
-        OptionalDouble  length = 
-            pMgr.getAsDouble( majorCat, LENGTH );
-        OptionalDouble  spacing = 
-            pMgr.getAsDouble( majorCat, SPACING );
-        Optional<Color> color = 
-            pMgr.getAsColor( majorCat, COLOR );
-        
-        assertEquals( stroke.isPresent(), set.hasStroke() );
-        assertEquals( spacing.isPresent(), set.hasSpacing() );
-        assertEquals( length.isPresent(), set.hasLength() );
-        assertEquals( color.isPresent(), set.hasColor() );
-        
-        if ( stroke.isPresent() )
-            assertEquals( stroke.getAsDouble(), set.getStroke() );
-        if ( spacing.isPresent() )
-            assertEquals( spacing.getAsDouble(), set.getSpacing() );
-        if ( length.isPresent() )
-            assertEquals( length.getAsDouble(), set.getLength() );
+        LineTestData    data    = LineTestData.of( button );
+        LinePropertySet set     = LinePropertySet.getPropertySet( button );
+        data.assertMapsTo( set );
     }
     
     private void verifySelected( JRadioButton expSelected )
@@ -141,104 +175,15 @@ class LinePanelTest
     
     private void verifyPropertySet( JRadioButton selected )
     {
-        LinePropertySet set     = getPropertySet( selected );
-        verifyStroke( set );
-        verifyLength( set );
-        verifySpacing( set );
-        verifyColor( set );
-    }
-    
-    private void verifyStroke( LinePropertySet set )
-    {
-        if ( !set.hasStroke() )
-        {
-            assertFalse( strokeLabel.isEnabled() );
-            assertFalse( strokeSpinner.isEnabled() );
-        }
-        else
-        {
-            assertTrue( strokeLabel.isEnabled() );
-            assertTrue( strokeSpinner.isEnabled() );
-            assertEquals( 
-                set.getStroke(), 
-                (double)strokeSpinner.getValue() 
+        LinePropertySet set = LinePropertySet.getPropertySet( selected );
+        LineTestData    data    =
+            new LineTestData(
+                strokeSpinner,
+                lengthSpinner,
+                spacingSpinner,
+                colorField
             );
-        }
-    }
-    
-    private void verifyLength( LinePropertySet set )
-    {
-        if ( !set.hasLength() )
-        {
-            assertFalse( lengthLabel.isEnabled() );
-            assertFalse( lengthSpinner.isEnabled() );
-        }
-        else
-        {
-            assertTrue( lengthLabel.isEnabled() );
-            assertTrue( lengthSpinner.isEnabled() );
-            assertEquals(
-                set.getLength(), 
-                (double)lengthSpinner.getValue()
-            );
-        }
-    }
-    
-    private void verifySpacing( LinePropertySet set )
-    {
-        if ( !set.hasSpacing() )
-        {
-            assertFalse( spacingLabel.isEnabled() );
-            assertFalse( spacingSpinner.isEnabled() );
-        }
-        else
-        {
-            assertTrue( spacingLabel.isEnabled() );
-            assertTrue( spacingSpinner.isEnabled() );
-            assertEquals( 
-                set.getSpacing(), 
-                (double)spacingSpinner.getValue()
-            );
-        }
-    }
-    
-    private void verifyColor( LinePropertySet set )
-    {
-        if ( !set.hasColor() )
-        {
-            assertFalse( colorButton.isEnabled() );
-            assertFalse( colorField.isEnabled() );
-        }
-        else
-        {
-            assertTrue( colorButton.isEnabled() );
-            assertTrue( colorField.isEnabled() );
-            assertTrue( equals( set.getColor(), colorField.getText() ) );
-        }
-    }
-    
-    private boolean equals( Color color, String strColor )
-    {
-        boolean result      = false;
-        int     intColor    = color.getRGB() & 0x00ffffff;
-        try
-        {
-            int actColor    = Integer.decode( strColor );
-            result = intColor == actColor;
-        }
-        catch ( NumberFormatException exc )
-        {
-            result = false;
-        }
-        return result;
-    }
-
-    private LinePropertySet getPropertySet( AbstractButton button )
-    {
-        Object  value   = button.getClientProperty( LinePanel.TYPE_KEY );
-        assertNotNull( value );
-        assertTrue( value instanceof LinePropertySet );
-        return (LinePropertySet)value;
+        data.assertMapsTo( set );
     }
 
     private void postFrame()
@@ -268,22 +213,10 @@ class LinePanelTest
         allButtons = new JRadioButton[] { axisRB, majorRB, minorRB, gridRB };
     }
 
-    private void invokeAndWait( Runnable runner )
-    {
-        try
-        {
-            SwingUtilities.invokeAndWait( runner );
-        }
-        catch ( InvocationTargetException | InterruptedException exc )
-        {
-            exc.printStackTrace();
-            fail( "unexpected exception" );
-        }
-    }    
     private void buildFrame()
     {
         frame = new JFrame();
-        frame.setDefaultCloseOperation( JFrame.DO_NOTHING_ON_CLOSE );
+        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
         JPanel  contentPane = new JPanel( new BorderLayout() );
         
         linePanel = new LinePanel();
@@ -292,6 +225,20 @@ class LinePanelTest
         frame.pack();
         frame.setVisible( true );
     }
+
+    private void invokeAndWait( Runnable runner )
+    {
+        try
+        {
+            SwingUtilities.invokeAndWait( runner );
+            Thread.sleep( 1000 );
+        }
+        catch ( InvocationTargetException | InterruptedException exc )
+        {
+            exc.printStackTrace();
+            fail( exc );
+        }
+    }    
     
     private JRadioButton getRadioButton( String label )
     {
@@ -363,6 +310,7 @@ class LinePanelTest
         return (JTextField)comp;
     }
     
+    @SuppressWarnings("unchecked")
     private <T extends JComponent> T getByType( Class<T> clazz )
     {
         Predicate<JComponent> isType   = jc -> (jc.getClass() == clazz);
@@ -388,11 +336,38 @@ class LinePanelTest
         return result;
     }
     
-    private Color nextColor( Color colorIn )
+    private JRadioButton getSelectedButton()
     {
-        int     intColorIn  = colorIn.getRGB();
-        int     intColorOut = (intColorIn & 0xffffff00) + 1;
-        Color   colorOut    = new Color( intColorOut );
-        return colorOut;
+        JRadioButton    selected    =
+            Arrays.stream( allButtons )
+            .filter( JRadioButton::isSelected )
+            .findFirst()
+            .orElse( null );
+        assertNotNull( selected, "No radio button selected" );
+        return selected;
+    }
+    
+    private void setCurrInput( LineTestData data )
+    {
+        if ( data.hasStroke() )
+            strokeSpinner.setValue( data.getStroke() );
+        if ( data.hasLength() )
+            lengthSpinner.setValue( data.getLength() );
+        if ( data.hasSpacing() )
+            strokeSpinner.setValue( data.getSpacing() );
+        if ( data.hasColor() )
+            colorField.setText( "" + data.getColor().getRGB() );
+    }
+    
+    private LineTestData getCurrInput()
+    {
+        LineTestData    data    =
+            new LineTestData(
+                strokeSpinner,
+                lengthSpinner,
+                spacingSpinner,
+                colorField
+            );
+        return data;
     }
 }
