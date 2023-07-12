@@ -154,7 +154,7 @@ public class LinePanel extends JPanel
         private static final Map<String,String> typeMap = new HashMap<>();
         static
         {
-            typeMap.put( axes, PropertyManager.AXIS );
+            typeMap.put( axes, PropertyManager.AXES );
             typeMap.put( majorTics, PropertyManager.MAJOR );
             typeMap.put( minorTics, PropertyManager.MINOR );
             typeMap.put( gridLines, PropertyManager.GRID );

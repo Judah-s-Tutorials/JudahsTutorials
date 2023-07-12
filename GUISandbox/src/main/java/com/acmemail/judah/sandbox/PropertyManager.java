@@ -9,7 +9,7 @@ import java.util.OptionalInt;
 @SuppressWarnings("serial")
 public class PropertyManager extends HashMap<String,Object>
 {
-    public static final String  AXIS        = "axis";
+    public static final String  AXES        = "axis";
     public static final String  MAJOR       = "major";
     public static final String  MINOR       = "minor";
     public static final String  GRID        = "grid";
@@ -30,8 +30,8 @@ public class PropertyManager extends HashMap<String,Object>
     
     private PropertyManager()
     {
-        put( AXIS, STROKE, 7.0 );
-        put( AXIS, COLOR, Color.RED );
+        put( AXES, STROKE, 7.0 );
+        put( AXES, COLOR, Color.RED );
         
         put( MAJOR, STROKE, 5.0 );
         put( MAJOR, LENGTH, 11.0 );
@@ -45,6 +45,16 @@ public class PropertyManager extends HashMap<String,Object>
         
         put( GRID, STROKE, 1.0 );
         put( GRID, COLOR, Color.GREEN );
+    }
+    
+    public Optional<Object> get( String major, String minor )
+    {
+        Optional<Object>    result  = Optional.empty();
+        String              key     = major + "." + minor;
+        Object              val     = get( key );
+        if ( val != null )
+            result = Optional.of( val );
+        return result;
     }
     
     public OptionalInt getAsInt( String major, String minor )

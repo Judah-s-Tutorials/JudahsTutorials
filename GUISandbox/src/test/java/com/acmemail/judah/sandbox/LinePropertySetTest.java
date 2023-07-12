@@ -1,6 +1,6 @@
 package com.acmemail.judah.sandbox;
 
-import static com.acmemail.judah.sandbox.PropertyManager.AXIS;
+import static com.acmemail.judah.sandbox.PropertyManager.AXES;
 import static com.acmemail.judah.sandbox.PropertyManager.COLOR;
 import static com.acmemail.judah.sandbox.PropertyManager.GRID;
 import static com.acmemail.judah.sandbox.PropertyManager.LENGTH;
@@ -24,7 +24,7 @@ class LinePropertySetTest
 	@Test
 	void testLinePropertySet()
 	{
-        testLinePropertySet( AXIS );
+        testLinePropertySet( AXES );
         testLinePropertySet( MAJOR );
         testLinePropertySet( MINOR );
         testLinePropertySet( GRID );
@@ -56,7 +56,7 @@ class LinePropertySetTest
 	@Test
 	void testApply()
 	{
-        testApply( AXIS );
+        testApply( AXES );
 //        testApply( MAJOR );
 //        testApply( MINOR );
 //        testApply( GRID );
@@ -105,7 +105,7 @@ class LinePropertySetTest
 	@Test
 	void testGetStroke()
 	{
-        testGetStroke( AXIS );
+        testGetStroke( AXES );
         testGetStroke( MAJOR );
         testGetStroke( MINOR );
         testGetStroke( GRID );
@@ -127,7 +127,7 @@ class LinePropertySetTest
 	@Test
 	void testGetLength()
 	{
-        testGetLength( AXIS );
+        testGetLength( AXES );
         testGetLength( MAJOR );
         testGetLength( MINOR );
         testGetLength( GRID );
@@ -149,7 +149,7 @@ class LinePropertySetTest
     @Test
     void testGetSpacing()
     {
-        testGetSpacing( AXIS );
+        testGetSpacing( AXES );
         testGetSpacing( MAJOR );
         testGetSpacing( MINOR );
         testGetSpacing( GRID );
@@ -171,7 +171,7 @@ class LinePropertySetTest
     @Test
     void testGetColor()
     {
-        testGetColor( AXIS );
+        testGetColor( AXES );
         testGetColor( MAJOR );
         testGetColor( MINOR );
         testGetColor( GRID );

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.Color;
 import java.text.ParseException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 
@@ -14,6 +15,27 @@ import javax.swing.JTextField;
 import com.acmemail.judah.sandbox.LinePropertySet;
 import com.acmemail.judah.sandbox.PropertyManager;
 
+/**
+ * Maintains test data
+ * for unit testing
+ * of the LinePanel class
+ * and and related facilities.
+ * Data is organized by major category.
+ * Contains methods for 
+ * generating a unique set of data
+ * from existing values
+ * ({@ink #getUniqueData()}
+ * and for validating
+ * expected data
+ * against actual data
+ * ({@link #assertMapsTo(JComponent)}, {@link #assertMapsTo(LinePropertySet)_.
+ * 
+ * @author Jack Straub
+ * 
+ * @see #getUniqueData()
+ * @see #assertMapsTo(JComponent)
+ * @see #assertMapsTo(LinePropertySet)
+ */
 public class LineTestData
 {
     private final PropertyManager   pMgr    = PropertyManager.instanceOf();
@@ -120,6 +142,7 @@ public class LineTestData
     public void assertMapsTo( JComponent comp )
     {
         LinePropertySet set = LinePropertySet.getPropertySet( comp );
+        System.out.println( set.getMajorCategory() );
         assertMapsTo( set );
     }
     
@@ -138,6 +161,37 @@ public class LineTestData
             assertEquals( getSpacing(), set.getSpacing() );
         if ( hasColor() )
             assertEquals( getColor(), set.getColor() );
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        int hash    = 
+            Objects.hash(
+                majorCategory,
+                stroke,
+                length,
+                spacing,
+                color
+            );
+        return hash;
+    }
+   
+    @Override
+    public boolean equals( Object other )
+    {
+        boolean result = false;
+        if  ( other != null && other instanceof LineTestData )
+        {
+            LineTestData    that    = (LineTestData)other;
+            result = Objects.equals( this.majorCategory, that.majorCategory );
+            result = result
+                && this.stroke.equals( that.stroke )
+                && this.length.equals( that.length )
+                && this.spacing.equals( that.spacing )
+                && this.color.equals( that.color );
+        }
+        return result;
     }
     
     private OptionalDouble getOptional( JSpinner spinner )

@@ -1,6 +1,6 @@
 package com.acmemail.judah.sandbox;
 
-import static com.acmemail.judah.sandbox.PropertyManager.AXIS;
+import static com.acmemail.judah.sandbox.PropertyManager.AXES;
 import static com.acmemail.judah.sandbox.PropertyManager.GRID;
 import static com.acmemail.judah.sandbox.PropertyManager.MAJOR;
 import static com.acmemail.judah.sandbox.PropertyManager.MINOR;
@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.function.Predicate;
@@ -27,11 +27,14 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.sandbox.test_utils.LineTestData;
 
-class LinePanelTestOrig
+class LinePanelTest
 {
     private JFrame          frame;
     private LinePanel       linePanel;
@@ -56,7 +59,18 @@ class LinePanelTestOrig
     private SpacingFeedback spacingFB;
     private ColorFeedback   colorFB;
     
-    private JRadioButton[]  allButtons;
+    private JButton         applyButton;
+    private JButton         resetButton;
+    
+    private JRadioButton[]  allRButtons;
+    
+    @AfterEach
+    public void afterEach()
+    {
+        Arrays.stream( Window.getWindows() )
+            .peek( w -> invokeAndWait( () -> w.setVisible( false ) ) )
+            .forEach( Window::dispose );
+    }
     
     @Test
     void testLinePanel() 
@@ -71,7 +85,7 @@ class LinePanelTestOrig
         postFrame();
         
         // Verify radio buttons are set to correct major category
-        verifyMajorCategory( axisRB, AXIS );
+        verifyMajorCategory( axisRB, AXES );
         verifyMajorCategory( majorRB, MAJOR );
         verifyMajorCategory( minorRB, MINOR );
         verifyMajorCategory( gridRB, GRID );
@@ -94,6 +108,19 @@ class LinePanelTestOrig
         testSelection( gridRB );
         testSelection( axisRB );
     }
+    
+    @Test
+    public void testApplyAxes()
+    {
+        LineTestData    testDataOrig    = new LineTestData( AXES );
+        testDataOrig.assertMapsTo( axisRB );
+        invokeAndWait( () -> axisRB.doClick() );
+        
+        LineTestData    testDataNew     = testDataOrig.getUniqueData();
+        setCurrInput( testDataNew );
+        invokeAndWait( () -> applyButton.doClick() );
+    }
+    
     
     private void testSelection( JRadioButton nextSelected )
     {
@@ -163,7 +190,7 @@ class LinePanelTestOrig
     private void verifySelected( JRadioButton expSelected )
     {
         assertTrue( expSelected.isSelected() );
-        JRadioButton expNull    = Arrays.stream( allButtons )
+        JRadioButton expNull    = Arrays.stream( allRButtons )
             .filter( b -> b != expSelected )
             .filter( JRadioButton::isSelected )
             .findFirst()
@@ -210,7 +237,10 @@ class LinePanelTestOrig
         spacingFB = getByType( SpacingFeedback.class );
         colorFB = getByType( ColorFeedback.class );
         
-        allButtons = new JRadioButton[] { axisRB, majorRB, minorRB, gridRB };
+        applyButton = getButton( "Apply" );
+        resetButton = getButton( "Reset" );
+        
+        allRButtons = new JRadioButton[] { axisRB, majorRB, minorRB, gridRB };
     }
 
     private void buildFrame()
@@ -231,7 +261,6 @@ class LinePanelTestOrig
         try
         {
             SwingUtilities.invokeAndWait( runner );
-            Thread.sleep( 1000 );
         }
         catch ( InvocationTargetException | InterruptedException exc )
         {
@@ -339,7 +368,7 @@ class LinePanelTestOrig
     private JRadioButton getSelectedButton()
     {
         JRadioButton    selected    =
-            Arrays.stream( allButtons )
+            Arrays.stream( allRButtons )
             .filter( JRadioButton::isSelected )
             .findFirst()
             .orElse( null );
@@ -350,13 +379,23 @@ class LinePanelTestOrig
     private void setCurrInput( LineTestData data )
     {
         if ( data.hasStroke() )
-            strokeSpinner.setValue( data.getStroke() );
+            setCurrInput( strokeSpinner, data.getStroke() );
         if ( data.hasLength() )
-            lengthSpinner.setValue( data.getLength() );
+            setCurrInput( lengthSpinner, data.getLength() );
         if ( data.hasSpacing() )
-            strokeSpinner.setValue( data.getSpacing() );
+            setCurrInput( spacingSpinner, data.getSpacing() );
         if ( data.hasColor() )
-            colorField.setText( "" + data.getColor().getRGB() );
+            setCurrInput( colorField, "" + data.getColor().getRGB() );
+    }
+    
+    private void setCurrInput( JSpinner spinner, double val )
+    {
+        invokeAndWait( () -> spinner.setValue( val ) );
+    }
+    
+    private void setCurrInput( JTextField field, String val )
+    {
+        invokeAndWait( () -> field.setText( val ) );
     }
     
     private LineTestData getCurrInput()
