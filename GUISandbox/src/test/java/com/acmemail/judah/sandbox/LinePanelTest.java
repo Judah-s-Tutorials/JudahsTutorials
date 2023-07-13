@@ -28,9 +28,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.sandbox.test_utils.LineTestData;
 
@@ -63,6 +62,24 @@ class LinePanelTest
     private JButton         resetButton;
     
     private JRadioButton[]  allRButtons;
+    
+    /** Settings for AXES category, as of start-of-test. */
+    private LinePropertySet initAxesSet;
+    /** Settings for MAJOR category, as of start-of-test. */
+    private LinePropertySet initMajorSet;
+    /** Settings for MINOR category, as of start-of-test. */
+    private LinePropertySet initMinorSet;
+    /** Settings for GRID category, as of start-of-test. */
+    private LinePropertySet initGridSet;
+    
+    @BeforeEach
+    public void beforeEach()
+    {
+        initAxesSet = new LinePropertySet( AXES );
+        initMajorSet = new LinePropertySet( MAJOR );
+        initMinorSet = new LinePropertySet( MINOR );
+        initGridSet = new LinePropertySet( GRID );
+    }
     
     @AfterEach
     public void afterEach()
