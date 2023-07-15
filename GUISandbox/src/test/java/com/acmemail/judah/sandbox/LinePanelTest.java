@@ -30,6 +30,8 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.sandbox.test_utils.LineTestData;
 
@@ -126,18 +128,104 @@ class LinePanelTest
         testSelection( axisRB );
     }
     
-    @Test
-    public void testApplyAxes()
+    @ParameterizedTest
+    @ValueSource( strings= {AXES,MAJOR,MINOR,GRID} )
+    public void testApply( String cat )
     {
-        LineTestData    testDataOrig    = new LineTestData( AXES );
-        testDataOrig.assertMapsTo( axisRB );
-        invokeAndWait( () -> axisRB.doClick() );
+        postFrame();
+        JRadioButton    button  = getButtonByCategory( cat );
+        
+        LineTestData    testDataOrig    = new LineTestData( cat );
+        testDataOrig.assertMapsTo( button );
+        invokeAndWait( () -> button.doClick() );
         
         LineTestData    testDataNew     = testDataOrig.getUniqueData();
         setCurrInput( testDataNew );
         invokeAndWait( () -> applyButton.doClick() );
+        verifyProperties( button );
     }
     
+//    @Test
+//    public void testApplyMajor()
+//    {
+//        postFrame();
+//        
+//        LineTestData    testDataOrig    = new LineTestData( MAJOR );
+//        testDataOrig.assertMapsTo( majorRB );
+//        invokeAndWait( () -> majorRB.doClick() );
+//        
+//        LineTestData    testDataNew     = testDataOrig.getUniqueData();
+//        setCurrInput( testDataNew );
+//        invokeAndWait( () -> applyButton.doClick() );
+//        verifyProperties( majorRB );
+//    }
+//    
+//    @Test
+//    public void testApplyMinor()
+//    {
+//        postFrame();
+//        
+//        LineTestData    testDataOrig    = new LineTestData( MINOR );
+//        testDataOrig.assertMapsTo( minorRB );
+//        invokeAndWait( () -> majorRB.doClick() );
+//        
+//        LineTestData    testDataNew     = testDataOrig.getUniqueData();
+//        setCurrInput( testDataNew );
+//        invokeAndWait( () -> applyButton.doClick() );
+//        verifyProperties( minorRB );
+//    }
+//    
+//    @Test
+//    public void testApplyGrid()
+//    {
+//        postFrame();
+//        
+//        LineTestData    testDataOrig    = new LineTestData( GRID );
+//        testDataOrig.assertMapsTo( gridRB );
+//        invokeAndWait( () -> gridRB.doClick() );
+//        
+//        LineTestData    testDataNew     = testDataOrig.getUniqueData();
+//        setCurrInput( testDataNew );
+//        invokeAndWait( () -> applyButton.doClick() );
+//        verifyProperties( gridRB );
+//    }
+    
+    @Test
+    public void testColorDialogOK()
+    {
+        postFrame();
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= {AXES,MAJOR,MINOR,GRID} )
+    public void testReset( String cat )
+    {
+        postFrame();
+        JRadioButton    button   = getButtonByCategory( cat );
+        doClick( button );
+        
+        // sanity check: input fields match data stored with RadioButton
+        LineTestData    origInput   = getCurrInput();
+        origInput.assertMapsTo( button );
+        
+        // create unique data, and set in input fields
+        LineTestData    newInput    = origInput.getUniqueData();
+        setCurrInput( newInput );
+        
+        // click any other RadioButton,
+        // forcing new input to be stored with RadioButton
+        if ( button != majorRB )
+            doClick( majorRB );
+        else
+            doClick( minorRB );
+        
+        // sanity check: new input data stored in RadioButton
+        newInput.assertMapsTo( button );
+
+        // reset; verify original data recovered in RadioButton
+        doClick( resetButton );
+        origInput.assertMapsTo( button );
+    }
     
     private void testSelection( JRadioButton nextSelected )
     {
@@ -193,8 +281,14 @@ class LinePanelTest
     
     private void verifyMajorCategory( JRadioButton button, String expMajor )
     {
+        assertEquals( expMajor, getMajorCategory( button ) );
+    }
+    
+    private String getMajorCategory( JRadioButton button )
+    {
         LinePropertySet set = LinePropertySet.getPropertySet( button );
-        assertEquals( expMajor, set.getMajorCategory() );
+        String          cat = set.getMajorCategory();
+        return cat;
     }
     
     private void verifyProperties( JRadioButton button )
@@ -413,6 +507,22 @@ class LinePanelTest
     private void setCurrInput( JTextField field, String val )
     {
         invokeAndWait( () -> field.setText( val ) );
+    }
+    
+    private void doClick( AbstractButton button )
+    {
+        invokeAndWait( () -> button.doClick() );
+    }
+    
+    private JRadioButton getButtonByCategory( String category )
+    {
+        JRadioButton    button  =
+            Arrays.stream( allRButtons )
+                .filter( rb -> category.equals( getMajorCategory( rb ) ) )
+                .findFirst()
+                .orElse( null );
+        assertNotNull( button );
+        return button;
     }
     
     private LineTestData getCurrInput()

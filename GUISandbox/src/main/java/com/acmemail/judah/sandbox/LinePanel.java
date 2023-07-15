@@ -73,20 +73,6 @@ public class LinePanel extends JPanel
     private final RadioBoxPanel     radioBoxPanel   = new RadioBoxPanel();
     private final PropertiesPanel   propertiesPanel = new PropertiesPanel();
     
-    public static void main(String[] args)
-    {
-        SwingUtilities.invokeLater( () -> build() );
-    }
-    
-    public static void build()
-    {
-        JFrame      frame   = new JFrame( "Properties Test" );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        frame.setContentPane( new LinePanel() );
-        frame.pack();
-        frame.setVisible( true );
-    }
-    
     private JRadioButton getSelectedButton()
     {
         JRadioButton    button  =
@@ -262,7 +248,7 @@ public class LinePanel extends JPanel
             return spinner;
         }
 
-        public void showColorDialog()
+        private void showColorDialog()
         {
             colorDialog.setVisible( true );
             Object  objStatus   = colorPane.getClientProperty( STATUS_KEY );
