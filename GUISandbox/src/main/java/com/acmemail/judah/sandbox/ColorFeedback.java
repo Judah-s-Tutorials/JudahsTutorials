@@ -51,6 +51,13 @@ public class ColorFeedback extends JLabel
         paintBorder( gtx );
     }
     
+    public Color getCurrColor()
+    {
+        Optional<Color> optColor    = getColor();
+        Color           color       = optColor.orElse( null );
+        return color;
+    }
+    
     private Optional<Color> getColor()
     {
         Optional<Color> colorOpt    = Optional.empty();

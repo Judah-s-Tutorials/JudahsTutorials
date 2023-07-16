@@ -59,17 +59,17 @@ public class LinePanel extends JPanel
         "judah.JColorChooserDemo.status";
     
     private final ButtonGroup   lineGroup   = new ButtonGroup();
-    private final JColorChooser colorPane   = new JColorChooser();
-    private final JDialog       colorDialog =
-        JColorChooser.createDialog(
-            null, 
-            "Choose a Color", 
-            true, 
-            colorPane, 
-            e -> setAndClose( JOptionPane.OK_OPTION ), 
-            e -> setAndClose( JOptionPane.CANCEL_OPTION )
-        );
-    
+//    private final JColorChooser colorPane   = new JColorChooser();
+//    private final JDialog       colorDialog =
+//        JColorChooser.createDialog(
+//            null, 
+//            "Choose a Color", 
+//            true, 
+//            colorPane, 
+//            null,//e -> setAndClose( JOptionPane.OK_OPTION ), 
+//            e -> setAndClose( JOptionPane.CANCEL_OPTION )
+//        );
+    private final ColorDialog       colorDialog     = new ColorDialog();
     private final RadioBoxPanel     radioBoxPanel   = new RadioBoxPanel();
     private final PropertiesPanel   propertiesPanel = new PropertiesPanel();
     
@@ -83,12 +83,6 @@ public class LinePanel extends JPanel
             .map( b -> (JRadioButton)b )
             .orElse( null );
         return button;
-    }
-    
-    private void setAndClose( int choice )
-    {
-        colorPane.putClientProperty( STATUS_KEY, choice );
-        colorDialog.setVisible( false );
     }
 
     public LinePanel()
@@ -250,15 +244,9 @@ public class LinePanel extends JPanel
 
         private void showColorDialog()
         {
-            colorDialog.setVisible( true );
-            Object  objStatus   = colorPane.getClientProperty( STATUS_KEY );
-            if ( objStatus == null || !(objStatus instanceof Integer) )
-                throw new RuntimeException( "Color error: " + objStatus );
-            int intStatus       = (int)objStatus;
-            System.out.println( intStatus );
-            if ( intStatus == JOptionPane.OK_OPTION )
+            Color   color   = colorDialog.showDialog();
+            if ( color != null )
             {
-                Color       color   = colorPane.getColor();
                 String      text    = Feedback.getText( color );
                 colorField.setText( text );
                 colorFB.repaint();

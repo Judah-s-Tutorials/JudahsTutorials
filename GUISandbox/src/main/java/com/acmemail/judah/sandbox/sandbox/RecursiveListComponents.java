@@ -7,10 +7,11 @@ import java.util.Arrays;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 
-import javax.swing.JButton;
+import javax.swing.AbstractButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 import com.acmemail.judah.sandbox.ComponentException;
 
@@ -135,12 +136,16 @@ public class RecursiveListComponents
         System.out.println( indent + comp.getClass().getName() );
         System.out.println( indent + "name: " + comp.getName() );
         String  text    = null;
+        String  layout  = null;
         if ( comp instanceof JLabel )
             text = ((JLabel)comp).getText();
-        else if ( comp instanceof JButton )
-            text = ((JButton)comp).getText();
+        else if ( comp instanceof AbstractButton )
+            text = ((AbstractButton)comp).getText();
+        else if ( comp instanceof JPanel )
+            layout = ((JPanel)comp).getLayout().getClass().getCanonicalName();
         else
             ;
         System.out.println( indent + "text: " + text );
+        System.out.println( indent + "layout: " + layout );
     }
 }

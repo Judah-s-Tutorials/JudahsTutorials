@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
@@ -18,6 +19,7 @@ import java.util.function.Predicate;
 
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -33,7 +35,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.acmemail.judah.sandbox.sandbox.SandboxUtils;
 import com.acmemail.judah.sandbox.test_utils.LineTestData;
+import com.acmemail.judah.sandbox.test_utils.Utils;
 
 class LinePanelTest
 {
@@ -73,6 +77,31 @@ class LinePanelTest
     private LinePropertySet initMinorSet;
     /** Settings for GRID category, as of start-of-test. */
     private LinePropertySet initGridSet;
+    
+    /**
+     *  The JColorChooser component of the 
+     *  JColorChooser dialog. Set by the 
+     *  {@linkplain #startColorChooserThread()} method.
+     */
+    private JColorChooser   chooser;
+    /**
+     *  The OK button component of the 
+     *  JColorChooser dialog. Set by the 
+     *  {@linkplain #startChooserThread()} method.
+     */
+    private JButton         okButton;
+    /**
+     *  The Cancel button component of the 
+     *  JColorChooser dialog. Set by the 
+     *  {@linkplain #startChooserThread()} method.
+     */
+    private JButton         cancelButton;
+    /**
+     *  The value returned by the JColorChooser dialog
+     *  when it is dismissed Set by the 
+     *  {@linkplain #startChooser()} method.
+     */
+    private Color           colorChoice;
     
     @BeforeEach
     public void beforeEach()
@@ -145,55 +174,21 @@ class LinePanelTest
         verifyProperties( button );
     }
     
-//    @Test
-//    public void testApplyMajor()
-//    {
-//        postFrame();
-//        
-//        LineTestData    testDataOrig    = new LineTestData( MAJOR );
-//        testDataOrig.assertMapsTo( majorRB );
-//        invokeAndWait( () -> majorRB.doClick() );
-//        
-//        LineTestData    testDataNew     = testDataOrig.getUniqueData();
-//        setCurrInput( testDataNew );
-//        invokeAndWait( () -> applyButton.doClick() );
-//        verifyProperties( majorRB );
-//    }
-//    
-//    @Test
-//    public void testApplyMinor()
-//    {
-//        postFrame();
-//        
-//        LineTestData    testDataOrig    = new LineTestData( MINOR );
-//        testDataOrig.assertMapsTo( minorRB );
-//        invokeAndWait( () -> majorRB.doClick() );
-//        
-//        LineTestData    testDataNew     = testDataOrig.getUniqueData();
-//        setCurrInput( testDataNew );
-//        invokeAndWait( () -> applyButton.doClick() );
-//        verifyProperties( minorRB );
-//    }
-//    
-//    @Test
-//    public void testApplyGrid()
-//    {
-//        postFrame();
-//        
-//        LineTestData    testDataOrig    = new LineTestData( GRID );
-//        testDataOrig.assertMapsTo( gridRB );
-//        invokeAndWait( () -> gridRB.doClick() );
-//        
-//        LineTestData    testDataNew     = testDataOrig.getUniqueData();
-//        setCurrInput( testDataNew );
-//        invokeAndWait( () -> applyButton.doClick() );
-//        verifyProperties( gridRB );
-//    }
-    
     @Test
     public void testColorDialogOK()
     {
         postFrame();
+        invokeAndWait( () -> axisRB.doClick() );
+        LineTestData    currData    = getCurrInput();
+        LineTestData    newData     = currData.getUniqueData();
+        Color           newColor    = Color.blue;//.getColor();
+        
+        Thread  thread  = startChooserThread();
+        invokeAndWait( () -> chooser.setColor( newColor ) );
+        invokeAndWait( () -> okButton.doClick() );
+        Utils.join( thread );
+        
+        assertEquals( newColor, colorFB.getCurrColor() );
     }
     
     @ParameterizedTest
@@ -410,12 +405,8 @@ class LinePanelTest
     
     private JButton getButton( String label )
     {
-        final Predicate<JComponent> isLabel   = 
-            jc -> (jc instanceof JButton);
-        Predicate<JComponent>   hasText             =
-            jc -> hasName( (JButton)jc, label );
-        Predicate<JComponent>   pred                =
-            isLabel.and( hasText );
+        Predicate<JComponent>   pred    =
+            ComponentFinder.getButtonPredicate( label );
         JComponent  comp    = ComponentFinder.find( linePanel, pred );
         assertNotNull( comp );
         assertTrue( comp instanceof JButton );
@@ -535,5 +526,61 @@ class LinePanelTest
                 colorField
             );
         return data;
+    }
+    
+    /**
+     * Starts a thread to display the JColorChooser dialog.
+     * Interrogates the dialog after it's displayed,
+     * and obtains the components needed
+     * for programmatic interaction.
+     * 
+     * @return  the new Thread
+     */
+    private Thread startChooserThread() 
+    {
+        Runnable    runner  = 
+            () -> invokeAndWait( () -> colorButton.doClick() );
+        String      name    = "ChooserThread";
+        Thread  thread      = new Thread( runner, name );
+        thread.start();
+        SandboxUtils.pause( 500 );
+        
+        // Assumption: color chooser dialog is the only JDialog
+        // that is presently visible.
+        ComponentFinder finder  = new ComponentFinder( true, false, true );
+        Window  colorDialog = finder.findWindow( w -> true );
+        assertNotNull( colorDialog );
+        
+        Predicate<JComponent>   pred    = jc -> (jc instanceof JColorChooser);
+        chooser = (JColorChooser)ComponentFinder.find( colorDialog, pred );
+        assertNotNull( chooser );
+        
+        pred = ComponentFinder.getButtonPredicate( "OK" );
+        okButton = (JButton)ComponentFinder.find( colorDialog, pred );
+        assertNotNull( okButton );
+        
+        pred = ComponentFinder.getButtonPredicate( "Cancel" );
+        cancelButton = (JButton)ComponentFinder.find( colorDialog, pred );
+        assertNotNull( cancelButton );
+        
+        return thread;
+    }
+    
+    /**
+     * Helper method to obtain the JColorChooser component
+     * of the JColorChooser dialog.
+     * 
+     * @return  the JColorChooser component of the JColorChooser dialog.
+     * 
+     * @throws ComponentException if the operation fails
+     */
+    private JColorChooser getColorChooser()
+    {
+        ComponentFinder finder  = new ComponentFinder( true, false, true );
+        JComponent  comp    = 
+            finder.find( c -> (c instanceof JColorChooser) );
+        if ( comp == null || !(comp instanceof JColorChooser) ) 
+            throw new ComponentException( "JColorChooser not found" );
+        return (JColorChooser)comp;
     }
 }
