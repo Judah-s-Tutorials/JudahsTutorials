@@ -40,10 +40,10 @@ import com.acmemail.judah.sandbox.sandbox.SandboxUtils;
 import com.acmemail.judah.sandbox.test_utils.LineTestData;
 import com.acmemail.judah.sandbox.test_utils.Utils;
 
-class LinePanelTest
+class LinePanelTest2
 {
     private JFrame          frame;
-    private LinePanel       linePanel;
+    private LinePanel2      linePanel;
     
     private JRadioButton    axisRB;
     private JRadioButton    majorRB;
@@ -175,6 +175,10 @@ class LinePanelTest
         verifyProperties( button );
     }
     
+    /**
+     * Start the color dialog, choose a new color and select the
+     * OK button. Verify that the data reflects the new color.
+     */
     @Test
     public void testColorDialogOK()
     {
@@ -182,13 +186,16 @@ class LinePanelTest
         invokeAndWait( () -> axisRB.doClick() );
         LineTestData    currData    = getCurrInput();
         LineTestData    newData     = currData.getUniqueData();
-        Color           newColor    = Color.blue;//.getColor();
+        Color           newColor    = newData.getColor();
         
         Thread  thread  = startChooserThread();
         invokeAndWait( () -> chooser.setColor( newColor ) );
         invokeAndWait( () -> okButton.doClick() );
         Utils.join( thread );
-        SandboxUtils.pause( 250 );
+        // at this point the chooser thread has terminated,
+        // but we're still waiting for the LinePanel to respond
+        // to events that are issued on the event dispatch thread.
+        Utils.pause( 250 );
         
         assertEquals( newColor, colorFB.getCurrColor() );
     }
@@ -385,7 +392,7 @@ class LinePanelTest
         frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
         JPanel  contentPane = new JPanel( new BorderLayout() );
         
-        linePanel = new LinePanel();
+        linePanel = new LinePanel2();
         contentPane.add( linePanel, BorderLayout.CENTER );
         frame.setContentPane( contentPane );
         frame.pack();
