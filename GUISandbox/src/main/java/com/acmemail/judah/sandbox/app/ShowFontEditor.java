@@ -8,7 +8,7 @@ import javax.swing.border.Border;
 
 import com.acmemail.judah.sandbox.FontEditor;
 
-public class ShowColorFontEditor
+public class ShowFontEditor
 {
     public static void main(String[] args)
     {
