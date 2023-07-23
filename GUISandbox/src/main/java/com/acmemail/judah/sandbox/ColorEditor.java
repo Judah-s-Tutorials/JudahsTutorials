@@ -2,33 +2,22 @@ package com.acmemail.judah.sandbox;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
-import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.border.Border;
 
 public class ColorEditor
 {
-    private static final Color      errColor    = new Color( 0xCCCCCC );
-    private static final String     errText     = "Error";
-    private static final String     normalText  = "";
-    
     private final JButton       colorButton;
     private final JTextField    textEditor;
     private final ColorFeedback colorFB;
@@ -40,7 +29,7 @@ public class ColorEditor
     {
         colorButton = new JButton( "Color" );
         textEditor = new JTextField( "0xFFFFFF" );
-        colorFB = new ColorFeedback();
+        colorFB = new ColorFeedback( textEditor );
         colorDialog = new ColorDialog();
         
         Font    baseFont    = textEditor.getFont();
@@ -140,46 +129,6 @@ public class ColorEditor
             String  strColor    = String.format( "0x%06x", intColor );
             textEditor.setText( strColor );
             commit();
-        }
-    }
-    
-    @SuppressWarnings("serial")
-    private class ColorFeedback extends JLabel
-    {
-        public ColorFeedback()
-        {
-            Border  border  = BorderFactory.createLineBorder( Color.BLACK );
-            setBorder( border );
-//            setPreferredSize( textEditor.getPreferredSize() );
-            setText( errText );
-        }
-        
-        @Override
-        public void paintComponent( Graphics graphics )
-        {
-            super.paintComponent( graphics );
-            Graphics2D      gtx         = (Graphics2D)graphics.create();
-            Optional<Color> optColor    = getColor();
-            Color           color       = getColor().orElse( errColor );
-            String          text        = 
-                optColor.isPresent() ? normalText : errText;
-            int             width       = getWidth();
-            int             height      = getHeight();
-            int             style       =
-                optColor.isPresent() ? Font.PLAIN : Font.ITALIC;
-            gtx.setColor( color );
-            gtx.fillRect( 0,  0, width, height );
-            
-            Font        actFont = getFont().deriveFont( style );
-            gtx.setFont( actFont );
-            FontMetrics metrics = gtx.getFontMetrics();
-            Rectangle2D errRect = 
-                metrics.getStringBounds( text, gtx );
-            float   xco     = (float)(width - errRect.getWidth()) / 2;
-            float   yco     = (float)(height + errRect.getHeight()) / 2;
-            
-            gtx.setColor( Color.BLACK );
-            gtx.drawString( text, xco, yco );
         }
     }
 }

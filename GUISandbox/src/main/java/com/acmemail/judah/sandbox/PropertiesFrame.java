@@ -156,7 +156,7 @@ public class PropertiesFrame
         private final StrokeFeedback  strokeFB      = 
             new StrokeFeedback( strokeSpinner, null );
         private final ColorFeedback  colorFB        = 
-            new ColorFeedback( colorField, null );
+            new ColorFeedback( colorField );
         private final LengthFeedback lengthFB       = 
             new LengthFeedback( lengthSpinner, null );
         private final SpacingFeedback   spacingFB   = 

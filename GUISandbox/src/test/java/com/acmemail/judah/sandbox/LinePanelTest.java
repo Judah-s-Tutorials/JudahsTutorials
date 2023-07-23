@@ -31,7 +31,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -63,21 +62,12 @@ class LinePanelTest
     private StrokeFeedback  strokeFB;
     private LengthFeedback  lengthFB;
     private SpacingFeedback spacingFB;
-    private ColorFeedback   colorFB;
+    private ColorFeedback  colorFB;
     
     private JButton         applyButton;
     private JButton         resetButton;
     
     private JRadioButton[]  allRButtons;
-    
-    /** Settings for AXES category, as of start-of-test. */
-    private LinePropertySet initAxesSet;
-    /** Settings for MAJOR category, as of start-of-test. */
-    private LinePropertySet initMajorSet;
-    /** Settings for MINOR category, as of start-of-test. */
-    private LinePropertySet initMinorSet;
-    /** Settings for GRID category, as of start-of-test. */
-    private LinePropertySet initGridSet;
     
     /**
      *  The JColorChooser component of the 
@@ -97,21 +87,6 @@ class LinePanelTest
      *  {@linkplain #startChooserThread()} method.
      */
     private JButton         cancelButton;
-    /**
-     *  The value returned by the JColorChooser dialog
-     *  when it is dismissed Set by the 
-     *  {@linkplain #startChooser()} method.
-     */
-    private Color           colorChoice;
-    
-    @BeforeEach
-    public void beforeEach()
-    {
-        initAxesSet = new LinePropertySet( AXES );
-        initMajorSet = new LinePropertySet( MAJOR );
-        initMinorSet = new LinePropertySet( MINOR );
-        initGridSet = new LinePropertySet( GRID );
-    }
     
     @AfterEach
     public void afterEach()
@@ -182,7 +157,7 @@ class LinePanelTest
         invokeAndWait( () -> axisRB.doClick() );
         LineTestData    currData    = getCurrInput();
         LineTestData    newData     = currData.getUniqueData();
-        Color           newColor    = Color.blue;//.getColor();
+        Color           newColor    = newData.getColor();
         
         Thread  thread  = startChooserThread();
         invokeAndWait( () -> chooser.setColor( newColor ) );
@@ -190,7 +165,7 @@ class LinePanelTest
         Utils.join( thread );
         SandboxUtils.pause( 250 );
         
-        assertEquals( newColor, colorFB.getCurrColor() );
+        assertEquals( newColor, colorFB.getColor() );
     }
     
     /**
@@ -213,12 +188,13 @@ class LinePanelTest
         Thread  thread  = startChooserThread();
         invokeAndWait( () -> chooser.setColor( newColor ) );
         invokeAndWait( () -> cancelButton.doClick() );
+        Utils.join( thread );
         // at this point the chooser thread has terminated,
         // but we're still waiting for the LinePanel to respond
         // to events that are issued on the event dispatch thread.
         Utils.pause( 250 );
         
-        assertEquals( origColor, colorFB.getCurrColor() );
+        assertEquals( origColor, colorFB.getColor() );
     }
     
     @ParameterizedTest
@@ -257,7 +233,6 @@ class LinePanelTest
         // Make sure all new data has been entered for the currently 
         // selected button.
         JRadioButton    origSelected    = getSelectedButton();
-        System.out.println( "O: " + origSelected.getText() + ", N: " + nextSelected.getText() );
         LineTestData    oldData         = LineTestData.of( origSelected );
         LineTestData    newData         = oldData.getUniqueData();
         setCurrInput( newData );
@@ -334,6 +309,32 @@ class LinePanelTest
         assertNull( expNull );
         
         verifyPropertySet( expSelected );
+        verifyEnablement( expSelected );
+    }
+    
+    private void verifyEnablement( JRadioButton selected )
+    {
+        LinePropertySet set = LinePropertySet.getPropertySet( selected );
+        
+        boolean hasStroke   = set.hasStroke();
+        assertEquals( hasStroke, strokeLabel.isEnabled() );
+        assertEquals( hasStroke, strokeSpinner.isEnabled() );
+        assertEquals( hasStroke, strokeFB.isEnabled() );
+        
+        boolean hasLength   = set.hasLength();
+        assertEquals( hasLength, lengthLabel.isEnabled() );
+        assertEquals( hasLength, lengthSpinner.isEnabled() );
+        assertEquals( hasLength, lengthFB.isEnabled() );
+        
+        boolean hasSpacing  = set.hasSpacing();
+        assertEquals( hasSpacing, spacingLabel.isEnabled() );
+        assertEquals( hasSpacing, spacingSpinner.isEnabled() );
+        assertEquals( hasSpacing, spacingFB.isEnabled() );
+        
+        boolean hasColor    = set.hasColor();
+        assertEquals( hasColor, colorButton.isEnabled() );
+        assertEquals( hasColor, colorField.isEnabled() );
+        assertEquals( hasColor, colorFB.isEnabled() );
     }
     
     private void verifyPropertySet( JRadioButton selected )
@@ -594,23 +595,5 @@ class LinePanelTest
         assertNotNull( cancelButton );
         
         return thread;
-    }
-    
-    /**
-     * Helper method to obtain the JColorChooser component
-     * of the JColorChooser dialog.
-     * 
-     * @return  the JColorChooser component of the JColorChooser dialog.
-     * 
-     * @throws ComponentException if the operation fails
-     */
-    private JColorChooser getColorChooser()
-    {
-        ComponentFinder finder  = new ComponentFinder( true, false, true );
-        JComponent  comp    = 
-            finder.find( c -> (c instanceof JColorChooser) );
-        if ( comp == null || !(comp instanceof JColorChooser) ) 
-            throw new ComponentException( "JColorChooser not found" );
-        return (JColorChooser)comp;
     }
 }

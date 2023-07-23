@@ -17,7 +17,7 @@ public class ShowFontEditor
 
     private static void build()
     {
-        JFrame  frame   = new JFrame( "Color Editor Demo" );    
+        JFrame  frame   = new JFrame( "Font Editor Demo" );    
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new FontEditor();
         Border  border  = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );

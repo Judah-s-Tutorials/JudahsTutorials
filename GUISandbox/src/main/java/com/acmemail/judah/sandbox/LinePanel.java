@@ -6,7 +6,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.ParseException;
@@ -22,25 +21,19 @@ import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
-import javax.swing.JColorChooser;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 @SuppressWarnings("serial")
@@ -55,21 +48,7 @@ public class LinePanel extends JPanel
     /** Identifies the color text field.  */
     public static final String  COLOR_FIELD_CN      = "ColorField";
     
-    private static final String STATUS_KEY          =
-        "judah.JColorChooserDemo.status";
-    
     private final ButtonGroup   lineGroup   = new ButtonGroup();
-//    private final JColorChooser colorPane   = new JColorChooser();
-//    private final JDialog       colorDialog =
-//        JColorChooser.createDialog(
-//            null, 
-//            "Choose a Color", 
-//            true, 
-//            colorPane, 
-//            null,//e -> setAndClose( JOptionPane.OK_OPTION ), 
-//            e -> setAndClose( JOptionPane.CANCEL_OPTION )
-//        );
-    private final ColorDialog       colorDialog     = new ColorDialog();
     private final RadioBoxPanel     radioBoxPanel   = new RadioBoxPanel();
     private final PropertiesPanel   propertiesPanel = new PropertiesPanel();
     
@@ -171,25 +150,27 @@ public class LinePanel extends JPanel
         private static final String stroke      = "Stroke";
         private static final String length      = "Length";
         private static final String spacing     = "Spacing";
-        private static final String color       = "Color";
         
+        private final ColorEditor   colorEditor     = new ColorEditor();
         private final JLabel        strokeLabel     = 
             new JLabel( stroke, SwingConstants.RIGHT );
         private final JLabel        spacingLabel    = 
             new JLabel( spacing, SwingConstants.RIGHT );
         private final JLabel        lengthLabel     = 
             new JLabel( length, SwingConstants.RIGHT );
-        private final JButton       colorButton     = new JButton( color );
+        private final JButton       colorButton     = 
+            colorEditor.getColorButton();// JButton( color );
         
         private final JSpinner      strokeSpinner   = getDefSpinner();
         private final JSpinner      lengthSpinner   = getDefSpinner();
         private final JSpinner      spacingSpinner  = getDefSpinner();         
-        private final JTextField    colorField      = new JTextField();
+        private final JTextField    colorField      = 
+            colorEditor.getTextComponent();// JTextField();
         
         private final StrokeFeedback  strokeFB      = 
             new StrokeFeedback( strokeSpinner, strokeLabel );
-        private final ColorFeedback  colorFB        = 
-            new ColorFeedback( colorField, colorButton );
+        private final JComponent    colorFB        = 
+            colorEditor.getFeedbackComponent();// ColorFeedback( colorField, colorButton );
         private final LengthFeedback lengthFB       = 
             new LengthFeedback( lengthSpinner, lengthLabel );
         private final SpacingFeedback   spacingFB   = 
@@ -226,8 +207,8 @@ public class LinePanel extends JPanel
             add( colorField );
             add( colorFB );
             colorField.setName( COLOR_FIELD_CN );
-            colorField.addActionListener( e -> colorFB.repaint() );
-            colorButton.addActionListener( e -> showColorDialog() );
+                //colorField.addActionListener( e -> colorFB.repaint() );
+                //colorButton.addActionListener( e -> showColorDialog() );
             
             lineGroup.getElements()
                 .asIterator()
@@ -242,16 +223,16 @@ public class LinePanel extends JPanel
             return spinner;
         }
 
-        private void showColorDialog()
-        {
-            Color   color   = colorDialog.showDialog();
-            if ( color != null )
-            {
-                String      text    = Feedback.getText( color );
-                colorField.setText( text );
-                colorFB.repaint();
-            }
-        }
+//        private void showColorDialog()
+//        {
+//            Color   color   = colorDialog.showDialog();
+//            if ( color != null )
+//            {
+//                String      text    = Feedback.getText( color );
+//                colorField.setText( text );
+//                colorFB.repaint();
+//            }
+//        }
 
         @Override
         public void itemStateChanged( ItemEvent evt )

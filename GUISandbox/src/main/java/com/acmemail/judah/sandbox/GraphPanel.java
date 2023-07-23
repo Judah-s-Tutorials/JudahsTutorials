@@ -162,20 +162,21 @@ public class GraphPanel extends JPanel
         {
             BoxLayout   layout  = new BoxLayout( this, BoxLayout.Y_AXIS );
             setLayout( layout );
-            add( new FontProperties() );
-            
-            JPanel      colorPanel      = new JPanel();
-            BoxLayout   colorBoxLayout  = 
-                new BoxLayout( colorPanel, BoxLayout.X_AXIS );
-            JButton     colorButton     = new JButton( "Color" );
-            JTextField      colorEditor = new JTextField( 10 );
-            colorEditor.setText( "255") ;
-            ColorFeedback   colorFB     = 
-                new ColorFeedback( colorEditor, colorButton );
-            colorPanel.add( colorButton );
-            colorPanel.add( colorEditor );
-            colorPanel.add( colorFB );
-            add( colorPanel );
+            add( new FontEditor() );
+            add( new ColorEditor().getPanel() );
+//            
+//            JPanel      colorPanel      = new JPanel();
+//            BoxLayout   colorBoxLayout  = 
+//                new BoxLayout( colorPanel, BoxLayout.X_AXIS );
+//            JButton     colorButton     = new JButton( "Color" );
+//            JTextField      colorEditor = new JTextField( 10 );
+//            colorEditor.setText( "255") ;
+//            ColorFeedback   colorFB     = 
+//                new ColorFeedback( colorEditor, colorButton );
+//            colorPanel.add( colorButton );
+//            colorPanel.add( colorEditor );
+//            colorPanel.add( colorFB );
+//            add( colorPanel );
         }
     }
     
@@ -254,7 +255,7 @@ public class GraphPanel extends JPanel
             JButton         colorButton      = new JButton( "Color" );
             JTextField      colorText        = getTextField();
             ColorFeedback   colorFB          = 
-                new ColorFeedback( colorText, colorButton );
+                new ColorFeedback( colorText );
 //            add( getFontPropertyPanel( "Color", colorText, colorFB ) );
             comps[row++] = new JComponent[] { colorButton, colorText, colorFB };
             colorText.setText( "0x00ff00" );

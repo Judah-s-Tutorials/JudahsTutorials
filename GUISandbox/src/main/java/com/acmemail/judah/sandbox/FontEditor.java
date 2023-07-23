@@ -7,20 +7,28 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.text.ParseException;
+import java.util.Optional;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.border.Border;
 
 @SuppressWarnings("serial")
 public class FontEditor extends JPanel
 {
     private static final String     sampleString    =
         "<html>1313 Mockingbird Lane, Wisdom NB 68101</html>";
+    
+    private static final String     errorString     = "--ERROR--";
+    private static final Color      errorColor      = Color.BLACK;
+    private static final Font       errorFont       =
+        new Font( Font.DIALOG, Font.ITALIC, 12 );
+    
     private static final String[]   fontNames       =
     {
         Font.DIALOG,
@@ -48,6 +56,7 @@ public class FontEditor extends JPanel
     public FontEditor()
     {
         super( new GridLayout( 1, 2 ) );
+        
         add( getLeftPanel() );
         add( feedback );
         colorEditor.getTextComponent().setText( "0x000000" );
@@ -59,6 +68,32 @@ public class FontEditor extends JPanel
         sizeEditor.addChangeListener( e -> feedback.update() );
         
         feedback.update();
+    }
+    
+    public Optional<Font> getSelectedFont()
+    {
+        Optional<Font>  optFont = Optional.empty();
+        
+        String  fontName    = (String)fontList.getSelectedItem();
+        int     fontSize    = 1;
+        int     fontStyle   = 0;
+        if ( boldToggle.isSelected() )
+            fontStyle |= Font.BOLD;
+        if ( italicToggle.isSelected() )
+            fontStyle |= Font.ITALIC;
+        try
+        {
+            sizeEditor.commitEdit();
+            fontSize = (int)sizeEditor.getValue();
+            Font    font    = new Font( fontName, fontStyle, fontSize );
+            optFont = Optional.of( font );
+        }
+        catch ( ParseException exc )
+        {
+            // ignore; return will default to Optional.empty()
+        }
+        
+        return optFont;
     }
     
     private JPanel getLeftPanel()
@@ -121,39 +156,41 @@ public class FontEditor extends JPanel
         return gbc;
     }
     
-    public class Feedback extends JLabel
+    private class Feedback extends JLabel
     {
         public Feedback( String text )
         {
             super( text );
-            this.setBackground( new Color( 0xEEEEEE ) );
-            this.setForeground( colorEditor.getColor().orElse( Color.BLACK ) );
+            setForeground( colorEditor.getColor().orElse( Color.BLACK ) );
+            setOpaque( true );
+            setBackground( new Color( 0xDDDDDD ) );
+            Border  border  = BorderFactory.createLineBorder( Color.BLACK, 2 );
+            setBorder( border );
         }
         
         public void update()
         {
-            Color   textColor   = 
-                colorEditor.getColor().orElse( Color.WHITE );
-            String  fontName    = (String)fontList.getSelectedItem();
-            int     fontSize    = 1;
-            int     fontStyle   = 0;
-            if ( boldToggle.isSelected() )
-                fontStyle |= Font.BOLD;
-            if ( italicToggle.isSelected() )
-                fontStyle |= Font.ITALIC;
-            try
+            Optional<Font>  optFont     = getSelectedFont();
+            Optional<Color> optColor    = colorEditor.getColor();
+            Font            font        = null;
+            String          text        = null;
+            Color           color       = null;
+            if ( optFont.isPresent() && optColor.isPresent() )
             {
-                sizeEditor.commitEdit();
-                fontSize = (int)sizeEditor.getValue();
+                font = optFont.get();
+                color = optColor.get();
+                text = sampleString;
             }
-            catch ( ParseException exc )
+            else
             {
-                // ignore; size will default to 1
+                font = errorFont;
+                text = errorString;
+                color = errorColor;
             }
-            
-            Font    font    = new Font( fontName, fontStyle, fontSize );
+                
             setFont( font );
-            setForeground( textColor );
+            setForeground( color );
+            setText( text );
             repaint();
         }
     }

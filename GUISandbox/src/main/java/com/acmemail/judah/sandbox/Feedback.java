@@ -8,6 +8,7 @@ import java.util.OptionalDouble;
 
 import javax.swing.JComponent;
 import javax.swing.JSpinner;
+import javax.swing.text.JTextComponent;
 
 public class Feedback
 {
@@ -32,6 +33,13 @@ public class Feedback
             // no action necessary
         }
         return value;
+    }
+    
+    public static Optional<Color> getColor( JTextComponent comp )
+    {
+        String          text        = comp.getText().trim();
+        Optional<Color> optColor    = getColor( text );
+        return optColor;
     }
     
     public static Optional<Color> getColor( String text )
