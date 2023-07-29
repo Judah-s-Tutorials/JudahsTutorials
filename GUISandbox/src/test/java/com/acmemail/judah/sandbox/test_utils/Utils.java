@@ -1,6 +1,9 @@
 package com.acmemail.judah.sandbox.test_utils;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
 
 public class Utils
 {
@@ -100,5 +103,19 @@ public class Utils
         {
             exc.printStackTrace();
         }
+    }
+    
+    public static Exception invokeAndWait( Runnable runner )
+    {
+        Exception   exception   = null;
+        try
+        {
+            SwingUtilities.invokeAndWait( runner );
+        }
+        catch ( InvocationTargetException | InterruptedException exc )
+        {
+            exception = exc;
+        }
+        return exception;
     }
 }
