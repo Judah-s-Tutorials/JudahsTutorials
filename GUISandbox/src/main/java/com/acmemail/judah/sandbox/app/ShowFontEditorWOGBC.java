@@ -6,9 +6,9 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
-import com.acmemail.judah.sandbox.ColorEditor;
+import com.acmemail.judah.sandbox.FontEditorWOGBC;
 
-public class ShowColorEditor
+public class ShowFontEditorWOGBC
 {
     public static void main(String[] args)
     {
@@ -17,9 +17,9 @@ public class ShowColorEditor
 
     private static void build()
     {
-        JFrame  frame   = new JFrame( "Color Editor Demo" );    
+        JFrame  frame   = new JFrame( "Font Editor Demo" );    
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        JPanel  pane    = new ColorEditor().getGridPanel();
+        JPanel  pane    = new FontEditorWOGBC();
         Border  border  = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
 
         pane.setBorder( border );

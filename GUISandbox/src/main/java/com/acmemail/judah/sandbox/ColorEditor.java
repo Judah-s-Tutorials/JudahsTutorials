@@ -2,6 +2,7 @@ package com.acmemail.judah.sandbox;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -51,10 +52,10 @@ public class ColorEditor
         });
     }
     
-    public JPanel getPanel()
+    public JPanel getBoxPanel( int axis )
     {
         JPanel      panel   = new JPanel();
-        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
+        BoxLayout   layout  = new BoxLayout( panel, axis );
         
         panel.setLayout( layout );
         panel.add( colorButton );
@@ -62,6 +63,18 @@ public class ColorEditor
         panel.add( colorFB );
         
         return panel;
+    }
+    
+    public JPanel getGridPanel()
+    {
+        JPanel      masterPanel = new JPanel( new GridLayout( 1, 2 ) );
+        JPanel      inputPanel  = new JPanel( new GridLayout( 1, 2, 2, 0 ) );
+        inputPanel.add( colorButton );
+        inputPanel.add( textEditor );
+        masterPanel.add( inputPanel );
+        masterPanel.add( colorFB );
+        
+        return masterPanel;
     }
     
     public JButton getColorButton()

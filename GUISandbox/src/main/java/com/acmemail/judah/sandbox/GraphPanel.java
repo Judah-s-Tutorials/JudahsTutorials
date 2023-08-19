@@ -109,7 +109,10 @@ public class GraphPanel extends JPanel
             BoxLayout layout    = new BoxLayout( this, BoxLayout.X_AXIS );
             Component horSpace  =
                 Box.createRigidArea( new Dimension( 50, 0 ) );
-            
+
+            radioBoxPanel.setAlignmentY( TOP_ALIGNMENT );
+            propertiesPanel.setAlignmentY( TOP_ALIGNMENT );
+
             setLayout( layout );
             add( radioBoxPanel );
             add( horSpace );
@@ -138,7 +141,9 @@ public class GraphPanel extends JPanel
         
         public RadioBoxPanel()
         {
-            super( new GridLayout( 5, 1 ) );
+            //super( new GridLayout( 5, 1 ) );
+            BoxLayout   layout  = new BoxLayout( this, BoxLayout.Y_AXIS );
+            setLayout( layout );
             
             Arrays.stream( labels )
                 .map( this::newRadioButton )
@@ -162,22 +167,35 @@ public class GraphPanel extends JPanel
         {
             BoxLayout   layout  = new BoxLayout( this, BoxLayout.Y_AXIS );
             setLayout( layout );
-            add( new FontEditor() );
-            add( new ColorEditor().getPanel() );
-//            
-//            JPanel      colorPanel      = new JPanel();
-//            BoxLayout   colorBoxLayout  = 
-//                new BoxLayout( colorPanel, BoxLayout.X_AXIS );
-//            JButton     colorButton     = new JButton( "Color" );
-//            JTextField      colorEditor = new JTextField( 10 );
-//            colorEditor.setText( "255") ;
-//            ColorFeedback   colorFB     = 
-//                new ColorFeedback( colorEditor, colorButton );
-//            colorPanel.add( colorButton );
-//            colorPanel.add( colorEditor );
-//            colorPanel.add( colorFB );
-//            add( colorPanel );
+            add( getFontPanel() );
+            Dimension   dim     = new Dimension( 1, 5 );
+            add( Box.createRigidArea( dim ) );
+            add( getColorPanel() );
         }
+    }
+    
+    private JPanel getFontPanel()
+    {
+        JPanel  panel   = new FontEditor();
+        Border  lineBorder      = 
+            BorderFactory.createLineBorder( Color.BLACK, 1 );
+        Border  titledBorder    = 
+            BorderFactory.createTitledBorder( lineBorder, "Font" );
+        panel.setBorder( titledBorder );
+
+        return panel;
+    }
+    
+    private JPanel getColorPanel()
+    {
+        JPanel  panel   = new ColorEditor().getGridPanel();
+        Border  lineBorder      = 
+            BorderFactory.createLineBorder( Color.BLACK, 1 );
+        Border  titledBorder    = 
+            BorderFactory.createTitledBorder( lineBorder, "Background Color" );
+        panel.setBorder( titledBorder );
+
+        return panel;
     }
     
     private class ButtonPanel extends JPanel
