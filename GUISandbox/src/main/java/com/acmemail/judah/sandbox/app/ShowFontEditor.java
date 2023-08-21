@@ -19,7 +19,7 @@ public class ShowFontEditor
     {
         JFrame  frame   = new JFrame( "Font Editor Demo" );    
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        JPanel  pane    = new FontEditor();
+        JPanel  pane    = new FontEditor().getPanel();
         Border  border  = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
 
         pane.setBorder( border );

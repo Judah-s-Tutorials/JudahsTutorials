@@ -2,16 +2,16 @@ package com.acmemail.judah.sandbox;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.awt.Insets;
 import java.text.ParseException;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -19,7 +19,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
 
 @SuppressWarnings("serial")
-public class FontEditor extends JPanel
+public class FontEditor
 {
     private static final String     sampleString    =
         "<html>1313 Mockingbird Lane, Wisdom NB 68101</html>";
@@ -55,10 +55,6 @@ public class FontEditor extends JPanel
 
     public FontEditor()
     {
-        super( new GridLayout( 1, 2 ) );
-        
-        add( getLeftPanel() );
-        add( feedback );
         colorEditor.getTextComponent().setText( "0x000000" );
         
         boldToggle.addActionListener( e -> feedback.update() );
@@ -68,6 +64,15 @@ public class FontEditor extends JPanel
         sizeEditor.addChangeListener( e -> feedback.update() );
         
         feedback.update();
+    }
+    
+    public JPanel getPanel()
+    {
+        JPanel  panel   = new JPanel( new GridLayout( 1, 2, 3, 0 ) );
+        panel.add( getLeftPanel() );
+        panel.add( feedback );
+        
+        return panel;
     }
     
     public Optional<Font> getSelectedFont()
@@ -96,64 +101,117 @@ public class FontEditor extends JPanel
         return optFont;
     }
     
-    private JPanel getLeftPanel()
+    public String getName()
     {
-        final int both      = GridBagConstraints.BOTH;
-        final int left      = GridBagConstraints.WEST;
-        final int right     = GridBagConstraints.EAST;
-        final int none      = GridBagConstraints.NONE;
-        final int center    = GridBagConstraints.CENTER;
-        
-        JPanel              panel   = new JPanel( new GridBagLayout() );
-        
-        GridBagConstraints  gbc     = getGBC( null, 0, 0, 2, both, center );
-        gbc.ipadx = 10;
-        panel.add( fontList, gbc );
-        
-        getGBC( gbc, 0, 1, 2, none, center );
-        panel.add( boldToggle, gbc );
-        
-        getGBC( gbc, 0, 2, 2, none, center );
-        panel.add( italicToggle, gbc );
-        
-        getGBC( gbc, 0, 3, 1, none, right );
-        panel.add( sizeEditor, gbc );
-        getGBC( gbc, 1, 3, 1, none, left );
-        panel.add( new JLabel( "Size" ), gbc );
-        
-        getGBC( gbc, 0, 4, 1, both, right );
-        panel.add( colorEditor.getColorButton(), gbc );
-        getGBC( gbc, 1, 4, 1, both, left );
-        panel.add( colorEditor.getTextComponent(), gbc );
-        
-        return panel;
+        String  currFontName    = (String)fontList.getSelectedItem();
+        return currFontName;
     }
     
-    private GridBagConstraints getGBC( 
-        GridBagConstraints gbc,
-        int xco,
-        int yco,
-        int width,
-        int fill,
-        int anchor
-    )
+    public OptionalInt getSize()
     {
-        if ( gbc == null )
-            gbc = new GridBagConstraints();
-        gbc.gridx = xco;
-        gbc.gridy = yco;
-        gbc.gridwidth = width;
-        gbc.fill = fill;
-        gbc.anchor = anchor;
+        OptionalInt optSize = OptionalInt.empty();
+        try
+        {
+            sizeEditor.commitEdit();
+            int size = (int)sizeEditor.getValue();
+            optSize = OptionalInt.of( size );
+        }
+        catch ( ParseException exc )
+        {
+        }
+        return optSize;
+    }
+    
+    public boolean isBold()
+    {
+        boolean currIsBold  = boldToggle.isSelected();
+        return currIsBold;
+    }
+    
+    public boolean isItalic()
+    {
+        boolean currIsItalic    = italicToggle.isSelected();
+        return currIsItalic;
+    }
+    
+    public Optional<Color> getColor()
+    {
+        Optional<Color> optColor    = colorEditor.getColor();
+        return optColor;
+    }
+    
+    /**
+     * @return the boldToggle
+     */
+    public JCheckBox getBoldToggle()
+    {
+        return boldToggle;
+    }
+
+    /**
+     * @return the italicToggle
+     */
+    public JCheckBox getItalicToggle()
+    {
+        return italicToggle;
+    }
+
+    /**
+     * @return the sizeEditor
+     */
+    public JSpinner getSizeEditor()
+    {
+        return sizeEditor;
+    }
+
+    /**
+     * @return the colorEditor
+     */
+    public ColorEditor getColorEditor()
+    {
+        return colorEditor;
+    }
+
+    /**
+     * @return the feedback
+     */
+    public JLabel getFeedback()
+    {
+        return feedback;
+    }
+
+    private JPanel getLeftPanel()
+    {
+        JPanel              panel   = new JPanel( new GridLayout( 5, 1 ) );
+        panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+        panel.add( fontList );
+        panel.add( boldToggle );
+        panel.add( italicToggle );
         
-        if ( anchor == GridBagConstraints.EAST )
-            gbc.insets = new Insets( 0, 0, 0, 2 );
-        else if ( anchor == GridBagConstraints.WEST )
-            gbc.insets = new Insets( 0, 2, 0, 0 );
-        else 
-            gbc.insets = new Insets( 0, 0, 0, 0 );
+        sizeEditor.setAlignmentX( JComponent.CENTER_ALIGNMENT );
+        JLabel sizeLabel = new JLabel( "Size" );
+        sizeLabel.setAlignmentX( JComponent.CENTER_ALIGNMENT );
         
-        return gbc;
+        JPanel  sizePanel   = new JPanel();
+        sizePanel.setLayout( new GridLayout( 1, 2, 3, 0 ) );
+        sizePanel.add( sizeEditor );
+        sizePanel.add( sizeLabel );
+        panel.add( sizePanel );
+        
+        JPanel  colorPanel   = new JPanel();
+        colorPanel.setLayout( new GridLayout( 1, 2, 3, 0 ) );
+        colorPanel.add( colorEditor.getColorButton() );
+        colorPanel.add( colorEditor.getTextComponent() );
+        panel.add( colorPanel );
+        
+        float   align   = JPanel.CENTER_ALIGNMENT;
+        fontList.setAlignmentX( align );
+        boldToggle.setAlignmentX( align );
+        italicToggle.setAlignmentX( align );
+        sizePanel.setAlignmentX( align );
+        colorPanel.setAlignmentX( align );
+        
+        return panel;
     }
     
     private class Feedback extends JLabel
