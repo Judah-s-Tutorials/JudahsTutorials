@@ -1,0 +1,357 @@
+package com.acmemail.judah.cartesian_plane.input;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+
+/**
+ * This class tests the InputParser class
+ * using instances of JEPEquation whenever
+ * an implementation of the Equation interface is required.
+ * 
+ * @author Jack Straub
+ */
+class InputParserJEPTest
+{
+    private JEPEquation jepEquation;
+    private InputParser parser;
+    
+    @BeforeEach
+    public void beforeEach()
+    {
+        jepEquation = new JEPEquation();
+        parser = new InputParser( jepEquation );
+    }
+    
+    @Test
+    public void testInputParser()
+    {
+        assertNotNull( parser.getEquation() );
+    }
+
+    @Test
+    public void testInputParserEquation()
+    {
+        Equation    equation    = new JEPEquation();
+        InputParser parser      = new InputParser( equation );
+        assertEquals( equation, parser.getEquation() );
+    }
+    
+    @Test
+    public void testIllegalArgumentException()
+    {
+        Class<IllegalArgumentException> clazz   =
+            IllegalArgumentException.class;
+        
+        assertThrows( clazz, () -> 
+            parser.parseInput( Command.SET, null ) );
+    }
+    
+    @Test
+    public void testParseInputParsedCommand()
+    {
+        String          expName = "paramName";
+        ParsedCommand   command = 
+            new ParsedCommand( Command.PARAM, "param", expName );
+        parser.parseInput( command );
+        String          actName = parser.getEquation().getParam();
+        assertEquals( expName, actName );
+        
+    }
+
+    @Test
+    public void testParseInputEQUATION()
+    {
+        Equation    oldVal      = parser.getEquation();
+        parser.parseInput( Command.EQUATION, "" );
+        Equation    newVal      = parser.getEquation();
+        assertNotNull( oldVal );
+        assertNotNull( newVal );
+        assertNotEquals( oldVal, newVal );        
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings= 
+        {"EXIT","NONE","YPLOT","XYPLOT","RPLOT","TPLOT","OPEN","SAVE","LOAD","SELECT" }
+    )
+    public void testParseInputNOOP( String strCommand )
+    {
+        Command command = Command.toCommand( strCommand );
+        Result  result  = parser.parseInput( command, "" );
+        assertTrue( result.isSuccess() );
+    }
+
+    @Test
+    public void testParseInputINVALID()
+    {
+        Result      result      = 
+            parser.parseInput( Command.INVALID, "" );
+        assertFalse( result.isSuccess() );
+    }
+
+    @Test
+    public void testParseInputSTART()
+    {
+        Equation    equation    = parser.getEquation();
+        testSetDouble( Command.START, equation::getRangeStart );
+    }
+
+    @Test
+    public void testParseInputEND()
+    {
+        Equation    equation    = parser.getEquation();
+        testSetDouble( Command.END, equation::getRangeEnd );
+    }
+
+    @Test
+    public void testParseInputSTEP()
+    {
+        Equation    equation    = parser.getEquation();
+        testSetDouble( Command.STEP, equation::getRangeStep );
+    }
+
+    @Test
+    public void testParseInputPARAM()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "newParamName";
+        testSetString( Command.PARAM, newVal, equation::getParam );
+    }
+
+    @Test
+    public void testParseInputRADIUS()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "newRadiusName";
+        testSetString( Command.RADIUS, newVal, equation::getRadiusName );
+    }
+
+    @Test
+    public void testParseInputTHETA()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "newThetaName";
+        testSetString( Command.THETA, newVal, equation::getThetaName );
+    }
+
+    @Test
+    public void testParseInputXEQUALS()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "a + a + a";
+        testSetString( Command.XEQUALS, newVal, equation::getXExpression );
+    }
+    
+    @Test
+    public void testParseInputYEQUALS()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "a + a + a";
+        testSetString( Command.YEQUALS, newVal, equation::getYExpression );
+    }
+    
+    @Test
+    public void testParseInputREQUALS()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "a + a + a";
+        testSetString( Command.REQUALS, newVal, equation::getRExpression );
+    }
+    
+    @Test
+    public void testParseInputTEQUALS()
+    {
+        Equation        equation    = parser.getEquation();
+        String          newVal      = "a + a + a";
+        testSetString( Command.TEQUALS, newVal, equation::getTExpression );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings= 
+        { "", "p", "p,q", " a, b , c  ,  d  ",
+          "abc", "def"
+        })
+    public void testParseVarsWithoutValues( String str )
+    {
+        Equation    equation    = parser.getEquation();
+        Result      result      = 
+            parser.parseInput( Command.SET, str );
+        assertTrue( result.isSuccess() );
+        
+        String[]    names   = str.split( "," );
+        for ( String name : names )
+        {
+            // If its input is the empty string, split( "," )
+            // returns a 1-element array consisting of the empty string.
+            // Don't try to test that.
+            String  vName   = name.trim();
+            if ( !vName.isEmpty() )
+            {
+                Optional<Double>    val = equation.getVar( vName );
+                assertTrue( val.isPresent() );
+                assertEquals( 0, val.get() );
+            }
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings= 
+        { "p=5", "p=5,q=6", " a = 5 , b = 6 , c  =  7  ,  d = 8  ",
+          "abc = 5 , def = 6 "
+        })
+    public void testParseVarsWithValues( String str )
+    {
+        Equation    equation    = parser.getEquation();
+        Result      result      = 
+            parser.parseInput( Command.SET, str );
+        assertTrue( result.isSuccess() );
+        
+        String[]    specs   = str.split( "," );
+        for ( String spec : specs )
+        {
+            String[]    pair    = spec.trim().split( "=" );
+            // sanity check
+            assertEquals( 2, pair.length );
+            String              name    = pair[0].trim();
+            String              value   = pair[1].trim();
+            double              dValue  = Double.parseDouble( value );
+            Optional<Double>    actVal  = equation.getVar( name );
+            assertTrue( actVal.isPresent() );
+            assertEquals( dValue, actVal.get() );
+        }
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings= 
+        { "%=5", "5=5,6=6", " 5a = 5 , 6b = 6 , ^c  =  7  ,  ^d = 8  ",
+          "abc% = 5 , de%f = 6 "
+        })
+    void testParseVarsWithBadNames( String str )
+    {
+        Result      result      = 
+            parser.parseInput( Command.SET, str );
+        assertFalse( result.isSuccess() );
+        List<String>        errors      = result.getMessages();
+        assertNotNull( errors );
+        assertFalse( errors.isEmpty() );
+        errors.forEach( System.out::println );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings= 
+        { "p=.", "p=.,q=%", " a = 5..0 , b = ..6 , c  =  %7  ,  d = 8$  ",
+          "abc = 55.x , def = x 6, ghi = 5 5 jkl = 5 6"
+        })
+    public void testParseVarsWithBadValues( String str )
+    {
+        Result        result      = 
+            parser.parseInput( Command.SET, str );
+        assertFalse( result.isSuccess() );
+        List<String>        errors      = result.getMessages();
+        assertNotNull( errors );
+        assertFalse( errors.isEmpty() );
+        errors.forEach( System.out::println );
+    }
+    
+    @Test
+    public void testParseVarsGoodAndBadSpecs()
+    {
+        // p and q are assigned from valid expressions;
+        // s is not
+        String      strVals = "p=10,q=10,%,s=;5";
+        Result      result  = 
+            parser.parseInput( Command.SET, strVals );
+        assertFalse( result.isSuccess() );
+        List<String>        errors      = result.getMessages();
+        assertNotNull( errors );
+        assertFalse( errors.isEmpty() );
+        errors.forEach( System.out::println );
+        
+        Equation            equation    = parser.getEquation();
+        Optional<Double>    pVal        = equation.getVar( "p" );
+        Optional<Double>    qVal        = equation.getVar( "q" );
+        Optional<Double>    sVal        = equation.getVar( "s" );
+        
+        // p and q should be stored...
+        assertTrue( pVal.isPresent() );
+        assertEquals( 10, pVal.get() );
+        assertTrue( qVal.isPresent() );
+        assertEquals( 10, qVal.get() );
+        
+        // ... but s should not
+        assertFalse( sVal.isPresent() );
+    }
+    
+    private void testSetDouble( Command cmd, DoubleSupplier getter  )
+    {
+        double  oldVal  = getter.getAsDouble();
+        double  newVal  = oldVal + 1;
+        Result  result  = parser.parseInput( cmd, "" + newVal );
+        assertTrue( result.isSuccess() );
+        assertEquals( newVal, getter.getAsDouble() );        
+        
+        // test invalid value
+        result = parser.parseInput( cmd, "invalidvalue" );
+        assertFalse( result.isSuccess() );
+        
+        // test no-arg option
+        testEmptyArg( cmd, "" + newVal );
+    }
+    
+    private void testSetString( 
+        Command          cmd,
+        String           newVal, 
+        Supplier<String> getter
+    )
+    {
+        String  oldVal  = getter.get();
+        assertNotEquals( oldVal, newVal );
+        Result          result      = 
+            parser.parseInput( cmd, newVal );
+        assertTrue( result.isSuccess() );
+        assertEquals( newVal, getter.get() );        
+        
+        // test invalid input
+        result = parser.parseInput( cmd, "%invalid%" );
+        assertFalse( result.isSuccess() );
+        
+        // test no-arg option
+        testEmptyArg( cmd, "" + newVal );
+    }
+    
+    private void 
+    testEmptyArg( Command cmd, String expOutput )
+    {
+        String  actOutput   = getStdout( cmd, "" );
+        assertEquals( expOutput, actOutput );
+    }
+    
+    private String getStdout( Command cmd, String arg )
+    {
+        ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
+        PrintStream             printStream = new PrintStream( baoStream );
+        PrintStream             stdOut      = System.out;
+        System.setOut( printStream );
+        
+        parser.parseInput( cmd, arg );
+        System.setOut( stdOut );
+        
+        String  str = baoStream.toString().trim();
+        return str;
+    }
+}

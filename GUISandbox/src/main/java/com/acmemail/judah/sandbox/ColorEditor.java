@@ -29,7 +29,7 @@ public class ColorEditor
     public ColorEditor()
     {
         colorButton = new JButton( "Color" );
-        textEditor = new JTextField( "0xFFFFFF" );
+        textEditor = new JTextField( "0xFFFFFF", 10 );
         colorFB = new ColorFeedback( textEditor );
         colorDialog = new ColorDialog();
         
