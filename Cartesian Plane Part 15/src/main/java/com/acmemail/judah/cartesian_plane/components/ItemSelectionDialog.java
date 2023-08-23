@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.input;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Window;

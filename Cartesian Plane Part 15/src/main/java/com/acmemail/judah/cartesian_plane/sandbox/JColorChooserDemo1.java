@@ -1,13 +1,11 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.Color;
+import java.awt.Dimension;
 
-import javax.swing.JButton;
 import javax.swing.JColorChooser;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 /**
@@ -25,6 +23,8 @@ import javax.swing.SwingUtilities;
  */
 public class JColorChooserDemo1
 {
+    private static JPanel feedback;
+    
     /**
      * Application entry point.
      * 
@@ -32,12 +32,26 @@ public class JColorChooserDemo1
      */
     public static void main(String[] args)
     {
+        SwingUtilities.invokeLater( () -> makeFeedbackWindow() );
         String  title   = "JColorChooser Demo";
         Color   color   = null;
         do
         {
             color = JColorChooser.showDialog( null, title, Color.BLUE );
-            System.out.println( color );
+            if ( color != null )
+                feedback.setBackground( color );
         } while ( color != null );
+        System.exit( 0 );
+    }
+    
+    private static void makeFeedbackWindow()
+    {
+        JFrame  frame   = new JFrame( "JColorChooser Demo" );
+        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        feedback = new JPanel();
+        feedback.setPreferredSize( new Dimension( 100, 100 ) );
+        frame.setContentPane( feedback );
+        frame.pack();
+        frame.setVisible( true );
     }
 }

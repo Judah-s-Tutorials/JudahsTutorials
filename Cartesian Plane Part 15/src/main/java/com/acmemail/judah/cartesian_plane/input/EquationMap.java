@@ -12,6 +12,8 @@ import java.util.Map;
 
 import javax.swing.JFileChooser;
 
+import com.acmemail.judah.cartesian_plane.components.ItemSelectionDialog;
+
 /**
  * Utility class that
  * maintains a map of equation names
