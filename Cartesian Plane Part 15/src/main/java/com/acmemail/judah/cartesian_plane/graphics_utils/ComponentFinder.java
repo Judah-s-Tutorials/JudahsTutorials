@@ -342,11 +342,25 @@ public class ComponentFinder
         return comp;
     }
     
+    /**
+     * Locates and disposes all top-level windows
+     * in an application.
+     */
     public static void disposeAll()
     {
         Arrays.stream( Window.getWindows() ).forEach( Window::dispose );
     }
     
+    /**
+     * Constructs a predicate
+     * that describes a pushbutton
+     * with a given label.
+     * 
+     * @param label the given label
+     * 
+     * @return  a predicate describing a pushbutton
+     *          with a given label
+     */
     public static Predicate<JComponent> getButtonPredicate( String label )
     {
         Predicate<JComponent>   isButton    = jc -> jc instanceof JButton;
@@ -356,6 +370,16 @@ public class ComponentFinder
         return pred;
     }
     
+    /**
+     * Constructs a predicate
+     * that describes a top-level window
+     * with a given title.
+     * 
+     * @param title the given title
+     * 
+     * @return  a predicate describing a top-level window
+     *          with a given title
+     */
     public static Predicate<Window> getWindowPredicate( String title )
     {
         Predicate<Window>   isDialog        = w -> (w instanceof JDialog);

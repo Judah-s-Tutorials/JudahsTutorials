@@ -18,11 +18,12 @@ public class PlotPointCommand implements PlotCommand
     
     /**
      * Constructor.
-     * Determines the plane in which the plot color 
-     * is to be set and the color to set it to.
+     * Determines the plane in which the plot point 
+     * is to be set.
      * 
      * @param plane the plane in which the plot color is to be set
-     * @param color the color to set the plot color to.
+     * @param xco   x-coordinate of the point
+     * @param yco   y-coordinate of the point
      */
     public PlotPointCommand( CartesianPlane plane, float xco, float yco )
     {

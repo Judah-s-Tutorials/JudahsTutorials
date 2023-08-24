@@ -145,8 +145,6 @@ public class CommandExecutor
     
     /**
      * Generate a plot of the form y = f(x).
-     * 
-     * @param parser    the object that encapsulates the equation to plot
      */
     private void plotY()
     {
@@ -161,8 +159,6 @@ public class CommandExecutor
     /**
      * Generate a plot from a polar equation
      * r = f(t).
-     * 
-     * @param parser    the object that encapsulates the equation to plot
      */
     private void plotR()
     {
@@ -177,8 +173,6 @@ public class CommandExecutor
     /**
      * Generate a plot from a polar equation
      * r = f(t).
-     * 
-     * @param parser    the object that encapsulates the equation to plot
      */
     private void plotT()
     {
@@ -192,8 +186,6 @@ public class CommandExecutor
     
     /**
      * Generate a plot of parametric equation.
-     * 
-     * @param parser    the object that encapsulates the equation to plot
      */
     private void plotXY()
     {

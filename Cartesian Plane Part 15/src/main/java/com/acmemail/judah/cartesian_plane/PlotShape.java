@@ -2,6 +2,13 @@ package com.acmemail.judah.cartesian_plane;
 
 import java.awt.Shape;
 
+/**
+ * Supports the ability
+ * to display points on a plane
+ * using a non-default shape.
+ * 
+ * @author Jack Straub
+ */
 public interface PlotShape
 {
     /**

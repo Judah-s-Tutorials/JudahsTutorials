@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
  */
 public class JColorChooserDemo1
 {
+    /** The component that provides feedback regarding the selected color. */
     private static JPanel feedback;
     
     /**
@@ -37,13 +38,26 @@ public class JColorChooserDemo1
         Color   color   = null;
         do
         {
+            // Display the dialog
             color = JColorChooser.showDialog( null, title, Color.BLUE );
+            
+            // Color will be non-null if the operator selects the OK button
             if ( color != null )
                 feedback.setBackground( color );
+            
+            // Color will be null if the operator selects the cancel button
+            // (or the close button)
         } while ( color != null );
         System.exit( 0 );
     }
     
+    /**
+     * Creates a frame containing a feedback window.
+     * The background color of the feedback window is updated
+     * each time the operator selects a color
+     * in the color dialog
+     * and pushes the OK button.
+     */
     private static void makeFeedbackWindow()
     {
         JFrame  frame   = new JFrame( "JColorChooser Demo" );

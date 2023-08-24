@@ -3,44 +3,91 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Window;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.EtchedBorder;
 
+/**
+ * Application to demonstrate
+ * how to embed 
+ * a JColorChooser
+ * in a GUI.
+ * Note that this application
+ * does <em>not</em> employ a dialog.
+ * The application displays the color-chooser
+ * on the left-side of the GUI,
+ * and a feedback window and controls
+ * on the right.
+ * Note that the preview panel
+ * of the JColorChooser
+ * has been removed
+ * (see {@link #JColorChooserDemo3()}, 
+ * "chooser.setPreviewPanel( new JPanel() )").
+ * To use the application,
+ * select a color on the left,
+ * and choose a button on the right,
+ * which will set either 
+ * the background color
+ * or the foreground color
+ * of the feedback window
+ * to the selected color.
+ * 
+ * @author Jack Straub
+ */
 public class JColorChooserDemo3
 {
-    private static ColorDialog      dialog;    
-    private static JPanel           feedback;
+    /** Test to display in the feedback window. */
+    private static final String sampleText  =
+        "<html><center>"
+        + "An elephant's faithful,<br>one hundred percent"
+        + "</center></html>";
+    /** The feedback window. */
+    private final JLabel        feedback    = new JLabel( sampleText );
+    /** The JColorChooser displayed on the let of the application GUI. */
+    private final JColorChooser chooser     = new JColorChooser( Color.BLUE );
+    /** Button to change the text color of the feedback window. */
+    private final JButton       fgButton    = new JButton( "Set Foreground" );
+    /** Button to change the background color of the feedback window. */
+    private final JButton       bgButton    = new JButton( "Set Background" );
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments; not used
+     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> build() );
+        SwingUtilities.invokeLater( JColorChooserDemo3::new );
     }
 
-    public static void build()
+    /**
+     * Constructor.
+     * Creates and shows the GUI.
+     */
+    public JColorChooserDemo3()
     {
-        dialog = new ColorDialog();
-        
-        JFrame  frame   = new JFrame( "Feedback Window" );
+        JFrame  frame   = new JFrame( "Color Chooser Demo 3" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
-        JPanel  pane    = new JPanel( new BorderLayout() );
-        feedback = new JPanel();
-        feedback.setPreferredSize( new Dimension( 100, 100 ) );
-        pane.add( feedback, BorderLayout.CENTER );
+        JPanel  pane    = new JPanel();
+        pane.setLayout( new BoxLayout( pane, BoxLayout.X_AXIS ) );
+        pane.add( chooser );
+        pane.add( Box.createRigidArea( new Dimension( 5, 0 ) ) );
+        pane.add( getFeedbackPanel() );
         
-        JButton pushMe  = new JButton( "Push Me" );
-        pane.add( pushMe, BorderLayout.SOUTH );
-        pushMe.addActionListener( e -> {
-           Color    color   = dialog.showDialog();
-           if ( color != null )
-               feedback.setBackground( color );
-        });
+        // Turn off the preview panel in the color-chooser.
+        chooser.setPreviewPanel( new JPanel() );
 
         frame.setContentPane( pane );
         frame.setLocation( 100, 100 );
@@ -48,46 +95,61 @@ public class JColorChooserDemo3
         frame.setVisible( true );
     }
     
-    private static class ColorDialog extends JDialog
+    /**
+     * Creates the feedback windows
+     * and controls (pushbuttons)
+     * of the GUI.
+     * 
+     * @return panel containing the feedback window
+     *         and controls (pushbuttons) of the GUI
+     */
+    private JPanel getFeedbackPanel()
     {
-        private final JColorChooser colorPane       = new JColorChooser();
-        private Color               selectedColor   = null;
+        Font    fbFont      = new Font( Font.SERIF, Font.PLAIN, 24 );
+        Border  border      =
+            BorderFactory.createLineBorder( Color.BLACK, 3 );
+        feedback.setFont( fbFont );
+        feedback.setHorizontalAlignment( SwingUtilities.CENTER );
+        feedback.setOpaque( true );
+        feedback.setBorder( border );
         
-        public ColorDialog()
-        {
-            super( (Window)null, "Color Dialog" );
-            this.setModal( true );
-            JPanel  pane    = new JPanel( new BorderLayout() );
-            pane.add( colorPane, BorderLayout.CENTER );
-            pane.add( getButtonPanel(), BorderLayout.SOUTH );
-            setContentPane( pane );
-            pack();
-        }
+        JPanel  buttonPanel = new JPanel();
+        buttonPanel.add( fgButton );
+        buttonPanel.add( bgButton );
         
-        public Color showDialog()
-        {
-            setVisible( true );
-            return selectedColor;
-        }
+        int     type        = EtchedBorder.RAISED;
+        Border  inBorder    = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
+        Border  outBorder   = BorderFactory.createEtchedBorder( type );
+        border = BorderFactory.createCompoundBorder( outBorder, inBorder );
+        JPanel  panel   = new JPanel( new BorderLayout() );
+        panel.add( buttonPanel, BorderLayout.NORTH );
+        panel.add( feedback, BorderLayout.CENTER );
+        panel.setBorder( border );
         
-        private JPanel getButtonPanel()
-        {
-            JPanel  panel           = new JPanel();
-            JButton okButton        = new JButton( "OK" );
-            JButton cancelButton    = new JButton( "Cancel" );
-            panel.add( okButton );
-            panel.add( cancelButton );
-            
-            okButton.addActionListener( e -> {
-                selectedColor = colorPane.getColor();
-                setVisible( false );
-            });
-            
-            cancelButton.addActionListener( e -> {
-                selectedColor = null;
-                setVisible( false );
-            });
-            return panel;
-        }
+        fgButton.addActionListener( this::apply );
+        bgButton.addActionListener( this::apply );
+        
+        return panel;
+    }
+    
+    /**
+     * Process a button selection,
+     * changing either the text
+     * or background color
+     * of the feedback window.
+     * 
+     * @param evt   ActionEvent describing
+     *              the pushbutton that was
+     *              selected by the operator
+     */
+    private void apply( ActionEvent evt )
+    {
+        Color   color   = 
+            chooser.getSelectionModel().getSelectedColor();
+        System.out.println( color );
+        if ( evt.getSource() == fgButton )
+            feedback.setForeground( color );
+        else
+            feedback.setBackground( color );
     }
 }

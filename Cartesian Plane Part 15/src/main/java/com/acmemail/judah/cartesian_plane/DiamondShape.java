@@ -48,10 +48,12 @@ public class DiamondShape implements PlotShape
     
     /**
      * Constructor.
-     * Sets the radius of the circle
-     * to a given value.
+     * Sets the dimensions
+     * of the enclosing rectangle
+     * for the desired diamond shape.
      * 
-     * @param radius    the given value
+     * @param rectWidth     width of the enclosing rectangle
+     * @param rectHeight    height of the enclosing rectangle
      */
     public DiamondShape( float rectWidth, float rectHeight )
     {
