@@ -120,7 +120,7 @@ public class JColorChooserDemo2b
         });
         pane.add( pushMe, BorderLayout.SOUTH );
 
-        feedback.setLocation( 100, 100 );
+        frame.setLocation( 100, 100 );
         frame.pack();
         frame.setVisible( true );
     }

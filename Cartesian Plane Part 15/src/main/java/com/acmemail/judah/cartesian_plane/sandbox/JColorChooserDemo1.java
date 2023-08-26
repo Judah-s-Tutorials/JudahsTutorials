@@ -64,6 +64,8 @@ public class JColorChooserDemo1
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         feedback = new JPanel();
         feedback.setPreferredSize( new Dimension( 100, 100 ) );
+        
+        frame.setLocation( 100, 100 );
         frame.setContentPane( feedback );
         frame.pack();
         frame.setVisible( true );

@@ -90,8 +90,8 @@ public class JColorChooserDemo3
         chooser.setPreviewPanel( new JPanel() );
 
         frame.setContentPane( pane );
-        frame.setLocation( 100, 100 );
         frame.pack();
+        SandboxUtils.center( frame );
         frame.setVisible( true );
     }
     
