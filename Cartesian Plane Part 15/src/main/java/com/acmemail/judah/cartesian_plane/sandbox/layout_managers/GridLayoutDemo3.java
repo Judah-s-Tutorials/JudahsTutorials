@@ -18,12 +18,12 @@ public class GridLayoutDemo3
 
     private static void makeGUI()
     {
-        JFrame  frame       = new JFrame( "GridLayout Demo 2" );
+        JFrame  frame       = new JFrame( "GridLayout Demo 3" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  mainPanel   = new JPanel( new GridLayout( 3, 4, 20, 5 ) );
         
         mainPanel.add( new JButton( "ant" ) );
-        mainPanel.add( new JButton( "elephant" ) );
+        mainPanel.add( new JButton( "hippo" ) );
         mainPanel.add( new JButton( "gnu" ) );
         mainPanel.add( new JButton( "ape" ) );
         mainPanel.add( new JButton( "cat" ) );

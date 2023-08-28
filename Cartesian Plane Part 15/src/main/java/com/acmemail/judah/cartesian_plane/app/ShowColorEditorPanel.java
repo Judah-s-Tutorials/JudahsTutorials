@@ -1,21 +1,18 @@
-package com.acmemail.judah.cartesian_plane.sandbox.app;
-
-import java.awt.GridLayout;
+package com.acmemail.judah.cartesian_plane.app;
 
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.components.ColorEditor;
 
 /**
- * Application to display the ColorEditor,
- * by individually positioning 
- * each ColorEditor component.
+ * Application to display the ColorEditor
+ * using the default component configuration
+ * provided by the ColorEditor.
  * 
  * @author Jack Straub
  */
-public class ShowColorEditor
+public class ShowColorEditorPanel
 {
     /**
      * Application entry point.
@@ -35,13 +32,7 @@ public class ShowColorEditor
         JFrame  frame   = new JFrame( "Show Color Editor" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
-        ColorEditor     editor  = new ColorEditor();
-        JPanel          pane    = new JPanel( new GridLayout( 1, 3 ) );
-        pane.add( editor.getColorButton() );
-        pane.add( editor.getTextEditor() );
-        pane.add( editor.getFeedback() );
-        
-        frame.setContentPane( pane );
+        frame.setContentPane( new ColorEditor().getPanel() );
         frame.pack();
         frame.setVisible( true );
     }

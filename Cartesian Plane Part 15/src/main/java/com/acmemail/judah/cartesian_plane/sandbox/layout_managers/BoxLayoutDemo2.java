@@ -21,7 +21,7 @@ public class BoxLayoutDemo2
 
     private static void makeGUI()
     {
-        JFrame  frame       = new JFrame( "BoxLayout Demo 1" );
+        JFrame  frame       = new JFrame( "BoxLayout Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  mainPanel   = new JPanel();
         mainPanel.add( getHorizontalPanel() );

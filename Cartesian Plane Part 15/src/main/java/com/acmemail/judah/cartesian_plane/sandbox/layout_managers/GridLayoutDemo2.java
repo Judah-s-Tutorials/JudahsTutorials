@@ -27,7 +27,7 @@ public class GridLayoutDemo2
         mainPanel.add( new JButton( "gnu" ) );
         mainPanel.add( new JButton( "ape" ) );
         mainPanel.add( new JButton( "cat" ) );
-        mainPanel.add( new JButton( "<html>VERY<br>TALL</html>" ) );
+        mainPanel.add( new JButton( "<html>VERY<BR>VERY<br>TALL</html>" ) );
         
         frame.setContentPane( mainPanel );
         frame.pack();

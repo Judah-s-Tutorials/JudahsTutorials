@@ -1,11 +1,10 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JColorChooser;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 /**
@@ -21,10 +20,10 @@ import javax.swing.SwingUtilities;
  * 
  * @author Jack Straub
  */
-public class JColorChooserDemo1
+public class JColorChooserDemo1 implements ActionListener
 {
     /** The component that provides feedback regarding the selected color. */
-    private static JPanel feedback;
+    private static ColorFeedbackFrame    feedback;
     
     /**
      * Application entry point.
@@ -32,42 +31,29 @@ public class JColorChooserDemo1
      * @param args  command line arguments; not used
      */
     public static void main(String[] args)
-    {
-        SwingUtilities.invokeLater( () -> makeFeedbackWindow() );
-        String  title   = "JColorChooser Demo";
-        Color   color   = null;
-        do
-        {
-            // Display the dialog
-            color = JColorChooser.showDialog( null, title, Color.BLUE );
-            
-            // Color will be non-null if the operator selects the OK button
-            if ( color != null )
-                feedback.setBackground( color );
-            
-            // Color will be null if the operator selects the cancel button
-            // (or the close button)
-        } while ( color != null );
-        System.exit( 0 );
+    {   
+        feedback = new ColorFeedbackFrame();  
+        ActionListener  listener    = new JColorChooserDemo1();
+        SwingUtilities.invokeLater( () -> feedback.makeGUI( listener ) );
     }
     
     /**
-     * Creates a frame containing a feedback window.
-     * The background color of the feedback window is updated
-     * each time the operator selects a color
-     * in the color dialog
-     * and pushes the OK button.
+     * Posts a JColorChooser dialog and waits for it to be dismissed.
+     * If dismissed with the OK action,
+     * the selected color 
+     * is set in the feedback window.
+     * 
+     * @param evt   event that caused this method to be activated
      */
-    private static void makeFeedbackWindow()
+    @Override
+    public void actionPerformed( ActionEvent evt )
     {
-        JFrame  frame   = new JFrame( "JColorChooser Demo" );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        feedback = new JPanel();
-        feedback.setPreferredSize( new Dimension( 100, 100 ) );
+        String  title   = "JColorChooser Demo";
+        // Display the dialog
+        Color   color   = JColorChooser.showDialog( null, title, Color.BLUE );
         
-        frame.setLocation( 100, 100 );
-        frame.setContentPane( feedback );
-        frame.pack();
-        frame.setVisible( true );
+        // Color will be non-null if the operator selects the OK button
+        if ( color != null )
+            feedback.setColor( color );
     }
 }

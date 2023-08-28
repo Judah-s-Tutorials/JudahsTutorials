@@ -3,6 +3,10 @@ package com.acmemail.judah.cartesian_plane.components;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import javax.swing.JButton;
@@ -115,6 +119,9 @@ public class ColorEditor
     private final JPanel        feedback    = new JPanel();
     /** ColorSelector dialog. */
     private final ColorSelector colorDialog = new ColorSelector( defColor );
+    
+    /** List of ActionListeners. */
+    private final List<ActionListener>  actionListeners = new ArrayList<>();
 
     /**
      * Constructor.
@@ -138,8 +145,46 @@ public class ColorEditor
         textEditor.setFont( newFont );
         
         textEditor.addActionListener( e -> editColor() );
+        textEditor.addActionListener( e -> fireActionListeners() );
         colorButton.addActionListener( e -> selectColor() );
         commit();
+    }
+    
+    /**
+     * Adds a given listener
+     * to the list of ActionListeners
+     * that are notified
+     * when the selected color changes.
+     * This happens
+     * whenever changes to the text editor
+     * are committed.
+     * Note that
+     * selecting a color
+     * from the color selector
+     * results in a change
+     * being committed to the text editor.
+     * 
+     * @param listener  the given listener
+     */
+    public void addActionListener( ActionListener listener )
+    {
+        actionListeners.add(listener );
+    }
+    
+    /**
+     * Removes a given listener
+     * from the list
+     * of ActionListeners.
+     * If the given listener
+     * is not in the list
+     * the operation
+     * is silently ignored.
+     * 
+     * @param listener  the given listener
+     */
+    public void removeActionListener( ActionListener listener )
+    {
+        actionListeners.remove( listener );
     }
     
     /**
@@ -278,5 +323,16 @@ public class ColorEditor
             textEditor.setText( "#Error" );
             feedback.setBackground( defColor );
         }
+    }
+    
+    /**
+     * Notifies all listeners 
+     * in the list of ActionListeners.
+     */
+    private void fireActionListeners()
+    {
+        ActionEvent event   = 
+            new ActionEvent( textEditor, ActionEvent.ACTION_FIRST, null );
+        actionListeners.forEach( l -> l.actionPerformed( event ));
     }
 }

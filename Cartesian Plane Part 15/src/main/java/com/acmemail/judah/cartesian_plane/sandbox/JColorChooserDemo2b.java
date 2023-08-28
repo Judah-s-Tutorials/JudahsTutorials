@@ -1,14 +1,7 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
-
-import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 /**
@@ -33,9 +26,9 @@ import javax.swing.SwingUtilities;
  * <p>
  * The GUI initially consists
  * of a feedback window
- * and a pushbutton.
+ * and two pushbutton.
  * To display the color-chooser dialog
- * press the pushbutton.
+ * press the execute button.
  * If you select a color in the dialog
  * and then press
  * the dialog's OK button,
@@ -45,6 +38,10 @@ import javax.swing.SwingUtilities;
  * in any other fashion
  * the color selection
  * will be ignored.
+ * </p>
+ * <p>
+ * To exit the application
+ * press the exit button.
  * </p>
  * 
  * @author Jack Straub
@@ -72,7 +69,7 @@ public class JColorChooserDemo2b
      * Feedback component for displaying the color selected
      * from the JColorChooser component.
      */
-    private static JPanel           feedback;
+    private static ColorFeedbackFrame   feedback;
     
     /** Records the operator's choice of OK/Cancel operations. */
     private static int  choice  = -1;
@@ -103,25 +100,11 @@ public class JColorChooserDemo2b
                 e -> choice = CANCEL_CHOICE
             );
 
-        JFrame  frame   = new JFrame( "Feedback Window" );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        
-        Container   pane    = frame.getContentPane();
-        pane.setLayout( new BorderLayout() );
-        feedback = new JPanel();
-        feedback.setPreferredSize( new Dimension( 100, 100 ) );
-        pane.add( feedback, BorderLayout.CENTER );
-        
-        JButton pushMe  = new JButton( "Push Me" );
-        pushMe.addActionListener( e -> {
+        feedback = new ColorFeedbackFrame();
+        feedback.makeGUI( e -> {
             dialog.setVisible( true );
             if ( choice == OK_CHOICE )
-                feedback.setBackground( colorPane.getColor() );
+                feedback.setColor( colorPane.getColor() );
         });
-        pane.add( pushMe, BorderLayout.SOUTH );
-
-        frame.setLocation( 100, 100 );
-        frame.pack();
-        frame.setVisible( true );
     }
 }
