@@ -121,15 +121,16 @@ public class JColorChooserDemo3
         Border  inBorder    = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
         Border  outBorder   = BorderFactory.createEtchedBorder( type );
         border = BorderFactory.createCompoundBorder( outBorder, inBorder );
-        JPanel  panel   = new JPanel( new BorderLayout() );
-        panel.add( buttonPanel, BorderLayout.NORTH );
-        panel.add( feedback, BorderLayout.CENTER );
-        panel.setBorder( border );
+        
+        JPanel  mainPanel   = new JPanel( new BorderLayout() );
+        mainPanel.add( buttonPanel, BorderLayout.NORTH );
+        mainPanel.add( feedback, BorderLayout.CENTER );
+        mainPanel.setBorder( border );
         
         fgButton.addActionListener( this::apply );
         bgButton.addActionListener( this::apply );
         
-        return panel;
+        return mainPanel;
     }
     
     /**

@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.sandbox.layout_managers;
 
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -35,12 +36,22 @@ public class BoxLayoutDemo3a
 
         panel.setLayout( layout );
         JLabel      shortLabel  = new JLabel( "Short" );
-        JLabel      longLabel   = new JLabel( "Really, Really long Label" );
+        JLabel      longLabel   = 
+            new JLabel( "Really, Really long Label" );
         JLabel      medLabel    = new JLabel( "Mid-size label" );
         JCheckBox   shortCBox   = new JCheckBox( "Once" );
-        JCheckBox   longCBox    = new JCheckBox( "Many, many, many times" );
+        JCheckBox   longCBox    = 
+            new JCheckBox( "Many, many, many times" );
         JCheckBox   medCBox     = new JCheckBox( "Occasionally" );
         
+        float       hPos        = JComponent.LEFT_ALIGNMENT;
+        shortLabel.setAlignmentX( hPos );
+        longLabel.setAlignmentX( hPos );
+        medLabel.setAlignmentX( hPos );
+        shortCBox.setAlignmentX( hPos );
+        longCBox.setAlignmentX( hPos );
+        medCBox.setAlignmentX( hPos );
+
         panel.add( shortLabel );
         panel.add( medLabel );
         panel.add( longLabel );
