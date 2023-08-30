@@ -35,8 +35,11 @@ import javax.swing.JDialog;
 public class ColorSelector
 {
     /** Default dialog title. */
-    private static String   defTitle    = "Color Selector";
+    private static final String defTitle    = "Color Selector";
     
+    /** The dialog created by JColorChooser.makeDialog. */
+    private final JDialog       dialog;
+
     /** 
      * The color selected by the operator when the dialog's OK
      * button is pressed. If the cancel button is pressed this
@@ -44,10 +47,20 @@ public class ColorSelector
      * to JColorChooser.makeDialog.
      */
     private Color               selectedColor;
-    /** The JColorChooser component of this dialog. */
-    private final JColorChooser colorPane       = new JColorChooser();
-    /** The dialog created by JColorChooser.makeDialog. */
-    private final JDialog       dialog;
+    
+    /**
+     * Default constructor.
+     * Creates a ColorSelector
+     * with no parent,
+     * a default title
+     * and an initial color of blue.
+     * 
+     * @see #ColorSelector(Window, String, Color)
+     */
+    public ColorSelector()
+    {
+        this( null, defTitle, Color.BLUE );
+    }
     
     /**
      * Default constructor.
@@ -66,20 +79,6 @@ public class ColorSelector
     }
     
     /**
-     * Default constructor.
-     * Creates a ColorSelector
-     * with no parent,
-     * a default title
-     * and an initial color of blue.
-     * 
-     * @see #ColorSelector(Window, String, Color)
-     */
-    public ColorSelector()
-    {
-        this( null, defTitle, Color.BLUE );
-    }
-    
-    /**
      * Constructor.
      * Creates a ColorSelector
      * with the given owner, title
@@ -91,6 +90,7 @@ public class ColorSelector
      */
     public ColorSelector( Window owner, String title, Color color )
     {
+        JColorChooser colorPane = new JColorChooser();
         dialog =
             JColorChooser.createDialog(
                 owner, 

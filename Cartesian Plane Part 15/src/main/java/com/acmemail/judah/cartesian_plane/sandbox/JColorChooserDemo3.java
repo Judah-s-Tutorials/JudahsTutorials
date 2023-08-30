@@ -122,7 +122,7 @@ public class JColorChooserDemo3
         Border  outBorder   = BorderFactory.createEtchedBorder( type );
         border = BorderFactory.createCompoundBorder( outBorder, inBorder );
         
-        JPanel  mainPanel   = new JPanel( new BorderLayout() );
+        JPanel  mainPanel   = new JPanel( new BorderLayout() ); 
         mainPanel.add( buttonPanel, BorderLayout.NORTH );
         mainPanel.add( feedback, BorderLayout.CENTER );
         mainPanel.setBorder( border );
