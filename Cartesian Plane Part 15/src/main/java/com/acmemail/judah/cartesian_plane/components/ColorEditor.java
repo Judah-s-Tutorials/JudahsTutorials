@@ -72,10 +72,12 @@ import javax.swing.JTextField;
  *     the remainder of the text
  *     is interpreted as hexadecimal.
  *     The text is not examined
- *     until the operator presses enter
+ *     until its value is "committed";
+ *     this happens
+ *     when the operator presses enter
  *     while the text field has focus,
  *     or the program
- *     calls the {@link #commit} method.
+ *     calls the {@link #getColor} method.
  *     If an invalid value is entered,
  *     the displayed text
  *     changes to an error message
@@ -118,10 +120,12 @@ public class ColorEditor
     /** The feedback component. */
     private final JPanel        feedback    = new JPanel();
     /** ColorSelector dialog. */
-    private final ColorSelector colorDialog = new ColorSelector( defColor );
+    private final ColorSelector colorDialog = 
+        new ColorSelector( defColor );
     
     /** List of ActionListeners. */
-    private final List<ActionListener>  actionListeners = new ArrayList<>();
+    private final List<ActionListener>  actionListeners = 
+        new ArrayList<>();
 
     /**
      * Constructor.
@@ -144,10 +148,9 @@ public class ColorEditor
         Font    newFont = new Font( name, style, size );
         textEditor.setFont( newFont );
         
+        feedback.setBackground( defColor );
         textEditor.addActionListener( e -> editColor() );
-        textEditor.addActionListener( e -> fireActionListeners() );
         colorButton.addActionListener( e -> selectColor() );
-        commit();
     }
     
     /**
@@ -185,20 +188,6 @@ public class ColorEditor
     public void removeActionListener( ActionListener listener )
     {
         actionListeners.remove( listener );
-    }
-    
-    /**
-     * Commits the value
-     * stored in the textEditor component.
-     * Achieves the same result
-     * as the operator
-     * typing enter
-     * while this component
-     * has focus.
-     */
-    public void commit()
-    {
-        textEditor.postActionEvent();
     }
     
     /**
@@ -278,6 +267,24 @@ public class ColorEditor
     }
     
     /**
+     * Sets the currently selected color
+     * to a given color.
+     * The text editor
+     * and feedback window
+     * are both updated.
+     * 
+     * @param color the given color
+     */
+    public void setColor( Color color )
+    {
+        int     iColor  = color.getRGB() & 0x00FFFFFF;
+        String  sColor  = String.format( "0x%06x", iColor );
+        textEditor.setText( sColor );
+        feedback.setBackground( color );
+        fireActionListeners();
+    }
+    
+    /**
      * Displays the ColorSelector
      * and waits for the operator
      * to choose OK or Cancel.
@@ -290,12 +297,7 @@ public class ColorEditor
     {
         Color   color   = colorDialog.showDialog();
         if ( color != null )
-        {
-            int     iColor  = color.getRGB() & 0x00FFFFFF;
-            String  sColor  = String.format( "0x%06x", iColor );
-            textEditor.setText( sColor );
-            textEditor.postActionEvent();
-        }
+            setColor( color );
     }
     
     /**
@@ -317,7 +319,7 @@ public class ColorEditor
     {
         Optional<Color> optColor    = getColor();
         if ( optColor.isPresent() )
-            feedback.setBackground( optColor.get() );
+            setColor( optColor.get() );
         else
         {
             textEditor.setText( "#Error" );

@@ -348,7 +348,9 @@ public class ComponentFinder
      */
     public static void disposeAll()
     {
-        Arrays.stream( Window.getWindows() ).forEach( Window::dispose );
+        GUIUtils.schedEDTAndWait( () -> {
+            Arrays.stream( Window.getWindows() ).forEach( Window::dispose );
+        });
     }
     
     /**

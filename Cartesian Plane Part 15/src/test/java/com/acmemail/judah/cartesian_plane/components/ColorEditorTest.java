@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Color;
 import java.awt.Window;
@@ -69,14 +68,14 @@ class ColorEditorTest
         actionListener1Fired = false;
         actionListener2Fired = false;
         defEditor.addActionListener( e -> actionListener1Fired = true );
-        commit();
+        commitEdit();
         assertTrue( actionListener1Fired );
         assertFalse( actionListener2Fired );
 
         actionListener1Fired = false;
         actionListener2Fired = false;
         defEditor.addActionListener( e -> actionListener2Fired = true );
-        commit();
+        commitEdit();
         assertTrue( actionListener1Fired );
         assertTrue( actionListener2Fired );
     }
@@ -91,37 +90,23 @@ class ColorEditorTest
         actionListener2Fired = false;
         defEditor.addActionListener( listener1 );
         defEditor.addActionListener( listener2 );
-        commit();
+        commitEdit();
         assertTrue( actionListener1Fired );
         assertTrue( actionListener2Fired );
 
         actionListener1Fired = false;
         actionListener2Fired = false;
         defEditor.removeActionListener( listener2 );
-        commit();
+        commitEdit();
         assertTrue( actionListener1Fired );
         assertFalse( actionListener2Fired );
 
         actionListener1Fired = false;
         actionListener2Fired = false;
         defEditor.removeActionListener( listener1 );
-        commit();
+        commitEdit();
         assertFalse( actionListener1Fired );
         assertFalse( actionListener2Fired );
-    }
-
-    @Test
-    void testCommit()
-    {
-        int     origRGB = getFeedbackRGB();
-        int     testRGB = getUniqueRGB();
-        textEditor.setText( "" + testRGB );        
-        // edit hasn't been committed, so the feedback window 
-        // should not have changed color
-        assertEquals( origRGB, getFeedbackRGB() );
-        
-        commit();
-        assertEquals( testRGB, getFeedbackRGB() );
     }
 
     @Test
@@ -144,7 +129,7 @@ class ColorEditorTest
     {
         int testRGB = getUniqueRGB();
         textEditor.setText( "" + testRGB );        
-        commit();
+        commitEdit();
         assertEquals( testRGB, getFeedbackRGB() );
     }
 
@@ -187,7 +172,7 @@ class ColorEditorTest
     {
         int     testRGB     = getUniqueRGB();
         textEditor.setText( "" + testRGB );        
-        commit();
+        commitEdit();
         
         int     actRGB      = getFeedbackRGB();
         assertEquals( testRGB, actRGB );
@@ -200,20 +185,12 @@ class ColorEditorTest
         // verify that the GUI behaves accordingly.
         Color   origColor   = getFeedbackColor();
         GUIUtils.schedEDTAndWait( () ->  textEditor.setText( "invalid" ) );
-        commit();
+        commitEdit();
         GUIUtils.schedEDTAndWait( () -> {
             String  actText = textEditor.getText().toUpperCase();
             assertTrue( actText.contains( "ERROR" ) );
         });
         assertEquals( origColor, getFeedbackColor() );
-    }
-    
-    private void commit()
-    {
-        // commit will precipitate activity on the EDT.
-        // Give it a moment to do its thing, and settle down.
-        defEditor.commit();
-        Utils.pause( 250 );
     }
     
     private Color getFeedbackColor()
@@ -306,5 +283,11 @@ class ColorEditorTest
         assertNotNull( comp );
         assertTrue( comp instanceof JButton );
         chooserCancelButton = (JButton)comp;
+    }
+    
+    private void commitEdit()
+    {
+        textEditor.postActionEvent();
+        Utils.pause( 250 );
     }
 }
