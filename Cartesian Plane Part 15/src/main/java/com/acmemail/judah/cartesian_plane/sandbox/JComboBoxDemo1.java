@@ -17,9 +17,34 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
+/**
+ * This is a simple application
+ * to demonstrate how
+ * a non-editable JComBox works.
+ * In addition to a JComboBox,
+ * the demo has three feedback windows
+ * and an activity log.
+ * Each time an item is selected
+ * or deselected
+ * the activity log
+ * and the selected/deselected feedback windows
+ * are updated. 
+ * This is accomplished 
+ * by putting an ItemListener
+ * on the JComboBox.
+ * In addition,
+ * Each time an item is selected
+ * the activity log
+ * and the action feedback windows
+ * are updated.
+ * 
+ * @author Jack Straub
+ */
 public class JComboBoxDemo1
 {
+    /** Line separator; declared here for convenience. */
     private static final String     endl        = System.lineSeparator();
+    /** Items to go in drop-down list. */
     private static final String[]   items       =
     { 
         "Montgomery",     "Juneau",       "Phoenix",    "Little Rock", 
@@ -35,18 +60,31 @@ public class JComboBoxDemo1
         "Pierre",         "Nashville",    "Austin",     "Salt Lake City",
     };
     
+    /** Combo box being demonstrated. */
     private JComboBox<String> comboBox;
+    /** Feedback window; updated every time an ActionEvent fires. */
     private JLabel      actionFB;
+    /** Feedback window; updated every time an Item fires. */
     private JLabel      selectedFB;
+    /** Feedback window; updated every time an Item fires. */
     private JLabel      deselectedFB;
+    /** Activity log. */
     private JTextArea   activityLog;
 
     
+    /**
+     * Application entry point.
+     * 
+     * @param args command line arguments; not used
+     */
     public static void main(String[] args)
     {
         new JComboBoxDemo1().makeGUI();
     }
 
+    /**
+     * Builds the GUI on the EDT.
+     */
     public void makeGUI()
     {
         comboBox  = new JComboBox<>( items );
@@ -64,6 +102,12 @@ public class JComboBoxDemo1
         frame.setVisible( true );
     }
     
+    /**
+     * Composes a JPanel
+     * containing the feed back windows.
+     * 
+     * @return  the composed JPanel
+     */
     private JPanel getFeedbackPanel()
     {
         JLabel  action      = new JLabel( "Action: " );
@@ -87,9 +131,12 @@ public class JComboBoxDemo1
         actionFB.setForeground( Color.BLACK );
         
         comboBox.addItemListener( this::logStateChange );
-        comboBox.addActionListener( e ->
-            actionFB.setText( getSelectedItem() )
-        );
+        comboBox.addActionListener( e -> {
+            String  selectedItem = getSelectedItem();
+            actionFB.setText( selectedItem );
+            appendToLog( "ACTION: " + selectedItem );
+        });
+        comboBox.addActionListener( e -> actionFB.setText( (String)comboBox.getSelectedItem() ));
         
         JPanel  panel   = new JPanel( new GridLayout( 3, 2, 10, 0 ) );
         panel.add( selected );
@@ -102,6 +149,16 @@ public class JComboBoxDemo1
         return panel;
     }
     
+    /**
+     * Composes a JPanel
+     * to be displayed
+     * on the left side
+     * of the parent window.
+     * The panel comprises
+     * the combo box and the feedback panel.
+     * 
+     * @return  the composed JPanel
+     */
     private JPanel getWestPanel()
     {
         JPanel      panel   = new JPanel();
@@ -124,21 +181,34 @@ public class JComboBoxDemo1
         return finalPanel;
     }
     
+    /**
+     * Composes a JPanel 
+     * containing the 
+     * commit and exit buttons.
+     * 
+     * @return  the composed JPanel
+     */
     private JPanel getButtonPanel()
     {
-        JButton select  = new JButton( "Commit" );
+        JButton commit  = new JButton( "Commit" );
         JButton exit    = new JButton( "Exit" );
-        select.addActionListener( e ->
-            appendToLog( "committed: " + getSelectedItem() )
+        commit.addActionListener( e ->
+            appendToLog( "COMMITTED: " + getSelectedItem() )
         );
         exit.addActionListener( e -> System.exit( 0 ) );
         
         JPanel  panel   = new JPanel();
-        panel.add( select );
+        panel.add( commit );
         panel.add( exit );
         return panel;
     }
     
+    /**
+     * Instantiates and configures
+     * the activity log.
+     * 
+     * @return  the activity log
+     */
     private JComponent getActivityLog()
     {
         activityLog = new JTextArea( 20, 30 );
@@ -148,6 +218,14 @@ public class JComboBoxDemo1
         return pane;
     }
     
+    /**
+     * Appends the given text
+     * to the activity log
+     * and follows it
+     * with a line separator.
+     * 
+     * @param text  the given text
+     */
     private void appendToLog( String text )
     {
         activityLog.append( text + endl );
@@ -155,6 +233,16 @@ public class JComboBoxDemo1
         activityLog.setCaretPosition( len );
     }
     
+    /*
+     * Listens for ItemEvents.
+     * Determines whether the event
+     * encapsulates a selection of deselection,
+     * and updates the corresponding 
+     * feedback window,
+     * and the activity log.
+     * 
+     * @param evt   the event to be processed
+     */
     private void logStateChange( ItemEvent evt )
     {
         String  state   = null;
@@ -174,6 +262,14 @@ public class JComboBoxDemo1
         appendToLog( msg );
     }
 
+    /**
+     * Gets the currently selected item
+     * from the combo box
+     * and returns it
+     * as a String.
+     * 
+     * @return  the currently selected item from the combo box
+     */
     private String getSelectedItem()
     {
         return (String)comboBox.getSelectedItem();
