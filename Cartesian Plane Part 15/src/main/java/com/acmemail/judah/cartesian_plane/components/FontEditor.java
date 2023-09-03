@@ -22,14 +22,19 @@ import javax.swing.border.Border;
 @SuppressWarnings("serial")
 public class FontEditor
 {
+    /** Text to display in feedback area. */
     private static final String     sampleString    =
         "<html>1313 Mockingbird Lane, Wisdom NB 68101</html>";
     
+    /** Text to display when a configuration property is invalid. */
     private static final String     errorString     = "--ERROR--";
-    private static final Color      errorColor      = Color.BLACK;
+    /** Color of feedback text when a configuration property is invalid. */
     private static final Font       errorFont       =
         new Font( Font.DIALOG, Font.ITALIC, 12 );
+    /** Text color to use when a configuration property is invalid. */
+    private static final Color      errorColor      = Color.BLACK;
     
+    /** Font names supported by this utility. */
     private static final String[]   fontNames       =
     {
         Font.DIALOG,
@@ -38,22 +43,38 @@ public class FontEditor
         Font.SANS_SERIF,
         Font.SERIF
     };
+    /** Drop-down list of supported font names. */
     private final JComboBox<String>     fontList        =
         new JComboBox<>( fontNames );
+    /** Bold face toggle. */
     private final JCheckBox             boldToggle      = 
         new JCheckBox( "Bold" );
+    /** Slope face toggle. */
     private final JCheckBox             italicToggle    = 
         new JCheckBox( "Italic" );
+    /** Configuration parameter for size selector. */
     private final SpinnerNumberModel    sizeModel       =
         new SpinnerNumberModel( 10, 1, 40, 1 );
+    /** Size selector. */
     private final JSpinner              sizeEditor      = 
         new JSpinner( sizeModel );
+    /**
+     * Color editor. The text editor and color pushbutton are extracted
+     * from this object, and embedded in the FontEditor GUI.
+     */
     private final ColorEditor           colorEditor     =
         new ColorEditor();
     
+    /** Feedback window. */
     private final Feedback              feedback        = 
         new Feedback( sampleString );
 
+    /**
+     * Constructor.
+     * This constructor configures GUI components
+     * so it must be invoked
+     * on the event dispatch thread (EDT).
+     */
     public FontEditor()
     {
         JTextField  textEditor  = colorEditor.getTextEditor();
@@ -68,6 +89,14 @@ public class FontEditor
         feedback.update();
     }
     
+    /**
+     * Returns a JPanel that incorporates
+     * all the FontEditor components.
+     * 
+     * @return  JPanel incorporating FontEditor components
+     * 
+     * @see  com.acmemail.judah.cartesian_plane.app.ShowFontEditor
+     */
     public JPanel getPanel()
     {
         JPanel  panel   = new JPanel( new GridLayout( 1, 2, 3, 0 ) );
@@ -77,6 +106,19 @@ public class FontEditor
         return panel;
     }
     
+    /**
+     * Returns an Optional
+     * containing a Font composed of
+     * the properties selected
+     * in the FontEditor components.
+     * If one of the properties
+     * is invalid
+     * an empty Optional is returned.
+     * 
+     * @return  
+     *      Optional containing composed Font,
+     *      or empty options if Font properties are invalid
+     */
     public Optional<Font> getSelectedFont()
     {
         Optional<Font>  optFont = Optional.empty();
@@ -103,12 +145,22 @@ public class FontEditor
         return optFont;
     }
     
+    /**
+     * Gets the font name.
+     * 
+     * @return  the font name
+     */
     public String getName()
     {
         String  currFontName    = (String)fontList.getSelectedItem();
         return currFontName;
     }
     
+    /**
+     * Gets the font size.
+     * 
+     * @return  the font size
+     */
     public OptionalInt getSize()
     {
         OptionalInt optSize = OptionalInt.empty();
@@ -124,18 +176,35 @@ public class FontEditor
         return optSize;
     }
     
+    /**
+     * Indicates whether the bold property
+     * is selected.
+     * 
+     * @return  true if the bold property is selected
+     */
     public boolean isBold()
     {
         boolean currIsBold  = boldToggle.isSelected();
         return currIsBold;
     }
     
+    /**
+     * Indicates whether the slope property
+     * is selected.
+     * 
+     * @return  true if the slope property is selected
+     */
     public boolean isItalic()
     {
         boolean currIsItalic    = italicToggle.isSelected();
         return currIsItalic;
     }
     
+    /**
+     * Gets the selected text color.
+     * 
+     * @return  the selected text color
+     */
     public Optional<Color> getColor()
     {
         Optional<Color> optColor    = colorEditor.getColor();
@@ -143,7 +212,10 @@ public class FontEditor
     }
     
     /**
-     * @return the boldToggle
+     * Gets the JToggleButton
+     * used to select the bold property.
+     * 
+     * @return toggle button for selecting the bold property
      */
     public JCheckBox getBoldToggle()
     {
@@ -151,7 +223,10 @@ public class FontEditor
     }
 
     /**
-     * @return the italicToggle
+     * Gets the JToggleButton
+     * used to select the italic (sloped) property.
+     * 
+     * @return toggle button for selecting the italic property
      */
     public JCheckBox getItalicToggle()
     {
@@ -159,7 +234,10 @@ public class FontEditor
     }
 
     /**
-     * @return the sizeEditor
+     * Gets the JSpinner used to configure
+     * the font size.
+     * 
+     * @return the JSpinner for selecting the font size
      */
     public JSpinner getSizeEditor()
     {
@@ -167,7 +245,12 @@ public class FontEditor
     }
 
     /**
-     * @return the colorEditor
+     * Returns the ColorEditor
+     * used to select the text color.
+     * 
+     * @return 
+     *      the ColorEditor for selecting
+     *      the text color
      */
     public ColorEditor getColorEditor()
     {
@@ -175,13 +258,21 @@ public class FontEditor
     }
 
     /**
-     * @return the feedback
+     * Gets the JComponent used as a feedback window.
+     * 
+     * @return the JLabel used as a feedback window
      */
-    public JLabel getFeedback()
+    public JComponent getFeedback()
     {
         return feedback;
     }
 
+    /**
+     * Composes the left-side panel
+     * of the default FontEditor GUI.
+     * 
+     * @return  the left-side panel of the default FontEditor GUI
+     */
     private JPanel getLeftPanel()
     {
         JPanel              panel   = new JPanel( new GridLayout( 5, 1 ) );
@@ -216,8 +307,20 @@ public class FontEditor
         return panel;
     }
     
+    /**
+     * Encapsulates the JComponent
+     * used as a feedback window.
+     * 
+     * @author Jack Straub
+     */
     private class Feedback extends JLabel
     {
+        /**
+         * Constructor.
+         * Configures the feedback window.
+         * 
+         * @param text  text to display in the feedback window
+         */
         public Feedback( String text )
         {
             super( text );
@@ -228,6 +331,13 @@ public class FontEditor
             setBorder( border );
         }
         
+        /**
+         * Updates the feedback window
+         * to reflect the currently configured font
+         * and text color.
+         * If a configuration parameter is invalid
+         * defaults are used.
+         */
         public void update()
         {
             Optional<Font>  optFont     = getSelectedFont();
