@@ -212,6 +212,18 @@ public class FontEditor
     }
     
     /**
+     * Gets the JComboBox
+     * that lists
+     * the support font names.
+     * 
+     * @return combo box for selecting the name property
+     */
+    public JComboBox<String> getNameCombo()
+    {
+        return fontList;
+    }
+    
+    /**
      * Gets the JToggleButton
      * used to select the bold property.
      * 
