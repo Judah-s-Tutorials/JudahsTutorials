@@ -7,8 +7,25 @@ import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.components.ColorEditor;
 
+/**
+ * Illustrates one way
+ * in which the ColorEditor
+ * can be used.
+ * The ColorEditor's default panel
+ * is ignored,
+ * and its constituent components
+ * are displayed
+ * in a custom arrangement.
+ * 
+ * @author Jack Straub
+ */
 public class ColorEditorDemo1
 {
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments, not used
+     */
     public static void main(String[] args)
     {
         SwingUtilities.invokeLater(  () -> {

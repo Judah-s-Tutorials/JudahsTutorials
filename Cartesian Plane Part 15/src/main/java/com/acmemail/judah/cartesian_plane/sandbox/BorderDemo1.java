@@ -17,23 +17,45 @@ import javax.swing.border.Border;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
+/**
+ * Application to examine the appearance
+ * of miscellaneous borders types.
+ *  
+ * @author Jack Straub
+ */
 public class BorderDemo1
 {
+    /** Initial x-coordinate for positioning frames. */
     private static final int    locX    = 300;
+    /** Initial y-coordinate for positioning frames. */
     private static final int    locY    = 300;
     
+    /** 
+     * List of all frames that have been created but not disposed.
+     * @see #finishAndShow(String, JPanel...)
+     * @see #closeAll()
+     */
     private List<JFrame>    allFrames   = new ArrayList<>();
+    /** 
+     * Main panel containing the GUI for initiating demos.
+     * Declared here for the convenience of GUI initialization.
+     */
     private JPanel          demoPanel;
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments, not used
+     */
     public static void main(String[] args)
     {
         SwingUtilities.invokeLater( () -> new BorderDemo1().makeGUI() );
-        BorderFactory.createBevelBorder( BevelBorder.RAISED );
-        BorderFactory.createRaisedBevelBorder();
-        BorderFactory.createBevelBorder( BevelBorder.LOWERED );
-        BorderFactory.createLoweredBevelBorder();
     }
     
+    /**
+     * Constructs the GUI.
+     * Must be called on the EDT.
+     */
     private void makeGUI()
     {
         JFrame  frame       = new JFrame( "Border Demo" );
@@ -62,6 +84,16 @@ public class BorderDemo1
         frame.setVisible( true );
     }
     
+    /**
+     * Creates a JButton
+     * with the given text
+     * and given action listener.
+     * The button is added
+     * to <em>demoPanel</em>.
+     * 
+     * @param text      the given text
+     * @param callBack  the given action listener
+     */
     private void 
     getDemoButton( String text, Runnable callBack )
     {
@@ -73,6 +105,10 @@ public class BorderDemo1
         demoPanel.add( button );
     }
 
+    /**
+     * Displays two frames
+     * illustrating the EmptyBorder.
+     */
     private void emptyBorderDemo()
     {
         JPanel  panel1  = getMainPanel( "JPanel Without Border" );
@@ -83,6 +119,11 @@ public class BorderDemo1
         finishAndShow( "Empty Border Demo", panel1, panel2 );
     }
 
+    /**
+     * Displays two frames
+     * illustrating the BevelBorder
+     * with default colors.
+     */
     private void bevelBorderDemo1()
     {
         JPanel  panel1  = getMainPanel( "JPanel With Raised Bevel Border" );
@@ -96,6 +137,11 @@ public class BorderDemo1
         finishAndShow( "Bevel Border Demo (1)", panel1, panel2 );
     }
 
+    /**
+     * Displays two frames
+     * illustrating the BevelBorder
+     * with user-specified colors.
+     */
     private void bevelBorderDemo2()
     {
         JPanel  panel1  = getMainPanel( "JPanel With Raised Bevel Border" );
@@ -117,6 +163,11 @@ public class BorderDemo1
         finishAndShow( "Bevel Border Demo (2)", panel1, panel2 );
     }
 
+    /**
+     * Displays two frames
+     * illustrating the EtchedBorder
+     * with default colors.
+     */
     private void etchedBorderDemo()
     {
         JPanel  panel1  = getMainPanel( "JPanel With Raised Etched Border" );
@@ -130,6 +181,10 @@ public class BorderDemo1
         finishAndShow( "Etched Border Demo", panel1, panel2 );
     }
 
+    /**
+     * Displays two frames
+     * illustrating the LineBorder.
+     */
     private void lineBorderDemo()
     {
         JPanel  panel1  = getMainPanel( "JPanel With Thin Line Border" );
@@ -143,6 +198,11 @@ public class BorderDemo1
         finishAndShow( "Line Border Demo", panel1, panel2 );
     }
 
+    /**
+     * Displays two frames
+     * illustrating the TitledBorder
+     * with all default property value.
+     */
     private void titledBorderDemo1()
     {
         JPanel  panel1  = getMainPanel( "JPanel With Titled Border" );
@@ -157,6 +217,12 @@ public class BorderDemo1
         finishAndShow( "Titled Border Demo (1)", panel1, panel2 );
     }
 
+    /**
+     * Displays two frames
+     * illustrating the TitledBorder
+     * electing to set some properties
+     * with custom values.
+     */
     private void titledBorderDemo2()
     {
         JPanel  panel1  = getMainPanel( "JPanel With Bevel/Titled Border" );
@@ -183,6 +249,10 @@ public class BorderDemo1
         finishAndShow( "Titled Border Demo (2)", panel1, panel2 );
     }
 
+    /**
+     * Displays two frames
+     * illustrating the CompoundBorder.
+     */
     private void compoundBorderDemo()
     {
         JPanel  panel1  = 
@@ -201,6 +271,16 @@ public class BorderDemo1
         finishAndShow( "Compound Border Demo", panel1, panel2 );
     }
     
+    /**
+     * Composes a panel
+     * from a template
+     * containing two buttons
+     * and a given caption.
+     * 
+     * @param caption   the given caption
+     *    
+     * @return  the composed panel
+     */
     private JPanel getMainPanel( String caption )
     {
         JPanel  mainPanel   = new JPanel( new BorderLayout() );
@@ -218,6 +298,15 @@ public class BorderDemo1
         return mainPanel;
     }
     
+    /**
+     * Gets a panel 
+     * containing the exit button.
+     * The button is configured
+     * with and action listener
+     * that calls System.exit.
+     * 
+     * @return  a panel containing the exit button
+     */
     private JPanel getButtonPanel()
     {
         Border  border  = 
@@ -231,6 +320,30 @@ public class BorderDemo1
         return panel;
     }
     
+    /**
+     * Executes the boilerplate
+     * for configuring and displaying
+     * a demonstration panel.
+     * The user passes a title
+     * and all the JPanels
+     * to be configured and displayed
+     * for a given demo.
+     * (The panels have presumably
+     * been initialized
+     * via {@linkplain #getMainPanel(String)}
+     * and been decorated
+     * with borders.)
+     * For each panel
+     * a JFrame and content pane,
+     * and the panel 
+     * is added to the content pane.
+     * Each frame is positioned horizontally
+     * beginning at {@linkplain #locX},
+     * packed and made visible.
+     * 
+     * @param title     the given title
+     * @param panels    the JPanels to be displayed
+     */
     private void finishAndShow( String title, JPanel... panels )
     {
         int nextX   = locX;
@@ -255,6 +368,11 @@ public class BorderDemo1
         }
     }
     
+    /**
+     * Closes and disposes
+     * all frames
+     * in the {@linkplain #allFrames} list.
+     */
     private void closeAll()
     {
        allFrames.stream()

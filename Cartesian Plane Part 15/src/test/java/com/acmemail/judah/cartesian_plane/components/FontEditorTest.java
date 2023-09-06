@@ -1,12 +1,18 @@
 package com.acmemail.judah.cartesian_plane.components;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+
+import java.awt.Color;
+import java.awt.Font;
+import java.util.Optional;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 
@@ -63,81 +69,218 @@ class FontEditorTest
     }
 
     @Test
-    void testGetPanel()
+    public void testGetPanel()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () -> testGetPanelEDT() );
+    }
+    
+    private void testGetPanelEDT()
+    {
+        // Make sure getPanel returns a JPanel containing all
+        // the expected components.
+        JPanel  panel   = defaultEditor.getPanel();
+        assertFound( panel, nameCombo );
+        assertFound( panel, boldToggle );
+        assertFound( panel, italicToggle );
+        assertFound( panel, sizeEditor );
+        assertFound( panel, nameCombo );
+        assertFound( panel, feedback );
+        assertFound( panel, colorEditor.getColorButton() );
+        assertFound( panel, colorEditor.getTextEditor() );
     }
 
     @Test
-    void testGetSelectedFont()
+    public void testGetSelectedFont()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () -> testGetSelectedFontEDT() );
+    }
+    
+    private void testGetSelectedFontEDT()
+    {
+        // Select new property values for selected font,
+        // then validate against getSelectedFont()
+        int     numItems    = nameCombo.getItemCount();
+        int     currItem    = nameCombo.getSelectedIndex();
+        int     selectItem  = (currItem + 1) % numItems;
+        nameCombo.setSelectedIndex( selectItem );
+        String  expFontName = nameCombo.getSelectedItem().toString();
+        
+        int     expSize     = (int)sizeEditor.getNextValue();
+        sizeEditor.setValue( expSize );
+        
+        boolean expBold     = !boldToggle.isSelected();
+        boldToggle.setSelected( expBold );
+        boolean expItalic   = !italicToggle.isSelected();
+        italicToggle.setSelected( expItalic );
+        
+        Optional<Font>  optFont = defaultEditor.getSelectedFont();
+        Font            font    = optFont.orElse( null );
+        assertNotNull( font );
+        assertEquals( expFontName, font.getName() );
+        assertEquals( expBold, font.isBold() );
+        assertEquals( expItalic, font.isItalic() );
+        assertEquals( expSize, font.getSize() );
     }
 
     @Test
-    void testGetName()
+    public void testGetName()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () -> testGetNameEDT() );
+    }
+    
+    private void testGetNameEDT()
+    {
+        String  currName    = nameCombo.getSelectedItem().toString();
+        assertEquals( currName, defaultEditor.getName() );
+        
+        int     numItems    = nameCombo.getItemCount();
+        int     currItem    = nameCombo.getSelectedIndex();
+        int     selectItem  = (currItem + 1) % numItems;
+        nameCombo.setSelectedIndex( selectItem );
+        String  expFontName = nameCombo.getSelectedItem().toString();
+        assertEquals( expFontName, defaultEditor.getName() );
     }
 
     @Test
-    void testGetSize()
+    public void testGetSize()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () -> testGetSizeEDT() );
+    }
+    
+    private void testGetSizeEDT()
+    {
+        int         currSize    = (int)sizeEditor.getValue();
+        int         actSize     = defaultEditor.getSize().orElse( -1 );
+        assertEquals( currSize, actSize );
+        
+        int     expSize     = (int)sizeEditor.getNextValue();
+        sizeEditor.setValue( expSize );
+        assertEquals( expSize, defaultEditor.getSize().orElse( -1 ) );
     }
 
     @Test
-    void testIsBold()
+    public void testIsBold()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () -> testIsBoldEDT() );
+    }
+    
+    private void testIsBoldEDT()
+    {
+        boolean currBold    = boldToggle.isSelected();
+        assertEquals( currBold, defaultEditor.isBold() );
+        
+        boolean expBold     = !currBold;
+        boldToggle.setSelected( expBold );
+        assertEquals( expBold, defaultEditor.isBold() );
     }
 
     @Test
-    void testIsItalic()
+    public void testIsItalic()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () -> testIsItalicEDT() );
+    }
+    
+    private void testIsItalicEDT()
+    {
+        boolean currItalic  = italicToggle.isSelected();
+        assertEquals( currItalic, defaultEditor.isItalic() );
+        
+        boolean expItalic   = !currItalic;
+        italicToggle.setSelected( expItalic );
+        assertEquals( expItalic, defaultEditor.isItalic() );
     }
 
     @Test
-    void testGetColor()
+    public void testGetColor()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () -> testGetColorEDT() );
+    }
+    
+    private void testGetColorEDT()
+    {
+        int     iExpColor   = Integer.decode( colorText.getText() );
+        Color   currColor   = defaultEditor.getColor().orElse( null );
+        assertNotNull( currColor );
+        int     iCurrColor  = currColor.getRGB() & 0x00FFFFFF;
+        assertEquals( iExpColor, iCurrColor );
+        
+        int     iNewColor   = iExpColor ^ 0xFF;
+        String  sNewColor   = "" + iNewColor;
+        colorText.setText( sNewColor );
+        colorText.postActionEvent();
+        Color   actColor    = defaultEditor.getColor().orElse( null );
+        assertNotNull( actColor );
+        int     iActColor   = actColor.getRGB() & 0x00FFFFFF;
+        assertEquals( iNewColor, iActColor );
+    }
+
+    @Test
+    public void testGetColorGoWrong()
+    {
+        GUIUtils.schedEDTAndWait( () -> testGetColorGoWrongEDT() );
+    }
+    
+    private void testGetColorGoWrongEDT()
+    {
+        // set color to an invalid value; verify FontEditor
+        // responds accordingly.
+        colorText.setText( "Q" );
+        colorText.postActionEvent();
+        assertFalse( defaultEditor.getColor().isPresent() );
     }
 
     @Test
     void testGetNameCombo()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () ->
+            assertNotNull( defaultEditor.getNameCombo() )
+        );
     }
 
     @Test
     void testGetBoldToggle()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () ->
+            assertNotNull( defaultEditor.getBoldToggle() )
+        );
     }
 
     @Test
     void testGetItalicToggle()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () ->
+            assertNotNull( defaultEditor.getItalicToggle() )
+        );
     }
 
     @Test
     void testGetSizeEditor()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () ->
+            assertNotNull( defaultEditor.getSizeEditor() )
+        );
     }
 
     @Test
     void testGetColorEditor()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () ->
+            assertNotNull( defaultEditor.getColorEditor() )
+        );
     }
 
     @Test
     void testGetFeedback()
     {
-        fail("Not yet implemented");
+        GUIUtils.schedEDTAndWait( () ->
+            assertNotNull( defaultEditor.getFeedback() )
+        );
     }
-
+    
+    private void assertFound( JPanel panel, JComponent comp )
+    {
+        assertNotNull(
+            ComponentFinder.find( panel, c -> c == comp )
+        );
+    }
 }

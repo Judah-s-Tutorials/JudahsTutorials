@@ -4,8 +4,22 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.Window;
 
+/**
+ * Utility class
+ * to provide convenience methods
+ * used by other sandbox classes,
+ * 
+ * @author Jack Straub
+ */
 public class SandboxUtils
 {
+    /**
+     * Locates a given Window
+     * so that it is centered
+     * in the display.
+     * 
+     * @param window    the given window
+     */
     public static void center( Window window )
     {
         Dimension   dialogSize  = window.getPreferredSize();

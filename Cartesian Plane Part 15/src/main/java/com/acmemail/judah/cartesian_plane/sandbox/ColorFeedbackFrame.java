@@ -10,7 +10,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 /**
- * Encapsulates a frame 
+ * This class 
+ * is for use
+ * by other sandbox applications.
+ * It encapsulates a frame 
  * with an empty window
  * (the "feedback window")
  * and buttons labeled
@@ -19,7 +22,7 @@ import javax.swing.JPanel;
  * will terminate the application.
  * The behavior of the execute button
  * is controlled by an ActionListener
- * given by the user.
+ * provided by the user.
  * The user can change
  * the color of the feedback window
  * by calling the {@link #setColor(Color)} method.

@@ -77,13 +77,10 @@ public class FontEditor
      */
     public FontEditor()
     {
-        JTextField  textEditor  = colorEditor.getTextEditor();
-        textEditor.setText( "0x000000" );
-        
         boldToggle.addActionListener( e -> feedback.update() );
         italicToggle.addActionListener( e -> feedback.update() );
         fontList.addActionListener( e -> feedback.update() );
-        textEditor.addActionListener( e -> feedback.update() );
+        colorEditor.addActionListener( e -> feedback.update() );
         sizeEditor.addChangeListener( e -> feedback.update() );
         
         feedback.update();
@@ -339,7 +336,8 @@ public class FontEditor
             setForeground( colorEditor.getColor().orElse( Color.BLACK ) );
             setOpaque( true );
             setBackground( new Color( 0xDDDDDD ) );
-            Border  border  = BorderFactory.createLineBorder( Color.BLACK, 2 );
+            Border  border  = 
+                BorderFactory.createLineBorder( Color.BLACK, 2 );
             setBorder( border );
         }
         
@@ -373,7 +371,6 @@ public class FontEditor
             setFont( font );
             setForeground( color );
             setText( text );
-            repaint();
         }
     }
 }

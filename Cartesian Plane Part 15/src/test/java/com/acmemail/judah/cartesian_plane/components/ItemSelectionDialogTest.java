@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.input;
+package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
