@@ -34,14 +34,6 @@ class ColorSelectorTest
     
     private Color           selectedColor;
     
-    @BeforeEach
-    public void beforeEach()
-    {
-        GUIUtils.schedEDTAndWait( () -> 
-            colorSelector = new ColorSelector()
-        );
-    }
-    
     @AfterEach
     public void afterEach()
     {
@@ -51,6 +43,9 @@ class ColorSelectorTest
     @Test
     public void testColorSelector()
     {
+        GUIUtils.schedEDTAndWait( () -> 
+            colorSelector   = new ColorSelector()
+        );
         Thread  thread  = showColorSelector();
         GUIUtils.schedEDTAndWait( () -> chooserOKButton.doClick() );
         Utils.join( thread );
@@ -94,36 +89,34 @@ class ColorSelectorTest
     @Test
     void testShowDialogOK()
     {
-        Thread  thread  = showColorSelector();
-        assertTrue( chooserDialog.isVisible() );
-        Color   color   = getUniqueColor( chooser.getColor() );
-        chooser.setColor( color );
-        chooserOKButton.doClick();
+        Color   initColor   = Color.RED;
+        Color   uniqueColor = Color.BLUE;
+        GUIUtils.schedEDTAndWait( () -> 
+            colorSelector   = new ColorSelector( initColor )
+        );
+        Thread  thread      = showColorSelector();
+        GUIUtils.schedEDTAndWait( () -> {
+            assertTrue( chooserDialog.isVisible() );
+            chooser.setColor( uniqueColor );
+            chooserOKButton.doClick();
+        });
         Utils.join( thread );
-        assertEquals( color, selectedColor );
+        assertEquals( uniqueColor, selectedColor );
     }
 
     @Test
     void testShowDialogCancel()
     {
+        GUIUtils.schedEDTAndWait( () -> 
+            colorSelector   = new ColorSelector()
+        );
         Thread  thread  = showColorSelector();
-        assertTrue( chooserDialog.isVisible() );
-        chooserCancelButton.doClick();
+        GUIUtils.schedEDTAndWait( () -> {
+            assertTrue( chooserDialog.isVisible() );
+            chooserCancelButton.doClick();
+        });
         Utils.join( thread );
         assertNull( selectedColor );
-    }
-    
-    private void clickButton( JButton button )
-    {
-        GUIUtils.schedEDTAndWait( () -> chooserOKButton.doClick() );
-    }
-    
-    private Color getUniqueColor( Color base )
-    {
-        int     iBase   = base.getRGB();
-        int     iUnique = iBase ^ 0xFFFFFF;
-        Color   color   = new Color( iUnique );
-        return color;
     }
     
     private Thread showColorSelector()
