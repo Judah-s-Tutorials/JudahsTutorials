@@ -284,15 +284,15 @@ public class FontEditor
      */
     private JPanel getLeftPanel()
     {
-        JPanel              panel   = new JPanel( new GridLayout( 5, 1 ) );
+        JPanel              panel   = new JPanel();
         panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
         panel.add( fontList );
         panel.add( boldToggle );
         panel.add( italicToggle );
         
-        sizeEditor.setAlignmentX( JComponent.CENTER_ALIGNMENT );
         JLabel sizeLabel = new JLabel( "Size" );
         sizeLabel.setAlignmentX( JComponent.CENTER_ALIGNMENT );
+        sizeEditor.setAlignmentX( JComponent.CENTER_ALIGNMENT );
         
         JPanel  sizePanel   = new JPanel();
         sizePanel.setLayout( new GridLayout( 1, 2, 3, 0 ) );

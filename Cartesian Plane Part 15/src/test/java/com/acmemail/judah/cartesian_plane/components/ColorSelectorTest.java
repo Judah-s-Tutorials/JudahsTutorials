@@ -15,6 +15,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,10 +34,26 @@ class ColorSelectorTest
     
     private Color           selectedColor;
     
-    @Test
-    void testColorSelector()
+    @BeforeEach
+    public void beforeEach()
     {
-        colorSelector = new ColorSelector();
+        GUIUtils.schedEDTAndWait( () -> 
+            colorSelector = new ColorSelector()
+        );
+    }
+    
+    @AfterEach
+    public void afterEach()
+    {
+        ComponentFinder.disposeAll();
+    }
+    
+    @Test
+    public void testColorSelector()
+    {
+        Thread  thread  = showColorSelector();
+        GUIUtils.schedEDTAndWait( () -> chooserOKButton.doClick() );
+        Utils.join( thread );
     }
 
     /**
@@ -44,12 +61,14 @@ class ColorSelectorTest
      */
     @ParameterizedTest
     @ValueSource(ints = {1, 3, 5})
-    void testColorSelectorColor( int iColor )
+    public void testColorSelectorColor( int iColor )
     {
         Color   color   = new Color( iColor );
-        colorSelector   = new ColorSelector( color );
+        GUIUtils.schedEDTAndWait( () -> 
+            colorSelector   = new ColorSelector( color )
+        );
         Thread  thread  = showColorSelector();
-        chooserOKButton.doClick();
+        GUIUtils.schedEDTAndWait( () -> chooserOKButton.doClick() );
         Utils.join( thread );
         assertEquals( color, selectedColor );
     }
@@ -60,10 +79,14 @@ class ColorSelectorTest
     {
         Color   color   = new Color( iColor );
         String  title   = "Test Title" + iColor;
-        colorSelector   = new ColorSelector( null, title, color );
+        GUIUtils.schedEDTAndWait( () -> 
+            colorSelector   = new ColorSelector( null, title, color )
+        );
         Thread  thread  = showColorSelector();
-        assertEquals( title, chooserDialog.getTitle() );
-        chooserOKButton.doClick();
+        GUIUtils.schedEDTAndWait( () -> {
+            assertEquals( title, chooserDialog.getTitle() );
+            chooserOKButton.doClick();
+        });
         Utils.join( thread );
         assertEquals( color, selectedColor );
     }
@@ -71,7 +94,6 @@ class ColorSelectorTest
     @Test
     void testShowDialogOK()
     {
-        colorSelector = new ColorSelector();
         Thread  thread  = showColorSelector();
         assertTrue( chooserDialog.isVisible() );
         Color   color   = getUniqueColor( chooser.getColor() );
@@ -84,7 +106,6 @@ class ColorSelectorTest
     @Test
     void testShowDialogCancel()
     {
-        colorSelector = new ColorSelector();
         Thread  thread  = showColorSelector();
         assertTrue( chooserDialog.isVisible() );
         chooserCancelButton.doClick();
@@ -92,10 +113,9 @@ class ColorSelectorTest
         assertNull( selectedColor );
     }
     
-    @AfterEach
-    public void afterEach()
+    private void clickButton( JButton button )
     {
-        ComponentFinder.disposeAll();
+        GUIUtils.schedEDTAndWait( () -> chooserOKButton.doClick() );
     }
     
     private Color getUniqueColor( Color base )
