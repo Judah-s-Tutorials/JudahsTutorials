@@ -17,7 +17,9 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,6 +48,7 @@ class ColorEditorTest
     
     private boolean     actionListener1Fired;
     private boolean     actionListener2Fired;
+    private Object      adHocInstanceVar;
     
     @BeforeEach
     public void beforeEach()
@@ -58,10 +61,17 @@ class ColorEditorTest
         });
         actionListener1Fired = false;
         actionListener2Fired = false;
+        adHocInstanceVar = null;
+    }
+    
+    @AfterEach
+    public void afterEach()
+    {
+        ComponentFinder.disposeAll();
     }
 
     @Test
-    void testColorEditor()
+    public void testColorEditor()
     {
         assertNotNull( textEditor );
         assertNotNull( colorButton );
@@ -69,17 +79,19 @@ class ColorEditorTest
     }
 
     @Test
-    void testAddActionListener()
+    public void testAddActionListener()
     {
+        ActionListener  listener1   = e -> actionListener1Fired = true;
+        ActionListener  listener2   = e -> actionListener2Fired = true;
         GUIUtils.schedEDTAndWait( () -> {
-            defEditor.addActionListener( e -> actionListener1Fired = true );
+            defEditor.addActionListener( listener1 );
             commitEdit();
             assertTrue( actionListener1Fired );
             assertFalse( actionListener2Fired );
     
             actionListener1Fired = false;
             actionListener2Fired = false;
-            defEditor.addActionListener( e -> actionListener2Fired = true );
+            defEditor.addActionListener( listener2 );
             commitEdit();
             assertTrue( actionListener1Fired );
             assertTrue( actionListener2Fired );
@@ -87,7 +99,7 @@ class ColorEditorTest
     }
 
     @Test
-    void testRemoveActionListener()
+    public void testRemoveActionListener()
     {
         ActionListener  listener1   = e -> actionListener1Fired = true;
         ActionListener  listener2   = e -> actionListener2Fired = true;
@@ -115,11 +127,10 @@ class ColorEditorTest
     }
 
     @Test
-    void testGetPanel()
+    public void testGetPanel()
     {
         // Just make sure we get back a JPanel containing all three 
         // ColorEditor components somewhere in the panel's window hierarchy.
-        
         Predicate<JComponent>   isTextEditor    = c -> (c == textEditor);
         Predicate<JComponent>   isColorButton   = c -> (c == colorButton);
         Predicate<JComponent>   isFeedback      = c -> (c == feedbackWindow);
@@ -141,14 +152,25 @@ class ColorEditorTest
             assertEquals( testRGB, getFeedbackRGB() );
         });
     }
+    
+    @Test
+    public void testGetFeedback()
+    {
+        GUIUtils.schedEDTAndWait( () -> {
+            int     feedbackRGB = getFeedbackRGB();
+            String  strRGB      = textEditor.getText();
+            int     textRGB     = Integer.decode( strRGB );
+            assertEquals( textRGB, feedbackRGB );
+        });
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 3, 5})
-    void testGetColorButton( int iRGB )
+    public void testGetColorButton( int iRGB )
     {
         // startColorSelector pokes the colorButton which causes
         // the chooser dialog to be posted.
-        Thread  thread      = startColorSelector();
+        Thread  thread      = startColorChooser();
         Color   testColor   = new Color( iRGB );
         GUIUtils.schedEDTAndWait( () -> {
             chooser.setColor( testColor );
@@ -157,20 +179,21 @@ class ColorEditorTest
         Utils.join( thread );
         GUIUtils.schedEDTAndWait( () ->
             assertEquals( iRGB, getFeedbackRGB() )
-        );
-        
+        );   
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 3, 5})
-    void testSelectColorAndCancel( int iRGB )
+    public void testSelectColorAndCancel( int iRGB )
     {
-        // start color selector and select a color; poke the cancel
-        // button, and verify that the selected color is not applied.
-        // the chooser dialog to be posted.
-        Thread  thread      = startColorSelector();
-        Color   testColor   = new Color( iRGB );
+        // Set color of ColorEditor to known value. Start
+        // color chooser and choose given color; poke cancel button
+        // and verify that the color in ColorEditor is not changed.
+        Thread  thread      = startColorChooser();
+        Color   origColor   = new Color( iRGB );
+        Color   testColor   = Color.RED;
         GUIUtils.schedEDTAndWait( () -> {
+            defEditor.setColor( origColor );
             chooser.setColor( testColor );
             chooserCancelButton.doClick();
         });
@@ -181,36 +204,69 @@ class ColorEditorTest
     }
 
     @Test
-    void testGetColor()
+    public void testGetColorFromText()
+    {
+        GUIUtils.schedEDTAndWait( () -> {
+            int     testRGB     = getUniqueRGB();
+            textEditor.setText( "" + testRGB );        
+            commitEdit();
+            
+            int     actRGB      = getFeedbackRGB();
+            assertEquals( testRGB, actRGB );
+        });
+    }
+    
+    @Test
+    public void testGetColorFromSelector()
     {
         int     testRGB     = getUniqueRGB();
-        textEditor.setText( "" + testRGB );        
-        commitEdit();
+        Color   testColor   = new Color( testRGB );
+        Thread  thread      = startColorChooser();
         
-        int     actRGB      = getFeedbackRGB();
-        assertEquals( testRGB, actRGB );
+        GUIUtils.schedEDTAndWait( () -> {
+            chooser.setColor( testColor );
+            chooserOKButton.doClick();
+        });
+        
+        Utils.join( thread );
+        GUIUtils.schedEDTAndWait( () -> {
+            Color   actColor    = defEditor.getColor().orElse( null );
+            assertNotNull( actColor );
+            assertEquals( testColor, actColor );
+            Color   fbColor     = getFeedbackColor();
+            assertEquals( testColor, fbColor );
+        });
     }
     
     @Test
     public void testEditTextNeg()
     {
         // Enter an invalid value into the text editor, and
-        // verify that the GUI behaves accordingly.
-        Color   origColor   = getFeedbackColor();
-        GUIUtils.schedEDTAndWait( () ->  textEditor.setText( "invalid" ) );
-        commitEdit();
         GUIUtils.schedEDTAndWait( () -> {
+            Color   origColor   = getFeedbackColor();
+            textEditor.setText( "invalid"  );
+            commitEdit();
             String  actText = textEditor.getText().toUpperCase();
             assertTrue( actText.contains( "ERROR" ) );
+            assertEquals( origColor, getFeedbackColor() );
         });
-        assertEquals( origColor, getFeedbackColor() );
     }
     
-    // Assumption: this method is called from the EDT.
     private Color getFeedbackColor()
     {
-        Color   bgColor = feedbackWindow.getBackground();
-        return bgColor;
+        if ( SwingUtilities.isEventDispatchThread() )
+            adHocInstanceVar = feedbackWindow.getBackground();
+        else
+            GUIUtils.schedEDTAndWait( () -> 
+                adHocInstanceVar = feedbackWindow.getBackground()
+           );
+        return (Color)adHocInstanceVar;
+    }
+    
+    private int getFeedbackRGB()
+    {
+        int rgb = getRGB( getFeedbackColor() );
+        return rgb;
     }
     
     private int getUniqueRGB()
@@ -221,10 +277,11 @@ class ColorEditorTest
         return rgb;
     }
     
-    private int getFeedbackRGB()
+    private Color getUniqueColor()
     {
-        int rgb = getRGB( getFeedbackColor() );
-        return rgb;
+        int     rgb     = getUniqueRGB();
+        Color   color   = new Color( rgb );
+        return color;
     }
     
     private int getRGB( Color color )
@@ -233,10 +290,10 @@ class ColorEditorTest
         return rgb;
     }
     
-    private Thread startColorSelector()
+    private Thread startColorChooser()
     {
         Thread  thread  = 
-            new Thread( () -> colorButton.doClick(), "ColorSelectorThread" );
+            new Thread( () -> colorButton.doClick(), "ColorChooserThread" );
         thread.start();
         Utils.pause( 250 );
         GUIUtils.schedEDTAndWait( () -> {
@@ -255,7 +312,7 @@ class ColorEditorTest
         boolean mustBeVisible   = true;
         ComponentFinder finder  = 
             new ComponentFinder( canBeDialog, canBeFrame, mustBeVisible );
-        Window  comp    = finder.findWindow( c -> true );
+        Window  comp    = finder.findWindow( w -> (w instanceof JDialog) );
         assertNotNull( comp );
         assertTrue( comp instanceof JDialog );
         chooserDialog = (JDialog)comp;

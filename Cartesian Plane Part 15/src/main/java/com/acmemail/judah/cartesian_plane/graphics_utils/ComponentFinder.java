@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 /**
  * Utility class to search for components
@@ -345,12 +346,30 @@ public class ComponentFinder
     /**
      * Locates and disposes all top-level windows
      * in an application.
+     * <p style="padding-left:3em;">
+     *     SAFE TO INVOKE FROM ANY THREAD
+     * </p>
+     * <P>
+     * Note that 
+     * it is safe
+     * to call this method
+     * from the EDT
+     * or any other thread.
+     * If not called
+     * from the EDT,
+     * the dispose task
+     * will be scheduled
+     * to run on the EDT.
+     * </p>
      */
     public static void disposeAll()
     {
-        GUIUtils.schedEDTAndWait( () -> {
-            Arrays.stream( Window.getWindows() ).forEach( Window::dispose );
-        });
+        if ( SwingUtilities.isEventDispatchThread() )
+            disposeAllEDT();
+        else
+            GUIUtils.schedEDTAndWait( () -> {
+                disposeAllEDT();
+            });
     }
     
     /**
@@ -393,6 +412,21 @@ public class ComponentFinder
         Predicate<Window>   pred            =
             (isDialog.and( isDialogTitle )).or(isFrame.and( isFrameTitle ));
         return pred;
+    }
+    
+    /**
+     * Locates and disposes all top-level windows
+     * in an application.
+     * It is assumed
+     * that this method
+     * is being invoked
+     * from the EDT.
+     * 
+     * @see #disposeAll()
+     */
+    private static void disposeAllEDT()
+    {
+        Arrays.stream( Window.getWindows() ).forEach( Window::dispose );
     }
     
     /**

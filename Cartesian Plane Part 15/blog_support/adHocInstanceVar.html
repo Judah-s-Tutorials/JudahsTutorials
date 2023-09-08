@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div  style="margin-left: 3em; padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p>
+    <strong><sup>*</sup>About adHocInstanceVar:</strong>
+    Recall that 
+    you cannot change the value 
+    of a local variable 
+    from an anonymous class; 
+    recall also 
+    that a lambda 
+    is an anonymous class. 
+    That makes 
+    code like this illegal:
+</p>
+<pre style="padding-left: 3em;">
+// This code won't compile!!!
+private Color getFeedbackColor()
+{
+    Color color = null;
+    GUIUtils.schedEDTAndWait( () -> 
+        color = feedbackWindow.getBackground()
+    );
+    return color;
+}</pre>
+<p>
+    However there’s no rule
+    against setting instance variables 
+    from a lambda, 
+    so we can substitute 
+    this code:
+</p>
+<pre style="padding-left: 3em;">
+// This code will compile
+private Color getFeedbackColor()
+{
+    GUIUtils.schedEDTAndWait( () -> 
+        adHocInstanceVar= feedbackWindow.getBackground()
+    );
+    return adHocInstanceVar;
+}</pre>
+</div>
+</body>
+</html>
