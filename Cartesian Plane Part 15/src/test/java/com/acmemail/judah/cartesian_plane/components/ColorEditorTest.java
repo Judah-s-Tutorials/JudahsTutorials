@@ -241,7 +241,9 @@ class ColorEditorTest
     @Test
     public void testEditTextNeg()
     {
-        // Enter an invalid value into the text editor, and
+        // Enter an invalid value into the text editor and commit.
+        // verify that the text editor displays "ERROR", and that
+        // the color of the feedback window doesn't change.
         GUIUtils.schedEDTAndWait( () -> {
             Color   origColor   = getFeedbackColor();
             textEditor.setText( "invalid"  );
@@ -275,13 +277,6 @@ class ColorEditorTest
         int rgb     = fRGB ^ 0xff;
         assertNotEquals( fRGB, rgb );
         return rgb;
-    }
-    
-    private Color getUniqueColor()
-    {
-        int     rgb     = getUniqueRGB();
-        Color   color   = new Color( rgb );
-        return color;
     }
     
     private int getRGB( Color color )

@@ -23,7 +23,6 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-import com.acmemail.judah.cartesian_plane.components.ItemSelectionDialog;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;

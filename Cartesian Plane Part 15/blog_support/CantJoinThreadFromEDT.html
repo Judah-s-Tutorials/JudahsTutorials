@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div  style="margin-left: 3em; padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p>
+    <strong>About Running the Dialog Thread:</strong>
+    This operation
+    will execute
+    just like similar ones
+    we've seen in the past:
+    the unit test method
+    gets the thread object,
+    configures and dimisses the dialog,
+    and waits for
+    the thread to terminate
+    (it <em>joins</em> the dialog thread).
+    Also a great deal of the test
+    will have to be executed
+    on the EDT;
+    but we have to be careful
+    <em>not</em> to join the dialog thread
+    while we're running on the EDT.
+    That's because the EDT
+    is processing the dialog dismissal;
+    joining the dialog thread
+    from the EDT
+    would suspend the EDT
+    while waiting for the EDT
+    to finish its work...
+    which it can't do while
+    it's suspended.
+    Multithreaded programming 
+    can be tricky.
+</p>
+</div>
+</body>
+</html>

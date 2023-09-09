@@ -3,15 +3,20 @@ package com.acmemail.judah.cartesian_plane.components;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Window;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
@@ -22,6 +27,7 @@ import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
+import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class FontEditorTest
 {
@@ -34,6 +40,11 @@ class FontEditorTest
     private ColorEditor         colorEditor;
     private JTextField          colorText;
     private JButton             colorButton;
+    
+    private JColorChooser       chooser;
+    private JDialog             chooserDialog;
+    private JButton             chooserOKButton;
+    private Color               selectedColor;
     
     @BeforeEach
     void setUp() throws Exception
@@ -109,9 +120,9 @@ class FontEditorTest
         sizeEditor.setValue( expSize );
         
         boolean expBold     = !boldToggle.isSelected();
-        boldToggle.setSelected( expBold );
+        boldToggle.doClick();
         boolean expItalic   = !italicToggle.isSelected();
-        italicToggle.setSelected( expItalic );
+        italicToggle.doClick();
         
         Optional<Font>  optFont = defaultEditor.getSelectedFont();
         Font            font    = optFont.orElse( null );
@@ -120,6 +131,67 @@ class FontEditorTest
         assertEquals( expBold, font.isBold() );
         assertEquals( expItalic, font.isItalic() );
         assertEquals( expSize, font.getSize() );
+    }
+    
+    @Test
+    public void testBoldToggle()
+    {
+        GUIUtils.schedEDTAndWait( () -> testBoldToggleEDT() );
+    }
+    
+    private void testBoldToggleEDT()
+    {
+        boolean currBold    = boldToggle.isSelected();
+        testBoldToggleEDT( currBold );
+        
+        currBold = !currBold;
+        boldToggle.doClick();
+        testBoldToggleEDT( currBold );
+        
+        currBold = !currBold;
+        boldToggle.doClick();
+        testBoldToggleEDT( currBold );
+    }
+    
+    private void testBoldToggleEDT( boolean expBold )
+    {
+        Font    selFont     = defaultEditor.getSelectedFont().orElse( null );
+        Font    fbFont      = feedback.getFont();
+        assertNotNull( selFont );
+        assertNotNull( fbFont );
+        boolean currBold    = boldToggle.isSelected();
+        assertEquals( expBold, currBold );
+        assertEquals( expBold, selFont.isBold() );
+        assertEquals( expBold, fbFont.isBold() );
+    }
+    
+    @Test
+    public void testItalicToggle()
+    {
+        GUIUtils.schedEDTAndWait( () -> testItalicToggleEDT() );
+    }
+    
+    private void testItalicToggleEDT()
+    {
+        boolean currItalic  = italicToggle.isSelected();
+        testItalicToggleEDT( currItalic );
+        
+        currItalic = !currItalic;
+        italicToggle.setSelected( currItalic );
+        testItalicToggleEDT( currItalic );
+        
+        currItalic = !currItalic;
+        italicToggle.setSelected( currItalic );
+        testItalicToggleEDT( currItalic );
+    }
+    
+    private void testItalicToggleEDT( boolean expItalic )
+    {
+        Font    font        = defaultEditor.getSelectedFont().orElse( null );
+        assertNotNull( font );
+        boolean currItalic  = italicToggle.isSelected();
+        assertEquals( expItalic, currItalic );
+        assertEquals( expItalic, font.isItalic() );
     }
 
     @Test
@@ -188,6 +260,31 @@ class FontEditorTest
         boolean expItalic   = !currItalic;
         italicToggle.setSelected( expItalic );
         assertEquals( expItalic, defaultEditor.isItalic() );
+    }
+    
+    @Test
+    public void testColorButton()
+    {
+        showColorSelector();
+        GUIUtils.schedEDTAndWait( () -> testColorButtonEDT() );
+        Utils.pause( 250 );
+        GUIUtils.schedEDTAndWait( () -> {
+            Color   expColor    = chooser.getColor();
+            Color   actColor    = defaultEditor.getColor().orElse( null );
+            assertEquals( expColor, actColor );
+        });
+    }
+    
+    private void testColorButtonEDT()
+    {
+        assertTrue( chooserDialog.isVisible() );
+        Color   currColor   = defaultEditor.getColor().orElse( null );
+        assertNotNull( currColor );
+        int     currRGB     = currColor.getRGB() & 0xffffff;
+        int     uniqueRGB   = currRGB ^ 0xff;
+        Color   uniqueColor = new Color( uniqueRGB );
+        chooser.setColor( uniqueColor );
+        chooserOKButton.doClick();
     }
 
     @Test
@@ -282,5 +379,53 @@ class FontEditorTest
         assertNotNull(
             ComponentFinder.find( panel, c -> c == comp )
         );
+    }
+    
+    private void showColorSelector()
+    {
+        colorButton.doClick();
+        Utils.pause( 250 );
+        GUIUtils.schedEDTAndWait( () -> {
+            getChooserDialog();
+            getChooser();
+            getChooserOKButton();
+        });
+    }
+    
+    private void getChooserDialog()
+    {
+        boolean canBeDialog     = true;
+        boolean canBeFrame      = false;
+        boolean mustBeVisible   = true;
+        ComponentFinder finder  = 
+            new ComponentFinder( canBeDialog, canBeFrame, mustBeVisible );
+        Window  comp    = finder.findWindow( c -> true );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JDialog );
+        chooserDialog = (JDialog)comp;
+    }
+    
+    private void getChooser()
+    {
+        // Assume getColorDialog called first
+        JComponent  comp    = 
+             ComponentFinder.find( 
+                 chooserDialog, 
+                 c -> (c instanceof JColorChooser) 
+             );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JColorChooser );
+        chooser = (JColorChooser)comp;
+    }
+    
+    private void getChooserOKButton()
+    {
+        Predicate<JComponent>   pred    = 
+            ComponentFinder.getButtonPredicate( "OK" );
+        JComponent              comp    =
+            ComponentFinder.find( chooserDialog, pred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JButton );
+        chooserOKButton = (JButton)comp;
     }
 }
