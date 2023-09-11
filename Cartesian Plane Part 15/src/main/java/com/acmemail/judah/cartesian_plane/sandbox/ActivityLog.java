@@ -2,12 +2,12 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Window;
 
+import javax.swing.JDialog;
 import javax.swing.JEditorPane;
-import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
@@ -31,19 +31,35 @@ public class ActivityLog
         + " min-width: 70em;"
         + " white-space: nowrap;}";
     
-    private static final String htmlPrefix  =
+    private static final String htmlPrefix      =
         "<html><body><p>";
-    private static final String htmlSuffix  =
+    private static final String htmlSuffix      =
         "</p></body></html>";
-    private final   StringBuilder   html    = 
+    private final   StringBuilder   html        = 
         new StringBuilder( htmlPrefix ); 
     
     private final   JEditorPane     textPane    = 
         new JEditorPane( "text/html", "" );
-    private final   JFrame      frame       = new JFrame( "Activity Log" );
+    private final   JDialog         dialog;
     
     public ActivityLog()
     {
+        this( null, "Activity Log" );
+    }
+    
+    public ActivityLog( Window parent )
+    {
+        this( parent, "Activity Log" );
+    }
+    
+    public ActivityLog( String title )
+    {
+        this( null, title );
+    }
+    
+    public ActivityLog( Window parent, String title )
+    {
+        dialog = new JDialog( parent, title );
         textPane.setText( htmlPrefix + htmlSuffix );
         JScrollPane scrollPane  = new JScrollPane( textPane );
         Dimension   dim         = new Dimension( 300, 150 );
@@ -51,10 +67,10 @@ public class ActivityLog
 
         JPanel  contentPane = new JPanel( new BorderLayout() );
         contentPane.add( scrollPane, BorderLayout.CENTER );
-        frame.setContentPane( contentPane );
-        frame.pack();
-        frame.setLocation( 200, 200 );
-        frame.setVisible( true );
+        dialog.setContentPane( contentPane );
+        dialog.pack();
+        dialog.setLocation( 200, 200 );
+        dialog.setVisible( true );
         
         HTMLEditorKit   kit         = new HTMLEditorKit();
         textPane.setEditorKit( kit );
@@ -64,12 +80,12 @@ public class ActivityLog
     
     public void setVisible( boolean visible )
     {
-        frame.setVisible( visible );
+        dialog.setVisible( visible );
     }
     
     public boolean isVisible()
     {
-        return frame.isVisible();
+        return dialog.isVisible();
     }
     
     public void append( String text )

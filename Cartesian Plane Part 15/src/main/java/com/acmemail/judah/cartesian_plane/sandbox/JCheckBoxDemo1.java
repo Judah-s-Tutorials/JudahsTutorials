@@ -5,6 +5,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -20,29 +21,75 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 
+/**
+ * Simple application
+ * to examine the JToggleButton
+ * and JCheckBox components.
+ * Two buttons are displayed
+ * (one JToggleButton and one JCheckBox).
+ * All state changes and actions
+ * are recorded in an activity log.
+ * The operator
+ * can introduce state changes
+ * and actions
+ * by mouse manipulation.
+ * There are controls
+ * to select or activate
+ * each button; 
+ * use these controls to observe
+ * the events precipitated
+ * by programmatically
+ * selecting or activating a button.
+ * 
+ * @author Jack Straub
+ */
 public class JCheckBoxDemo1
 {
+    /** CSS properties for reporting a JCheckBox state event. */
     private static final String cbStateChangedStyle =
         "\"color: green; font-style: italic;\"";
+    /** CSS properties for reporting a JCheckBox action event. */
     private static final String cbActionStyle       =
         "\"color: olive; font-style: bold;\"";
+    /** CSS properties for reporting a JCheckBox item event. */
+    private static final String cbItemStyle         =
+        "\"color: #90EE90; font-style: plain;\"";
+
+    /** CSS properties for reporting a JToggleButton state change event. */
     private static final String tbStateChangedStyle =
         "\"color: red; font-style: italic;\"";
+    /** CSS properties for reporting a JToggleButton action event. */
     private static final String tbActionStyle       =
         "\"color: fuchsia; font-style: bold;\"";
+    /** CSS properties for reporting a JToggleButton item event. */
+    private static final String tbItemStyle         =
+        "\"color: #800000; font-style: plain;\"";
+
+    /** Separator to introduce into log when convenient to do so. */
     private static final String strSeparator        =
         "----------------------------------------";
     
+    /** Activity log. */
     private ActivityLog     log;
+    /** Check box being demonstrated. */
     private JCheckBox       checkBox;
+    /** Toggle button being demonstrated. */
     private JToggleButton   toggleButton;
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command line arguments, not used
+     */
     public static void main(String[] args)
     {
         JCheckBoxDemo1  demo    = new JCheckBoxDemo1();
         SwingUtilities.invokeLater( () -> demo.build() );
     }
 
+    /**
+     * Create and deploy GUI.
+     */
     private void build()
     {
         log = new ActivityLog();
@@ -61,6 +108,16 @@ public class JCheckBoxDemo1
         frame.setVisible( true );
     }
     
+    /**
+     * Create a JPanel
+     * containing the toggle button
+     * and check box
+     * to demonstrate.
+     * The buttons are configured
+     * with ChangListeners and ActionListeners.
+     * 
+     * @return  the created panel
+     */
     private JPanel getTogglePanel()
     {
         JPanel      panel   = new JPanel( new GridLayout( 1, 2, 4, 0 ) );
@@ -77,12 +134,28 @@ public class JCheckBoxDemo1
         
         toggleButton.addChangeListener( this::stateChanged );
         toggleButton.addActionListener( this::actionPerformed );
+        toggleButton.addItemListener( this::itemStateChanged );
         checkBox.addChangeListener( this::stateChanged );
         checkBox.addActionListener( this::actionPerformed );
+        checkBox.addItemListener( this::itemStateChanged );
         
         return panel;
     }
     
+    /**
+     * Create a panel
+     * containing the buttons
+     * for controlling the demonstration.
+     * There are two controls
+     * for each button.
+     * One toggles the value
+     * of a button
+     * using JToggleButton.setSelected.
+     * The other simulates a button push
+     * by invoking AbstractButton.doClick.
+     * 
+     * @return the created panel
+     */
     private JPanel getButtonPanel()
     {
         JPanel  panel       = new JPanel( new GridLayout( 3, 3, 3, 3 ) );
@@ -129,6 +202,18 @@ public class JCheckBoxDemo1
         return panel;
     }
     
+    /**
+     * The stateChanged method
+     * for StateChangeListeners.
+     * Records the event
+     * and the state of the button
+     * associated with the event
+     * in the application log.
+     * 
+     * @param evt   the reported event
+     * 
+     * @see ActivityLog#append(String, String)
+     */
     private void stateChanged( ChangeEvent evt )
     {
         Object  source  = evt.getSource();
@@ -144,6 +229,45 @@ public class JCheckBoxDemo1
         }
     }
     
+    /**
+     * The itemStateChanged method
+     * for ItemListeners.
+     * Records the event
+     * and the state of the button
+     * associated with the event
+     * in the application log.
+     * 
+     * @param evt   the reported event
+     * 
+     * @see ActivityLog#append(String, String)
+     */
+    private void itemStateChanged( ItemEvent evt )
+    {
+        Object  source  = evt.getSource();
+        if ( source instanceof JToggleButton )
+        {
+            JToggleButton   toggle  = (JToggleButton)source;
+            StringBuilder   bldr    = new StringBuilder( "ITEM STATE CHANGE " );
+            getToggleState( toggle, bldr );
+            String          style   =
+                toggle instanceof JCheckBox ? 
+                    cbItemStyle : tbItemStyle;
+            log.append( bldr.toString(), style );
+        }
+    }
+    
+    /**
+     * The actionPerformed method
+     * for ActionListeners.
+     * Records the event
+     * and the state of the button
+     * associated with the event
+     * in the application log.
+     * 
+     * @param evt   the reported event
+     * 
+     * @see ActivityLog#append(String, String)
+     */
     private void actionPerformed( ActionEvent evt )
     {
         Object  source  = evt.getSource();
@@ -159,12 +283,29 @@ public class JCheckBoxDemo1
         }
     }
     
-    private void getToggleState( JToggleButton toggle, StringBuilder bldr )
+    /**
+     * Creates a log message
+     * describing the state
+     * of a given toggle button.
+     * The message is appended
+     * to the given StringBuilder.
+     * The log message includes:
+     * <ul>
+     * <li>The button label;</li>
+     * <li>The button state (selected or deselected);</li>
+     * <li>The button's armed state; and</li>
+     * <li>The button's pressed state.</li>
+     * </ul>
+     * 
+     * @param toggle    the given toggle button
+     * @param bldr      the given StringBuilder
+     */
+    private void 
+    getToggleState( JToggleButton toggle, StringBuilder bldr )
     {
         ButtonModel     model   = toggle.getModel();
         String          text    = toggle.getText();
-        String          status  =
-            toggle.isSelected() ? " selected" : " deselected";
+        String          status  =            toggle.isSelected() ? " selected" : " deselected";
         bldr.append( text ).append( status )
             .append( " (" )
                 .append( "armed: ").append( model.isArmed() )
