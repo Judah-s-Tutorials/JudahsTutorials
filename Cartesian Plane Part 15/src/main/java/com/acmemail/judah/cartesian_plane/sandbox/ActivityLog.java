@@ -11,6 +11,18 @@ import javax.swing.JScrollPane;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
+/**
+ * Implements a non-modal dialog
+ * which can be used
+ * for logging events
+ * and other messages.
+ * Text can be "styled"
+ * using HTML and CSS, for example:
+ * <pre>
+ * </pre>
+ * 
+ * @author Jack Straub
+ */
 public class ActivityLog
 {
     public static final String  STYLE_A     =

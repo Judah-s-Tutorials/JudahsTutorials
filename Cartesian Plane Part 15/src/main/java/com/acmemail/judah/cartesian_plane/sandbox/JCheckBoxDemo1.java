@@ -297,19 +297,20 @@ public class JCheckBoxDemo1
      * <li>The button's pressed state.</li>
      * </ul>
      * 
-     * @param toggle    the given toggle button
+     * @param button    the given toggle button
      * @param bldr      the given StringBuilder
      */
     private void 
-    getToggleState( JToggleButton toggle, StringBuilder bldr )
+    getToggleState( JToggleButton button, StringBuilder bldr )
     {
-        ButtonModel     model   = toggle.getModel();
-        String          text    = toggle.getText();
-        String          status  =            toggle.isSelected() ? " selected" : " deselected";
-        bldr.append( text ).append( status )
-            .append( " (" )
-                .append( "armed: ").append( model.isArmed() )
-                .append( ", pressed: " ).append( model.isPressed() )
+        ButtonModel     model   = button.getModel();
+        String          text    = button.getText();
+        String          status  = button.isSelected() ? " selected" : " deselected";
+        bldr.append( text )
+            .append( status ).append( " (" )
+            .append( "armed: ").append( model.isArmed() )
+            .append( ", pressed: " ).append( model.isPressed() )
+            .append( ", rollover: " ).append( model.isRollover() )
             .append( ")" );
     }
 }
