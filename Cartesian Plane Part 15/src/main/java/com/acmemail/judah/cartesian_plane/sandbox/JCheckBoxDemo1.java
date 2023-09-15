@@ -92,12 +92,12 @@ public class JCheckBoxDemo1
      */
     private void build()
     {
-        log = new ActivityLog();
-        toggleButton = new JToggleButton( "Toggle Button" );
-        checkBox = new JCheckBox( "Check Box" );
-        
         JFrame      frame       = new JFrame( "Check Box Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        
+        log = new ActivityLog( frame );
+        toggleButton = new JToggleButton( "Toggle Button" );
+        checkBox = new JCheckBox( "Check Box" );
         
         JPanel          contentPane = new JPanel( new BorderLayout() );
         contentPane.add( getTogglePanel(), BorderLayout.CENTER );

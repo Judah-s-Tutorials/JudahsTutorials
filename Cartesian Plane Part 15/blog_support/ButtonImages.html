@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div  style="margin-left: 3em; padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA; max-width: 65em;">
+<p style="font-size: 200%; font-weight: bold;">
+Digression: Buttons with Images
+</p>
+<img src="../images/ButtonIcons.png" alt="ButtonIcons.png" style="float: right; width: 20%; height: auto;">
+<p>
+We are not
+going to be 
+putting images 
+on our buttons
+in this project,
+but,
+in case you're interested in doing so,
+here is a quick discussion
+of how to do it.
+</p>
+<p>
+To add an image
+to a component,
+first it has to be
+formatted as an <em>icon</em>.
+The quickest way
+is to use 
+the <em>ImageIcon(String path)</em> constructor,
+where <em>path</em> is the path
+to an image file
+in any of the common formats:<br>
+<span style="font-family: 'Lucida Console', 'Courier New', monospace;">
+&nbsp;&nbsp;&nbsp;&nbsp;ImageIcon icon = new ImageIcon( "images/Forward.png" );<br>
+</span>
+However, this constructor
+won't tell us
+whether or not
+the image indicated by the path
+was found
+and correctly loaded.
+I prefer to create a <em>BufferedImage</em> first,
+then use that to create the icon.
+The GUI pictured at right
+was created using
+application <em>ButtonImageDemo1</em>
+in the project sandbox;
+the icons in the GUI
+were formulated using:
+</p>
+<pre style="font-family: 'Lucida Console', 'Courier New', monospace; padding-left:3em;">
+private ImageIcon getImageIcon( String path )
+{
+    File        file    = new File( path );
+    ImageIcon   icon    = null;
+    try
+    {
+        BufferedImage   image   = ImageIO.read( file );
+        icon = new ImageIcon( image );
+    }
+    catch ( IOException exc )
+    {
+        exc.printStackTrace();
+        System.exit( 1 );
+    }
+    return icon;
+}</pre>
+<p>
+If <em>ImageIO.read</em> fails
+it will throw an IOException
+which we can then catch.
+</p>
+</div>
+</body>
+</html>
