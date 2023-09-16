@@ -324,6 +324,7 @@ public class ColorEditor
         {
             textEditor.setText( "#Error" );
             feedback.setBackground( defColor );
+            fireActionListeners();
         }
     }
     

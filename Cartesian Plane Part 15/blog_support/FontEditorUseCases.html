@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cartesian Plane: Font Editor Use Cases</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<p class="head">
+Font Editor Use Cases
+</p>
+<p class="subhead">
+GUI Component Description
+</p>
+<dl class="numbered">
+    <dt>font-editor</dt>
+    <dd>
+        An implementation
+        of the <em>FontEditor</em> class;
+        a collection of components
+        as described below.
+    </dd>
+    <dt>font-name-list</dt>
+    <dd>
+        A list of font names
+        including, at a minimum:
+        <ul>
+            <li>Dialog</li>
+            <li>DialogInput</li>
+            <li>Monospaced</li>
+            <li>SansSerif</li>
+            <li>Serif</li>
+        </ul>
+    </dd>
+    <dt>bold-toggle</dt>
+    <dd>
+        A check box
+        which indicates
+        whether or not
+        a font should be bold.
+    </dd>
+    <dt>italic-toggle</dt>
+    <dd>
+        A check box
+        which indicates
+        whether or not
+        a font should be italic.
+    </dd>
+    <dt>size-editor</dt>
+    <dd>
+        A component
+        used to edit 
+        the font size.
+    </dd>
+    <dt>size-editor</dt>
+    <dd>
+        A component
+        used to edit 
+        the font size.
+    </dd>
+    <dt>color-button</dt>
+    <dd>
+        A button that posts
+        a color selector,
+        as described in
+        the <em>ColorEditor</em> specification.
+    </dd>
+    <dt>color-editor</dt>
+    <dd>
+        A component 
+        used to edit 
+        a color,
+        as described in
+        the <em>ColorEditor</em> specification.
+    </dd>
+    <dt>feedback-window</dt>
+    <dd>
+        A <em>JLabel</em>
+        that displays text
+        that reflects
+        the selected font properties
+        and text color.
+    </dd>
+</dl>
+
+<p class="subhead">
+Properties and Initial Values
+</p>
+<dl>
+<dt>font-name</dt>
+<dd>
+    The name of the font;
+    synchronized with
+    the feedback window
+    and the font-name-list.<br>
+    Initial value: Dialog
+</dd>
+</dl>
+<dt>bold</dt>
+<dd>
+    The font weight;
+    synchronized with
+    the feedback window
+    and the bold-toggle.<br>
+    Initial value: false
+</dd>
+<dt>italic</dt>
+<dd>
+    The font slope;
+    synchronized with
+    the feedback window
+    and the italic-toggle.<br>
+    Initial value: false
+</dd>
+<dt>font-size</dt>
+<dd>
+    The font slope;
+    synchronized with
+    the feedback window
+    and the size-editor.<br>
+    Initial value: 10
+</dd>
+<dt>text-color</dt>
+<dd>
+    The text color;
+    synchronized with
+    the feedback window
+    and the color-editor.<br>
+    Initial value: blue (0xFF)
+</dd>
+</dl>
+
+<p class="subhead">
+Use Cases
+</p>
+<dl>
+<dt>construction</dt>
+<dd>
+    The property accessors
+    return the correct initial values;
+    the components reflect 
+    those same initial values.
+</dd>
+<dt>font-name-selection</dt>
+<dd>
+    Instantiate the <em>FontEditor</em>.
+    For each name
+    in the font-names list:
+    select the name;
+    verify that <em>getName()</em>
+    returns the correct name.
+    Verify that:
+    <ol>
+        <li>
+            Accessors for
+            for bold, italic, font-size and text-color
+            return the initial values 
+            for those properties.
+        </li>
+        <li>
+            getFont() returns a font
+            that matches the selected properties.
+        </li>
+        <li>
+            the font in the feedback window
+            matches the value
+            returned by getFont().
+        </li>
+    </ol>
+</dd>
+</dl>
+
+</body>
+</html>

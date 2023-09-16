@@ -270,7 +270,7 @@ public class FontEditor
      * 
      * @return the JLabel used as a feedback window
      */
-    public JComponent getFeedback()
+    public JLabel getFeedback()
     {
         return feedback;
     }

@@ -1,0 +1,45 @@
+body 
+{
+    background-color: #EEEEEE;
+    width: 60em;
+    max-width: 60em;
+    margin-left: 1em;
+}
+
+p, li { font-family: verdana, helvetica, arial, sans-serif }
+
+.title { font-size: 200%; }
+
+.head { font-size: 190%; }
+
+.subhead { font-size: 125%; }
+
+.section
+{ 
+    font-size: 110%;
+    font-weight: bold;
+}
+
+.subsection
+{
+    text-decoration: underline;
+    font-weight: bold;
+}
+
+dt
+{
+    font-weight: bold;
+}
+
+.numbered
+{
+    counter-reset: term;
+    counter-increment: term;
+    content: counter(term) ". ";
+}
+
+dt.numbered
+{
+    counter-increment: term;
+    content: counter(term) ". ";
+}

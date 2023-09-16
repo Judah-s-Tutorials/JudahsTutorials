@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Window;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 
@@ -17,9 +18,12 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -36,7 +40,7 @@ class FontEditorTest
     private JCheckBox           boldToggle;
     private JCheckBox           italicToggle;
     private JSpinner            sizeEditor;
-    private JComponent          feedback;
+    private JLabel              feedback;
     private ColorEditor         colorEditor;
     private JTextField          colorText;
     private JButton             colorButton;
@@ -45,9 +49,9 @@ class FontEditorTest
     private JDialog             chooserDialog;
     private JButton             chooserOKButton;
     private Color               selectedColor;
-    
+
     @BeforeEach
-    void setUp() throws Exception
+    public void setUp() throws Exception
     {
         GUIUtils.schedEDTAndWait( () -> {    
             defaultEditor = new FontEditor();
@@ -63,13 +67,13 @@ class FontEditorTest
     }
 
     @AfterEach
-    void tearDown() throws Exception
+    public void tearDown() throws Exception
     {
         ComponentFinder.disposeAll();
     }
 
     @Test
-    void testFontEditor()
+    public void testFontEditor()
     {
         assertNotNull( nameCombo );
         assertNotNull( boldToggle );
@@ -77,6 +81,9 @@ class FontEditorTest
         assertNotNull( sizeEditor );
         assertNotNull( colorEditor );
         assertNotNull( feedback );
+        
+        FontProfile currFont    = new FontProfile();
+        assertTrue( currFont.matches( defaultEditor ) );
     }
 
     @Test
@@ -267,7 +274,6 @@ class FontEditorTest
     {
         showColorSelector();
         GUIUtils.schedEDTAndWait( () -> testColorButtonEDT() );
-        Utils.pause( 250 );
         GUIUtils.schedEDTAndWait( () -> {
             Color   expColor    = chooser.getColor();
             Color   actColor    = defaultEditor.getColor().orElse( null );
@@ -325,9 +331,28 @@ class FontEditorTest
         colorText.postActionEvent();
         assertFalse( defaultEditor.getColor().isPresent() );
     }
+    
+    @Test
+    public void testInvalidColor()
+    {
+        GUIUtils.schedEDTAndWait( () -> testInvalidColorEDT() );
+    }
+    
+    @Test
+    public void testInvalidColorEDT()
+    {
+        colorText.setText( "q" );
+        colorText.postActionEvent();
+        Optional<Color> optColor        = defaultEditor.getColor();
+        assertFalse( optColor.isPresent() );
+        
+        String          feedbackText    = 
+            feedback.getText().toUpperCase();
+        assertTrue( feedbackText.contains( "ERROR" ) );
+    }
 
     @Test
-    void testGetNameCombo()
+    public void testGetNameCombo()
     {
         GUIUtils.schedEDTAndWait( () ->
             assertNotNull( defaultEditor.getNameCombo() )
@@ -335,7 +360,7 @@ class FontEditorTest
     }
 
     @Test
-    void testGetBoldToggle()
+    public void testGetBoldToggle()
     {
         GUIUtils.schedEDTAndWait( () ->
             assertNotNull( defaultEditor.getBoldToggle() )
@@ -343,7 +368,7 @@ class FontEditorTest
     }
 
     @Test
-    void testGetItalicToggle()
+    public void testGetItalicToggle()
     {
         GUIUtils.schedEDTAndWait( () ->
             assertNotNull( defaultEditor.getItalicToggle() )
@@ -351,7 +376,7 @@ class FontEditorTest
     }
 
     @Test
-    void testGetSizeEditor()
+    public void testGetSizeEditor()
     {
         GUIUtils.schedEDTAndWait( () ->
             assertNotNull( defaultEditor.getSizeEditor() )
@@ -359,7 +384,7 @@ class FontEditorTest
     }
 
     @Test
-    void testGetColorEditor()
+    public void testGetColorEditor()
     {
         GUIUtils.schedEDTAndWait( () ->
             assertNotNull( defaultEditor.getColorEditor() )
@@ -367,7 +392,7 @@ class FontEditorTest
     }
 
     @Test
-    void testGetFeedback()
+    public void testGetFeedback()
     {
         GUIUtils.schedEDTAndWait( () ->
             assertNotNull( defaultEditor.getFeedback() )
@@ -383,7 +408,8 @@ class FontEditorTest
     
     private void showColorSelector()
     {
-        colorButton.doClick();
+        assertFalse( SwingUtilities.isEventDispatchThread() );
+        SwingUtilities.invokeLater( () -> colorButton.doClick() );
         Utils.pause( 250 );
         GUIUtils.schedEDTAndWait( () -> {
             getChooserDialog();
@@ -399,7 +425,7 @@ class FontEditorTest
         boolean mustBeVisible   = true;
         ComponentFinder finder  = 
             new ComponentFinder( canBeDialog, canBeFrame, mustBeVisible );
-        Window  comp    = finder.findWindow( c -> true );
+        Window  comp    = finder.findWindow( w -> true );
         assertNotNull( comp );
         assertTrue( comp instanceof JDialog );
         chooserDialog = (JDialog)comp;
@@ -427,5 +453,66 @@ class FontEditorTest
         assertNotNull( comp );
         assertTrue( comp instanceof JButton );
         chooserOKButton = (JButton)comp;
+    }
+    
+    private class FontProfile
+    {
+        public final Font   font;
+        public final Color  textColor;
+        
+        public FontProfile()
+        {
+            textColor = colorEditor.getColor().orElse( null );
+            
+            String  name        = (String)nameCombo.getSelectedItem();
+            int     size        = (int)sizeEditor.getValue();
+            int     bold        = 
+                boldToggle.isSelected() ? Font.BOLD : 0;
+            int     italic      = 
+                italicToggle.isSelected() ? Font.ITALIC : 0;
+            int     style       = bold | italic;
+            font = new Font( name, style, size );
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            int hash    = Objects.hash( font, textColor );
+            return hash;
+        }
+        
+        @Override
+        public boolean equals( Object obj )
+        {
+            boolean result  = false;
+            if ( this == obj )
+                result = true;
+            else if ( obj == null )
+                result = false;
+            else if ( !(obj instanceof FontProfile ) )
+                result = false;
+            else
+            {
+                FontProfile that    = (FontProfile)obj;
+                result = 
+                    Objects.equals( this.font, that.font )
+                    && Objects.equals( this.textColor, that.textColor );
+            }
+            return result;
+        }
+        
+        public boolean matches( FontEditor that )
+        {
+            boolean result  = that == null;
+            if ( !result )
+            {
+                Font    thatFont    = that.getSelectedFont().orElse( null );
+                Color   thatColor   = that.getColor().orElse( null );
+                result = 
+                    Objects.equals( this.font, thatFont )
+                    && Objects.equals( this.textColor, thatColor );
+            }
+            return result;
+        }
     }
 }

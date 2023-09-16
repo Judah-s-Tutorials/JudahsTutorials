@@ -5,11 +5,11 @@
     <title>Title</title>
 </head>
 <body>
-<div  style="margin-left: 3em; padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA; max-width: 65em;">
-<p style="font-size: 200%; font-weight: bold;">
+<div  style="padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p style="font-size: 150%; font-weight: bold;">
 Digression: Buttons with Images
 </p>
-<img src="../images/ButtonIcons.png" alt="ButtonIcons.png" style="float: right; width: 20%; height: auto;">
+<img src="https://judahstutorials.com/wp-content/uploads/2023/09/ButtonIcons.png" alt="ButtonIcons.png" style="float: right; width: 60%; height: auto;">
 <p>
 We are not
 going to be 
@@ -71,6 +71,144 @@ private ImageIcon getImageIcon( String path )
 If <em>ImageIO.read</em> fails
 it will throw an IOException
 which we can then catch.
+</p>
+<p>
+To add an image
+to a <em>JButton,</em>
+you can use one of the constructors:<br>
+</p>
+<pre style="font-family: 'Lucida Console', 'Courier New', monospace; padding-left:3em;">
+JButton( Icon image )
+JButton( String text, Icon image )
+</pre>
+<p>
+You can always
+set the image and/or text
+after instantiation
+using:
+</p>
+<pre style="font-family: 'Lucida Console', 'Courier New', monospace; padding-left:3em;">
+AbstractButton.setText( String text )
+AbstractButton.setImage( Icon image )
+</pre>
+<p>
+When using text
+and an image,
+by default the text
+is placed to the right
+of the image.
+To place the text
+on the left, use
+<em>JButton.setHorizontalTextPosition( SwingConstants.LEFT )</em>.
+To configure the space
+between text and image, use 
+<em>JButton.setIconTextGap( int pixels )</em>.
+To create the GUI
+pictued above, 
+I used a helper method
+to consistently configure
+<em>JButtons</em>
+with both text and labels:
+</p>
+<pre style="font-family: 'Lucida Console', 'Courier New', monospace; padding-left:3em;">
+    ImageIcon   fwdIcon     = getImageIcon( "images/Forward.png" );
+    JButton     fwdButton2  = getLabeledButton( "Forward", fwdIcon );
+    ...
+private JButton getLabeledButton( String label, Icon icon )
+{
+    JButton button  = new JButton( label, icon );
+    button.setHorizontalTextPosition( SwingConstants.LEFT );
+    button.setIconTextGap( 5 );
+    return button;
+}</pre>
+<p>
+When using images
+on toggle Buttons
+you can use one
+image for the deselected state
+and another for the selected state.
+To set the <em>default</em> image
+in a constructor,
+use <em>CheckBox( Icon image )</em>;
+the given image
+will always be used
+for a button
+in the deselected state,
+and, unless otherwise configured,
+will also use it for the selected state.
+To configure an image
+for a button
+in the selected state,
+use
+<em>AbstractedButton.setSelectedIcon( Icon image )</em>.
+To set the default image
+after instantiation, use
+<em>AbstractedButton.setIcon( Icon image )</em>.
+To create the first three check boxes
+in the accompanying figure
+I used the following helper method:
+</p>
+<pre style="font-family: 'Lucida Console', 'Courier New', monospace; padding-left:3em;">
+    ImageIcon   goIcon      = getImageIcon( "images/Go.png" );
+    ImageIcon   goIconSel   = getImageIcon( "images/GoSelected.png" );
+    JCheckBox   checkBox2   = getCheckBox( "Go", goIcon, goIconSel );
+    ...
+private JCheckBox getCheckBox( 
+    String text, 
+    ImageIcon icon, 
+    ImageIcon selectedIcon
+)
+{
+    Border      bevelBorder = 
+        BorderFactory.createBevelBorder( BevelBorder.RAISED );
+    Border      emptyBorder =
+        BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
+    Border      border      =
+        BorderFactory.createCompoundBorder( bevelBorder, emptyBorder );
+    
+    JCheckBox   checkBox    = new JCheckBox( icon );
+    checkBox.setSelectedIcon( selectedIcon );
+    checkBox.setText( text );
+    checkBox.setBorder( border );
+    checkBox.setBorderPainted( true );
+    
+    return checkBox;
+}</pre>
+<p style="margin-left: 4em; padding: 1em; border: solid thin black;">
+<strong>Note:</strong>
+By default,
+<em>JTextBoxes</em> don't draw their borders
+even if you set one.
+To force a <em>JTextBox</em>
+to draw its Border
+use <em>AbstractButton.setBorderPainted( boolean paint )</em>.
+</p>
+<p>
+You can also set images
+to be used
+for a button's
+<em>roll-over</em> and <em>pressed</em> states.
+The last check box
+in the above GUI
+was configured using:
+</p>
+<pre style="font-family: 'Lucida Console', 'Courier New', monospace; padding-left:3em;">
+ImageIcon   stopIcon    = getImageIcon( "images/Stop.png" );
+ImageIcon   stopIconRO  = getImageIcon( "images/StopRollover.png" );
+ImageIcon   goIcon      = getImageIcon( "images/Go.png" );
+ImageIcon   goIconSel   = getImageIcon( "images/GoSelected.png" );
+        
+JCheckBox   checkBox4   = getCheckBox( "Stop", stopIcon, "Go", goIconSel );
+panel.add( checkBox4 );
+checkBox4.setRolloverIcon( stopIconRO );
+checkBox4.setPressedIcon( goIcon );</pre>
+<p>
+There are two more image options
+for buttons
+(not shown in the sample GUI); 
+see
+<em>AbstractButton.setDisabledIcon(Icon icon)</em> and
+<em>AbstractButton.setDisabledSelectedIcon(Icon icon)</em>
 </p>
 </div>
 </body>
