@@ -36,6 +36,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 class FontEditorTest
 {
     private FontEditor          defaultEditor;
+    
     private JComboBox<String>   nameCombo;
     private JCheckBox           boldToggle;
     private JCheckBox           italicToggle;
@@ -51,7 +52,7 @@ class FontEditorTest
     private Color               selectedColor;
 
     @BeforeEach
-    public void setUp() throws Exception
+    public void beforeEach() throws Exception
     {
         GUIUtils.schedEDTAndWait( () -> {    
             defaultEditor = new FontEditor();
@@ -67,7 +68,7 @@ class FontEditorTest
     }
 
     @AfterEach
-    public void tearDown() throws Exception
+    public void afterEach() throws Exception
     {
         ComponentFinder.disposeAll();
     }
