@@ -7,28 +7,26 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.components.FontEditor;
 
-public class GraphicsCaptureDemo2
+public class GraphicsCaptureDemo3
 {
-    private JPanel          copyFromPanel;
-    private feedbackPanel   feedbackPanel;
-    private JLabel          feedback;
-    
-    private ActivityLog activityLog;
+    private JPanel      copyFromPanel;
+    private CopyToPanel copyToPanel;
+    private JLabel      feedback;
     
     /**
      * Application entry point.
@@ -38,15 +36,14 @@ public class GraphicsCaptureDemo2
     */
     public static void main(String[] args)
     {
-        GraphicsCaptureDemo2    demo    = new GraphicsCaptureDemo2();
+        GraphicsCaptureDemo3    demo    = new GraphicsCaptureDemo3();
         SwingUtilities.invokeLater( () -> demo.buildAll() );
     }
     
     private void buildAll()
     {
-        activityLog = new ActivityLog();
         buildCopyFromFrame();
-        buildFeedbackFrame();
+        buildCopyToFrame();
     }
     
     private void buildCopyFromFrame()
@@ -65,9 +62,9 @@ public class GraphicsCaptureDemo2
         frame.setVisible( true );
     }
     
-    private void buildFeedbackFrame()
+    private void buildCopyToFrame()
     {
-        JFrame  frame       = new JFrame( "Colors Found" );
+        JFrame  frame       = new JFrame( "Copied Image" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
             
         JPanel  contentPane = new JPanel( new BorderLayout() );
@@ -79,8 +76,8 @@ public class GraphicsCaptureDemo2
             BorderFactory.createCompoundBorder( outerBorder, innerBorder );
         contentPane.setBorder( border );
         
-        feedbackPanel = new feedbackPanel();
-        contentPane.add( feedbackPanel, BorderLayout.CENTER );
+        copyToPanel = new CopyToPanel();
+        contentPane.add( copyToPanel, BorderLayout.CENTER );
         contentPane.add( getControlPanel(), BorderLayout.SOUTH );
         
         frame.setContentPane( contentPane );
@@ -91,77 +88,51 @@ public class GraphicsCaptureDemo2
     
     private JPanel getControlPanel()
     {
-        JPanel      panel       = new JPanel();
-        JButton     countButton = new JButton( "Count" );
+        JPanel      panel   = new JPanel();
+        JTextField  widthField  = new JTextField( "200", 10 );
+        JTextField  heightField = new JTextField( "200", 10 );
+        JButton     copyButton  = new JButton( "Copy" );
         JButton     exitButton  = new JButton( "Exit" );
         
-        panel.add( countButton );
+        panel.add( new JLabel( "Width:" ) );
+        panel.add( widthField );
+        panel.add( new JLabel( "Height:" ) );
+        panel.add( heightField );
+        panel.add( copyButton );
         panel.add( exitButton );
         
-        countButton.addActionListener( e -> countColors() );
+        copyButton.addActionListener( e ->
+            makeCopy( widthField.getText(), heightField.getText() )
+        );
         exitButton.addActionListener( e -> System.exit( 0 ) );
         
         return panel;
     }
     
-    private void countColors()
+    private void makeCopy( String strWidth, String strHeight )
     {
-        int             width   = feedback.getWidth();
-        int             height  = feedback.getHeight();
-        int             type    = BufferedImage.TYPE_INT_ARGB;
-        BufferedImage   image   = new BufferedImage( width, height, type );
+        int width   = feedback.getWidth();
+        int height  = feedback.getHeight();
+        
+        BufferedImage   image   = 
+            new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB );
         Graphics2D      gtx     = image.createGraphics();
-        gtx.fillRect( 0,  0, width, height );        
+
+        gtx.fillRect( 0,  0, width, height );
         feedback.paint( gtx );
-        
-        System.out.println( feedback.getClass().getName() );
-        List<Integer>   allColors   = new ArrayList<>();
-        for ( int row = 0 ; row < height ; ++row )
-            for ( int col = 0 ; col < width ; ++col )
-            {
-                Integer color   = image.getRGB( col, row ) & 0xffffff;
-                if ( !allColors.contains( color ) )
-                {
-                    allColors.add( color );
-                    String  strColor    = Integer.toHexString( color ) ;
-                    activityLog.append( strColor, "\"font-family: monospace;\""  );
-                    if ( color.equals( 0xff ) )
-                        System.out.println( strColor );
-                }
-            }
-        activityLog.append( "count: " + allColors.size() );
-        int     rectWidth   = 75;
-        int     rectHeight  = 25;
-        int     spacing     = 5;
-        int     nColors     = allColors.size();
-        width = rectWidth + 2 * spacing;
-        height = rectHeight * (nColors + 1 );
-        image = new BufferedImage( width, height, type );
-        gtx = image.createGraphics();
-        gtx.setColor( Color.WHITE );
-        gtx.fillRect( 0, 0, width, height );
-        
-        int xco     = spacing;
-        int incr    = rectHeight + spacing;
-        for ( int inx=0,yco=spacing ; inx < nColors ; ++inx, yco += incr )
-        {
-            int     iColor  = allColors.get( inx );
-            gtx.setColor( new Color( iColor ) );
-            gtx.fillRect( xco, yco, rectWidth, rectHeight );
-        }
-        
-        feedbackPanel.setImage( image );
-        feedbackPanel.repaint();
+        copyToPanel.setImage( image );
+        copyToPanel.repaint();
+        gtx.dispose();
     }
     
     @SuppressWarnings("serial")
-    private class feedbackPanel extends JPanel
+    private class CopyToPanel extends JPanel
     {
         private final BufferedImage tile    = makeTile();
         private BufferedImage   copy    = null;
         private Graphics2D      gtx;
         
-        public feedbackPanel()
+        public CopyToPanel()
         {
             Dimension   size    = new Dimension( 300, 300 );
             setPreferredSize( size );
@@ -221,6 +192,8 @@ public class GraphicsCaptureDemo2
             FontMetrics     metrics     = gtx.getFontMetrics( font );
             Rectangle2D     strDim      = 
                 metrics.getStringBounds( tileString, gtx );
+            gtx.dispose();
+            
             int             rectWidth   = (int)(strDim.getWidth() + .5);
             int             rectHeight  = (int)(strDim.getHeight() + .5);
             int             strAscent   = metrics.getAscent();
@@ -238,6 +211,8 @@ public class GraphicsCaptureDemo2
             gtx.setFont( font );
             gtx.setColor( tileFontColor ); 
             gtx.drawString( tileString, strXco, strYco );
+            
+            gtx.dispose();
             return tile;
         }
     }

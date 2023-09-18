@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
@@ -85,8 +86,8 @@ public class GraphicsCaptureDemo1
     private JPanel getControlPanel()
     {
         JPanel      panel   = new JPanel();
-        JTextField  widthField  = new JTextField( "200", 10 );
-        JTextField  heightField = new JTextField( "200", 10 );
+        JTextField  widthField  = new JTextField( "400", 10 );
+        JTextField  heightField = new JTextField( "150", 10 );
         JButton     copyButton  = new JButton( "Copy" );
         JButton     exitButton  = new JButton( "Exit" );
         
@@ -120,14 +121,23 @@ public class GraphicsCaptureDemo1
         }
         
         BufferedImage   image   = 
-            new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
+            new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB );
         Graphics2D      gtx     = image.createGraphics();
+        gtx.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+            RenderingHints.VALUE_ANTIALIAS_ON);
+        gtx.setRenderingHint(RenderingHints.KEY_RENDERING,
+            RenderingHints.VALUE_RENDER_QUALITY);
+        gtx.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
+            RenderingHints.VALUE_STROKE_PURE);
+
         gtx.fillRect( 0,  0, width, height );
         copyFromPanel.paint( gtx );
         copyToPanel.setImage( image );
         copyToPanel.repaint();
+        gtx.dispose();
     }
     
+    @SuppressWarnings("serial")
     private class CopyToPanel extends JPanel
     {
         private final BufferedImage tile    = makeTile();
@@ -136,7 +146,7 @@ public class GraphicsCaptureDemo1
         
         public CopyToPanel()
         {
-            Dimension   size    = new Dimension( 300, 300 );
+            Dimension   size    = new Dimension( 500, 300 );
             setPreferredSize( size );
         }
         
@@ -194,6 +204,8 @@ public class GraphicsCaptureDemo1
             FontMetrics     metrics     = gtx.getFontMetrics( font );
             Rectangle2D     strDim      = 
                 metrics.getStringBounds( tileString, gtx );
+            gtx.dispose();
+            
             int             rectWidth   = (int)(strDim.getWidth() + .5);
             int             rectHeight  = (int)(strDim.getHeight() + .5);
             int             strAscent   = metrics.getAscent();
@@ -211,6 +223,8 @@ public class GraphicsCaptureDemo1
             gtx.setFont( font );
             gtx.setColor( tileFontColor ); 
             gtx.drawString( tileString, strXco, strYco );
+            
+            gtx.dispose();
             return tile;
         }
     }
