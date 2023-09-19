@@ -1,14 +1,9 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
@@ -121,16 +116,10 @@ public class GraphicsCaptureDemo1
         }
         
         BufferedImage   image   = 
-            new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB );
+            new BufferedImage( width, height, BufferedImage.TYPE_INT_ARGB );
         Graphics2D      gtx     = image.createGraphics();
-        gtx.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-            RenderingHints.VALUE_ANTIALIAS_ON);
-        gtx.setRenderingHint(RenderingHints.KEY_RENDERING,
-            RenderingHints.VALUE_RENDER_QUALITY);
-        gtx.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL,
-            RenderingHints.VALUE_STROKE_PURE);
-
-        gtx.fillRect( 0,  0, width, height );
+        gtx.fillRect( 0, 0, width, height );
+        
         copyFromPanel.paint( gtx );
         copyToPanel.setImage( image );
         copyToPanel.repaint();
@@ -140,9 +129,10 @@ public class GraphicsCaptureDemo1
     @SuppressWarnings("serial")
     private class CopyToPanel extends JPanel
     {
-        private final BufferedImage tile    = makeTile();
-        private BufferedImage   copy    = null;
-        private Graphics2D      gtx;
+        private final GreekTile     greekTile   = new GreekTile();
+        private final BufferedImage tile        = greekTile.getTile();
+        private BufferedImage       copy        = null;
+        private Graphics2D          gtx         = null;
         
         public CopyToPanel()
         {
@@ -166,66 +156,17 @@ public class GraphicsCaptureDemo1
             int tileWidth   = tile.getWidth();
             int tileHeight  = tile.getHeight();
             
-            for ( int row=0,yco=0 ; yco <= height ; yco+=tileHeight,row++ )
+            greekTile.resetTileOffset();
+            for ( int yco=0 ; yco <= height ; yco+=tileHeight )
             {
-                int randomOff   = (int)(Math.random() * tileWidth);
-                int rowStart    = (row % 2) == 0 ? 0 : -tileWidth / 2;
-                rowStart -= randomOff;
+                int randomOff   = greekTile.getTileOffset();
+                int rowStart    = -randomOff;
                 for ( int xco = rowStart ; xco <= width ; xco += tileWidth )
                     gtx.drawImage( tile, xco, yco, this );
             }
             
             if ( copy != null )
                 gtx.drawImage( copy, 50, 50, this );
-        }
-        
-        private BufferedImage makeTile()
-        {
-            Color   background      = new Color( 0xcccccc );
-            char    alpha           = '\u0391';
-            char    pie             = '\u03A0';
-            char    omega           = '\u03A9';
-            int     tileMargin      = 0;
-            String  tileFontName    = Font.DIALOG_INPUT;
-            int     tileFontStyle   = Font.ITALIC;
-            int     tileFontSize    = 40;
-            Color   tileFontColor   = Color.YELLOW;
-            String  tileString      = 
-                alpha + " " + pie + " " + omega + " ";
-            
-            // This is just temporary BufferedImage which is used to
-            // obtain a graphics context to calculate font metrics.
-            int             type    = BufferedImage.TYPE_4BYTE_ABGR;
-            BufferedImage   temp    = new BufferedImage( 10, 10, type );
-            Graphics2D      gtx     = temp.createGraphics();
-            
-            Font            font        = 
-                new Font( tileFontName, tileFontStyle, tileFontSize );
-            FontMetrics     metrics     = gtx.getFontMetrics( font );
-            Rectangle2D     strDim      = 
-                metrics.getStringBounds( tileString, gtx );
-            gtx.dispose();
-            
-            int             rectWidth   = (int)(strDim.getWidth() + .5);
-            int             rectHeight  = (int)(strDim.getHeight() + .5);
-            int             strAscent   = metrics.getAscent();
-            int             strXco      = tileMargin;
-            int             strYco      = tileMargin + strAscent;
-            int             tileWidth   = rectWidth + tileMargin;
-            int             tileHeight  = rectHeight +  tileMargin;
-            
-            BufferedImage   tile        = 
-                new BufferedImage( tileWidth, tileHeight, type );
-            gtx = tile.createGraphics();
-            gtx.setColor( background );
-            gtx.fillRect( 0, 0, tileWidth, tileHeight );
-            
-            gtx.setFont( font );
-            gtx.setColor( tileFontColor ); 
-            gtx.drawString( tileString, strXco, strYco );
-            
-            gtx.dispose();
-            return tile;
         }
     }
 }

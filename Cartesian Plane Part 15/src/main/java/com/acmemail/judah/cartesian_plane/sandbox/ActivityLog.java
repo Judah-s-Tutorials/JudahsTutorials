@@ -95,6 +95,11 @@ public class ActivityLog
         dialog.setVisible( visible );
     }
     
+    public void setLocation( int xco, int yco )
+    {
+        dialog.setLocation( xco, yco );
+    }
+    
     public boolean isVisible()
     {
         return dialog.isVisible();
