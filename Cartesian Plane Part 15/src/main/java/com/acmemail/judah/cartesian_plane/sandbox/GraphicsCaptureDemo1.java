@@ -19,6 +19,10 @@ import com.acmemail.judah.cartesian_plane.components.FontEditor;
 
 public class GraphicsCaptureDemo1
 {
+    /** 
+     * The panel containing the graphics to copy. This comes directly
+     * from <em>FontEditor.getPanel()</em>.
+     */
     private JPanel      copyFromPanel;
     private CopyToPanel copyToPanel;
     

@@ -7,10 +7,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Graphics2D;
 import java.awt.Window;
+import java.awt.image.BufferedImage;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -18,11 +23,11 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.AfterEach;
@@ -49,7 +54,6 @@ class FontEditorTest
     private JColorChooser       chooser;
     private JDialog             chooserDialog;
     private JButton             chooserOKButton;
-    private Color               selectedColor;
 
     @BeforeEach
     public void beforeEach() throws Exception
@@ -241,33 +245,23 @@ class FontEditorTest
     @Test
     public void testIsBold()
     {
-        GUIUtils.schedEDTAndWait( () -> testIsBoldEDT() );
-    }
-    
-    private void testIsBoldEDT()
-    {
-        boolean currBold    = boldToggle.isSelected();
-        assertEquals( currBold, defaultEditor.isBold() );
-        
-        boolean expBold     = !currBold;
-        boldToggle.setSelected( expBold );
-        assertEquals( expBold, defaultEditor.isBold() );
+        GUIUtils.schedEDTAndWait( () ->
+            testTogglePropertyEDT(
+                () -> defaultEditor.getBoldToggle(),
+                () -> defaultEditor.isBold()
+            )
+        );
     }
 
     @Test
     public void testIsItalic()
     {
-        GUIUtils.schedEDTAndWait( () -> testIsItalicEDT() );
-    }
-    
-    private void testIsItalicEDT()
-    {
-        boolean currItalic  = italicToggle.isSelected();
-        assertEquals( currItalic, defaultEditor.isItalic() );
-        
-        boolean expItalic   = !currItalic;
-        italicToggle.setSelected( expItalic );
-        assertEquals( expItalic, defaultEditor.isItalic() );
+        GUIUtils.schedEDTAndWait( () ->
+            testTogglePropertyEDT(
+                () -> defaultEditor.getItalicToggle(),
+                () -> defaultEditor.isItalic()
+            )
+        );
     }
     
     @Test
@@ -364,7 +358,10 @@ class FontEditorTest
     public void testGetBoldToggle()
     {
         GUIUtils.schedEDTAndWait( () ->
-            assertNotNull( defaultEditor.getBoldToggle() )
+            testTogglePropertyEDT(
+                () -> defaultEditor.getBoldToggle(),
+                () -> defaultEditor.isBold()
+            )
         );
     }
 
@@ -372,7 +369,10 @@ class FontEditorTest
     public void testGetItalicToggle()
     {
         GUIUtils.schedEDTAndWait( () ->
-            assertNotNull( defaultEditor.getItalicToggle() )
+            testTogglePropertyEDT(
+                () -> defaultEditor.getItalicToggle(),
+                () -> defaultEditor.isItalic()
+            )
         );
     }
 
@@ -405,6 +405,40 @@ class FontEditorTest
         assertNotNull(
             ComponentFinder.find( panel, c -> c == comp )
         );
+    }
+    
+    private void assertFeedbackContains( Color color )
+    {
+        int             iColor  = color.getRGB() & 0xFFFFFF;
+        int             width   = feedback.getWidth();
+        int             height  = feedback.getHeight();
+        int             type    = BufferedImage.TYPE_INT_ARGB;
+        BufferedImage   buff    = new BufferedImage( width, height, type );
+        Graphics2D      gtx     = buff.createGraphics();
+        GUIUtils.schedEDTAndWait( () -> feedback.paint( gtx ) );
+        
+//        int defResult   = -1;
+//        int actResult   =
+//            Arrays.stream( buff )
+//                .flatMapToInt( a -> Arrays.stream( a ) )
+//                .map( i -> i & 0xffffff )
+//                .filter( e -> e == 7 )
+//                .findFirst().orElse( -1 );
+
+    }
+    
+    private void testTogglePropertyEDT( 
+        Supplier<JToggleButton> buttonSupplier, 
+        BooleanSupplier propertySupplier
+    )
+    {
+        JToggleButton   button      = buttonSupplier.get();
+        assertNotNull( button );
+        boolean         currValue   = button.isSelected();
+        assertEquals( currValue, propertySupplier.getAsBoolean() );
+        
+        button.setSelected( !currValue );
+        assertEquals( !currValue, propertySupplier.getAsBoolean() );
     }
     
     private void showColorSelector()

@@ -27,8 +27,8 @@ import com.acmemail.judah.cartesian_plane.components.FontEditor;
 public class GraphicsCaptureDemo2
 {
     private JPanel      copyFromPanel;
-    private CopyToPanel copyToPanel;
     private Robot       robot;
+    private CopyToPanel copyToPanel;
     private ActivityLog log;
     
     /**
@@ -59,7 +59,7 @@ public class GraphicsCaptureDemo2
         log.setLocation( 600, 100 );
         buildCopyFromFrame();
         buildCopyToFrame();
-        log.append( "initializtion complete" );
+        log.append( "initialization complete" );
     }
     
     private void buildCopyFromFrame()
