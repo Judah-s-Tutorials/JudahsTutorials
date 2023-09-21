@@ -8,14 +8,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -23,6 +24,7 @@ import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -33,6 +35,8 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
@@ -111,6 +115,13 @@ class FontEditorTest
         assertFound( panel, colorEditor.getColorButton() );
         assertFound( panel, colorEditor.getTextEditor() );
     }
+    
+    private void assertFound( JPanel panel, JComponent comp )
+    {
+        assertNotNull(
+            ComponentFinder.find( panel, c -> c == comp )
+        );
+    }
 
     @Test
     public void testGetSelectedFont()
@@ -120,29 +131,26 @@ class FontEditorTest
     
     private void testGetSelectedFontEDT()
     {
+        // Does getSelectedFont return a value that matches
+        // the current component settings?
+        FontProfile profile = new FontProfile();
+        assertTrue( profile.matches( defaultEditor ) );
+        
         // Select new property values for selected font,
         // then validate against getSelectedFont()
         int     numItems    = nameCombo.getItemCount();
         int     currItem    = nameCombo.getSelectedIndex();
         int     selectItem  = (currItem + 1) % numItems;
         nameCombo.setSelectedIndex( selectItem );
-        String  expFontName = nameCombo.getSelectedItem().toString();
         
         int     expSize     = (int)sizeEditor.getNextValue();
         sizeEditor.setValue( expSize );
         
-        boolean expBold     = !boldToggle.isSelected();
         boldToggle.doClick();
-        boolean expItalic   = !italicToggle.isSelected();
         italicToggle.doClick();
         
-        Optional<Font>  optFont = defaultEditor.getSelectedFont();
-        Font            font    = optFont.orElse( null );
-        assertNotNull( font );
-        assertEquals( expFontName, font.getName() );
-        assertEquals( expBold, font.isBold() );
-        assertEquals( expItalic, font.isItalic() );
-        assertEquals( expSize, font.getSize() );
+        profile = new FontProfile();
+        assertTrue( profile.matches( defaultEditor ) );
     }
     
     @Test
@@ -311,6 +319,61 @@ class FontEditorTest
         int     iActColor   = actColor.getRGB() & 0x00FFFFFF;
         assertEquals( iNewColor, iActColor );
     }
+    
+    @Test
+    public void testFeedbackFontProperties()
+    {
+        GUIUtils.schedEDTAndWait( () -> testFeedbackFontPropertiesEDT() );
+    }
+    
+    private void testFeedbackFontPropertiesEDT()
+    {
+        // Make sure current property values 
+        // are reflected in feedback window
+        FontProfile profile = new FontProfile();
+        Font        expFont = profile.font;
+        Font        actFont = feedback.getFont();
+        assertEquals( expFont, actFont );
+        
+        // Select new property values for selected font,
+        // then validate against getSelectedFont()
+        int     numItems    = nameCombo.getItemCount();
+        int     currItem    = nameCombo.getSelectedIndex();
+        int     selectItem  = (currItem + 1) % numItems;
+        nameCombo.setSelectedIndex( selectItem );
+        
+        int     expSize     = (int)sizeEditor.getNextValue();
+        sizeEditor.setValue( expSize );
+        boldToggle.doClick();
+        italicToggle.doClick();
+        
+        // Make sure property changes are reflected in feedback window
+        profile = new FontProfile();
+        expFont = profile.font;
+        actFont = feedback.getFont();
+        assertEquals( expFont, actFont );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( ints = {
+        0xFF0000, // red
+        0x00FF00, // green 
+        0x0000FF, // blue
+        0xFFFF00, // yellow
+        0xFF00FF  // magenta
+    })
+    public void testFeedbackColor( int iColor )
+    {
+        System.out.println( Integer.toHexString( iColor ) );
+        GUIUtils.schedEDTAndWait( () -> testFeedbackColorEDT( iColor ) );
+    }
+
+    public void testFeedbackColorEDT( int iColor )
+    {
+        colorText.setText( String.valueOf( iColor ) );
+        colorText.postActionEvent();
+        assertFeedbackContains( iColor );
+    }
 
     @Test
     public void testGetColorGoWrong()
@@ -400,31 +463,53 @@ class FontEditorTest
         );
     }
     
-    private void assertFound( JPanel panel, JComponent comp )
+    private void realizeGUI()
     {
-        assertNotNull(
-            ComponentFinder.find( panel, c -> c == comp )
-        );
+        // Assume this method is called from the EDT
+        assertTrue( SwingUtilities.isEventDispatchThread() );
+        JFrame  frame   = new JFrame();
+        frame.setContentPane( defaultEditor.getPanel() );
+        frame.pack();
+        frame.dispose();
     }
     
-    private void assertFeedbackContains( Color color )
+    private void assertFeedbackContains( int iColor )
     {
-        int             iColor  = color.getRGB() & 0xFFFFFF;
+        // Assume this method is called from the EDT
+        assertTrue( SwingUtilities.isEventDispatchThread() );
+        realizeGUI();
         int             width   = feedback.getWidth();
         int             height  = feedback.getHeight();
+        // Verify that the feedback window has been realized
+        assertTrue( width > 0 );
+        assertTrue( height > 0 );
         int             type    = BufferedImage.TYPE_INT_ARGB;
         BufferedImage   buff    = new BufferedImage( width, height, type );
         Graphics2D      gtx     = buff.createGraphics();
-        GUIUtils.schedEDTAndWait( () -> feedback.paint( gtx ) );
+        feedback.paint( gtx );
         
-//        int defResult   = -1;
-//        int actResult   =
-//            Arrays.stream( buff )
-//                .flatMapToInt( a -> Arrays.stream( a ) )
-//                .map( i -> i & 0xffffff )
-//                .filter( e -> e == 7 )
-//                .findFirst().orElse( -1 );
-
+        int         result  =
+            Stream.iterate( 
+                new Point( 0, 0 ), 
+                p -> p.y < height, 
+                p -> nextPoint( p, width )
+            )
+            .mapToInt( p -> buff.getRGB( p.x, p.y ) )
+            .map( i -> i & 0xffffff )
+            .filter( i -> i == iColor )
+            .findFirst()
+            .orElse( 0xffffffff );
+        assertEquals( iColor, result );
+    }
+    
+    private static Point nextPoint( Point point, int maxWidth )
+    {
+        if ( ++point.x == maxWidth )
+        {
+            point.x = 0;
+            ++point.y;
+        }
+        return point;
     }
     
     private void testTogglePropertyEDT( 
