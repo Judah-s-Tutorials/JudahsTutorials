@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cartesian Plane: Font Editor Use Cases</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p>
+<sup>*</sup><strong>Note:</strong>
+Here's a quick discussion
+about thread synchronization 
+in the color button test.
+You may skip it
+if you wish.
+In this discussion
+<em>test thread</em>
+refers to the thread
+that <em>JUnit</em> started
+to execute our test driver;
+<em>EDT</em> of course
+refers to the <em>Event Dispatch Thread.</em>
+</p>
+<ol>
+    <li>
+        Our test method,
+        <em>testColorButton(),</em>
+        calls <em>showColorSelector()</em>,
+        from the test thread.
+    </li>
+    <li>
+        Method <em>showColorSelector()</em>:
+        <ol type="a">
+            <li>
+                Schedules <em>colorButton.doClick()</em>
+                to execute on the EDT
+                using <em>SwingUtilities.invokeLater()</em>.
+                We can't use 
+                <em>SwingUtilities.invokeAndWait()</em> here
+                because <em>doClick()</em>
+                is going to start the color selector
+                and not return
+                until the color selector 
+                is dismissed.
+                If we tried to use
+                <em>invokeAndWait()</em> here
+                the selector dialog 
+                would appear on the screen
+                and stay there,
+                either for all eternity,
+                or until someone notices
+                that our test driver
+                is no longer running
+                and kills it.
+            </li>
+            <li>
+                Because we used <em>invokeLater</em>
+                the test thread pauses
+                to give the <em>doClick()</em> task
+                a chance
+                to execute on the EDT.
+            </li>
+            <li>
+                <p>
+                Method <em>showColorSelector()</em>
+                schedules a new task
+                to execute on the EDT;
+                the new task
+                obtains some of
+                the selector dialog's components,
+                notably its <em>OK</em> button.
+                This task
+                doesn't execute any blocking operations,
+                so it can be called
+                using <em>invokeAndWait()</em>
+            </li>
+        </ol>
+    <li>
+        When <em>showColorSelector()</em> completes
+        we go back to <em>testColorButton(),</em>
+        executing on the EDT.
+    </li>
+    <li>
+        <p>
+        Method <em>testColorButton()</em>
+        schedules <em>testColorButtonEDT()</em>
+        to execute on the EDT
+        using <em>invokeAndWait()</em>.
+        </p>
+        <p>
+        Let's take stock
+        of our current state.
+        The <em>testColorButton()</em>
+        has just executed
+        the line of code: <br>
+        <code>&nbsp;&nbsp;&nbsp;&nbsp;GUIUtils.schedEDTAndWait( () -> testColorButtonEDT() );</code><br>
+        The test thread
+        is now suspended,
+        awaiting the completion
+        of <em>testColorButtonEDT()</em>.
+        </p>
+        <p>
+        Method <em>testColorButtonEDT()</em>
+        is executing on the EDT:
+        </p>
+        <pre style="margin-left: 4em;">assertTrue( chooserDialog.isVisible() );
+Color   currColor   = defaultEditor.getColor().orElse( null );
+assertNotNull( currColor );
+int     currRGB     = currColor.getRGB() & 0xffffff;
+int     uniqueRGB   = currRGB ^ 0xff;
+Color   uniqueColor = new Color( uniqueRGB );
+chooser.setColor( uniqueColor );
+...</pre>
+        <p>
+        The last thing it does
+        is call the OK button's <em>doClick()</em> method:
+        </p>
+        <pre>    chooserOKButton.doClick();</pre>
+        <p>
+        Note that this
+        <em>does not</em>
+        immediately close the dialog.
+        In an effort
+        to emulate an operator
+        physically clicking the button,
+        the <em>doClick()</em> method
+        formulates a new button click event
+        and adds it to
+        the EDT's event queue.
+        When <em>doClick()</em> returns:
+        </p>
+        <ol type = "a">
+        <li>
+            The <em>doClick()</em> method
+            has finished executing;
+        </li>
+        <li>
+            The color selector dialog
+            is still being displayed; and
+        </li>
+        <li>
+            There is an event
+            in the EDT's event queue
+            waiting to be processed.<br>&nbsp;
+        </li>
+        </ol>
+    </li>
+    <li>
+        The documentation
+        for <em>invokeAndWait()</em> says:
+        "This call blocks 
+        until all pending AWT events 
+        have been processed... ."
+        In other words
+        that new event
+        created by <em>doClick()</em>
+        is in the event queue
+        so <em>invokeAndWait()</em>
+        isn't ready to return.
+    </li>
+    <li>
+        With <em>testColorButton</em> still suspended,
+        the EDT begins processing
+        the new event.
+        Note that this may cause
+        still more events
+        to be added to
+        the event queue;
+        presumably <em>invokeAndWait()</em>
+        will not return
+        until they have all been processed.
+    </li>
+    <li>
+        After processing all events
+        in the queue,
+        the dialog will be closed,
+        <em>FontEditor</em> will have been updated,
+        and <em>invokeAndWait()</em> 
+        returns to <em>testColorButton()</em>
+        which continues running
+        in the test thread.
+    </li>
+    <li>
+       Method <em>testColorButton()</em>
+       schedules another, simpler task
+       (one that doesn't
+       spawn any new events)
+       to execute on the EDT:
+        <pre style="margin-left: 4em;">assertTrue( chooserDialog.isVisible() );
+GUIUtils.schedEDTAndWait( () -> {
+    Color   expColor    = chooser.getColor();
+    Color   actColor    = defaultEditor.getColor().orElse( null );
+    assertEquals( expColor, actColor );
+});</pre>
+       when that task is complete,
+       the test method is finished.
+    </li>
+</ol>
+</div>
+</body>
+</html>
