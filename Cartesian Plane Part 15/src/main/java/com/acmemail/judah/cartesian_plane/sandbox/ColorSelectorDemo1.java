@@ -32,10 +32,10 @@ import com.acmemail.judah.cartesian_plane.components.ColorSelector;
 public class ColorSelectorDemo1 implements ActionListener
 {
     /** The component that provides feedback regarding the selected color. */
-    private static ColorFeedbackFrame   feedback;
+    private ColorFeedbackFrame   feedback;
     
     /** Contains the dialog allowing an operator to select a color. */
-    private static ColorSelector        selector;
+    private ColorSelector        selector;
     
     /**
      * Application entry point.
@@ -44,12 +44,16 @@ public class ColorSelectorDemo1 implements ActionListener
      */
     public static void main(String[] args)
     {   
-        feedback = new ColorFeedbackFrame();  
-        ActionListener  listener    = new ColorSelectorDemo1();
-        SwingUtilities
-            .invokeLater( () -> feedback.makeGUI( listener ) );
-        SwingUtilities
-            .invokeLater( () -> selector = new ColorSelector() );
+         
+        ColorSelectorDemo1  demo    = new ColorSelectorDemo1();
+        SwingUtilities.invokeLater( () -> demo.makeGUI( ) );
+    }
+    
+    private void makeGUI()
+    {
+        feedback = new ColorFeedbackFrame();
+        feedback.makeGUI( this );
+        selector = new ColorSelector();
     }
     
     /**

@@ -259,6 +259,7 @@ public class BorderDemo1
             getMainPanel( "JPanel With Titled Border Inside Etched" );
         JPanel  panel2  = 
             getMainPanel( "JPanel With Titled Border Outside Etched" );
+        
         Border  etched  = BorderFactory.createEtchedBorder();
         Border  titled  = 
             BorderFactory.createTitledBorder( "Your Title Goes Here" );
