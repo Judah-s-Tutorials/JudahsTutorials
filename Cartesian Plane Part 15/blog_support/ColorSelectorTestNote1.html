@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cartesian Plane: Font Editor Use Cases</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p>
+<strong>Note:</strong>
+The <em>showDialog()</em> method
+consists of a single line of code,
+and is present
+for aesthetic purposes.
+Because it's a single line of code
+many programmers
+are going to want
+to integrate it
+into the calling method,
+<em>showColorSelector()</em>.
+This can be done,
+but it's kind of ugly:
+</p>
+<pre style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 90%; margin-left:3em;">Thread  thread  = new Thread( 
+    () -> GUIUtils.schedEDTAndWait(
+        () -> selectedColor = colorSelector.showDialog()
+    )
+);</pre>
+<p>
+In my opinion
+the improved readability
+is worth the extra
+bit of code.
+</p>
+</div>
+</body>
+</html>

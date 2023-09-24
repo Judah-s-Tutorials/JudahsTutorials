@@ -48,7 +48,7 @@ class ColorEditorTest
     
     private boolean     actionListener1Fired;
     private boolean     actionListener2Fired;
-    private Object      adHocInstanceVar;
+    private Color       feedbackColor;
     
     @BeforeEach
     public void beforeEach()
@@ -61,7 +61,7 @@ class ColorEditorTest
         });
         actionListener1Fired = false;
         actionListener2Fired = false;
-        adHocInstanceVar = null;
+        feedbackColor = null;
     }
     
     @AfterEach
@@ -257,12 +257,12 @@ class ColorEditorTest
     private Color getFeedbackColor()
     {
         if ( SwingUtilities.isEventDispatchThread() )
-            adHocInstanceVar = feedbackWindow.getBackground();
+            feedbackColor = feedbackWindow.getBackground();
         else
             GUIUtils.schedEDTAndWait( () -> 
-                adHocInstanceVar = feedbackWindow.getBackground()
+                feedbackColor = feedbackWindow.getBackground()
            );
-        return (Color)adHocInstanceVar;
+        return (Color)feedbackColor;
     }
     
     private int getFeedbackRGB()
@@ -285,10 +285,15 @@ class ColorEditorTest
         return rgb;
     }
     
+    private void showDialog()
+    {
+        GUIUtils.schedEDTAndWait( () -> colorButton.doClick() );
+    }
+
     private Thread startColorChooser()
     {
         Thread  thread  = 
-            new Thread( () -> colorButton.doClick(), "ColorChooserThread" );
+            new Thread( () -> showDialog(), "ColorChooserThread" );
         thread.start();
         Utils.pause( 250 );
         GUIUtils.schedEDTAndWait( () -> {

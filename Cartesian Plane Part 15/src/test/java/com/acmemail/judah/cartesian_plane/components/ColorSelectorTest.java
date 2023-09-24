@@ -15,6 +15,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -33,6 +34,14 @@ class ColorSelectorTest
     
     private Color           selectedColor;
     
+    @BeforeEach
+    public void beforeEach()
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            colorSelector   = new ColorSelector()
+        );
+    }
+    
     @AfterEach
     public void afterEach()
     {
@@ -42,11 +51,11 @@ class ColorSelectorTest
     @Test
     public void testColorSelector()
     {
-        GUIUtils.schedEDTAndWait( () -> 
-            colorSelector   = new ColorSelector()
-        );
         Thread  thread  = showColorSelector();
-        GUIUtils.schedEDTAndWait( () -> chooserOKButton.doClick() );
+        GUIUtils.schedEDTAndWait( () -> {
+            assertTrue( chooserDialog.isVisible() );
+            chooserOKButton.doClick();
+        });
         Utils.join( thread );
     }
 
@@ -62,22 +71,26 @@ class ColorSelectorTest
             colorSelector   = new ColorSelector( color )
         );
         Thread  thread  = showColorSelector();
-        GUIUtils.schedEDTAndWait( () -> chooserOKButton.doClick() );
+        GUIUtils.schedEDTAndWait( () -> {
+            assertTrue( chooserDialog.isVisible() );
+            chooserOKButton.doClick();
+        });
         Utils.join( thread );
         assertEquals( color, selectedColor );
     }
 
     @ParameterizedTest
     @ValueSource(ints = {1, 3, 5})
-    void testColorSelectorWindowStringColor( int iColor )
+    public void testColorSelectorWindowStringColor( int iColor )
     {
         Color   color   = new Color( iColor );
-        String  title   = "Test Title" + iColor;
+        String  title   = "Test Title " + iColor;
         GUIUtils.schedEDTAndWait( () -> 
             colorSelector   = new ColorSelector( null, title, color )
         );
         Thread  thread  = showColorSelector();
         GUIUtils.schedEDTAndWait( () -> {
+            assertTrue( chooserDialog.isVisible() );
             assertEquals( title, chooserDialog.getTitle() );
             chooserOKButton.doClick();
         });
@@ -86,7 +99,7 @@ class ColorSelectorTest
     }
 
     @Test
-    void testShowDialogOK()
+    public void testShowDialogOK()
     {
         Color   initColor   = Color.RED;
         Color   uniqueColor = Color.BLUE;
@@ -104,7 +117,7 @@ class ColorSelectorTest
     }
 
     @Test
-    void testShowDialogCancel()
+    public void testShowDialogCancel()
     {
         GUIUtils.schedEDTAndWait( () -> 
             colorSelector   = new ColorSelector()
@@ -118,11 +131,17 @@ class ColorSelectorTest
         assertNull( selectedColor );
     }
     
+    private void showDialog()
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            selectedColor = colorSelector.showDialog() 
+        );
+    }
+    
     private Thread showColorSelector()
     {
         assertNotNull( colorSelector );
-        Thread  thread  = 
-            new Thread( () -> selectedColor = colorSelector.showDialog() );
+        Thread  thread  = new Thread( () -> showDialog() );
         thread.start();
         Utils.pause( 250 );
         GUIUtils.schedEDTAndWait( () -> {
@@ -149,7 +168,8 @@ class ColorSelectorTest
     
     private void getChooser()
     {
-        // Assume getColorDialog called first
+        // Assume getChooserDialog called first
+        assertNotNull( chooserDialog );
         JComponent  comp    = 
              ComponentFinder.find( 
                  chooserDialog, 
@@ -162,6 +182,8 @@ class ColorSelectorTest
     
     private void getChooserOKButton()
     {
+        // Assume getChooserDialog called first
+        assertNotNull( chooserDialog );
         Predicate<JComponent>   pred    = 
             ComponentFinder.getButtonPredicate( "OK" );
         JComponent              comp    =
@@ -173,6 +195,8 @@ class ColorSelectorTest
     
     private void getChooserCancelButton()
     {
+        // Assume getChooserDialog called first
+        assertNotNull( chooserDialog );
         Predicate<JComponent>   pred    = 
             ComponentFinder.getButtonPredicate( "Cancel" );
         JComponent              comp    =
