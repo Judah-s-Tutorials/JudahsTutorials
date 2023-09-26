@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Cartesian Plane: Font Editor Use Cases</title>
+     <link rel='stylesheet' href='main.css'> 
+</head>
+<body>
+<div  style='padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;'>
+<p>
+<strong><sup>*</sup>Note:</strong>
+In Java,
+You can  do all sorts
+of interesting things
+with HTML,
+sometimes even with CSS.
+Try this in a program:
+</p>
+<pre style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 90%; padding-left:3em;">private static final String labelText   =
+    "&lt;html>"
+    + "&lt;span style='color: red;'>Little miss &lt;/span>"
+    + "&lt;span style='color: green; font-size: 200%;'>"
+    + "    Stuffit"
+    + "&lt;/span>&lt;br>"
+    + "&lt;span style='color: blue;'>sat on &lt;/span>"
+    + "&lt;span style='color: #7f00ff; "
+    + "font-size: 200%; font-family: arial bold'>"
+    +     "a Muppet"
+    + "&lt;/span>&amp;#x1F911;"
+    + "&lt;/html>";
+...
+JLable label = new JLabel( labelText );</pre>
+<p>
+See also:
+</p>
+<ul>
+    <li>
+        <a href='https://docs.oracle.com/javase/tutorial/uiswing/components/html.html'>
+            How to Use HTML in Swing Components
+        </a>
+        In the Oracle Java Tutorial
+    </li>
+    <li>
+        <a href='https://docs.oracle.com/javase/tutorial/uiswing/components/editorpane.html'>
+            How to Use Editor Panes and Text Panes
+        </a>
+        In the Oracle Java Tutorial
+    </li>
+    <li>
+        The
+        <a href='https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/javax/swing/JEditorPane.html'>
+            JEditorPane
+        </a>
+        documentation page
+        in the Oracle Java documentation
+    </li>
+    <li>
+        In the project sandbox:
+        <ul>
+            <li>HTMLDemo1</li>
+            <li>ActivityLog</li>
+            <li>ActivityLogDemo</li>
+        </ul>
+    </li>
+</ul>
+</div>
+</body>
+</html>
+
