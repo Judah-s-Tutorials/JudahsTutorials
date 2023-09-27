@@ -58,8 +58,6 @@ class FontEditorTest
     private JColorChooser       chooser;
     private JDialog             chooserDialog;
     private JButton             chooserOKButton;
-    
-    private boolean             actionListenerInvoked;
 
     @BeforeEach
     public void beforeEach() throws Exception
@@ -95,12 +93,6 @@ class FontEditorTest
         
         FontProfile currFont    = new FontProfile();
         assertTrue( currFont.matches( defaultEditor ) );
-    }
-    
-    @Test
-    public void testAddActionListener()
-    {
-        actionListenerInvoked = false;
     }
 
     @Test
