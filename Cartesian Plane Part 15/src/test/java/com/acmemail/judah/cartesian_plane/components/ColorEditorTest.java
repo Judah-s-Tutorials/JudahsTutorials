@@ -79,7 +79,7 @@ class ColorEditorTest
     }
 
     @Test
-    public void testAddActionListener()
+    public void testAddActionListenerColorEditor()
     {
         ActionListener  listener1   = e -> actionListener1Fired = true;
         ActionListener  listener2   = e -> actionListener2Fired = true;
@@ -96,6 +96,31 @@ class ColorEditorTest
             assertTrue( actionListener1Fired );
             assertTrue( actionListener2Fired );
         });
+    }
+
+    @Test
+    public void testAddActionListenerColorSelector()
+    {
+        Thread  thread  = startColorChooser();
+        actionListener1Fired = false;
+        GUIUtils.schedEDTAndWait( () -> {
+            defEditor.addActionListener( e -> actionListener1Fired = true );
+            chooserOKButton.doClick();
+            commitEdit();
+        });
+        Utils.join( thread );
+        assertTrue( actionListener1Fired );
+    }
+
+    @Test
+    public void testAddActionListenerSetColor()
+    {
+        actionListener1Fired = false;
+        GUIUtils.schedEDTAndWait( () -> {
+            defEditor.addActionListener( e -> actionListener1Fired = true );
+            defEditor.setColor( Color.RED );
+        });
+        assertTrue( actionListener1Fired );
     }
 
     @Test
@@ -355,7 +380,9 @@ class ColorEditorTest
     
     private void commitEdit()
     {
-        textEditor.postActionEvent();
-        Utils.pause( 250 );
+        if ( SwingUtilities.isEventDispatchThread() )
+            textEditor.postActionEvent();
+        else
+            GUIUtils.schedEDTAndWait( () -> textEditor.postActionEvent() );
     }
 }

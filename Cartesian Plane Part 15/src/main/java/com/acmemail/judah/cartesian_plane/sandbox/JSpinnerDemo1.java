@@ -99,7 +99,7 @@ public class JSpinnerDemo1
         // leave it out.
         JSpinner.NumberEditor   editor  =
             new JSpinner.NumberEditor( spinner, "0000" );
-        spinner.setEditor( new JSpinner.DefaultEditor( spinner ) );
+        spinner.setEditor( editor );
         
         return panel;
     }
