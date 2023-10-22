@@ -1,32 +1,35 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
 import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
-import javax.swing.border.EtchedBorder;
 
+/**
+ * This is a simple application
+ * to demonstrate how radio buttons work.
+ * Three JRadioButtons are instantiated
+ * and added to a <em>ButtonGroup<em>.
+ * When one button in the group
+ * is selected,
+ * the previously selected button
+ * (if any) 
+ * is deselected
+ * (it "pops up").
+ * When a button is selected
+ * its ActionListeners are invoked.
+ * 
+ * @author Jack Straub
+ */
 public class RadioButtonDemo1
 {
-    private JLabel      demoLabel;
-    private ButtonGroup fontButtonGroup;
-    private Font        origFont;
-    private Font        smallerFont;
-    private Font        smallestFont;
-    private Font        largerFont;
-    private Font        largestFont;
-    
     /**
      * Application entry point.
      *
@@ -38,6 +41,9 @@ public class RadioButtonDemo1
         SwingUtilities.invokeLater( () -> new RadioButtonDemo1().build() );
     }
     
+    /**
+     * Create and deploy the application GUI.
+     */
     private void build()
     {
         JFrame      frame       = new JFrame( "Radio Button Demo 1" );
@@ -48,61 +54,25 @@ public class RadioButtonDemo1
         Border      border      = 
             BorderFactory.createEmptyBorder( 20, 20, 20, 20 );
         centerPanel.setBorder( border );
-        demoLabel = new JLabel( "Radio Button Demo 1" );
-        centerPanel.setPreferredSize( new Dimension( 300, 75 ) );
-        centerPanel.add( demoLabel );
+        BoxLayout   layout      = 
+            new BoxLayout( centerPanel, BoxLayout.Y_AXIS );
+        centerPanel.setLayout( layout );
         contentPane.add( centerPanel, BorderLayout.CENTER );
         
-        contentPane.add( getRadioButtonPanel(), BorderLayout.SOUTH );
+        ActivityLog log     = new ActivityLog( frame );
+        ButtonGroup group   = new ButtonGroup();
+        Stream.of( "Pick me!!", "No, me!!", "Me me me me me!!!!!" )
+            .forEach( s -> {
+                JRadioButton    button  = new JRadioButton( s );
+                group.add( button );
+                centerPanel.add( button );
+                button.addActionListener( e -> 
+                    log.append( "Selected: " + button.getText() ));
+            });
+
         frame.setContentPane( contentPane );
-        frame.setLocation( 200, 200 );
+        frame.setLocation( 100, 100 );
         frame.pack();
         frame.setVisible( true );
-    }
-    
-    private JPanel getRadioButtonPanel()
-    {
-        JPanel      buttonPanel = new JPanel( new GridLayout( 1, 5 ) );
-        fontButtonGroup = new ButtonGroup();
-        origFont    = demoLabel.getFont();
-        float   origSize    = origFont.getSize();
-        smallerFont = origFont.deriveFont( origSize * .75f );
-        smallestFont = origFont.deriveFont( origSize * .5f );
-        largerFont = origFont.deriveFont( origSize * 1.5f );
-        largestFont = origFont.deriveFont( origSize * 2 );
-        Stream.of( 
-            smallestFont, 
-            smallerFont, 
-            origFont, 
-            largerFont, 
-            largestFont
-        ).forEach( f -> {
-            JRadioButton    button  = new JRadioButton();
-            button.addActionListener( e -> demoLabel.setFont( f ) );
-            fontButtonGroup.add( button );
-            buttonPanel.add( button );
-        });
-
-        JPanel      mainPanel   = new JPanel();
-        BoxLayout   mainLayout  = new BoxLayout( mainPanel, BoxLayout.X_AXIS );
-        mainPanel.setLayout( mainLayout );
-        mainPanel.add( new JLabel( "Smaller" ) );
-        mainPanel.add( buttonPanel );
-        mainPanel.add( new JLabel( "Larger" ) );
-        
-        Border  empty       =
-            BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
-        Border  etched      = 
-            BorderFactory.createEtchedBorder( EtchedBorder.RAISED );
-        Border  compound    = 
-            BorderFactory.createCompoundBorder( empty, etched );
-        Border  mainBorder  =
-            BorderFactory.createCompoundBorder( compound, empty );
-        Border  titled      =
-            BorderFactory.createTitledBorder( "Choose Font Size" );
-        mainPanel.setBorder( mainBorder );
-        buttonPanel.setBorder( titled );
-        
-        return mainPanel;
     }
 }
