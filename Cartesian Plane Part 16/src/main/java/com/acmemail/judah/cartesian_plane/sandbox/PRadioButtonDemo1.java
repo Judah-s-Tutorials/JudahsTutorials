@@ -66,7 +66,7 @@ public class PRadioButtonDemo1
      */
     private void build()
     {
-        JFrame      frame       = new JFrame( "Radio Button Demo 3" );
+        JFrame      frame       = new JFrame( "PRadioButton Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         activityLog = new ActivityLog( frame );
         JPanel      contentPane = new JPanel( new BorderLayout() );

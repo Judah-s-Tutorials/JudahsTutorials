@@ -23,17 +23,26 @@ public class PRadioButton<T>
     extends JRadioButton
     implements Supplier<T>
 {
+    /** Value encapsulated by this object. */
     private final T property;
     
+    /**
+     * Constructor.
+     * 
+     * @param property  value encapsulated by this object
+     */
     public PRadioButton( T property )
     {
         this.property = property;
     }
 
+    /**
+     * Satisfies <em>get()</em>
+     * as specified by <em>Supplier&lt;T&gt;</em>.
+     */
     @Override
     public T get()
     {
         return property;
     }
-
 }
