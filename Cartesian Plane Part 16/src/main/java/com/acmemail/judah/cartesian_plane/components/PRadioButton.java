@@ -28,11 +28,27 @@ public class PRadioButton<T>
     
     /**
      * Constructor.
+     * Creates a button with the given property
+     * and no text.
      * 
      * @param property  value encapsulated by this object
      */
     public PRadioButton( T property )
     {
+        this.property = property;
+    }
+    
+    /**
+     * Constructor.
+     * Creates a button with the given property
+     * and text.
+     * 
+     * @param property  value encapsulated by this object
+     * @param text      the text displayed with this button
+     */
+    public PRadioButton( T property, String text )
+    {
+        super( text );
         this.property = property;
     }
 

@@ -398,7 +398,12 @@ public abstract class LinePropertySet
     public static LinePropertySet getPropertySet( JComponent comp )
     {
         Object  value   = comp.getClientProperty( TYPE_KEY );
-        if ( (value != null) && !(value instanceof LinePropertySet) )
+        if ( value == null )
+        {
+            String  message = "Expected LinePropertySet, was null";
+            throw new ComponentException( message );
+        }
+        if ( !(value instanceof LinePropertySet) )
         {
             String  message =
                 "Expected LinePropertySet, was "

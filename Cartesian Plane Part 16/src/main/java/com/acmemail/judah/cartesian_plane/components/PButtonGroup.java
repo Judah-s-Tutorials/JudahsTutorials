@@ -1,9 +1,9 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
@@ -43,6 +43,19 @@ public class PButtonGroup<T> extends ButtonGroup
     {
         buttonList.add( button );
         super.add( button );
+    }
+    
+    /**
+     * Gets an unmodifiable list
+     * of the group's buttons.
+     * 
+     * @return  an unmodifiable list of the group's buttons
+     */
+    public List<PRadioButton<T>> getButtons()
+    {
+        List<PRadioButton<T>>   list    =
+            Collections.unmodifiableList( buttonList );
+        return list;
     }
     
     /**
@@ -106,7 +119,7 @@ public class PButtonGroup<T> extends ButtonGroup
         if ( value == null )
             throw new IllegalArgumentException( mayNotBeNull );
         JRadioButton    toSelect    = buttonList.stream()
-            .filter( p -> value.equals( p ) )
+            .filter( b -> value.equals( b.get() ) )
             .findFirst()
             .orElse( null );
         
