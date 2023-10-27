@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
-import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -17,6 +16,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -24,16 +24,14 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
 /**
- * This is a variation
- * on {@linkplain MenuDemo1},
- * which adds submenus
- * to the help menu.
+ * Application that demonstrates
+ * how to create a simple menu.
  * 
  * @author Jack Straub
  * 
- * @see MenuDemo1
+ * @see MenuDemo4
  */
-public class MenuDemo2
+public class MenuDemo3
 {
     private static final String newLine = System.lineSeparator();
     private JTextArea   textArea;
@@ -48,7 +46,7 @@ public class MenuDemo2
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new MenuDemo2().build() );
+        SwingUtilities.invokeLater( () -> new MenuDemo3().build() );
     }
     
     /**
@@ -65,7 +63,7 @@ public class MenuDemo2
      */
     private void build()
     {
-        JFrame      frame       = new JFrame( "Menu Demo 2" );
+        JFrame      frame       = new JFrame( "Menu Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         textArea = new JTextArea( 24, 80 );
         textArea.setEditable( false );
@@ -122,6 +120,7 @@ public class MenuDemo2
         JMenuItem   openItem    = new JMenuItem( "Open", KeyEvent.VK_O );
         JMenuItem   saveItem    = new JMenuItem( "Save", KeyEvent.VK_S );
         JMenuItem   saveAsItem  = new JMenuItem( "Save As", KeyEvent.VK_A );
+        JSeparator  separator   = new JSeparator();
         JMenuItem   exitItem    = new JMenuItem( "Exit", KeyEvent.VK_E );
         
         KeyStroke   ctrlS       =
@@ -136,6 +135,7 @@ public class MenuDemo2
         menu.add( openItem );
         menu.add( saveItem );
         menu.add( saveAsItem );
+        menu.add( separator );
         menu.add( exitItem );
         return menu;
     }
@@ -173,17 +173,17 @@ public class MenuDemo2
      */
     private JMenu getHelpMenu()
     {
-        JMenu       menu            = new JMenu( "Help" );
+        JMenu       menu        = new JMenu( "Help" );
         menu.setMnemonic( KeyEvent.VK_H );
 
-        JMenuItem   topicsItem      = new JMenuItem( "Topics" );
-        JMenu       indexMenu       = new JMenu( "Index" );
-        JMenu       quickRefMenu    = new JMenu( "Quick Reference" );
-        JMenuItem   aboutItem       = new JMenuItem( "About" );
+        JMenuItem   topicsItem  = new JMenuItem( "Topics" );
+        JMenuItem   indexItem   = new JMenuItem( "Index" );
+        JMenuItem   aboutItem   = new JMenuItem( "About" );
         
         topicsItem.addActionListener( e -> log( "Showing help topics" ) );
+        indexItem.addActionListener( e -> log( "Showing help index" ) );
         String      about       =
-            "Menu Demo 2, Version 1.0.0" + newLine
+            "Menu Demo 1, Version 1.0.0" + newLine
             + "Copyright \u00a9 2026 "
             + "by Solomon Mining Associates, Ltd.";
         aboutItem.addActionListener( e -> 
@@ -195,35 +195,8 @@ public class MenuDemo2
             )
         );
         
-        JMenuItem   indexItemA  = new JMenuItem( "A-F" );
-        JMenuItem   indexItemG  = new JMenuItem( "G-L" );
-        JMenuItem   indexItemM  = new JMenuItem( "M-R" );
-        JMenuItem   indexItemS  = new JMenuItem( "S-Z" );
-        indexItemA.addActionListener( this::actionPerformed );
-        indexItemG.addActionListener( this::actionPerformed );
-        indexItemM.addActionListener( this::actionPerformed );
-        indexItemS.addActionListener( this::actionPerformed );
-        indexMenu.add( indexItemA );
-        indexMenu.add( indexItemG );
-        indexMenu.add( indexItemM );
-        indexMenu.add( indexItemS );
-        
-        JMenuItem   quickRefItem1   = 
-            new JMenuItem( "World Domination, How To" );
-        JMenuItem   quickRefItem2   = 
-            new JMenuItem( "Thermonuclear Annihilation, Avoiding" );
-        JMenuItem   quickRefItem3   = 
-            new JMenuItem( "Natural Resources, Plundering" );
-        quickRefItem1.addActionListener( this::actionPerformed );
-        quickRefItem2.addActionListener( this::actionPerformed );
-        quickRefItem3.addActionListener( this::actionPerformed );
-        quickRefMenu.add( quickRefItem1 );
-        quickRefMenu.add( quickRefItem2 );
-        quickRefMenu.add( quickRefItem3 );
-        
         menu.add( topicsItem );
-        menu.add( indexMenu );
-        menu.add( quickRefMenu );
+        menu.add( indexItem );
         menu.add( aboutItem );
         return menu;
     }
@@ -283,15 +256,5 @@ public class MenuDemo2
         dialog.pack();
         
         return dialog;
-    }
-    
-    private void actionPerformed( ActionEvent evt )
-    {
-        Object  source  = evt.getSource();
-        if ( source instanceof AbstractButton )
-        {
-            String  text    = ((AbstractButton)source).getText();
-            log( "Selected \"" + text + "\"" );
-        }
     }
 }

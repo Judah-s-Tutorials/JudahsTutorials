@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 
+import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -16,7 +17,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -24,14 +24,16 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
 /**
- * Application that demonstrates
- * how to create a simple menu.
+ * This is a variation
+ * on {@linkplain MenuDemo3},
+ * which adds submenus
+ * to the help menu.
  * 
  * @author Jack Straub
  * 
- * @see MenuDemo4
+ * @see MenuDemo3
  */
-public class MenuDemo1
+public class MenuDemo4
 {
     private static final String newLine = System.lineSeparator();
     private JTextArea   textArea;
@@ -46,7 +48,7 @@ public class MenuDemo1
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new MenuDemo1().build() );
+        SwingUtilities.invokeLater( () -> new MenuDemo4().build() );
     }
     
     /**
@@ -63,7 +65,7 @@ public class MenuDemo1
      */
     private void build()
     {
-        JFrame      frame       = new JFrame( "Menu Demo 1" );
+        JFrame      frame       = new JFrame( "Menu Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         textArea = new JTextArea( 24, 80 );
         textArea.setEditable( false );
@@ -115,12 +117,16 @@ public class MenuDemo1
     private JMenu getFileMenu()
     {
         JMenu   menu    = new JMenu( "File" );
+        menu.setMnemonic( KeyEvent.VK_F );
         
-        JMenuItem   openItem    = new JMenuItem( "Open" );
-        JMenuItem   saveItem    = new JMenuItem( "Save" );
-        JMenuItem   saveAsItem  = new JMenuItem( "Save As" );
-        JSeparator  separator   = new JSeparator();
-        JMenuItem   exitItem    = new JMenuItem( "Exit" );
+        JMenuItem   openItem    = new JMenuItem( "Open", KeyEvent.VK_O );
+        JMenuItem   saveItem    = new JMenuItem( "Save", KeyEvent.VK_S );
+        JMenuItem   saveAsItem  = new JMenuItem( "Save As", KeyEvent.VK_A );
+        JMenuItem   exitItem    = new JMenuItem( "Exit", KeyEvent.VK_E );
+        
+        KeyStroke   ctrlS       =
+            KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK );
+        saveItem.setAccelerator( ctrlS );
         
         openItem.addActionListener( e -> log( "Open selected" ) );
         saveItem.addActionListener( e -> log( "Save selected" ) );
@@ -130,7 +136,6 @@ public class MenuDemo1
         menu.add( openItem );
         menu.add( saveItem );
         menu.add( saveAsItem );
-        menu.add( separator );
         menu.add( exitItem );
         return menu;
     }
@@ -143,6 +148,7 @@ public class MenuDemo1
     private JMenu getWindowMenu()
     {
         JMenu   menu    = new JMenu( "Window" );
+        menu.setMnemonic( KeyEvent.VK_W );
         
         JCheckBoxMenuItem   graphItem   =
             new JCheckBoxMenuItem( "Edit Graph Properties", false );
@@ -167,16 +173,17 @@ public class MenuDemo1
      */
     private JMenu getHelpMenu()
     {
-        JMenu       menu        = new JMenu( "Help" );
+        JMenu       menu            = new JMenu( "Help" );
+        menu.setMnemonic( KeyEvent.VK_H );
 
-        JMenuItem   topicsItem  = new JMenuItem( "Topics" );
-        JMenuItem   indexItem   = new JMenuItem( "Index" );
-        JMenuItem   aboutItem   = new JMenuItem( "About" );
+        JMenuItem   topicsItem      = new JMenuItem( "Topics" );
+        JMenu       indexMenu       = new JMenu( "Index" );
+        JMenu       quickRefMenu    = new JMenu( "Quick Reference" );
+        JMenuItem   aboutItem       = new JMenuItem( "About" );
         
         topicsItem.addActionListener( e -> log( "Showing help topics" ) );
-        indexItem.addActionListener( e -> log( "Showing help index" ) );
         String      about       =
-            "Menu Demo 1, Version 1.0.0" + newLine
+            "Menu Demo 2, Version 1.0.0" + newLine
             + "Copyright \u00a9 2026 "
             + "by Solomon Mining Associates, Ltd.";
         aboutItem.addActionListener( e -> 
@@ -188,8 +195,35 @@ public class MenuDemo1
             )
         );
         
+        JMenuItem   indexItemA  = new JMenuItem( "A-F" );
+        JMenuItem   indexItemG  = new JMenuItem( "G-L" );
+        JMenuItem   indexItemM  = new JMenuItem( "M-R" );
+        JMenuItem   indexItemS  = new JMenuItem( "S-Z" );
+        indexItemA.addActionListener( this::actionPerformed );
+        indexItemG.addActionListener( this::actionPerformed );
+        indexItemM.addActionListener( this::actionPerformed );
+        indexItemS.addActionListener( this::actionPerformed );
+        indexMenu.add( indexItemA );
+        indexMenu.add( indexItemG );
+        indexMenu.add( indexItemM );
+        indexMenu.add( indexItemS );
+        
+        JMenuItem   quickRefItem1   = 
+            new JMenuItem( "World Domination, How To" );
+        JMenuItem   quickRefItem2   = 
+            new JMenuItem( "Thermonuclear Annihilation, Avoiding" );
+        JMenuItem   quickRefItem3   = 
+            new JMenuItem( "Natural Resources, Plundering" );
+        quickRefItem1.addActionListener( this::actionPerformed );
+        quickRefItem2.addActionListener( this::actionPerformed );
+        quickRefItem3.addActionListener( this::actionPerformed );
+        quickRefMenu.add( quickRefItem1 );
+        quickRefMenu.add( quickRefItem2 );
+        quickRefMenu.add( quickRefItem3 );
+        
         menu.add( topicsItem );
-        menu.add( indexItem );
+        menu.add( indexMenu );
+        menu.add( quickRefMenu );
         menu.add( aboutItem );
         return menu;
     }
@@ -249,5 +283,15 @@ public class MenuDemo1
         dialog.pack();
         
         return dialog;
+    }
+    
+    private void actionPerformed( ActionEvent evt )
+    {
+        Object  source  = evt.getSource();
+        if ( source instanceof AbstractButton )
+        {
+            String  text    = ((AbstractButton)source).getText();
+            log( "Selected \"" + text + "\"" );
+        }
     }
 }
