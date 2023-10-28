@@ -1,8 +1,9 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
+import java.awt.Window;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -18,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
@@ -31,7 +31,7 @@ import javax.swing.border.Border;
  * 
  * @see MenuDemo4
  */
-public class MenuDemo3
+public class MenuDemo2
 {
     private static final String newLine = System.lineSeparator();
     private JTextArea   textArea;
@@ -46,7 +46,7 @@ public class MenuDemo3
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new MenuDemo3().build() );
+        SwingUtilities.invokeLater( () -> new MenuDemo2().build() );
     }
     
     /**
@@ -63,18 +63,11 @@ public class MenuDemo3
      */
     private void build()
     {
-        JFrame      frame       = new JFrame( "Menu Demo 3" );
+        JFrame      frame       = new JFrame( "Menu Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         textArea = new JTextArea( 24, 80 );
         textArea.setEditable( false );
         JScrollPane scrollPane  = new JScrollPane( textArea );
-
-        JPanel      contentPane = new JPanel( new BorderLayout() );
-        contentPane.add( scrollPane, BorderLayout.CENTER );
-        contentPane.add( getMenu(), BorderLayout.NORTH );
-        frame.setContentPane( contentPane );
-        frame.setLocation( 200, 200 );
-        frame.pack();
         
         graphDialog = getDialog( 
             frame,
@@ -89,6 +82,13 @@ public class MenuDemo3
             "LINE PROPERTIES"
         );
         lineDialog.setLocation( 300, 100 );
+
+        JPanel      contentPane = new JPanel( new BorderLayout() );
+        contentPane.add( scrollPane, BorderLayout.CENTER );
+        contentPane.add( getMenu(), BorderLayout.NORTH );
+        frame.setContentPane( contentPane );
+        frame.setLocation( 200, 200 );
+        frame.pack();
         frame.setVisible( true );
     }
     
@@ -101,6 +101,7 @@ public class MenuDemo3
     {
         JMenuBar    menuBar = new JMenuBar();
         menuBar.add( getFileMenu() );
+        menuBar.add( getEditMenu() );
         menuBar.add( getWindowMenu() );
         menuBar.add( getHelpMenu() );
         
@@ -115,17 +116,12 @@ public class MenuDemo3
     private JMenu getFileMenu()
     {
         JMenu   menu    = new JMenu( "File" );
-        menu.setMnemonic( KeyEvent.VK_F );
         
-        JMenuItem   openItem    = new JMenuItem( "Open", KeyEvent.VK_O );
-        JMenuItem   saveItem    = new JMenuItem( "Save", KeyEvent.VK_S );
-        JMenuItem   saveAsItem  = new JMenuItem( "Save As", KeyEvent.VK_A );
+        JMenuItem   openItem    = new JMenuItem( "Open" );
+        JMenuItem   saveItem    = new JMenuItem( "Save" );
+        JMenuItem   saveAsItem  = new JMenuItem( "Save As" );
         JSeparator  separator   = new JSeparator();
-        JMenuItem   exitItem    = new JMenuItem( "Exit", KeyEvent.VK_E );
-        
-        KeyStroke   ctrlS       =
-            KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK );
-        saveItem.setAccelerator( ctrlS );
+        JMenuItem   exitItem    = new JMenuItem( "Exit" );
         
         openItem.addActionListener( e -> log( "Open selected" ) );
         saveItem.addActionListener( e -> log( "Save selected" ) );
@@ -140,6 +136,27 @@ public class MenuDemo3
         return menu;
     }
     
+    private JMenu getEditMenu()
+    {
+        JMenu       menu        = new JMenu( "Edit" );
+        JMenuItem   copyItem    = new JMenuItem( "Copy" );
+        JMenuItem   pasteItem   = new JMenuItem( "Paste" );
+        JMenuItem   scaleItem   = new JMenuItem( "Scale" );
+        JMenuItem   cropItem    = new JMenuItem( "Crop" );
+        
+        copyItem.addActionListener( e -> log( "Copy selected" ) );
+        pasteItem.addActionListener( e -> log( "Paste selected" ) );
+        scaleItem.addActionListener( e -> log( "Scale selected" ) );
+        cropItem.addActionListener( e -> log( "Crop selected" ) );
+        
+        menu.add( copyItem );
+        menu.add( pasteItem );
+        menu.add( scaleItem );
+        menu.add( cropItem );
+        
+        return menu;
+    }
+    
     /**
      * Assembles the application's window menu.
      * 
@@ -148,7 +165,6 @@ public class MenuDemo3
     private JMenu getWindowMenu()
     {
         JMenu   menu    = new JMenu( "Window" );
-        menu.setMnemonic( KeyEvent.VK_W );
         
         JCheckBoxMenuItem   graphItem   =
             new JCheckBoxMenuItem( "Edit Graph Properties", false );
@@ -163,6 +179,8 @@ public class MenuDemo3
         menu.add( graphItem );
         menu.add( lineItem );
         
+        addVisibilityListener( graphDialog, graphItem );
+        addVisibilityListener( lineDialog, lineItem );
         return menu;
     }
     
@@ -174,7 +192,6 @@ public class MenuDemo3
     private JMenu getHelpMenu()
     {
         JMenu       menu        = new JMenu( "Help" );
-        menu.setMnemonic( KeyEvent.VK_H );
 
         JMenuItem   topicsItem  = new JMenuItem( "Topics" );
         JMenuItem   indexItem   = new JMenuItem( "Index" );
@@ -211,6 +228,36 @@ public class MenuDemo3
     private void log( String message )
     {
         textArea.append( message + newLine );
+    }
+    
+    /**
+     * Synchronize the visibility
+     * of a given Window
+     * with a given JMenuItem.
+     * When the Window becomes visible
+     * ("is shown")
+     * the item is selected,
+     * when the Window loses visibility
+     * ("is hidden")
+     * the item is deselected.
+     * 
+     * @param window    the given Window
+     * @param item      the given JMenuItem
+     */
+    private static void addVisibilityListener( Window window, JMenuItem item )
+    {
+        window.addComponentListener( new ComponentAdapter() {
+            @Override
+            public void componentHidden( ComponentEvent evt )
+            {
+                item.setSelected( false );
+            }
+            @Override
+            public void componentShown( ComponentEvent evt )
+            {
+                item.setSelected( true );
+            }
+        });
     }
     
     /**

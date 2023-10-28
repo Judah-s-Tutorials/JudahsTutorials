@@ -1,15 +1,8 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -18,10 +11,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTextArea;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 
 /**
  * Application that demonstrates
@@ -35,8 +25,6 @@ public class MenuDemo1
 {
     private static final String newLine = System.lineSeparator();
     private JTextArea   textArea;
-    private JDialog     graphDialog;
-    private JDialog     lineDialog;
     
     /**
      * Application entry point.
@@ -75,20 +63,6 @@ public class MenuDemo1
         frame.setContentPane( contentPane );
         frame.setLocation( 200, 200 );
         frame.pack();
-        
-        graphDialog = getDialog( 
-            frame,
-            "Set Graph Properties", 
-            "GRAPH PROPERTIES"
-        );
-        graphDialog.setLocation( 100, 100 );
-        
-        lineDialog = getDialog( 
-            frame,
-            "Set Line Properties", 
-            "LINE PROPERTIES"
-        );
-        lineDialog.setLocation( 300, 100 );
         frame.setVisible( true );
     }
     
@@ -101,7 +75,7 @@ public class MenuDemo1
     {
         JMenuBar    menuBar = new JMenuBar();
         menuBar.add( getFileMenu() );
-        menuBar.add( getWindowMenu() );
+        menuBar.add( getEditMenu() );
         menuBar.add( getHelpMenu() );
         
         return menuBar;
@@ -135,27 +109,23 @@ public class MenuDemo1
         return menu;
     }
     
-    /**
-     * Assembles the application's window menu.
-     * 
-     * @return the application's window menu
-     */
-    private JMenu getWindowMenu()
+    private JMenu getEditMenu()
     {
-        JMenu   menu    = new JMenu( "Window" );
+        JMenu       menu        = new JMenu( "Edit" );
+        JMenuItem   copyItem    = new JMenuItem( "Copy" );
+        JMenuItem   pasteItem   = new JMenuItem( "Paste" );
+        JMenuItem   scaleItem   = new JMenuItem( "Scale" );
+        JMenuItem   cropItem    = new JMenuItem( "Crop" );
         
-        JCheckBoxMenuItem   graphItem   =
-            new JCheckBoxMenuItem( "Edit Graph Properties", false );
-        JCheckBoxMenuItem   lineItem    =
-            new JCheckBoxMenuItem( "Edit Line Properties", false );
-        graphItem.addItemListener( e -> 
-            graphDialog.setVisible( graphItem.isSelected() )
-        );
-        lineItem.addItemListener( e -> 
-            lineDialog.setVisible( lineItem.isSelected() )
-        );
-        menu.add( graphItem );
-        menu.add( lineItem );
+        copyItem.addActionListener( e -> log( "Copy selected" ) );
+        pasteItem.addActionListener( e -> log( "Paste selected" ) );
+        scaleItem.addActionListener( e -> log( "Scale selected" ) );
+        cropItem.addActionListener( e -> log( "Crop selected" ) );
+        
+        menu.add( copyItem );
+        menu.add( pasteItem );
+        menu.add( scaleItem );
+        menu.add( cropItem );
         
         return menu;
     }
@@ -204,50 +174,5 @@ public class MenuDemo1
     private void log( String message )
     {
         textArea.append( message + newLine );
-    }
-    
-    /**
-     * Creates a non-modal dialog
-     * containing text
-     * and a button.
-     * Pushing the button
-     * closes the dialog.
-     * 
-     * @param owner the owner of the dialog
-     * @param title the dialog title
-     * @param text  the text to display in the dialog
-     * 
-     * @return  the created dialog
-     */
-    private JDialog getDialog( JFrame owner, String title, String text )
-    {
-        JDialog dialog      = new JDialog( owner, title );
-        JPanel  contentPane = new JPanel( new BorderLayout() );
-        String  labelText   = 
-            "<html><p style="
-            + "'font-size: 300%;'>" 
-            + text
-            + "</p></html>";
-        JLabel  label       = new JLabel( labelText );
-        JPanel  centerPanel = new JPanel();
-        Border  outer       =
-            BorderFactory.createBevelBorder( BevelBorder.RAISED );
-        Border  inner       = 
-            BorderFactory.createEmptyBorder( 15, 15, 15, 15 );
-        Border  border      =
-            BorderFactory.createCompoundBorder( outer, inner );
-        centerPanel.setBorder( border );
-        centerPanel.add( label );
-        contentPane.add( centerPanel, BorderLayout.CENTER );
-        
-        JPanel  buttonPanel = new JPanel();
-        JButton closeButton = new JButton( "Close" );
-        closeButton.addActionListener( e -> dialog.setVisible( false ) );
-        buttonPanel.add( closeButton );
-        contentPane.add( buttonPanel, BorderLayout.SOUTH );
-        dialog.setContentPane( contentPane );
-        dialog.pack();
-        
-        return dialog;
     }
 }

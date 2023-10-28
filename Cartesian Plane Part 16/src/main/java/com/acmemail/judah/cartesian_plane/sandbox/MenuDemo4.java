@@ -65,7 +65,7 @@ public class MenuDemo4
      */
     private void build()
     {
-        JFrame      frame       = new JFrame( "Menu Demo 2" );
+        JFrame      frame       = new JFrame( "Menu Demo 4" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         textArea = new JTextArea( 24, 80 );
         textArea.setEditable( false );
