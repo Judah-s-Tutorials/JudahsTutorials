@@ -244,7 +244,8 @@ public class MenuDemo2
      * @param window    the given Window
      * @param item      the given JMenuItem
      */
-    private static void addVisibilityListener( Window window, JMenuItem item )
+    private static void 
+    addVisibilityListener( Window window, JMenuItem item )
     {
         window.addComponentListener( new ComponentAdapter() {
             @Override

@@ -101,6 +101,7 @@ public class MenuDemo3
     {
         JMenuBar    menuBar = new JMenuBar();
         menuBar.add( getFileMenu() );
+        menuBar.add( getEditMenu() );
         menuBar.add( getWindowMenu() );
         menuBar.add( getHelpMenu() );
         
@@ -140,6 +141,44 @@ public class MenuDemo3
         return menu;
     }
     
+    /**
+     * Assembles the application's edit menu.
+     * 
+     * @return  the application's edit menu
+     */
+    private JMenu getEditMenu()
+    {
+        JMenu       menu        = new JMenu( "Edit" );
+        menu.setMnemonic( KeyEvent.VK_E );
+        JMenuItem   copyItem    = 
+            new JMenuItem( "Copy", KeyEvent.VK_C );
+        JMenuItem   pasteItem   = 
+            new JMenuItem( "Paste", KeyEvent.VK_P );
+        JMenuItem   scaleItem   = 
+            new JMenuItem( "Scale", KeyEvent.VK_L );
+        JMenuItem   cropItem    = 
+            new JMenuItem( "Crop", KeyEvent.VK_R );
+        
+        copyItem.addActionListener( e -> log( "Copy selected" ) );
+        pasteItem.addActionListener( e -> log( "Paste selected" ) );
+        scaleItem.addActionListener( e -> log( "Scale selected" ) );
+        cropItem.addActionListener( e -> log( "Crop selected" ) );
+        
+        KeyStroke   ctrlL       =
+            KeyStroke.getKeyStroke( KeyEvent.VK_L, ActionEvent.CTRL_MASK );
+        scaleItem.setAccelerator( ctrlL );
+        KeyStroke   ctrlR       =
+            KeyStroke.getKeyStroke( KeyEvent.VK_R, ActionEvent.CTRL_MASK );
+        cropItem.setAccelerator( ctrlR );
+
+        menu.add( copyItem );
+        menu.add( pasteItem );
+        menu.add( scaleItem );
+        menu.add( cropItem );
+        
+        return menu;
+    }
+
     /**
      * Assembles the application's window menu.
      * 
