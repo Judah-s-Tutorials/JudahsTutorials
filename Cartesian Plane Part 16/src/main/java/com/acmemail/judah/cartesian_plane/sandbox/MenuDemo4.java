@@ -173,12 +173,7 @@ public class MenuDemo4
      */
     private JMenu getHelpMenu()
     {
-        JMenu       menu            = new JMenu( "Help" );
-        menu.setMnemonic( KeyEvent.VK_H );
-
         JMenuItem   topicsItem      = new JMenuItem( "Topics" );
-        JMenu       indexMenu       = new JMenu( "Index" );
-        JMenu       quickRefMenu    = new JMenu( "Quick Reference" );
         JMenuItem   aboutItem       = new JMenuItem( "About" );
         
         topicsItem.addActionListener( e -> log( "Showing help topics" ) );
@@ -195,6 +190,8 @@ public class MenuDemo4
             )
         );
         
+        // Create the index submenu
+        JMenu       indexMenu       = new JMenu( "Index" );
         JMenuItem   indexItemA  = new JMenuItem( "A-F" );
         JMenuItem   indexItemG  = new JMenuItem( "G-L" );
         JMenuItem   indexItemM  = new JMenuItem( "M-R" );
@@ -208,6 +205,8 @@ public class MenuDemo4
         indexMenu.add( indexItemM );
         indexMenu.add( indexItemS );
         
+        // Create the quick-reference submenu
+        JMenu       quickRefMenu    = new JMenu( "Quick Reference" );
         JMenuItem   quickRefItem1   = 
             new JMenuItem( "World Domination, How To" );
         JMenuItem   quickRefItem2   = 
@@ -221,6 +220,9 @@ public class MenuDemo4
         quickRefMenu.add( quickRefItem2 );
         quickRefMenu.add( quickRefItem3 );
         
+        // Create the principal help menu
+        JMenu       menu            = new JMenu( "Help" );
+        menu.setMnemonic( KeyEvent.VK_H );
         menu.add( topicsItem );
         menu.add( indexMenu );
         menu.add( quickRefMenu );

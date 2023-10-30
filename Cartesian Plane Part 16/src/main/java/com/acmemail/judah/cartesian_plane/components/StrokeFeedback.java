@@ -14,16 +14,16 @@ import javax.swing.JComponent;
 /**
  * This component
  * provides visual feedback
- * about the selected length
+ * about the weight (stroke)
  * of a line.
  * The feedback
  * consists of a horizontal line
- * drawn to a length
+ * drawn with a weight
  * provided by the user.
  * When instantiating this component
  * the user provides a <em>Supplier&lt;Number&gt;</em>
  * which supplies
- * the desired length of the line.
+ * the desired weight of the line.
  * The <em>Supplier</em> is consulted
  * each time this component's
  * <em>paintComponent</em> method is invoked.
@@ -32,11 +32,11 @@ import javax.swing.JComponent;
  * call this component's 
  * <em>repaint</em> method.
  * <p>
- * The weight 
+ * The length  
  * of the horizontal line
- * can be changed
- * via the component's
- * <em>setWeight</em> method.
+ * is calculated
+ * as a percentage
+ * of the component's width.
  * The foreground and background colors
  * can be set
  * via the superclass's
@@ -50,69 +50,58 @@ import javax.swing.JComponent;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class LengthFeedback extends JComponent
+public class StrokeFeedback extends JComponent
 {
     /** The default background color for this component. */
     private static final Color  defBackground   = Color.WHITE;
     /** The default foreground color for this component. */
     private static final Color  defForeground   = Color.BLACK;
-    /** The default weight for this component. */
-    private static final float  defWeight       = 3;
+    /** 
+     * The percentage of the width of the component
+     * occupied by the horizontal feedback line.
+     */
+    public static final float   percentWidth    = .75f;
     
     /** Contains the coordinates of the horizontal feedback line. */
     private final Line2D            line    = new Line2D.Double();
-    /** Supplies the desired length of the horizontal feedback line. */
-    private final DoubleSupplier    lengthSupplier;
-    /** Contains the weight of the horizontal feedback line. */
-    private Stroke                  stroke;
+    /** Supplies the desired weight of the horizontal feedback line. */
+    private final DoubleSupplier    weightSupplier;
     
     /**
      * Constructor.
      * Determines the source
-     * for the length 
+     * for the weight 
      * of the horizontal feedback line.
      * 
      * @param valueSource   
-     *      source for the length of the horizontal feedback line
+     *      source for the weight of the horizontal feedback line
      */
-    public LengthFeedback( DoubleSupplier valueSource )
+    public StrokeFeedback( DoubleSupplier valueSource )
     {
-        lengthSupplier = valueSource;
+        weightSupplier = valueSource;
         setBackground( defBackground );
         setForeground( defForeground );
-        setWeight( defWeight );
         setBorder( BorderFactory.createLineBorder( Color.BLACK ) );
-    }
-
-    /**
-     * Sets the weight
-     * of the horizontal feedback line
-     * to the given value.
-     * Automatically calls
-     * this component's repaint method.
-     * 
-     * @param weight    the given value
-     */
-    public void setWeight( float weight )
-    {
-        stroke = new BasicStroke( weight );
     }
     
     @Override
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        Graphics2D  gtx     = (Graphics2D)graphics.create();
-        int         width   = getWidth();
-        int         height  = getHeight();
-        double      length  = lengthSupplier.getAsDouble();
-        double      xco1    = (width - length) / 2;
-        double      xco2    = xco1 + length;
-        double      yco     = height / 2;
+        Graphics2D  gtx         = (Graphics2D)graphics.create();
+        int         width       = getWidth();
+        int         height      = getHeight();
+        double      weight      = weightSupplier.getAsDouble();
+        double      centerXco   = width / 2d;
+        double      xcoOffset   = (width * percentWidth) / 2;
+        double      xco1        = centerXco - xcoOffset;
+        double      xco2        = centerXco + xcoOffset;
+        double      yco         = height / 2;
         
         gtx.setColor( getBackground() );
         gtx.fillRect( 0, 0, width, height );
         
+        Stroke      stroke      = new BasicStroke( (float)weight );
         gtx.setColor( getForeground() );
         gtx.setStroke( stroke );
         line.setLine( xco1, yco, xco2, yco );
