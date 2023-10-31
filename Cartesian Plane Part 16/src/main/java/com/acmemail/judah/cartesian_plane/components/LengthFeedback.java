@@ -117,6 +117,7 @@ public class LengthFeedback extends JComponent
         gtx.setStroke( stroke );
         line.setLine( xco1, yco, xco2, yco );
         gtx.draw( line );
+        gtx.dispose();
     }
     
     @Override

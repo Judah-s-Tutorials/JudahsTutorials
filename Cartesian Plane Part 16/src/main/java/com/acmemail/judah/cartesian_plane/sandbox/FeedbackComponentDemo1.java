@@ -66,7 +66,8 @@ public class FeedbackComponentDemo1
      */
     public FeedbackComponentDemo1()
     {
-        JFrame          frame           = new JFrame( "FeedbackComponent Demo 1" );
+        JFrame          frame           = 
+            new JFrame( "FeedbackComponent Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel          contentPane     = 
             new JPanel( new GridLayout( 3, 3, 3, 3 ) );
@@ -101,13 +102,17 @@ public class FeedbackComponentDemo1
             strokeControl.getSelectedProperty()
         );
         strokeControl.getButtons().stream()
-            .forEach( b -> b.addActionListener( e -> strokeFB.repaint() ) );
+            .forEach( b -> b.addActionListener( 
+                e -> strokeFB.repaint() 
+            )
+        );
         strokeControl.selectIndex( 0 );
         contentPane.add( strokeLabel );
         contentPane.add( strokePanel );
         contentPane.add( strokeFB );
         
-        Border  emptyBorder = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
+        Border  emptyBorder = 
+            BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
         contentPane.setBorder( emptyBorder );
         frame.setContentPane( contentPane );
         frame.pack();

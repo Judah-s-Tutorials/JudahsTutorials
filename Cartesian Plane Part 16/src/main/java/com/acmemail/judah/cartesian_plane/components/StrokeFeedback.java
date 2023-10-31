@@ -93,10 +93,10 @@ public class StrokeFeedback extends JComponent
         int         height      = getHeight();
         double      weight      = weightSupplier.getAsDouble();
         double      centerXco   = width / 2d;
+        double      yco         = height / 2;
         double      xcoOffset   = (width * percentWidth) / 2;
         double      xco1        = centerXco - xcoOffset;
         double      xco2        = centerXco + xcoOffset;
-        double      yco         = height / 2;
         
         gtx.setColor( getBackground() );
         gtx.fillRect( 0, 0, width, height );
@@ -106,6 +106,7 @@ public class StrokeFeedback extends JComponent
         gtx.setStroke( stroke );
         line.setLine( xco1, yco, xco2, yco );
         gtx.draw( line );
+        gtx.dispose();
     }
     
     @Override

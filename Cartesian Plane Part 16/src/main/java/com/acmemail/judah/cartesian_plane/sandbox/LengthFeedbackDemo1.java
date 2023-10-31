@@ -59,17 +59,20 @@ public class LengthFeedbackDemo1
      */
     public LengthFeedbackDemo1()
     {
-        JFrame          frame       = new JFrame( "LengthFeedback Demo 1" );
+        JFrame          frame       = 
+            new JFrame( "LengthFeedback Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel          contentPane = 
             new JPanel( new GridLayout( 1, 3, 3, 3 ) );
         JLabel          label       = 
             new JLabel( "Length", SwingConstants.RIGHT );
-        LengthFeedback  lengthFB    = 
-            new LengthFeedback( () -> numberModel.getNumber().doubleValue() );
+        LengthFeedback  lengthFB    = new LengthFeedback( () -> 
+            numberModel.getNumber().doubleValue()
+        );
         spinner.addChangeListener( e -> lengthFB.repaint() );
         
-        Border  emptyBorder = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
+        Border  emptyBorder = 
+            BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
         contentPane.setBorder( emptyBorder );
         contentPane.add( label );
         contentPane.add( spinner );

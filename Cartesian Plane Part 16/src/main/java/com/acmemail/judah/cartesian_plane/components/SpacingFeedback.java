@@ -134,5 +134,6 @@ public class SpacingFeedback extends JComponent
         right.setLine( xcoRight, ycoTop, xcoRight, ycoBottom );
         gtx.draw( left );
         gtx.draw( right );
+        gtx.dispose();
     }
 }
