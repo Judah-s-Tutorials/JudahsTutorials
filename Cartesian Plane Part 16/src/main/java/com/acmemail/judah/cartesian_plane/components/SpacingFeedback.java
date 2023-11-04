@@ -109,6 +109,18 @@ public class SpacingFeedback extends JComponent
         stroke = new BasicStroke( weight );
     }
     
+    /**
+     * Gets the weight
+     * of the vertical feedback lines.
+     * 
+     * @return  the weight of the vertical feedback lines
+     */
+    public float getWeight()
+    {
+        float   weight  = ((BasicStroke)stroke).getLineWidth();
+        return weight;
+    }
+    
     @Override
     public void paintComponent( Graphics graphics )
     {

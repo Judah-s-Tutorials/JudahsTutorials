@@ -26,6 +26,7 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -150,6 +151,7 @@ public class LinePanel extends JPanel
         private static final String stroke      = "Stroke";
         private static final String length      = "Length";
         private static final String spacing     = "Spacing";
+        private static final String draw        = "Draw";
         
         private final ColorEditor   colorEditor     = new ColorEditor();
         private final JLabel        strokeLabel     = 
@@ -160,12 +162,15 @@ public class LinePanel extends JPanel
             new JLabel( length, SwingConstants.RIGHT );
         private final JButton       colorButton     = 
             colorEditor.getColorButton();// JButton( color );
+        private final JLabel        drawLabel       = 
+            new JLabel( draw, SwingConstants.RIGHT );
         
         private final JSpinner      strokeSpinner   = getDefSpinner();
         private final JSpinner      lengthSpinner   = getDefSpinner();
         private final JSpinner      spacingSpinner  = getDefSpinner();         
         private final JTextField    colorField      = 
             colorEditor.getTextComponent();// JTextField();
+        private final JCheckBox     drawToggle      = new JCheckBox();
         
         private final StrokeFeedback  strokeFB      = 
             new StrokeFeedback( strokeSpinner, strokeLabel );
@@ -178,7 +183,7 @@ public class LinePanel extends JPanel
         
         public PropertiesPanel()
         {
-            super( new GridLayout( 4, 3, 5, 3 ) );
+            super( new GridLayout( 5, 3, 5, 3 ) );
             
             // sanity check; radio buttons must be created prior to
             // this class being instantiated.
@@ -209,6 +214,10 @@ public class LinePanel extends JPanel
             colorField.setName( COLOR_FIELD_CN );
                 //colorField.addActionListener( e -> colorFB.repaint() );
                 //colorButton.addActionListener( e -> showColorDialog() );
+            
+            add( drawLabel );
+            add( drawToggle );
+            add( new JLabel() ); // placeholder
             
             lineGroup.getElements()
                 .asIterator()

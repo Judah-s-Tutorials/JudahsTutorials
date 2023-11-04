@@ -98,6 +98,18 @@ public class LengthFeedback extends JComponent
         stroke = new BasicStroke( weight );
     }
     
+    /**
+     * Gets the weight
+     * of the horizontal feedback line.
+     * 
+     * @return  the weight of the horizontal feedback line
+     */
+    public float getWeight()
+    {
+        float   weight  = ((BasicStroke)stroke).getLineWidth();
+        return weight;
+    }
+    
     @Override
     public void paintComponent( Graphics graphics )
     {
