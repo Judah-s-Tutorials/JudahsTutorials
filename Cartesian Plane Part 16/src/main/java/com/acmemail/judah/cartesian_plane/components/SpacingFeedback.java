@@ -54,14 +54,8 @@ import javax.swing.JComponent;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class SpacingFeedback extends JComponent
+public class SpacingFeedback extends Feedback
 {
-    /** The default background color for this component. */
-    private static final Color  defBackground   = Color.WHITE;
-    /** The default foreground color for this component. */
-    private static final Color  defForeground   = Color.BLACK;
-    /** The default weight for this component. */
-    private static final float  defWeight       = 3;
     /** 
      * The proportion of the height of the component that
      * the vertical feedback lines should occupy.
@@ -88,11 +82,8 @@ public class SpacingFeedback extends JComponent
      */
     public SpacingFeedback( DoubleSupplier valueSource )
     {
+        super();
         spacingSupplier = valueSource;
-        setBackground( defBackground );
-        setForeground( defForeground );
-        setWeight( defWeight );
-        setBorder( BorderFactory.createLineBorder( Color.BLACK ) );
     }
 
     /**
@@ -106,19 +97,8 @@ public class SpacingFeedback extends JComponent
      */
     public void setWeight( float weight )
     {
+        super.setWeight( weight );
         stroke = new BasicStroke( weight );
-    }
-    
-    /**
-     * Gets the weight
-     * of the vertical feedback lines.
-     * 
-     * @return  the weight of the vertical feedback lines
-     */
-    public float getWeight()
-    {
-        float   weight  = ((BasicStroke)stroke).getLineWidth();
-        return weight;
     }
     
     @Override

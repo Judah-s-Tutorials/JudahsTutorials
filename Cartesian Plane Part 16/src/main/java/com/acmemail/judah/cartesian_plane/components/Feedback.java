@@ -1,12 +1,7 @@
 package com.acmemail.judah.cartesian_plane.components;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
-import java.awt.geom.Line2D;
-import java.util.function.DoubleSupplier;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
@@ -50,14 +45,20 @@ import javax.swing.JComponent;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class LengthFeedback extends Feedback
-{    
-    /** Contains the coordinates of the horizontal feedback line. */
-    private final Line2D            line    = new Line2D.Double();
-    /** Supplies the desired length of the horizontal feedback line. */
-    private final DoubleSupplier    lengthSupplier;
-    /** Contains the weight of the horizontal feedback line. */
-    private Stroke                  stroke;
+public abstract class Feedback extends JComponent
+{
+    /** The default background color for this component. */
+    private static final Color  defBackground   = Color.WHITE;
+    /** The default foreground color for this component. */
+    private static final Color  defForeground   = Color.BLACK;
+    /** The default weight for this component. */
+    private static final float  defWeight       = 3;
+    
+    /** 
+     * The weight of lines drawn in this component.
+     * Not used by all subclasses.
+     */
+    private float   weight  = defWeight;
     
     /**
      * Constructor.
@@ -68,15 +69,17 @@ public class LengthFeedback extends Feedback
      * @param valueSource   
      *      source for the length of the horizontal feedback line
      */
-    public LengthFeedback( DoubleSupplier valueSource )
+    public Feedback()
     {
-        super();
-        lengthSupplier = valueSource;
+        setBackground( defBackground );
+        setForeground( defForeground );
+        setWeight( defWeight );
+        setBorder( BorderFactory.createLineBorder( Color.BLACK ) );
     }
 
     /**
      * Sets the weight
-     * of the horizontal feedback line
+     * of the lines drawn by this component
      * to the given value.
      * Automatically calls
      * this component's repaint method.
@@ -85,29 +88,30 @@ public class LengthFeedback extends Feedback
      */
     public void setWeight( float weight )
     {
-        super.setWeight( weight );
-        stroke = new BasicStroke( weight );
+        this.weight = weight;
+    }
+    
+    /**
+     * Gets the weight
+     * of the lines
+     * drawn by this component.
+     * 
+     * @return  the weight feedback lines
+     */
+    public float getWeight()
+    {
+        return weight;
     }
     
     @Override
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        Graphics2D  gtx     = (Graphics2D)graphics.create();
-        int         width   = getWidth();
-        int         height  = getHeight();
-        double      length  = lengthSupplier.getAsDouble();
-        double      xco1    = (width - length) / 2;
-        double      xco2    = xco1 + length;
-        double      yco     = height / 2;
-        
-        gtx.setColor( getBackground() );
-        gtx.fillRect( 0, 0, width, height );
-        
-        gtx.setColor( getForeground() );
-        gtx.setStroke( stroke );
-        line.setLine( xco1, yco, xco2, yco );
-        gtx.draw( line );
-        gtx.dispose();
+    }
+    
+    @Override
+    public boolean isOpaque()
+    {
+        return true;
     }
 }

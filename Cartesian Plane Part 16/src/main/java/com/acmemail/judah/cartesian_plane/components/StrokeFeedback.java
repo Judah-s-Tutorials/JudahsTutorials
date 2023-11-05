@@ -50,12 +50,8 @@ import javax.swing.JComponent;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class StrokeFeedback extends JComponent
+public class StrokeFeedback extends Feedback
 {
-    /** The default background color for this component. */
-    private static final Color  defBackground   = Color.WHITE;
-    /** The default foreground color for this component. */
-    private static final Color  defForeground   = Color.BLACK;
     /** 
      * The percentage of the width of the component
      * occupied by the horizontal feedback line.
@@ -78,10 +74,8 @@ public class StrokeFeedback extends JComponent
      */
     public StrokeFeedback( DoubleSupplier valueSource )
     {
+        super();
         weightSupplier = valueSource;
-        setBackground( defBackground );
-        setForeground( defForeground );
-        setBorder( BorderFactory.createLineBorder( Color.BLACK ) );
     }
     
     @Override
@@ -107,11 +101,5 @@ public class StrokeFeedback extends JComponent
         line.setLine( xco1, yco, xco2, yco );
         gtx.draw( line );
         gtx.dispose();
-    }
-    
-    @Override
-    public boolean isOpaque()
-    {
-        return true;
     }
 }

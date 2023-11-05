@@ -21,15 +21,17 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.components.Feedback;
-import com.acmemail.judah.cartesian_plane.components.LengthFeedback;
+import com.acmemail.judah.cartesian_plane.components.SpacingFeedback;
 
-public class FBCompTA
+public class FBCompTA2
 {
     /** The path to the directory for storing test data. */
     private static final String dataPath    =
-        "TestDataDir/Feedback/Length";
+        "TestDataDir/Feedback/Spacing";
+
+    // #2
     /** The name of the file used to store test data. */
-    private static final String dataFile    = "LengthData.ser";
+    private static final String dataFile    = "SpacingData.ser";
     /** The path to the file used to store test data. */
     private final File      filePath        = makeFilePath();
     /** The dimensions of the feedback component. */
@@ -42,9 +44,10 @@ public class FBCompTA
      * @see #nextActionPerformed(ActionEvent)
      */
     private double          currVal             = 1;
+    // #3
     /** The feedback component undergoing test. */
     private final Feedback          feedback    = 
-        new LengthFeedback( () -> currVal );
+        new SpacingFeedback( () -> currVal );
     
     /**
      * Application entry point.
@@ -55,7 +58,7 @@ public class FBCompTA
     public static void main(String[] args)
     {
         SwingUtilities.invokeLater( () -> 
-            new FBCompTA()
+            new FBCompTA2()
         );
     }
     
@@ -63,11 +66,12 @@ public class FBCompTA
      * Constructor;
      * creates and shows the GUI.
      */
-    public FBCompTA()
+    public FBCompTA2()
     {
         feedback.setPreferredSize( compSize );
         
-        String  title   = "Feedback Component Test Assistant";
+        // #1
+        String  title   = "Spacing Feedback Component Test Assistant";
         JFrame  frame   = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  contentPane = new JPanel( new BorderLayout() );
