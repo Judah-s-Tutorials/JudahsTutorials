@@ -1,15 +1,11 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.util.function.DoubleSupplier;
-
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 
 /**
  * This component
@@ -101,5 +97,11 @@ public class StrokeFeedback extends Feedback
         line.setLine( xco1, yco, xco2, yco );
         gtx.draw( line );
         gtx.dispose();
+    }
+    
+    @Override
+    public void setWeight( float weight )
+    {
+        super.setWeight( -1 );
     }
 }

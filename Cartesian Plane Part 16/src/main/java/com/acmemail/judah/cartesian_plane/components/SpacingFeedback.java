@@ -1,15 +1,11 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.util.function.DoubleSupplier;
-
-import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 
 /**
  * This component
@@ -95,10 +91,15 @@ public class SpacingFeedback extends Feedback
      * 
      * @param weight    the given value
      */
+    @Override
     public void setWeight( float weight )
     {
         super.setWeight( weight );
-        stroke = new BasicStroke( weight );
+        stroke = new BasicStroke(
+            getWeight(),
+            BasicStroke.CAP_BUTT,
+            BasicStroke.JOIN_ROUND
+        );
     }
     
     @Override

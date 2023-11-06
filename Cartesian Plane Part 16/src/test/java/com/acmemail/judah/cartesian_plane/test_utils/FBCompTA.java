@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.event.ActionEvent;
@@ -12,12 +13,17 @@ import java.io.ObjectOutputStream;
 import java.util.function.DoubleSupplier;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.components.Feedback;
@@ -68,12 +74,37 @@ public abstract class FBCompTA
      * value is increased each time a new data file is created.
      */
     private int                 fileNameSeq     = 1;
+    /** The current data file. */
+    private File                dataFile;
     
     /** The minimum property value to feed to the feedback component. */
     private static double       minVal          = 1;
     /** The maximum property value to feed to the feedback component. */
     private static double       maxVal          = 500;
+    /** Model encapsulated by the value spinner. */
+    private final SpinnerNumberModel    valModel    = 
+        new SpinnerNumberModel( 10, minVal, maxVal, 1 );
+    /** Spinner that controls the value of the property under test. */
+    private final JSpinner              valSpinner  = 
+        new JSpinner( valModel );
     
+    /** The minimum weight to feed to the feedback component. */
+    private static double       minWeight       = 1;
+    /** The maximum weight to feed to the feedback component. */
+    private static double       maxWeight       = 500;
+    /** Model encapsulated by the weight spinner. */
+    private final SpinnerNumberModel    weightModel  = 
+        new SpinnerNumberModel( 1, minWeight, maxWeight, 1 );
+    /** Spinner that controls the weight of the property under test. */
+    private final JSpinner              weightSpinner = 
+        new JSpinner( weightModel );
+    
+    private final JLabel    dirDescriptor       = new JLabel();
+    private final JLabel    fileDescriptor      = new JLabel();
+    private final JLabel    classDescriptor     = new JLabel();
+    private final JLabel    valueDescriptor     = new JLabel();
+    private final JLabel    weightDescriptor    = new JLabel();
+
     /**
      * Contains the current property value to be applied to the feedback
      * component. This value is updated every time the Increase
@@ -90,25 +121,29 @@ public abstract class FBCompTA
      * Constructor;
      * creates and shows the GUI.
      */
-    public FBCompTA( String subdir, Class<Feedback> subjectClass )
+    public FBCompTA( String subdir )
     {
         dataSubdir = subdir;
         dataFileDir = makeFilePath();
-        feedback = getFeedbackInstance( () -> currVal );
+        feedback = getFeedbackInstance( () -> 
+            valModel.getNumber().doubleValue()
+        );
         feedback.setPreferredSize( compSize );
         
         String  title   = "Feedback Component Test Assistant";
         JFrame  frame   = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  contentPane = new JPanel( new BorderLayout() );
-        contentPane.add( getButtonPanel(), BorderLayout.SOUTH );
+        contentPane.add( getControlPanel(), BorderLayout.SOUTH );
+        contentPane.add( getDescriptorPanel(), BorderLayout.CENTER );
         
         frame.setContentPane( contentPane );
         frame.pack();
         frame.setLocation( 100, 100 );;
         frame.setVisible( true );
         
-        makeComponentDialog( feedback );
+        makeComponentDialog( frame, feedback );
+        getDataFile();
     }
     
     /**
@@ -123,7 +158,7 @@ public abstract class FBCompTA
      *      File representing the data file
      *      created by this application
      */
-    public File getDataFile()
+    public void getDataFile()
     {
         String  name    = String.format( 
             fileNameFmt, 
@@ -131,8 +166,8 @@ public abstract class FBCompTA
             fileNameSeq++,
             fileNameExt
         );
-        File    file    = new File( dataFileDir, name );
-        return file;
+        dataFile = new File( dataFileDir, name );
+        fileDescriptor.setText( dataFile.getName() );
     }
     
     private File makeFilePath()
@@ -145,77 +180,134 @@ public abstract class FBCompTA
     
     /**
      * Creates the panel
-     * containing the buttons
+     * containing the components
      * for controlling
      * this application.
      * 
      * @return  the panel containing this application's control buttons
      */
-    private JPanel getButtonPanel()
+    private JPanel getControlPanel()
     {
-        JButton     incr        = new JButton( "Incr" );
-        JButton     decr        = new JButton( "Decr" );
         JButton     save        = new JButton( "Save" );
         JButton     exit        = new JButton( "Exit" );
         
-        incr.addActionListener( this::incrActionPerformed );
-        decr.addActionListener( this::decrActionPerformed );
+        valSpinner.addChangeListener( e -> feedback.repaint() );
+        valSpinner.addChangeListener( e -> {
+            float   val = valModel.getNumber().floatValue();
+            valueDescriptor.setText( "" + val );
+        });
+        
+        float       currWeight  = feedback.getWeight();
+        weightSpinner.addChangeListener( e -> {
+            float   weight  = weightModel.getNumber().floatValue();
+            weightDescriptor.setText( "" + weight );
+            feedback.setWeight( weight );
+            feedback.repaint();
+        });
+        if ( currWeight < 0 )
+            weightSpinner.setEnabled( false );
+        else
+            weightModel.setValue( currWeight );
         save.addActionListener( this::saveActionPerformed );
         exit.addActionListener( e -> System.exit( 0 ) );
         
+        Dimension   spacing     = new Dimension( 3, 0 );
         JPanel      panel       = new JPanel();
         BoxLayout   layout      = new BoxLayout( panel, BoxLayout.X_AXIS );
         panel.setLayout( layout );
-        panel.add( incr );
-        panel.add( decr );
+        panel.add( new JLabel( "Value " ) );
+        panel.add( valSpinner );
+        panel.add( Box.createRigidArea( spacing ) );
+        panel.add( new JLabel( "Weight " ) );
+        panel.add( weightSpinner );
+        panel.add( Box.createRigidArea( spacing ) );
         panel.add( save );
+        panel.add( Box.createRigidArea( spacing ) );
         panel.add( exit );
+        
+        int     outerMargin = 10;
+        Border  outer       =
+            BorderFactory.createEmptyBorder( 
+                outerMargin, 
+                outerMargin, 
+                outerMargin, 
+                outerMargin
+            );
+        
+        int     innerMargin = 5;
+        Border  inner       =
+            BorderFactory.createEmptyBorder( 
+                innerMargin, 
+                innerMargin, 
+                innerMargin, 
+                innerMargin
+            );
+        Border  line        =
+            BorderFactory.createLineBorder( Color.BLACK, 1 );
+        Border  compound    = 
+            BorderFactory.createCompoundBorder( outer, line );
+        Border  border      =
+            BorderFactory.createCompoundBorder( compound, inner );
+        panel.setBorder( border );
         
         return panel;
     }
     
-    /**
-     * Method to be invoked
-     * when the Increase button 
-     * is pushed.
-     * The value
-     * controlling the feedback component
-     * is incremented,
-     * and the feedback component
-     * is repainted.
-     * 
-     * @param evt   event associated with the button push;
-     *              not used.
-     */
-    private void incrActionPerformed( ActionEvent evt )
+    private JPanel getDescriptorPanel()
     {
-        if ( currVal < maxVal )
-        {
-            ++currVal;
-            feedback.repaint();
-        }
+        String  simpleName  = feedback.getClass().getSimpleName();
+        classDescriptor.setText( simpleName );
+        float   numValue    = valModel.getNumber().floatValue();
+        valueDescriptor.setText( "" + numValue );
+        float   weightValue = feedback.getWeight();
+        weightDescriptor.setText( "" + weightValue );
+        String  dirName     = dataFileDir.getPath();
+        dirDescriptor.setText( dirName );
+        
+        JPanel      classPanel  = 
+            getDescriptorPanel( "Class: ", classDescriptor );
+        JPanel      valuePanel  = 
+            getDescriptorPanel( "Value:", valueDescriptor );
+        JPanel      weightPanel = 
+            getDescriptorPanel( "Weight: ", weightDescriptor );
+        JPanel      dirPanel    =
+            getDescriptorPanel( "Data Dir: ", dirDescriptor );
+        JPanel      filePanel   =
+            getDescriptorPanel( "Data File: ", fileDescriptor );
+        
+        JPanel      masterPanel = new JPanel();
+        BoxLayout   layout      = 
+            new BoxLayout( masterPanel, BoxLayout.Y_AXIS );
+        masterPanel.setLayout( layout );
+        masterPanel.add( classPanel );
+        masterPanel.add( valuePanel );
+        masterPanel.add( weightPanel );
+        masterPanel.add( dirPanel );
+        masterPanel.add( filePanel );
+        return masterPanel;
     }
     
-    /**
-     * Method to be invoked
-     * when the Decrease button 
-     * is pushed.
-     * The value
-     * controlling the feedback component
-     * is decremented,
-     * and the feedback component
-     * is repainted.
-     * 
-     * @param evt   event associated with the button push;
-     *              not used.
-     */
-    private void decrActionPerformed( ActionEvent evt )
+    private JPanel getDescriptorPanel( String idStr, JLabel right )
     {
-        if ( currVal > minVal )
-        {
-            --currVal;
-            feedback.repaint();
-        }
+        JPanel      panel   = new JPanel();
+        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
+        panel.setLayout( layout );
+        
+        int     margin  = 3;
+        Border  border  = 
+            BorderFactory.createEmptyBorder( 
+                margin,
+                margin,
+                margin, 
+                margin
+            );
+        panel.setBorder( border );
+        
+        JLabel  label   = new JLabel( idStr, SwingConstants.RIGHT );
+        panel.add( label );
+        panel.add( right );
+        
+        return panel;
     }
     
     /**
@@ -242,8 +334,6 @@ public abstract class FBCompTA
         FBCompTADetail  detail  = 
             new FBCompTADetail( currVal, -1, image );
         
-        // Construct filename from prefix sequence number and extension
-        File    dataFile    = getDataFile();
         try ( 
             FileOutputStream fileStream = 
                 new FileOutputStream( dataFile );
@@ -258,7 +348,11 @@ public abstract class FBCompTA
         catch ( IOException exc )
         {
             exc.printStackTrace();
+            fileDescriptor.setText( "Error: " + exc.getMessage() );
         }
+        
+        // Set up the next data file
+        getDataFile();
     }
     
     /**
@@ -289,11 +383,10 @@ public abstract class FBCompTA
      * @param component 
      *      the feedback component to be displayed in the dialog
      */
-    private void makeComponentDialog( JComponent component )
+    private void makeComponentDialog( JFrame frame, JComponent component )
     {
-        JDialog   compDialog    = new JDialog();
         String      title       = "Component Display";
-        compDialog.setTitle( title );
+        JDialog     compDialog  = new JDialog( frame, title );
         
         Border  border      =
             BorderFactory.createEmptyBorder( 10, 10, 10, 10 );
@@ -301,8 +394,15 @@ public abstract class FBCompTA
         contentPane.setBorder( border );
         contentPane.add( component );
         compDialog.setContentPane( contentPane );
-        compDialog.setLocation( 200, 200 );
+        
         compDialog.pack();
+        
+        int         xco     = frame.getX() + frame.getWidth() + 10;
+        int         yco     = 
+            frame.getY() 
+            + frame.getHeight() / 2 
+            - compDialog.getHeight() / 2;
+        compDialog.setLocation( xco, yco );
         compDialog.setVisible( true );
     }
 }
