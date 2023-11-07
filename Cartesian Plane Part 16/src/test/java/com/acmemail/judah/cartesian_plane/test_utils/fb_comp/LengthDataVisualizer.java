@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils;
+package com.acmemail.judah.cartesian_plane.test_utils.fb_comp;
 
 import java.util.function.DoubleSupplier;
 
@@ -7,10 +7,8 @@ import javax.swing.SwingUtilities;
 import com.acmemail.judah.cartesian_plane.components.Feedback;
 import com.acmemail.judah.cartesian_plane.components.LengthFeedback;
 
-public class FBCompLengthTA extends FBCompTA
+public class LengthDataVisualizer extends FBCompTAVisualizer
 {
-    private static final String     subdir      = "Length";
-    
     /**
      * Application entry point.
      *
@@ -19,19 +17,18 @@ public class FBCompLengthTA extends FBCompTA
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( FBCompLengthTA::new );
+        SwingUtilities.invokeLater( LengthDataVisualizer::new );
     }
     
-    public FBCompLengthTA()
+    
+    public LengthDataVisualizer()
     {
-        super(subdir);
+        super( FBCompLengthTA.SUBDIR, s -> getComponent( s ) );
     }
-
-    @Override
-    public Feedback getFeedbackInstance( DoubleSupplier supplier )
+    
+    private static Feedback getComponent( DoubleSupplier supplier )
     {
         Feedback    feedback    = new LengthFeedback( supplier );
         return feedback;
     }
-
 }

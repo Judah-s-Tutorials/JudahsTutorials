@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils;
+package com.acmemail.judah.cartesian_plane.test_utils.fb_comp;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -27,12 +27,35 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.components.Feedback;
+import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
+/**
+ * Application to generate test data
+ * for one of the feedback components,
+ * for example LengthFeedback, SpacingFeedback
+ * and StrokeFeedback.
+ * A subclass provides
+ * the name of the subdirectory
+ * in which test data files
+ * are to be stored.
+ * If necessary,
+ * the subdirectory will be created
+ * as a child of 
+ * Utils.BASE_TEST_DATA_DIR/Feedback.
+ * Test data file names
+ * begin with "TestData",
+ * followed by a sequence number
+ * followed by the extension ".ser".
+ * 
+ * @author Jack Straub
+ */
 public abstract class FBCompTA
 {
     public abstract Feedback 
-    getFeedbackInstance( DoubleSupplier supplier );
-    
+        getFeedbackInstance( DoubleSupplier supplier );
+
+    /** The dimensions of the feedback component. */
+    public static final Dimension     COMP_SIZE    = new Dimension( 100, 25 );
     /**
      * Master directory for all feedback data files. This will
      * be a subdirectory of the project test data files; 
@@ -42,7 +65,7 @@ public abstract class FBCompTA
      * components are stored, for example: "Length", "Spacing",
      * "Stroke".
      */
-    private static final String feedbackDir     = "Feedback";
+    public static final String  FEEDBACK_DIR    = "Feedback";
     /** 
      * The first part of the name of the file where
      * data for a test are stored.
@@ -99,27 +122,46 @@ public abstract class FBCompTA
     private final JSpinner              weightSpinner = 
         new JSpinner( weightModel );
     
+    /** 
+     * Component to display the name of the directory
+     * in which test data is stored.
+     */
     private final JLabel    dirDescriptor       = new JLabel();
+    /**
+     * Component to display the name of the file
+     * in which test data is to be stored.
+     */
     private final JLabel    fileDescriptor      = new JLabel();
+    /**
+     * Component to display the name of the class
+     * for which test data is being generated.
+     */
     private final JLabel    classDescriptor     = new JLabel();
+    /**
+     * Component to display the property value
+     * assigned to the component to be tested.
+     */
     private final JLabel    valueDescriptor     = new JLabel();
+    /**
+     * Component to display the weight
+     * assigned to the component to be tested.
+     */
     private final JLabel    weightDescriptor    = new JLabel();
 
-    /**
-     * Contains the current property value to be applied to the feedback
-     * component. This value is updated every time the Increase
-     * or Decrease buttons are pushed.
-     * @see #incrActionPerformed(ActionEvent)
-     */
-    private double              currVal     = minVal;
     /** The feedback component undergoing test. */
     private final Feedback      feedback;
-    /** The dimensions of the feedback component. */
-    private final Dimension     compSize    = new Dimension( 100, 25 );
     
     /**
      * Constructor;
      * creates and shows the GUI.
+     * Performs all initialization,
+     * including establish the
+     * name and location of 
+     * the first test data file;
+     * note that the file 
+     * is not created
+     * until the test data
+     * is saved.
      */
     public FBCompTA( String subdir )
     {
@@ -128,7 +170,7 @@ public abstract class FBCompTA
         feedback = getFeedbackInstance( () -> 
             valModel.getNumber().doubleValue()
         );
-        feedback.setPreferredSize( compSize );
+        feedback.setPreferredSize( COMP_SIZE );
         
         String  title   = "Feedback Component Test Assistant";
         JFrame  frame   = new JFrame( title );
@@ -153,6 +195,8 @@ public abstract class FBCompTA
      * that is expected
      * to be created 
      * by this application.
+     * Updates the name of the file
+     * displayed in the GUI.
      * 
      * @return  
      *      File representing the data file
@@ -170,9 +214,19 @@ public abstract class FBCompTA
         fileDescriptor.setText( dataFile.getName() );
     }
     
+    /**
+     * Determines the path
+     * to the directory
+     * in which test data files
+     * are to be stored.
+     * 
+     * @return  
+     *      the path to the directory in which test data files
+     *      are to be stored
+     */
     private File makeFilePath()
     {
-        String  subPath = feedbackDir + "/" + dataSubdir;
+        String  subPath = FEEDBACK_DIR + "/" + dataSubdir;
         File    path    = Utils.getTestDataDir( subPath );
         
         return path;
@@ -253,6 +307,18 @@ public abstract class FBCompTA
         return panel;
     }
     
+    /**
+     * Gets the panel
+     * in which current parameters
+     * are displayed.
+     * This includes such data
+     * as the location of the current data file,
+     * and the value and weight
+     * currently assigned to 
+     * the test component.
+     * 
+     * @return  the panel in which current parameters are displayed
+     */
     private JPanel getDescriptorPanel()
     {
         String  simpleName  = feedback.getClass().getSimpleName();
@@ -287,6 +353,21 @@ public abstract class FBCompTA
         return masterPanel;
     }
     
+    /**
+     * Helper method for {@linkplain #getDescriptorPanel()}.
+     * Formulates a panel 
+     * containing the label of a descriptor
+     * (e.g. "Data File: ")
+     * and the associated descriptor
+     * (e.g. fileDescriptor).
+     * 
+     * @param idStr text to display in the label
+     * @param right descriptor to display
+     * 
+     * @return
+     *      panel containing the label of a descriptor
+     *      and the associated descriptor
+     */
     private JPanel getDescriptorPanel( String idStr, JLabel right )
     {
         JPanel      panel   = new JPanel();
@@ -331,8 +412,9 @@ public abstract class FBCompTA
     private void saveActionPerformed( ActionEvent evt )
     {
         BufferedImage   image   = getBufferedImage();
+        float           currVal = valModel.getNumber().floatValue();
         FBCompTADetail  detail  = 
-            new FBCompTADetail( currVal, -1, image );
+            new FBCompTADetail( currVal, feedback.getWeight(), image );
         
         try ( 
             FileOutputStream fileStream = 
@@ -368,7 +450,7 @@ public abstract class FBCompTA
     {
         int             type        = BufferedImage.TYPE_INT_RGB;
         BufferedImage   image       = 
-            new BufferedImage( compSize.width, compSize.height, type );
+            new BufferedImage( COMP_SIZE.width, COMP_SIZE.height, type );
         Graphics        graphics    = image.createGraphics(); 
         feedback.paintComponent( graphics );
         return image;

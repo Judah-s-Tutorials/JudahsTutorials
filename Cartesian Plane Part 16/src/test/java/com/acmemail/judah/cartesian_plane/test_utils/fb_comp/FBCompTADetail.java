@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils;
+package com.acmemail.judah.cartesian_plane.test_utils.fb_comp;
 
 import java.awt.image.BufferedImage;
 import java.io.Serializable;
