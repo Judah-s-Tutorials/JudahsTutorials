@@ -16,6 +16,7 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -25,15 +26,38 @@ import javax.swing.border.Border;
 import com.acmemail.judah.cartesian_plane.components.Feedback;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
+/**
+ * This application
+ * allows the test data files
+ * associated with feedback components
+ * to be traversed and observed.
+ * It is mainly of interested
+ * to personnel wishing to 
+ * verify the accuracy of test data.
+ * It is assumed
+ * that the test files
+ * were produced by {@linkplain FBCompTA}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see FBCompTA
+ */
 public abstract class FBCompTAVisualizer
 {
+    /** 
+     * The root directory for feedback component test data files.
+     * The subdirectory provided by the user is assumed to be
+     * a child to the root directory.
+     * @see #FBCompTAVisualizer(String, Function)
+     */
     private static final String baseSubdir      = 
         Utils.BASE_TEST_DATA_DIR + "/" + FBCompTA.FEEDBACK_DIR;
-    private int                 nextFileInx    = 0; 
     private final File          subdir;
     private final File[]        allFiles;
+    private int                 nextFileInx    = 0; 
     
     private final Feedback      feedback;
+    private final JFrame        frame       = new JFrame();
     private final JLabel        expFeedback = new JLabel();
     private final JLabel        actFeedback = new JLabel();
     private final JLabel        testClass   = new JLabel();
@@ -43,11 +67,32 @@ public abstract class FBCompTAVisualizer
     private final JLabel        currWeight  = new JLabel();
     private final JLabel        result      = new JLabel();
     
+    private final JButton       next        = new JButton( "Next" );
+    
     private BufferedImage       expImage;
     private BufferedImage       actImage;
     private float               value       = 0;
     private float               weight      = 0;
     
+    /**
+     * Constructor.
+     * Initializes all aspects
+     * of the application.
+     * The user provides the name
+     * of the subdirectory
+     * in which data files reside;
+     * this will be assumed
+     * to be a child
+     * of the <em>feedback</em> directory
+     * which contains all subdirectories
+     * associated with feedback control
+     * testing data.
+     * 
+     * @param subdir        the given subdirectory name 
+     * @param fbSupplier    the given feedback control supplier
+     * 
+     * @see #baseSubdir
+     */
     public FBCompTAVisualizer(
         String  subdir,
         Function<DoubleSupplier,Feedback> fbSupplier
@@ -73,20 +118,24 @@ public abstract class FBCompTAVisualizer
         
         feedback = fbSupplier.apply( () -> value );
         feedback.setPreferredSize( FBCompTA.COMP_SIZE );
-        nextFile();
         makeGUI();
-        getActualImage();
-        
-        result.setText( "Success" );
+        nextFile();
     }
     
+    /**
+     * Creates and displays the application GUI.
+     * It assumes that 
+     * the subject feedback control
+     * has already been created.
+     */
     private void makeGUI()
     {
         String  title   = "Feedback Component Test Data Visualizer";
-        JFrame  frame   = new JFrame( title );
+        frame.setTitle( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new JPanel( new BorderLayout() );
         pane.add( getCenterPanel(), BorderLayout.CENTER );
+        pane.add( getControlPanel(), BorderLayout.SOUTH );
         
         frame.setContentPane( pane );
         frame.setLocation( 200, 200 );
@@ -94,14 +143,39 @@ public abstract class FBCompTAVisualizer
         frame.setVisible( true );
     }
     
+    /**
+     * Obtains the panel
+     * to be displayed
+     * in the central region
+     * of the parent content pane.
+     * This consists 
+     * of the parameter
+     * and review panels.
+     * 
+     * @return  
+     *      the panel to be displayed in the central region
+     *      of the parent content pane
+     */
     private JPanel getCenterPanel()
     {
-        JPanel      panel   = new JPanel();
+        JPanel          panel   = new JPanel();
+        BoxLayout       layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
+        panel.setLayout( layout );
         panel.add( getParameterPanel() );
         panel.add( getReviewPanel() );
         return panel;
     }
     
+    /**
+     * Obtains a panel
+     * displaying the parameters
+     * associated with
+     * the most recently processed data file.
+     * 
+     * @return
+     *      a panel displaying the parameters associated with
+     *      the most recently processed data file
+     */
     private JPanel getParameterPanel()
     {
         String  simpleName  = feedback.getClass().getSimpleName();
@@ -136,25 +210,48 @@ public abstract class FBCompTAVisualizer
         return masterPanel;
     }
     
+    /**
+     * Obtains a panel
+     * displaying the feedback control
+     * in its current state,
+     * and the expected and actual images
+     * resulting from processing
+     * the most recent data file.
+     * 
+     * @return  
+     *      a panel containing the feedback component,
+     *      and expected and actual images related to the 
+     *      most recently processed data file
+     */
     private JPanel getReviewPanel()
     {
         JPanel      panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
         panel.setLayout( layout );
+          Border  border  = 
+          BorderFactory.createTitledBorder( "Review" );
+          panel.setBorder( border );
 
         JPanel  fbPanel = new JPanel();
         fbPanel.add( feedback );
         panel.add( fbPanel );
         
         panel.add( getImagePanel() );
-        
-        JPanel  resultPanel = new JPanel();
-        resultPanel.add( result );
-        panel.add( resultPanel );
 
         return panel;
     }
     
+    /**
+     * Obtains a panel
+     * displaying the expected and actual images
+     * that result
+     * from processing
+     * the most recent data file.
+     * 
+     * @return
+     *      a panel displaying the expected and actual images
+     *      that result from processing the most recent data file
+     */
     private JPanel getImagePanel()
     {
         Border      border  =
@@ -184,7 +281,6 @@ public abstract class FBCompTAVisualizer
         panel.setLayout( layout );
         panel.setBorder( border );
         panel.add( new JLabel( "Expected:" ) );
-        expFeedback.setIcon( new ImageIcon( expImage ) );
         panel.add( expFeedback );
         return panel;
     }
@@ -197,14 +293,6 @@ public abstract class FBCompTAVisualizer
      */
     private JPanel getActualPanel()
     {
-        // Don't have an actual image yet, but we need a label
-        // of appropriate size, so make a dummy.
-        int         width       = FBCompTA.COMP_SIZE.width;
-        int         height      = FBCompTA.COMP_SIZE.height;
-        int         type        = BufferedImage.TYPE_INT_RGB;
-        actImage = new BufferedImage( width, height, type ); 
-        actFeedback.setIcon( new ImageIcon( actImage ) );
-        
         Border      border      = 
             BorderFactory.createLineBorder( Color.BLACK, 1 );
         JPanel      panel       = new JPanel();
@@ -255,10 +343,40 @@ public abstract class FBCompTAVisualizer
     }
     
     /**
-     * Obtains an image of the feedback component
-     * as it is currently displayed.
+     * Obtains a panel
+     * containing the application controls.
+     * This consists of the label
+     * noting the success/failure 
+     * of processing 
+     * the most recent data file,
+     * a button to read the next data file
+     * and an exit button.
      * 
-     * @return  an image of the feedback component
+     * @return  a panel containing the application controls
+     */
+    private JPanel getControlPanel()
+    {
+        JButton exit    = new JButton( "Exit" );
+        next.addActionListener( e -> nextFile() );
+        exit.addActionListener( e -> System.exit( 0 ) );
+        
+        JPanel      panel   = new JPanel();
+        panel.add( result );
+        panel.add( Box.createRigidArea( new Dimension( 25, 0 ) ) );
+        panel.add( next );
+        panel.add( exit );
+        return panel;
+    }
+    
+    /**
+     * If possible, 
+     * obtains an image of the feedback component
+     * as it is currently displayed,
+     * and sets it in the 
+     * actFeedback label.
+     * If the component is not displayable,
+     * makes a correctly initialized blak imate
+     * and sets it in the actFeedback label.
      */
     private void getActualImage()
     {
@@ -266,13 +384,31 @@ public abstract class FBCompTAVisualizer
         int             height      = FBCompTA.COMP_SIZE.height;
         int             type        = expImage.getType();
         actImage = new BufferedImage( width, height, type );
-        Graphics        graphics    = actImage.createGraphics();
-        feedback.paintComponent( graphics );
+        if ( feedback.getWidth() > 0)
+        {
+            Graphics        graphics    = actImage.createGraphics();
+            feedback.paintComponent( graphics );
+        }
         
         ImageIcon       icon        = new ImageIcon( actImage );
         actFeedback.setIcon( icon );
     }
     
+    /**
+     * Gets and parses the next data file
+     * from the list
+     * of data files.
+     * If all data files
+     * have been processed,
+     * the request is ignored.
+     * If the last file is read
+     * the "next" button
+     * is disabled.
+     * 
+     * @see #allFiles
+     * @see #nextFileInx
+     * @see #getActualImage()
+     */
     private void nextFile()
     {
         final String    fmt = "%3.1f";
@@ -291,9 +427,33 @@ public abstract class FBCompTAVisualizer
             
             feedback.setWeight( weight );
             expFeedback.setIcon( new ImageIcon( expImage ) );
+            feedback.repaint();
+            getActualImage();
+            frame.pack();
+            if ( nextFileInx == allFiles.length )
+                next.setEnabled( false );
+            
+            if ( Utils.equals( expImage, actImage ) )
+                result.setText( "Success" );
+            else
+                result.setText( "Fail" );
+            result.repaint();
+            System.out.println( result.getText() );
         }
     }
     
+    /**
+     * Reads the given data file.
+     * If there's an I/O error
+     * a stack trace is printed
+     * and the application is terminated.
+     * 
+     * @param file  the given data file.
+     * 
+     * @return  the given data file.
+     * 
+     * @see #nextFile()
+     */
     private FBCompTADetail getDetail( File file )
     {
         FBCompTADetail  detail  = null;
