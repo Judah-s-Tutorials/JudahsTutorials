@@ -140,7 +140,8 @@ public class SerializationDemo1
         System.out.println( "Writing: " + file.getName() );
         try ( 
             FileOutputStream fileStr = new FileOutputStream( file );
-            ObjectOutputStream objStr = new ObjectOutputStream( fileStr );
+            ObjectOutputStream objStr = 
+                new ObjectOutputStream( fileStr );
         )
         {
             objStr.writeObject( detailOrig );
