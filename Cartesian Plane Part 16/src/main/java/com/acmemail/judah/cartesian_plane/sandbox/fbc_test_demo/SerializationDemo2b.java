@@ -128,28 +128,28 @@ public class SerializationDemo2b
         return panel;
     }
     
-    private void showFile( ActionEvent evt )
+private void showFile( ActionEvent evt )
+{
+    File    file    = group.getSelectedProperty();
+    try (
+        FileInputStream fileStr = new FileInputStream( file );
+        ObjectInputStream objStr = new ObjectInputStream( fileStr );
+    )
     {
-        File    file    = group.getSelectedProperty();
-        try (
-            FileInputStream fileStr = new FileInputStream( file );
-            ObjectInputStream objStr = new ObjectInputStream( fileStr );
-        )
-        {
-            FBCompTADetail detail   =
-                (FBCompTADetail)objStr.readObject();
-            updateGUI( detail );
-        }
-        catch ( 
-            IOException 
-            | ClassNotFoundException
-            | ClassCastException exc
-        )
-        {
-            exc.printStackTrace();
-            System.exit( 1 );
-        }
+        FBCompTADetail detail   =
+            (FBCompTADetail)objStr.readObject();
+        updateGUI( detail );
     }
+    catch ( 
+        IOException 
+        | ClassNotFoundException
+        | ClassCastException exc
+    )
+    {
+        exc.printStackTrace();
+        System.exit( 1 );
+    }
+}
     
     private void updateGUI( FBCompTADetail detail )
     {
