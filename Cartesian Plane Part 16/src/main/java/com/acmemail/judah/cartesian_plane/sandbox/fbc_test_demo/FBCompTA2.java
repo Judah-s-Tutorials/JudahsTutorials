@@ -205,6 +205,7 @@ public class FBCompTA2
         catch ( IOException exc )
         {
             exc.printStackTrace();
+            System.exit( 1 );
         }
     }
     

@@ -205,6 +205,7 @@ public class FBCompTA3
         catch ( IOException exc )
         {
             exc.printStackTrace();
+            System.exit( 1 );
         }
     }
     
@@ -219,7 +220,7 @@ public class FBCompTA3
      */
     private BufferedImage getBufferedImage()
     {
-        int             type        = BufferedImage.TYPE_INT_RGB;
+        int             type        = BufferedImage.TYPE_INT_ARGB;
         BufferedImage   image       = 
             new BufferedImage( compSize.width, compSize.height, type );
         Graphics        graphics    = image.createGraphics(); 

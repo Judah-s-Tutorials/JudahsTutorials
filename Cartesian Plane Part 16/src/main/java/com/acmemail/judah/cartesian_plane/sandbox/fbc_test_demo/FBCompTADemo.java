@@ -53,7 +53,7 @@ public class FBCompTADemo
         frame.setLocation( 300, 300 );
         frame.pack();
         compare();
-        frame.pack();
+//        frame.pack();
         frame.setVisible( true );
     }
     
@@ -83,7 +83,8 @@ public class FBCompTADemo
         Border      border      = 
             BorderFactory.createLineBorder( Color.BLACK, 1 );
         JPanel      panel       = new JPanel();
-        BoxLayout   layout      = new BoxLayout( panel, BoxLayout.Y_AXIS );
+        BoxLayout   layout      = 
+            new BoxLayout( panel, BoxLayout.Y_AXIS );
         ImageIcon   icon        = new ImageIcon( expImage );
         panel.setLayout( layout );
         panel.setBorder( border );
@@ -97,7 +98,8 @@ public class FBCompTADemo
         Border      border      = 
             BorderFactory.createLineBorder( Color.BLACK, 1 );
         JPanel      panel       = new JPanel();
-        BoxLayout   layout      = new BoxLayout( panel, BoxLayout.Y_AXIS );
+        BoxLayout   layout      = 
+            new BoxLayout( panel, BoxLayout.Y_AXIS );
         panel.setLayout( layout );
         panel.setBorder( border );
         panel.add( new JLabel( "Actual:" ) );
@@ -123,8 +125,9 @@ public class FBCompTADemo
     {
         LengthFeedback  feedback    =
             new LengthFeedback( () -> detail.getPropertyValue() );
-        Dimension       dim         =
-            new Dimension( expImage.getWidth(), expImage.getHeight() );
+        int             width       = expImage.getWidth();
+        int             height      = expImage.getHeight();
+        Dimension       dim         = new Dimension( width, height );
         feedback.setPreferredSize( dim );
         return feedback;
     }
@@ -133,23 +136,20 @@ public class FBCompTADemo
     {
         FBCompTADetail  detail  = null;
         try (
-            FileInputStream fileStream = new FileInputStream( dataFile );
+            FileInputStream fileStream = 
+                new FileInputStream( dataFile );
             ObjectInputStream inStream = 
                 new ObjectInputStream( fileStream );
         )
         {
             Object  obj     = inStream.readObject();
-            if ( !(obj instanceof FBCompTADetail) )
-            {
-                String  className   = obj.getClass().getName();
-                String  error       = 
-                    "Unexpected object type: " + className;
-                System.err.println( error );
-                System.exit( 1 );
-            }
             detail = (FBCompTADetail)obj;
         }
-        catch ( IOException | ClassNotFoundException exc )
+        catch ( 
+            IOException 
+            | ClassNotFoundException
+            | ClassCastException exc
+        )
         {
             exc.printStackTrace();
             System.exit( 1 );

@@ -27,7 +27,7 @@ public class FBCompTA
 {
     /** The path to the directory for storing test data. */
     private static final String dataPath    =
-        "TestDataDir/Feedback/Length";
+        "test_data/Feedback/Length";
     /** The name of the file used to store test data. */
     private static final String dataFile    = "LengthData.ser";
     /** The path to the file used to store test data. */
@@ -41,9 +41,9 @@ public class FBCompTA
      * is pushed.
      * @see #nextActionPerformed(ActionEvent)
      */
-    private double          currVal             = 1;
+    private double          currVal         = 1;
     /** The feedback component undergoing test. */
-    private final Feedback          feedback    = 
+    private final Feedback  feedback        = 
         new LengthFeedback( () -> currVal );
     
     /**
@@ -79,7 +79,6 @@ public class FBCompTA
         frame.setVisible( true );
         
         makeComponentDialog( feedback );
-//        compDialog.setVisible( true );
     }
     
     /**
@@ -201,6 +200,7 @@ public class FBCompTA
         catch ( IOException exc )
         {
             exc.printStackTrace();
+            System.exit( 1 );
         }
     }
     
@@ -215,7 +215,7 @@ public class FBCompTA
      */
     private BufferedImage getBufferedImage()
     {
-        int             type        = BufferedImage.TYPE_INT_RGB;
+        int             type        = BufferedImage.TYPE_INT_ARGB;
         BufferedImage   image       = 
             new BufferedImage( compSize.width, compSize.height, type );
         Graphics        graphics    = image.createGraphics(); 
