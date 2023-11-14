@@ -54,7 +54,7 @@ public abstract class FBCompTAVisualizer
         Utils.BASE_TEST_DATA_DIR + "/" + FBCompTA.FEEDBACK_DIR;
     private final File          subdir;
     private final File[]        allFiles;
-    private int                 nextFileInx    = 0; 
+    private int                 nextFileInx = 0; 
     
     private final Feedback      feedback;
     private final JFrame        frame       = new JFrame();

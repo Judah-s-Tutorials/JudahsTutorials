@@ -226,6 +226,12 @@ public abstract class FBCompTA
     {
         String  subPath = FEEDBACK_DIR + "/" + dataSubdir;
         File    path    = Utils.getTestDataDir( subPath );
+        if ( path == null )
+        {
+            String  message = "Failed to create path " + subPath;
+            System.err.println( message );
+            System.exit( 1 );
+        }
         
         return path;
     }
@@ -252,8 +258,8 @@ public abstract class FBCompTA
         float       currWeight  = feedback.getWeight();
         weightSpinner.addChangeListener( e -> {
             float   weight  = weightModel.getNumber().floatValue();
-            weightDescriptor.setText( "" + weight );
             feedback.setWeight( weight );
+            weightDescriptor.setText( "" + weight );
             feedback.repaint();
         });
         if ( currWeight < 0 )
