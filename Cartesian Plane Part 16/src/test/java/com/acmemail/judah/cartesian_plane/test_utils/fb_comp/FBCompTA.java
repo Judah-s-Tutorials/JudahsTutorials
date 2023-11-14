@@ -16,8 +16,6 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -55,7 +53,8 @@ public abstract class FBCompTA
         getFeedbackInstance( DoubleSupplier supplier );
 
     /** The dimensions of the feedback component. */
-    public static final Dimension     COMP_SIZE    = new Dimension( 100, 25 );
+    public static final Dimension   COMP_SIZE    = 
+        new Dimension( 100, 25 );
     /**
      * Master directory for all feedback data files. This will
      * be a subdirectory of the project test data files; 
@@ -184,7 +183,6 @@ public abstract class FBCompTA
         frame.setLocation( 100, 100 );;
         frame.setVisible( true );
         
-        makeComponentDialog( frame, feedback );
         getDataFile();
     }
     
@@ -340,6 +338,8 @@ public abstract class FBCompTA
             getDescriptorPanel( "Data Dir: ", dirDescriptor );
         JPanel      filePanel   =
             getDescriptorPanel( "Data File: ", fileDescriptor );
+        JPanel      fbPanel     = new JPanel();
+        fbPanel.add( feedback );
         
         JPanel      masterPanel = new JPanel();
         BoxLayout   layout      = 
@@ -350,6 +350,7 @@ public abstract class FBCompTA
         masterPanel.add( weightPanel );
         masterPanel.add( dirPanel );
         masterPanel.add( filePanel );
+        masterPanel.add( fbPanel );
         return masterPanel;
     }
     
@@ -454,37 +455,5 @@ public abstract class FBCompTA
         Graphics        graphics    = image.createGraphics(); 
         feedback.paintComponent( graphics );
         return image;
-    }
-    
-    /**
-     * Creates a dialog
-     * that displays
-     * the rendered
-     * feedback component.
-     * 
-     * @param component 
-     *      the feedback component to be displayed in the dialog
-     */
-    private void makeComponentDialog( JFrame frame, JComponent component )
-    {
-        String      title       = "Component Display";
-        JDialog     compDialog  = new JDialog( frame, title );
-        
-        Border  border      =
-            BorderFactory.createEmptyBorder( 10, 10, 10, 10 );
-        JPanel  contentPane = new JPanel();
-        contentPane.setBorder( border );
-        contentPane.add( component );
-        compDialog.setContentPane( contentPane );
-        
-        compDialog.pack();
-        
-        int         xco     = frame.getX() + frame.getWidth() + 10;
-        int         yco     = 
-            frame.getY() 
-            + frame.getHeight() / 2 
-            - compDialog.getHeight() / 2;
-        compDialog.setLocation( xco, yco );
-        compDialog.setVisible( true );
     }
 }

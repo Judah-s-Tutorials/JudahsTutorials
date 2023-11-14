@@ -50,10 +50,9 @@ public class FBCompTADemo
         cPane.add( getMainPanel(), BorderLayout.CENTER );
         cPane.add( result, BorderLayout.SOUTH );
         
-        frame.setLocation( 300, 300 );
-        frame.pack();
         compare();
-//        frame.pack();
+        frame.pack();
+        frame.setLocation( 300, 300 );
         frame.setVisible( true );
     }
     
@@ -110,8 +109,8 @@ public class FBCompTADemo
     
     private BufferedImage getActualImage()
     {
-        int             width       = feedback.getWidth();
-        int             height      = feedback.getHeight();
+        int             width       = expImage.getWidth();
+        int             height      = expImage.getHeight();
         int             type        = expImage.getType();
         BufferedImage   actImage    = 
             new BufferedImage( width, height, type );
