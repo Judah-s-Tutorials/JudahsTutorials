@@ -130,7 +130,8 @@ public abstract class FBCompTAVisualizer
      */
     private void makeGUI()
     {
-        String  title   = "Feedback Component Test Data Visualizer";
+        String  title   = 
+            "Feedback Component Test Data Visualizer";
         frame.setTitle( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new JPanel( new BorderLayout() );
@@ -228,9 +229,9 @@ public abstract class FBCompTAVisualizer
         JPanel      panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
         panel.setLayout( layout );
-          Border  border  = 
-          BorderFactory.createTitledBorder( "Review" );
-          panel.setBorder( border );
+        Border      border  = 
+        BorderFactory.createTitledBorder( "Review" );
+        panel.setBorder( border );
 
         JPanel  fbPanel = new JPanel();
         fbPanel.add( feedback );
@@ -409,38 +410,38 @@ public abstract class FBCompTAVisualizer
      * @see #nextFileInx
      * @see #getActualImage()
      */
-private void nextFile()
-{
-    final String    fmt = "%3.1f";
-    if ( nextFileInx < allFiles.length )
+    private void nextFile()
     {
-        File            nextFile    = allFiles[nextFileInx++];
-        FBCompTADetail  detail      = getDetail( nextFile );
-        value = (float)detail.getPropertyValue();
-        weight = (float)detail.getWeight();
-        String          strWeight   = String.format( fmt, weight );
-        String          strValue    = String.format( fmt, value );
-        currVal.setText( strValue );
-        currWeight.setText( strWeight );
-        currFile.setText( nextFile.getName() );
-        expImage = detail.getBufferedImage();
-        
-        feedback.setWeight( weight );
-        expFeedback.setIcon( new ImageIcon( expImage ) );
-        feedback.repaint();
-        getActualImage();
-        frame.pack();
-        if ( nextFileInx == allFiles.length )
-            next.setEnabled( false );
-        
-        if ( Utils.equals( expImage, actImage ) )
-            result.setText( "Success" );
-        else
-            result.setText( "Fail" );
-        result.repaint();
-        System.out.println( result.getText() );
+        final String    fmt = "%3.1f";
+        if ( nextFileInx < allFiles.length )
+        {
+            File            nextFile    = allFiles[nextFileInx++];
+            FBCompTADetail  detail      = getDetail( nextFile );
+            value = (float)detail.getPropertyValue();
+            weight = (float)detail.getWeight();
+            String          strWeight   = String.format( fmt, weight );
+            String          strValue    = String.format( fmt, value );
+            currVal.setText( strValue );
+            currWeight.setText( strWeight );
+            currFile.setText( nextFile.getName() );
+            expImage = detail.getBufferedImage();
+            
+            feedback.setWeight( weight );
+            expFeedback.setIcon( new ImageIcon( expImage ) );
+            feedback.repaint();
+            getActualImage();
+            frame.pack();
+            if ( nextFileInx == allFiles.length )
+                next.setEnabled( false );
+            
+            if ( Utils.equals( expImage, actImage ) )
+                result.setText( "Success" );
+            else
+                result.setText( "Fail" );
+            result.repaint();
+            System.out.println( result.getText() );
+        }
     }
-}
     
     /**
      * Reads the given data file.
