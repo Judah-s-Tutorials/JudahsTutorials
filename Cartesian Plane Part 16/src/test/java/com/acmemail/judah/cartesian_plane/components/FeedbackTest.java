@@ -1,5 +1,6 @@
 package com.acmemail.judah.cartesian_plane.components;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -14,9 +15,8 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -25,84 +25,72 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 import com.acmemail.judah.cartesian_plane.test_utils.fb_comp.FBCompTA;
 import com.acmemail.judah.cartesian_plane.test_utils.fb_comp.FBCompTADetail;
 
-abstract class FeedbackTest
+public abstract class FeedbackTest
 {
     private static final String baseSubdir      = 
         Utils.BASE_TEST_DATA_DIR + "/" + FBCompTA.FEEDBACK_DIR;
-    private static File         subdir;
-    private static File[]       allFiles = null;
+    private static String       strSubdir;
+    private static File[]       allFiles;
     private static Feedback     feedback;
+    private static double       currVal     = 0;
+    private static double       currWeight  = -1;
+    
     private BufferedImage       expImage;
+    private BufferedImage       actImage;
     
-    private static double  currVal     = 0;
-    
-//    public FeedbackTest( Function<DoubleSupplier,Feedback> fbSupplier )
-//    {
-//        File    base    = new File( baseSubdir );
-//        this.subdir = new File( base, subdir );
-//        String  msg     = 
-//            "Test directory doesn't exist: " + this.subdir.getName();
-//        assertTrue ( this.subdir.exists(), msg );
-//
-//        allFiles = this.subdir.listFiles( (d,f) -> f.endsWith( ".ser" ) );
-//        msg = "Directory has no test files: " + this.subdir.getName();
-//        assertTrue( allFiles.length > 0, msg );
-
-//        GUIUtils.schedEDTAndWait( () -> makeGUI( fbSupplier ) );
-//    }
-    
-    public static void makeGUI( 
+    public static void initAll( 
         String subdir, 
         Function<DoubleSupplier,Feedback> fbSupplier
     )
     {
-        getFiles( subdir );
+        strSubdir = subdir;
+        loadFiles();
         feedback = fbSupplier.apply( () -> currVal );
         feedback.setPreferredSize( FBCompTA.COMP_SIZE );
-        System.out.println( FBCompTA.COMP_SIZE );
-        JFrame  frame   = new JFrame();
-        frame.getContentPane().add( feedback );
+        JFrame frame = new JFrame();
+        JPanel  contentPane = new JPanel();
+        contentPane.add( feedback );
+        frame.setContentPane( contentPane );
         frame.pack();
-        frame.setVisible( true );
     }
 
     @ParameterizedTest
     @MethodSource( "getFiles" )
     void test( File file )
     {
-        System.out.println( file.getName() );
-        Utils.pause( 2000 );
-        nextFile( file );
-    }
-
-    @Test
-    public void test2()
-    {
-        System.out.println( subdir );
+        GUIUtils.schedEDTAndWait( () -> nextFile( file ) );
+        assertEquals( currWeight, feedback.getWeight() );
+        assertTrue( feedback.isOpaque() );
     }
     
-    @Test
-    public void test3()
-    {
-        System.out.println( feedback.getClass().getName() );
-    }
-    
+    /**
+     * Deserializes a file
+     * and updates the state of the test
+     * with the contents
+     * of the encapsulated FBCompTADetail
+     * THIS METHOD MUST BE CALLED
+     * FROM THE EVENT DISPATCH THREAD.
+     * 
+     * @param nextFile
+     */
     private void nextFile( File nextFile )
     {
         FBCompTADetail  detail      = getDetail( nextFile );
-        currVal = (float)detail.getPropertyValue();
-        double          weight      = detail.getWeight();
-        feedback.setWeight( (float)weight );
+        currVal = detail.getPropertyValue();
+        currWeight = detail.getWeight();
         expImage = detail.getBufferedImage();
         
-        GUIUtils.schedEDTAndWait( () -> feedback.repaint() );
-        BufferedImage   actImage    = getActualImage();
+        feedback.setWeight( (float)currWeight );
+        feedback.repaint();
+        actImage = getActualImage();
         
         StringBuilder   bldr    = new StringBuilder();
-        bldr.append( "Value: " ).append( currVal );
-        bldr.append( ",Weight: ").append( weight );
-        bldr.append( ",File: ").append( nextFile.getName() );
+        bldr.append( "Dir: ").append( strSubdir );
+        bldr.append( ", File: ").append( nextFile.getName() );
+        bldr.append( ", Value: " ).append( currVal );
+        bldr.append( ", Weight: ").append( currWeight );
         String          msg     = bldr.toString();
+        System.out.println( msg );
         assertTrue( Utils.equals( expImage, actImage ), msg );
     }
 
@@ -126,22 +114,31 @@ abstract class FeedbackTest
         return detail;
     }
     
+    /**
+     * Makes a copy of the actual image
+     * currently displayed
+     * in the Feedback component.
+     * THIS METHOD MUST BE CALLED
+     * FROM THE EVENT DISPATCH THREAD.
+     * 
+     * @return  
+     *      a copy of the actual image currently displayed
+     *      in the Feedback component
+     */
     private BufferedImage getActualImage()
     {
-        int             width       = FBCompTA.COMP_SIZE.width;
-        int             height      = FBCompTA.COMP_SIZE.height;
+        int             width       = feedback.getWidth();
+        int             height      = feedback.getHeight();
         int             type        = expImage.getType();
         BufferedImage   actImage    = 
             new BufferedImage( width, height, type );
         Graphics        graphics    = actImage.createGraphics();
-        GUIUtils.schedEDTAndWait( () -> 
-            feedback.paintComponent( graphics ) 
-        );
+        feedback.paintComponent( graphics );
         
         return actImage;
     }
     
-    public static void getFiles( String strSubdir )
+    private static void loadFiles()
     {
         File    base    = new File( baseSubdir );
         File    subdir  = new File( base, strSubdir );
