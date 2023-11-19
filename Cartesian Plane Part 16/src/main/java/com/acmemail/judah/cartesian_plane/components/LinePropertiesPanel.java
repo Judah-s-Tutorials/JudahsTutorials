@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -26,18 +26,6 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
-import com.acmemail.judah.cartesian_plane.components.ColorEditor;
-import com.acmemail.judah.cartesian_plane.components.LengthFeedback;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
-import com.acmemail.judah.cartesian_plane.components.PButtonGroup;
-import com.acmemail.judah.cartesian_plane.components.PRadioButton;
-import com.acmemail.judah.cartesian_plane.components.SpacingFeedback;
-import com.acmemail.judah.cartesian_plane.components.StrokeFeedback;
-
 /**
  * This panel
  * builds the GUI
@@ -55,7 +43,7 @@ import com.acmemail.judah.cartesian_plane.components.StrokeFeedback;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class LinePropertiesPanelGUI extends JPanel
+public class LinePropertiesPanel extends JPanel
 {
     /** Label for the minor tics radio button. */
     private static final String minorTics   = "Minor Tics";
@@ -93,7 +81,7 @@ public class LinePropertiesPanelGUI extends JPanel
      * Constructor.
      * Fully configures the line properties GUI.
      */
-    public LinePropertiesPanelGUI()
+    public LinePropertiesPanel()
     {
         super( new BorderLayout() );
         Border  lineBorder      = 

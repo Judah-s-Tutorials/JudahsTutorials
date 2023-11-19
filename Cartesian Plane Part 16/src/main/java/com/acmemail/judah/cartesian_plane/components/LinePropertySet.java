@@ -3,10 +3,7 @@ package com.acmemail.judah.cartesian_plane.components;
 import java.awt.Color;
 import java.util.Optional;
 
-import javax.swing.JComponent;
-
 import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 /**
  * An object of this class
@@ -89,16 +86,14 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  */
 public abstract class LinePropertySet
 {
-    public static final  String TYPE_KEY    = "judah.property_type";
-    
-    private final String    drawProperty;
-    private final String    strokeProperty;
-    private final String    lengthProperty;
-    private final String    spacingProperty;
-    private final String    colorProperty;
+    private final PropertyManager   pMgr    = PropertyManager.INSTANCE;
+    private final String        drawProperty;
+    private final String        strokeProperty;
+    private final String        lengthProperty;
+    private final String        spacingProperty;
+    private final String        colorProperty;
 
-	private final PropertyManager	pMgr	= PropertyManager.INSTANCE;
-	private Optional<Boolean>  draw;
+    private Optional<Boolean>  draw;
     private Optional<Float>    stroke;
     private Optional<Float>    length;
     private Optional<Float>    spacing;
@@ -377,53 +372,6 @@ public abstract class LinePropertySet
     {
         if ( hasColor() )
             this.color = Optional.of( color );
-    }
-    
-    /**
-     * Obtains and returns
-     * the LinePropertySet instance
-     * stored as a client property
-     * in a given JComponent.
-     * 
-     * @param comp  the given JComponent
-     * 
-     * @return  
-     *      the LinePropertySet instance
-     *      stored in the given JComponent
-     *      
-     * @throws 
-     *      ComponentException 
-     *      if a LinePropertySet instance isn't found
-     */
-    public static LinePropertySet getPropertySet( JComponent comp )
-    {
-        Object  value   = comp.getClientProperty( TYPE_KEY );
-        if ( value == null )
-        {
-            String  message = "Expected LinePropertySet, was null";
-            throw new ComponentException( message );
-        }
-        if ( !(value instanceof LinePropertySet) )
-        {
-            String  message =
-                "Expected LinePropertySet, was "
-                + value.getClass().getName();
-            throw new ComponentException( message );
-        }
-        return (LinePropertySet)value;
-    }
-    
-    /**
-     * Stores the given LinePropertySet instance
-     * as a client property
-     * in the given JComponent.
-     * 
-     * @param comp  the given JComponent
-     * @param set   the given LinePropertySet
-     */
-    public static void putPropertySet( JComponent comp, LinePropertySet set )
-    {
-        comp.putClientProperty( TYPE_KEY, set );
     }
     
     /**
