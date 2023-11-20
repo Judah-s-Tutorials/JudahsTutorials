@@ -1,96 +1,211 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.awt.Color;
-
-import javax.swing.JRadioButton;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 
-/**
- * This is no a thorough test
- * of LinePropertySet.
- * It just picks up
- * a few lines of coverage
- * that are missed
- * by subclass tests
- * such as LinePropertySetGridLinesTest.
- * 
- * @author Jack Straub
- */
-public class LinePropertySetTest
+abstract class LinePropertySetTest
 {
+    private static final PropertyManager    pMgr    = 
+        PropertyManager.INSTANCE;
+    
+    private final Supplier<LinePropertySet> setSupplier;
+    
+    private final String            drawProperty;
+    private final String            strokeProperty;
+    private final String            lengthProperty;
+    private final String            spacingProperty;
+    private final String            colorProperty;
+
+    private final Optional<Boolean> drawOrig;
+    private final Optional<Float>   strokeOrig;
+    private final Optional<Float>   lengthOrig;
+    private final Optional<Float>   spacingOrig;
+    private final Optional<Color>   colorOrig;
+
+    private Optional<Boolean>       drawCurr;
+    private Optional<Float>         strokeCurr;
+    private Optional<Float>         lengthCurr;
+    private Optional<Float>         spacingCurr;
+    private Optional<Color>         colorCurr;
+    
+    public LinePropertySetTest(
+        String drawProperty,
+        String strokeProperty, 
+        String lengthProperty, 
+        String spacingProperty, 
+        String colorProperty,
+        Supplier<LinePropertySet> setSupplier
+    )
+    {
+        super();
+        LinePropertySetInitializer.initProperties();
+        this.setSupplier = setSupplier;
+
+        this.drawProperty = drawProperty;
+        this.strokeProperty = strokeProperty;
+        this.lengthProperty = lengthProperty;
+        this.spacingProperty = spacingProperty;
+        this.colorProperty = colorProperty;
+        
+        drawCurr = drawOrig = asBoolean( drawProperty );
+        strokeCurr = strokeOrig = asFloat( strokeProperty );
+        lengthCurr = lengthOrig = asFloat( lengthProperty );
+        colorCurr = colorOrig = asColor( colorProperty );
+        spacingCurr = spacingOrig = asFloat( spacingProperty );
+    }
 
     @Test
-    void test()
+    public void test()
     {
-        LinePropertySet set = new LinePropertySetMisc();
+        LinePropertySet set = setSupplier.get();
         
-        // No properties should be present in the test set
-        assertPresent( set );
-        // Every property should have a default value
-        assertHasDefaultValues( set );
-        // Attempt to set all properties, then verify that
-        // properties still have default values.
-        setNewValues( set );
-        assertHasDefaultValues( set );
+        // Test all has... methods.
+        assertPresentIf( set );
         
-        // This changes nothing, but does pick up a couple 
-        // of lines of coverage.
+        // Verify that newly created set has expected values
+        assertHasOrigValues( set );
+        
+        // Get unique values for all properties, then reset and verify
+        // that all properties are returned to their original values.
+        getUniqueValues( set );
+        assertHasCurrValues( set );
+        set.reset();
+        assertHasOrigValues( set );
+        
+        // Get unique values for all properties, then apply and verify
+        // that all properties are updated via the PropertyManager.
+        getUniqueValues( set );
+        assertHasCurrValues( set );
         set.apply();
+        assertHasAppliedValues();
     }
     
-    @Test
-    public void negativeTesting()
+    private void assertPresentIf( LinePropertySet set )
     {
-        // Verify that LinePropertySet.getPropertySet
-        // fails when it's supposed to.
-        Class<ComponentException>   clazz   = ComponentException.class;
-        JRadioButton    button  = new JRadioButton();
-        assertThrows( clazz, () -> LinePropertySet.getPropertySet( button ) );
-        
-        button.putClientProperty( LinePropertySet.TYPE_KEY, new Object() );
-        assertThrows( clazz, () -> LinePropertySet.getPropertySet( button ) );
+        assertEquals( set.hasDraw(), drawOrig.isPresent() );
+        assertEquals( set.hasColor(), colorOrig.isPresent() );
+        assertEquals( set.hasStroke(), strokeOrig.isPresent() );
+        assertEquals( set.hasLength(), lengthOrig.isPresent() );
+        assertEquals( set.hasSpacing(), spacingOrig.isPresent() );
     }
     
-    private void assertPresent( LinePropertySet set )
+    private void assertHasOrigValues( LinePropertySet set )
     {
-        assertFalse( set.hasDraw() );
-        assertFalse( set.hasColor() );
-        assertFalse( set.hasStroke() );
-        assertFalse( set.hasLength() );
-        assertFalse( set.hasSpacing() );
+        assertEqualsIfPresent( set.getDraw(), drawOrig );
+        assertEqualsIfPresent( set.getColor(), colorOrig );
+        assertEqualsIfPresent( set.getStroke(), strokeOrig );
+        assertEqualsIfPresent( set.getLength(), lengthOrig );
+        assertEqualsIfPresent( set.getSpacing(), spacingOrig );
     }
     
-    private void assertHasDefaultValues( LinePropertySet set )
+    private void assertHasCurrValues( LinePropertySet set )
     {
-        assertNull( set.getColor() );
-        assertEquals( -1, set.getStroke() );
-        assertEquals( -1, set.getLength() );
-        assertEquals( -1, set.getSpacing() );
-        assertFalse( set.getDraw() );
+        assertEqualsIfPresent( set.getDraw(), drawCurr );
+        assertEqualsIfPresent( set.getColor(), colorCurr );
+        assertEqualsIfPresent( set.getStroke(), strokeCurr );
+        assertEqualsIfPresent( set.getLength(), lengthCurr );
+        assertEqualsIfPresent( set.getSpacing(), spacingCurr );
     }
     
-    private void setNewValues( LinePropertySet set )
+    private void assertHasAppliedValues()
     {
-        set.setColor( Color.BLUE );
-        set.setStroke( 5 );
-        set.setLength( 5 );
-        set.setSpacing( 5 );
-        set.setDraw( true );
+        assertEquals( drawCurr, asBoolean( drawProperty ) );
+        assertEquals( colorCurr, asColor( colorProperty ) );
+        assertEquals( strokeCurr, asFloat( strokeProperty ) );
+        assertEquals( lengthCurr, asFloat( lengthProperty ) );
+        assertEquals( spacingCurr, asFloat( spacingProperty ) );
     }
-
-    private static class LinePropertySetMisc extends LinePropertySet
+    
+    private void getUniqueValues( LinePropertySet set )
     {
-        LinePropertySetMisc()
+        if ( (drawCurr = newBoolean( drawCurr )).isPresent() )
+            set.setDraw( drawCurr.get() );
+        if ( (colorCurr = newColor( colorCurr )).isPresent() )
+            set.setColor( colorCurr.get() );
+        if ( (strokeCurr = newFloat( strokeCurr )).isPresent() )
+            set.setStroke( strokeCurr.get() );
+        if ( (lengthCurr = newFloat( lengthCurr )).isPresent() )
+            set.setLength( lengthCurr.get() );
+        if ( (spacingCurr = newFloat( spacingCurr )).isPresent() )
+            set.setSpacing( spacingCurr.get() );
+            
+    }
+    
+    private static void 
+    assertEqualsIfPresent( Object actual, Optional<?> expected )
+    {
+        if ( expected.isPresent() )
+            assertEquals( actual, expected.get() );
+    }
+    
+    private static Optional<Float> asFloat( String propertyName )
+    {
+        Float           val         = pMgr.asFloat( propertyName );
+        Optional<Float> optional    = 
+            val != null ? Optional.of( val ) : Optional.empty();
+        return optional;
+    }
+    
+    private static Optional<Color> asColor( String propertyName )
+    {
+        Color           val         = pMgr.asColor( propertyName );
+        Optional<Color> optional    = 
+            val != null ? Optional.of( val ) : Optional.empty();
+        return optional;
+    }
+    
+    private static 
+    Optional<Boolean> asBoolean( String propertyName )
+    {
+        Boolean             val         = pMgr.asBoolean( propertyName );
+        Optional<Boolean>   optional    = 
+            val != null ? Optional.of( val ) : Optional.empty();
+        return optional;
+    }
+    
+    private static 
+    Optional<Float> newFloat( Optional<Float> currFloat )
+    {
+        Optional<Float> optional    = Optional.empty();
+        if ( !currFloat.isEmpty() )
         {
-            super( "", "", "", "", "" );
+            float newVal    = currFloat.get() + 10;
+            optional = Optional.of( newVal );
         }
+        return optional;
+    }
+    
+    private static 
+    Optional<Color> newColor( Optional<Color> currColor )
+    {
+        Optional<Color> optional    = Optional.empty();
+        if ( !currColor.isEmpty() )
+        {
+            Color   val     = currColor.get();
+            int     newRGB  = val.getRGB() & 0xFFFFFF + 10;
+            Color   newVal  = new Color( newRGB );
+            optional = Optional.of( newVal );
+        }
+        return optional;
+    }
+    
+    private static Optional<Boolean> 
+    newBoolean( Optional<Boolean> currBoolean )
+    {
+        Optional<Boolean> optional  = Optional.empty();
+        if ( !currBoolean.isEmpty() )
+        {
+            boolean newVal  = !currBoolean.get();
+            optional = Optional.of( newVal );
+        }
+        return optional;
     }
 }

@@ -270,7 +270,7 @@ public abstract class LinePropertySet
      *      the stroke property value,
      *      or -1 if not present
      */
-    public double getStroke()
+    public float getStroke()
     {
         return stroke.orElse( -1f );
     }
@@ -283,7 +283,7 @@ public abstract class LinePropertySet
      *      the length property value,
      *      or -1 if not present
      */
-    public double getLength()
+    public float getLength()
     {
         return length.orElse( -1f );
     }
@@ -296,7 +296,7 @@ public abstract class LinePropertySet
      *      the spacing property value,
      *      or -1 if not present
      */
-    public double getSpacing()
+    public float getSpacing()
     {
         return spacing.orElse( -1f );
     }
