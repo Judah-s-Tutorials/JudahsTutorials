@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 
-abstract class LinePropertySetTest
+public abstract class LinePropertySetTest
 {
     private static final PropertyManager    pMgr    = 
         PropertyManager.INSTANCE;
@@ -36,7 +36,7 @@ abstract class LinePropertySetTest
     private Optional<Float>         spacingCurr;
     private Optional<Color>         colorCurr;
     
-    public LinePropertySetTest(
+  public LinePropertySetTest(
         String drawProperty,
         String strokeProperty, 
         String lengthProperty, 
@@ -135,8 +135,7 @@ abstract class LinePropertySetTest
         if ( (lengthCurr = newFloat( lengthCurr )).isPresent() )
             set.setLength( lengthCurr.get() );
         if ( (spacingCurr = newFloat( spacingCurr )).isPresent() )
-            set.setSpacing( spacingCurr.get() );
-            
+            set.setSpacing( spacingCurr.get() );            
     }
     
     private static void 

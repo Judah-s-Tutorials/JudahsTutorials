@@ -26,6 +26,8 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+
 /**
  * This panel
  * builds the GUI
@@ -215,7 +217,12 @@ public class LinePropertiesPanel extends JPanel
      */
     private void applyAction( ActionEvent evt )
     {
-        
+        LinePropertySet set     = buttonGroup.getSelectedProperty();
+        if ( set == null  )
+        {
+            String  msg = "LinePropertySet not found";
+            throw new ComponentException( msg );
+        }
     }
     
     /**
@@ -411,9 +418,17 @@ public class LinePropertiesPanel extends JPanel
          *      event object associated with 
          *      ItemListener activation
          */
+        @SuppressWarnings("unchecked")
         @Override
         public void itemStateChanged(ItemEvent evt)
         {
+            Object  source  = evt.getSource();
+            if ( source instanceof PRadioButton )
+            {
+                PRadioButton<LinePropertySet>   button  =
+                    (PRadioButton<LinePropertySet>)source;
+                LinePropertySet                 set     = button.get();
+            }
         }        
     }
 }
