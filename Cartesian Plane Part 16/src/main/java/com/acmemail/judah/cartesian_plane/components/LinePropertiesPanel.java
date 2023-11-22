@@ -3,8 +3,10 @@ package com.acmemail.judah.cartesian_plane.components;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -18,6 +20,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -231,26 +234,74 @@ public class LinePropertiesPanel extends JPanel
      * when the Reset button pushed.
      * 
      * @param evt   
-     *      event object associated with the ActionEvent
+     *      ActionEvent object
      *      that caused this method to be invoked; not used
      */
     private void resetAction( ActionEvent evt )
     {
+        // Reset all LinePropertySets to their original values
+        buttonGroup.getButtons().stream()
+            .map( b -> b.get() )
+            .forEach( s -> s.reset() );
         
+        // Invoke all ItemListeners on the selected button, passing
+        // a SELECTED event. This will cause the GUI to be reinitialized
+        // with the selected button's LinePropertySet values.
+        PRadioButton<LinePropertySet>   selectedButton  = 
+            buttonGroup.getSelectedButton();
+        ItemEvent   event   = 
+            new ItemEvent(
+                selectedButton,
+                ItemEvent.ITEM_FIRST,
+                selectedButton,
+                ItemEvent.SELECTED
+            );
+        Stream.of( selectedButton.getItemListeners() )
+            .forEach( l -> l.itemStateChanged( event ) );
     }
     
     /**
      * Action method
      * that is executed
      * when the Close button pushed.
+     * If the root component
+     * in the source's containment hierarchy
+     * is a JDialog it is closed,
+     * otherwise no action is take.
+     * if there is no top-level window
+     * in the source's containment hierarchy
+     * a ComponentException is thrown.
      * 
      * @param evt   
      *      event object associated with the ActionEvent
      *      that caused this method to be invoked; not used
+     *      
+     * @throws ComponentException
+     *      if the event sources component
+     *      does not have a top-level window parent
+     *      in its containment hierarchy.
      */
     private void closeAction( ActionEvent evt )
     {
-        
+        Object  source  = evt.getSource();
+        if ( source instanceof JComponent )
+        {
+            Container   testObj = ((JComponent)source).getParent();
+            while ( !(testObj instanceof Window ) && testObj != null )
+                testObj = testObj.getParent();
+            if ( testObj == null )
+            {
+                StringBuilder   bldr    = new StringBuilder()
+                    .append( "Top-level window of LinePropertiesPanel " )
+                    .append( "not found; " )
+                    .append( "source type = " )
+                    .append( source.getClass().getName() );
+                throw new ComponentException( bldr.toString() );
+            }
+            
+            if ( testObj instanceof JDialog )
+                ((JDialog)testObj).setVisible( false );
+        }
     }
 
     /**
@@ -428,7 +479,83 @@ public class LinePropertiesPanel extends JPanel
                 PRadioButton<LinePropertySet>   button  =
                     (PRadioButton<LinePropertySet>)source;
                 LinePropertySet                 set     = button.get();
+                if ( button.isSelected() )
+                    itemSelected( set );
+                else
+                    itemDeselected( set );
             }
-        }        
+        }
+        
+        /**
+         * Given a LinePropertySet 
+         * associated with a deselected radio button
+         * copy the values of 
+         * the GUI controls
+         * into the corresponding fields
+         * of the set.
+         * 
+         * @param set   the given LinePropertySet
+         */
+        private void itemDeselected( LinePropertySet set )
+        {
+            if ( set.hasDraw() )
+                set.setDraw( drawToggle.isSelected() );
+            if ( set.hasLength() )
+                set.setLength( lengthModel.getNumber().floatValue() );
+            if ( set.hasSpacing() )
+                set.setSpacing( spacingModel.getNumber().floatValue() );
+            if ( set.hasStroke() )
+                set.setStroke( strokeModel.getNumber().floatValue() );
+            if ( set.hasColor() )
+                set.setColor( colorEditor.getColor().orElse( null ) );
+        }
+        
+        /**
+         * Given a LinePropertySet 
+         * associated with a selected radio button
+         * copy the property values
+         * from the set 
+         * to the corresponding.
+         * If a particular property
+         * of the set
+         * is not supported,
+         * disable the corresponding GUI component,
+         * otherwise make sure
+         * the component is enabled.
+         * 
+         * @param set   the given LinePropertySet
+         */
+        private void itemSelected( LinePropertySet set )
+        {
+            boolean hasDraw     = set.hasDraw();
+            drawToggle.setEnabled( hasDraw );
+            drawLabel.setEnabled( hasDraw );
+            if ( hasDraw )
+                drawToggle.setSelected( set.getDraw() );
+            
+            boolean hasLength   = set.hasLength();
+            lengthSpinner.setEnabled( hasLength );
+            lengthLabel.setEnabled( hasLength );
+            if ( hasLength )
+                lengthModel.setValue( set.getLength() );
+
+            boolean hasSpacing  = set.hasSpacing();
+            spacingLabel.setEnabled( hasSpacing );
+            spacingSpinner.setEnabled( hasSpacing );
+            if ( hasSpacing )
+                spacingModel.setValue( set.getSpacing() );
+
+            boolean hasStroke  = set.hasStroke();
+            strokeLabel.setEnabled( hasSpacing );
+            strokeSpinner.setEnabled( hasStroke );
+            if ( hasStroke )
+                strokeModel.setValue( set.getStroke() );
+
+            boolean hasColor    = set.hasColor();
+            colorButton.setEnabled( hasColor );
+            colorField.setEditable( hasColor );
+            if ( hasColor )
+                colorEditor.setColor( set.getColor() );
+        }
     }
 }
