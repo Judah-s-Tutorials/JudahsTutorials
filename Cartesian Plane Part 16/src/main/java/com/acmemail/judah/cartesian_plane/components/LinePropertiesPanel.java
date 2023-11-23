@@ -311,15 +311,6 @@ public class LinePropertiesPanel extends JPanel
      * 
      * @author Jack Straub
      */
-    /**
-     * @author Jack Straub
-     */
-    /**
-     * @author Jack Straub
-     */
-    /**
-     * @author Jack Straub
-     */
     private class PropertiesPanel extends JPanel 
         implements ItemListener
     {
