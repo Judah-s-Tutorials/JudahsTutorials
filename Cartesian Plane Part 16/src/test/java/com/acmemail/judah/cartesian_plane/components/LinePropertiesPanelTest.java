@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -37,15 +38,8 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LinePropertiesPanelTest
 {
-    private static LinePropertySet  axesSetOrig;
-    private static LinePropertySet  gridLinesSetOrig;
-    private static LinePropertySet  ticMajorSetOrig;
-    private static LinePropertySet  ticMinorSetOrig;
-    
-    private static LinePropertySet  axesSetNew;
-    private static LinePropertySet  gridLinesSetNew;
-    private static LinePropertySet  ticMajorSetNew;
-    private static LinePropertySet  ticMinorSetNew;
+    private final LPSMap    setMapOrig  = new LPSMap();
+    private final LPSMap    setMapNew   = new LPSMap();
     
     private List<PRadioButton<LinePropertySet>>      
                                     radioButtons;
@@ -70,25 +64,21 @@ public class LinePropertiesPanelTest
     static void setUpBeforeClass() throws Exception
     {
         LinePropertySetInitializer.initProperties();
-        axesSetOrig = new LinePropertySetAxes();
-        gridLinesSetOrig = new LinePropertySetGridLines();
-        ticMajorSetOrig = new LinePropertySetTicMajor();
-        ticMinorSetOrig = new LinePropertySetTicMinor();
     }
     
     public LinePropertiesPanelTest()
     {
         makeDialog();
         
-        initPropertySet( axesSetOrig, 1 );
-        initPropertySet( gridLinesSetOrig, 2 );
-        initPropertySet( ticMajorSetOrig, 3 );
-        initPropertySet( ticMinorSetOrig, 4 );
+        setMapOrig.put( new LinePropertySetAxes() );
+        setMapOrig.put( new LinePropertySetGridLines() );
+        setMapOrig.put( new LinePropertySetTicMajor() );
+        setMapOrig.put( new LinePropertySetTicMinor() );
         
-        axesSetNew = newLinePropertySet( axesSetOrig );
-        gridLinesSetNew = newLinePropertySet( gridLinesSetOrig );
-        ticMajorSetNew = newLinePropertySet( ticMajorSetOrig );
-        ticMinorSetNew = newLinePropertySet( ticMinorSetOrig );
+        setMapNew.put( new LinePropertySetAxes() );
+        setMapNew.put( new LinePropertySetGridLines() );
+        setMapNew.put( new LinePropertySetTicMajor() );
+        setMapNew.put( new LinePropertySetTicMinor() );
     }
 
     @Order( 5 )
@@ -101,8 +91,9 @@ public class LinePropertiesPanelTest
     }
     
     @Order( 10 )
+    @Test
     public void 
-    testSynchOnTraversal( PRadioButton<LinePropertySet> rButton)
+    testSynchOnSelected()
     {
         radioButtons.stream()
             // select given radio button
@@ -111,6 +102,31 @@ public class LinePropertiesPanelTest
             .map( b -> b.get() )
             // verify that GUI is synched with selected button
             .forEach( s -> assertSetSynched( s ) );
+    }
+    
+    @Order( 15 )
+    @Test
+    public void 
+    testSynchOnDeselected()
+    {
+        for ( PRadioButton<LinePropertySet> button : radioButtons )
+        {
+            doClick( button );
+            LinePropertySet currSet = button.get();
+            LinePropertySet newSet  = setMapNew.get( currSet );
+            if ( newSet.hasStroke() )
+                strokeModel.setValue( newSet.getStroke() );
+            if ( newSet.hasLength() )
+                lengthModel.setValue( newSet.getLength() );
+            if ( newSet.hasSpacing() )
+                spacingModel.setValue( newSet.getSpacing() );
+            if ( newSet.hasColor() )
+                setHexColor( newSet.getColor() );
+            if ( newSet.hasDraw() )
+                drawCheckBox.setSelected( newSet.getDraw() );
+            selectOther();
+            assertEqualsSet( newSet, currSet );
+        }
     }
     
     private void doClick( AbstractButton button )
@@ -124,6 +140,25 @@ public class LinePropertiesPanelTest
             String  text    = button.getText();
             fail( "doClick() failed on " + text, exc );
         }
+    }
+    
+    private void selectOther()
+    {
+        PRadioButton    other   =
+            radioButtons.stream()
+                .filter( rb -> !rb.isSelected() )
+                .findFirst().orElse( null );
+        assertNotNull( other );
+        doClick( other );
+    }
+    
+    private void setHexColor( Color color )
+    {
+        GUIUtils.schedEDTAndWait( () -> {
+            String  hexColor    = Integer.toHexString( color.getRGB() );
+            colorField.setText( hexColor );
+            colorField.postActionEvent();
+        });
     }
 
     private void makeDialog()
@@ -450,5 +485,21 @@ public class LinePropertiesPanelTest
         }
         
         return setOut;
+    }
+    
+    private static class LPSMap extends 
+        HashMap<Class<?>, LinePropertySet>
+    {
+        public void put( LinePropertySet set )
+        {
+            put( set.getClass(), set );
+        }
+
+        public LinePropertySet get( LinePropertySet setIn )
+        {
+            LinePropertySet setOut  = get( setIn.getClass() );
+            assertNotNull( setOut );
+            return setOut;
+        }
     }
 }
