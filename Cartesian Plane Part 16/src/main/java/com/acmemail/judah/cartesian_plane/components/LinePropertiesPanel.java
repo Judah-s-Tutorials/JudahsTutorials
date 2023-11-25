@@ -220,12 +220,9 @@ public class LinePropertiesPanel extends JPanel
      */
     private void applyAction( ActionEvent evt )
     {
-        LinePropertySet set     = buttonGroup.getSelectedProperty();
-        if ( set == null  )
-        {
-            String  msg = "LinePropertySet not found";
-            throw new ComponentException( msg );
-        }
+        buttonGroup.getButtons().stream()
+            .map( b -> b.get() )
+            .forEach( s -> s.apply() );
     }
     
     /**
