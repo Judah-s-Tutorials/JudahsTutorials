@@ -457,20 +457,22 @@ public class LinePropertiesPanel extends JPanel
          *      event object associated with 
          *      ItemListener activation
          */
-        @SuppressWarnings("unchecked")
         @Override
         public void itemStateChanged(ItemEvent evt)
         {
             Object  source  = evt.getSource();
-            if ( source instanceof PRadioButton )
+            if ( source instanceof PRadioButton<?> )
             {
-                PRadioButton<LinePropertySet>   button  =
-                    (PRadioButton<LinePropertySet>)source;
-                LinePropertySet                 set     = button.get();
-                if ( button.isSelected() )
-                    itemSelected( set );
-                else
-                    itemDeselected( set );
+                PRadioButton<?> button  = (PRadioButton<?>)source;
+                Object          obj     = button.get();
+                if ( obj instanceof LinePropertySet )
+                {
+                    LinePropertySet set = (LinePropertySet)obj;
+                    if ( button.isSelected() )
+                        itemSelected( set );
+                    else
+                        itemDeselected( set );
+                }
             }
         }
         
@@ -541,7 +543,7 @@ public class LinePropertiesPanel extends JPanel
 
             boolean hasColor    = set.hasColor();
             colorButton.setEnabled( hasColor );
-            colorField.setEditable( hasColor );
+            colorField.setEnabled( hasColor );
             if ( hasColor )
                 colorEditor.setColor( set.getColor() );
         }

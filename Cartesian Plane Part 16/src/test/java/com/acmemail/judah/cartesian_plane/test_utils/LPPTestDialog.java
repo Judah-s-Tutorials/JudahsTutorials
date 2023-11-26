@@ -28,6 +28,7 @@ import com.acmemail.judah.cartesian_plane.components.PRadioButton;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
+@SuppressWarnings("serial")
 public class LPPTestDialog extends JDialog
 {
     private final LinePropertiesPanel   propertiesPanel = 
@@ -90,17 +91,31 @@ public class LPPTestDialog extends JDialog
         doClick( closeButton );
     }
     
+    public void setDialogVisible( boolean visible )
+    {
+        if ( SwingUtilities.isEventDispatchThread() )
+            super.setVisible( visible );
+        else
+            GUIUtils.schedEDTAndWait( 
+                () -> super.setVisible( visible )
+            );
+    }
+    
+    public boolean isDialogVisible()
+    {
+        boolean[]   isVis   = new boolean[1];
+        if ( SwingUtilities.isEventDispatchThread() )
+            isVis[0] = isVisible();
+        else
+            GUIUtils.schedEDTAndWait( 
+                () -> isVis[0] = isVisible()
+            );
+        return isVis[0];
+    }
+    
     public List<PRadioButton<LinePropertySet>> getRadioButtons()
     {
         return radioButtons;
-    }
-    
-    public void assertSetSynched( LinePropertySet set )
-    {
-        if ( SwingUtilities.isEventDispatchThread() )
-            assertSynched( set );
-        else
-            GUIUtils.schedEDTAndWait( () -> assertSynched( set ) );
     }
     
     public void getAllProperties( LinePropertySet set )
@@ -133,6 +148,42 @@ public class LPPTestDialog extends JDialog
             GUIUtils.schedEDTAndWait( () -> synchRightEDT( set ) );
     }
     
+    public boolean isStrokeEnabled()
+    {
+        boolean enabled = isEnabled( strokeSpinner );
+        return enabled;
+    }
+    
+    public boolean isLengthEnabled()
+    {
+        boolean enabled = isEnabled( lengthSpinner );
+        return enabled;
+    }
+    
+    public boolean isSpacingEnabled()
+    {
+        boolean enabled = isEnabled( spacingSpinner );
+        return enabled;
+    }
+    
+    public boolean isColorButtonEnabled()
+    {
+        boolean enabled = isEnabled( colorButton );
+        return enabled;
+    }
+    
+    public boolean isColorFieldEnabled()
+    {
+        boolean enabled = isEnabled( colorField );
+        return enabled;
+    }
+    
+    public boolean isDrawEnabled()
+    {
+        boolean enabled = isEnabled( drawCheckBox );
+        return enabled;
+    }
+    
     private void synchRightEDT( LinePropertySet set )
     {
         if ( set.hasStroke() )
@@ -145,33 +196,6 @@ public class LPPTestDialog extends JDialog
             setColor( set.getColor() );
         if ( set.hasDraw() )
             drawCheckBox.setSelected( set.getDraw() );
-    }
-    
-    private void assertSynched( LinePropertySet set )
-    {
-        boolean hasDraw = set.hasDraw();
-        boolean hasLength = set.hasLength();
-        boolean hasSpacing = set.hasSpacing();
-        boolean hasStroke = set.hasStroke();
-        boolean hasColor = set.hasColor();
-        
-        assertEquals( hasDraw, drawCheckBox.isEnabled() );
-        assertEquals( hasStroke, strokeSpinner.isEnabled() );
-        assertEquals( hasLength, lengthSpinner.isEnabled() );
-        assertEquals( hasSpacing, drawCheckBox.isEnabled() );
-        assertEquals( hasColor, colorButton.isEnabled() );
-        assertEquals( hasColor, colorField.isEnabled() );
-        
-        if ( hasStroke )
-            assertEquals( set.getStroke(),  floatValue( strokeModel ) );
-        if ( hasLength )
-            assertEquals( set.getLength(), floatValue( lengthModel ) );
-        if ( hasSpacing )
-            assertEquals( set.getSpacing(),  floatValue( spacingModel ) );
-        if ( hasColor )
-            assertEqualsColor( set.getColor(), colorField.getText() );
-        if ( hasDraw )
-            assertEquals( set.getDraw(), drawCheckBox.isSelected() );
     }
     
     private static float floatValue( SpinnerNumberModel model )
@@ -197,21 +221,6 @@ public class LPPTestDialog extends JDialog
         return color;
     }
     
-    private static void assertEqualsColor( Color color, String strColor )
-    {
-        try
-        {
-            int expColor    = color.getRGB() & 0xFFFFFF;
-            int actColor    = Integer.decode( strColor ) & 0xFFFFFF;
-            assertEquals( expColor, actColor );
-            
-        }
-        catch ( NumberFormatException exc )
-        {
-            fail( "Invalid color string", exc );
-        }
-    }
-    
     private void setColor( Color color )
     {
         int     rgb     = color.getRGB() & 0xffffff;
@@ -226,65 +235,6 @@ public class LPPTestDialog extends JDialog
             button.doClick();
         else
             GUIUtils.schedEDTAndWait( () -> button.doClick() ); 
-    }
-    
-//    public void setStroke( float val )
-//    {
-//        setValue( strokeModel,val );
-//    }
-//    
-//    public float getStroke()
-//    {
-//        float   val = getFloat( strokeModel );
-//        return val;
-//    }
-//    
-//    public boolean isStrokeEnabled()
-//    {
-//        boolean isEnabled   = isEnabled( strokeSpinner );
-//        return isEnabled;
-//    }
-//    
-//    public void setLength( float val )
-//    {
-//        setValue( lengthModel, val );
-//    }
-//    
-//    public boolean isLengthEnabled()
-//    {
-//        boolean isEnabled   = isEnabled( lengthSpinner );
-//        return isEnabled;
-//    }
-//    
-//    public void setSpacing( float val )
-//    {
-//        setValue( spacingModel, val );
-//    }
-//    
-//    public boolean isSpacingEnabled()
-//    {
-//        boolean isEnabled   = isEnabled( spacingSpinner );
-//        return isEnabled;
-//    }
-    
-    private static void setValue( SpinnerNumberModel model, float val )
-    {
-        if ( SwingUtilities.isEventDispatchThread() )
-            model.setValue( val );
-        else
-            GUIUtils.schedEDTAndWait( () -> model.setValue( val ) );
-    }
-    
-    private static float getFloat( SpinnerNumberModel model )
-    {
-        float[] floatVal    = new float[1];
-        if ( SwingUtilities.isEventDispatchThread() )
-            floatVal[0] = model.getNumber().floatValue();
-        else
-            GUIUtils.schedEDTAndWait( () -> 
-                floatVal[0] = model.getNumber().floatValue()
-            );
-        return floatVal[0];
     }
     
     private static boolean isEnabled( JComponent comp )
@@ -333,6 +283,7 @@ public class LPPTestDialog extends JDialog
         return buttons;
     }
     
+    @SuppressWarnings("unchecked")
     private PRadioButton<LinePropertySet> parseRButton( String text )
     {
         Predicate<JComponent>   isButton    =
@@ -347,7 +298,6 @@ public class LPPTestDialog extends JDialog
         assertTrue( comp instanceof PRadioButton<?> );
         PRadioButton<?> testButton  = (PRadioButton<?>)comp;
         assertTrue( testButton.get() instanceof LinePropertySet );
-        
         PRadioButton<LinePropertySet>   button  =
             (PRadioButton<LinePropertySet>)testButton;
         return button;

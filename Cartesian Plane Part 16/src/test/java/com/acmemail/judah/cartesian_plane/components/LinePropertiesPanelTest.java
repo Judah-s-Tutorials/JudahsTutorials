@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -9,7 +10,7 @@ import java.awt.Color;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
-import java.util.List;
+import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
@@ -33,10 +34,10 @@ public class LinePropertiesPanelTest
     static void setUpBeforeClass() throws Exception
     {
         LinePropertySetInitializer.initProperties();
-            GUIUtils.schedEDTAndWait( () -> {
-            dialog = new LPPTestDialog();
-            dialog.setVisible( true );
-        });
+            GUIUtils.schedEDTAndWait( () ->
+                dialog = new LPPTestDialog()
+        );
+        dialog.setDialogVisible( true );
             
         setMapOrig.put( new LinePropertySetAxes() );
         setMapOrig.put( new LinePropertySetGridLines() );
@@ -57,19 +58,29 @@ public class LinePropertiesPanelTest
             .map( b -> b.get() )
             .peek( s -> Utils.pause( 250 ) )
             .map( s -> (LinePropertySet)s )
-            .forEach( dialog::assertSetSynched );
+            .peek( s -> assertEnabledSynch( s ) )
+            .map( s -> new LinePropertySet[] {s, null} )
+            .peek( a -> a[1] = newInstance( a[0] ) )
+            .peek( a -> dialog.getAllProperties( a[1] ) )
+            .forEach( a -> assertEqualsSet( a[0], a[1] ) );
     }
     
     @Order( 10 )
     @Test
     public void testSynchOnTraversal()
     {
+        // Select a button ("initial button")
+        // Give all components new values ("new values")
+        // Select a different button
+        // Verify that the LinePropertySet associated with the initia;l
+        //     button has been updated with new values
         dialog.getRadioButtons().forEach( button -> {
             LinePropertySet storedValues    = button.get();
             LinePropertySet newValues       = 
                 setMapNew.get( storedValues );
             dialog.doClick( button );
             Utils.pause( 250 );
+            assertEnabledSynch( storedValues );
             dialog.synchRight( newValues );
             Utils.pause( 250 );
             selectOther();
@@ -121,6 +132,55 @@ public class LinePropertiesPanelTest
         });
     }
     
+    @Order( 25 )
+    @Test
+    public void testClose()
+    {
+        PRadioButton<LinePropertySet>   button  = 
+            getButton( b -> b.isSelected() );
+        LinePropertySet buttonProperties    = button.get();
+        LinePropertySet compValues          = 
+            newInstance( buttonProperties );
+        dialog.getAllProperties( compValues );
+        
+        // sanity check
+        assertEqualsSet( buttonProperties, compValues );
+        assertTrue( dialog.isDialogVisible() );
+        
+        dialog.close();
+        Utils.pause( 500 );
+        assertFalse( dialog.isDialogVisible() );
+        Utils.pause( 500 );
+        dialog.setDialogVisible( true );
+        Utils.pause( 500 );
+        
+        assertTrue( button.isSelected() );
+        LinePropertySet testProperties      = button.get();
+        dialog.getAllProperties( compValues );
+        assertEqualsSet( testProperties, buttonProperties );
+        assertEqualsSet( buttonProperties, compValues );        
+    }
+    
+    private PRadioButton<LinePropertySet> 
+    getButton( Predicate<PRadioButton<LinePropertySet>> pred )
+    {
+        PRadioButton<LinePropertySet>   button  = 
+            dialog.getRadioButtons().stream()
+                .filter( pred )
+                .findFirst().orElse( null );
+        assertNotNull( button );
+        return button;
+    }
+    private static void assertEnabledSynch( LinePropertySet set )
+    {
+        assertEquals( set.hasStroke(), dialog.isStrokeEnabled() );
+        assertEquals( set.hasLength(), dialog.isLengthEnabled() );
+        assertEquals( set.hasSpacing(), dialog.isSpacingEnabled() );
+        assertEquals( set.hasColor(), dialog.isColorButtonEnabled() );
+        assertEquals( set.hasColor(), dialog.isColorFieldEnabled() );
+        assertEquals( set.hasDraw(), dialog.isDrawEnabled() );
+    }
+    
     private static void 
     assertEqualsSet( LinePropertySet set1, LinePropertySet set2 )
     {
@@ -150,7 +210,7 @@ public class LinePropertiesPanelTest
 
     private void selectOther()
     {
-        PRadioButton    other   =
+        PRadioButton<LinePropertySet>   other   =
             dialog.getRadioButtons().stream()
                 .filter( rb -> !rb.isSelected() )
                 .findFirst().orElse( null );
@@ -207,6 +267,7 @@ public class LinePropertiesPanelTest
         return setOut;
     }
 
+    @SuppressWarnings("serial")
     private static class LPSMap extends 
         HashMap<Class<?>, LinePropertySet>
     {
