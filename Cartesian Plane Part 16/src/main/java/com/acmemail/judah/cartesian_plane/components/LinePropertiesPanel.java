@@ -220,6 +220,23 @@ public class LinePropertiesPanel extends JPanel
      */
     private void applyAction( ActionEvent evt )
     {
+        // Update the selected button's property set with the
+        // current values of the components on the right side
+        // of the panel. Do this by notifying all ItemListeners
+        // with an ItemEvent.DESELECTED event.
+        PRadioButton<LinePropertySet>   selectedButton  = 
+            buttonGroup.getSelectedButton();
+        ItemEvent   event   = 
+            new ItemEvent(
+                selectedButton,
+                ItemEvent.ITEM_FIRST,
+                selectedButton,
+                ItemEvent.DESELECTED
+            );
+        Stream.of( selectedButton.getItemListeners() )
+            .forEach( l -> l.itemStateChanged( event ) );
+
+        
         buttonGroup.getButtons().stream()
             .map( b -> b.get() )
             .forEach( s -> s.apply() );
@@ -468,10 +485,10 @@ public class LinePropertiesPanel extends JPanel
                 if ( obj instanceof LinePropertySet )
                 {
                     LinePropertySet set = (LinePropertySet)obj;
-                    if ( button.isSelected() )
-                        itemSelected( set );
+                    if ( evt.getStateChange() == ItemEvent.SELECTED )
+                        copyRight( set );
                     else
-                        itemDeselected( set );
+                        copyLeft( set );
                 }
             }
         }
@@ -486,7 +503,7 @@ public class LinePropertiesPanel extends JPanel
          * 
          * @param set   the given LinePropertySet
          */
-        private void itemDeselected( LinePropertySet set )
+        private void copyLeft( LinePropertySet set )
         {
             if ( set.hasDraw() )
                 set.setDraw( drawToggle.isSelected() );
@@ -515,7 +532,7 @@ public class LinePropertiesPanel extends JPanel
          * 
          * @param set   the given LinePropertySet
          */
-        private void itemSelected( LinePropertySet set )
+        private void copyRight( LinePropertySet set )
         {
             boolean hasDraw     = set.hasDraw();
             drawToggle.setEnabled( hasDraw );

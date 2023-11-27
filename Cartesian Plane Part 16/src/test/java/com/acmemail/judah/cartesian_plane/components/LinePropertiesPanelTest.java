@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.LPPTestDialog;
 import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
@@ -34,9 +34,7 @@ public class LinePropertiesPanelTest
     static void setUpBeforeClass() throws Exception
     {
         LinePropertySetInitializer.initProperties();
-            GUIUtils.schedEDTAndWait( () ->
-                dialog = new LPPTestDialog()
-        );
+        dialog = LPPTestDialog.getDialog();
         dialog.setDialogVisible( true );
             
         setMapOrig.put( new LinePropertySetAxes() );
@@ -159,6 +157,34 @@ public class LinePropertiesPanelTest
         dialog.getAllProperties( compValues );
         assertEqualsSet( testProperties, buttonProperties );
         assertEqualsSet( buttonProperties, compValues );        
+    }
+    
+    @Order( 25 )
+    @Test
+    public void testApplyReset()
+    {
+        // Special test case:
+        // . change stroke value
+        // . apply
+        // . reset
+        // . verify that the stroke value remains as modified
+        final int   newVal  = 10;
+        PRadioButton<LinePropertySet>   button  = 
+            getButton( b -> b.isSelected() );
+        LinePropertySet origSet = button.get();
+        LinePropertySet testSet = newInstance( origSet );
+        dialog.getAllProperties( testSet );
+        assertEqualsSet( origSet, testSet );
+        assertNotEquals( newVal, origSet.getStroke() );
+        
+        testSet.setStroke( newVal );
+        dialog.synchRight( testSet );
+        dialog.apply();
+        dialog.reset();
+        
+        dialog.getAllProperties( testSet );
+        assertEquals( newVal, testSet.getStroke() );
+        assertEquals( newVal, origSet.getStroke() );
     }
     
     private PRadioButton<LinePropertySet> 

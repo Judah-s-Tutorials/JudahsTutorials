@@ -31,6 +31,8 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 @SuppressWarnings("serial")
 public class LPPTestDialog extends JDialog
 {
+    private static LPPTestDialog        dialog          = null;
+    
     private final LinePropertiesPanel   propertiesPanel = 
         new LinePropertiesPanel();
     private final List<PRadioButton<LinePropertySet>>      
@@ -50,9 +52,15 @@ public class LPPTestDialog extends JDialog
     private final JButton               resetButton;
     private final JButton               closeButton;
 
-    public LPPTestDialog()
+    /**
+     * Default constructor.
+     * Private to prevent external instantiation.
+     * 
+     * @see #getDialog()
+     */
+    private LPPTestDialog()
     {
-        propCompPanel = getPropControlPanel();
+        propCompPanel = getPropCompPanel();
         radioButtons = parseRButtons();
         
         List<JSpinner>  allSpinners = parseSpinners();
@@ -74,6 +82,15 @@ public class LPPTestDialog extends JDialog
         setTitle( "Line Properties Panel Test Dialog" );
         setContentPane( propertiesPanel );
         pack();
+    }
+    
+    public static LPPTestDialog getDialog()
+    {
+        if ( dialog == null )
+            GUIUtils.schedEDTAndWait( () ->
+                dialog = new LPPTestDialog()
+            );
+        return dialog;
     }
     
     public void apply()
@@ -221,20 +238,20 @@ public class LPPTestDialog extends JDialog
         return color;
     }
     
-    private void setColor( Color color )
-    {
-        int     rgb     = color.getRGB() & 0xffffff;
-        String  strRGB  = String.format( "0x%06x", rgb );
-        colorField.setText( strRGB );
-        colorField.postActionEvent();
-    }
-    
     public void doClick( AbstractButton button )
     {
         if ( SwingUtilities.isEventDispatchThread() )
             button.doClick();
         else
             GUIUtils.schedEDTAndWait( () -> button.doClick() ); 
+    }
+    
+    private void setColor( Color color )
+    {
+        int     rgb     = color.getRGB() & 0xffffff;
+        String  strRGB  = String.format( "0x%06x", rgb );
+        colorField.setText( strRGB );
+        colorField.postActionEvent();
     }
     
     private static boolean isEnabled( JComponent comp )
@@ -249,7 +266,7 @@ public class LPPTestDialog extends JDialog
         return bVal[0];
     }
     
-    private JPanel getPropControlPanel()
+    private JPanel getPropCompPanel()
     {
         Predicate<JComponent>   pred    = c -> (c instanceof JSpinner);
         JComponent              comp    =
