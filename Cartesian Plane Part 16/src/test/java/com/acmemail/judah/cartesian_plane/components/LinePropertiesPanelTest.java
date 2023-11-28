@@ -56,11 +56,7 @@ public class LinePropertiesPanelTest
             .map( b -> b.get() )
             .peek( s -> Utils.pause( 250 ) )
             .map( s -> (LinePropertySet)s )
-            .peek( s -> assertEnabledSynch( s ) )
-            .map( s -> new LinePropertySet[] {s, null} )
-            .peek( a -> a[1] = newInstance( a[0] ) )
-            .peek( a -> dialog.getAllProperties( a[1] ) )
-            .forEach( a -> assertEqualsSet( a[0], a[1] ) );
+            .forEach( s -> assertPropertiesSynched( s ) );
     }
     
     @Order( 10 )
@@ -70,7 +66,7 @@ public class LinePropertiesPanelTest
         // Select a button ("initial button")
         // Give all components new values ("new values")
         // Select a different button
-        // Verify that the LinePropertySet associated with the initia;l
+        // Verify that the LinePropertySet associated with the initial
         //     button has been updated with new values
         dialog.getRadioButtons().forEach( button -> {
             LinePropertySet storedValues    = button.get();
@@ -78,12 +74,11 @@ public class LinePropertiesPanelTest
                 setMapNew.get( storedValues );
             dialog.doClick( button );
             Utils.pause( 250 );
-            assertEnabledSynch( storedValues );
             dialog.synchRight( newValues );
             Utils.pause( 250 );
             selectOther();
             Utils.pause( 250 );
-            assertEqualsSet( storedValues, newValues );
+            assertSetsSynched( storedValues, newValues );
         });
     }
     
@@ -96,7 +91,7 @@ public class LinePropertiesPanelTest
             LinePropertySet storedValues    = button.get();
             LinePropertySet origValues      = 
                 setMapOrig.get( storedValues );
-            assertEqualsSet( storedValues, origValues );
+            assertSetsSynched( storedValues, origValues );
         });
     }
     
@@ -114,7 +109,7 @@ public class LinePropertiesPanelTest
             Utils.pause( 250 );
             selectOther();
             Utils.pause( 250 );
-            assertEqualsSet( storedValues, newValues );
+            assertSetsSynched( storedValues, newValues );
         });
         
         dialog.apply();
@@ -125,8 +120,8 @@ public class LinePropertiesPanelTest
                 setMapNew.get( storedValues );
             LinePropertySet pMgrValues      =
                 newInstance( storedValues );
-            assertEqualsSet( storedValues, newValues );
-            assertEqualsSet( newValues, pMgrValues );
+            assertSetsSynched( storedValues, newValues );
+            assertSetsSynched( newValues, pMgrValues );
         });
     }
     
@@ -137,26 +132,21 @@ public class LinePropertiesPanelTest
         PRadioButton<LinePropertySet>   button  = 
             getButton( b -> b.isSelected() );
         LinePropertySet buttonProperties    = button.get();
-        LinePropertySet compValues          = 
-            newInstance( buttonProperties );
-        dialog.getAllProperties( compValues );
         
         // sanity check
-        assertEqualsSet( buttonProperties, compValues );
+        assertPropertiesSynched( buttonProperties );
         assertTrue( dialog.isDialogVisible() );
         
         dialog.close();
         Utils.pause( 500 );
         assertFalse( dialog.isDialogVisible() );
-        Utils.pause( 500 );
         dialog.setDialogVisible( true );
         Utils.pause( 500 );
         
-        assertTrue( button.isSelected() );
+        assertTrue( dialog.isSelected( button ) );
         LinePropertySet testProperties      = button.get();
-        dialog.getAllProperties( compValues );
-        assertEqualsSet( testProperties, buttonProperties );
-        assertEqualsSet( buttonProperties, compValues );        
+        assertSetsSynched( testProperties, buttonProperties );
+        assertPropertiesSynched( buttonProperties );        
     }
     
     @Order( 25 )
@@ -173,8 +163,7 @@ public class LinePropertiesPanelTest
             getButton( b -> b.isSelected() );
         LinePropertySet origSet = button.get();
         LinePropertySet testSet = newInstance( origSet );
-        dialog.getAllProperties( testSet );
-        assertEqualsSet( origSet, testSet );
+        assertPropertiesSynched( origSet );
         assertNotEquals( newVal, origSet.getStroke() );
         
         testSet.setStroke( newVal );
@@ -182,8 +171,8 @@ public class LinePropertiesPanelTest
         dialog.apply();
         dialog.reset();
         
-        dialog.getAllProperties( testSet );
-        assertEquals( newVal, testSet.getStroke() );
+        LPPTestDialog.CompConfig  config  = dialog.getAllProperties();
+        assertEquals( newVal, config.stroke );
         assertEquals( newVal, origSet.getStroke() );
     }
     
@@ -197,41 +186,63 @@ public class LinePropertiesPanelTest
         assertNotNull( button );
         return button;
     }
-    private static void assertEnabledSynch( LinePropertySet set )
-    {
-        assertEquals( set.hasStroke(), dialog.isStrokeEnabled() );
-        assertEquals( set.hasLength(), dialog.isLengthEnabled() );
-        assertEquals( set.hasSpacing(), dialog.isSpacingEnabled() );
-        assertEquals( set.hasColor(), dialog.isColorButtonEnabled() );
-        assertEquals( set.hasColor(), dialog.isColorFieldEnabled() );
-        assertEquals( set.hasDraw(), dialog.isDrawEnabled() );
-    }
     
-    private static void 
-    assertEqualsSet( LinePropertySet set1, LinePropertySet set2 )
+    private void assertPropertiesSynched( LinePropertySet set1 )
     {
-        boolean hasDraw = set1.hasDraw();
+        LPPTestDialog.CompConfig    config  = dialog.getAllProperties();
+        boolean hasStroke = set1.hasStroke();
         boolean hasLength = set1.hasLength();
         boolean hasSpacing = set1.hasSpacing();
-        boolean hasStroke = set1.hasStroke();
         boolean hasColor = set1.hasColor();
+        boolean hasDraw = set1.hasDraw();
         
-        assertEquals( hasDraw, set2.hasDraw() );
+        assertEquals( hasStroke, config.strokeSpinnerEnabled );
+        assertEquals( hasStroke, config.strokeLabelEnabled );
+        assertEquals( hasLength, config.lengthSpinnerEnabled );
+        assertEquals( hasLength, config.lengthLabelEnabled );
+        assertEquals( hasSpacing, config.spacingSpinnerEnabled );
+        assertEquals( hasSpacing, config.spacingLabelEnabled );
+        assertEquals( hasColor, config.colorButtonEnabled );
+        assertEquals( hasColor, config.colorFieldEnabled );
+        assertEquals( hasDraw, config.drawCheckBoxEnabled );
+
+        if ( hasStroke )
+            assertEquals( set1.getStroke(), config.stroke );
+        if ( hasLength )
+            assertEquals( set1.getLength(), config.length );
+        if ( hasSpacing )
+            assertEquals( set1.getSpacing(), config.spacing );
+        if ( hasColor )
+            assertEquals( set1.getColor(), config.color );
+        if ( hasDraw )
+            assertEquals( set1.getDraw(), config.draw );
+}
+    
+    private static void 
+    assertSetsSynched( LinePropertySet set1, LinePropertySet set2 )
+    {
+        boolean hasStroke = set1.hasStroke();
+        boolean hasLength = set1.hasLength();
+        boolean hasSpacing = set1.hasSpacing();
+        boolean hasColor = set1.hasColor();
+        boolean hasDraw = set1.hasDraw();
+        
+        assertEquals( hasStroke, set2.hasStroke() );
         assertEquals( hasLength, set2.hasLength() );
         assertEquals( hasSpacing, set2.hasSpacing() );
-        assertEquals( hasStroke, set2.hasStroke() );
         assertEquals( hasColor, set2.hasColor() );
+        assertEquals( hasDraw, set2.hasDraw() );
         
-        if ( hasDraw )
-            assertEquals( set1.getDraw(), set2.getDraw() );
+        if ( hasStroke )
+            assertEquals( set1.getStroke(), set2.getStroke() );
         if ( hasLength )
             assertEquals( set1.getLength(), set2.getLength() );
         if ( hasSpacing )
             assertEquals( set1.getSpacing(), set2.getSpacing() );
-        if ( hasStroke )
-            assertEquals( set1.getStroke(), set2.getStroke() );
         if ( hasColor )
             assertEquals( set1.getColor(), set2.getColor() );
+        if ( hasDraw )
+            assertEquals( set1.getDraw(), set2.getDraw() );
     }
 
     private void selectOther()

@@ -553,7 +553,7 @@ public class LinePropertiesPanel extends JPanel
                 spacingModel.setValue( set.getSpacing() );
 
             boolean hasStroke  = set.hasStroke();
-            strokeLabel.setEnabled( hasSpacing );
+            strokeLabel.setEnabled( hasStroke );
             strokeSpinner.setEnabled( hasStroke );
             if ( hasStroke )
                 strokeModel.setValue( set.getStroke() );
