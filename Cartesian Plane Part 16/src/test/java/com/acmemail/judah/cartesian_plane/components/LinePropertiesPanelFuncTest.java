@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Predicate;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -24,7 +25,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class LinePropertiesPanelTest
+public class LinePropertiesPanelFuncTest
 {
     private static final LPSMap     setMapOrig  = new LPSMap();
     private static final LPSMap     setMapNew   = new LPSMap();
@@ -36,7 +37,6 @@ public class LinePropertiesPanelTest
         LinePropertySetInitializer.initProperties();
         dialog = LPPTestDialog.getDialog();
         dialog.setDialogVisible( true );
-            
         setMapOrig.put( new LinePropertySetAxes() );
         setMapOrig.put( new LinePropertySetGridLines() );
         setMapOrig.put( new LinePropertySetTicMajor() );
@@ -305,8 +305,8 @@ public class LinePropertiesPanelTest
     }
 
     @SuppressWarnings("serial")
-    private static class LPSMap extends 
-        HashMap<Class<?>, LinePropertySet>
+    private static class LPSMap  
+        extends HashMap<Class<?>, LinePropertySet>
     {
         public void put( LinePropertySet set )
         {

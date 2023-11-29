@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enum to List Demo</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p>
+<strong>Digression:</strong>
+My first thought 
+was not to write a method 
+named <em>isDialogVisisble()</em>, 
+but to override <em>isVisible()</em>
+in the dialog class:
+</p>
+<pre style="margin-left: 2em;">
+@Override
+public boolean isVisible()
+{
+    if ( SwingUtilities.isEventDispatchThread() )
+        tempBoolean = super.isVisible();
+    else
+        GUIUtils.schedEDTAndWait(
+            () -> tempBoolean = super.isVisible()
+        );
+}</pre>
+<p>
+It turns out, however,
+that <em>pack()</em>
+invokes <em>isVisible()</em>
+multiple times,
+and,
+at least sometimes,
+on some versions of Windows,
+the first time it's called
+<em>isEventDispatchThread()</em> returns false,
+and <em>GUIUtils.schedEDTAndWait(...)</em>
+crashes with 
+an <em>InvocationTargetException</em>.
+(I've been advised
+that this does not
+occur on <em>MacOS</em>).
+</p>
+<p>
+The work around
+was to give a method 
+a unique name, <em>isDialogVisible</em>.
+For symmetry,
+rather than override <em>setVisible</em>,
+I decided on a unique method name
+for that as well,
+<em>setDialogVisible</em>.
+</p>
+</div>
+</body>
+</html>

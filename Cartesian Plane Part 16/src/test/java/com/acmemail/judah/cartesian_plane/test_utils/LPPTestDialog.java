@@ -119,14 +119,22 @@ public class LPPTestDialog extends JDialog
     {
         doClick( closeButton );
     }
+
+    public void doClick( AbstractButton button )
+    {
+        if ( SwingUtilities.isEventDispatchThread() )
+            button.doClick();
+        else
+            GUIUtils.schedEDTAndWait( () -> button.doClick() ); 
+    }
     
     public void setDialogVisible( boolean visible )
     {
         if ( SwingUtilities.isEventDispatchThread() )
-            super.setVisible( visible );
+            setVisible( visible );
         else
             GUIUtils.schedEDTAndWait( 
-                () -> super.setVisible( visible )
+                () -> setVisible( visible )
             );
     }
     
@@ -175,14 +183,6 @@ public class LPPTestDialog extends JDialog
             synchRightEDT( set );
         else
             GUIUtils.schedEDTAndWait( () -> synchRightEDT( set ) );
-    }
-
-    public void doClick( AbstractButton button )
-    {
-        if ( SwingUtilities.isEventDispatchThread() )
-            button.doClick();
-        else
-            GUIUtils.schedEDTAndWait( () -> button.doClick() ); 
     }
     
     private void synchRightEDT( LinePropertySet set )

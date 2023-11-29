@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enum to List Demo</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="padding-left: .5em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<ul>
+<li>At Initialization Time
+    <ul>
+    <li>
+        Create a map.
+        the key to the map
+        will be type <em>LinePropertySet.class</em>
+        and the value will be a <em>LinePropertySet</em> object.
+        Name the map <em>setMapOrig</em>.
+    </li>
+    <li>
+        Create an instance
+        of each subclass of <em>LinePropertySet</em>,
+        for example,
+        <pre>LinePropertySet set = new LinePropertySetTicMajor();</pre>
+    </li>
+    <li>
+        Note that,
+        since we haven't applied any changes yet,
+        <em>set</em> contains initial values 
+        obtained from the <em>PropertyManager</em>.
+        Add these objects to <em>setMapOrig</em>.
+        <pre>setMapOrig.put(LinePropertySetTicMajor.class, set);</pre>
+    </li>
+    </ul>
+</li>
+<li>During Testing
+    <ul>
+    <li>For Each Radio Button:
+        <ul>
+        <li>Click the button</li>
+        <li>Change all values on right side of the panel</li>
+        </ul>
+    </li>
+    <li>Click <em>Reset</em> button</li>
+    <li>For Each Radio Button:
+        <ul>
+        <li>Click the button</li>
+        <li>Get the <em>LinePropertySet</em> from the button:<br>
+            <code>LinePropertySet currSet = button.get();</code>
+        </li>
+        <li>Get the <em>LinePropertySet</em> containing the original values
+            for this subclass of <em>LinePropertySet</em>:<br>
+            <code>LinePropertySet origSet = setMapOrig.get(currSet.getClass());</code>
+        </li>
+        <li>Verify that the <em>LinePropertySet</em> contained in the button
+            has been reset to its original values:<br>
+            <code>assertSetsEqual( origSet, currSet );</code>
+        </li>
+        </ul>
+    </li>
+    </ul>
+</li>
+</ul>
+</div>
+</body>
+</html>
