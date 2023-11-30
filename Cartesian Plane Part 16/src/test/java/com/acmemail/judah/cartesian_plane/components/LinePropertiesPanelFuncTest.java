@@ -55,7 +55,7 @@ public class LinePropertiesPanelFuncTest
             .peek( dialog::doClick )
             .map( b -> b.get() )
             .peek( s -> Utils.pause( 250 ) )
-            .map( s -> (LinePropertySet)s )
+            .peek( s -> assertSetsSynched( s, setMapOrig.get(s ) ) )
             .forEach( s -> assertPropertiesSynched( s ) );
     }
     
@@ -82,18 +82,18 @@ public class LinePropertiesPanelFuncTest
         });
     }
     
-    @Order( 15 )
-    @Test
-    public void testReset()
-    {
-        dialog.reset();
-        dialog.getRadioButtons().forEach( button -> {
-            LinePropertySet storedValues    = button.get();
-            LinePropertySet origValues      = 
-                setMapOrig.get( storedValues );
-            assertSetsSynched( storedValues, origValues );
-        });
-    }
+@Order( 15 )
+@Test
+public void testReset()
+{
+    dialog.reset();
+    dialog.getRadioButtons().forEach( button -> {
+        LinePropertySet storedValues    = button.get();
+        LinePropertySet origValues      = 
+            setMapOrig.get( storedValues );
+        assertSetsSynched( storedValues, origValues );
+    });
+}
     
     @Order( 20 )
     @Test
@@ -138,10 +138,11 @@ public class LinePropertiesPanelFuncTest
         assertTrue( dialog.isDialogVisible() );
         
         dialog.close();
-        Utils.pause( 500 );
+        Utils.pause( 250 );
         assertFalse( dialog.isDialogVisible() );
         dialog.setDialogVisible( true );
-        Utils.pause( 500 );
+        Utils.pause( 250 );
+        assertTrue( dialog.isDialogVisible() );
         
         assertTrue( dialog.isSelected( button ) );
         LinePropertySet testProperties      = button.get();
@@ -248,10 +249,7 @@ public class LinePropertiesPanelFuncTest
     private void selectOther()
     {
         PRadioButton<LinePropertySet>   other   =
-            dialog.getRadioButtons().stream()
-                .filter( rb -> !rb.isSelected() )
-                .findFirst().orElse( null );
-        assertNotNull( other );
+            getButton( b -> !b.isSelected() );
         dialog.doClick( other );
     }
     
@@ -279,15 +277,12 @@ public class LinePropertiesPanelFuncTest
 
     private static LinePropertySet newInstance( LinePropertySet setIn )
     {
-        @SuppressWarnings("unchecked")
-        Class<LinePropertySet>  clazz   = 
-            (Class<LinePropertySet>)setIn.getClass();
-        LinePropertySet         setOut  = null;
+        Class<?>        clazz   = setIn.getClass();
+        LinePropertySet setOut  = null;
         try
         {
-            Constructor<LinePropertySet>    ctor    = 
-                clazz.getConstructor();
-            Object      inst    = ctor.newInstance();
+            Constructor<?>  ctor    = clazz.getConstructor();
+            Object          inst    = ctor.newInstance();
             assertTrue( inst instanceof LinePropertySet );
             setOut = (LinePropertySet)inst;
         }
