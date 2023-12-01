@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils;
+package com.acmemail.judah.cartesian_plane.test_utils.lp_plane;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -60,6 +62,7 @@ public class LPPTestDialog extends JDialog
     // longer predictable.
     private boolean     tempBoolean;
     private CompConfig  tempConfig;
+    private Object      tempObj;
 
     /**
      * Default constructor.
@@ -99,9 +102,14 @@ public class LPPTestDialog extends JDialog
     public static LPPTestDialog getDialog()
     {
         if ( dialog == null )
-            GUIUtils.schedEDTAndWait( () ->
-                dialog = new LPPTestDialog()
-            );
+        {
+            if ( SwingUtilities.isEventDispatchThread() )
+                dialog = new LPPTestDialog();
+            else
+                GUIUtils.schedEDTAndWait( () ->
+                    dialog = new LPPTestDialog()
+                );
+        }
         return dialog;
     }
     
@@ -183,6 +191,29 @@ public class LPPTestDialog extends JDialog
             synchRightEDT( set );
         else
             GUIUtils.schedEDTAndWait( () -> synchRightEDT( set ) );
+    }
+    
+    public BufferedImage getPanelImage()
+    {
+        if ( SwingUtilities.isEventDispatchThread() )
+            tempObj = getPanelImageEDT();
+        else
+            GUIUtils.schedEDTAndWait( () -> 
+                tempObj = getPanelImageEDT()
+            );
+        return (BufferedImage)tempObj;
+    }
+    
+    private BufferedImage getPanelImageEDT()
+    {
+        int             type    = BufferedImage.TYPE_INT_ARGB;
+        int             width   = propertiesPanel.getWidth();
+        int             height  = propertiesPanel.getHeight();
+        BufferedImage   image   = 
+            new BufferedImage( width, height, type );
+        Graphics2D      gtx     = image.createGraphics();
+        propertiesPanel.paintComponents( gtx );
+        return image;
     }
     
     private void synchRightEDT( LinePropertySet set )

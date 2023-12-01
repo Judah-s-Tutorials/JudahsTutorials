@@ -20,9 +20,9 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
-import com.acmemail.judah.cartesian_plane.test_utils.LPPTestDialog;
 import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
+import com.acmemail.judah.cartesian_plane.test_utils.lp_plane.LPPTestDialog;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LinePropertiesPanelFuncTest
