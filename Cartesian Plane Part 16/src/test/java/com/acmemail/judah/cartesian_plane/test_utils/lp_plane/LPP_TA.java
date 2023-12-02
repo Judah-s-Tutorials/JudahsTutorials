@@ -2,12 +2,13 @@ package com.acmemail.judah.cartesian_plane.test_utils.lp_plane;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -15,14 +16,12 @@ import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
-import com.acmemail.judah.cartesian_plane.components.LinePropertiesPanel;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
@@ -31,6 +30,7 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
 import com.acmemail.judah.cartesian_plane.components.PButtonGroup;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 /**
  * This is the LinePropertiesPlane Test Assistant.
@@ -57,9 +57,19 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  */
 public class LPP_TA
 {
-    private static final String title   = 
-        "LinePropertiesPanel TA";
-    private final LPPTestDialog             lppDialog;
+    /**
+     * Master directory for all LinePropertiesPnel test data files.
+     * This will be a subdirectory of the project test data files; 
+     * see {@linkplain Utils#BASE_TEST_DATA_DIR}.
+     * The directory should contain four files containing serialized
+     * data, with suffix "Image.ser" and prefixes "Axes," "GridLines," 
+     * "MinorTics" and "MajorTics." 
+     */
+    public static final String  LPP_DIR = "LinePropertiesPanel";
+
+    private static final File   lppPath = Utils.getTestDataDir( LPP_DIR );
+    private static final String title   = "LinePropertiesPanel TA";
+    private final LPPTestDialog lppDialog;
     private final PButtonGroup<Descriptor>  buttonGroup = 
         new PButtonGroup<>();        
     private final JLabel                    fileName    = new JLabel();
@@ -148,11 +158,12 @@ public class LPP_TA
         if ( !(prop instanceof Descriptor) )
             throw new ComponentException( "Invalid PRadioButton" );
         Descriptor  descrip = (Descriptor)prop;
+        String      cName   = descrip.className;
+        className.setText( cName );
         fileName.setText( descrip.fileName );
-        className.setText( descrip.className );
         
         Predicate<PRadioButton<LinePropertySet>>    pred    = 
-            b -> descrip.className.equals( b.get().getClass().getSimpleName() );
+            b -> cName.equals( getSimpleName( b ) );
         PRadioButton<LinePropertySet>   target  =
             lppDialog.getRadioButtons().stream()
                 .filter( pred )
@@ -160,6 +171,14 @@ public class LPP_TA
         if ( target == null )
             throw new ComponentException( "target button not found" );
         lppDialog.doClick( target );
+    }
+    
+    private static String 
+    getSimpleName( PRadioButton<LinePropertySet> button )
+    {
+        LinePropertySet set     = button.get();
+        String          name    = set.getClass().getSimpleName();
+        return name;
     }
 
     private JPanel getFeedbackPanel()
@@ -197,7 +216,30 @@ public class LPP_TA
     {
         PRadioButton<Descriptor>    button  = 
             buttonGroup.getSelectedButton();
-        button.get().saved.setSelected( true );
+        Descriptor      descrip = button.get();
+        BufferedImage   image   = lppDialog.getPanelImage();
+        LPP_TADetail    detail  = new LPP_TADetail( descrip.clazz, image );
+        saveDetail( detail, descrip.fileName );
+
+        descrip.saved.setSelected( true );
+    }
+    
+    private static void 
+    saveDetail( LPP_TADetail detail, String fileName )
+    {
+        File    dataFile    = new File( lppPath, fileName );
+        try (
+            FileOutputStream fStream = new FileOutputStream( dataFile );
+            ObjectOutputStream oStream = new ObjectOutputStream( fStream ); 
+        )
+        {
+            oStream.writeObject( detail );
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            System.exit( 1 );
+        }
     }
     
     private static class Descriptor
@@ -206,12 +248,14 @@ public class LPP_TA
         public final String     fileName;
         public final String     className;
         public final JCheckBox  saved;
+        public final Class<? extends LinePropertySet>   clazz;
         
         public <T extends LinePropertySet> Descriptor( Class<T> clazz )
         {
             final int   count       = 
                 LinePropertySet.class.getSimpleName().length();
             
+            this.clazz = clazz;
             className   = clazz.getSimpleName();
             text = className.substring( count );
             fileName = text + "Image.ser";
