@@ -539,30 +539,40 @@ public class LinePropertiesPanel extends JPanel
             drawLabel.setEnabled( hasDraw );
             if ( hasDraw )
                 drawToggle.setSelected( set.getDraw() );
+            else
+                drawToggle.setSelected( false );
             
             boolean hasLength   = set.hasLength();
             lengthSpinner.setEnabled( hasLength );
             lengthLabel.setEnabled( hasLength );
             if ( hasLength )
                 lengthModel.setValue( set.getLength() );
+            else
+                lengthModel.setValue( 0 );
 
             boolean hasSpacing  = set.hasSpacing();
             spacingLabel.setEnabled( hasSpacing );
             spacingSpinner.setEnabled( hasSpacing );
             if ( hasSpacing )
                 spacingModel.setValue( set.getSpacing() );
+            else
+                spacingModel.setValue( 0 );
 
             boolean hasStroke  = set.hasStroke();
             strokeLabel.setEnabled( hasStroke );
             strokeSpinner.setEnabled( hasStroke );
             if ( hasStroke )
                 strokeModel.setValue( set.getStroke() );
+            else
+                strokeModel.setValue( 0 );
 
             boolean hasColor    = set.hasColor();
             colorButton.setEnabled( hasColor );
             colorField.setEnabled( hasColor );
             if ( hasColor )
                 colorEditor.setColor( set.getColor() );
+            else
+                colorEditor.setColor( Color.GRAY );
         }
     }
 }

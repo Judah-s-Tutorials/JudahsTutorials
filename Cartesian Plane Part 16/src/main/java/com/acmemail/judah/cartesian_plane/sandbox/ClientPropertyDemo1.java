@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
-import javax.swing.ButtonModel;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -97,7 +96,6 @@ public class ClientPropertyDemo1
         mainPanel.setBorder( mainBorder );
         buttonPanel.setBorder( titled );
 
-        ButtonModel selected    = fontButtonGroup.getSelection();
         return mainPanel;
     }
     
