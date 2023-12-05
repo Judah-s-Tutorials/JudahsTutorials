@@ -17,6 +17,7 @@ import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
@@ -116,7 +117,7 @@ public class GraphPanel extends JPanel
         private static final String topMargin       = "Top Margin";
         private static final String rightMargin     = "Right Margin";
         private static final String bottomMargin    = "Bottom Margin";
-        private static final String leftMargin      = "Right Margin";
+        private static final String leftMargin      = "Left Margin";
         
         private static final String[]   labels  =
             { graph, topMargin, rightMargin, leftMargin, bottomMargin };
@@ -139,6 +140,16 @@ public class GraphPanel extends JPanel
                 .map( this::newRadioButton )
                 .peek( this::add )
                 .forEach( b -> lineGroup.add( b ) );
+            
+            String  draftText   = 
+                "<html>" +
+                    "<span style='font-size: 300%;'>" +
+                        "<i><b>" +
+                            "Draft" + 
+                        "</b></i>" +
+                    "</span>" +
+                "</html>";
+            add( new JLabel( draftText ) );
         }
         
         private JRadioButton newRadioButton( String label )

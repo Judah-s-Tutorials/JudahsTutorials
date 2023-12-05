@@ -8,51 +8,41 @@
 <body>
 <div  style="padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
 <p>
-<strong>Digression:</strong>
-My first thought 
-was not to write a method 
-named <em>isDialogVisisble()</em>, 
-but to override <em>isVisible()</em>
-in the dialog class:
-</p>
-<pre style="margin-left: 2em;">
-@Override
-public boolean isVisible()
-{
-    if ( SwingUtilities.isEventDispatchThread() )
-        tempBoolean = super.isVisible();
-    else
-        GUIUtils.schedEDTAndWait(
-            () -> tempBoolean = super.isVisible()
-        );
-}</pre>
-<p>
-It turns out, however,
-that <em>pack()</em>
-invokes <em>isVisible()</em>
-multiple times,
-and,
-at least sometimes,
-on some versions of Windows,
-the first time it's called
-<em>isEventDispatchThread()</em> returns false,
-and <em>GUIUtils.schedEDTAndWait(...)</em>
-crashes with 
-an <em>InvocationTargetException</em>.
-(I've been advised
-that this does not
-occur on <em>MacOS</em>).
-</p>
-<p>
-The work around
-was to give a method 
-a unique name, <em>isDialogVisible</em>.
-For symmetry,
-rather than override <em>setVisible</em>,
-I decided on a unique method name
-for that as well,
-<em>setDialogVisible</em>.
-</p>
+<strong>Digression: Row or Column? X or Y?</strong>
+When we layout an array
+we typically layout it out
+in <em>rows</em> and <em>columns</em>,
+listing the row first
+and then the column; 
+given <code>int[][] intArr,</code>
+and <code>intArr[10][25]</code>
+we're referring to 
+<em>row 10</em>
+and <em>column 25</em>
+of <em>intArr</em>.
+If we envision an array
+as a rectangle,
+rows are the vertical components
+and columns are the horizontal components.
+But when we talk about the Cartesian plane
+we write coordinates as <em>(x,y)</em>
+where <em>x</em> is the horizontal component
+and <em>y</em> is the vertical component.
+The <em>getRGB(int x, int y)</em> method
+of the <em>BufferedImage</em> class
+uses Cartesian coordinates,
+which is why we write:<pre>
+    raster[row][col] = image.getRGB( col, row );</pre>
+Perhaps it would help
+to clarify things
+if we wrote:<pre>
+    for ( int row = 0 ; row &lt; rows ; ++row )
+        for ( int col = 0 ; col &lt; cols ; ++col )
+        {
+            int xco = col;
+            int yco = row;
+            raster[row][col] = image.getRGB( xco, yco );
+        }</pre>
 </div>
 </body>
 </html>
