@@ -38,6 +38,7 @@ public abstract class FeedbackTest
     private BufferedImage       expImage;
     private BufferedImage       actImage;
     
+    // The method must be invoked on the EDT.
     public static void initAll( 
         String subdir, 
         Function<DoubleSupplier,Feedback> fbSupplier

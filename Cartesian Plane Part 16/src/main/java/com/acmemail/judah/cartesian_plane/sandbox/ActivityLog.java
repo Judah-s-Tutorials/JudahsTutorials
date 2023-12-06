@@ -115,7 +115,7 @@ public class ActivityLog
         boolean hasStyle    = style != null && !style.isEmpty();
         
         if ( hasStyle )
-            html.append( "<span style=" ).append( style ).append( ">" );
+            html.append( "<span style=\"" ).append( style ).append( "\">" );
         html.append( text );
         if ( hasStyle )
             html.append( "</span>" );
