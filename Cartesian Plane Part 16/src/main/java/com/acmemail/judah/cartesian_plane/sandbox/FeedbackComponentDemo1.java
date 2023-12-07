@@ -23,13 +23,14 @@ import com.acmemail.judah.cartesian_plane.components.StrokeFeedback;
 
 /**
  * Application to demonstrate
- * the use of the <em>SpacingFeedback</em> component.
- * Revises {@linkplain LineFeedbackDemo1}
- * by adding to the content pane
- * a second row of three components:
- * a label, SpacingFeedback component
- * and a spinner that controls the value
- * of the spacing feedback component.
+ * how to use different components
+ * to control feedback components.
+ * A LengthFeedback component is controlled
+ * by a spinner,
+ * a SpacingFeedback component
+ * is controlled by a text field
+ * and a StrokeFeedback component
+ * is controlled by radio buttons.
  * 
  * @author Jack Straub
  */
@@ -119,6 +120,13 @@ public class FeedbackComponentDemo1
         frame.setVisible( true );
     }
     
+    /**
+     * Creates the panel
+     * that contains a StrokeFeedback component
+     * and the radio buttons that control it.
+     * 
+     * @return  the panel containing the StrokeFeedback component
+     */
     private JPanel getStrokePanel()
     {
         PRadioButton<Double>   small    = new PRadioButton<>( 1. );
@@ -144,6 +152,18 @@ public class FeedbackComponentDemo1
         return panel;
     }
     
+    /**
+     * Parses the double value
+     * expressed as a string
+     * in a text field.
+     * If parsing fields
+     * an error is displayed
+     * in the text field,
+     * and a random value
+     * is returned.
+     * 
+     * @return  the double value parsed from a text field
+     */
     private double parseTextControl()
     {
         double  value   = 1;

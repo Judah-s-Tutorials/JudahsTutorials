@@ -88,6 +88,12 @@ public class PRadioButtonDemo1
         frame.setVisible( true );
     }
     
+    /**
+     * Gets the panel
+     * containing the "Show Properties" button.
+     * 
+     * @return  the panel containing the "Show Properties" button
+     */
     private JPanel getShowPropertiesPanel()
     {
         JPanel  panel   = new JPanel();

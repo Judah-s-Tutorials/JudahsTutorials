@@ -9,6 +9,13 @@ import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.components.LinePropertiesPanel;
 
+/**
+ * Application to demonstrate
+ * the LinePropertiesPanel class
+ * from the project ...components package.
+ * 
+ * @author Jack Straub
+ */
 public class ShowLinePropertiesPanel
 {
     /**
@@ -23,6 +30,9 @@ public class ShowLinePropertiesPanel
         SwingUtilities.invokeLater( () -> demo.buildGUI() );
     }
 
+    /**
+     * Create and show the GUI.
+     */
     private void buildGUI()
     {
         String  title   = "Show Line Properties Panel";
@@ -44,6 +54,14 @@ public class ShowLinePropertiesPanel
         frame.setVisible( true );
     }
     
+    /**
+     * Creates the dialog
+     * containing the LinePropertiesPanel.
+     * 
+     * @param frame the parent of this dialog
+     * 
+     * @return  the created dialog
+     */
     private JDialog showDialog( JFrame frame )
     {
         JDialog dialog  = new JDialog( frame );

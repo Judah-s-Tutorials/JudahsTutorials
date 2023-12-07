@@ -23,6 +23,16 @@ import javax.swing.border.Border;
 import com.acmemail.judah.cartesian_plane.components.Feedback;
 import com.acmemail.judah.cartesian_plane.components.SpacingFeedback;
 
+/**
+ * Revision of application {@linkplain FBCompTA}.
+ * This application allows configuration
+ * a spacing feedback component,
+ * which is encapsulated in a FBCompTADetail object
+ * and serialized to a file 
+ * in the Feedback/Spacing directory.
+ * 
+ * @author Jack Straub
+ */
 public class FBCompTA2
 {
     /** The path to the directory for storing test data. */

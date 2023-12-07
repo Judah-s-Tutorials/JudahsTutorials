@@ -58,6 +58,23 @@ public class SerializationDemo2b
         }
     }
     
+    /**
+     * Constructs the GUI
+     * for this application.
+     * The content pane 
+     * is a JPanel
+     * containing three additional panels
+     * in the West, Center and East
+     * regions of a BorderLayout.
+     * The left panel
+     * contains a button for each file
+     * contained in the test directory.
+     * The center panel
+     * contains data describing
+     * the detail object stored in the file
+     * and the right panel contains the object
+     * stored in the file.
+     */
     private void makeGUI()
     {
         String  title       = "Serialization Demo 2";
@@ -71,9 +88,17 @@ public class SerializationDemo2b
         frame.setContentPane( mainPanel );
         frame.setLocation( 300, 300 );
         frame.pack();
+        group.selectIndex( 0 );
         frame.setVisible( true );
     }
     
+    /**
+     * Creates the panel
+     * containing the image
+     * associated with a given file.
+     * 
+     * @return  the image panel
+     */
     private JPanel getImagePanel()
     {
         JPanel  panel   = new JPanel();
@@ -81,6 +106,16 @@ public class SerializationDemo2b
         return panel;
     }
 
+    /**
+     * Creates the panel
+     * with a GridLayout
+     * containing the data
+     * associated with a given file,
+     * i.e. the property value
+     * and weight.
+     * 
+     * @return  the image panel
+     */
     private JPanel getDetailPanel()
     {
         JPanel      panel   = new JPanel( new GridLayout( 2, 2 ));
@@ -105,6 +140,20 @@ public class SerializationDemo2b
         return innerPanel;
     }
     
+    /**
+     * Gets the panel containing the radio buttons
+     * for this GUI.
+     * There is one radio button
+     * for each file found in the data directory.
+     * The buttons are laid out vertically.
+     * Each button is a PRadioButton<File> object,
+     * where the encapsulated property
+     * is the File object
+     * associated with test data
+     * for a single FBCompDetail object.
+     * 
+     * @return  the radio button panel
+     */
     private JPanel getRadioButtonPanel()
     {
         JPanel      panel   = new JPanel();
@@ -128,29 +177,55 @@ public class SerializationDemo2b
         return panel;
     }
     
-private void showFile( ActionEvent evt )
-{
-    File    file    = group.getSelectedProperty();
-    try (
-        FileInputStream fileStr = new FileInputStream( file );
-        ObjectInputStream objStr = new ObjectInputStream( fileStr );
-    )
+    /**
+     * Reads a data file,
+     * and updates the GUI
+     * with the data obtained.
+     * This method is invoked
+     * when the operator
+     * selects a radio button
+     * in the application's GUI.
+     * The ActionEvent propagated by the GUI
+     * identifies which button was selected,
+     * and the selected button
+     * is a PRadioButton<File> object
+     * whose property identifies
+     * the file to read.
+     * 
+     * @param evt   
+     *      object that identifies the radio button selection event
+     */
+    private void showFile( ActionEvent evt )
     {
-        FBCompTADetail detail   =
-            (FBCompTADetail)objStr.readObject();
-        updateGUI( detail );
+        File    file    = group.getSelectedProperty();
+        try (
+            FileInputStream fileStr = new FileInputStream( file );
+            ObjectInputStream objStr = new ObjectInputStream( fileStr );
+        )
+        {
+            FBCompTADetail detail   =
+                (FBCompTADetail)objStr.readObject();
+            updateGUI( detail );
+        }
+        catch ( 
+            IOException 
+            | ClassNotFoundException
+            | ClassCastException exc
+        )
+        {
+            exc.printStackTrace();
+            System.exit( 1 );
+        }
     }
-    catch ( 
-        IOException 
-        | ClassNotFoundException
-        | ClassCastException exc
-    )
-    {
-        exc.printStackTrace();
-        System.exit( 1 );
-    }
-}
     
+    /**
+     * Updates the application GUI
+     * with the image 
+     * and associated data
+     * encapsulated in a given FBCompTADetail object.
+     * 
+     * @param detail the given FBCompTADetail object
+     */
     private void updateGUI( FBCompTADetail detail )
     {
         final String    numFmt  = "%3.1f";

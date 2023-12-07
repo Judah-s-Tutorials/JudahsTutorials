@@ -15,8 +15,23 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+/**
+ * Simple application
+ * to demonstrate how to create
+ * an ImageIcon
+ * and display it
+ * on a JLabel.
+ * 
+ * @author Jack Straub
+ */
 public class ImageIconDemo1
 {
+    /** 
+     * Sample image to convert to an icon
+     * and display in a JLabel.
+     * It is create in
+     * this class's constructor.
+     */
     private final Image testImage;
     
     /**
@@ -31,6 +46,12 @@ public class ImageIconDemo1
         SwingUtilities.invokeLater( () -> demo.makeGUI() );
     }
     
+    /**
+     * Default constructor.
+     * Creates the sample image
+     * that will be installed
+     * in a JLabel.
+     */
     public ImageIconDemo1()
     {
         int     type        = BufferedImage.TYPE_INT_ARGB;
@@ -55,6 +76,10 @@ public class ImageIconDemo1
         testImage = bufImage;
     }
     
+    /**
+     * Create the GUI
+     * for this application.
+     */
     private void makeGUI()
     {
         JFrame  frame   = new JFrame( "ImageIcon Demo 1" );

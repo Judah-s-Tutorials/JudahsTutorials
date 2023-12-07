@@ -5,6 +5,14 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+/**
+ * This is a simple application
+ * that demonstrates
+ * how to use
+ * the {@linkplain ActivityLog} class.
+ * 
+ * @author Jack Straub
+ */
 public class ActivityLogDemo
 {
     private ActivityLog dialog;
@@ -21,6 +29,13 @@ public class ActivityLogDemo
         SwingUtilities.invokeLater( () -> demo.buildGUI() );
     }
     
+    /**
+     * Builds the GUI for this application.
+     * Initiates an ActivityLog dialog,
+     * and a frame with buttons
+     * to display the dialog,
+     * and terminate the application.
+     */
     private void buildGUI()
     {
         JFrame      frame   = new JFrame( "Activity Log Demo" );
@@ -45,16 +60,21 @@ public class ActivityLogDemo
         demo();
     }
     
+    /**
+     * Writes text
+     * to the activity log
+     * using the two append overloads.
+     */
     private void demo()
     {
         dialog.append( "<em>The sun was shining on the sea,</em>" );
         dialog.append( "<strong>Shining with all his might,</strong>" );
         dialog.append( 
-            "He did his very best",
+            "He did his very best to make",
             "color: blue;"
         );
         dialog.append( 
-            "To make the billows smooth and bright,",
+            "The billows smooth and bright,",
             "color: green; font-size: 150%"
         );
     }

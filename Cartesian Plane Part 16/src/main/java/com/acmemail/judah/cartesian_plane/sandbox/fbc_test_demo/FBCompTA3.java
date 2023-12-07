@@ -23,6 +23,16 @@ import javax.swing.border.Border;
 import com.acmemail.judah.cartesian_plane.components.Feedback;
 import com.acmemail.judah.cartesian_plane.components.StrokeFeedback;
 
+/**
+ * Revision of application {@linkplain FBCompTA}.
+ * This application allows configuration
+ * a stroke feedback component,
+ * which is encapsulated in a FBCompTADetail object
+ * and serialized to a file 
+ * in the Feedback/Stroke directory.
+ * 
+ * @author Jack Straub
+ */
 public class FBCompTA3
 {
     /** The path to the directory for storing test data. */

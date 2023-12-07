@@ -18,7 +18,7 @@ import com.acmemail.judah.cartesian_plane.components.SpacingFeedback;
 import com.acmemail.judah.cartesian_plane.components.StrokeFeedback;
 
 /**
- * Application collect
+ * Application to collect
  * all our feedback components together:
  * LengthFeedback, SpacingFeedbac, StrokeFeedback
  * and ColorEditor.

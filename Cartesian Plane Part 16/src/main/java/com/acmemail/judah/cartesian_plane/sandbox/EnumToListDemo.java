@@ -8,6 +8,13 @@ import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
 import javax.swing.JRadioButton;
 
+/**
+ * Application to demonstrate
+ * how to get a list of buttons
+ * from a ButtonGroup.
+ * 
+ * @author Jack Straub
+ */
 public class EnumToListDemo
 {
     /**

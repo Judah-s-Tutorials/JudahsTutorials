@@ -23,6 +23,34 @@ import javax.swing.border.Border;
 import com.acmemail.judah.cartesian_plane.components.Feedback;
 import com.acmemail.judah.cartesian_plane.components.LengthFeedback;
 
+/**
+ * Sample application
+ * to experiment with designs
+ * for the production application
+ * that will eventually 
+ * reside in the com.acmemail.judah.cartesian_plane.test_utils.fb_comp package
+ * under the test source tree.
+ * It consists of a frame
+ * containing three buttons,
+ * and a dialog
+ * containing a LengthFeedback component.
+ * Pushing the Next button
+ * increase the value
+ * of the LengthFeedbackComponent.
+ * Pushing the Save button
+ * encapsulates a description 
+ * of the LengthFeedback component
+ * in a FBCompTADetail object
+ * and serializes the object
+ * to a file in the Feedback/Length directory.
+ * Pushing the Exit button
+ * terminates the application.
+ * 
+ * @author Jack Straub
+ * 
+ * @see FBCompTA2
+ * @see FBCompTA3
+ */
 public class FBCompTA
 {
     /** The path to the directory for storing test data. */
@@ -100,6 +128,11 @@ public class FBCompTA
         return file;
     }
     
+    /**
+     * Establishes the path
+     * to the 
+     * @return
+     */
     private File makeFilePath()
     {
         File    data    = new File( dataPath );

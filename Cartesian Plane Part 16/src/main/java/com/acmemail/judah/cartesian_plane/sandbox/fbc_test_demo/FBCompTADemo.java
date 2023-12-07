@@ -23,6 +23,25 @@ import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.components.LengthFeedback;
 
+/**
+ * This application
+ * deserializes the file
+ * created by {@linkplain FBCompTA}.
+ * First it uses the deserialized data
+ * to instantiate a LengthFeedback object.
+ * Then it uses a BufferedImage
+ * to take a picture of
+ * the LengthFeedback display,
+ * and compares it to the BufferedImage
+ * encapsulated by
+ * the deserialized data.
+ * <p>
+ * This application assumes
+ * that FBCompTA has been used
+ * to create a data file.
+ * 
+ * @author Jack Straub
+ */
 public class FBCompTADemo
 {
     private static final    File    dataFile    = FBCompTA.getDataFile();

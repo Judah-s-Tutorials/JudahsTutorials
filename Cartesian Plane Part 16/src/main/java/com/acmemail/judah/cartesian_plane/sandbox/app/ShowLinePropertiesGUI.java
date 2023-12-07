@@ -6,6 +6,16 @@ import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.sandbox.LinePropertiesPanelGUI;
 
+/**
+ * Simple application
+ * to demonstrate the LinePropertiesPanelGUI class
+ * from the project sandbox.
+ * Not to be confused
+ * with the LinePropertiesPanel class
+ * in the ...components package.
+ * 
+ * @author Jack Straub
+ */
 public class ShowLinePropertiesGUI
 {
     /**
@@ -19,6 +29,9 @@ public class ShowLinePropertiesGUI
         SwingUtilities.invokeLater( () -> makeGUI() );
     }
     
+    /**
+     * Creates and shows the GUI.
+     */
     private static void makeGUI()
     {
         JFrame  frame   = new JFrame( "Show Line Properties GUI" );

@@ -79,6 +79,7 @@ import com.acmemail.judah.cartesian_plane.PropertyManager;
  * via the class constructor.
  * See, for example, {@linkplain LinePropertySetTicMajor}.
  * </p>
+ * 
  * @author Jack Straub
  * 
  * @see com.acmemail.judah.cartesian_plane.PropertyManager
