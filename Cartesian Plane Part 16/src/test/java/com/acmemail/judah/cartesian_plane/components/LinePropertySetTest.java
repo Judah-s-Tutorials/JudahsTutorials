@@ -148,16 +148,14 @@ public abstract class LinePropertySetTest
     private static Optional<Float> asFloat( String propertyName )
     {
         Float           val         = pMgr.asFloat( propertyName );
-        Optional<Float> optional    = 
-            val != null ? Optional.of( val ) : Optional.empty();
+        Optional<Float> optional    = Optional.ofNullable( val );
         return optional;
     }
     
     private static Optional<Color> asColor( String propertyName )
     {
         Color           val         = pMgr.asColor( propertyName );
-        Optional<Color> optional    = 
-            val != null ? Optional.of( val ) : Optional.empty();
+        Optional<Color> optional    = Optional.ofNullable( val );
         return optional;
     }
     
@@ -165,8 +163,7 @@ public abstract class LinePropertySetTest
     Optional<Boolean> asBoolean( String propertyName )
     {
         Boolean             val         = pMgr.asBoolean( propertyName );
-        Optional<Boolean>   optional    = 
-            val != null ? Optional.of( val ) : Optional.empty();
+        Optional<Boolean>   optional    = Optional.ofNullable( val );
         return optional;
     }
     

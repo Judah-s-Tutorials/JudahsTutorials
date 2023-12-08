@@ -300,7 +300,7 @@ public void testReset()
 
     @SuppressWarnings("serial")
     private static class LPSMap  
-        extends HashMap<Class<?>, LinePropertySet>
+        extends HashMap<Class<? extends LinePropertySet>, LinePropertySet>
     {
         public void put( LinePropertySet set )
         {

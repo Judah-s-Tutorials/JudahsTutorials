@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enum to List Demo</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p>
+<strong>Decoding the LPSMap Declaration:</strong>
+</p>
+<p>
+We want <em>LPSMap</em>
+to be a subclass of <em>HashMap</em>,
+so we start with:
+</p>
+<p style="margin-left:4em; font-family: 'Lucida Console', 'Courier New', monospace; font-size: 90%;">
+    class LPSMap extends HashMap
+</p>
+<p>
+But <em>HashMap</em> is a generic type
+with two type parameters,
+<em>&lt;K,V></em>
+where <em>K</em> is the type of the key,
+and <em>V</em> is the type of the value,
+so we rewrite the class declaration 
+like this:
+</p>
+<p style="margin-left:4em; font-family: 'Lucida Console', 'Courier New', monospace; font-size: 90%;">
+    class LPSMap extends<br>
+    HashMap&lt;Class,LinePropertySet>
+</p>
+<p>
+Now we have a compiler warning
+because <em>Class</em>
+is a generic type;
+to get rid of the warning
+we change the declaration again:
+</p>
+<p style="margin-left:4em; font-family: 'Lucida Console', 'Courier New', monospace; font-size: 90%;">
+    class LPSMap extends<br>
+    HashMap&lt;Class&lt;?>,LinePropertySet>
+</p>
+<p>
+Finally,
+as conscientious programmers,
+we recognize
+that the type of the key
+shouldn't be any old <em>Class</em>,
+but a <em>Class</em>
+that is a subclass
+of <em>LinePropertySet</em>
+giving us:
+</p>
+<p style="margin-left:4em; font-family: 'Lucida Console', 'Courier New', monospace; font-size: 90%;">
+    class LPSMap extends<br>
+    HashMap&lt;Class&lt;? extends LinePropertySet>,LinePropertySet>
+</p>
+</div>
+</body>
+</html>
