@@ -18,7 +18,67 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
 
-@SuppressWarnings("serial")
+/**
+ * An object of this type
+ * encapsulates a collection of components
+ * that can be used
+ * to configure a font.
+ * Components include:
+ * <ul>
+ * <li>
+ *      JComboBox containing the names
+ *      of supported fonts.
+ *      Supported fonts
+ *      are limited to 
+ *      the logical fonts
+ *      provided by Java:
+ *      dialog, monospaced, etc.
+ * </li>
+ * <li>
+ *      JCheckBox to indicate
+ *      whether or not
+ *      the font is bold.
+ * </li>
+ * <li>
+ *      JCheckBox to indicate
+ *      whether or not
+ *      the font is italic.
+ * </li>
+ * <li>
+ *      JSpinner with SpinnerNumberModel
+ *      for setting the size
+ *      of the font.
+ * </li>
+ * <li>
+ *      ColorEditor to set
+ *      the text color.
+ * </li>
+ * <li>
+ *      JLabel to display sample text
+ *      in the configured font
+ *      (the "feedback window").
+ * </li>
+ * </ul>
+ * <p>
+ * The user can obtain a JPanel
+ * displaying the componentsd
+ * in a default configuration
+ * (see {@linkplain #getPanel()},
+ * or individual components can be retrieved
+ * and configured however the user wishes
+ * (see {@linkplain #getBoldToggle()},
+ * {@linkplain #getNameCombo()},
+ * etc.)
+ * There are setters
+ * for changing the values
+ * of the elements of 
+ * the font configuration,
+ * and getters
+ * for obtaining the values
+ * of the elements.
+ * </p>
+ * @author Jack Straub
+ */
 public class FontEditor
 {
     /** Text to display in feedback area. */
@@ -51,7 +111,7 @@ public class FontEditor
     /** Slope face toggle. */
     private final JCheckBox             italicToggle    = 
         new JCheckBox( "Italic" );
-    /** Configuration parameter for size selector. */
+    /** Spinner model for size selector */
     private final SpinnerNumberModel    sizeModel       =
         new SpinnerNumberModel( 10, 1, 40, 1 );
     /** Size selector. */
@@ -76,6 +136,8 @@ public class FontEditor
      */
     public FontEditor()
     {
+        // Configure the action listeners that will update the
+        // feedback window when a value changes.
         boldToggle.addActionListener( e -> feedback.update() );
         italicToggle.addActionListener( e -> feedback.update() );
         fontList.addActionListener( e -> feedback.update() );
@@ -113,7 +175,7 @@ public class FontEditor
      * 
      * @return  
      *      Optional containing composed Font,
-     *      or empty options if Font properties are invalid
+     *      or empty optional if Font properties are invalid
      */
     public Optional<Font> getSelectedFont()
     {
@@ -129,7 +191,7 @@ public class FontEditor
         try
         {
             sizeEditor.commitEdit();
-            fontSize = (int)sizeEditor.getValue();
+            fontSize = sizeModel.getNumber().intValue();
             Font    font    = new Font( fontName, fontStyle, fontSize );
             optFont = Optional.of( font );
         }
@@ -197,9 +259,15 @@ public class FontEditor
     }
     
     /**
-     * Gets the selected text color.
+     * Gets an Optional encapsulating
+     * the selected text color.
+     * If the color value
+     * is invalid,
+     * returns an empty Optional. 
      * 
-     * @return  the selected text color
+     * @return  
+     *      the selected text color
+     *      or an empty Optional if invalid
      */
     public Optional<Color> getColor()
     {
@@ -220,7 +288,7 @@ public class FontEditor
     }
     
     /**
-     * Gets the JToggleButton
+     * Gets the JCheckBox
      * used to select the bold property.
      * 
      * @return toggle button for selecting the bold property
@@ -231,7 +299,7 @@ public class FontEditor
     }
 
     /**
-     * Gets the JToggleButton
+     * Gets the JCheckBox
      * used to select the italic (sloped) property.
      * 
      * @return toggle button for selecting the italic property
@@ -244,6 +312,8 @@ public class FontEditor
     /**
      * Gets the JSpinner used to configure
      * the font size.
+     * The spinner will contain
+     * a SpinnerNumberModel.
      * 
      * @return the JSpinner for selecting the font size
      */
@@ -321,6 +391,7 @@ public class FontEditor
      * 
      * @author Jack Straub
      */
+    @SuppressWarnings("serial")
     private class Feedback extends JLabel
     {
         /**

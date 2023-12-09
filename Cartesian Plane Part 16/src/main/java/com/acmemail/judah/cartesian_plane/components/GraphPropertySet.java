@@ -39,7 +39,7 @@ import com.acmemail.judah.cartesian_plane.PropertyManager;
  * 
  * @author Jack Straub
  */
-public class GraphPropertySet
+public abstract class GraphPropertySet
 {
     private final PropertyManager   pMgr    = PropertyManager.INSTANCE;
     private final String        widthProperty;
@@ -47,25 +47,39 @@ public class GraphPropertySet
     private final String        fgColorProperty;
     private final String        fontNameProperty;
     private final String        fontSizeProperty;
-    private final String        isItalicProperty;
-    private final String        isBoldProperty;
+    private final String        fontStyleProperty;
+    private final String        fontDrawProperty;
     
     private float   width;
     private Color   bgColor;
     private Color   fgColor;
     private String  fontName;
     private float   fontSize;
-    private boolean isItalic;
-    private boolean isBold;
+    private String  fontStyle;
+    private boolean fontDraw;
     
+    /**
+     * Constructor.
+     * Establishes the specific property names
+     * base on the category encapsulated
+     * by the subclass.
+     * 
+     * @param widthProperty     the name of the width property
+     * @param bgColorProperty   the name of the background color property
+     * @param fgColorProperty   the name of the foreground color property
+     * @param fontNameProperty  the name of the font name property
+     * @param fontSizeProperty  the name of the font size property
+     * @param fontStyleProperty the name of the font style property
+     * @param fontDrawProperty  the name of the font draw property
+     */
     public GraphPropertySet(
         String widthProperty, 
         String bgColorProperty,
         String fgColorProperty,
         String fontNameProperty, 
         String fontSizeProperty, 
-        String isItalicProperty, 
-        String isBoldProperty
+        String fontStyleProperty,
+        String fontDrawProperty
     )
     {
         super();
@@ -74,8 +88,8 @@ public class GraphPropertySet
         this.fgColorProperty = fgColorProperty;
         this.fontNameProperty = fontNameProperty;
         this.fontSizeProperty = fontSizeProperty;
-        this.isItalicProperty = isItalicProperty;
-        this.isBoldProperty = isBoldProperty;
+        this.fontStyleProperty = fontStyleProperty;
+        this.fontDrawProperty = fontDrawProperty;
     }
     
     /**
@@ -95,8 +109,8 @@ public class GraphPropertySet
         fgColor = pMgr.asColor( fgColorProperty );
         fontName = pMgr.asString( fontNameProperty );
         fontSize = pMgr.asFloat( fontSizeProperty );
-        isItalic = pMgr.asBoolean( isItalicProperty );
-        isBold = pMgr.asBoolean( isBoldProperty );
+        fontStyle = pMgr.asString( fontStyleProperty );
+        fontDraw = pMgr.asBoolean( fontDrawProperty );
     }
     
     /**
@@ -112,8 +126,8 @@ public class GraphPropertySet
         pMgr.setProperty( fgColorProperty, fgColor );
         pMgr.setProperty( fontNameProperty, fontName );
         pMgr.setProperty( fontSizeProperty, fontSize );
-        pMgr.setProperty( isItalicProperty, isItalic );
-        pMgr.setProperty( isBoldProperty, isBold );
+        pMgr.setProperty( fontStyleProperty, fontStyle );
+        pMgr.setProperty( fontDrawProperty, fontDraw );
     }
 
     /**
@@ -215,6 +229,26 @@ public class GraphPropertySet
     {
         this.fontSize = fontSize;
     }
+    
+    /**
+     * Gets the value of the font draw property.
+     * 
+     * @return the value of the font draw property
+     */
+    public boolean getFontDraw()
+    {
+        return fontDraw;
+    }
+    
+    /**
+     * Sets the value of the font draw property.
+     * 
+     * @param fontDraw  the font draw value to set
+     */
+    public void setFontDraw( boolean fontDraw )
+    {
+        this.fontDraw = fontDraw;
+    }
 
     /**
      * Gets the value of the isItalic property.
@@ -223,7 +257,8 @@ public class GraphPropertySet
      */
     public boolean isItalic()
     {
-        return isItalic;
+        String  ucStyle = fontStyle.toUpperCase();
+        return ucStyle.contains( "ITALIC" );
     }
 
     /**
@@ -231,9 +266,8 @@ public class GraphPropertySet
      * 
      * @param isItalic true, to indicate the font is italic.
      */
-    public void setItalic(boolean isItalic)
+    public void setItalic( boolean isItalic )
     {
-        this.isItalic = isItalic;
     }
 
     /**
@@ -243,7 +277,8 @@ public class GraphPropertySet
      */
     public boolean isBold()
     {
-        return isBold;
+        String  ucStyle = fontStyle.toUpperCase();
+        return ucStyle.contains( "BOLD" );
     }
 
     /**
@@ -253,6 +288,32 @@ public class GraphPropertySet
      */
     public void setBold(boolean isBold)
     {
-        this.isBold = isBold;
+        setStyle( isItalic(), isBold );
+    }
+    
+    /**
+     * Set the font style.
+     * Result will be "PLAIN" (not bold or italic),
+     * "ITALIC", "BOLD" or "ITALIC BOLD".
+     * 
+     * @param isItalic  true if style includes italic
+     * @param isBold    true if style includes bold
+     */
+    private void setStyle( boolean isItalic, boolean isBold )
+    {
+        StringBuilder   bldr    = new StringBuilder();
+        if ( !isItalic && !isBold )
+            bldr.append( "PLAIN" );
+        else
+        {
+            if ( isItalic )
+            {
+                bldr.append( "ITALIC" );
+                if ( isBold )
+                    bldr.append( " " );
+            }
+            if ( isBold )
+                bldr.append( "BOLD" );
+        }
     }
 }
