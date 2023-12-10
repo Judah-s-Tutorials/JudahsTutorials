@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.text.ParseException;

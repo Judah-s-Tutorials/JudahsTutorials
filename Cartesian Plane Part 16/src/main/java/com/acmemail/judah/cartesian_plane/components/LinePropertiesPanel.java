@@ -281,7 +281,7 @@ public class LinePropertiesPanel extends JPanel
      * If the root component
      * in the source's containment hierarchy
      * is a JDialog it is closed,
-     * otherwise no action is take.
+     * otherwise no action is taken.
      * if there is no top-level window
      * in the source's containment hierarchy
      * a ComponentException is thrown.

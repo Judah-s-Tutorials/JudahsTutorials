@@ -49,26 +49,9 @@ public class ShowGraphPropertiesPanel
         frame.setLocation( 200, 200 );
         frame.pack();
         
-        JDialog dialog  = showDialog( frame );
+        JDialog dialog  = GraphPropertiesPanel.getDialog( frame );
         button.addActionListener( e -> dialog.setVisible( true ) );
         frame.setVisible( true );
-    }
-    
-    /**
-     * Creates the dialog
-     * containing the LinePropertiesPanel.
-     * 
-     * @param frame the parent of this dialog
-     * 
-     * @return  the created dialog
-     */
-    private JDialog showDialog( JFrame frame )
-    {
-        JDialog dialog  = new JDialog( frame );
-        dialog.setTitle( "Line Properties Dialog" );
-        dialog.setLocation( 300, 300 );
-        dialog.setContentPane( new GraphPropertiesPanel() );
-        dialog.pack();
-        return dialog;
+        dialog.setVisible( true );
     }
 }
