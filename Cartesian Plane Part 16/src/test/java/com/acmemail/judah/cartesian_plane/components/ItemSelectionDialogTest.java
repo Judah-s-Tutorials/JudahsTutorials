@@ -24,6 +24,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
+import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
@@ -100,7 +101,7 @@ class ItemSelectionDialogTest
     void testShowCancel() 
     {
         Thread          thread  = startDialog();
-        SwingUtilities.invokeLater( () -> cancelButton.doClick() );
+        GUIUtils.schedEDTAndWait( () -> cancelButton.doClick() );
         Utils.join( thread );
         
         assertTrue( selection < 0 );
@@ -171,7 +172,7 @@ class ItemSelectionDialogTest
     private Thread startDialog( ItemSelectionDialog dialog )
     {
         Thread  thread  = new Thread( () -> show( dialog ) );
-        thread.start();
+        GUIUtils.schedEDTAndWait( () -> thread.start() );
         Utils.pause( 500 );
         return thread;
     }

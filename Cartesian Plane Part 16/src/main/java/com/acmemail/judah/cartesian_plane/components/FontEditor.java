@@ -1,7 +1,6 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.text.ParseException;
@@ -216,6 +215,22 @@ public class FontEditor
     }
     
     /**
+     * Sets the current font name
+     * to the given value.
+     * The name must match
+     * one of the strings
+     * in the name combo box;
+     * if it doesn't,
+     * the name will be unchanged.
+     * 
+     * @param name  the given value
+     */
+    public void setName( String name )
+    {
+        fontList.setSelectedItem( name );
+    }
+    
+    /**
      * Gets the font size.
      * 
      * @return  the font size
@@ -236,6 +251,17 @@ public class FontEditor
     }
     
     /**
+     * Sets the size of the current font
+     * to the given value.
+     * 
+     * @param size  the given value
+     */
+    public void setSize( int size )
+    {
+        sizeModel.setValue( size );
+    }
+    
+    /**
      * Indicates whether the bold property
      * is selected.
      * 
@@ -245,6 +271,18 @@ public class FontEditor
     {
         boolean currIsBold  = boldToggle.isSelected();
         return currIsBold;
+    }
+    
+    /**
+     * Indicates whether or not
+     * the current font
+     * is bold.
+     * 
+     * @param bold  true, if the current font is bold
+     */
+    public void setBold( boolean bold )
+    {
+        boldToggle.setSelected( bold );
     }
     
     /**
@@ -260,6 +298,18 @@ public class FontEditor
     }
     
     /**
+     * Indicates whether or not
+     * the current font
+     * is italic.
+     * 
+     * @param italic  true, if the current font is bold
+     */
+    public void setItalic( boolean italic )
+    {
+        italicToggle.setSelected( italic );
+    }
+
+    /**
      * Gets an Optional encapsulating
      * the selected text color.
      * If the color value
@@ -274,6 +324,18 @@ public class FontEditor
     {
         Optional<Color> optColor    = colorEditor.getColor();
         return optColor;
+    }
+    
+    /**
+     * Sets the text color
+     * of the current font
+     * to the given value.
+     * 
+     * @param color the given value
+     */
+    public void setColor( Color color )
+    {
+        colorEditor.setColor( color );
     }
     
     /**

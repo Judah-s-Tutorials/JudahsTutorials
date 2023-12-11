@@ -2,7 +2,6 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -20,11 +19,10 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.border.Border;
-import javax.swing.border.LineBorder;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
@@ -113,6 +111,12 @@ public class GraphPropertiesPanel extends JPanel
     private final ColorEditor   bgEditor        = new ColorEditor();
     /** Component for editing font draw property. */
     private final JCheckBox     drawEditor      = new JCheckBox( "Draw" );
+    /** Spinner model for editing width. */
+    private final SpinnerNumberModel    widthModel  = 
+        new SpinnerNumberModel( 0, 0, Integer.MAX_VALUE, 1 );
+    /** Spinner for editing width. */
+    private final JSpinner      widthEditor     = 
+        new JSpinner( widthModel );
     
     /**
      * Constructor.
@@ -140,6 +144,8 @@ public class GraphPropertiesPanel extends JPanel
         add( getLeftPanel(), BorderLayout.WEST );
         add( getRightPanel(), BorderLayout.CENTER );
         add( getControlPanel(), BorderLayout.SOUTH );
+        
+        buttonGroup.selectIndex( 0 );
     }
     
     /**
@@ -183,6 +189,7 @@ public class GraphPropertiesPanel extends JPanel
         Stream.of( rbLabels )
             .map( this::newRadioButton )
             .peek( panel::add )
+            .peek( b -> b.addItemListener( this::itemStateChanged ) )
             .forEach( buttonGroup::add );
         return panel;
     }
@@ -221,42 +228,16 @@ public class GraphPropertiesPanel extends JPanel
      * laid out vertically.
      * 
      * @return the created panel
-     */
-    private JPanel getRightPanel_()
-    {
-        JPanel  fontEditorPanel = fontEditor.getPanel();
-        Border  lineBorder      = 
-            BorderFactory.createLineBorder( Color.BLACK, 1 );
-        Border  fontBorder      =
-            BorderFactory.createTitledBorder( lineBorder, "Font" );
-        fontEditorPanel.setBorder( fontBorder );
-        
-        JPanel  bgEditorPanel   = bgEditor.getPanel();
-        Border  bgBorder        = BorderFactory
-            .createTitledBorder( lineBorder, "Background Color" );
-        bgEditorPanel.setBorder( bgBorder );
-        
-        JPanel      rightPanel  = new JPanel();
-        BoxLayout   layout      = 
-            new BoxLayout( rightPanel, BoxLayout.Y_AXIS );
-        rightPanel.setLayout( layout );
-        
-        Dimension   spacer  = new Dimension( 1, 5 );
-        rightPanel.add( fontEditorPanel );
-        rightPanel.add( Box.createRigidArea( spacer ) );
-        rightPanel.add( bgEditorPanel );
-        
-        return rightPanel;
-    }
-    
+     */    
     private JPanel getRightPanel()
     {
-        JPanel      fontPanel   = getFontPanel();
+        JPanel  fontEditorPanel     = getFontPanel();        
+        JPanel  bgEditorPanel       = bgEditor.getPanel();
+        JPanel  widthEditorPanel    = getWidthPanel();
         
-        Border  lineBorder      = 
+        Border  lineBorder          = 
             BorderFactory.createLineBorder( Color.BLACK, 1 );
-        JPanel  bgEditorPanel   = bgEditor.getPanel();
-        Border  bgBorder        = BorderFactory
+        Border  bgBorder            = BorderFactory
             .createTitledBorder( lineBorder, "Background Color" );
         bgEditorPanel.setBorder( bgBorder );
         
@@ -266,8 +247,9 @@ public class GraphPropertiesPanel extends JPanel
         panel.setLayout( layout );
         
         Dimension   spacer  = new Dimension( 1, 5 );
-        panel.add( fontPanel );
+        panel.add( fontEditorPanel );
         panel.add( Box.createRigidArea( spacer ) );
+        panel.add( widthEditorPanel );
         panel.add( bgEditorPanel );
         
         return panel;
@@ -294,6 +276,21 @@ public class GraphPropertiesPanel extends JPanel
         panel.add( fontPanel );
         panel.add( drawPanel );
         
+        return panel;
+    }
+    
+    private JPanel getWidthPanel()
+    {
+        int         layoutType  = FlowLayout.LEFT;
+        FlowLayout  layout      = new FlowLayout( layoutType );
+        JPanel      panel       = new JPanel( layout );
+        Border  lineBorder          = 
+            BorderFactory.createLineBorder( Color.BLACK, 1 );
+        Border  bgBorder            = BorderFactory
+            .createTitledBorder( lineBorder, "Width" );
+        panel.setBorder( bgBorder );
+//        panel.add( new JLabel( "Width: " ) );
+        panel.add( widthEditor );
         return panel;
     }
     
@@ -353,16 +350,25 @@ public class GraphPropertiesPanel extends JPanel
     private void copyLeft( GraphPropertySet set )
     {
         set.setFontName( fontEditor.getName() );
-        set.setFontSize( fontEditor.getSize().orElse( -1 ) );
         set.setItalic( fontEditor.isItalic() );
         set.setBold( fontEditor.isBold() );
-//        set.setFontDraw( fontEditor.dr);
-        
+        set.setFontSize( fontEditor.getSize().orElse( -1 ) );
+        set.setFGColor( fontEditor.getColor().orElse( Color.BLACK ) );
+        set.setFontDraw( drawEditor.isSelected() );
+        set.setWidth( widthModel.getNumber().floatValue() );
+        set.setBGColor( bgEditor.getColor().orElse( Color.GRAY ) );
     }
     
     private void copyRight( GraphPropertySet set )
     {
-        
+        fontEditor.setName( set.getFontName() );
+        fontEditor.setBold( set.isBold() );
+        fontEditor.setItalic( set.isItalic() );
+        fontEditor.setSize( (int)set.getFontSize() );
+        fontEditor.setColor( set.getFGColor() );
+        drawEditor.setSelected( set.isFontDraw() );
+        widthEditor.setValue( set.getWidth() );
+        bgEditor.setColor ( set.getBGColor() );
     }
     
     /**

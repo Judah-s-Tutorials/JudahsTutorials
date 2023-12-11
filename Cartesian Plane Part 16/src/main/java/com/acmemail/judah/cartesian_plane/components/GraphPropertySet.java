@@ -90,6 +90,7 @@ public abstract class GraphPropertySet
         this.fontSizeProperty = fontSizeProperty;
         this.fontStyleProperty = fontStyleProperty;
         this.fontDrawProperty = fontDrawProperty;
+        reset();
     }
     
     /**
@@ -185,7 +186,7 @@ public abstract class GraphPropertySet
      * 
      * @param fgColor the foreground color to set
      */
-    public void setFgColor(Color fgColor)
+    public void setFGColor(Color fgColor)
     {
         this.fgColor = fgColor;
     }
@@ -235,7 +236,7 @@ public abstract class GraphPropertySet
      * 
      * @return the value of the font draw property
      */
-    public boolean getFontDraw()
+    public boolean isFontDraw()
     {
         return fontDraw;
     }
@@ -268,6 +269,7 @@ public abstract class GraphPropertySet
      */
     public void setItalic( boolean isItalic )
     {
+        setStyle( isItalic, isBold() );
     }
 
     /**
@@ -315,5 +317,6 @@ public abstract class GraphPropertySet
             if ( isBold )
                 bldr.append( "BOLD" );
         }
+        fontStyle = bldr.toString();
     }
 }

@@ -57,7 +57,7 @@ public abstract class FeedbackTest
 
     @ParameterizedTest
     @MethodSource( "getFiles" )
-    void test( File file )
+    public void test( File file )
     {
         GUIUtils.schedEDTAndWait( () -> nextFile( file ) );
         assertEquals( currWeight, feedback.getWeight() );
