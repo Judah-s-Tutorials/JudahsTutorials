@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import javax.swing.AbstractButton;
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -19,6 +21,7 @@ import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.TitledBorder;
@@ -27,6 +30,7 @@ import com.acmemail.judah.cartesian_plane.components.GraphPropertiesPanel;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
+import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 @SuppressWarnings("serial")
 public class GPPTestDialog extends JDialog
@@ -50,6 +54,10 @@ public class GPPTestDialog extends JDialog
     private final JTextField            bgColorTextField;
     private final List<PRadioButton<GraphPropertySet>>  radioButtons;
     
+    private final JButton               resetButton;
+    private final JButton               applyButton;
+    private final JButton               closeButton;
+    
     /**
      * Constructor.
      * Formulates this dialog,
@@ -63,28 +71,31 @@ public class GPPTestDialog extends JDialog
         
         fontNames = getFontNamesComboBox();
         fontEditorPanel = getFontPanel();
-        boldCheckBox = getCheckBox( "Bold" );
-        italicCheckBox = getCheckBox( "Italic" );
+        boldCheckBox = getJCheckBox( "Bold" );
+        italicCheckBox = getJCheckBox( "Italic" );
         sizeSpinner = getSizeSpinner();
         sizeModel = getNumberModel( sizeSpinner );
         fgColorTextField = getFGColorTextField();
-        drawCheckBox = getCheckBox( "Draw" );
+        drawCheckBox = getJCheckBox( "Draw" );
         widthSpinner = getWidthSpinner();
         widthModel = getNumberModel( widthSpinner );
         bgColorTextField = getBGColorTextField();
         radioButtons = getRadioButtons();
+        resetButton = getJButton( "Reset" );
+        applyButton = getJButton( "Apply" );
+        closeButton = getJButton( "Close" );
     }
     
     public static GPPTestDialog getDialog()
     {
         if ( dialog == null )
         {
-//            if ( SwingUtilities.isEventDispatchThread() )
+            if ( SwingUtilities.isEventDispatchThread() )
                 dialog = new GPPTestDialog();
-//            else
-//                GUIUtils.schedEDTAndWait( 
-//                    () -> dialog = new GPPTestDialog()
-//            );
+            else
+                GUIUtils.schedEDTAndWait( 
+                    () -> dialog = new GPPTestDialog()
+            );
         }
         return dialog;
     }
@@ -105,7 +116,7 @@ public class GPPTestDialog extends JDialog
      * as represented in the GUI components.
      * 
      * @return  
-     *  the values of all properties derived from the GUI components
+     *      the values of all properties derived from the GUI components
      */
     public GraphPropertySet getProperties()
     {
@@ -114,6 +125,22 @@ public class GPPTestDialog extends JDialog
     }
     
     public void setProperties( GraphPropertySet set )
+    {
+        if ( SwingUtilities.isEventDispatchThread() )
+            setPropertiesEDT( set );
+        else
+            GUIUtils.schedEDTAndWait( () -> setPropertiesEDT( set ) );
+    }
+    
+    /**
+     * Set the state 
+     * of the property-management components
+     * from the property values
+     * in the given GraphPropertySet.
+     * 
+     * @param set   the given GraphPropertySet
+     */
+    private void setPropertiesEDT( GraphPropertySet set )
     {
         fontNames.setSelectedItem( set.getFontName() );
         boldCheckBox.setSelected( set.isBold() );
@@ -126,10 +153,75 @@ public class GPPTestDialog extends JDialog
     }
     
     /**
+     * Click the given button.
+     * 
+     * @param button    the given button
+     */
+    public void doClick( AbstractButton button )
+    {
+        if ( SwingUtilities.isEventDispatchThread() )
+            button.doClick();
+        else
+            GUIUtils.schedEDTAndWait( () -> button.doClick() );
+    }
+    
+    /**
+     * Clicks the Reset button.
+     */
+    public void selectReset()
+    {
+        doClick( resetButton );
+    }
+    
+    /**
+     * Clicks the Apply button.
+     */
+    public void selectApply()
+    {
+        doClick( applyButton );
+    }
+    
+    /**
+     * Clicks the Close button.
+     */
+    public void selectClose()
+    {
+        doClick( closeButton );
+    }
+    
+    /**
+     * Sets the visibility of this dialog.
+     * 
+     * @param visible   true to make the dialog visible
+     */
+    public void setDialogVisible( boolean visible )
+    {
+        if ( SwingUtilities.isEventDispatchThread() )
+            setVisible( visible );
+        else
+            GUIUtils.schedEDTAndWait( () -> setVisible( visible ) );
+    }
+    
+    /**
+     * Indicates whether this dialog is visible.
+     * 
+     * @return  true if this dialog is visible
+     */
+    public boolean isDialogVisible()
+    {
+        boolean[]   isVisible   = new boolean[1];
+        if ( SwingUtilities.isEventDispatchThread() )
+            isVisible[0] = isVisible();
+        else
+            GUIUtils.schedEDTAndWait( () -> isVisible[0] = isVisible() );
+        return isVisible[0];
+    }
+    
+    /**
      * Gets the panel that contains
      * the font configuration components.
      * <p>
-     * Precondontion: fontNames is non-null
+     * Precondition: fontNames is non-null
      * 
      * @return  the panel that contains the font configuration components
      */
@@ -168,7 +260,7 @@ public class GPPTestDialog extends JDialog
      * 
      * @return  the JCheckBox with the given text
      */
-    private JCheckBox getCheckBox( String text )
+    private JCheckBox getJCheckBox( String text )
     {
         Predicate<JComponent>   isCheckBox  =
             c -> (c instanceof JCheckBox);
@@ -180,6 +272,25 @@ public class GPPTestDialog extends JDialog
         assertNotNull( comp );
         assertTrue( comp instanceof JCheckBox );
         return (JCheckBox)comp;
+        
+    }
+    
+    /**
+     * Gets the JButton with the given text.
+     * 
+     * @param text  the given text
+     * 
+     * @return  the JButton with the given text
+     */
+    private JButton getJButton( String text )
+    {
+        Predicate<JComponent>   pred        = 
+            ComponentFinder.getButtonPredicate( text );
+        JComponent  comp    =
+            ComponentFinder.find( this, pred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JButton );
+        return (JButton)comp;
         
     }
     
@@ -454,6 +565,14 @@ public class GPPTestDialog extends JDialog
                 "",
                 ""
             );
+            if ( SwingUtilities.isEventDispatchThread() )
+                init();
+            else
+                GUIUtils.schedEDTAndWait( () -> init() );
+        }
+        
+        private void init()
+        {
             Object  item    = fontNames.getSelectedItem();
             assertTrue( item instanceof String );
             setFontName( (String)item );
@@ -469,19 +588,13 @@ public class GPPTestDialog extends JDialog
         @Override
         public void reset()
         {
-            String  msg =
-                "The reset operation is not supported by the "
-                + "AllProperties class.";
-            throw new UnsupportedOperationException( msg );
+            // do nothing on selection
         }
         
         @Override
         public void apply()
         {
-            String  msg =
-                "The reset operation is not supported by the "
-                + "AllProperties class.";
-            throw new UnsupportedOperationException( msg );
+            // do nothing on selection
         }
     }
 }

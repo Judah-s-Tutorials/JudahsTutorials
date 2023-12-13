@@ -258,6 +258,8 @@ public abstract class GraphPropertySet
      */
     public boolean isItalic()
     {
+        if ( fontStyle == null )
+            fontStyle = "PLAIN";
         String  ucStyle = fontStyle.toUpperCase();
         return ucStyle.contains( "ITALIC" );
     }
@@ -279,6 +281,8 @@ public abstract class GraphPropertySet
      */
     public boolean isBold()
     {
+        if ( fontStyle == null )
+            fontStyle = "PLAIN";
         String  ucStyle = fontStyle.toUpperCase();
         return ucStyle.contains( "BOLD" );
     }
