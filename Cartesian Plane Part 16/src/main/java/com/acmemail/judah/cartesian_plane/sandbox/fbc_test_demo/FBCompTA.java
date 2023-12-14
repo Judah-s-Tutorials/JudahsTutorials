@@ -130,8 +130,9 @@ public class FBCompTA
     
     /**
      * Establishes the path
-     * to the 
-     * @return
+     * to the data file.
+     * 
+     * @return  the path to the data file
      */
     private File makeFilePath()
     {

@@ -459,6 +459,22 @@ public class GPPTestDialog extends JDialog
         return result;
     }
     
+    /**
+     * If a given panel
+     * has a TitledBorder
+     * return it,
+     * otherwise return null.
+     * Note: 
+     * TitledBorders are often
+     * one element of a CompoundBorder.
+     * To get the TitledBorder
+     * the ConmpoundBorder
+     * must be disassembled.
+     * 
+     * @param panel the given panel
+     * 
+     * @return  the given panel's TitledBorder, or null if none
+     */
     private TitledBorder getTitledBorder( JComponent panel )
     {
         TitledBorder    titledBorder    = null;
@@ -552,8 +568,34 @@ public class GPPTestDialog extends JDialog
         return color;
     }
     
+    /**
+     * Class to encapsulate
+     * the property values represented
+     * in a GraphPropertiesPanel components.
+     * It is a dummy subclass of GraphPropertySet
+     * that passes empty strings
+     * to the superclass constructor.
+     * It is only helpful during testing
+     * when a dummy GraphPropertySet
+     * initialized from a GraphPropertiesPanel components
+     * can be compared to the expected values
+     * encapsulated in one of the panel's
+     * radio buttons.
+     * Methods apply() and reset() are overridden
+     * so that they don't do anything.
+     * 
+     * @author Jack Straub
+     */
     private class AllProperties extends GraphPropertySet
     {
+        /**
+         * Constructor.
+         * Initializes all fields
+         * from the GraphPropertiesPanel components.
+         * Initialization is guaranteed
+         * to take place
+         * on the EDT.
+         */
         public AllProperties()
         {
             super( 
@@ -571,6 +613,14 @@ public class GPPTestDialog extends JDialog
                 GUIUtils.schedEDTAndWait( () -> init() );
         }
         
+        /**
+         * Initializes all fields
+         * from the GraphPropertiesPanel components.
+         * 
+         * Precondition: this method
+         * must be executed
+         * on the Event Dispatch Thread.
+         */
         private void init()
         {
             Object  item    = fontNames.getSelectedItem();
@@ -585,12 +635,18 @@ public class GPPTestDialog extends JDialog
             setBGColor( getColor( bgColorTextField ) );
         }
         
+        /**
+         * Makes the reset() method a noop.
+         */
         @Override
         public void reset()
         {
             // do nothing on selection
         }
         
+        /**
+         * Makes the apply() method a noop.
+         */
         @Override
         public void apply()
         {

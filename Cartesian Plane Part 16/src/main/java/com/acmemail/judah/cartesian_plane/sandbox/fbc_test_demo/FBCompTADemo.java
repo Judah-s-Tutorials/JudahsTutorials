@@ -44,19 +44,41 @@ import com.acmemail.judah.cartesian_plane.components.LengthFeedback;
  */
 public class FBCompTADemo
 {
+    /** The data file to read. */
     private static final    File    dataFile    = FBCompTA.getDataFile();
+    /** The contents of the deserialized data file. */
     private final FBCompTADetail    detail      = getDetail();
+    /** The expected image; extracted from the target data file. */
     private final BufferedImage     expImage    =
         detail.getBufferedImage();
+    /** LengthFeedBack object to use in this demo. */
     private final LengthFeedback    feedback    = getFeedback();
+    /** 
+     * Label to display the result of comparing the expected image,
+     * extracted from the deserialized data file, with the actual
+     * image, constructed dynamically using configuration data
+     * extracted from the deserialized data file.
+     */
     private final JLabel            result      = 
         new JLabel( "", SwingConstants.CENTER );
     
-    public static void main( String[] args )
+    /**
+     * Application entry point.
+     *
+     * @param args command line arguments, not used
+     */
+    public static void main(String[] args)
     {
         SwingUtilities.invokeLater( () -> new FBCompTADemo() );
     }
     
+    /**
+     * Constructor.
+     * Creates and shows
+     * the application GUI.
+     * <p>
+     * Precondition: this constructor must be invoked from the EDT.
+     */
     public FBCompTADemo()
     {
         String  title   = "FeedbackCompTA Demo";
@@ -75,6 +97,16 @@ public class FBCompTADemo
         frame.setVisible( true );
     }
     
+    /**
+     * Builds the main panel
+     * to use in the application GUI.
+     * This consists of 
+     * the panel containing the expected image
+     * and the panel containing the actual image
+     * arranged horizontally.
+     * 
+     * @return  this application GUI's main panel
+     */
     private JPanel getMainPanel()
     {
         Border      border  =
@@ -89,6 +121,11 @@ public class FBCompTADemo
         return panel;
     }
     
+    /**
+     * Gets a panel containing the feedback label.
+     * 
+     * @return  a panel containing the feedback label
+     */
     private JPanel getComponentPanel()
     {
         JPanel  panel   = new JPanel();
@@ -96,6 +133,16 @@ public class FBCompTADemo
         return panel;
     }
     
+    /**
+     * Gets the panel
+     * containing the expected image
+     * used in this GUI.
+     * This consists of a descriptive label
+     * followed by the expected image label
+     * arranged vertically.
+     * 
+     * @return  the panel containing the expected image
+     */
     private JPanel getExpectedPanel()
     {
         Border      border      = 
@@ -111,6 +158,16 @@ public class FBCompTADemo
         return panel;
     }
     
+    /**
+     * Gets the panel
+     * containing the actual image
+     * used in this GUI.
+     * This consists of a descriptive label
+     * followed by the actual image label
+     * arranged vertically.
+     * 
+     * @return  the panel containing the expected image
+     */
     private JPanel getActualPanel()
     {
         Border      border      = 
@@ -126,6 +183,14 @@ public class FBCompTADemo
         return panel;
     }
     
+    /**
+     * Gets a picture of the actual image
+     * displayed in this GUI's LengthFeedback component.
+     * 
+     * @return  
+     *      a picture of the actual image displayed in the 
+     *      LengthFeedback component
+     */
     private BufferedImage getActualImage()
     {
         int             width       = expImage.getWidth();
@@ -139,6 +204,18 @@ public class FBCompTADemo
         return actImage;
     }
     
+    /**
+     * Gets a properly sized
+     * LengthFeedback object
+     * to use in this demo.
+     * <p>
+     * Precondition:
+     *      The target data file has been deserialized,
+     *      and the expected image extracted
+     *      and stored in the expImage field.
+     * 
+     * @return  properly sized LengthFeedback object
+     */
     private LengthFeedback getFeedback()
     {
         LengthFeedback  feedback    =
@@ -150,6 +227,16 @@ public class FBCompTADemo
         return feedback;
     }
     
+    /**
+     * Reads and deserializes 
+     * the target file.
+     * The contents of the file
+     * are returned in a FBCompTADetail object.
+     * 
+     * @return  
+     *      the contents of the target file
+     *      encapsulated in a FBCompTADetail object
+     */
     private FBCompTADetail getDetail()
     {
         FBCompTADetail  detail  = null;
@@ -175,6 +262,11 @@ public class FBCompTADemo
         return detail;
     }
     
+    /**
+     * Compares the expected image to the actual image
+     * and displays the result
+     * in the "result" label.
+     */
     private void compare()
     {
         int             width       = feedback.getWidth();

@@ -24,21 +24,53 @@ import javax.swing.border.Border;
 import com.acmemail.judah.cartesian_plane.components.Feedback;
 import com.acmemail.judah.cartesian_plane.components.StrokeFeedback;
 
+/**
+ * This is a revision
+ * of {@linkplain FBCompTADemo}.
+ * It's equivalent to the original,
+ * but displays and evaluates
+ * the StrokeFeedback component
+ * deserialized from a test data file.
+ * 
+ * @author Jack Straub
+ */
 public class FBCompTADemo3
 {
+    /** The data file to read. */
     private static final    File    dataFile    = FBCompTA3.getDataFile();
+    /** The contents of the deserialized data file. */
     private final FBCompTADetail    detail      = getDetail();
+    /** The expected image; extracted from the target data file. */
     private final BufferedImage     expImage    =
         detail.getBufferedImage();
+    /** StrokeFeedBack object to use in this demo. */
     private final Feedback          feedback    = getFeedback();
+    /** 
+     * Label to display the result of comparing the expected image,
+     * extracted from the deserialized data file, with the actual
+     * image, constructed dynamically using configuration data
+     * extracted from the deserialized data file.
+     */
     private final JLabel            result      = 
         new JLabel( "", SwingConstants.CENTER );
     
+    /**
+     * Application entry point.
+     *
+     * @param args command line arguments, not used
+     */
     public static void main( String[] args )
     {
         SwingUtilities.invokeLater( () -> new FBCompTADemo3() );
     }
     
+    /**
+     * Constructor.
+     * Creates and shows
+     * the application GUI.
+     * <p>
+     * Precondition: this constructor must be invoked from the EDT.
+     */
     public FBCompTADemo3()
     {
         String  title   = "FeedbackCompTA Demo 3";
@@ -58,6 +90,16 @@ public class FBCompTADemo3
         frame.setVisible( true );
     }
     
+    /**
+     * Builds the main panel
+     * to use in the application GUI.
+     * This consists of 
+     * the panel containing the expected image
+     * and the panel containing the actual image
+     * arranged horizontally.
+     * 
+     * @return  this application GUI's main panel
+     */
     private JPanel getMainPanel()
     {
         Border      border  =
@@ -72,6 +114,11 @@ public class FBCompTADemo3
         return panel;
     }
     
+    /**
+     * Gets a panel containing the feedback label.
+     * 
+     * @return  a panel containing the feedback label
+     */
     private JPanel getComponentPanel()
     {
         JPanel  panel   = new JPanel();
@@ -79,6 +126,16 @@ public class FBCompTADemo3
         return panel;
     }
     
+    /**
+     * Gets the panel
+     * containing the expected image
+     * used in this GUI.
+     * This consists of a descriptive label
+     * followed by the expected image label
+     * arranged vertically.
+     * 
+     * @return  the panel containing the expected image
+     */
     private JPanel getExpectedPanel()
     {
         Border      border      = 
@@ -93,6 +150,16 @@ public class FBCompTADemo3
         return panel;
     }
     
+    /**
+     * Gets the panel
+     * containing the actual image
+     * used in this GUI.
+     * This consists of a descriptive label
+     * followed by the actual image label
+     * arranged vertically.
+     * 
+     * @return  the panel containing the expected image
+     */
     private JPanel getActualPanel()
     {
         Border      border      = 
@@ -107,6 +174,14 @@ public class FBCompTADemo3
         return panel;
     }
     
+    /**
+     * Gets a picture of the actual image
+     * displayed in this GUI's LengthFeedback component.
+     * 
+     * @return  
+     *      a picture of the actual image displayed in the 
+     *      LengthFeedback component
+     */
     private BufferedImage getActualImage()
     {
         int             width       = feedback.getWidth();
@@ -120,6 +195,18 @@ public class FBCompTADemo3
         return actImage;
     }
     
+    /**
+     * Gets a properly sized
+     * StrokeFeedback object
+     * to use in this demo.
+     * <p>
+     * Precondition:
+     *      The target data file has been deserialized,
+     *      and the expected image extracted
+     *      and stored in the expImage field.
+     * 
+     * @return  properly sized LengthFeedback object
+     */
     private Feedback getFeedback()
     {
         Feedback  feedback    =
@@ -130,6 +217,16 @@ public class FBCompTADemo3
         return feedback;
     }
     
+    /**
+     * Reads and deserializes 
+     * the target file.
+     * The contents of the file
+     * are returned in a FBCompTADetail object.
+     * 
+     * @return  
+     *      the contents of the target file
+     *      encapsulated in a FBCompTADetail object
+     */
     private FBCompTADetail getDetail()
     {
         FBCompTADetail  detail  = null;
@@ -158,6 +255,11 @@ public class FBCompTADemo3
         return detail;
     }
     
+    /**
+     * Compares the expected image to the actual image
+     * and displays the result
+     * in the "result" label.
+     */
     private void compare()
     {
         int             width       = feedback.getWidth();

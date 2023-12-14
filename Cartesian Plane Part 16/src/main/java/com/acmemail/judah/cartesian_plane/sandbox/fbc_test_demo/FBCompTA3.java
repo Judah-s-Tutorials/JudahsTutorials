@@ -115,6 +115,15 @@ public class FBCompTA3
         return file;
     }
     
+    /**
+     * Creates and initializes
+     * the path to the data file.
+     * <p>
+     * Postcondition: all directories in the path
+     * to the data file exist.
+     * 
+     * @return  the initialized path
+     */
     private File makeFilePath()
     {
         File    data    = new File( dataPath );

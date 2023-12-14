@@ -472,27 +472,15 @@ public enum PropertyManager
      */
     public Integer asFontStyle( String propName )
     {
-        Integer iVal    = null;
+        int     iVal    = Font.PLAIN;
         String  sVal    = propertyMap.get( propName );
         if ( sVal != null )
         {
             String  csVal   = sVal.toUpperCase();
-            switch ( csVal )
-            {
-            case "PLAIN":
-                iVal = Font.PLAIN;
-                break;
-            case "BOLD":
-                iVal = Font.BOLD;
-                break;
-            case "ITALIC":
-                iVal = Font.ITALIC;
-                break;
-            default:
-                String  err = 
-                    "\"" + sVal + "\"" + "is not a valid font style";
-                throw new IllegalArgumentException( err );
-            }
+            if ( csVal.contains( "BOLD" ) )
+                iVal |= Font.BOLD;
+            if ( csVal.contains( "ITALIC" ) )
+                iVal |= Font.ITALIC;
         }
         return iVal;
     }

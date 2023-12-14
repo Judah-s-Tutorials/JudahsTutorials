@@ -195,10 +195,6 @@ public abstract class FBCompTA
      * by this application.
      * Updates the name of the file
      * displayed in the GUI.
-     * 
-     * @return  
-     *      File representing the data file
-     *      created by this application
      */
     public void getDataFile()
     {

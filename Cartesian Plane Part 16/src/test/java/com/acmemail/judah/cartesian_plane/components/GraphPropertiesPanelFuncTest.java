@@ -10,7 +10,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -68,12 +67,6 @@ class GraphPropertiesPanelFuncTest
             dialog.setVisible( true );
         });
         radioButtons = dialog.getRBList();
-    }
-
-//    @Test
-    void test()
-    {
-        new Scanner( System.in ).nextLine();
     }
     
     @Test
@@ -194,6 +187,7 @@ class GraphPropertiesPanelFuncTest
             .forEach( arr -> assertSetEquals( arr[0], arr[1] ) );
     }
     
+    @Test
     public void testClose()
     {
         // Change all property values for all buttons. Close and 
@@ -205,6 +199,7 @@ class GraphPropertiesPanelFuncTest
             .forEach( dialog::setProperties );
         PRadioButton<GraphPropertySet>  selectedButton  = 
             getSelectedButton();
+        dialog.selectApply();
         dialog.selectClose();
         
         assertFalse( dialog.isDialogVisible() );
@@ -213,6 +208,7 @@ class GraphPropertiesPanelFuncTest
         
         radioButtons.stream()
             .map( b -> b.get() )
+            .peek( s -> System.out.println( s.getClass().getName() ) )
             .map( s -> new GraphPropertySet[] { s, newInstance( s ) } )
             .forEach( arr -> assertSetEquals( arr[0], arr[1] ) );
     }

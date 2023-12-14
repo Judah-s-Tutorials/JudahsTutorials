@@ -19,7 +19,7 @@ import com.acmemail.judah.cartesian_plane.components.StrokeFeedback;
 /**
  * Application to demonstrate
  * the use of the <em>SpacingFeedback</em> component.
- * Revises {@linkplain LineFeedbackDemo1}
+ * Revises {@linkplain LengthFeedbackDemo1}
  * by adding to the content pane
  * a second row of three components:
  * a label, SpacingFeedback component

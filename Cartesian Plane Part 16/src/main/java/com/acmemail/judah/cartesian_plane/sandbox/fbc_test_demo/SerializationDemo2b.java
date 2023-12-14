@@ -23,17 +23,42 @@ import javax.swing.border.Border;
 import com.acmemail.judah.cartesian_plane.components.PButtonGroup;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
 
+/**
+ * This application reads
+ * and displays
+ * the serial data
+ * created by {@linkplain SerializationDemo2a}.
+ * 
+ * @author Jack Straub
+ */
 public class SerializationDemo2b
 {
+    /** The directory in which all test data is stored. */
     private static final    File        testDir     =
         SerializationDemo2a.getTestDir();
+    /** List of data files read from the test data directory. */
     private final   File[]  testFiles   = 
         testDir.listFiles( f -> f.getName().endsWith( ".ser" ) );
     
+    /** The top-level window used in this application. */
     private final   JFrame  frame       = new JFrame();
+    /** 
+     * The label that displays the target property
+     * (length, spacing or stroke)
+     * from the deserialized detail object.
+     */
     private final   JLabel  propLabel   = new JLabel( "XX.XX" );
+    /** 
+     * The label that displays the weight property
+     * from the deserialized detail object.
+     */
     private final   JLabel  weightLabel = new JLabel( " XX.XX" );
+    /** 
+     * The label that displays the image
+     * from the deserialized detail object.
+     */
     private final   JLabel  imageLabel  = new JLabel();
+    /** The group that manages the radio buttons used in this GUI. */
     private final   PButtonGroup<File>  group   = new PButtonGroup<>();
     
     /**
