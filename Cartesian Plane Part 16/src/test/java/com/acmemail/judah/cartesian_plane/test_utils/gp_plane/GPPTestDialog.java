@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -130,6 +131,11 @@ public class GPPTestDialog extends JDialog
             setPropertiesEDT( set );
         else
             GUIUtils.schedEDTAndWait( () -> setPropertiesEDT( set ) );
+    }
+    
+    public BufferedImage getPanelImage()
+    {
+        return null;
     }
     
     /**

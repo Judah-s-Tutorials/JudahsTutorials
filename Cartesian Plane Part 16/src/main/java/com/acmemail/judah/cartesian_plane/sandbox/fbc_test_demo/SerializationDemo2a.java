@@ -71,7 +71,8 @@ public class SerializationDemo2a
         {
             if ( !testDir.mkdirs() )
             {
-                String  msg     = "Unable to create " + testDir.getName();
+                String  msg     = 
+                    "Unable to create " + testDir.getName();
                 System.err.println( msg );
                 System.exit( 1 );
             }

@@ -71,11 +71,30 @@ public class Utils
         return file;
     }
     
+    /**
+     * Return a reference to the given subpath,
+     * which is assumed to be rooted in the project test directory
+     * indicated by BASE_TEST_DATA_DIR.
+     * For example, if <em>subpath</em> 
+     * refers to <em>LandMasses/Continents/Asia</em>
+     * a reference to 
+     * <em>BASE_TEST_DATA_DIR/LandMasses/Continents/Asia</em>
+     * will be returned.
+     * If necessary, 
+     * any subdirectories in the path
+     * will be created.
+     * If the operation fails
+     * null will be returned.
+     * 
+     * @param subpath   the given subpath
+     * 
+     * @return 
+     *      a reference to subpath rooted in BASE_TEST_DATA_DIR,
+     *      or null if the operation fails
+     */
     public static File getTestDataDir( String subpath )
     {
-        String  fullPath    = 
-            BASE_TEST_DATA_DIR + "/" + subpath;
-        File    testDir = new File( fullPath );
+        File    testDir = new File( BASE_TEST_DATA_DIR, subpath );
         if ( !testDir.exists() )
             if ( !testDir.mkdirs() )
                 testDir = null;
