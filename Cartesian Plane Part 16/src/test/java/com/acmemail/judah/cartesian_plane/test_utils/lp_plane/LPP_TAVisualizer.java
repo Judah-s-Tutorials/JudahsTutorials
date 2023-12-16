@@ -27,6 +27,7 @@ import com.acmemail.judah.cartesian_plane.components.PButtonGroup;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
+import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 /**
@@ -68,6 +69,7 @@ public class LPP_TAVisualizer
      */
     public static void main( String[] args )
     {
+        LinePropertySetInitializer.initProperties();
         LPP_TAVisualizer    app = new LPP_TAVisualizer();
         GUIUtils.schedEDTAndWait( () -> app.showGUI() );
         

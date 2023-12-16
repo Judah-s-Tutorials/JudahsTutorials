@@ -30,6 +30,7 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
 import com.acmemail.judah.cartesian_plane.components.PButtonGroup;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 /**
@@ -83,6 +84,7 @@ public class LPP_TA
     */
     public static void main(String[] args)
     {
+        LinePropertySetInitializer.initProperties();
         SwingUtilities.invokeLater( () -> new LPP_TA() );
     }
     

@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.sandbox.utils;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;

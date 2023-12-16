@@ -84,9 +84,18 @@ public class GPP_TA
     */
     public static void main(String[] args)
     {
+        new GPPTestDataInitializer();
         SwingUtilities.invokeLater( () -> new GPP_TA() );
     }
     
+    /**
+     * Constructor.
+     * Fully instantiates 
+     * and configures the GUI.
+     * <p>
+     * Precondition:
+     * Must be invoked on the EDT.
+     */
     public GPP_TA()
     {
         JFrame  frame   = new JFrame( title );
@@ -110,6 +119,21 @@ public class GPP_TA
         gppDialog.setVisible( true );
     }
     
+    /**
+     * Creates the GUI's main panel.
+     * This consists of two additional panels
+     * laid out horizontally.
+     * The left panel
+     * (the option panel)
+     * contains the options
+     * that drive the application;
+     * the right panel
+     * (the feedback panel)
+     * describes the current state
+     * of the application.
+     * 
+     * @return  the GUI's main panel
+     */
     private JPanel getMainPanel()
     {
         JPanel      panel   = new JPanel();
@@ -125,6 +149,22 @@ public class GPP_TA
         return panel;
     }
 
+    /**
+     * Returns a panel
+     * containing application options
+     * laid out in a GridLayout
+     * of 5 rows and two columns.
+     * The left column
+     * contains the application's options
+     * (one for each subclass
+     * of GraphPropertySet)
+     * and the right column
+     * indicates whether 
+     * an image for that option
+     * has been saved.
+     * 
+     * @return  a panel containing application options
+     */
     private JPanel getOptionPanel()
     {
         Descriptor[]    descriptors =
@@ -149,7 +189,74 @@ public class GPP_TA
             .forEach( b -> b.addActionListener( this::selectAction ) );
         return panel;
     }
+
+    /**
+     * Creates and returns
+     * the feedback panel
+     * to be displayed
+     * in the GUI's main panel.
+     * It consists of two labels
+     * laid out vertically;
+     * one label describes
+     * the current file name,
+     * and the other describes
+     * the class name
+     * associated with the currently selected option.
+     * 
+     * @return  
+     *      the feedback panel to be incorporated into
+     *      the GUI's main panel
+     */
+    private JPanel getFeedbackPanel()
+    {
+        final int margin = 10;
+        JPanel      panel   = new JPanel();
+        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
+        Border      border  = BorderFactory
+            .createEmptyBorder( margin, margin, margin, margin );
+        panel.setLayout( layout );
+        panel.setBorder( border );
+        
+        fileName.setAlignmentX( Component.CENTER_ALIGNMENT );
+        className.setAlignmentX( Component.CENTER_ALIGNMENT );
+        
+        panel.add( fileName );
+        panel.add( className );
+        return panel;
+    }
     
+    /**
+     * Gets the control panel
+     * containing the Save and Close buttons.
+     * The panel uses a FlowLayout,
+     * so the buttons will typically
+     * be laid out horizontally.
+     * 
+     * @return  the GUI's control panel
+     */
+    private JPanel getControlPanel()
+    {
+        JPanel  panel   = new JPanel();
+        JButton save    = new JButton( "Save" );
+        JButton close   = new JButton( "Close" );
+        panel.add( save );
+        panel.add( close );
+        
+        save.addActionListener( this::saveAction );
+        close.addActionListener( e -> System.exit( 0 ) );
+        return panel;
+    }
+    
+    /**
+     * Method that is activated
+     * when an application option 
+     * is selected.
+     * The test dialog and feedback window
+     * are synchronized 
+     * with the selected option.
+     * 
+     * @param evt   event object associated with the select action
+     */
     private void selectAction( ActionEvent evt )
     {
         Object  source  = evt.getSource();
@@ -175,45 +282,16 @@ public class GPP_TA
         gppDialog.doClick( target );
     }
     
-    private static String 
-    getSimpleName( PRadioButton<GraphPropertySet> button )
-    {
-        GraphPropertySet    set     = button.get();
-        String              name    = set.getClass().getSimpleName();
-        return name;
-    }
-
-    private JPanel getFeedbackPanel()
-    {
-        final int margin = 10;
-        JPanel      panel   = new JPanel();
-        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
-        Border      border  = BorderFactory
-            .createEmptyBorder( margin, margin, margin, margin );
-        panel.setLayout( layout );
-        panel.setBorder( border );
-        
-        fileName.setAlignmentX( Component.CENTER_ALIGNMENT );
-        className.setAlignmentX( Component.CENTER_ALIGNMENT );
-        
-        panel.add( fileName );
-        panel.add( className );
-        return panel;
-    }
-    
-    private JPanel getControlPanel()
-    {
-        JPanel  panel   = new JPanel();
-        JButton save    = new JButton( "Save" );
-        JButton close   = new JButton( "Close" );
-        panel.add( save );
-        panel.add( close );
-        
-        save.addActionListener( this::saveAction );
-        close.addActionListener( e -> System.exit( 0 ) );
-        return panel;
-    }
-    
+    /**
+     * This is the method that's executed
+     * when the Save button is selected.
+     * The current state
+     * of the test dialog
+     * is encapsulated in a GPP_TADetail
+     * and written to a file.
+     * 
+     * @param evt   event object associated with the selection event
+     */
     private void saveAction( ActionEvent evt )
     {
         PRadioButton<Descriptor>    button  = 
@@ -226,6 +304,29 @@ public class GPP_TA
         descrip.saved.setSelected( true );
     }
     
+    /**
+     * This method obtains the simple class name
+     * from a given PRadioButton<GraphPropertySet> object.
+     * 
+     * @param button    the given object
+     * 
+     * @return  the given object's simple class name
+     */
+    private static String 
+    getSimpleName( PRadioButton<GraphPropertySet> button )
+    {
+        GraphPropertySet    set     = button.get();
+        String              name    = set.getClass().getSimpleName();
+        return name;
+    }
+    
+    /**
+     * Save a given GPP_TADetail object
+     * to a file with a given name.
+     * 
+     * @param detail    the given detail object
+     * @param fileName  the given file name
+     */
     private static void 
     saveDetail( GPP_TADetail detail, String fileName )
     {
@@ -244,6 +345,23 @@ public class GPP_TA
         }
     }
     
+    /**
+     * Simple class to encapsulate
+     * the data associated with
+     * a selected option.
+     * The data include:
+     * <ul>
+     * <li>The text to display on the option's radio button;</li>
+     * <li>The name of the file associated with an option;</li>
+     * <li>The name of the class represented by an option;</li>
+     * <li>
+     *      A Boolean that indicates whether 
+     *      the details of an option
+     *      have been save to a file.
+     * </li>
+     * </ul>
+     * @author Jack Straub
+     */
     private static class Descriptor
     {
         public final String     text;

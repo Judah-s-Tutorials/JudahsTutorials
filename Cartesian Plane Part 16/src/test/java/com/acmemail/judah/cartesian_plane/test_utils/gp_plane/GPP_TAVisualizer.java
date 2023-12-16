@@ -68,6 +68,7 @@ public class GPP_TAVisualizer
      */
     public static void main( String[] args )
     {
+        new GPPTestDataInitializer();
         GPP_TAVisualizer    app = new GPP_TAVisualizer();
         GUIUtils.schedEDTAndWait( () -> app.showGUI() );
         
@@ -85,7 +86,7 @@ public class GPP_TAVisualizer
     public void showGUI()
     {
         final int   frameXco    = 150;
-        final int   frameYco    = 150;
+        final int   frameYco    = 50;
         testDialog = GPPTestDialog.getDialog();
         testDialog.setTitle( "Actual Image Generator" );
         
@@ -108,10 +109,11 @@ public class GPP_TAVisualizer
         nextXco += frame.getWidth();
         fbDialog.setLocation( nextXco, frameYco );
         
-        // Must select a button to give fbDialog a size before
+        // Must select a button to give fb panel a size before
         // calculating position of testDialog...
         // ... see also note, above, re: "showGUI must execute..."
-        buttonGroup.selectIndex( 1 );
+        int inx = buttonGroup.getButtonCount() > 1 ? 1 : 0;
+        buttonGroup.selectIndex( inx );
         nextXco += fbDialog.getWidth();
         testDialog.setLocation( nextXco, frameYco );
 

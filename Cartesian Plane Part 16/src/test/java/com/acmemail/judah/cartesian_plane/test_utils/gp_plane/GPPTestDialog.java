@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.Predicate;
@@ -33,31 +34,78 @@ import com.acmemail.judah.cartesian_plane.components.PRadioButton;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
+/**
+ * This is a dialog containing a GraphPropertiesPanel
+ * for testing purposes.
+ * All the components needed for testing
+ * are available via this class.
+ * The values of all components can be modified
+ * (see {@linkplain #setProperties(GraphPropertySet)})
+ * or obtained,
+ * (see {@linkplain #getProperties()})
+ * and all buttons can be selected
+ * (see {@linkplain #doClick(AbstractButton)})
+ * via the enclosed facilities.
+ * The facilities in an object
+ * of this class
+ * ensure that they are
+ * executed on the Event Dispatch Thread (EDT).
+ * 
+ * @author Jack Straub
+ */
 @SuppressWarnings("serial")
 public class GPPTestDialog extends JDialog
 {
     /** This class's singleton. */
     private static GPPTestDialog    dialog;
     
+    /** The GraphPropertiesPanel under test. */
     private final GraphPropertiesPanel  propertiesPanel =
         new GraphPropertiesPanel();
     
+    /** The combo box listing all the font names. */
     private final JComboBox<String>     fontNames;
+    /** The font editor panel from the GraphPropertiesPanel. */
     private final JPanel                fontEditorPanel;
+    /** The bold check box from the GraphPropertiesPanel. */
     private final JCheckBox             boldCheckBox;
+    /** The italic check box from the GraphPropertiesPanel. */
     private final JCheckBox             italicCheckBox;
+    /** The size spinner from the GraphPropertiesPanel. */
     private final JSpinner              sizeSpinner;
+    /** The spinner model from sizeSpinner. */
     private final SpinnerNumberModel    sizeModel;
+    /** 
+     * The text field from the foreground color editor 
+     * in the GraphPropertiesPanel.
+     */
     private final JTextField            fgColorTextField;
+    /** The draw check box from the GraphPropertiesPanel. */
     private final JCheckBox             drawCheckBox;
+    /** The width spinner from the GraphPropertiesPanel. */
     private final JSpinner              widthSpinner;
+    /** The spinner model from widthSpinner. */
     private final SpinnerNumberModel    widthModel;
+    /** 
+     * The text field from the background color editor 
+     * in the GraphPropertiesPanel.
+     */
     private final JTextField            bgColorTextField;
+    /** Collection of radio buttons from the GraphPropertiesPanel. */
     private final List<PRadioButton<GraphPropertySet>>  radioButtons;
     
+    /** The Reset button from the GraphPropertiesPanel. */
     private final JButton               resetButton;
+    /** The Apply button from the GraphPropertiesPanel. */
     private final JButton               applyButton;
+    /** The Close button from the GraphPropertiesPanel. */
     private final JButton               closeButton;
+    
+    // These are volatile variables for use in lambdas. They are used
+    // in method return statements, after which their values are no
+    // longer predictable.
+    private boolean     tempBoolean;
+    private Object      tempObj;
     
     /**
      * Constructor.
@@ -87,6 +135,12 @@ public class GPPTestDialog extends JDialog
         closeButton = getJButton( "Close" );
     }
     
+    /**
+     * Returns the JDialog object
+     * comprising this class's singleton.
+     * 
+     * @return  the JDialog object comprising this class's singleton
+     */
     public static GPPTestDialog getDialog()
     {
         if ( dialog == null )
@@ -125,6 +179,13 @@ public class GPPTestDialog extends JDialog
         return set;
     }
     
+    /**
+     * Sets the state of all components
+     * in the GraphPropertiesPanel
+     * to the given value.
+     * 
+     * @param set   the given values
+     */
     public void setProperties( GraphPropertySet set )
     {
         if ( SwingUtilities.isEventDispatchThread() )
@@ -133,9 +194,46 @@ public class GPPTestDialog extends JDialog
             GUIUtils.schedEDTAndWait( () -> setPropertiesEDT( set ) );
     }
     
+    /**
+     * Gets a BufferedImage reflecting 
+     * the current state of the GraphPropertiesPanel.
+     * 
+     * @return  
+     *      a BufferedImage reflecting 
+     *      the current state of the GraphPropertiesPanel
+     */
     public BufferedImage getPanelImage()
     {
-        return null;
+        if ( SwingUtilities.isEventDispatchThread() )
+            tempObj = getPanelImageEDT();
+        else
+            GUIUtils.schedEDTAndWait( () -> 
+                tempObj = getPanelImageEDT()
+            );
+        return (BufferedImage)tempObj;
+    }
+    
+    /**
+     * Gets a BufferedImage reflecting 
+     * the current state of the GraphPropertiesPanel.
+     * <p>
+     * Precondition:
+     *     Must be invoked on the EDT.
+     * 
+     * @return  
+     *      a BufferedImage reflecting 
+     *      the current state of the GraphPropertiesPanel
+     */
+    private BufferedImage getPanelImageEDT()
+    {
+        int             type    = BufferedImage.TYPE_INT_ARGB;
+        int             width   = propertiesPanel.getWidth();
+        int             height  = propertiesPanel.getHeight();
+        BufferedImage   image   = 
+            new BufferedImage( width, height, type );
+        Graphics2D      gtx     = image.createGraphics();
+        propertiesPanel.paintComponents( gtx );
+        return image;
     }
     
     /**
@@ -143,6 +241,10 @@ public class GPPTestDialog extends JDialog
      * of the property-management components
      * from the property values
      * in the given GraphPropertySet.
+     * <p>
+     * Precondition:
+     * This method must be invoked
+     * on the EDT.
      * 
      * @param set   the given GraphPropertySet
      */
@@ -215,12 +317,11 @@ public class GPPTestDialog extends JDialog
      */
     public boolean isDialogVisible()
     {
-        boolean[]   isVisible   = new boolean[1];
         if ( SwingUtilities.isEventDispatchThread() )
-            isVisible[0] = isVisible();
+            tempBoolean = isVisible();
         else
-            GUIUtils.schedEDTAndWait( () -> isVisible[0] = isVisible() );
-        return isVisible[0];
+            GUIUtils.schedEDTAndWait( () -> tempBoolean = isVisible() );
+        return tempBoolean;
     }
     
     /**
@@ -394,7 +495,7 @@ public class GPPTestDialog extends JDialog
      * Gets a list of all PRadioButtons
      * in this dialog.
      * 
-     * @return
+     * @return  a list of all PRadioButtons in this dialog
      */
     @SuppressWarnings("unchecked")
     private List<PRadioButton<GraphPropertySet>> getRadioButtons()

@@ -24,12 +24,32 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertiesPanel;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
+/**
+ * This is a dialog containing a LinePropertiesPanel
+ * for testing purposes.
+ * All the components needed for testing
+ * are available via this class.
+ * The values of all components can be modified
+ * (see {@linkplain #setProperties(GraphPropertySet)})
+ * or obtained,
+ * (see {@linkplain #getProperties()})
+ * and all buttons can be selected
+ * (see {@linkplain #doClick(AbstractButton)})
+ * via the enclosed facilities.
+ * The facilities in an object
+ * of this class
+ * ensure that they are
+ * executed on the Event Dispatch Thread (EDT).
+ * 
+ * @author Jack Straub
+ */
 @SuppressWarnings("serial")
 public class LPPTestDialog extends JDialog
 {
@@ -99,6 +119,12 @@ public class LPPTestDialog extends JDialog
         pack();
     }
     
+    /**
+     * Returns the JDialog object
+     * comprising this class's singleton.
+     * 
+     * @return  the JDialog object comprising this class's singleton
+     */
     public static LPPTestDialog getDialog()
     {
         if ( dialog == null )
@@ -193,6 +219,14 @@ public class LPPTestDialog extends JDialog
             GUIUtils.schedEDTAndWait( () -> synchRightEDT( set ) );
     }
     
+    /**
+     * Gets a BufferedImage reflecting 
+     * the current state of the LinePropertiesPanel.
+     * 
+     * @return  
+     *      a BufferedImage reflecting 
+     *      the current state of the LinePropertiesPanel
+     */
     public BufferedImage getPanelImage()
     {
         if ( SwingUtilities.isEventDispatchThread() )
@@ -204,6 +238,17 @@ public class LPPTestDialog extends JDialog
         return (BufferedImage)tempObj;
     }
     
+    /**
+     * Gets a BufferedImage reflecting 
+     * the current state of the LinePropertiesPanel.
+     * <p>
+     * Precondition:
+     *     Must be invoked on the EDT.
+     * 
+     * @return  
+     *      a BufferedImage reflecting 
+     *      the current state of the LinePropertiesPanel
+     */
     private BufferedImage getPanelImageEDT()
     {
         int             type    = BufferedImage.TYPE_INT_ARGB;

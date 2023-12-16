@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Graphics;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -146,6 +147,15 @@ public class GraphPropertiesPanel extends JPanel
         add( getControlPanel(), BorderLayout.SOUTH );
         
         buttonGroup.selectIndex( 0 );
+    }
+    
+    /*
+     * Makes paintComponent(Graphics) public.
+     */
+    @Override
+    public void paintComponent( Graphics graphics )
+    {
+        super.paintComponent( graphics );
     }
     
     /**
