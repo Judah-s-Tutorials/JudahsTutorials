@@ -1,5 +1,7 @@
 package com.acmemail.judah.cartesian_plane.sandbox.app;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JFrame;
@@ -13,8 +15,8 @@ public class ShowRaster
 {
     private static final int            red     = 0x00FF0000;
     private static final int            blue    = 0x000000FF;
-    private static final int            rows    = 10;
-    private static final int            cols    = 20;
+    private static final int            rows    = 100;
+    private static final int            cols    = 200;
     private static final BufferedImage  raster  = 
         new BufferedImage( cols, rows, BufferedImage.TYPE_INT_ARGB );
     /**
@@ -44,8 +46,9 @@ public class ShowRaster
             new RasterVisualizerPanel( raster );
         JScrollPane             scrollPane  = 
             new JScrollPane( rasterPanel );
-        JPanel                  contentPane = new JPanel();
-        contentPane.add( scrollPane );
+        JPanel                  contentPane = new JPanel( new BorderLayout() );
+        contentPane.add( scrollPane, BorderLayout.CENTER );
+        scrollPane.setPreferredSize( new Dimension( 100, 100 ) );
         
         JFrame  frame   = new JFrame( "Show Raster App" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );

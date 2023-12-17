@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.Predicate;
@@ -133,6 +135,25 @@ public class GPPTestDialog extends JDialog
         resetButton = getJButton( "Reset" );
         applyButton = getJButton( "Apply" );
         closeButton = getJButton( "Close" );
+        
+        setResizeMonitor();
+    }
+    
+    private void setResizeMonitor()
+    {
+        fgColorTextField.addComponentListener( new ComponentAdapter() {
+            @Override
+            public void componentResized( ComponentEvent evt )
+            {
+                Component   comp    = evt.getComponent();
+                comp = comp.getParent();
+                comp = comp.getParent();
+                String  message =
+                    comp.getClass().getSimpleName() 
+                    + ": " + comp.getWidth() + ", " + comp.getHeight();
+                System.out.println( message );
+            }
+        });
     }
     
     /**

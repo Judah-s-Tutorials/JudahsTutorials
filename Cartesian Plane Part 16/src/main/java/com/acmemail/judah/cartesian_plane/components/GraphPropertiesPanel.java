@@ -5,7 +5,6 @@ import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
@@ -20,6 +19,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -149,15 +149,6 @@ public class GraphPropertiesPanel extends JPanel
         buttonGroup.selectIndex( 0 );
     }
     
-    /*
-     * Makes paintComponent(Graphics) public.
-     */
-    @Override
-    public void paintComponent( Graphics graphics )
-    {
-        super.paintComponent( graphics );
-    }
-    
     /**
      * Creates a dialog
      * with a given parent,
@@ -285,6 +276,9 @@ public class GraphPropertiesPanel extends JPanel
         
         panel.add( fontPanel );
         panel.add( drawPanel );
+        
+        JLabel  feedback    = fontEditor.getFeedback();
+        feedback.setMaximumSize( feedback.getPreferredSize() );
         
         return panel;
     }

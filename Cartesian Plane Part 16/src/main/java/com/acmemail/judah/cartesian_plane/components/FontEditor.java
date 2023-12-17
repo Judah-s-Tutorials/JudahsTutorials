@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.text.ParseException;
@@ -160,6 +161,11 @@ public class FontEditor
         JPanel  panel   = new JPanel( new GridLayout( 1, 2, 3, 0 ) );
         panel.add( getLeftPanel() );
         panel.add( feedback );
+        
+        Dimension   prefSize    = feedback.getPreferredSize();
+        System.out.println( prefSize );
+        feedback.setPreferredSize( new Dimension( 200, 100 ) );
+        feedback.setMaximumSize( new Dimension( 200, 100 ) );
         
         return panel;
     }
@@ -500,8 +506,10 @@ public class FontEditor
                 text = errorString;
                 color = errorColor;
             }
-                
+            
+            Dimension   dim = new Dimension( getWidth(), getHeight() );
             setFont( font );
+            this.setSize( dim );
             setForeground( color );
             setText( text );
         }

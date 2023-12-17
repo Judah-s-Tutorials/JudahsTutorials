@@ -93,7 +93,9 @@ public class GPPTestDataInitializer
         fontNamesInx += 2;
         set.setBold( isBold = !isBold );
         set.setItalic( isItalic = !isItalic );
-        set.setFontSize( fontSize += 4 );
+        set.setFontSize( fontSize += 2 );
+    set.setFontSize( 6 );
+//    set.setBold( false );
         set.setFGColor( new Color( fgColor += 100 ) );
         set.setWidth( width += 100 );
         set.setFontDraw( isFontDraw = !isFontDraw );
@@ -115,7 +117,7 @@ public class GPPTestDataInitializer
         dest.setFontName( fontNames.get( namesInx ) );
         dest.setBold( !source.isBold() );
         dest.setItalic( !source.isItalic() );
-        dest.setFontSize( source.getFontSize() + 2 );
+        dest.setFontSize( source.getFontSize() + 1 );
         dest.setFGColor( fgColor );
         dest.setWidth( width += 100 );
         dest.setFontDraw( isFontDraw = !isFontDraw );

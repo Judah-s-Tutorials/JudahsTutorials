@@ -2,8 +2,6 @@ package com.acmemail.judah.cartesian_plane.sandbox.app;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JButton;
@@ -14,7 +12,6 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.components.GraphPropertiesPanel;
-import com.acmemail.judah.cartesian_plane.sandbox.MakeRaster;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.RasterVisualizerPanel;
 
 public class ShowRasterGPP
@@ -60,16 +57,16 @@ public class ShowRasterGPP
         int             cols    = gpPanel.getWidth();
         int             type    = BufferedImage.TYPE_INT_ARGB;
         raster = new BufferedImage( cols, rows, type );
-        gpPanel.paintComponent( raster.createGraphics() );
+        gpPanel.paintComponents( raster.createGraphics() );
 //        raster = MakeRaster.get();
     }
     
     private static void openDialog()
     {
-        if ( raster == null )
-            getRaster();
-        if ( dialog == null )
-            makeDialog();
+        if ( dialog != null )
+            dialog.dispose();
+        getRaster();
+        makeDialog();
         dialog.setLocation( frame.getWidth() + 10, 100 );
         dialog.setVisible( true );
     }
@@ -80,11 +77,10 @@ public class ShowRasterGPP
             new RasterVisualizerPanel( raster );
         rasterPanel.setPreferredSize( new Dimension( 300, 300 ) );
         JScrollPane             scrollPane  = 
-            new JScrollPane(  );
-        scrollPane.setViewportView( rasterPanel );
+            new JScrollPane( rasterPanel );
+        scrollPane.setPreferredSize( new Dimension( 500, 500 ));
         JPanel                  contentPane = new JPanel();
         contentPane.add( scrollPane );
-//        contentPane.setPreferredSize( new Dimension( 500, 500 ) );
         
         dialog = new JDialog( frame, "Showing Raster" );
         dialog.setContentPane( contentPane );
