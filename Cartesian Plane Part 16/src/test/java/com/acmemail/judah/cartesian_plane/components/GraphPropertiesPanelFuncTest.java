@@ -20,8 +20,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
-import com.acmemail.judah.cartesian_plane.test_utils.gp_plane.GPPTestDataInitializer;
-import com.acmemail.judah.cartesian_plane.test_utils.gp_plane.GPPTestDialog;
+import com.acmemail.judah.cartesian_plane.test_utils.gp_panel.GPPTestDataInitializer;
+import com.acmemail.judah.cartesian_plane.test_utils.gp_panel.GPPTestDialog;
 
 class GraphPropertiesPanelFuncTest
 {

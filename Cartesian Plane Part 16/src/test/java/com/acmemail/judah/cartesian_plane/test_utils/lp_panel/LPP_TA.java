@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils.lp_plane;
+package com.acmemail.judah.cartesian_plane.test_utils.lp_panel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -59,7 +59,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 public class LPP_TA
 {
     /**
-     * Master directory for all LinePropertiesPnel test data files.
+     * Master directory for all LinePropertiesPanel test data files.
      * This will be a subdirectory of the project test data files; 
      * see {@linkplain Utils#BASE_TEST_DATA_DIR}.
      * The directory should contain four files containing serialized
@@ -68,12 +68,24 @@ public class LPP_TA
      */
     public static final String  LPP_DIR = "LinePropertiesPanel";
 
+    /** 
+     * Path to master directory 
+     * for all LinePropertiesPanel test data files.
+     */
     private static final File   lppPath = Utils.getTestDataDir( LPP_DIR );
+    /** Title of the application's main window. */
     private static final String title   = "LinePropertiesPanel TA";
+    /** Dialog for displaying test data. */
     private final LPPTestDialog lppDialog;
+    /** Button group for all application radio buttons. */
     private final PButtonGroup<Descriptor>  buttonGroup = 
         new PButtonGroup<>();        
+    /** The label used to display the next file name to use. */
     private final JLabel                    fileName    = new JLabel();
+    /** 
+     * The label used to display the name of the current class
+     * for which test data is being gathered.
+     */
     private final JLabel                    className   = new JLabel();
     
     /**
@@ -88,6 +100,13 @@ public class LPP_TA
         SwingUtilities.invokeLater( () -> new LPP_TA() );
     }
     
+    /**
+     * Constructor.
+     * Initializes the application GUI.
+     * <p>
+     * Precondition:
+     * Must be invoked on the EDT.
+     */
     public LPP_TA()
     {
         JFrame  frame   = new JFrame( title );
@@ -111,6 +130,20 @@ public class LPP_TA
         lppDialog.setVisible( true );
     }
     
+    /**
+     * Gets the main panel
+     * for this application's GUI.
+     * This consists of two additional panels,
+     * one containing the application 
+     * radio buttons
+     * and one to display feedback
+     * regarding the current state
+     * of the application.
+     * The two sub-panels
+     * are arranged horizontally,
+     * 
+     * @return  the main panel for this application's GUI
+     */
     private JPanel getMainPanel()
     {
         JPanel      panel   = new JPanel();
@@ -126,6 +159,22 @@ public class LPP_TA
         return panel;
     }
 
+    /**
+     * Gets the panel
+     * containing the options 
+     * for this application. 
+     * This consists of a radio button
+     * for each option
+     * and a check box indicating whether
+     * data for the option 
+     * has been saved.
+     * The radio button and associated check box
+     * for each option
+     * are laid out horizontally;
+     * the options are then arranged vertically.
+     * 
+     * @return  the panel containing the options for this application
+     */
     private JPanel getOptionPanel()
     {
         Descriptor[]    descriptors =
@@ -150,6 +199,20 @@ public class LPP_TA
         return panel;
     }
     
+    /**
+     * Method to execute
+     * when an application option
+     * (represented as a radio button)
+     * is selected.
+     * The option in the test dialog
+     * is synchronized with the select option,
+     * and the feedback label
+     * describing the property set being examined
+     * is updated.
+     * 
+     * @param evt   
+     *      event object associated with the initiating selection event
+     */
     private void selectAction( ActionEvent evt )
     {
         Object  source  = evt.getSource();
@@ -175,6 +238,18 @@ public class LPP_TA
         lppDialog.doClick( target );
     }
     
+    /**
+     * Given a radio button
+     * encapsulating a LinePropertySet
+     * obtains the class name
+     * of the LinePropertySet.
+     * 
+     * @param button    the given radio button
+     * 
+     * @return  
+     *      the class name of the given button's 
+     *      encapsulated LinePropertySet.
+     */
     private static String 
     getSimpleName( PRadioButton<LinePropertySet> button )
     {
@@ -183,6 +258,15 @@ public class LPP_TA
         return name;
     }
 
+    /**
+     * Gets the panel containing 
+     * the GUI's feedback labels
+     * for displaying the current file name
+     * and LinePropertySet class.
+     * The labels are laid out vertically.
+     * 
+     * @return  the panel containing the GUI's feedback labels
+     */
     private JPanel getFeedbackPanel()
     {
         final int margin = 10;
@@ -201,6 +285,17 @@ public class LPP_TA
         return panel;
     }
     
+    /**
+     * Returns the panel
+     * containing the application's controls
+     * (the Save and Close buttons).
+     * The panel is configured
+     * with a FlowLayout,
+     * so the buttons will typically
+     * be laid out horizontally.
+     * 
+     * @return  the panel containing the application's controls
+     */
     private JPanel getControlPanel()
     {
         JPanel  panel   = new JPanel();
@@ -214,18 +309,34 @@ public class LPP_TA
         return panel;
     }
     
+    /**
+     * Action method to be executed
+     * with the Save button is selected.
+     * 
+     * @param evt   
+     *      event object associated with the selection event;
+     *      not used
+     */
     private void saveAction( ActionEvent evt )
     {
         PRadioButton<Descriptor>    button  = 
             buttonGroup.getSelectedButton();
         Descriptor      descrip = button.get();
         BufferedImage   image   = lppDialog.getPanelImage();
-        LPP_TADetail    detail  = new LPP_TADetail( descrip.clazz, image );
+        LPP_TADetail    detail  = 
+            new LPP_TADetail( descrip.clazz, image );
         saveDetail( detail, descrip.fileName );
 
         descrip.saved.setSelected( true );
     }
     
+    /**
+     * Saves a given LPP_TADetail object
+     * to a file with a given name.
+     * 
+     * @param detail    the given detail object
+     * @param fileName  the given file name
+     */
     private static void 
     saveDetail( LPP_TADetail detail, String fileName )
     {
@@ -244,14 +355,60 @@ public class LPP_TA
         }
     }
     
+    /**
+     * Simple class to encapsulate the state
+     * of an option.
+     * This includes:
+     * <ul>
+     * <li>
+     *      The text to display with the option,
+     *      for example "TicMajor";
+     * </li>
+     * <li>
+     *      The file name attached to the option,
+     *      for example "TicMajorImage.ser";</li>
+     * <li>The file name attached to the option;</li>
+     * <li>
+     *      The class name attached to the option,
+     *      for example "LinePropertySetTicMajor";</li>
+     * <li>
+     *      The class of the LineProperty attached to the option,
+     *      for example LinePropertySetTicMajor.class; and
+     * </li>
+     * <li>
+     *      Whether or not the test data
+     *      associated with this option has been saved.
+     * </li>
+     * </ul>
+     * @author Jack Straub
+     */
     private static class Descriptor
     {
+        /** Text associated with a given option. */
         public final String     text;
+        /** File name associated with a given option. */
         public final String     fileName;
+        /** Class name associated with a given option. */
         public final String     className;
+        /** 
+         * Indicates whether or not the test data for a given option
+         * has been saved.
+         */
         public final JCheckBox  saved;
+        /** The Class class associated with a given option. */
         public final Class<? extends LinePropertySet>   clazz;
         
+        /**
+         * Constructor.
+         * Initializes all fields for this object.
+         * 
+         * @param <T>   
+         *      type of class associated with
+         *      a given option; 
+         *      must be a subclass of LinePropertySet
+         * @param clazz
+         *      Class class associated with a given option.
+         */
         public <T extends LinePropertySet> Descriptor( Class<T> clazz )
         {
             final int   count       = 

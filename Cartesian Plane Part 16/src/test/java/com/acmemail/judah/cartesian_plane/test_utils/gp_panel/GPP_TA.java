@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils.gp_plane;
+package com.acmemail.judah.cartesian_plane.test_utils.gp_panel;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
+import com.acmemail.judah.cartesian_plane.components.GraphPropertiesPanel;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetBM;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetLM;
@@ -37,27 +38,46 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
  * This is the GraphPropertiesPlane Test Assistant.
  * It generates up to five files
  * containing graphical rendering
- * of the GraphPropertiesPlane,
+ * of the GraphPropertiesPanel,
  * one for for each selected radio button.
  * When you run the generator
  * it will display a dialog
- * containing the GraphPropertiesPanel;
- * throughout the execution of this application
+ * containing a {@linkplain GraphPropertiesPanel}.
+ * The data represented
+ * in the sample panel
+ * is determined by the {@linkplain GPPTestDataInitializer}.
+ * Throughout the execution of this application
  * you should not attempt to modify
  * the GraphPropertiesPanel GUI.
  * Instead, click one of the options
  * displayed on the left side
  * of this application's GUI;
- * this will force the LinePropertiesPanel
+ * this will force the GraphPropertiesPanel
  * into one of five configurations;
  * if you're happy with the display
  * press the Save button.
  * If you wish
  * you can then select a different option.
+ * <p>
+ * Test application that use
+ * the saved data
+ * should first run the GPPTestDataInitializer.
+ * 
  * @author Jack Straub
+ * 
+ * @see GPPTestDataInitializer
+ * @see GPP_TAVisualizer
+ * @see GPPTestDialog
  */
 public class GPP_TA
 {
+    /** 
+     * Work around for issue #??????.
+     * Made public so that it can be synchronized with related
+     * applications, such as GPP_TAVisualizer.
+     */
+    public static double fixedFontSize  = 6;
+    
     /**
      * Master directory for all GraphPropertiesPnel test data files.
      * This will be a subdirectory of the project test data files; 
@@ -68,12 +88,18 @@ public class GPP_TA
      */
     public static final String  GPP_DIR = "GraphPropertiesPanel";
 
+    /** Directory path for all graph panel test. */
     private static final File   gppPath = Utils.getTestDataDir( GPP_DIR );
+    /** Title of the application main window. */
     private static final String title   = "GraphPropertiesPanel TA";
+    /** Dialog to formulate the test data image. */
     private final GPPTestDialog gppDialog;
+    /** Button group for the application's radio buttons. */
     private final PButtonGroup<Descriptor>  buttonGroup = 
         new PButtonGroup<>();        
+    /** Label to display the next file name to save. */
     private final JLabel                    fileName    = new JLabel();
+    /** Label to display the current */
     private final JLabel                    className   = new JLabel();
     
     /**
@@ -84,6 +110,10 @@ public class GPP_TA
     */
     public static void main(String[] args)
     {
+        // Workaround for issue #?????
+        // "Test will not work when font size is allowed to change,
+        // or is too big.
+        GPPTestDataInitializer.setFixedFontSize( fixedFontSize );
         new GPPTestDataInitializer();
         SwingUtilities.invokeLater( () -> new GPP_TA() );
     }

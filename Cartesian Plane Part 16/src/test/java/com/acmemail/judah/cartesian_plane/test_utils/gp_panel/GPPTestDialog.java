@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils.gp_plane;
+package com.acmemail.judah.cartesian_plane.test_utils.gp_panel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.Predicate;
@@ -48,9 +46,10 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  * and all buttons can be selected
  * (see {@linkplain #doClick(AbstractButton)})
  * via the enclosed facilities.
- * The facilities in an object
- * of this class
- * ensure that they are
+ * The facilities 
+ * ensure that,
+ * whenever necessary,
+ * they are
  * executed on the Event Dispatch Thread (EDT).
  * 
  * @author Jack Straub
@@ -135,25 +134,6 @@ public class GPPTestDialog extends JDialog
         resetButton = getJButton( "Reset" );
         applyButton = getJButton( "Apply" );
         closeButton = getJButton( "Close" );
-        
-        setResizeMonitor();
-    }
-    
-    private void setResizeMonitor()
-    {
-        fgColorTextField.addComponentListener( new ComponentAdapter() {
-            @Override
-            public void componentResized( ComponentEvent evt )
-            {
-                Component   comp    = evt.getComponent();
-                comp = comp.getParent();
-                comp = comp.getParent();
-                String  message =
-                    comp.getClass().getSimpleName() 
-                    + ": " + comp.getWidth() + ", " + comp.getHeight();
-                System.out.println( message );
-            }
-        });
     }
     
     /**

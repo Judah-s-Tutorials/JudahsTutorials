@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.test_utils.lp_plane;
+package com.acmemail.judah.cartesian_plane.test_utils.lp_panel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,18 +37,26 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  * All the components needed for testing
  * are available via this class.
  * The values of all components can be modified
- * (see {@linkplain #setProperties(GraphPropertySet)})
+ * (see {@linkplain #synchRight(LinePropertySet)})
  * or obtained,
- * (see {@linkplain #getProperties()})
+ * (see {@linkplain #getAllProperties()})
  * and all buttons can be selected
  * (see {@linkplain #doClick(AbstractButton)})
  * via the enclosed facilities.
- * The facilities in an object
- * of this class
- * ensure that they are
+ * The facilities in this class
+ * ensure that
+ * when necessary,
+ * they are
  * executed on the Event Dispatch Thread (EDT).
+ * <p>
+ * This class is implemented
+ * as a singleton.
+ * To obtain its sole object
+ * call {@linkplain #getDialog()}.
  * 
  * @author Jack Straub
+ * 
+ * @see #getDialog()
  */
 @SuppressWarnings("serial")
 public class LPPTestDialog extends JDialog
@@ -139,21 +147,35 @@ public class LPPTestDialog extends JDialog
         return dialog;
     }
     
+    /**
+     * Selects the encapsulated LinePropertiesPanel Apply button.
+     */
     public void apply()
     {
         doClick( applyButton );
     }
     
+    /**
+     * Selects the encapsulated LinePropertiesPanel Reset button.
+     */
     public void reset()
     {
         doClick( resetButton );
     }
     
+    /**
+     * Selects the encapsulated LinePropertiesPanel Close button.
+     */
     public void close()
     {
         doClick( closeButton );
     }
 
+    /**
+     * Clicks a given button.
+     * 
+     * @param button    the given button
+     */
     public void doClick( AbstractButton button )
     {
         if ( SwingUtilities.isEventDispatchThread() )
@@ -162,6 +184,11 @@ public class LPPTestDialog extends JDialog
             GUIUtils.schedEDTAndWait( () -> button.doClick() ); 
     }
     
+    /**
+     * Sets the visibility of the dialog.
+     * 
+     * @param visible   true to make the dialog visible
+     */
     public void setDialogVisible( boolean visible )
     {
         if ( SwingUtilities.isEventDispatchThread() )
@@ -172,6 +199,11 @@ public class LPPTestDialog extends JDialog
             );
     }
     
+    /**
+     * Indicates whether this dialog is in the visible state.
+     * 
+     * @return  true if this dialog is visible
+     */
     public boolean isDialogVisible()
     {
         if ( SwingUtilities.isEventDispatchThread() )
@@ -183,6 +215,13 @@ public class LPPTestDialog extends JDialog
         return tempBoolean;
     }
     
+    /**
+     * Indicates whether a given button is in the selected state.
+     * 
+     * @param button    the given button
+     * 
+     * @return  true if the given button is selected
+     */
     public boolean isSelected( AbstractButton button )
     {
         if ( SwingUtilities.isEventDispatchThread() )
@@ -194,11 +233,26 @@ public class LPPTestDialog extends JDialog
         return tempBoolean;
     }
     
+    /**
+     * Gets a list of the encapsulated LinePropertiesPanel's
+     * radio buttons.
+     * 
+     * @return  
+     *      a list of the encapsulated LinePropertiesPanel's
+     *      radio buttons
+     */
     public List<PRadioButton<LinePropertySet>> getRadioButtons()
     {
         return radioButtons;
     }
     
+    /**
+     * Returns the values of all 
+     * the LinePropertiesPanel's components
+     * used to configure properties.
+     * 
+     * @return  the values of all configuration components
+     */
     public CompConfig getAllProperties()
     {
         if ( SwingUtilities.isEventDispatchThread() )
