@@ -113,6 +113,25 @@ public class LinePropertiesPanel extends JPanel
     }
     
     /**
+     * Creates a dialog
+     * with a given parent,
+     * and containing a LinePropertiesPanel.
+     * The dialog is <em>not</em> made visible.
+     * 
+     * @param parent    the given parent
+     * 
+     * @return the created dialog
+     */
+    public static JDialog getDialog( Window parent )
+    {
+        final String    title   = "Line Properties Dialog";
+        JDialog dialog      = new JDialog( parent, title );
+        dialog.setContentPane( new LinePropertiesPanel() );
+        dialog.pack();
+        return dialog;
+    }
+
+    /**
      * Configures the main panel
      * for this GUI.
      * It consist

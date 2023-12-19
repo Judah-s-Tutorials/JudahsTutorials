@@ -152,8 +152,7 @@ public class GraphPropertiesPanel extends JPanel
     /**
      * Creates a dialog
      * with a given parent,
-     * and a GraphPropertiesPanel
-     * as the content pane.
+     * and containing a GraphPropertiesPanel.
      * The dialog is <em>not</em> made visible.
      * 
      * @param parent    the given parent

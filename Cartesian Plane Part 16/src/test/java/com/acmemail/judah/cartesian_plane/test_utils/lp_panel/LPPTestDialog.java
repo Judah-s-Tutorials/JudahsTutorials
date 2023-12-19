@@ -24,7 +24,6 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertiesPanel;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
@@ -44,7 +43,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  * (see {@linkplain #doClick(AbstractButton)})
  * via the enclosed facilities.
  * The facilities in this class
- * ensure that
+ * ensure that,
  * when necessary,
  * they are
  * executed on the Event Dispatch Thread (EDT).
@@ -265,6 +264,14 @@ public class LPPTestDialog extends JDialog
         return tempConfig;
     }
     
+    /**
+     * Synchronize the values in a given LinePropertySet
+     * with the components that manage them.
+     * (The components on the right side
+     * of the LinePropertiesPanel).
+     * 
+     * @param set   the given LinePropertySet
+     */
     public void synchRight( LinePropertySet set )
     {
         if ( SwingUtilities.isEventDispatchThread() )
@@ -315,6 +322,18 @@ public class LPPTestDialog extends JDialog
         return image;
     }
     
+    /**
+     * Synchronize the values in a given LinePropertySet
+     * with the components that manage them.
+     * (The components on the right side
+     * of the LinePropertiesPanel).
+     * 
+     * Precondition:
+     * This method must be invoked
+     * on the Event Dispatch Thread.
+     * 
+     * @param set   the given LinePropertySet
+     */
     private void synchRightEDT( LinePropertySet set )
     {
         if ( set.hasStroke() )
@@ -329,6 +348,19 @@ public class LPPTestDialog extends JDialog
             drawCheckBox.setSelected( set.getDraw() );
     }
 
+    /**
+     * Converts a string to a Color.
+     * The string is expected to contain
+     * a valid integer value
+     * in the range of an Integer;
+     * alpha bits are stripped.
+     * If the input is invalid
+     * null is returned.
+     * 
+     * @param strColor  the string to convert to an integer
+     * 
+     * @return  the converted value, or null if the input is invalid
+     */
     private static Color colorValue( String strColor )
     {
         Color   color   = null;
@@ -344,6 +376,24 @@ public class LPPTestDialog extends JDialog
         return color;
     }
     
+    /**
+     * Converts a given color to a string
+     * and uses it to set the value 
+     * of the colorField.
+     * The value is represented
+     * as a hexadecimal number
+     * with the alpha bits stripped.
+     * After the text value is set,
+     * the text field issues an ActionEvent,
+     * just as though an operator
+     * had typed the enter key
+     * in the field.
+     * <p>
+     * It is save to call this method
+     * from any thread.
+     * 
+     * @param color the given color
+     */
     private void setColor( Color color )
     {
         int     rgb     = color.getRGB() & 0xffffff;
@@ -360,6 +410,19 @@ public class LPPTestDialog extends JDialog
             });
     }
     
+    /**
+     * Obtains, from the LinePropertiesPanel,
+     * the panel that contains the controls
+     * used to manage property values.
+     * This is the panel that appears
+     * on the right side of the LinePropertiesPanel,
+     * and includes the spinners
+     * and the color editor.
+     * 
+     * @return
+     *      the panel that contains the controls
+     *      used to manage property values
+     */
     private JPanel getPropCompPanel()
     {
         Predicate<JComponent>   pred    = c -> (c instanceof JSpinner);
@@ -374,6 +437,20 @@ public class LPPTestDialog extends JDialog
         return (JPanel)parent;
     }
     
+    /**
+     * Obtains a list of all JSpinners
+     * in the LinePropertiesPanel.
+     * <p>
+     * Precondition:
+     * The panel containing the spinners 
+     * ({@linkplain #propCompPanel})
+     * has already been obtained
+     * from the GUI.
+     * 
+     * @return  a list of all JSpinners in the LinePropertiesPanel
+     * 
+     * @see #getPropCompPanel()
+     */
     private List<JSpinner> parseSpinners()
     {
         List<JSpinner>  allSpinners   = 
@@ -385,6 +462,13 @@ public class LPPTestDialog extends JDialog
         return allSpinners;
     }
     
+    /**
+     * Obtains a list of all radio buttons
+     * in the GUI.
+     * These are the buttons
+     * on the left side
+     * of the {@link LinePropertiesPanel}.
+     */
     private List<PRadioButton<LinePropertySet>> parseRButtons()
     {
         List<PRadioButton<LinePropertySet>> buttons =
@@ -394,6 +478,14 @@ public class LPPTestDialog extends JDialog
         return buttons;
     }
     
+    /**
+     * Obtains the radio button
+     * with the given text.
+     * 
+     * @param text  the given text
+     * 
+     * @return  the radio button with the given text
+     */
     @SuppressWarnings("unchecked")
     private PRadioButton<LinePropertySet> parseRButton( String text )
     {
@@ -414,6 +506,14 @@ public class LPPTestDialog extends JDialog
         return button;
     }
 
+    /**
+     * Obtains the JButton
+     * with the given text.
+     * 
+     * @param text  the given text
+     * 
+     * @return  the JButton with the given text
+     */
     private JButton parseJButton( String text )
     {
         Predicate<JComponent>   pred    = 
@@ -425,6 +525,20 @@ public class LPPTestDialog extends JDialog
         return (JButton)comp;
     }
     
+    /**
+     * Parses from the GUI
+     * the text field that manages the color property.
+     * <p>
+     * Precondition:
+     * The panel containing the color editor 
+     * ({@linkplain #propCompPanel})
+     * has already been obtained
+     * from the GUI.
+     * 
+     * @return  the text field that manages the color property
+     * 
+     * @see #getPropCompPanel()
+     */
     private JTextField parseColorField()
     {
         // The color field is the JTextField that is a *direct* child
@@ -439,6 +553,12 @@ public class LPPTestDialog extends JDialog
         return textField;
     }
     
+    /**
+     * Parses the first JCheckBox
+     * from the GUI.
+     * 
+     * @return  the first JCheckBox found in the GUI
+     */
     private JCheckBox parseJCheckBox()
     {
         Predicate<JComponent>   pred    = c -> (c instanceof JCheckBox);
@@ -449,6 +569,14 @@ public class LPPTestDialog extends JDialog
         return (JCheckBox)comp;
     }
     
+    /**
+     * Parses from the GUI
+     * the JLabel with the given text.
+     *  
+     * @param text  the given text
+     * 
+     * @return  the JLabel with the given text
+     */
     private JLabel parseJLabel( String text )
     {
         Predicate<JComponent>   isLabel     =
@@ -465,24 +593,52 @@ public class LPPTestDialog extends JDialog
         return label;
     }
     
+    /**
+     * Encapsulates the state
+     * of all components used to manage property values.
+     * (The components on the right side
+     * of the LinePropertiesPanel).
+     * "State" includes a component's value
+     * and whetheror not it is enabled.
+     * 
+     * @author Jack Straub
+     */
     public class CompConfig
     {
+        /** True if the stroke spinner is enabled. */
         public final boolean    strokeSpinnerEnabled;
+        /** True if the label on the stroke spinner is enabled. */
         public final boolean    strokeLabelEnabled;
+        /** True if the length spinner is enabled. */
         public final boolean    lengthSpinnerEnabled;
+        /** True if the label on the length spinner is enabled. */
         public final boolean    lengthLabelEnabled;
+        /** True if the spacing spinner is enabled. */
         public final boolean    spacingSpinnerEnabled;
+        /** True if the label on the spacing spinner is enabled. */
         public final boolean    spacingLabelEnabled;
+        /** True if the color button is enabled. */
         public final boolean    colorButtonEnabled;
+        /** True if the color text field is enabled. */
         public final boolean    colorFieldEnabled;
+        /** True if the color "draw" check box is enabled. */
         public final boolean    drawCheckBoxEnabled;
         
+        /** The value of the stroke spinner. */
         public final float      stroke;
+        /** The value of the length spinner. */
         public final float      length;
+        /** The value of the spacing spinner. */
         public final float      spacing;
+        /** The value of the color field. */
         public final Color      color;
+        /** The value of the "draw" property. */
         public final boolean    draw;
         
+        /**
+         * Constructor.
+         * Initializes all fields.
+         */
         private CompConfig()
         {
             strokeSpinnerEnabled = strokeSpinner.isEnabled();
