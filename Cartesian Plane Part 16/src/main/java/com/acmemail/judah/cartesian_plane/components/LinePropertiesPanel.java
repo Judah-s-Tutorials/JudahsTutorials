@@ -82,6 +82,12 @@ public class LinePropertiesPanel extends JPanel
     private final PButtonGroup<LinePropertySet> buttonGroup =
         new PButtonGroup<>();
     
+    private void temp()
+    {
+        Supplier<LinePropertySet>   supplier    = typeMap.get( "Axes" );
+        LinePropertySet set = supplier.get();
+    }
+    
     /**
      * Constructor.
      * Fully configures the line properties GUI.
@@ -427,15 +433,19 @@ public class LinePropertiesPanel extends JPanel
          * Fully configures
          * the panel containing
          * the properties components.
+         * 
+         * Precondition:
+         * The buttons in the radio button panel
+         * must be created before invoking this constructor.
          */
-        private PropertiesPanel()
+        public PropertiesPanel()
         {
             super( new GridLayout( 5, 3, 5, 3 ) );
             
             // sanity check; radio buttons must be created prior to
             // this class being instantiated.
             if ( buttonGroup.getButtonCount() < 1 )
-                throw new RuntimeException( "no radio buttons found" );
+                throw new ComponentException( "no radio buttons found" );
             
             add( strokeLabel );
             add( strokeSpinner );
@@ -484,6 +494,22 @@ public class LinePropertiesPanel extends JPanel
         }
         
         /**
+         * Convenience method for obtaining a Float value
+         * from a given SpinnerNumberModel.
+         * 
+         * @param model the given SpinnerNumberModel
+         * 
+         * @return  
+         *      the value of the given SpinnerNumberModel
+         *      as type Float
+         */
+        private Float floatValue( SpinnerNumberModel model )
+        {
+            Float   value   = model.getNumber().floatValue();
+            return value;
+        }
+        
+        /**
          * Method to listen for 
          * ItemListener events.
          * Associated with this panel's
@@ -527,11 +553,11 @@ public class LinePropertiesPanel extends JPanel
             if ( set.hasDraw() )
                 set.setDraw( drawToggle.isSelected() );
             if ( set.hasLength() )
-                set.setLength( lengthModel.getNumber().floatValue() );
+                set.setLength( floatValue( lengthModel ) );
             if ( set.hasSpacing() )
-                set.setSpacing( spacingModel.getNumber().floatValue() );
+                set.setSpacing( floatValue( spacingModel ) );
             if ( set.hasStroke() )
-                set.setStroke( strokeModel.getNumber().floatValue() );
+                set.setStroke( floatValue( strokeModel ) );
             if ( set.hasColor() )
                 set.setColor( colorEditor.getColor().orElse( null ) );
         }
