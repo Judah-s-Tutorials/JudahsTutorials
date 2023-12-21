@@ -260,7 +260,6 @@ public class LinePropertiesPanel extends JPanel
             );
         Stream.of( selectedButton.getItemListeners() )
             .forEach( l -> l.itemStateChanged( event ) );
-
         
         buttonGroup.getButtons().stream()
             .map( b -> b.get() )
@@ -531,9 +530,9 @@ public class LinePropertiesPanel extends JPanel
                 {
                     LinePropertySet set = (LinePropertySet)obj;
                     if ( evt.getStateChange() == ItemEvent.SELECTED )
-                        copyRight( set );
+                        synchRight( set );
                     else
-                        copyLeft( set );
+                        synchLeft( set );
                 }
             }
         }
@@ -548,7 +547,7 @@ public class LinePropertiesPanel extends JPanel
          * 
          * @param set   the given LinePropertySet
          */
-        private void copyLeft( LinePropertySet set )
+        private void synchLeft( LinePropertySet set )
         {
             if ( set.hasDraw() )
                 set.setDraw( drawToggle.isSelected() );
@@ -577,7 +576,7 @@ public class LinePropertiesPanel extends JPanel
          * 
          * @param set   the given LinePropertySet
          */
-        private void copyRight( LinePropertySet set )
+        private void synchRight( LinePropertySet set )
         {
             boolean hasDraw     = set.hasDraw();
             drawToggle.setEnabled( hasDraw );
