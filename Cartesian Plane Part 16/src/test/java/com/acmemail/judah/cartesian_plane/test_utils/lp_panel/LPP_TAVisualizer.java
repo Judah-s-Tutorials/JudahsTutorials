@@ -265,7 +265,8 @@ public class LPP_TAVisualizer
             {
                 String  actualName  = obj.getClass().getSimpleName();
                 String  message     =
-                    "Expected type: int[][], actual type: " + actualName;
+                    "Expected type: LPP_TADetail, actual type: " + 
+                    actualName;
                 throw new ClassNotFoundException( message );
             }
             detail = (LPP_TADetail)obj;

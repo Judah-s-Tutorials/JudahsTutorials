@@ -65,9 +65,6 @@ public abstract class Feedback extends JComponent
      * Determines the source
      * for the length 
      * of the horizontal feedback line.
-     * 
-     * @param valueSource   
-     *      source for the length of the horizontal feedback line
      */
     public Feedback()
     {
