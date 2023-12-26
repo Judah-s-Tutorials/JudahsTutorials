@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LinePropertiesPanel, GraphPropertiesPanel Comparison</title>
+    <link rel="stylesheet" href="main.css"> 
+    <style>
+        table.jt-norm
+        {
+            border: 1px solid black;
+            border-collapse:collapse;
+            padding: .5em 0 .5em 0;
+        }
+        th.jt-norm
+        {
+            border: 1px solid black;
+            padding:0 .25em 0 .25em;
+        }
+        td.jt-norm
+        {
+            border: 1px solid black;
+            padding: 0 .25em 0 .25em;
+        }
+        td.jt-level0
+        {
+            border: 1px solid black;
+            padding: 0 .25em 0 .25em;
+            font-style: italic;
+        }
+        td.jt-level1
+        {
+            border: 1px solid black;
+            padding: 0 .25em 0 .25em;
+            padding-left: 2em;
+        }
+        div.jt-style1
+        {
+            border: .25em solid black;
+            padding: .5em .5em .5em .5em; 
+            background-color: #EEE8AA;
+        }
+    </style>
+</head>
+<body>
+<div  class="jt-style1">
+<table class="jt-norm">
+<thead>
+    <tr>
+        <th class="jt-norm">LinePropertiesPanel</th>
+        <th class="jt-norm">GraphPropertiesPanel</th>
+    </tr>
+</thead>
+<tbody>
+    <tr>
+        <td class="jt-level0">class LinePropertySet</td>
+        <td class="jt-level0">class GraphPropertySet</td>
+    </tr>
+    <tr>
+        <td class="jt-level1">
+            Categories:
+            <ul style="margin-top:0;margin-bottom:0;">
+                <li>Axes</li>
+                <li>Major Tics</li>
+                <li>Minor Tics</li>
+                <li>Grid Lines</li>
+            </ul>
+        </td>
+        <td class="jt-level1">
+            Categories:
+            <ul style="margin-top:0;margin-bottom:0;">
+                <li>Main Window</li>
+                <li>Top Margin</li>
+                <li>Right Margin</li>
+                <li>Bottom Margin</li>
+                <li>Left Margin</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td class="jt-level1">
+            Implemented using superclass <em>LinePropertySet</em>
+            plus one subclass per category.
+        </td>
+        <td class="jt-level1">
+            Implemented using superclass <em>GraphPropertySet</em>
+            plus one subclass per category.
+        </td>
+    </tr>
+    <tr>
+        <td class="jt-level1">
+            Methods <em>apply()</em> 
+            and <em>reset()</em>
+            coordinate property values
+            with <em>PropertyManager.</em>
+        </td>
+        <td class="jt-level1">
+            Methods <em>apply()</em> 
+            and <em>reset()</em>
+            coordinate property values
+            with <em>PropertyManager.</em>
+        </td>
+    </tr>
+    <tr>
+        <td class="jt-level1">
+            Properties:
+            <ul style="margin-top:0;margin-bottom:0;">
+                <li>draw</li>
+                <li>stroke</li>
+                <li>length</li>
+                <li>spacing</li>
+                <li>color</li>
+            </ul>
+            Properties are optional per category;
+            e.g. <em>Axes</em> don't have a length.
+        </td>
+        <td class="jt-level1">
+            Properties:
+            <ul style="margin-top:0;margin-bottom:0;">
+                <li>draw</li>
+                <li>font-name</li>
+                <li>font-style</li>
+                <li>font-size</li>
+                <li>font-color</li>
+                <li>background color</li>
+            </ul>
+            Properties are <em>never</em> optional;
+            simplifies property management.
+        </td>
+    </tr>
+    <tr>
+        <td class="jt-level0">GUI Layout</td>
+        <td class="jt-level0">GUI Layout</td>
+    </tr>
+    <tr>
+        <td class="jt-level1">
+            <strong>Options panel</strong> on left;
+            vertical arrangement of 
+            <em>PRadioButton&lt;LinePropertySet></em>
+        </td>
+        <td class="jt-level1">
+            <strong>Options panel</strong> on left;
+            vertical arrangement of 
+            <em>PRadioButton&lt;GraphPropertySet></em>
+        </td>
+    </tr>
+    <tr>
+        <td class="jt-level1">
+            <strong>Component panel</strong> on right;
+            vertical arrangement of 
+            <em>
+                Feedback components,
+                ColorEditor
+            </em>
+            and <em>JToggleButton.</em>
+        </td>
+        <td class="jt-level1">
+            <strong>Component panel</strong> on right;
+            vertical arrangement of 
+            <em>
+                FontEditor,
+                JToggleButton,
+                JTextField
+            </em>
+            and <em>ColorEditor.</em>
+        </td>
+    </tr>
+    <tr>
+        <td class="jt-level1">
+            <strong>Control panel</strong> on bottom,
+            contains <em>Apply, Reset</em>
+            and <em>Close</em> buttons.
+        </td>
+        <td class="jt-level1">
+            <strong>Control panel</strong> on bottom,
+            contains <em>Apply, Reset</em>
+            and <em>Close</em> buttons.
+        </td>
+    </tr>
+    <tr>
+        <td class="jt-level0">
+            Testing Facilities
+        </td>
+        <td class="jt-level0">
+            Testing Facilities
+        </td>
+    </tr>
+    <tr>
+        <td class="jt-level1">
+            <ul style="margin-top:0;margin-bottom:0;">
+                <li>
+                    <em>LinePropertySetInitializer:</em>
+                    to start all applications and tests
+                    with predictable and unique property values.
+                </li>
+                <li>
+                    <em>LinePropertySetTest:</em>
+                    JUnit test for the <em>LinePropertySet</em> class.
+                </li>
+                <li>
+                    <em>LPPTestDialog:</em>
+                    dialog to manage GUI interaction during testing
+                    and test data generation.
+                </li>
+                <li>
+                    <em>LinePropertiesPanelFuncTest:</em>
+                    JUnit test for functional testing of properties panel.
+                </li>
+                <li>
+                    <em>LPP_TADetail:</em>
+                    for organizing test data.
+                </li>
+                <li>
+                    <em>LPP_TA:</em>
+                    test assistant for generating visual test data.
+                </li>
+                <li>
+                    <em>LPP_TAVisualizer:</em>
+                    test assistant for examining visual test data.
+                </li>
+                <li>
+                    <em>LinePropertiesPanelVisualTest:</em>
+                    JUnit test for validating properties panel appearance.
+                </li>
+            </ul>
+        </td>
+        <td class="jt-level1">
+            <ul style="margin-top:0;margin-bottom:0;">
+                <li>
+                    <em>GPPTestDataInitializer:</em>
+                    to start all applications and tests
+                    with predictable and unique property values.
+                </li>
+                <li>
+                    <em>GraphPropertySetTest:</em>
+                    JUnit test for the <em>GraphPropertySet</em> class.
+                </li>
+                <li>
+                    <em>GPPTestDialog:</em>
+                    dialog to manage GUI interaction during testing
+                    and test data generation.
+                </li>
+                <li>
+                    <em>GraphPropertiesPanelFuncTest:</em>
+                    JUnit test for functional testing of properties panel.
+                </li>
+                <li>
+                    <em>GPP_TADetail:</em>
+                    for organizing test data.
+                </li>
+                <li>
+                    <em>GPP_TA:</em>
+                    test assistant for generating visual test data.
+                </li>
+                <li>
+                    <em>GPP_TAVisualizer:</em>
+                    test assistant for examining visual test data.
+                </li>
+                <li>
+                    <em>GraphPropertiesPanelVisualTest:</em>
+                    JUnit test for validating properties panel appearance.
+                </li>
+            </ul>
+        </td>
+    </tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

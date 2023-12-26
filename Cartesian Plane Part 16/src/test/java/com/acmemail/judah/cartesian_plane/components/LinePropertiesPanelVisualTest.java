@@ -29,7 +29,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.lp_panel.LPPTestDialog;
 import com.acmemail.judah.cartesian_plane.test_utils.lp_panel.LPP_TA;
 import com.acmemail.judah.cartesian_plane.test_utils.lp_panel.LPP_TADetail;
 
-class LinePropertiesVisualTest
+class LinePropertiesPanelVisualTest
 {
     /** Path to the storage location of all test data files. */
     private static final File               lppPath     = 
