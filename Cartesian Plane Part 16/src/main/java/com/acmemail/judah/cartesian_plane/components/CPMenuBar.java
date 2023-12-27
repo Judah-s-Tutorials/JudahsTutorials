@@ -1,17 +1,17 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
+import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -19,96 +19,29 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
+import javax.swing.text.html.HTMLEditorKit;
+import javax.swing.text.html.StyleSheet;
 
-/**
- * This is a variation
- * on {@linkplain MenuDemo3},
- * which adds submenus
- * to the help menu.
- * 
- * @author Jack Straub
- * 
- * @see MenuDemo3
- */
-public class MenuDemo4
+import com.acmemail.judah.cartesian_plane.sandbox.SynchVisible;
+
+public class CPMenuBar extends JMenuBar
 {
     private static final String newLine = System.lineSeparator();
-    private JTextArea   textArea;
-    private JDialog     graphDialog;
-    private JDialog     lineDialog;
-    
-    /**
-     * Application entry point.
-     *
-     * @param args command line arguments, not used
-     *
-    */
-    public static void main(String[] args)
-    {
-        SwingUtilities.invokeLater( () -> new MenuDemo4().build() );
-    }
-    
-    /**
-     * Builds all elements of the GUI,
-     * including a frame, menu bar and two dialogs.
-     * The menu bar is incorporated
-     * in the frame,
-     * which is initially visible;
-     * the dialogs are non-modal
-     * and initially invisible.
-     * The dialogs can be made visible
-     * by selecting them
-     * via the frame's <em>Window</em> menu.
-     */
-    private void build()
-    {
-        JFrame      frame       = new JFrame( "Menu Demo 4" );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        textArea = new JTextArea( 24, 80 );
-        textArea.setEditable( false );
-        JScrollPane scrollPane  = new JScrollPane( textArea );
 
-        JPanel      contentPane = new JPanel( new BorderLayout() );
-        contentPane.add( scrollPane, BorderLayout.CENTER );
-        contentPane.add( getMenu(), BorderLayout.NORTH );
-        frame.setContentPane( contentPane );
-        frame.setLocation( 200, 200 );
-        frame.pack();
-        
-        graphDialog = getDialog( 
-            frame,
-            "Set Graph Properties", 
-            "GRAPH PROPERTIES"
-        );
-        graphDialog.setLocation( 100, 100 );
-        
-        lineDialog = getDialog( 
-            frame,
-            "Set Line Properties", 
-            "LINE PROPERTIES"
-        );
-        lineDialog.setLocation( 300, 100 );
-        frame.setVisible( true );
-    }
+    private final Window                topWindow;
+    private final JDialog               lineDialog;
+    private final JDialog               graphDialog;
+    private final ModalMessageDialog    modalMessageDialog;
     
-    /**
-     * Assembles the application's menu bar.
-     * 
-     * @return the application's menu bar
-     */
-    private JMenuBar getMenu()
+    public CPMenuBar( Window topWindow )
     {
-        JMenuBar    menuBar = new JMenuBar();
-        menuBar.add( getFileMenu() );
-        menuBar.add( getWindowMenu() );
-        menuBar.add( getHelpMenu() );
-        
-        return menuBar;
+        this.topWindow = topWindow;
+        lineDialog =
+            LinePropertiesPanel.getDialog( topWindow );
+        graphDialog   =
+            GraphPropertiesPanel.getDialog( topWindow );
+        modalMessageDialog = new ModalMessageDialog();
     }
     
     /**
@@ -142,6 +75,11 @@ public class MenuDemo4
         return menu;
     }
     
+    private void showDialog( JCheckBoxMenuItem item, JDialog dialog )
+    {
+        dialog.setVisible( item.isSelected() );
+    }
+    
     /**
      * Assembles the application's window menu.
      * 
@@ -162,6 +100,8 @@ public class MenuDemo4
         lineItem.addItemListener( e -> 
             lineDialog.setVisible( lineItem.isSelected() )
         );
+        lineDialog.addComponentListener( new SynchVisible( lineItem ) );
+        graphDialog.addComponentListener( new SynchVisible( graphItem ) );
         menu.add( graphItem );
         menu.add( lineItem );
         
@@ -173,7 +113,7 @@ public class MenuDemo4
      * 
      * @return the application's help menu
      */
-    private JMenu getHelpMenu()
+    private JMenu configHelpMenu()
     {
         JMenuItem   topicsItem      = new JMenuItem( "Topics" );
         JMenuItem   aboutItem       = new JMenuItem( "About" );
@@ -232,63 +172,6 @@ public class MenuDemo4
         return menu;
     }
     
-    /**
-     * Logs a message
-     * in the application's
-     * text area.
-     * 
-     * @param message   the message to log
-     */
-    private void log( String message )
-    {
-        textArea.append( message + newLine );
-    }
-    
-    /**
-     * Creates a non-modal dialog
-     * containing text
-     * and a button.
-     * Pushing the button
-     * closes the dialog.
-     * 
-     * @param owner the owner of the dialog
-     * @param title the dialog title
-     * @param text  the text to display in the dialog
-     * 
-     * @return  the created dialog
-     */
-    private JDialog getDialog( JFrame owner, String title, String text )
-    {
-        JDialog dialog      = new JDialog( owner, title );
-        JPanel  contentPane = new JPanel( new BorderLayout() );
-        String  labelText   = 
-            "<html><p style="
-            + "'font-size: 300%;'>" 
-            + text
-            + "</p></html>";
-        JLabel  label       = new JLabel( labelText );
-        JPanel  centerPanel = new JPanel();
-        Border  outer       =
-            BorderFactory.createBevelBorder( BevelBorder.RAISED );
-        Border  inner       = 
-            BorderFactory.createEmptyBorder( 15, 15, 15, 15 );
-        Border  border      =
-            BorderFactory.createCompoundBorder( outer, inner );
-        centerPanel.setBorder( border );
-        centerPanel.add( label );
-        contentPane.add( centerPanel, BorderLayout.CENTER );
-        
-        JPanel  buttonPanel = new JPanel();
-        JButton closeButton = new JButton( "Close" );
-        closeButton.addActionListener( e -> dialog.setVisible( false ) );
-        buttonPanel.add( closeButton );
-        contentPane.add( buttonPanel, BorderLayout.SOUTH );
-        dialog.setContentPane( contentPane );
-        dialog.pack();
-        
-        return dialog;
-    }
-    
     private void actionPerformed( ActionEvent evt )
     {
         Object  source  = evt.getSource();
@@ -296,6 +179,82 @@ public class MenuDemo4
         {
             String  text    = ((AbstractButton)source).getText();
             log( "Selected \"" + text + "\"" );
+        }
+    }
+
+    private void showModalMessageDialog( String str )
+    {
+        JOptionPane.showMessageDialog( topWindow, str );
+    }
+    
+    private static void log( String str )
+    {
+        System.out.println( str );
+    }
+    
+    private static class SynchVisible extends ComponentAdapter
+    {
+        private final AbstractButton    toggle;
+        
+        public SynchVisible( AbstractButton toggle )
+        {
+            this.toggle = toggle;
+        }
+        
+        @Override
+        public void componentHidden( ComponentEvent evt )
+        {
+            toggle.setSelected( false );
+        }
+        @Override
+        public void componentShown( ComponentEvent evt )
+        {
+            toggle.setSelected( true );
+        }
+    }
+    
+    private static class ModalMessageDialog extends JDialog
+    {
+        /** HTML/CSS-aware component for displaying text. */
+        private final JEditorPane   textPane    = 
+            new JEditorPane( "text/html", "" );
+        private final StyleSheet    styleSheet;
+        
+        /** CSS for configuring body element. */
+        private static final String bodyRule    = 
+            "body {"
+            + "margin-left: 2em;"
+            + "font-family: Arial, Helvetica, sans-serif;"
+            + " font-size:"
+            + " 14;"
+            + " min-width: 70em;"
+            + " white-space: nowrap;}";
+
+        public ModalMessageDialog()
+        {
+            JScrollPane scrollPane  = new JScrollPane( textPane );
+            Dimension   dim         = new Dimension( 300, 150 );
+            scrollPane.setPreferredSize( dim );
+            
+            HTMLEditorKit   kit         = new HTMLEditorKit();
+            textPane.setEditorKit( kit );
+            styleSheet  = kit.getStyleSheet();
+            styleSheet.addRule( bodyRule );
+
+            JPanel  contentPane = new JPanel( new BorderLayout() );
+            contentPane.add( scrollPane, BorderLayout.CENTER );
+            setContentPane( contentPane );
+            pack();
+        }
+        
+        public void setText( String text )
+        {
+            textPane.setText( text );
+        }
+        
+        public void setCSS( String css )
+        {
+//            textPane.sty
         }
     }
 }
