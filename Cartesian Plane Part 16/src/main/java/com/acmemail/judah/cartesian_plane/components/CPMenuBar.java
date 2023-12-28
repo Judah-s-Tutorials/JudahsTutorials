@@ -12,7 +12,6 @@ import javax.swing.AbstractButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -22,8 +21,6 @@ import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
-
-import com.acmemail.judah.cartesian_plane.sandbox.SynchVisible;
 
 public class CPMenuBar extends JMenuBar
 {

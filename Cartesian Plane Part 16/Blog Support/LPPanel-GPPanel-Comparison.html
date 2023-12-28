@@ -178,12 +178,129 @@
         </td>
     </tr>
     <tr>
-        <td class="jt-level0">
-            Testing Facilities
+        <td class="jt-level0">Event Processing</td>
+        <td class="jt-level0">Event Processing</td>
+    </tr>
+    <tr>
+        <td class="jt-level1">
+            <ul style="margin-top:0;margin-bottom:0;">
+                <li>
+                    <em>Initialization:</em>
+                    load all property values
+                    from the <em>PropertyManager</em>
+                    (this happens automatically
+                    for each category
+                    as soon as we instantiate
+                    the category's <em>LinePropertySet</em> subclass).
+                    Perform a <em>synch-right</em> for
+                    the selected radio button;
+                    this is taken care of
+                    when we select the first radio button
+                    (see 
+                    <a href="#RadioButtonSelection">
+                        Radio Button Selection,
+                    </a>
+                    below).
+                </li>
+                <li>
+                    <em>Radio Button Deselection:</em>
+                    Perform a <em>synch-left</em> for the button
+                    being deselected.
+                </li>
+                <li id="RadioButtonSelection">
+                    <em>Radio Button Selection:</em>
+                    Perform a <em>synch-right</em> for the button
+                    being selected.
+                </li>
+                <li>
+                    <em>Apply Button Selection:</em>
+                    Perform a <em>synch-left</em> for 
+                    the currently selected radio button;
+                    execute the apply method
+                    for each radio button's encapsulated <em>LinePropertySet</em> object.
+                    Note that the <em>synch-left</em> operation
+                    is initiated by generating a deselection event
+                    for the currently selected radio button.
+                </li>
+                <li>
+                    <em>Reset Button Selection:</em>
+                    Execute the reset method
+                    for each radio button's encapsulated <em>LinePropertySet</em> object;
+                    perform a <em>synch-right</em> for 
+                    the currently selected radio button.
+                    Note that the <em>synch-right</em> operation
+                    is initiated by generating a selection event
+                    for the currently selected radio button.
+                </li>
+                <li>
+                    <em>Close Button Selection:</em>
+                    Look for the button's <em>JDialog</em> ancestor.
+                    If found, close the dialog,
+                    otherwise ignore the operation.
+                </li>
+            </ul>
         </td>
-        <td class="jt-level0">
-            Testing Facilities
+        <td class="jt-level1">
+            <ul style="margin-top:0;margin-bottom:0;">
+                <li>
+                    <em>Initialization:</em>
+                    load all property values
+                    from the <em>PropertyManager</em>
+                    (this happens automatically
+                    for each category
+                    as soon as we instantiate
+                    the category's <em>GraphPropertySet</em> subclass).
+                    Perform a <em>synch-right</em> for
+                    the selected radio button;
+                    this is taken care of
+                    when we select the first radio button
+                    (see 
+                    <a href="#RadioButtonSelection">
+                        Radio Button Selection,
+                    </a>
+                    below).
+                </li>
+                <li>
+                    <em>Radio Button Deselection:</em>
+                    Perform a <em>synch-left</em> for the button
+                    being deselected.
+                </li>
+                <li>
+                    <em>Radio Button Selection:</em>
+                    Perform a <em>synch-right</em> for the button
+                    being selected.
+                </li>
+                <li>
+                    <em>Apply Button Selection:</em>
+                    Perform a <em>synch-left</em> for 
+                    the currently selected radio button;
+                    execute the apply method
+                    for each radio button's encapsulated <em>GraphPropertySet</em> object.
+                    Note that the <em>synch-left</em> operation
+                    is initiated by generating a deselection event
+                    for the currently selected radio button.
+                </li>
+                <li>
+                    <em>Reset Button Selection:</em>
+                    Execute the reset method
+                    for each radio button's encapsulated <em>GraphPropertySet</em> object;
+                    perform a <em>synch-right</em> for 
+                    the currently selected radio button.
+                    Note that the <em>synch-right</em> operation
+                    is initiated by generating a selection event
+                    for the currently selected radio button.
+                </li>
+                <li>
+                    <em>Close Button Selection:</em>
+                    Look for the button's <em>JDialog</em> ancestor.
+                    If found, close the dialog,
+                    otherwise ignore the operation.
+                </li>
+            </ul>
         </td>
+    <tr>
+        <td class="jt-level0">Testing Facilities</td>
+        <td class="jt-level0">Testing Facilities</td>
     </tr>
     <tr>
         <td class="jt-level1">

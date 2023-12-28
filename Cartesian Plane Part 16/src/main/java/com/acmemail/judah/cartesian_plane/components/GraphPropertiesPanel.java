@@ -232,8 +232,8 @@ public class GraphPropertiesPanel extends JPanel
     private JPanel getRightPanel()
     {
         JPanel  fontEditorPanel     = getFontPanel();        
-        JPanel  bgEditorPanel       = bgEditor.getPanel();
         JPanel  widthEditorPanel    = getWidthPanel();
+        JPanel  bgEditorPanel       = bgEditor.getPanel();
         
         Border  lineBorder          = 
             BorderFactory.createLineBorder( Color.BLACK, 1 );
