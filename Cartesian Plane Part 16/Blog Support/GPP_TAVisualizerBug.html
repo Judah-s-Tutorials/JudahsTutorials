@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LinePropertiesPanel, GraphPropertiesPanel Comparison</title>
+    <link rel="stylesheet" href="../../BlogSupport/default_forwp.css"> 
+</head>
+<body>
+<div  class="jt-style1">
+<p style="font-size:120%;font-weight:bold;">
+    GPP_TAVisualizer Fails to Validate Actual Image Due to Font<br>Issue #1
+</p>
+<p>
+If font size changes while switching between saved images; 
+or if font size is too large; 
+GPP_TAVisualizer fails to validate expected image (from data file)
+against actual image (from test dialog).
+Sometimes, when switching to a different image then switching back to the original, 
+the image is successfully validated.
+</p>
+<p>
+Upon examination by a human, 
+no problem with any of the images could be discerned.
+</p>
+<p>
+<strong>Work-Around</strong><br>
+Added to GPPTestDataInitializer a facility to fix the font size to a constant 
+for all test images (see GPPTestDataInitializer.setFixedFontSize(Double)),
+so that all images have the same font size. 
+Fixed the font size to 6 in initialization code for:
+</p>
+<ul>
+<li>GPP_TA</li>
+<li>GPP_TAVisualier</li>
+<li>GraphPropertiesPanelVisualTest</li>
+</ul>
+</div>
+</body>
+</html>
