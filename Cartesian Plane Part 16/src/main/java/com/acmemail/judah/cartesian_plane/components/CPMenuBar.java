@@ -51,24 +51,30 @@ public class CPMenuBar extends JMenuBar
         JMenu   menu    = new JMenu( "File" );
         menu.setMnemonic( KeyEvent.VK_F );
         
-        JMenuItem   openItem    = new JMenuItem( "Open", KeyEvent.VK_O );
-        JMenuItem   saveItem    = new JMenuItem( "Save", KeyEvent.VK_S );
-        JMenuItem   saveAsItem  = new JMenuItem( "Save As", KeyEvent.VK_A );
-        JMenuItem   exitItem    = new JMenuItem( "Exit", KeyEvent.VK_E );
+        JMenuItem   open    = new JMenuItem( "Open", KeyEvent.VK_O );
+        JMenuItem   save    = new JMenuItem( "Save", KeyEvent.VK_S );
+        JMenuItem   saveAs  = new JMenuItem( "Save As", KeyEvent.VK_A );
+        JMenuItem   exit    = new JMenuItem( "Exit", KeyEvent.VK_E );
         
         KeyStroke   ctrlS       =
             KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK );
-        saveItem.setAccelerator( ctrlS );
+        save.setAccelerator( ctrlS );
         
-        openItem.addActionListener( e -> log( "Open selected" ) );
-        saveItem.addActionListener( e -> log( "Save selected" ) );
-        saveAsItem.addActionListener( e -> log( "Save As selected" ) );
-        exitItem.addActionListener( e -> System.exit( 0 ) );
+        open.addActionListener( e -> log( "Open selected" ) );
+        save.addActionListener( e -> log( "Save selected" ) );
+        saveAs.addActionListener( e -> log( "Save As selected" ) );
+        exit.addActionListener( e -> System.exit( 0 ) );
         
-        menu.add( openItem );
-        menu.add( saveItem );
-        menu.add( saveAsItem );
-        menu.add( exitItem );
+        menu.add( open );
+        menu.add( save );
+        menu.add( saveAs );
+        menu.add( exit );
+        
+        // Not ready to be connected
+        open.setEnabled( false );
+        save.setEnabled( false );
+        saveAs.setEnabled( false );
+        
         return menu;
     }
     

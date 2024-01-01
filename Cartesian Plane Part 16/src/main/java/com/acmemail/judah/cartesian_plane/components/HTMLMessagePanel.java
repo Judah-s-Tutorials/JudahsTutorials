@@ -9,6 +9,7 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
@@ -79,6 +80,7 @@ public class HTMLMessagePanel
 {
     /** HTML/CSS-aware component for displaying text. */
     private final JEditorPane   editorPane;
+    private final HTMLEditorKit editorKit;
     /** Scroll pane; usually with view set to textPane. */
     private final JScrollPane   scrollPane;
     /** Main panel containing JScrollPane. */
@@ -117,19 +119,21 @@ public class HTMLMessagePanel
      */
     public HTMLMessagePanel( String text, StyleSheet styleSheet )
     {
-        HTMLEditorKit   kit = new HTMLEditorKit();
+        editorKit = new HTMLEditorKit();
         mainPanel = new JPanel( new BorderLayout() );
         if ( styleSheet != null )
-            kit.setStyleSheet( styleSheet );
+            editorKit.setStyleSheet( styleSheet );
         else
         {
-            StyleSheet  defStyleSheet   = kit.getStyleSheet();
+            StyleSheet  defStyleSheet   = editorKit.getStyleSheet();
             defStyleSheet.addRule( bodyRule );
         }
         
-        editorPane = new JEditorPane( "text/html", "" );
-        scrollPane  = new JScrollPane( editorPane );
-        Dimension   dim         = new Dimension( 300, 150 );
+        editorPane = new JEditorPane( "text/html", text );
+        scrollPane = new JScrollPane( editorPane );
+        editorPane.setEditable( false );
+        editorPane.setCaretPosition( 0 );
+        Dimension   dim         = new Dimension( 500, 300 );
         scrollPane.setPreferredSize( dim );
     }
     
@@ -227,6 +231,11 @@ public class HTMLMessagePanel
         return editorPane.getText();
     }
     
+    public void addHyperlinkListener( HyperlinkListener listener )
+    {
+        editorPane.addHyperlinkListener( listener );
+    }
+    
     /**
      * Creates the dialog for this object,
      * using the given parent and title.
@@ -254,6 +263,7 @@ public class HTMLMessagePanel
         mainPanel.add( controls, BorderLayout.SOUTH );
         dialog.setModal( true );
         dialog.setContentPane( mainPanel );
+        dialog.getRootPane().setDefaultButton( close );
         dialog.pack();
     }
 }
