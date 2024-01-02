@@ -80,7 +80,6 @@ public class HTMLMessagePanel
 {
     /** HTML/CSS-aware component for displaying text. */
     private final JEditorPane   editorPane;
-    private final HTMLEditorKit editorKit;
     /** Scroll pane; usually with view set to textPane. */
     private final JScrollPane   scrollPane;
     /** Main panel containing JScrollPane. */
@@ -119,7 +118,7 @@ public class HTMLMessagePanel
      */
     public HTMLMessagePanel( String text, StyleSheet styleSheet )
     {
-        editorKit = new HTMLEditorKit();
+        HTMLEditorKit   editorKit = new HTMLEditorKit();
         mainPanel = new JPanel( new BorderLayout() );
         if ( styleSheet != null )
             editorKit.setStyleSheet( styleSheet );
@@ -130,6 +129,7 @@ public class HTMLMessagePanel
         }
         
         editorPane = new JEditorPane( "text/html", text );
+        editorPane.setFocusable( false );
         scrollPane = new JScrollPane( editorPane );
         editorPane.setEditable( false );
         editorPane.setCaretPosition( 0 );
@@ -219,6 +219,8 @@ public class HTMLMessagePanel
     public void setText( String text )
     {
         editorPane.setText( text );
+        if ( dialog != null )
+            dialog.pack();
     }
     
     /**

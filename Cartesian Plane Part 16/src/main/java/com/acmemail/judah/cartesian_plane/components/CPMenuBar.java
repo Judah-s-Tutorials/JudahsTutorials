@@ -1,44 +1,45 @@
 package com.acmemail.judah.cartesian_plane.components;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.Desktop;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.util.stream.Stream;
 
 import javax.swing.AbstractButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
-import javax.swing.text.html.HTMLEditorKit;
-import javax.swing.text.html.StyleSheet;
 
 public class CPMenuBar extends JMenuBar
 {
-    private static final String newLine = System.lineSeparator();
-
-    private final Window                topWindow;
-    private final JDialog               lineDialog;
-    private final JDialog               graphDialog;
-    private final ModalMessageDialog    modalMessageDialog;
+    private final Window        topWindow;
+    private final JDialog       lineDialog;
+    private final JDialog       graphDialog;
+    private final JDialog       aboutDialog;
     
     public CPMenuBar( Window topWindow )
     {
         this.topWindow = topWindow;
         lineDialog =
             LinePropertiesPanel.getDialog( topWindow );
-        graphDialog   =
+        graphDialog =
             GraphPropertiesPanel.getDialog( topWindow );
-        modalMessageDialog = new ModalMessageDialog();
+        aboutDialog = new AboutDialog( topWindow ).getDialog();
+        
+        add( getFileMenu() );
+        add( getWindowMenu() );
+        add( configHelpMenu() );
     }
     
     /**
@@ -54,7 +55,7 @@ public class CPMenuBar extends JMenuBar
         JMenuItem   open    = new JMenuItem( "Open", KeyEvent.VK_O );
         JMenuItem   save    = new JMenuItem( "Save", KeyEvent.VK_S );
         JMenuItem   saveAs  = new JMenuItem( "Save As", KeyEvent.VK_A );
-        JMenuItem   exit    = new JMenuItem( "Exit", KeyEvent.VK_E );
+        JMenuItem   exit    = new JMenuItem( "Exit", KeyEvent.VK_X );
         
         KeyStroke   ctrlS       =
             KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK );
@@ -76,11 +77,6 @@ public class CPMenuBar extends JMenuBar
         saveAs.setEnabled( false );
         
         return menu;
-    }
-    
-    private void showDialog( JCheckBoxMenuItem item, JDialog dialog )
-    {
-        dialog.setVisible( item.isSelected() );
     }
     
     /**
@@ -118,76 +114,77 @@ public class CPMenuBar extends JMenuBar
      */
     private JMenu configHelpMenu()
     {
-        JMenuItem   topicsItem      = new JMenuItem( "Topics" );
-        JMenuItem   aboutItem       = new JMenuItem( "About" );
+        JMenu       topicsMenu  = getMathTopicsMenu();
+        JMenu       calcsMenu   = getCalculatorsMenu();
+        JMenuItem   aboutItem   = new JMenuItem( "About", KeyEvent.VK_A );
+        aboutItem.addActionListener( e -> aboutDialog.setVisible( true ) );
         
-        topicsItem.addActionListener( e -> log( "Showing help topics" ) );
-        String      about       =
-            "Menu Demo 2, Version 1.0.0" + newLine
-            + "Copyright \u00a9 2026 "
-            + "by Solomon Mining Associates, Ltd.";
-        aboutItem.addActionListener( e -> 
-            JOptionPane.showMessageDialog(
-                null,
-                about,
-                "About This Product",
-                JOptionPane.INFORMATION_MESSAGE
-            )
-        );
+        JMenu       helpMenu        = new JMenu( "Help" );
+        helpMenu.setMnemonic( KeyEvent.VK_H );
+        helpMenu.add( topicsMenu );
+        helpMenu.add( calcsMenu );
+        helpMenu.add( aboutItem );
+        return helpMenu;
+    }
+    
+    private JMenu getMathTopicsMenu()
+    {
+        URLDesc[]    siteDescs   =
+        {
+            new URLDesc( "https://www.mathsisfun.com/", "Math is Fun" ),
+            new URLDesc( "https://www.wolframalpha.com/", "Wolfram Alpha" ),
+            new URLDesc( "https://www.khanacademy.org/", "Khan Academy" )
+        };
+        JMenu   menu    = new JMenu( "Math Help" );
+        menu.setMnemonic( KeyEvent.VK_M );
+        Stream.of( siteDescs )
+            .forEach( u -> {
+                JMenuItem   item    = new JMenuItem( u.urlDesc );
+                item.addActionListener( e -> activateLink( u.url ) );
+                menu.add( item );
+            });
         
-        // Create the index submenu
-        JMenu       indexMenu       = new JMenu( "Index" );
-        JMenuItem   indexItemA  = new JMenuItem( "A-F" );
-        JMenuItem   indexItemG  = new JMenuItem( "G-L" );
-        JMenuItem   indexItemM  = new JMenuItem( "M-R" );
-        JMenuItem   indexItemS  = new JMenuItem( "S-Z" );
-        indexItemA.addActionListener( this::actionPerformed );
-        indexItemG.addActionListener( this::actionPerformed );
-        indexItemM.addActionListener( this::actionPerformed );
-        indexItemS.addActionListener( this::actionPerformed );
-        indexMenu.add( indexItemA );
-        indexMenu.add( indexItemG );
-        indexMenu.add( indexItemM );
-        indexMenu.add( indexItemS );
-        
-        // Create the quick-reference submenu
-        JMenu       quickRefMenu    = new JMenu( "Quick Reference" );
-        JMenuItem   quickRefItem1   = 
-            new JMenuItem( "World Domination, How To" );
-        JMenuItem   quickRefItem2   = 
-            new JMenuItem( "Thermonuclear Annihilation, Avoiding" );
-        JMenuItem   quickRefItem3   = 
-            new JMenuItem( "Natural Resources, Plundering" );
-        quickRefItem1.addActionListener( this::actionPerformed );
-        quickRefItem2.addActionListener( this::actionPerformed );
-        quickRefItem3.addActionListener( this::actionPerformed );
-        quickRefMenu.add( quickRefItem1 );
-        quickRefMenu.add( quickRefItem2 );
-        quickRefMenu.add( quickRefItem3 );
-        
-        // Create the principal help menu
-        JMenu       menu            = new JMenu( "Help" );
-        menu.setMnemonic( KeyEvent.VK_H );
-        menu.add( topicsItem );
-        menu.add( indexMenu );
-        menu.add( quickRefMenu );
-        menu.add( aboutItem );
         return menu;
     }
     
-    private void actionPerformed( ActionEvent evt )
+    private JMenu getCalculatorsMenu()
     {
-        Object  source  = evt.getSource();
-        if ( source instanceof AbstractButton )
+        URLDesc[]    siteDescs   =
         {
-            String  text    = ((AbstractButton)source).getText();
-            log( "Selected \"" + text + "\"" );
-        }
+            new URLDesc( "https://web2.0calc.com/", "web2.0calc" ),
+            new URLDesc( "https://www.desmos.com/", "Desmos" ),
+            new URLDesc( "https://www.calculator.net/", "Calculator.net" )
+        };
+        JMenu   menu    = new JMenu( "Calculators" );
+        menu.setMnemonic( KeyEvent.VK_C );
+        Stream.of( siteDescs )
+            .forEach( u -> {
+                JMenuItem   item    = new JMenuItem( u.urlDesc );
+                item.addActionListener( e -> activateLink( u.url ) );
+                menu.add( item );
+            });
+        
+        return menu;
     }
 
-    private void showModalMessageDialog( String str )
+    private void activateLink( URL url )
     {
-        JOptionPane.showMessageDialog( topWindow, str );
+        Desktop desktop = Desktop.getDesktop();
+        try
+        {
+            desktop.browse( url.toURI() );
+        } 
+        catch ( IOException | URISyntaxException exc )
+        {
+            exc.printStackTrace();
+            JOptionPane.showMessageDialog(
+                topWindow, 
+                exc.getMessage(),
+                "Link Error",
+                JOptionPane.ERROR_MESSAGE,
+                null
+            );
+        }
     }
     
     private static void log( String str )
@@ -216,48 +213,25 @@ public class CPMenuBar extends JMenuBar
         }
     }
     
-    private static class ModalMessageDialog extends JDialog
+    private static class URLDesc
     {
-        /** HTML/CSS-aware component for displaying text. */
-        private final JEditorPane   textPane    = 
-            new JEditorPane( "text/html", "" );
-        private final StyleSheet    styleSheet;
+        public final String urlDesc;
+        public final URL    url;
         
-        /** CSS for configuring body element. */
-        private static final String bodyRule    = 
-            "body {"
-            + "margin-left: 2em;"
-            + "font-family: Arial, Helvetica, sans-serif;"
-            + " font-size:"
-            + " 14;"
-            + " min-width: 70em;"
-            + " white-space: nowrap;}";
-
-        public ModalMessageDialog()
+        public URLDesc( String urlStr, String desc )
         {
-            JScrollPane scrollPane  = new JScrollPane( textPane );
-            Dimension   dim         = new Dimension( 300, 150 );
-            scrollPane.setPreferredSize( dim );
-            
-            HTMLEditorKit   kit         = new HTMLEditorKit();
-            textPane.setEditorKit( kit );
-            styleSheet  = kit.getStyleSheet();
-            styleSheet.addRule( bodyRule );
-
-            JPanel  contentPane = new JPanel( new BorderLayout() );
-            contentPane.add( scrollPane, BorderLayout.CENTER );
-            setContentPane( contentPane );
-            pack();
-        }
-        
-        public void setText( String text )
-        {
-            textPane.setText( text );
-        }
-        
-        public void setCSS( String css )
-        {
-//            textPane.sty
+            URL temp    = null;
+            try
+            {
+                temp = new URL( urlStr );
+            }
+            catch ( MalformedURLException exc )
+            {
+                exc.printStackTrace();
+                System.exit( 1 );
+            }
+            url = temp;
+            urlDesc = desc;
         }
     }
 }
