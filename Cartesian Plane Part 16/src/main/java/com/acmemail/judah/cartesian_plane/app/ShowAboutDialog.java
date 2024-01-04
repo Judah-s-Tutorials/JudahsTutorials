@@ -2,7 +2,6 @@ package com.acmemail.judah.cartesian_plane.app;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -10,6 +9,11 @@ import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.components.AboutDialog;
 
+/**
+ * Demonstrates how to open the "About" dialog.
+ * 
+ * @author Jack Straub
+ */
 public class ShowAboutDialog
 {
     /**
@@ -23,18 +27,21 @@ public class ShowAboutDialog
         SwingUtilities.invokeLater( () -> createGUI() );
     }
     
+    /**
+     * Creates and shows the main application frame.
+     */
     public static void createGUI()
     {
         String      title       = "Show About Dialog";
         JFrame      frame       = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );  
         
-        JDialog     dialog      = new AboutDialog().getDialog();
+        AboutDialog about      = new AboutDialog();
         
         JButton     exit        = new JButton( "Exit" );
         JButton     show        = new JButton( "Show Dialog" );
         exit.addActionListener( e -> System.exit( 0 ) );
-        show.addActionListener( e -> dialog.setVisible( true ) );
+        show.addActionListener( e -> about.show() );
         
         Border      border      = 
             BorderFactory.createEmptyBorder( 10, 10, 10, 10 );
@@ -45,7 +52,7 @@ public class ShowAboutDialog
         frame.setContentPane( pane );
         frame.pack();
         frame.setLocation( 200, 200 );
-        dialog.setLocation( 200 + frame.getWidth(), 200 );
+        about.getDialog().setLocation( 200 + frame.getWidth(), 200 );
         frame.setVisible( true );
     }
 

@@ -34,7 +34,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  * These are the <em>main window,</em>
  * in which the graph
  * is displayed,
- * and the <em>top-, right-, bottom-</em 
+ * and the <em>top-, right-, bottom-</em>
  * and <em>left-margins</em>.
  * <p>
  * The area to manage
@@ -201,7 +201,7 @@ public class GraphPropertiesPanel extends JPanel
      * with a given label,
      * and a GraphPropertySet object.
      * 
-     * @param given label
+     * @param label the given label
      * 
      * @return  
      *      a PRadioButton configured with a label

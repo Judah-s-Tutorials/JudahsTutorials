@@ -12,23 +12,26 @@ import javax.swing.border.Border;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
-import com.acmemail.judah.cartesian_plane.components.HTMLMessagePanel;
+import com.acmemail.judah.cartesian_plane.components.MessagePanel;
 
 /**
  * Application to illustrate the use
- * of the {@linkplain HTMLMessagePanel} class.
+ * of the {@linkplain MessagePanel} class.
  * Several hard-coded CSS rules 
  * are added to the default style sheet.
  * The style sheet and hard-coded HTML text
- * are then used to instantiate the HTMLMessagePanel.
- * A dialog is then extracted from the object
+ * are then used to instantiate the MessagePanel.
+ * A dialog is extracted from the object
  * via the 
- * {@linkplain HTMLMessagePanel#getDialog(java.awt.Window, String)}
- * method.
+ * {@linkplain MessagePanel#getDialog(java.awt.Window, String)}
+ * method;
+ * the dialog is displayed
+ * when the Show button
+ * in the application's main window is pushed. 
  * 
  * @author Jack Straub
  */
-public class HTMLMessagePanelDemo1
+public class MessagePanelDemo1
 {
     /** CSS rule for configuring the HTML body element. */
     private static final String bodyRule    =
@@ -75,7 +78,7 @@ public class HTMLMessagePanelDemo1
     */
     public static void main(String[] args)
     {
-        HTMLMessagePanelDemo1    app = new HTMLMessagePanelDemo1();
+        MessagePanelDemo1    app = new MessagePanelDemo1();
         SwingUtilities.invokeLater( app::createGUI );
     }
     
@@ -98,15 +101,13 @@ public class HTMLMessagePanelDemo1
         String          title       = "Show HTML Message Panel";
         JFrame          frame       = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );        
-        HTMLMessagePanel    messagePanel    = 
-            new HTMLMessagePanel( htmlText, styleSheet );
-        JDialog             messageDialog   = 
-            messagePanel.getDialog( frame, title );
+        MessagePanel    msgPanel    = MessagePanel.of( htmlText, styleSheet );
+        JDialog         msgDialog   = msgPanel.getDialog( frame, title );
         
         JButton     exit        = new JButton( "Exit" );
         JButton     show        = new JButton( "Show Dialog" );
         exit.addActionListener( e -> System.exit( 0 ) );
-        show.addActionListener( e -> messageDialog.setVisible( true ) );
+        show.addActionListener( e -> msgDialog.setVisible( true ) );
         
         Border      border      = 
             BorderFactory.createEmptyBorder( 10, 10, 10, 10 );
@@ -117,7 +118,7 @@ public class HTMLMessagePanelDemo1
         frame.setContentPane( pane );
         frame.pack();
         frame.setLocation( 200, 200 );
-        messageDialog.setLocation( 200 + frame.getWidth(), 200 );
+        msgDialog.setLocation( 200 + frame.getWidth(), 200 );
         frame.setVisible( true );
     }
 }

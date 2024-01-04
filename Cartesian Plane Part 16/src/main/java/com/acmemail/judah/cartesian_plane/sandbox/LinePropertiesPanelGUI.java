@@ -170,7 +170,7 @@ public class LinePropertiesPanelGUI extends JPanel
      * with a given label,
      * and a LinePropertySet object.
      * 
-     * @param given label
+     * @param label the given label
      * 
      * @return  
      *      a PRadioButton configured with a label

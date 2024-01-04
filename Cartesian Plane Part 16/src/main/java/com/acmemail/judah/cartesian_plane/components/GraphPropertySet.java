@@ -34,7 +34,7 @@ import com.acmemail.judah.cartesian_plane.PropertyManager;
  * (e.g. CPConstants.MARGIN_TOP_BG_COLOR_PN)
  * is established by subclasses
  * via the class constructor.
- * See, for example, {@linkplain GraphPropertyMain}.
+ * See, for example, {@linkplain GraphPropertySetMW}.
  * </p>
  * 
  * @author Jack Straub

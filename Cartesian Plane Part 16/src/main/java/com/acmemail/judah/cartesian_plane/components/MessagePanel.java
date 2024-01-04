@@ -1,6 +1,8 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Window;
 import java.io.BufferedReader;
@@ -8,12 +10,16 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
@@ -24,8 +30,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 /**
  * This class consists of a set of components
  * that can be configured for use in a window.
- * The components can be obtained individually,
- * configured as a JPanel or
+ * The components can be obtained individually, or
  * configured as a JDialog.
  * The components are:
  * <ul>
@@ -43,27 +48,14 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  * This is a JScrollPane that is configured 
  * with the editor pane as a view.
  * If you obtain this component
- * (by calling {@linkplain #scrollPane()})
- * the component will not be 
- * a part of any other container.
- * </li>
- * <li>
- * The Message Panel<br>
- * This is a JPanel that is configured 
- * with the scroll pane as a child;
- * note that the scroll pane
- * will likely contain the editor pane as a view.
- * If you obtain this component
- * (by calling {@linkplain #getMessagePanel()})
+ * (by calling {@linkplain #getScrollPane()})
  * the component will not be 
  * a part of any other container.
  * </li>
  * <li>
  * The Message Dialog<br>
  * This is a JDialog that is configured 
- * with the message panel as a content pane.
- * Note that the message panel
- * will contain the scroll pane,
+ * with a JPanel that contains the scroll pane,
  * which will in turn contain the editor pane as a view.
  * </li>
  * </ul>
@@ -72,19 +64,17 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  * is to be flexible,
  * but not infinitely so.
  * If you get the dialog component,
- * be aware that it will contain the message panel,
- * and you must not make the message panel
+ * be aware that it will contain the scroll pane,
+ * and you must not make the scroll pane
  * a child of another container.
- * Likewise, if you get the message panel
- * and add it to a container,
- * getting the dialog would make the message panel
- * a child of two different containers,
- * which is not allowed.
+ * 
  * @author Jack Straub
  */
-public class MessagePanel extends JPanel
+public class MessagePanel
 {
+    /** Content type of an HTML document. */
     public static final String  HTML_TYPE   = "text/html";
+    /** Content type of a plain text document. */
     public static final String  PLAIN_TYPE  = "text/plain";
     
     /** System line separator. */
@@ -97,16 +87,6 @@ public class MessagePanel extends JPanel
     private final JScrollPane   scrollPane;
     /** Dialog containing this object's message panel. */
     private JDialog             dialog;
-    
-    /** Default CSS for configuring body element. */
-//    private static final String bodyRule    = 
-//        "body {"
-//        + "margin-left: 2em;"
-//        + "font-family: Arial, Helvetica, sans-serif;"
-//        + " font-size:"
-//        + " 14;"
-//        + " min-width: 70em;"
-//        + " white-space: nowrap;}";
 
     /**
      * Constructor.
@@ -123,7 +103,6 @@ public class MessagePanel extends JPanel
      * @param text          the given text
      * @param styleSheet    the given style sheet
      * 
-     * @see #getMessagePanel()
      * @see #getScrollPane()
      * @see #getDialog(Window, String)
      */
@@ -133,13 +112,25 @@ public class MessagePanel extends JPanel
         
         editorPane = new JEditorPane( type, text );
         editorPane.setFocusable( false );
-        scrollPane = new JScrollPane( editorPane );
         editorPane.setEditable( false );
-        editorPane.setCaretPosition( 0 );
-        Dimension   dim         = new Dimension( 500, 300 );
+        editorPane.addHyperlinkListener( this::hyperlinkUpdate );
+        
+        scrollPane = new JScrollPane();
+        Dimension   dim = new Dimension( 500, 300 );
         scrollPane.setPreferredSize( dim );
+        editorPane.setCaretPosition( 0 );
     }
     
+    /**
+     * Creates a MessagePanel
+     * using the given text and StyleSheet.
+     * The content-type is assumed to be text/html.
+     * 
+     * @param text          the given text
+     * @param styleSheet    the given StyleSheet; may be null
+     * 
+     * @return  the created MessagePanel
+     */
     public static MessagePanel of( String text, StyleSheet styleSheet )
     {
         MessagePanel    panel   = 
@@ -147,6 +138,21 @@ public class MessagePanel extends JPanel
         return panel;
     }
     
+    /**
+     * Creates a MessagePanel
+     * using the given text and CSS.
+     * The content-type is assumed to be text/html.
+     * 
+     * @param text  the given text
+     * @param css   the given StyleSheet
+     * <p>
+     * Precondition: 
+     * the given string be valid CSS syntax,
+     * with the restrictions specified by
+     * class javax.swing.text.html.CSS.
+     * 
+     * @return  the created MessagePanel
+     */
     public static MessagePanel of( String text, String css )
     {
         StyleSheet      style   = getStyleSheetFromCSS( css );
@@ -155,6 +161,16 @@ public class MessagePanel extends JPanel
         return panel;
     }
     
+    
+    /**
+     * Creates a MessagePanel
+     * using the given text.
+     * The content-type is assumed to be text/plain.
+     * 
+     * @param text          the given text
+     * 
+     * @return  the created MessagePanel
+     */
     public static MessagePanel of( String text )
     {
         MessagePanel    panel   = 
@@ -162,91 +178,219 @@ public class MessagePanel extends JPanel
         return panel;
     }
     
+    /**
+     * Creates a MessagePanel
+     * using the given text
+     * from the given named resource.
+     * The content-type is assumed to be text/html,
+     * if the given name ends in ".HTML",
+     * otherwise it is assumed to be text/plain.
+     * 
+     * @param resource  the given resource
+     * 
+     * @return  the created MessagePanel
+     */
     public static MessagePanel ofResource( String resource )
     {
         String          testName    = resource.toUpperCase().strip();
         String          type        =
-            testName.endsWith( "HTML" ) ? HTML_TYPE : PLAIN_TYPE;
+            testName.endsWith( ".HTML" ) ? HTML_TYPE : PLAIN_TYPE;
         InputStream     inStream    = getResourceAsStream( resource );
         String          text        = getText( inStream );
         MessagePanel    panel       = new MessagePanel( text, type, null );
         return panel;
     }
     
+    /**
+     * Creates a MessagePanel
+     * using two resources;
+     * the first resource is used as the source of the text,
+     * and the second is either null
+     * or the source of CSS data
+     * that will be compiled into
+     * a StyleSheet.
+     * The content-type is assumed to be text/html.
+     * <p>
+     * Precondition: 
+     * if non-null,
+     * the resource be valid CSS syntax,
+     * with the restrictions specified by
+     * class javax.swing.text.html.CSS.
+     * 
+     * @param textRes   the given text resource
+     * @param cssRes    the given CSS resource; may be null
+     * 
+     * @return  the created MessagePanel
+     */
     public static MessagePanel ofResource( String textRes, String cssRes )
     {
         InputStream     inStream    = getResourceAsStream( textRes );
-        StyleSheet      styleSheet  = getStyleSheetFromResource( cssRes );
+        StyleSheet      styleSheet  = null;
         String          text        = getText( inStream );
+        if ( cssRes != null )
+            styleSheet  = getStyleSheetFromResource( cssRes );
         MessagePanel    panel       = 
             new MessagePanel( text, HTML_TYPE, styleSheet );
         return panel;
     }
     
-    public void setStyleSheet( String css )
-    {
-        StyleSheet  sheet   = getStyleSheetFromCSS( css );
-        editorKit.setStyleSheet( sheet );
-    }
-    
+    /**
+     * Incorporates the given StyleSheet
+     * 
+     * @param sheet the given StyleSheet
+     */
     public void setStyleSheet( StyleSheet sheet )
     {
         editorKit.setStyleSheet( sheet );
+        editorPane.setText( editorPane.getText() );
+        
+        if ( dialog != null )
+            dialog.pack();
     }
     
+    /**
+     * Compiles and incorporates a StyleSheet
+     * using CSS data from the given string.
+     * <p>
+     * Precondition: 
+     * the given string must be valid CSS syntax,
+     * with the restrictions specified by
+     * class javax.swing.text.html.CSS.
+     * 
+     * @param css   the given string
+     */
+    public void setStyleSheet( String css )
+    {
+        StyleSheet  sheet   = getStyleSheetFromCSS( css );
+        setStyleSheet( sheet );
+    }
+    
+    /**
+     * Compiles and incorporates a StyleSheet
+     * using CSS data from the given resource.
+     * <p>
+     * Precondition: 
+     * the given resource must be valid CSS syntax,
+     * with the restrictions specified by
+     * class javax.swing.text.html.CSS.
+     * 
+     * @param resource  the given resource
+     * 
+     * @throws ComponentException if an error occurs
+     */
     public void setStyleSheetFromResource( String resource )
     {
         StyleSheet  sheet   = getStyleSheetFromResource( resource );
-        editorKit.setStyleSheet( sheet );
+        setStyleSheet( sheet );
     }
     
-    private static StyleSheet getStyleSheetFromCSS( String css )
+    /**
+     * Gets the StyleSheet currently incorporated
+     * in this MessagePanel.
+     * 
+     * @return  
+     *      the StyleSheet currently incorporated
+     *      in this MessagePanel
+     */
+    public StyleSheet getStyleSheet()
     {
-        StyleSheet              styleSheet  = null;
-        try ( ByteArrayInputStream inStream    = 
-            new ByteArrayInputStream( css.getBytes() )
-        )
-        {
-            styleSheet = getStyleSheet( inStream );
-        }
-        catch ( IOException exc )
-        {
-            exc.printStackTrace();
-            throw new ComponentException( exc );
-        }
-        return styleSheet;
+        StyleSheet  sheet   = editorKit.getStyleSheet();
+        return sheet;
     }
     
-    private static StyleSheet getStyleSheetFromResource( String resource )
+    /**
+     * Sets the text of this object's editor pane
+     * to the given String.
+     * 
+     * @param text  the given String
+     */
+    public void setText( String text )
     {
-        StyleSheet              styleSheet  = null;
-        try ( InputStream inStream  = getResourceAsStream( resource ) )
-        {
-            styleSheet = getStyleSheet( inStream );
-        }
-        catch ( IOException exc )
-        {
-            exc.printStackTrace();
-            throw new ComponentException( exc );
-        }
-        return styleSheet;
+        editorPane.setText( text );
+        editorPane.setCaretPosition( 0 );
+
+        if ( dialog != null )
+            dialog.pack();
     }
     
-    private static StyleSheet getStyleSheet( InputStream inStream )
+    /**
+     * Sets the text of this object's editor pane
+     * to from the given resource.
+     * 
+     * @param resource  the given resource
+     * 
+     * @throws ComponentException if an error occurs
+     */
+    public void setTextResource( String resource )
     {
-        StyleSheet  styleSheet  =  new StyleSheet();       
-        try (
-            InputStreamReader reader = new InputStreamReader( inStream );
-        )
-        {
-            styleSheet.loadRules( reader, null );
-        }
-        catch ( IOException exc )
-        {
-            exc.printStackTrace();
-            throw new ComponentException( exc );
-        }
-        return styleSheet;
+        activateLink( resource );
+    }
+    
+    /**
+     * Gets the text of this object's editor pane.
+     * 
+     * @return  the text of this object's editor pane
+     */
+    public String getText()
+    {
+        return editorPane.getText();
+    }
+    
+    /**
+     * Sets the content-type of the encapsulated JEditorPane
+     * to the given string.
+     * 
+     * @param type  the given string
+     */
+    public void setContentType( String type )
+    {
+        editorPane.setContentType( type );
+        if ( dialog != null )
+            dialog.pack();
+    }
+    
+    /**
+     * Gets the content-type of the encapsulated JEditorPane.
+     * 
+     * @return  the content type of this object's editor pane
+     */
+    public String getContentType()
+    {
+        return editorPane.getText();
+    }
+    
+    /**
+     * Adds a given HyperLinkListener to the JEditorPane
+     * encapsulated in this panel.
+     * 
+     * @param listener  the given HyperLinkListener
+     */
+    public void addHyperlinkListener( HyperlinkListener listener )
+    {
+        editorPane.addHyperlinkListener( listener );
+    }
+    
+    /**
+     * Gets the JEditorPane component.
+     * 
+     * @return  the JEditorPane component of this object
+     */
+    public JEditorPane getEditorPane()
+    {
+        return editorPane;
+    }
+    
+    /**
+     * Gets the JScrollPane component.
+     * 
+     * @return  the JScrollPane component of this object
+     */
+    public JScrollPane getScrollPane()
+    {
+        Component   comp    = scrollPane.getViewport().getView();
+        if ( comp == null )
+            scrollPane.setViewportView( editorPane );
+        return scrollPane;
     }
     
     /**
@@ -271,33 +415,187 @@ public class MessagePanel extends JPanel
     }
     
     /**
-     * Sets the text of this object's editor pane
-     * to the given String.
+     * Compiles a StyleSheet from a given string.
+     * <p>
+     * Precondition: 
+     * the string must be valid CSS syntax,
+     * with the restrictions specified by
+     * class javax.swing.text.html.CSS.
      * 
-     * @param text  the given String
+     * @param css   the given string
+     * 
+     * @return  the compiled StyleSheet
+     * 
+     * @throws ComponentException if an error occurs
      */
-    public void setText( String text )
+    private static StyleSheet getStyleSheetFromCSS( String css )
     {
-        editorPane.setText( text );
-        if ( dialog != null )
-            dialog.pack();
+        StyleSheet              styleSheet  = null;
+        try ( ByteArrayInputStream inStream    = 
+            new ByteArrayInputStream( css.getBytes() )
+        )
+        {
+            styleSheet = getStyleSheet( inStream );
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            throw new ComponentException( exc );
+        }
+        return styleSheet;
     }
     
     /**
-     * Gets the text of this object's editor pane.
+     * Reads a string from a given resource
+     * and compiles it into a StyleSheet.
+     * <p>
+     * Precondition: 
+     * data from the stream must be valid CSS syntax,
+     * with the restrictions specified by
+     * class javax.swing.text.html.CSS.
      * 
-     * @return  the text of this object's editor pane
+     * @param resource  the given resource
+     * 
+     * @return  the compiled StyleSheet
+     * 
+     * @throws ComponentException if an error occurs
      */
-    public String getText()
+    private static StyleSheet getStyleSheetFromResource( String resource )
     {
-        return editorPane.getText();
+        StyleSheet              styleSheet  = null;
+        try ( InputStream inStream  = getResourceAsStream( resource ) )
+        {
+            styleSheet = getStyleSheet( inStream );
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            throw new ComponentException( exc );
+        }
+        return styleSheet;
     }
     
-    public void addHyperlinkListener( HyperlinkListener listener )
+    /**
+     * Reads a given input stream,
+     * compiling the data into a StyleSheet.
+     * <p>
+     * Precondition: 
+     * data from the stream must be valid CSS syntax,
+     * with the restrictions specified by
+     * class javax.swing.text.html.CSS.
+     * 
+     * @param inStream  the given input stream
+     * 
+     * @return  the compiles StyleSheet
+     * 
+     * @throws ComponentException if an error occurs
+     */
+    private static StyleSheet getStyleSheet( InputStream inStream )
     {
-        editorPane.addHyperlinkListener( listener );
+        StyleSheet  styleSheet  =  new StyleSheet();       
+        try (
+            InputStreamReader reader = new InputStreamReader( inStream );
+        )
+        {
+            styleSheet.loadRules( reader, null );
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            throw new ComponentException( exc );
+        }
+        return styleSheet;
     }
     
+    /**
+     * Processes a hyperlink event.
+     * A hyperlink event may be issued 
+     * for types ENTER, EXIT or ACTIVATED.
+     * Only ACTIVATED event types are processed;
+     * other types are ignored.
+     * 
+     * @param evt   the hyperlink event object
+     */
+    private void hyperlinkUpdate( HyperlinkEvent evt )
+    {
+        HyperlinkEvent.EventType  type    = evt.getEventType();
+        if ( type == HyperlinkEvent.EventType.ACTIVATED )
+        {
+            URL url = evt.getURL();
+            if ( url != null )
+                activateLink( url );
+            else
+                activateLink( evt.getDescription() );
+        }
+    }
+    
+    /**
+     * Attempts to open a given URL
+     * in the systems default web browser.
+     * 
+     * @param url   the given URL
+     */
+    private void activateLink( URL url )
+    {
+        Desktop desktop = Desktop.getDesktop();
+        try
+        {
+            desktop.browse( url.toURI() );
+        } 
+        catch ( IOException | URISyntaxException exc )
+        {
+            exc.printStackTrace();
+            JOptionPane.showMessageDialog(
+                null, 
+                exc.getMessage(),
+                "Link Error",
+                JOptionPane.ERROR_MESSAGE,
+                null
+            );
+        }
+    }
+    
+    /**
+     * Attempts to display the text
+     * of a given resource file in a new dialog.
+     * If the name of the file
+     * ends in ".html"
+     * the content-type is assumed to be text/html,
+     * otherwise the content-type is assumed to be text/plain.
+     * 
+     * @param resource  the given resource file name
+     */
+    private void activateLink( String resource )
+    {
+        try
+        {
+            String      contentType = null;
+            InputStream inStream    = getResourceAsStream( resource );
+            String      text        = getText( inStream );
+            String      lcFileName  = resource.toLowerCase().trim();
+            if ( lcFileName.endsWith( ".html" ) )
+                contentType = HTML_TYPE;
+            else
+                contentType = PLAIN_TYPE;
+            editorPane.setContentType( contentType );
+            editorPane.setText( text );
+            editorPane.setCaretPosition( 0 );
+            if ( dialog != null )
+                dialog.pack();
+        } 
+        catch ( ComponentException exc )
+        {
+            exc.printStackTrace();
+            JOptionPane.showMessageDialog(
+                null, 
+                exc.getMessage(),
+                "Link Error",
+                JOptionPane.ERROR_MESSAGE,
+                null
+            );
+        }
+    }
+
     /**
      * Creates the dialog for this object,
      * using the given parent and title.
@@ -309,14 +607,17 @@ public class MessagePanel extends JPanel
     {
         dialog = new JDialog( parent, title );
         
+        JPanel  cPane   = new JPanel( new BorderLayout() );
+        cPane.add( getScrollPane(), BorderLayout.CENTER );
+        
         JPanel  controls    = new JPanel();
         JButton close       = new JButton( "Close" );
         close.addActionListener( e -> dialog.setVisible( false ) );
         
         controls.add( close );
-        add( controls, BorderLayout.SOUTH );
+        cPane.add( controls, BorderLayout.SOUTH );
         dialog.setModal( true );
-        dialog.setContentPane( this );
+        dialog.setContentPane( cPane );
         dialog.getRootPane().setDefaultButton( close );
         dialog.pack();
     }

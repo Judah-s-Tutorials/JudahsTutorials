@@ -82,12 +82,6 @@ public class LinePropertiesPanel extends JPanel
     private final PButtonGroup<LinePropertySet> buttonGroup =
         new PButtonGroup<>();
     
-    private void temp()
-    {
-        Supplier<LinePropertySet>   supplier    = typeMap.get( "Axes" );
-        LinePropertySet set = supplier.get();
-    }
-    
     /**
      * Constructor.
      * Fully configures the line properties GUI.
@@ -188,7 +182,7 @@ public class LinePropertiesPanel extends JPanel
      * with a given label,
      * and a LinePropertySet object.
      * 
-     * @param given label
+     * @param label the given label
      * 
      * @return  
      *      a PRadioButton configured with a label
