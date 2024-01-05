@@ -7,13 +7,6 @@ public class HTMLEditorKitDemo
 {
     private static final String rule1   = ".test1{ color: #0001;";
     private static final String rule2   = ".test2{ color: #0002;";
-    private static final String rule3   = ".test3{ color: #0003;";
-    private static final String rule4   = ".test4{ color: #0004;";
-    private static final String rule5   = ".test5{ color: #0005;";
-    private static final String rule6   = ".test6{ color: #0006;";
-    private static final String rule7   = ".test7{ color: #0007;";
-    private static final String rule8   = ".test8{ color: #0008;";
-    private static final String rule9   = ".test9{ color: #0009;";
     
     public static void main( String[] args )
     {

@@ -111,6 +111,7 @@ public class MessagePanel
         editorKit.setStyleSheet( styleSheet );
         
         editorPane = new JEditorPane( type, text );
+        editorPane.setEditorKit( editorKit );
         editorPane.setFocusable( false );
         editorPane.setEditable( false );
         editorPane.addHyperlinkListener( this::hyperlinkUpdate );
