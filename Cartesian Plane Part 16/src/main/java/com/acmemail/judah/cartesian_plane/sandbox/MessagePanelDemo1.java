@@ -82,7 +82,6 @@ public class MessagePanelDemo1
         SwingUtilities.invokeLater( app::createGUI );
     }
     
-    
     /**
      * Fully configures and shows the GUI for this application.
      * The dialog containing the sample HTMLMessagePanel

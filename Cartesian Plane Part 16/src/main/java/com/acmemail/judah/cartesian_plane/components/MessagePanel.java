@@ -112,9 +112,11 @@ public class MessagePanel
         
         editorPane = new JEditorPane( type, text );
         editorPane.setEditorKit( editorKit );
+        editorPane.setText( text );
         editorPane.setFocusable( false );
         editorPane.setEditable( false );
         editorPane.addHyperlinkListener( this::hyperlinkUpdate );
+System.out.println( editorPane.getText());
         
         scrollPane = new JScrollPane();
         Dimension   dim = new Dimension( 500, 300 );
