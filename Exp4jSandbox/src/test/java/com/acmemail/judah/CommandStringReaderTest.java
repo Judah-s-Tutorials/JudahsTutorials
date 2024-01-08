@@ -13,6 +13,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +72,7 @@ class CommandStringReaderTest
             Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, "", true ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testSimpleCommandWithoutArg );
     }
     
@@ -97,7 +98,7 @@ class CommandStringReaderTest
             Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, getArg(), true ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testSimpleCommandWithArg );
     }
     
@@ -129,7 +130,7 @@ class CommandStringReaderTest
                     "   " + p.getArgString() +
                     "   "
                 )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testLeadingTrailingSpaces );
     }
     
@@ -159,7 +160,7 @@ class CommandStringReaderTest
                 "#",
                 "     #     "
                 )
-                .toList();
+            .collect( Collectors.toList() );
         ioTest( input, this::testEmptyLinesAndComments );
     }
     
@@ -205,7 +206,7 @@ class CommandStringReaderTest
                 .flatMap( s ->
                     Stream.of( s, "", "#", "  #  ", "$BadCommand" )
                 )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testMixAndMatch );
     }
     

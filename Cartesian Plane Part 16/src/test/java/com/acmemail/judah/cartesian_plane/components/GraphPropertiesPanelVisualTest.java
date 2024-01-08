@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.swing.Icon;
@@ -115,7 +116,8 @@ class GraphPropertiesPanelVisualTest
         List<GPP_TADetail>  detailObjects   =
             Stream.of( allFiles )
                 .map( f -> getDetail( f ) )
-                .toList();
+                .collect( Collectors.toList() );
+
         return detailObjects;
     }
     

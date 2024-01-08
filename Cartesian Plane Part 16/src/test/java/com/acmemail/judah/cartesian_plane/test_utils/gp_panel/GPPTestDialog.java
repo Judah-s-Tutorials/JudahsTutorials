@@ -10,6 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractButton;
@@ -517,7 +518,7 @@ public class GPPTestDialog extends JDialog
             Stream.of( panel.getComponents() )
                 .filter( c -> (c instanceof PRadioButton<?>) )
                 .map( c -> (PRadioButton<GraphPropertySet>)c )
-                .toList();
+                .collect( Collectors.toList() );
         
         assertEquals( 5, list.size() );
         return list;

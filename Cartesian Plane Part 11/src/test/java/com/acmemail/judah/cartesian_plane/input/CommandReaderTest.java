@@ -84,7 +84,7 @@ class CommandReaderTest
             Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, "" ) )
                 .map( p -> p.getCommandString() )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testSimpleCommandWithoutArg );
     }
     
@@ -111,7 +111,7 @@ class CommandReaderTest
             Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, getArg() ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testSimpleCommandWithArg );
     }
     
@@ -142,7 +142,7 @@ class CommandReaderTest
         List<String>    input   = 
             expResults.stream()
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testShortcuts );
     }
     
@@ -175,7 +175,7 @@ class CommandReaderTest
                     "   " + p.getArgString() +
                     "   "
                 )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testLeadingTrailingSpaces );
     }
     
@@ -206,7 +206,7 @@ class CommandReaderTest
                 "#",
                 "     #     "
                 )
-                .toList();
+            .collect( Collectors.toList() );
         ioTest( input, this::testEmptyLinesAndComments );
     }
     
@@ -252,7 +252,7 @@ class CommandReaderTest
                 .flatMap( s ->
                     Stream.of( s, "", "#", "  #  ", "$BadCommand" )
                 )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testMixAndMatch );
     }
     
@@ -291,7 +291,7 @@ class CommandReaderTest
                 .flatMap( s ->
                     Stream.of( s, "", "#", "  #  " )
                 )
-                .toList();
+                .collect( Collectors.toList() );
         ioTest( input, this::testStream );
     }
 

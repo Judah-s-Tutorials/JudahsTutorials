@@ -3,9 +3,7 @@ package com.acmemail.judah.cartesian_plane.sandbox.layout_managers;
 import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.Toolkit;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;

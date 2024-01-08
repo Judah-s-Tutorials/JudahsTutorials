@@ -1,14 +1,11 @@
 package com.acmemail.judah.cartesian_plane.sandbox.layout_managers;
 
-import java.awt.Color;
-
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.sandbox.SandboxUtils;

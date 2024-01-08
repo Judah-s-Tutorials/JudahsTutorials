@@ -10,6 +10,7 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractButton;
@@ -457,7 +458,7 @@ public class LPPTestDialog extends JDialog
             Stream.of( propCompPanel.getComponents() )
                 .filter( c -> (c instanceof JSpinner) )
                 .map( c -> (JSpinner)c )
-                .toList();
+                .collect( Collectors.toList() );
         assertEquals( 3, allSpinners.size() );
         return allSpinners;
     }
@@ -474,7 +475,7 @@ public class LPPTestDialog extends JDialog
         List<PRadioButton<LinePropertySet>> buttons =
             Stream.of( "Axes", "Major Tics", "Minor Tics", "Grid Lines" )
                 .map( this::parseRButton )
-                .toList();
+                .collect( Collectors.toList() );
         return buttons;
     }
     
