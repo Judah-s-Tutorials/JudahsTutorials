@@ -8,18 +8,18 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
-import com.acmemail.judah.cartesian_plane.components.MessagePanel;
+import com.acmemail.judah.cartesian_plane.components.MessagePane;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 /**
  * Application to demonstrate the use
- * of the {@linkplain MessagePanel} class.
+ * of the {@linkplain MessagePane} class.
  * HTML text containing links is read from
  * the SandboxDocs resource folder,
  * then used to instantiate a MessagePanel object.
  * A dialog is then extracted from the object
  * via the 
- * {@linkplain MessagePanel#getDialog(java.awt.Window, String)}
+ * {@linkplain MessagePane#getDialog(java.awt.Window, String)}
  * method.
  * <p>
  * Links in the text are treated as follows:
@@ -48,7 +48,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  * 
  * @author Jack Straub
  */
-public class MessagePanelDemo3
+public class MessagePaneDemo3
 {
     /** Resource directory for sand box docs. */
     private static final String resDir      = "SandboxDocs/";
@@ -70,7 +70,7 @@ public class MessagePanelDemo3
      */
     public static void main(String[] args)
     {
-        MessagePanelDemo3    app = new MessagePanelDemo3();
+        MessagePaneDemo3    app = new MessagePaneDemo3();
         SwingUtilities.invokeLater( app::createGUI );
     }
     
@@ -87,14 +87,14 @@ public class MessagePanelDemo3
         frame = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );    
         
-        MessagePanel    msgPanel    = 
-            MessagePanel.ofResource( htmlFile, null );
+        MessagePane    msgPanel    = 
+            MessagePane.ofResource( htmlFile, null );
         msgDialog = msgPanel.getDialog( frame, title );
         
         JButton     exit        = new JButton( "Exit" );
         JButton     show        = new JButton( "Show Dialog" );
         exit.addActionListener( e -> System.exit( 0 ) );
-        show.addActionListener( e -> msgPanel.setTextResource( htmlFile ) );
+        show.addActionListener( e -> msgPanel.setTextFromResource( htmlFile ) );
         show.addActionListener( e -> msgDialog.setVisible( true ) );
         
         Border      border      = 

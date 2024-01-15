@@ -70,7 +70,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  * 
  * @author Jack Straub
  */
-public class MessagePanel
+public class MessagePane
 {
     /** Content type of an HTML document. */
     public static final String  HTML_TYPE   = "text/html";
@@ -87,6 +87,15 @@ public class MessagePanel
     private final JScrollPane   scrollPane;
     /** Dialog containing this object's message panel. */
     private JDialog             dialog;
+    
+    /** 
+     * Default hyperlink listener.
+     * Added to the JEditorPane during construction.
+     * Can optionally be removed
+     * by calling {@linkplain #removeDefaultHyperlinkListener()}.
+     */
+    private final HyperlinkListener defaultHyperlinkListener    =
+        this::hyperlinkUpdate;
 
     /**
      * Constructor.
@@ -106,17 +115,18 @@ public class MessagePanel
      * @see #getScrollPane()
      * @see #getDialog(Window, String)
      */
-    private MessagePanel( String text, String type, StyleSheet styleSheet )
+    private MessagePane( String text, String type, StyleSheet styleSheet )
     {
-        editorKit.setStyleSheet( styleSheet );
+        if( styleSheet != null )
+            editorKit.setStyleSheet( styleSheet );
         
         editorPane = new JEditorPane( type, text );
         editorPane.setEditorKit( editorKit );
+        editorPane.setContentType( type );
         editorPane.setText( text );
         editorPane.setFocusable( false );
         editorPane.setEditable( false );
-        editorPane.addHyperlinkListener( this::hyperlinkUpdate );
-System.out.println( editorPane.getText());
+        editorPane.addHyperlinkListener( defaultHyperlinkListener );
         
         scrollPane = new JScrollPane();
         Dimension   dim = new Dimension( 500, 300 );
@@ -134,10 +144,10 @@ System.out.println( editorPane.getText());
      * 
      * @return  the created MessagePanel
      */
-    public static MessagePanel of( String text, StyleSheet styleSheet )
+    public static MessagePane of( String text, StyleSheet styleSheet )
     {
-        MessagePanel    panel   = 
-            new MessagePanel( text, HTML_TYPE, styleSheet );
+        MessagePane    panel   = 
+            new MessagePane( text, HTML_TYPE, styleSheet );
         return panel;
     }
     
@@ -156,14 +166,13 @@ System.out.println( editorPane.getText());
      * 
      * @return  the created MessagePanel
      */
-    public static MessagePanel of( String text, String css )
+    public static MessagePane of( String text, String css )
     {
         StyleSheet      style   = getStyleSheetFromCSS( css );
-        MessagePanel    panel   = 
-            new MessagePanel( text, HTML_TYPE, style );
+        MessagePane    panel   = 
+            new MessagePane( text, HTML_TYPE, style );
         return panel;
     }
-    
     
     /**
      * Creates a MessagePanel
@@ -174,10 +183,9 @@ System.out.println( editorPane.getText());
      * 
      * @return  the created MessagePanel
      */
-    public static MessagePanel of( String text )
+    public static MessagePane of( String text )
     {
-        MessagePanel    panel   = 
-            new MessagePanel( text, PLAIN_TYPE, null );
+        MessagePane    panel   = new MessagePane( text, PLAIN_TYPE, null );
         return panel;
     }
     
@@ -192,15 +200,26 @@ System.out.println( editorPane.getText());
      * @param resource  the given resource
      * 
      * @return  the created MessagePanel
+     * 
+     * @throws ComponentException if the given resource cannot be loaded
      */
-    public static MessagePanel ofResource( String resource )
+    public static MessagePane ofResource( String resource )
     {
-        String          testName    = resource.toUpperCase().strip();
-        String          type        =
+        String  testName    = resource.toUpperCase().strip();
+        String  type        =
             testName.endsWith( ".HTML" ) ? HTML_TYPE : PLAIN_TYPE;
-        InputStream     inStream    = getResourceAsStream( resource );
-        String          text        = getText( inStream );
-        MessagePanel    panel       = new MessagePanel( text, type, null );
+        String  text        = null;
+        try ( InputStream inStream = getResourceAsStream( resource );
+        )
+        {
+            text = getText( inStream );
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            throw new ComponentException();
+        }
+        MessagePane    panel       = new MessagePane( text, type, null );
         return panel;
     }
     
@@ -224,16 +243,18 @@ System.out.println( editorPane.getText());
      * @param cssRes    the given CSS resource; may be null
      * 
      * @return  the created MessagePanel
+     * 
+     * @throws ComponentException if the given resource cannot be loaded
      */
-    public static MessagePanel ofResource( String textRes, String cssRes )
+    public static MessagePane ofResource( String textRes, String cssRes )
     {
         InputStream     inStream    = getResourceAsStream( textRes );
         StyleSheet      styleSheet  = null;
         String          text        = getText( inStream );
         if ( cssRes != null )
             styleSheet  = getStyleSheetFromResource( cssRes );
-        MessagePanel    panel       = 
-            new MessagePanel( text, HTML_TYPE, styleSheet );
+        MessagePane    panel       = 
+            new MessagePane( text, HTML_TYPE, styleSheet );
         return panel;
     }
     
@@ -245,10 +266,7 @@ System.out.println( editorPane.getText());
     public void setStyleSheet( StyleSheet sheet )
     {
         editorKit.setStyleSheet( sheet );
-        editorPane.setText( editorPane.getText() );
-        
-        if ( dialog != null )
-            dialog.pack();
+        setText( editorPane.getText() );
     }
     
     /**
@@ -266,6 +284,7 @@ System.out.println( editorPane.getText());
     {
         StyleSheet  sheet   = getStyleSheetFromCSS( css );
         setStyleSheet( sheet );
+        setText( editorPane.getText() );
     }
     
     /**
@@ -318,15 +337,34 @@ System.out.println( editorPane.getText());
     
     /**
      * Sets the text of this object's editor pane
-     * to from the given resource.
+     * to from the given resource. 
+     * If the name of the resource ends in html
+     * the content-type is set to "text/html,"
+     * otherwise it's set to "text/plain."
      * 
      * @param resource  the given resource
      * 
      * @throws ComponentException if an error occurs
      */
-    public void setTextResource( String resource )
+    public void setTextFromResource( String resource )
     {
-        activateLink( resource );
+        try ( InputStream inStream = getResourceAsStream( resource ) )
+        {
+            String  text        = getText( inStream );
+            String  contentType = null;
+            String  lcFileName  = resource.toLowerCase().trim();
+            if ( lcFileName.endsWith( "html" ) )
+                contentType = HTML_TYPE;
+            else
+                contentType = PLAIN_TYPE;
+            editorPane.setContentType( contentType );
+            setText( text );
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            throw new ComponentException();
+        }
     }
     
     /**
@@ -348,8 +386,7 @@ System.out.println( editorPane.getText());
     public void setContentType( String type )
     {
         editorPane.setContentType( type );
-        if ( dialog != null )
-            dialog.pack();
+        setText( editorPane.getText() );
     }
     
     /**
@@ -359,7 +396,7 @@ System.out.println( editorPane.getText());
      */
     public String getContentType()
     {
-        return editorPane.getText();
+        return editorPane.getContentType();
     }
     
     /**
@@ -371,6 +408,33 @@ System.out.println( editorPane.getText());
     public void addHyperlinkListener( HyperlinkListener listener )
     {
         editorPane.addHyperlinkListener( listener );
+    }
+    
+    /**
+     * Removes a HyperLinkListener
+     * from the list of HyperlinkListeners.
+     * The caller specifies the listener to remove;
+     * if the given listener is not currently registered
+     * as a HyperlinkListener,
+     * the operation is silently ignored.
+     * 
+     * @param listener  the given HyperlinkListener
+     */
+    public void removeHyperlinkListener( HyperlinkListener listener )
+    {
+        editorPane.removeHyperlinkListener( listener );
+    }
+    
+    /**
+     * Removes the default HyperlinkListener
+     * from the JEditorPane.
+     * After calling this method
+     * the user will have sole control
+     * over hyperlink processing.
+     */
+    public void removeDefaultHyperlinkListener()
+    {
+        editorPane.removeHyperlinkListener( defaultHyperlinkListener );
     }
     
     /**
@@ -400,6 +464,10 @@ System.out.println( editorPane.getText());
      * Gets the dialog created for this object.
      * If necessary, the object will be created
      * with the given parent and title.
+     * After calling this method
+     * the JScrollPane/JEditorPane pair
+     * will be part of the returned dialog's 
+     * containment hierarchy.
      * <p>
      * It is safe to call this method multiple times,
      * however after the dialog is initially created
@@ -572,19 +640,7 @@ System.out.println( editorPane.getText());
     {
         try
         {
-            String      contentType = null;
-            InputStream inStream    = getResourceAsStream( resource );
-            String      text        = getText( inStream );
-            String      lcFileName  = resource.toLowerCase().trim();
-            if ( lcFileName.endsWith( ".html" ) )
-                contentType = HTML_TYPE;
-            else
-                contentType = PLAIN_TYPE;
-            editorPane.setContentType( contentType );
-            editorPane.setText( text );
-            editorPane.setCaretPosition( 0 );
-            if ( dialog != null )
-                dialog.pack();
+            setTextFromResource( resource );
         } 
         catch ( ComponentException exc )
         {
@@ -616,9 +672,9 @@ System.out.println( editorPane.getText());
         JPanel  controls    = new JPanel();
         JButton close       = new JButton( "Close" );
         close.addActionListener( e -> dialog.setVisible( false ) );
-        
         controls.add( close );
         cPane.add( controls, BorderLayout.SOUTH );
+        
         dialog.setModal( true );
         dialog.setContentPane( cPane );
         dialog.getRootPane().setDefaultButton( close );

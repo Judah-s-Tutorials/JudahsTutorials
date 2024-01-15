@@ -29,4 +29,24 @@ public class SandboxUtils
         int     yco     = screenSize.height / 2 - dialogSize.height / 2;
         window.setLocation( xco, yco );
     }
+    
+    /**
+     * Convenience method to sleep
+     * for a given number of milliseconds
+     * and perform exception handling.
+     * If an exception is raised
+     * it is ignored.
+     * 
+     * @param millis    the given number of milliseconds
+     */
+    public static void pause( long millis )
+    {
+        try
+        {
+            Thread.sleep( millis );
+        }
+        catch ( InterruptedException exc )
+        {
+        }
+    }
 }

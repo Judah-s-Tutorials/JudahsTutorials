@@ -41,7 +41,7 @@ public class ShowAboutDialog
         JButton     exit        = new JButton( "Exit" );
         JButton     show        = new JButton( "Show Dialog" );
         exit.addActionListener( e -> System.exit( 0 ) );
-        show.addActionListener( e -> about.show() );
+        show.addActionListener( e -> about.showDialog( true) );
         
         Border      border      = 
             BorderFactory.createEmptyBorder( 10, 10, 10, 10 );

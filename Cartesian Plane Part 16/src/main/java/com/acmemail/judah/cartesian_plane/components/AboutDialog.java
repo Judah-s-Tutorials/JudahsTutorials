@@ -12,7 +12,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  * from the menu bar resource directory.
  * The text is displayed in an HTML-aware JEditorPane,
  * contained in a dialog provided by the 
- * {@linkplain MessagePanel} class.
+ * {@linkplain MessagePane} class.
  * 
  * @author Jack Straub
  */
@@ -27,7 +27,7 @@ public class AboutDialog
     /** Resource file for about message. */
     private final String        aboutResource;
     /** This object's message panel. */
-    private final MessagePanel  msgPanel;
+    private final MessagePane  msgPanel;
     /** This object's dialog. */
     private final JDialog       dialog;
     
@@ -62,21 +62,26 @@ public class AboutDialog
     public AboutDialog( Window parent, String resDir )
     {
         aboutResource = resDir + "/" + aboutFile;
-        msgPanel = MessagePanel.ofResource( aboutResource, null );
+        msgPanel = MessagePane.ofResource( aboutResource, null );
         dialog = msgPanel.getDialog( parent, aboutTitle );
     }
     
     /**
-     * Restores the original text from the About.html file
-     * and makes the dialog visible.
+     * Changes the visibility of the encapsulated dialog
+     * to the given state.
+     * If the given state is true,
+     * the original text from the About.html file is restored.
+     * 
+     * @param   show    the given state
      * 
      * @throws ComponentException 
      *      if there's a problem reading the About.html resource file
      */
-    public void show()
+    public void showDialog( boolean show )
     {
-        msgPanel.setTextResource( aboutResource );
-        dialog.setVisible( true );
+        if ( show )
+            msgPanel.setTextFromResource( aboutResource );
+        dialog.setVisible( show );
     }
     
     /**

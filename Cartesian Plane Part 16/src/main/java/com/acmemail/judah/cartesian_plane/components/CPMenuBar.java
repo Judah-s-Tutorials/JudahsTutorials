@@ -21,13 +21,32 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+/**
+ * The menu bar for the main window
+ * of the Cartesian plane application.
+ * 
+ * @author Jack Straub
+ */
+@SuppressWarnings("serial")
 public class CPMenuBar extends JMenuBar
 {
+    /** The parent of this dialog. */
     private final Window        topWindow;
+    /** Dialog to configure line properties in the Cartesian plane. */
     private final JDialog       lineDialog;
+    /** Dialog to configure graph properties in the Cartesian plane. */
     private final JDialog       graphDialog;
-    private final JDialog       aboutDialog;
+    /** Dialog to show "about application" page. */
+    private final AboutDialog   aboutDialog;
     
+    /**
+     * Constructor.
+     * Fully configures the application menu bar.
+     * 
+     * @param topWindow 
+     *      top-level window to use as parent of dialogs
+     *      launched by this menu bar; may be null
+     */
     public CPMenuBar( Window topWindow )
     {
         this.topWindow = topWindow;
@@ -35,7 +54,7 @@ public class CPMenuBar extends JMenuBar
             LinePropertiesPanel.getDialog( topWindow );
         graphDialog =
             GraphPropertiesPanel.getDialog( topWindow );
-        aboutDialog = new AboutDialog( topWindow ).getDialog();
+        aboutDialog = new AboutDialog( topWindow );
         
         add( getFileMenu() );
         add( getWindowMenu() );
@@ -117,7 +136,7 @@ public class CPMenuBar extends JMenuBar
         JMenu       topicsMenu  = getMathTopicsMenu();
         JMenu       calcsMenu   = getCalculatorsMenu();
         JMenuItem   aboutItem   = new JMenuItem( "About", KeyEvent.VK_A );
-        aboutItem.addActionListener( e -> aboutDialog.setVisible( true ) );
+        aboutItem.addActionListener( e -> aboutDialog.showDialog( true ) );
         
         JMenu       helpMenu        = new JMenu( "Help" );
         helpMenu.setMnemonic( KeyEvent.VK_H );
@@ -127,6 +146,11 @@ public class CPMenuBar extends JMenuBar
         return helpMenu;
     }
     
+    /**
+     * Configures the "help topics" submenu.
+     * 
+     * @return  the "math topics" submenu.
+     */
     private JMenu getMathTopicsMenu()
     {
         URLDesc[]    siteDescs   =
@@ -147,6 +171,11 @@ public class CPMenuBar extends JMenuBar
         return menu;
     }
     
+    /**
+     * Configures the "calculators" submenu.
+     * 
+     * @return  the "calculators" submenu.
+     */
     private JMenu getCalculatorsMenu()
     {
         URLDesc[]    siteDescs   =
@@ -167,6 +196,15 @@ public class CPMenuBar extends JMenuBar
         return menu;
     }
 
+    /**
+     * Opens a URL in the host's default browser.
+     * If an error occurs
+     * the error message
+     * is displayed in a modal dialog;
+     * the operation is otherwise ignored.
+     * 
+     * @param url   the URL to open
+     */
     private void activateLink( URL url )
     {
         Desktop desktop = Desktop.getDesktop();
@@ -187,25 +225,61 @@ public class CPMenuBar extends JMenuBar
         }
     }
     
+    /**
+     * Temporary facility to simulate 
+     * as-of-yet implemented functionality.
+     * Prints a given string to stdout.
+     * 
+     * @param str   the given string
+     */
     private static void log( String str )
     {
         System.out.println( str );
     }
     
+    /**
+     * ComponentListener for synchronizing the state of a toggle button
+     * with the visibility of a window.
+     * The window is typically a dialog.
+     * For example,
+     * if the line properties dialog loses visibility,
+     * the associated menu checkbox item
+     * will be set to false.
+     * 
+     * @author Jack Straub
+     */
     private static class SynchVisible extends ComponentAdapter
     {
+        /** The button associated with this object. */
         private final AbstractButton    toggle;
         
+        /**
+         * Constructor.
+         * Establishes the button whose state
+         * is to be synchronized
+         * with the visibility of some window.
+         * 
+         * @param toggle
+         *      the button whose state is to be synchronized
+         *      with the visibility of some window
+         */
         public SynchVisible( AbstractButton toggle )
         {
             this.toggle = toggle;
         }
         
+        /**
+         * Method to be invoked when a window loses visibility.
+         */
         @Override
         public void componentHidden( ComponentEvent evt )
         {
             toggle.setSelected( false );
         }
+        
+        /**
+         * Method to be invoked when a window becomes visible.
+         */
         @Override
         public void componentShown( ComponentEvent evt )
         {
@@ -213,11 +287,32 @@ public class CPMenuBar extends JMenuBar
         }
     }
     
+    /**
+     * Establishes a correspondence
+     * between a description of a URL,
+     * and an object of type <em>class URL.</em>
+     * The description is typically used
+     * as the text of a menu item,
+     * and the object is used to activate the URL
+     * when the menu item is selected.
+     * 
+     * @author Jack Straub
+     */
     private static class URLDesc
     {
+        /** String representation of the encapsulated URL. */
         public final String urlDesc;
+        /** Object representation of the encapsulated URL. */
         public final URL    url;
         
+        /**
+         * Constructor.
+         * Establishes the description of the encapsulated URL
+         * and the associated URL object.
+         * 
+         * @param urlStr    the description of the URL
+         * @param desc      the URL object
+         */
         public URLDesc( String urlStr, String desc )
         {
             URL temp    = null;

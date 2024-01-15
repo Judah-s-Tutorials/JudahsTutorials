@@ -8,23 +8,23 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
-import com.acmemail.judah.cartesian_plane.components.MessagePanel;
+import com.acmemail.judah.cartesian_plane.components.MessagePane;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 /**
  * Application to demonstrate the use
- * of the {@linkplain MessagePanel} class.
+ * of the {@linkplain MessagePane} class.
  * A MessagePanel object is instantiated
  * using CSS and HTML text from files
  * in the SandboxDocs resource folder.
  * A dialog is then extracted from the object
  * via the 
- * {@linkplain MessagePanel#getDialog(java.awt.Window, String)}
+ * {@linkplain MessagePane#getDialog(java.awt.Window, String)}
  * method.
  * 
  * @author Jack Straub
  */
-public class MessagePanelDemo2
+public class MessagePaneDemo2
 {
     /** Resource directory for sand box docs. */
     private static final String resDir      = "SandboxDocs/";
@@ -43,7 +43,7 @@ public class MessagePanelDemo2
      */
     public static void main(String[] args)
     {
-        MessagePanelDemo2    app = new MessagePanelDemo2();
+        MessagePaneDemo2    app = new MessagePaneDemo2();
         SwingUtilities.invokeLater( app::createGUI );
     }
     
@@ -59,8 +59,8 @@ public class MessagePanelDemo2
         String          title       = "Show HTML Message Panel";
         JFrame          frame       = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );        
-        MessagePanel    msgPanel    = 
-            MessagePanel.ofResource( htmlFile, cssFile );
+        MessagePane    msgPanel    = 
+            MessagePane.ofResource( htmlFile, cssFile );
         JDialog         msgDialog   = msgPanel.getDialog( frame, title );
         
         JButton     exit        = new JButton( "Exit" );
