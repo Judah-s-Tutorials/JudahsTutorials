@@ -46,7 +46,7 @@ public class ModelToView2DDemo
      *
      * @param args command line arguments, not used
      *
-    */
+     */
     public static void main(String[] args) throws IOException
     {
         GUIUtils.schedEDTAndWait( () -> makeGUI() );

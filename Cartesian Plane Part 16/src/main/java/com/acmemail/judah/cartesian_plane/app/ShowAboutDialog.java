@@ -36,8 +36,7 @@ public class ShowAboutDialog
         JFrame      frame       = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );  
         
-        AboutDialog about      = new AboutDialog();
-        
+        AboutDialog about       = new AboutDialog();
         JButton     exit        = new JButton( "Exit" );
         JButton     show        = new JButton( "Show Dialog" );
         exit.addActionListener( e -> System.exit( 0 ) );

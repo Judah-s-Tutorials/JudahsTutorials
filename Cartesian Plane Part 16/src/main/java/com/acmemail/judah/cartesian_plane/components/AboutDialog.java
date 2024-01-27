@@ -27,7 +27,7 @@ public class AboutDialog
     /** Resource file for about message. */
     private final String        aboutResource;
     /** This object's message panel. */
-    private final MessagePane  msgPanel;
+    private final MessagePane   msgPanel;
     /** This object's dialog. */
     private final JDialog       dialog;
     

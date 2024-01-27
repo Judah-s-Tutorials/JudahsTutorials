@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.AWTException;
-import java.awt.Component;
 import java.awt.Point;
 import java.awt.Robot;
 import java.awt.event.InputEvent;
@@ -133,6 +132,7 @@ public class MessagePaneTest
             "body.%2$c { background-color: #%1$06x; font-size: %3$d; }";
         IntStream.range( 0, numCSSRules )
             .mapToObj( i  -> String.format( fmt, i, 'a' + i, i + 10 ) )
+            .peek( System.out::println )
             .forEach( styleSheet::addRule );
     }
     
@@ -746,7 +746,7 @@ public class MessagePaneTest
         catch ( AWTException exc )
         {
             exc.printStackTrace();
-            System.exit( 1 );
+            fail( exc );
         }
         return robot;
     }
