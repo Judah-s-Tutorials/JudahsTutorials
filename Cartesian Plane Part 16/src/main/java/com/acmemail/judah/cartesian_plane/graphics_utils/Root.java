@@ -7,6 +7,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.acmemail.judah.cartesian_plane.components.CPMenuBar;
+
 /**
  * This class encapsulates the frame that is required
  * to assemble the GUI for our project.
@@ -97,7 +99,10 @@ public class Root implements Runnable
         BorderLayout    layout  = new BorderLayout();
         contentPane = new JPanel( layout );
         
-        /* Make the Canvas a child of the content pane. */
+        /* Make the menu bar the north child of the content pane. */
+        contentPane.add( new CPMenuBar( frame ), BorderLayout.NORTH );
+        
+        /* Make the Canvas the center child of the content pane. */
         contentPane.add( userPanel, BorderLayout.CENTER );
         /* Set the content pane in the frame. */
         frame.setContentPane( contentPane );
