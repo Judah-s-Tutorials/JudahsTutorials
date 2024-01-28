@@ -30,7 +30,7 @@ import javax.swing.KeyStroke;
 @SuppressWarnings("serial")
 public class CPMenuBar extends JMenuBar
 {
-    /** The parent of this dialog. */
+    /** The owner of this dialog. */
     private final Window        topWindow;
     /** Dialog to configure line properties in the Cartesian plane. */
     private final JDialog       lineDialog;
@@ -310,8 +310,8 @@ public class CPMenuBar extends JMenuBar
          * Establishes the description of the encapsulated URL
          * and the associated URL object.
          * 
-         * @param urlStr    the description of the URL
-         * @param desc      the URL object
+         * @param urlStr    the URL object, formatted as a string
+         * @param desc      the description of the URL
          */
         public URLDesc( String urlStr, String desc )
         {
