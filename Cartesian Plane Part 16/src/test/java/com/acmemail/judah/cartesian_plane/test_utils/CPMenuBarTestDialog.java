@@ -1,15 +1,17 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.Window;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -22,6 +24,23 @@ import com.acmemail.judah.cartesian_plane.components.CPMenuBar;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
+/**
+ * This class encapsulates a dialog
+ * that contains a CPMenuBar.
+ * It's purpose is to facilitate testing
+ * of the CPMenuBar class.
+ * It simplifies access to components
+ * of the CPMenuBar,
+ * and to the dialogs that the CPMenuBar posts.
+ * Operations on components
+ * are always executed on the EventDispatchThread,
+ * relieving the test class of this responsibility.
+ * 
+ * @author Jack Straub
+ */
+/**
+ * @author Jack Straub
+ */
 public class CPMenuBarTestDialog
 {
     /** Singleton for this class. */
@@ -31,12 +50,6 @@ public class CPMenuBarTestDialog
     private final JDialog       dialog;
     /** The encapsulated menu bar. */
     private final CPMenuBar     menuBar;
-    /** The encapsulated File menu. */
-    private final JMenu         fileMenu;
-    /** The encapsulated Window menu. */
-    private final JMenu         windowMenu;
-    /** The encapsulated Help menu. */
-    private final JMenu         helpMenu;
     
     /** The encapsulated line property dialog. */
     private final JDialog       lineDialog;
@@ -45,33 +58,55 @@ public class CPMenuBarTestDialog
     /** The encapsulated About dialog. */
     private final JDialog       aboutDialog;
     
-    /** 
-     * Ad hoc field for the convenience of methods
+    /*
+     * Ad hoc fields are for the convenience of methods
      * utilizing lambdas, where modification
      * of a local variable
      * is forbidden.
-     * The value of this variable
+     * The value of an ad hoc variable
      * is unpredictable outside of
      * the narrow context within which
      * it is used in a method.
      */
-    private Object      adHocObject1;
+    /** 
+     * Instance variable to be used as needed when a JMenu object
+     * is assigned in a lambda.
+     */
     private JMenu       adHocJMenu1;
+    /** 
+     * Instance variable to be used as needed when a JMenuItem object
+     * is assigned in a lambda.
+     */
     private JMenuItem   adHocJMenuItem1;
+    /** 
+     * Instance variable to be used as needed when a Boolean
+     * variable is assigned in a lambda.
+     */
+    private boolean     adHocBoolean1;
     
+    /**
+     * Constructor.
+     * Configures and makes visible a dialog
+     * containing a CPMenuBar.
+     * 
+     * @see #CPMenuBarTestDialog()
+     */
     private CPMenuBarTestDialog()
     {
         menuBar = new CPMenuBar( null );
         dialog = makeDialog();
-        fileMenu = getMenu( "File" );
-        windowMenu = getMenu( "Window" );
-        helpMenu = getMenu( "Help" );
         
         graphDialog = getDialog( "Graph" );
         lineDialog = getDialog( "Line" );
         aboutDialog = getDialog( "About" );
     }
     
+    /**
+     * Method to obtain the sole instance
+     * of this class.
+     * 
+     * @return  the sole instance of this class
+     */
     public static CPMenuBarTestDialog getTestDialog()
     {
         if ( testDialog == null )
@@ -83,6 +118,32 @@ public class CPMenuBarTestDialog
         return testDialog;
     }
     
+    /**
+     * Returns true if the encapsulated dialog
+     * has focus.
+     * The work performed by this method
+     * is always executed on the EDT.
+     * 
+     * @return  true if the encapsulated dialog has focus.
+     */
+    public boolean hasFocus()
+    {
+        GUIUtils.schedEDTAndWait( 
+            () -> adHocBoolean1 = dialog.hasFocus()
+        );
+        return adHocBoolean1;
+    }
+    
+    /**
+     * Obtains the JMenu object containing the given text.
+     * This method may be called on any thread.
+     * If necessary, the work performed by this method
+     * is delegated to the EDT.
+     * 
+     * @param text  the given text
+     * 
+     * @return  the JMenu object containing the given text
+     */
     public JMenu getMenu( String text )
     {
         if ( SwingUtilities.isEventDispatchThread() )
@@ -94,7 +155,157 @@ public class CPMenuBarTestDialog
         return adHocJMenu1;
     }
     
-    public JMenu getMenuEDT( String text )
+    /**
+     * Gets the JMenuItem with the given menu hierarchy.
+     * For example,
+     * <em>getMenuItem("Help", "Math Help", "Math is Fun")</em>
+     * will return the item with the text "Math is Fun"
+     * from the "Math Help" submenu
+     * of the "Help" menu.
+     * The work performed by this method
+     * is always executed on the EDT.
+     * 
+     * @param labels
+     * @return
+     */
+    public JMenuItem getMenuItem( String... labels )
+    {
+        GUIUtils.schedEDTAndWait( 
+            () -> adHocJMenuItem1 = getMenuItemEDT( labels )
+        );
+        return adHocJMenuItem1;
+    }
+    
+    /**
+     * Gets the dialog that contains the LinePropertiesPanel
+     * which is spawned by the Window menu.
+     * 
+     * @return  the dialog that contains the LinePropertiesPanel
+     */
+    public JDialog getLineDialog()
+    {
+        return lineDialog;
+    }
+    
+    /**
+     * Gets the dialog that contains the GraphPropertiesPanel
+     * which is spawned by the Window menu.
+     * 
+     * @return  the dialog that contains the GraphPropertiesPanel
+     */
+    public JDialog getGraphDialog()
+    {
+        return graphDialog;
+    }
+    
+    /**
+     * Gets the About dialog 
+     * which is spawned by the Help menu.
+     * 
+     * @return  the dialog that contains the LinePropertiesPanel
+     */
+    public JDialog getAboutDialog()
+    {
+        return aboutDialog;
+    }
+    
+    /**
+     * Clicks the given button.
+     * This work is always delegated to the EDT.
+     * 
+     * @param button    the given button
+     */
+    public void doClick( AbstractButton button )
+    {
+        SwingUtilities.invokeLater(() -> button.doClick() );
+        Utils.pause( 500 );
+    }
+    
+    /**
+     * Spawns a thread that will click the given button.
+     * The actual click operation will be delegated to the EDT.
+     * This method will pause for a brief time
+     * before returning the spawned Thread object
+     * to the caller.
+     * The method will pause for a brief time
+     * before returning to the caller.
+     * <p>
+     * A typical use of this method
+     * is to click a button
+     * that posts a modal dialog.
+     * When the test procedure is complete
+     * the dialog can be closed,
+     * and the thread will terminate:
+     * <pre>
+     *     Thread thread = tester.doClickInThread( aboutMenuItem );
+     *     assertTrue( tester.isVisible( aboutDialog ) );
+     *     tester.setVisible( aboutDialog, false );
+     *     Utils.join( thread );
+     *     assertFalse( tester.isVisible( aboutDialog ) );</pre>
+     * 
+     * @param button    the given button
+     * 
+     * @return  the Thread object to which the operation is delegated
+     */
+    public Thread doClickInThread( AbstractButton button )
+    {
+        Runnable    doClick = () -> button.doClick();
+        Runnable    asEDT   = 
+            () -> SwingUtilities.invokeLater( doClick );
+        Thread      thread  = new Thread( asEDT );
+        thread.start();
+        Utils.pause( 500 );
+        return thread;
+    }
+    
+    /**
+     * Determines whether the given component is visible.
+     * This process is always delegated to the EDT.
+     * 
+     * @param comp  the given component
+     * 
+     * @return  true if the given component is visible
+     */
+    public boolean isVisible( Component comp )
+    {
+        GUIUtils.schedEDTAndWait( () -> adHocBoolean1 = comp.isVisible() );
+        return adHocBoolean1;
+    }
+    
+    /**
+     * Sets the visibility of the given component.
+     * This process is always delegated to the EDT.
+     * 
+     * @param comp  the given component
+     * 
+     * @param visible   true to make the component visible
+     */
+    public void setVisible( Component comp, boolean visible )
+    {
+        GUIUtils.schedEDTAndWait( () -> comp.setVisible( visible ) );
+    }
+    
+    /**
+     * Sets the enabled state of the given component.
+     * 
+     * @param comp      the given component
+     * @param enabled   true to enable the given component
+     */
+    public void setEnabled( Component comp, boolean enabled )
+    {
+        GUIUtils.schedEDTAndWait( () -> comp.setEnabled( enabled ) );
+    }
+    
+    /**
+     * Finds the JMenu with the given text.
+     * It is assumed that this method is invoked
+     * from the EDT.
+     * 
+     * @param text  the given text
+     * 
+     * @return  the JMenu with the given text
+     */
+    private JMenu getMenuEDT( String text )
     {
         Predicate<JComponent>   isMenu  = c -> (c instanceof JMenu);
         Predicate<JComponent>   hasText = 
@@ -107,14 +318,18 @@ public class CPMenuBarTestDialog
         return (JMenu)comp;
     }
     
-    public JMenuItem getMenuItem( String... labels )
-    {
-        GUIUtils.schedEDTAndWait( 
-            () -> adHocJMenuItem1 = getMenuItemEDT( labels )
-        );
-        return adHocJMenuItem1;
-    }
-    
+    /**
+     * Finds the menu item with the given menu hierarchy.
+     * It is assumed that this method is invoked
+     * from the EDT.
+     * 
+     * @param labels  the given menu hierarchy
+     * 
+     * @return  the menu item with the given menu hierarchy
+     * 
+     * @see #getMenuItem(String...)
+     * @see #getMenuItem(JMenu, String)
+     */
     private JMenuItem getMenuItemEDT( String... labels )
     {
         JMenuItem   item    = getMenu( labels[0] );
@@ -128,6 +343,18 @@ public class CPMenuBarTestDialog
         return item;
     }
     
+    /**
+     * Finds the item within a given JMenu
+     * with the given text.
+     * It is assumed that this method
+     * is invoked on the EDT.
+     * 
+     * @param menu  the given JMenu
+     * @param text  the given text
+     * 
+     * @return  
+     *      the item within the given JMenu with the given text
+     */
     private JMenuItem getMenuItem( JMenu menu, String text )
     {
         JMenuItem   item    =
@@ -140,6 +367,17 @@ public class CPMenuBarTestDialog
         return item;
     }
     
+    /**
+     * Gets the dialog with the title
+     * that contains the given text.
+     * It is assumed that this method
+     * is invoked on the EDT.
+     * 
+     * @param titleFragment the given text
+     * 
+     * @return
+     *      the dialog with the title that contains the given text
+     */
     private JDialog getDialog( String titleFragment )
     {
         ComponentFinder     finder      = 
@@ -154,6 +392,14 @@ public class CPMenuBarTestDialog
         return (JDialog)window;
     }
     
+    /**
+     * Creates and show the JDialog
+     * that will contain the CPMenuBar under test.
+     * It is assumed that this method
+     * is invoked on the EDT.
+     * 
+     * @return  the created dialog
+     */
     private JDialog makeDialog()
     {
         String  title       = "Menu Bar Test Dialog";
