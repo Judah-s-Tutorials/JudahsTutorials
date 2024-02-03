@@ -1,6 +1,5 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -58,16 +57,15 @@ public class CPMenuBarTestDialog
     /** The encapsulated About dialog. */
     private final JDialog       aboutDialog;
     
-    /*
+    /**************************************************
      * Ad hoc fields are for the convenience of methods
-     * utilizing lambdas, where modification
-     * of a local variable
-     * is forbidden.
-     * The value of an ad hoc variable
-     * is unpredictable outside of
-     * the narrow context within which
-     * it is used in a method.
-     */
+     * utilizing lambdas, where modification of a local
+     * variable is forbidden.
+     * 
+     * The value of an ad hoc variable is unpredictable
+     * outside of the narrow context within which it is
+     * used in a method.
+     **************************************************/
     /** 
      * Instance variable to be used as needed when a JMenu object
      * is assigned in a lambda.
@@ -312,14 +310,15 @@ public class CPMenuBarTestDialog
             c -> text.equals( ((JMenu)c).getText() );
         Predicate<JComponent>   pred    = isMenu.and( hasText );
         JComponent              comp    =
-            ComponentFinder.find( dialog, pred );
+            ComponentFinder.find( menuBar, pred );
         assertNotNull( comp );
         assertTrue( comp instanceof JMenu );
         return (JMenu)comp;
     }
     
     /**
-     * Finds the menu item with the given menu hierarchy.
+     * Finds the menu item with the given text
+     * within the given menu hierarchy.
      * It is assumed that this method is invoked
      * from the EDT.
      * 
@@ -393,7 +392,7 @@ public class CPMenuBarTestDialog
     }
     
     /**
-     * Creates and show the JDialog
+     * Creates and shows the JDialog
      * that will contain the CPMenuBar under test.
      * It is assumed that this method
      * is invoked on the EDT.

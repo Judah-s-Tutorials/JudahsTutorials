@@ -4,10 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.awt.Component;
 import java.util.stream.IntStream;
 
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -71,16 +69,8 @@ class CPMenuBarTest
         testWindowItem( "Edit Line Properties" );
         testWindowItem( "Edit Graph Properties" );
         
-        assertTrue( windowMenu.getMenuComponentCount() >= 2 );
-        Component   comp    = windowMenu.getMenuComponent( 0 );
-        assertTrue( comp instanceof JCheckBoxMenuItem );
-        JCheckBoxMenuItem   graphItem   = (JCheckBoxMenuItem)comp;
-        comp = windowMenu.getMenuComponent( 1 );
-        assertTrue( comp instanceof JCheckBoxMenuItem );
-        JCheckBoxMenuItem   lineItem    = (JCheckBoxMenuItem)comp;
-        
-        testWindowDialog( lineItem, lineDialog );
-        testWindowDialog( graphItem, graphDialog );
+        testWindowDialog( "Edit Line Properties", lineDialog );
+        testWindowDialog( "Edit Graph Properties", graphDialog );
     }
 
     @Test
@@ -108,7 +98,6 @@ class CPMenuBarTest
         JMenuItem   mathIsFun   = 
             tester.getMenuItem( "Help", "Math Help", "Math is Fun" );
         assertNotNull( mathIsFun );
-        Utils.pause( 500 );
         assertTrue( tester.hasFocus() );
         tester.doClick( mathIsFun );
         Utils.pause( 500 );
@@ -147,8 +136,9 @@ class CPMenuBarTest
         assertTrue( text.equals( item.getText() ) );
     }
     
-    private void testWindowDialog( JCheckBoxMenuItem item, JDialog dialog )
+    private void testWindowDialog( String menuItem, JDialog dialog )
     {
+        JMenuItem   item    = tester.getMenuItem( "Window", menuItem );
         // Start with dialog not visible
         assertFalse( item.isSelected() );
         assertFalse( tester.isVisible( dialog ) );

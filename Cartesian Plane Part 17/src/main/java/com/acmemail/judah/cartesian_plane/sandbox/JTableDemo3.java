@@ -16,24 +16,24 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-public class JTableDemo2
+public class JTableDemo3
 {
-    private static String[]     headings = { "State", "Capital", "Action" };
+    private static String[]     headings = { "State", "Population", "Action" };
     private static Object[][]   data    =
     {
-        { "Alabama", "Montgomery", Boolean.valueOf( Boolean.valueOf( false ) ) },
-        { "Alaska", "Juneau", Boolean.valueOf( false ) },
-        { "Arizona", "Phoenix", Boolean.valueOf( false ) },
-        { "Arkansas", "Little Rock", Boolean.valueOf( false ) },
-        { "California", "Sacramento", Boolean.valueOf( false ) },
-        { "Colorado", "Denver", Boolean.valueOf( false ) },
-        { "Connecticut", "Hartford", Boolean.valueOf( false ) },
-        { "Delaware", "Dover", Boolean.valueOf( false ) },
-        { "Florida", "Tallahassee", Boolean.valueOf( false ) },
-        { "Georgia", "Atlanta", Boolean.valueOf( false ) },
-        { "Hawaii", "Honolulu", Boolean.valueOf( false ) },
-        { "Idaho", "Boise", Boolean.valueOf( false ) },
-        { "Illinois", "Springfield", Boolean.valueOf( false ) },
+        { "Alabama", Double.valueOf( 100.0 ), Boolean.valueOf( Boolean.valueOf( false ) ) },
+        { "Alaska", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Arizona", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Arkansas", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "California", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Colorado", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Connecticut", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Delaware", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Florida", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Georgia", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Hawaii", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Idaho", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Illinois", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
     };
     
     private JTable              table;
@@ -46,7 +46,7 @@ public class JTableDemo2
     */
     public static void main(String[] args)
     {
-        JTableDemo2 demo    = new JTableDemo2();
+        JTableDemo3 demo    = new JTableDemo3();
         SwingUtilities.invokeLater( () -> demo.buildGUI() );
     }
     
@@ -135,8 +135,15 @@ public class JTableDemo2
         @Override
         public Class<?> getColumnClass( int col )
         {
-            Class<?>    clazz   = col == 2 ?
-                Boolean.class : super.getColumnClass( col );
+//            Class<?>    clazz   = col == 2 ?
+//                Boolean.class : super.getColumnClass( col );
+            Class<?>    clazz   = null;
+            if ( col == 1 )
+                clazz = Double.class;
+            else if ( col == 2 )
+                clazz = Boolean.class;
+            else
+                clazz = super.getColumnClass( col );
             return clazz;
         }
     }
