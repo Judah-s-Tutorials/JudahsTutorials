@@ -162,7 +162,6 @@ public class FontEditor
         panel.add( getLeftPanel() );
         panel.add( feedback );
         
-        Dimension   prefSize    = feedback.getPreferredSize();
         feedback.setPreferredSize( new Dimension( 200, 100 ) );
         feedback.setMaximumSize( new Dimension( 200, 100 ) );
         

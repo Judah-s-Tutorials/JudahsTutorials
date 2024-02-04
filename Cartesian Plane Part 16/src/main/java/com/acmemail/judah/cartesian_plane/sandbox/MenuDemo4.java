@@ -2,8 +2,6 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractButton;

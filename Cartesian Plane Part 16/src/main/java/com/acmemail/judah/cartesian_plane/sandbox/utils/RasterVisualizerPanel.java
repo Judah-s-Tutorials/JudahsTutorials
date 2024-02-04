@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
@@ -17,8 +16,6 @@ public class RasterVisualizerPanel extends JPanel
     private static final int        pixHeight   = pixWidth;
     private static final int        pixColGap   = 2;
     private static final int        pixRowGap   = pixColGap;
-    private static final Rectangle  pixel       =
-        new Rectangle( pixWidth, pixHeight );
     
     private final BufferedImage raster;
     private final int           rasterWidth;
