@@ -3,11 +3,15 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.stream.IntStream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -18,25 +22,39 @@ import javax.swing.table.TableModel;
 
 public class JTableDemo3
 {
-    private static String[]     headings = { "State", "Population", "Action" };
-    private static Object[][]   data    =
+    private static final String     prompt          =
+        "Enter the name of a state and its population (in millions)";
+    private static final String     stateHeader     =
+        "<html><br>State</html>";
+    private static final String     popHeader       =
+        "<html><center>Population<br>(Millions)</center></html>";
+    private static final String     actionHeader    =
+        "<html><br>Action</html>";
+    private static final String[]   headings        = 
+    { stateHeader, popHeader, actionHeader };
+    private static final Vector     headerVec       = 
+        new Vector( Arrays.asList( headings ) );
+    private static final Object[][] data            =
     {
-        { "Alabama", Double.valueOf( 100.0 ), Boolean.valueOf( Boolean.valueOf( false ) ) },
-        { "Alaska", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Arizona", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Arkansas", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "California", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Colorado", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Connecticut", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Delaware", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Florida", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Georgia", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Hawaii", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Idaho", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
-        { "Illinois", Double.valueOf( 100.0 ), Boolean.valueOf( false ) },
+        { "Alabama", 5.024, false },
+        { "Alaska", .733, false },
+        { "Arizona", 7.152, false },
+        { "Arkansas", 3.1, false },
+        { "California", 39.538, false },
+        { "Colorado", 5.773, false },
+        { "Connecticut", 3.606, false },
+        { "Delaware", .990, false },
+        { "Florida", 21.538, false },
+        { "Georgia", 10.712, false },
+        { "Hawaii", 1.455, false },
+        { "Idaho", 1.839, false },
+        { "Illinois", 12.813, false },
     };
+    private static final Vector<Vector>  dataVec     = 
+        new Vector( Arrays.asList( data ) );
     
     private JTable              table;
+    private LocalTableModel     model;
     
     /**
      * Application entry point.
@@ -56,7 +74,8 @@ public class JTableDemo3
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel      contentPane = new JPanel( new BorderLayout() );
-        table = new JTable( new LocalTableModel() );
+        model = new LocalTableModel();
+        table = new JTable( model );
         table.setFillsViewportHeight(true);
         table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
         JScrollPane scrollPane  = new JScrollPane( table );
@@ -79,6 +98,7 @@ public class JTableDemo3
         JButton     add         = new JButton( "New" );
         apply.addActionListener( this::applyAction );
         delete.addActionListener( this::deleteAction );
+        add.addActionListener( this::newAction );
         exit.addActionListener( e -> System.exit( 0 ) );
         buttonPanel.add( apply );
         buttonPanel.add( add );
@@ -87,21 +107,78 @@ public class JTableDemo3
         return buttonPanel;
     }
     
+    private void newAction( ActionEvent evt )
+    {
+        String  input   = JOptionPane.showInputDialog( prompt );
+        if ( input != null )
+        {
+            try
+            {
+                StringTokenizer tizer   = 
+                    new StringTokenizer( input, ", " );
+                int             count   = tizer.countTokens();
+                if ( count < 1 )
+                    throw new NumberFormatException( "Invalid entry" );
+                if ( count > 2)
+                    throw new NumberFormatException( "Invalid entry" );
+                double      value   = 0;
+                String      name    = tizer.nextToken().strip();
+                if ( highlightState( name ) >= 0 )
+                    throw new NumberFormatException( "Duplicate name" );
+                if ( tizer.hasMoreTokens() )
+                    value = Double.parseDouble( tizer.nextToken() );
+                Object[]    newRow  = { name, value, false };
+                ((LocalTableModel)table.getModel()).addRow( newRow );
+            }
+            catch ( NumberFormatException exc )
+            {
+                String  err = "Parse error: " + exc.getMessage();
+                JOptionPane.showMessageDialog( null, err );
+            }
+        }
+    }
+    
+    private int highlightState( String name )
+    {
+        int         rowCount    = table.getRowCount();
+        int         inx         =
+            IntStream.range( 0, rowCount )
+                .filter( i -> name.equalsIgnoreCase( getName( i ) ) )
+                .findFirst()
+                .orElse( -1 );
+        if ( inx >= 0 )
+            table.setRowSelectionInterval( inx, inx );
+        return inx;
+    }
+    
+    private String getName( int inx )
+    {
+        if ( inx >= table.getRowCount() )
+            throw new IndexOutOfBoundsException( "invalid row index" );
+        Object  obj     = table.getValueAt( inx, 0 );
+        if ( !(obj instanceof String) )
+            throw new Error( "column not String" );
+        String  name    = (String)obj;
+        return name;
+    }
+    
+    @SuppressWarnings("rawtypes")
     private void deleteAction( ActionEvent evt )
     {
-        int         numRows     = table.getRowCount();
-        TableModel  tableModel  = table.getModel();
-        LocalTableModel newModel    = new LocalTableModel( headings );
-        if ( tableModel instanceof DefaultTableModel )
+        Vector<Vector>      dataVec     = model.getDataVector();
+        Iterator<Vector>    iter        = dataVec.iterator();
+        while ( iter.hasNext() )
         {
-            DefaultTableModel   defModel    = (DefaultTableModel)tableModel;
-            @SuppressWarnings("rawtypes")
-            Vector<Vector>      oldVec      = defModel.getDataVector();
-            IntStream.range( 0, numRows )
-                .filter( i -> !(Boolean)(table.getValueAt( i, 2 )) )
-                .forEach( i -> newModel.addRow( oldVec.get( i ) ) );
-            table.setModel( newModel );
+            Vector<?>vec = iter.next();
+            Object  obj = vec.get( 2 );
+            if ( obj instanceof Boolean )
+            {
+                if ( (Boolean)obj )
+                    iter.remove();
+            }
         }
+        Vector<String>  headers = new Vector<>( Arrays.asList( headings ) );
+        model.setDataVector(dataVec, headers);
     }
     
     private void applyAction( ActionEvent evt )
@@ -125,6 +202,7 @@ public class JTableDemo3
         public LocalTableModel()
         {
             super( data, headings );
+//            super( dataVec, headerVec );
         }
         
         public LocalTableModel( Object[] headings )
