@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -18,7 +18,8 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
+
+import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
 public class JTableDemo3
 {
@@ -30,26 +31,27 @@ public class JTableDemo3
         "<html><center>Population<br>(Millions)</center></html>";
     private static final String     actionHeader    =
         "<html><br>Action</html>";
-    private static final String[]   headings        = 
+    private static final String[]   headers         = 
     { stateHeader, popHeader, actionHeader };
     private static final Vector     headerVec       = 
-        new Vector( Arrays.asList( headings ) );
+        new Vector( Arrays.asList( headers ) );
     private static final Object[][] data            =
-    {
-        { "Alabama", 5.024, false },
-        { "Alaska", .733, false },
-        { "Arizona", 7.152, false },
-        { "Arkansas", 3.1, false },
-        { "California", 39.538, false },
-        { "Colorado", 5.773, false },
-        { "Connecticut", 3.606, false },
-        { "Delaware", .990, false },
-        { "Florida", 21.538, false },
-        { "Georgia", 10.712, false },
-        { "Hawaii", 1.455, false },
-        { "Idaho", 1.839, false },
-        { "Illinois", 12.813, false },
-    };
+        State.getDataSet( stateHeader, popHeader );
+//    {
+//        { "Alabama", 5.024, false },
+//        { "Alaska", .733, false },
+//        { "Arizona", 7.152, false },
+//        { "Arkansas", 3.1, false },
+//        { "California", 39.538, false },
+//        { "Colorado", 5.773, false },
+//        { "Connecticut", 3.606, false },
+//        { "Delaware", .990, false },
+//        { "Florida", 21.538, false },
+//        { "Georgia", 10.712, false },
+//        { "Hawaii", 1.455, false },
+//        { "Idaho", 1.839, false },
+//        { "Illinois", 12.813, false },
+//    };
     private static final Vector<Vector>  dataVec     = 
         new Vector( Arrays.asList( data ) );
     
@@ -177,15 +179,14 @@ public class JTableDemo3
                     iter.remove();
             }
         }
-        Vector<String>  headers = new Vector<>( Arrays.asList( headings ) );
-        model.setDataVector(dataVec, headers);
+        Vector vHeaders = new Vector( Arrays.asList( headers ) );
+        model.setDataVector(dataVec, vHeaders);
     }
     
     private void applyAction( ActionEvent evt )
     {
-        TableModel  model   = table.getModel();
-        int         rows    = model.getRowCount();
-        int         cols    = model.getColumnCount();
+        int rows    = model.getRowCount();
+        int cols    = model.getColumnCount();
         for ( int row = 0 ; row < rows ; ++row )
             for ( int col = 0 ; col < cols ; ++col )
             {
@@ -201,7 +202,7 @@ public class JTableDemo3
     {
         public LocalTableModel()
         {
-            super( data, headings );
+            super( data, headers );
 //            super( dataVec, headerVec );
         }
         

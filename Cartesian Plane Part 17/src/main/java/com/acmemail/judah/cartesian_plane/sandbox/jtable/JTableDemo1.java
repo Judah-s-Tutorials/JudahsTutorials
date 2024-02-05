@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -11,25 +11,13 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.TableModel;
 
+import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
+
 public class JTableDemo1
 {
     private static String[]     headers = { "State", "Capital" };
     private static Object[][]   data    =
-    {
-        { "Alabama", "Montgomery" },
-        { "Alaska", "Juneau" },
-        { "Arizona", "Phoenix" },
-        { "Arkansas", "Little Rock" },
-        { "California", "Sacramento" },
-        { "Colorado", "Denver" },
-        { "Connecticut", "Hartford" },
-        { "Delaware", "Dover" },
-        { "Florida", "Tallahassee" },
-        { "Georgia", "Atlanta" },
-        { "Hawaii", "Honolulu" },
-        { "Idaho", "Boise" },
-        { "Illinois", "Springfield" },
-    };
+        State.getDataSet( "name", "capital" );
     
     private JTable              table;
     
@@ -53,7 +41,7 @@ public class JTableDemo1
         JPanel      contentPane = new JPanel( new BorderLayout() );
         table = new JTable( data, headers );
         table.setFillsViewportHeight(true);
-        table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+        table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
         JScrollPane scrollPane  = new JScrollPane( table );
         contentPane.add( scrollPane, BorderLayout.CENTER );
         
@@ -67,7 +55,7 @@ public class JTableDemo1
         contentPane.add( buttonPanel, BorderLayout.SOUTH );
         
         frame.setContentPane( contentPane );
-        frame.setLocation( 200, 200 );;
+        frame.setLocation( 200, 200 );
         frame.pack();
         frame.setVisible( true );
     }
