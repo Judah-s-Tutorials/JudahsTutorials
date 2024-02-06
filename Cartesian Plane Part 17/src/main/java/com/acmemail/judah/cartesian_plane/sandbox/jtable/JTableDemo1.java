@@ -15,11 +15,17 @@ import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
 public class JTableDemo1
 {
-    private static String[]     headers = { "State", "Capital" };
-    private static Object[][]   data    =
-        State.getDataSet( "name", "capital" );
-    
-    private JTable              table;
+    private final String[]      headers = 
+    { "First", "Last", "ID" };
+    private final Object[][]    data    =
+    {
+        { "Jill", "Biden", 131157 },
+        { "Melania", "Trump", 171129 },
+        { "Michelle", "Obama", 200231 },
+        { "Laura", "Bush", 100719 },
+        { "Hillary", "Clinton", 131157 },
+    };
+    private final JTable        table   = new JTable( data, headers );
     
     /**
      * Application entry point.
@@ -29,28 +35,21 @@ public class JTableDemo1
     */
     public static void main(String[] args)
     {
-        JTableDemo1 demo    = new JTableDemo1();
-        SwingUtilities.invokeLater( () -> demo.buildGUI() );
+        SwingUtilities.invokeLater( JTableDemo1::new );
     }
     
-    private void buildGUI()
+    private JTableDemo1()
     {
         JFrame      frame       = new JFrame( "JTable Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel      contentPane = new JPanel( new BorderLayout() );
-        table = new JTable( data, headers );
-        table.setFillsViewportHeight(true);
-        table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
         JScrollPane scrollPane  = new JScrollPane( table );
         contentPane.add( scrollPane, BorderLayout.CENTER );
         
         JPanel      buttonPanel = new JPanel();
-        JButton     apply       = new JButton( "Apply" );
         JButton     exit        = new JButton( "Exit" );
-        apply.addActionListener( this::applyAction );
         exit.addActionListener( e -> System.exit( 0 ) );
-        buttonPanel.add( apply );
         buttonPanel.add( exit );
         contentPane.add( buttonPanel, BorderLayout.SOUTH );
         
@@ -58,21 +57,5 @@ public class JTableDemo1
         frame.setLocation( 200, 200 );
         frame.pack();
         frame.setVisible( true );
-    }
-    
-    private void applyAction( ActionEvent evt )
-    {
-        TableModel  model   = table.getModel();
-        int         rows    = model.getRowCount();
-        int         cols    = model.getColumnCount();
-        for ( int row = 0 ; row < rows ; ++row )
-            for ( int col = 0 ; col < cols ; ++col )
-            {
-                System.out.print( model.getValueAt( row, col ) );
-                if ( col < (cols - 1 ) )
-                    System.out.print( ", " );
-                else
-                    System.out.println();
-            }
     }
 }
