@@ -83,7 +83,7 @@ public class StateParser
                 .peek( sa -> temp.setAbbreviation( sa[0] ) )
                 .peek( sa -> temp.setName( sa[1] ) )
                 .map( sa -> sa[2] )
-                .mapToDouble( Double::parseDouble )
+                .mapToInt( Integer::parseInt )
                 .peek( temp::setPopulation )
                 .mapToObj( d -> State.findByName( states, temp.getName() ) )
                 .filter( st -> st != null )

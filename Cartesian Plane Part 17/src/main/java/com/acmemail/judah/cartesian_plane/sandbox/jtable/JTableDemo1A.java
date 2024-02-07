@@ -9,9 +9,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
-import javax.swing.table.TableModel;
-
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
 public class JTableDemo1A
 {

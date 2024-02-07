@@ -17,7 +17,7 @@ public class State
     private String  name;
     private String  abbreviation;
     private String  capital;
-    private double  population;
+    private int     population;
     private String  zipStart;
     private String  zipEnd;
     private double  latitude;
@@ -33,8 +33,9 @@ public class State
     {
         name = fields[0];
         capital = fields[1];
-        double  totalPop    = Double.parseDouble( fields[2] );
-        population = totalPop / 1e6;
+//        double  totalPop    = Double.parseDouble( fields[2] );
+//        population = totalPop / 1e6;
+        population = Integer.parseInt( fields[2] );
         latitude = Double.parseDouble( fields[3] );
         longitude = Double.parseDouble( fields[4] );
     }
@@ -49,7 +50,7 @@ public class State
         name = fields[0];
         abbreviation = fields[1];
         capital = fields[2];
-        population = Double.parseDouble( fields[3] );
+        population = Integer.parseInt( fields[3] );
         zipStart = fields[4];
         zipEnd = fields[5];
         latitude = Double.parseDouble( fields[6] );
@@ -114,7 +115,7 @@ public class State
         Object  val     = null;
         switch ( name )
         {
-        case "name":
+        case "state":
             val = state.getName();
             break;
         case "abbreviation":
@@ -245,7 +246,7 @@ public class State
     /**
      * @return the population
      */
-    public double getPopulation()
+    public int getPopulation()
     {
         return population;
     }
@@ -253,7 +254,7 @@ public class State
     /**
      * @param population the population to set
      */
-    public void setPopulation(double population)
+    public void setPopulation(int population)
     {
         this.population = population;
     }

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Enum to List Demo</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p>
+<strong>Digression: About <em>Vectors</em>:</strong>
+This discussion is present
+because the <em>JTable</em> maakes frequent reference
+to the <em>Vector</em> class.
+We're not going to be using <em>Vectors</em>
+in our project.
+So if you already know what a vector is,
+or if you don't care, 
+you can skip the following paragraphs.
+</p>
+<p>
+For our purposes
+a <em>Vector</em> is functionally equivalent
+to an <em>ArrayList</em>.
+In fact, <em>Vector</em>,
+introduced in Java 1.0,
+is a direct ancestor of 
+<em>ArrayList</em>, which was introduced in Java 1.2.
+The main advantage of a <em>Vector</em>
+over an <em>ArrayList</em>
+is that <em>Vectors</em> are thread-safe.
+In the context of the <em>JTable</em> API
+<em>Vector</em> is a substutute for <em>Object[]</em>
+in the same way 
+that an <em>ArrayList</em> can be substituted
+for an <em>Object[]</em>.
+As a an alternative to a two-dimensional <em>Object</em> array <em>Object[][]</em>
+we can typically use a <em>Vector</em> of <em>Vectors</em>,
+as in the overloaded constructors:
+</p>
+<pre style="margin-left: 2em;">JTable(Object[][] rowData, Object[] columnNames)
+JTable(Vector&lt;? extends Vector&lt;?>> rowData, Vector&lt;?> columnNames)</pre>
+<p>
+A final note about <em>Vectors</em>: 
+there are still places in the <em>JTable</em> API
+that use pre-generic declarations of <em>Vector</em>,
+such as the declaration of <em>getDataVector()</em>
+in the <em>DefaultTableModel</em> class:
+</p>
+<pre style="margin-left: 2em;">Vector&lt;Vector> getDataVector()</pre>
+<p>
+This can be very annoying
+when it comes to trying
+to resolve compiler warnings
+such as 
+"Vector is a raw type. References to generic type Vector&lt;E> should be parameterized".
+</p>
+</div>
+</body>
+</html>
