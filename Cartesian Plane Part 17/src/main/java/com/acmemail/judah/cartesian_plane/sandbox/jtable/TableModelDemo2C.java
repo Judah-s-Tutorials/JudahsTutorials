@@ -13,12 +13,24 @@ import javax.swing.table.DefaultTableModel;
 
 import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
+/**
+ * Minor modification of {@linkplain TableModelDemo2B}.
+ * This code uses an anonymous class
+ * instead of a traditional nested class
+ * to establish the type of column 2
+ * in the GUI's JTable.
+ * 
+ * @author Jack Straub
+ */
 public class TableModelDemo2C
 {
+    /** Header array for the GUI's JTable. */
     private final String[]      headers = 
         { "State", "Capital", "Population" };
+    /** Data array for the GUI's JTable. */
     private final Object[][]    data    = 
         State.getDataSet( "state", "capital", "population" );
+    
     /**
      * Application entry point.
      *
@@ -30,6 +42,11 @@ public class TableModelDemo2C
         SwingUtilities.invokeLater( () -> new TableModelDemo2C() );
     }
     
+    /**
+     * Constructor.
+     * Configures and displays the application frame.
+     * Must be executed on the EDT.
+     */
     public TableModelDemo2C()
     {
         JFrame      frame       = new JFrame( "Tabel Model Demo 2" );
@@ -66,6 +83,12 @@ public class TableModelDemo2C
         frame.setVisible( true );
     }
     
+    /**
+     * Prints out the value of column three
+     * for the first 5 rows of the given data model.
+     * 
+     * @param model the given data model
+     */
     private void testAction( DefaultTableModel model )
     {
         IntStream.range( 0, 5 ).forEach( i -> 

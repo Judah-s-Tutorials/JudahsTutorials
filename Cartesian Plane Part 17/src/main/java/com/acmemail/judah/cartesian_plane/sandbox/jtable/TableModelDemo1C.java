@@ -7,6 +7,23 @@ import javax.swing.table.DefaultTableModel;
 
 import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
+/**
+ * Demonstrates to instantiate a JTable from a TableModel.
+ * The TableModel itself is constructed using the 
+ * DefaultTableModel(int numRows, int numHeaders) constructor.
+ * The final table will have four columns.
+ * Three columns (columns 1, 2, 3) of data are obtained 
+ * from the us-state-all-data.csv data set.
+ * Another column (column 0) containing 
+ * dynamically generates identification numbers
+ * is formulated.
+ * The model's data array is then initialized
+ * one cell at a time.
+ * 
+ * @author Jack Straub
+ * 
+ * @see TableModelDemo1
+ */
 public class TableModelDemo1C
 {
     /**

@@ -1,7 +1,6 @@
 package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.awt.BorderLayout;
-import java.util.stream.IntStream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -10,38 +9,34 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
-
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
+import javax.swing.table.TableModel;
 
 /**
- * This application is part two
- * of a demonstration of how to use column types.
- * It uses a static nested class
- * that extends DefaultTableModel,
- * and overrides getColumnClass.
- * The method returns the default type
- * for all columns except column 2,
- * for which it returns Integer.class.
- * This causes the data in column 2 cell
- * to be displayed and edited an integer.
- * <p>
- * The bottom of the application frame shows a Test button.
- * When pushed,
- * all the data in column 2
- * will be printed to stdout.
+ * This is an application that shows how
+ * to implement a simple JTable.
+ * The JTable is instantiated
+ * using data and header arrays,
+ * an positioned in a JScrollPane.
  * 
  * @author Jack Straub
- * 
- * @see TableModelDemo2A
  */
-public class TableModelDemo2B
+public class CheckBoxDemo1
 {
-    /** Header array for the GUI's JTable. */
+    /** Array of headers (column names). */
     private final String[]      headers = 
-        { "State", "Capital", "Population" };
-    /** Data array for the GUI's JTable. */
-    private final Object[][]    data    = 
-        State.getDataSet( "state", "capital", "population" );
+    { "Name", "Present" };
+    /** Data array. */
+    private final Object[][]    data    =
+    {
+        { "Alex", true },
+        { "Ashley", true },
+        { "Jesse", true },
+        { "Joyce", false },
+        { "Leslie", true },
+        { "Riley", true },
+        { "Robin", true },
+        { "Ryan", false },
+    };
     
     /**
      * Application entry point.
@@ -51,53 +46,36 @@ public class TableModelDemo2B
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new TableModelDemo2B() );
+        SwingUtilities.invokeLater( CheckBoxDemo1::new );
     }
     
     /**
      * Constructor.
-     * Configures and displays the application frame.
+     * Initializes and displays the application frame.
      * Must be executed on the EDT.
      */
-    public TableModelDemo2B()
+    private CheckBoxDemo1()
     {
-        JFrame      frame       = new JFrame( "Tabel Model Demo 2" );
+        JFrame      frame       = new JFrame( "JTable Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
-        LocalTableModel     model       = 
-            new LocalTableModel( data, headers );
-        JTable              table       = new JTable( model );
-        JPanel              contentPane = new JPanel( new BorderLayout() );
-        JScrollPane         scrollPane  = new JScrollPane( table );
+        JPanel      contentPane = new JPanel( new BorderLayout() );
+        TableModel  model       = new LocalTableModel( data, headers );
+        JTable      table       = new JTable( model );
+        JScrollPane scrollPane  = new JScrollPane( table );
         contentPane.add( scrollPane, BorderLayout.CENTER );
         
         JPanel      buttonPanel = new JPanel();
         JButton     exit        = new JButton( "Exit" );
         exit.addActionListener( e -> System.exit( 0 ) );
-        JButton test            = new JButton( "Test" );
-        test.addActionListener( e -> testAction( model) );
-        buttonPanel.add( test );
         buttonPanel.add( exit );
         contentPane.add( buttonPanel, BorderLayout.SOUTH );
-                
+        
         frame.setContentPane( contentPane );
         frame.setLocation( 200, 200 );
         frame.pack();
         frame.setVisible( true );
     }
-    
-    /**
-     * Prints out the value of column three
-     * for the first 5 rows of the given data model.
-     * 
-     * @param model the given data model
-     */
-    private void testAction( DefaultTableModel model )
-    {
-        IntStream.range( 0, 5 ).forEach( i -> 
-            System.out.println( model.getValueAt( i, 2) ) );
-    }
-    
     /**
      * Subclass of DefaultTableModel
      * that is used to establish the type
@@ -129,7 +107,7 @@ public class TableModelDemo2B
         public Class<?> getColumnClass( int col ) 
         {
             Class<?>    clazz   = 
-                col == 2 ? Integer.class : super.getColumnClass( col );
+                col == 1 ? Boolean.class : super.getColumnClass( col );
             return clazz;
         }
     }

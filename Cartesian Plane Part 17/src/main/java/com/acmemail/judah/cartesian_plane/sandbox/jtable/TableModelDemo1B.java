@@ -7,6 +7,17 @@ import javax.swing.table.DefaultTableModel;
 
 import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
+/**
+ * Demonstrates to instantiate a JTable from a TableModel.
+ * The TableModel itself is constructed using the 
+ * DefaultTableModel(Object[] headers, int numRows) constructor,
+ * after which the data rows are added one at a time
+ * using the addRow(Object[] data) method.
+ * 
+ * @author Jack Straub
+ * 
+ * @see TableModelDemo1
+ */
 public class TableModelDemo1B
 {
     /**

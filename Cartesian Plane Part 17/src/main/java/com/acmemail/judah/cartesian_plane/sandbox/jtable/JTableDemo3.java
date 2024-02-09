@@ -21,10 +21,18 @@ import javax.swing.table.DefaultTableModel;
 
 import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
+/**
+ * Application that demonstrates
+ * how to dynamically add a row
+ * to a table.
+ * 
+ * @author Jack Straub
+ */
 public class JTableDemo3
 {
     private static final String     prompt          =
-        "Enter the name of a state and its population (in millions)";
+        "Enter the name of a state and its population,"
+        + "separated by a comma";
     private static final String     stateHeader     =
         "<html><br>State</html>";
     private static final String     popHeader       =
@@ -33,12 +41,8 @@ public class JTableDemo3
         "<html><br>Action</html>";
     private static final String[]   headers         = 
     { stateHeader, popHeader, actionHeader };
-    private static final Vector     headerVec       = 
-        new Vector( Arrays.asList( headers ) );
     private static final Object[][] data            =
         State.getDataSet( stateHeader, popHeader );
-    private static final Vector<Vector>  dataVec     = 
-        new Vector( Arrays.asList( data ) );
     
     private JTable              table;
     private LocalTableModel     model;
