@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.awt.BorderLayout;
+import java.util.Arrays;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -11,42 +12,22 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
+import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.ComponentException;
 import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
 /**
- * This application shows how to set the type of a column
- * in order to take advantage of the type-specific
- * editing and formatting capabilities of a JTable.
- * Specifically, the population column
- * (the third column, or column index number 2)
- * is set to integer.
- * This cause the data in the column
- * to be right-justified, 
- * and to prevent the operator
- * from editing a cell in the column
- * to contain a non-integer value.
- * <p>
- * The column type is set 
- * by declaring a nested class that extends DefaultTableModel
- * (see {@linkplain LocalTableModel})
- * and overriding the getColumnClass method.
- * Note that the nested class
- * is responsible for setting the table's
- * header and data array;
- * the JTable is then instantiated 
- * using the constructor
- * that requires a TableModel as an argument.
+ * This application demonstrates how to 
+ * dynamically add a row to a table 
+ * after the table has been created.
  * 
  * @author Jack Straub
  */
 public class JTableDemo2
 {
-    /** Array of table headers (column names). */
-    private static String[]     headers     =
-    { "State", "Abbreviation", "Population" };
-    /** Array of table data. */
-    private static Object[][]   data        =
-        State.getDataSet( "state", "abbreviation", "population" );
+    private final String[]      headers = 
+    { "State", "Abbrev", "Population" };
+    private final Object[][]    data    =
+    State.getDataSet( "state", "abbreviation", "population" );
     
     /**
      * Application entry point.
@@ -56,26 +37,34 @@ public class JTableDemo2
     */
     public static void main(String[] args)
     {
-        JTableDemo2 demo    = new JTableDemo2();
-        SwingUtilities.invokeLater( () -> demo.buildGUI() );
+        SwingUtilities.invokeLater( JTableDemo2::new );
     }
     
     /**
+     * Constructor.
      * Initializes and displays the application frame.
      * Must be executed on the EDT.
      */
-    private void buildGUI()
+    private JTableDemo2()
     {
-        JFrame      frame       = new JFrame( "JTable Demo 1" );
+        JFrame      frame       = new JFrame( "JTable Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel      contentPane = new JPanel( new BorderLayout() );
         TableModel  model       = new LocalTableModel( data, headers );
         JTable      table       = new JTable( model );
+        addSelectColumn( table );
         JScrollPane scrollPane  = new JScrollPane( table );
         contentPane.add( scrollPane, BorderLayout.CENTER );
         
-        contentPane.add( getButtonPanel(), BorderLayout.SOUTH );
+        JPanel      buttonPanel = new JPanel();
+        JButton     print       = new JButton( "Print" );
+        JButton     exit        = new JButton( "Exit" );
+        print.addActionListener( e -> printAction( table ) );
+        exit.addActionListener( e -> System.exit( 0 ) );
+        buttonPanel.add( print );
+        buttonPanel.add( exit );
+        contentPane.add( buttonPanel, BorderLayout.SOUTH );
         
         frame.setContentPane( contentPane );
         frame.setLocation( 200, 200 );
@@ -84,66 +73,80 @@ public class JTableDemo2
     }
     
     /**
-     * Supplies the JPanel that displays
-     * the frame's Exit button.
+     * Adds a fourth column to a given JTable's model.
+     * The header of the column is select,
+     * and the value of all cells is (Boolean)false.
      * 
-     * @return  the JPanel that displays the frame's Exit button
+     * @param table the given JTable
      */
-    private JPanel getButtonPanel()
+    private void addSelectColumn( JTable table )
     {
-        JPanel      buttonPanel = new JPanel();
-        JButton     exit        = new JButton( "Exit" );
-        exit.addActionListener( e -> System.exit( 0 ) );
-        buttonPanel.add( exit );
-        return buttonPanel;
+        TableModel          temp        = table.getModel();
+        if ( !(temp instanceof DefaultTableModel) )
+            throw new ComponentException( "wrong table model type" );
+        DefaultTableModel   model       = (DefaultTableModel)temp;
+        int                 rowCount    = model.getRowCount();
+        Object[]            colData     = new Object[rowCount];
+        Arrays.fill( colData, false );
+        model.addColumn( "Select", colData );
     }
     
     /**
-     * Subclasses DefaultTableModel for the purpose
-     * of overriding getColumnClass.
-     * The overridden method sets the type 
-     * of the third column (column #2)
-     * to Integer.
+     * Traverses a given table,
+     * printing the all selected rows.
+     * 
+     * @param table the given table
+     */
+    private void printAction( JTable table )
+    {
+        int     rowCount    = table.getRowCount();
+        for ( int row = 0 ; row < rowCount ; ++row )
+        {
+            Object  value   = table.getValueAt( row, 3 );
+            if ( value instanceof Boolean && (Boolean)value )
+            {
+                StringBuilder   bldr    = new StringBuilder();
+                bldr.append( table.getValueAt( row, 0 ) ).append( ", " )
+                    .append( table.getValueAt( row, 1 ) ).append( ", " )
+                    .append( table.getValueAt( row, 2 ) );
+                System.out.println( bldr );
+            }
+        }
+    }
+    
+    /**
+     * Subclass of DefaultTableModel
+     * that is used to establish the type
+     * of column 2 in the GUI's JTable.
      * 
      * @author Jack Straub
+     * 
+     * @see #getColumnClass(int)
      */
     @SuppressWarnings("serial")
     private static class LocalTableModel extends DefaultTableModel
     {
-        /**
-         * Constructor.
-         * Sets the TableModel's
-         * header an data rows.
-         * 
-         * @param data      
-         *      the table's data; equivalent to the data argument
-         *      passed to the DefaultTableModel constructor
-         *      DefaultTableModel(Object[][] data, Object[] headers)
-         * @param headers
-         *      the table's headers; equivalent to the headers argument
-         *      passed to the DefaultTableModel constructor
-         *      DefaultTableModel(Object[][] data, Object[] headers)
-         */
-        public LocalTableModel( Object[][] data, Object[] headers)
+        public LocalTableModel( Object[][] data, Object[] headers )
         {
             super( data, headers );
         }
         
         /**
-         * Establishes the type of data in a column
-         * based on the given column index.
-         * If the column index is two
-         * the type is explicitly set to Integer,
-         * otherwise the type returned by this method
-         * in the superclass is used.
+         * Establishes the type of a column
+         * in the GUI's JTable.
          * 
-         *  @param  col the given column index.
+         * @param the given column number
          */
         @Override
-        public Class<?> getColumnClass( int col )
+        public Class<?> getColumnClass( int col ) 
         {
-            Class<?>    clazz   = col == 2 ?
-                Integer.class : super.getColumnClass( col );
+            Class<?>    clazz   = null;
+            if ( col == 2 )
+                clazz = Integer.class;
+            else if ( col == 3 )
+                clazz = Boolean.class;
+            else
+                clazz = super.getColumnClass( col );
             return clazz;
         }
     }

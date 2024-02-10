@@ -1,12 +1,8 @@
 package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.StringTokenizer;
-import java.util.Vector;
 import java.util.stream.IntStream;
 
 import javax.swing.JButton;
@@ -16,36 +12,33 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 
+import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.ComponentException;
 import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
 /**
- * Application that demonstrates
- * how to dynamically add a row
- * to a table.
+ * This application demonstrates how to 
+ * dynamically add a row to a table 
+ * after the table has been created.
  * 
  * @author Jack Straub
  */
 public class JTableDemo3
 {
-    private static final String     prompt          =
-        "Enter the name of a state and its population,"
-        + "separated by a comma";
-    private static final String     stateHeader     =
-        "<html><br>State</html>";
-    private static final String     popHeader       =
-        "<html><center>Population<br>(Millions)</center></html>";
-    private static final String     actionHeader    =
-        "<html><br>Action</html>";
-    private static final String[]   headers         = 
-    { stateHeader, popHeader, actionHeader };
-    private static final Object[][] data            =
-        State.getDataSet( stateHeader, popHeader );
+    private static final String prompt  = 
+        "Enter name, abbreviation and population, separated by commas.";
+    private final String[]      headers = 
+    { "State", "Abbrev", "Population" };
+    private final Object[][]    data    =
+    State.getDataSet( "state", "abbreviation", "population" );
     
-    private JTable              table;
-    private LocalTableModel     model;
+    /** JTable's data model. */
+    private final DefaultTableModel model   = 
+        new LocalTableModel( data, headers );
+    /** GUI's JTable. */
+    private final JTable            table   = new JTable( model );
     
     /**
      * Application entry point.
@@ -55,191 +48,178 @@ public class JTableDemo3
     */
     public static void main(String[] args)
     {
-        JTableDemo3 demo    = new JTableDemo3();
-        SwingUtilities.invokeLater( () -> demo.buildGUI() );
+        SwingUtilities.invokeLater( JTableDemo3::new );
     }
     
-    private void buildGUI()
+    /**
+     * Constructor.
+     * Initializes and displays the application frame.
+     * Must be executed on the EDT.
+     */
+    private JTableDemo3()
     {
-        JFrame      frame       = new JFrame( "JTable Demo 1" );
+        JFrame      frame       = new JFrame( "JTable Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel      contentPane = new JPanel( new BorderLayout() );
-        model = new LocalTableModel();
-        table = new JTable( model );
-        table.setFillsViewportHeight(true);
-        table.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
+        addSelectColumn( table );
         JScrollPane scrollPane  = new JScrollPane( table );
         contentPane.add( scrollPane, BorderLayout.CENTER );
         
-        contentPane.add( getButtonPanel(), BorderLayout.SOUTH );
+        JPanel      buttonPanel = new JPanel();
+        JButton     print       = new JButton( "Print" );
+        JButton     add         = new JButton( "Add" );
+        JButton     insert      = new JButton( "Insert" );
+        JButton     exit        = new JButton( "Exit" );
+        print.addActionListener( e -> printAction( table ) );
+        add.addActionListener( e -> addAction( table ) );
+        insert.addActionListener( e -> insertAction( table ) );
+        exit.addActionListener( e -> System.exit( 0 ) );
+        buttonPanel.add( add );
+        buttonPanel.add( insert );
+        buttonPanel.add( print );
+        buttonPanel.add( exit );
+        contentPane.add( buttonPanel, BorderLayout.SOUTH );
         
         frame.setContentPane( contentPane );
         frame.setLocation( 200, 200 );
         frame.pack();
         frame.setVisible( true );
     }
-    
-    private JPanel getButtonPanel()
+
+    private void addAction(JTable table)
     {
-        JPanel      buttonPanel = new JPanel();
-        JButton     apply       = new JButton( "Apply" );
-        JButton     exit        = new JButton( "Exit" );
-        JButton     delete      = new JButton( "Delete Selected" );
-        JButton     add         = new JButton( "New" );
-        apply.addActionListener( this::applyAction );
-        delete.addActionListener( this::deleteAction );
-        add.addActionListener( this::newAction );
-        exit.addActionListener( e -> System.exit( 0 ) );
-        buttonPanel.add( apply );
-        buttonPanel.add( add );
-        buttonPanel.add( delete );
-        buttonPanel.add( exit );
-        return buttonPanel;
+        insertRow( model.getRowCount() );
     }
     
-    private void newAction( ActionEvent evt )
+    private void insertAction( JTable table )
     {
-        String  input   = JOptionPane.showInputDialog( prompt );
+        int position    =
+            IntStream.range( 0, model.getRowCount() )
+                .peek( System.out::println )
+                .peek( r -> System.out.println( model.getValueAt( r, 3 ) ))
+                .filter( r -> (Boolean)( model.getValueAt( r, 3 ) ) )
+                .findFirst().orElse( 0 );
+        insertRow( position );
+    }
+    
+    private void insertRow( int position )
+    {
+        Object[]    row = getNewRow();
+        if ( row != null )
+            model.insertRow( position, row );
+    }
+    
+    private Object[] getNewRow()
+    {
+        String      input   = JOptionPane.showInputDialog( prompt );
+        Object[]    row     = null;
         if ( input != null )
+            row = parseInput( input );
+        return row;
+    }
+    
+    private Object[] parseInput( String input )
+    {
+        Object[]        row     = null;
+        StringTokenizer tizer   = new StringTokenizer( input, "," );
+        try
         {
-            try
+            if ( tizer.countTokens() != 3 )
             {
-                StringTokenizer tizer   = 
-                    new StringTokenizer( input, ", " );
-                int             count   = tizer.countTokens();
-                if ( count < 1 )
-                    throw new NumberFormatException( "Invalid entry" );
-                if ( count > 2)
-                    throw new NumberFormatException( "Invalid entry" );
-                double      value   = 0;
-                String      name    = tizer.nextToken().strip();
-                if ( highlightState( name ) >= 0 )
-                    throw new NumberFormatException( "Duplicate name" );
-                if ( tizer.hasMoreTokens() )
-                    value = Double.parseDouble( tizer.nextToken() );
-                Object[]    newRow  = { name, value, false };
-                ((LocalTableModel)table.getModel()).addRow( newRow );
+                String  msg = "Incorrect number of fields entered";
+                throw new ComponentException( msg );
             }
-            catch ( NumberFormatException exc )
+            String  name    = tizer.nextToken().trim();
+            String  abbr    = tizer.nextToken().trim();
+            String  sPop    = tizer.nextToken().trim();
+            Integer iPop    = Integer.valueOf( sPop );
+            row = new Object[]{ name, abbr, iPop, false };
+        }
+        catch ( NumberFormatException exc )
+        {
+            JOptionPane.showMessageDialog(
+                null, 
+                exc.getMessage(), 
+                "Input Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+        return row;
+    }
+
+    /**
+     * Adds a fourth column to a given JTable's model.
+     * The header of the column is select,
+     * and the value of all cells is (Boolean)false.
+     * 
+     * @param table the given JTable
+     */
+    private void addSelectColumn( JTable table )
+    {
+        int         rowCount    = model.getRowCount();
+        Object[]    colData     = new Object[rowCount];
+        Arrays.fill( colData, false );
+        model.addColumn( "Select", colData );
+    }
+    
+    /**
+     * Traverses a given table,
+     * printing the all selected rows.
+     * 
+     * @param table the given table
+     */
+    private void printAction( JTable table )
+    {
+        int     rowCount    = table.getRowCount();
+        for ( int row = 0 ; row < rowCount ; ++row )
+        {
+            Object  value   = table.getValueAt( row, 3 );
+            if ( value instanceof Boolean && (Boolean)value )
             {
-                String  err = "Parse error: " + exc.getMessage();
-                JOptionPane.showMessageDialog( null, err );
+                StringBuilder   bldr    = new StringBuilder();
+                bldr.append( table.getValueAt( row, 0 ) ).append( ", " )
+                    .append( table.getValueAt( row, 1 ) ).append( ", " )
+                    .append( table.getValueAt( row, 2 ) );
+                System.out.println( bldr );
             }
         }
     }
     
-    private int highlightState( String name )
+    /**
+     * Subclass of DefaultTableModel
+     * that is used to establish the type
+     * of column 2 in the GUI's JTable.
+     * 
+     * @author Jack Straub
+     * 
+     * @see #getColumnClass(int)
+     */
+    @SuppressWarnings("serial")
+    private static class LocalTableModel extends DefaultTableModel
     {
-        int         rowCount    = table.getRowCount();
-        int         inx         =
-            IntStream.range( 0, rowCount )
-                .filter( i -> name.equalsIgnoreCase( getName( i ) ) )
-                .findFirst()
-                .orElse( -1 );
-        if ( inx >= 0 )
-            table.setRowSelectionInterval( inx, inx );
-        return inx;
-    }
-    
-    private String getName( int inx )
-    {
-        if ( inx >= table.getRowCount() )
-            throw new IndexOutOfBoundsException( "invalid row index" );
-        Object  obj     = table.getValueAt( inx, 0 );
-        if ( !(obj instanceof String) )
-            throw new Error( "column not String" );
-        String  name    = (String)obj;
-        return name;
-    }
-    
-    @SuppressWarnings("rawtypes")
-    private void deleteAction( ActionEvent evt )
-    {
-        Vector<Vector>      dataVec     = model.getDataVector();
-        Iterator<Vector>    iter        = dataVec.iterator();
-        while ( iter.hasNext() )
-        {
-            Vector<?>vec = iter.next();
-            Object  obj = vec.get( 2 );
-            if ( obj instanceof Boolean )
-            {
-                if ( (Boolean)obj )
-                    iter.remove();
-            }
-        }
-        Vector vHeaders = new Vector( Arrays.asList( headers ) );
-        model.setDataVector(dataVec, vHeaders);
-    }
-    
-    private void applyAction( ActionEvent evt )
-    {
-        int rows    = model.getRowCount();
-        int cols    = model.getColumnCount();
-        for ( int row = 0 ; row < rows ; ++row )
-            for ( int col = 0 ; col < cols ; ++col )
-            {
-                System.out.print( model.getValueAt( row, col ) );
-                if ( col < (cols - 1 ) )
-                    System.out.print( ", " );
-                else
-                    System.out.println();
-            }
-    }
-    
-    private class LocalTableModel extends DefaultTableModel
-    {
-        public LocalTableModel()
+        public LocalTableModel( Object[][] data, Object[] headers )
         {
             super( data, headers );
-//            super( dataVec, headerVec );
         }
         
-        public LocalTableModel( Object[] headings )
-        {
-            super( null, headings );
-        }
-        
+        /**
+         * Establishes the type of a column
+         * in the GUI's JTable.
+         * 
+         * @param the given column number
+         */
         @Override
-        public Class<?> getColumnClass( int col )
+        public Class<?> getColumnClass( int col ) 
         {
-//            Class<?>    clazz   = col == 2 ?
-//                Boolean.class : super.getColumnClass( col );
             Class<?>    clazz   = null;
-            if ( col == 1 )
-                clazz = Double.class;
-            else if ( col == 2 )
+            if ( col == 2 )
+                clazz = Integer.class;
+            else if ( col == 3 )
                 clazz = Boolean.class;
             else
                 clazz = super.getColumnClass( col );
             return clazz;
-        }
-    }
-    
-    @SuppressWarnings("serial")
-    private class LocalCellRenderer extends DefaultTableCellRenderer
-    {
-        @Override
-        public Component getTableCellRendererComponent(
-            JTable table, 
-            Object value, 
-            boolean isSelected, 
-            boolean hasFocus, 
-            int row, 
-            int col
-        )
-        {
-            Component   comp    = value instanceof Component ?
-                (Component)value :
-                super.getTableCellRendererComponent(
-                    table, 
-                    value, 
-                    isSelected, 
-                    hasFocus, 
-                    row, 
-                    col
-                );
-            return comp;       
         }
     }
 }

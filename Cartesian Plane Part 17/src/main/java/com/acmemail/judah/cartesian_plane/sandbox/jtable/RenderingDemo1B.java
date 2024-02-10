@@ -71,6 +71,15 @@ public class RenderingDemo1B
         frame.setVisible( true );
     }
     
+    /**
+     * Installs a given TableCellRender
+     * in the given column
+     * of a given JTable.
+     * 
+     * @param table     the given JTable
+     * @param col       the given column
+     * @param renderer  the given TableCellRender
+     */
     private void 
     setCellRenderer( JTable table, int col, TableCellRenderer renderer )
     {
@@ -79,6 +88,15 @@ public class RenderingDemo1B
         column.setCellRenderer( renderer );
     }
     
+    /**
+     * Subclass of DefaultTableModel
+     * that is used to establish the types
+     * of the columns in the GUI's JTable.
+     * 
+     * @author Jack Straub
+     * 
+     * @see #getColumnClass(int)
+     */
     @SuppressWarnings("serial")
     private static class LocalTableModel extends DefaultTableModel
     {
@@ -101,6 +119,16 @@ public class RenderingDemo1B
         }
     }
     
+    
+    /**
+     * Subclass of DefaultTableCellRenderer
+     * that is used to format the data
+     * columns of type Integer.
+     * 
+     * @author Jack Straub
+     * 
+     * @see #getColumnClass(int)
+     */
     @SuppressWarnings("serial")
     private static class IntRenderer extends DefaultTableCellRenderer
     {

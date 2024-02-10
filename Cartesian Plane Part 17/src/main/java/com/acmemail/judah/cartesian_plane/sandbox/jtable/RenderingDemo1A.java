@@ -60,6 +60,16 @@ public class RenderingDemo1A
         frame.setVisible( true );
     }
     
+    
+    /**
+     * Subclass of DefaultTableModel
+     * that is used to establish the types
+     * of the columns in the GUI's JTable.
+     * 
+     * @author Jack Straub
+     * 
+     * @see #getColumnClass(int)
+     */
     @SuppressWarnings("serial")
     private static class LocalTableModel extends DefaultTableModel
     {
