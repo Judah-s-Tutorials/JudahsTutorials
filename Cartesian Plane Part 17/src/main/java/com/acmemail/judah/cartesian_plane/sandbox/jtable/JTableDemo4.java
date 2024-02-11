@@ -3,7 +3,10 @@ package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Vector;
 import java.util.stream.IntStream;
 
 import javax.swing.JButton;
@@ -15,20 +18,21 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.ComponentException;
 import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 
 /**
  * This application demonstrates how to 
- * dynamically add a row to a table 
+ * dynamically delete rows from a table 
  * after the table has been created and deployed.
  * 
  * @author Jack Straub
  */
-public class JTableDemo3
+public class JTableDemo4
 {
     private static final String prompt  = 
         "Enter name, abbreviation and population, separated by commas.";
-    private final String[]      headers = 
+    private final Object[]      headers = 
     { "State", "Abbrev", "Population" };
     private final Object[][]    data    =
     State.getDataSet( "state", "abbreviation", "population" );
@@ -47,7 +51,7 @@ public class JTableDemo3
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( JTableDemo3::new );
+        SwingUtilities.invokeLater( JTableDemo4::new );
     }
     
     /**
@@ -55,7 +59,7 @@ public class JTableDemo3
      * Initializes and displays the application frame.
      * Must be executed on the EDT.
      */
-    private JTableDemo3()
+    private JTableDemo4()
     {
         JFrame      frame       = new JFrame( "JTable Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
@@ -69,13 +73,16 @@ public class JTableDemo3
         JButton     print       = new JButton( "Print" );
         JButton     add         = new JButton( "Add" );
         JButton     insert      = new JButton( "Insert" );
+        JButton     delete      = new JButton( "Delete" );
         JButton     exit        = new JButton( "Exit" );
         print.addActionListener( this::printAction );
         add.addActionListener( this::addAction );
         insert.addActionListener( this::insertAction );
+        delete.addActionListener( this::deleteAction );
         exit.addActionListener( e -> System.exit( 0 ) );
         buttonPanel.add( add );
         buttonPanel.add( insert );
+        buttonPanel.add( delete );
         buttonPanel.add( print );
         buttonPanel.add( exit );
         contentPane.add( buttonPanel, BorderLayout.SOUTH );
@@ -119,6 +126,25 @@ public class JTableDemo3
             .filter( r -> (Boolean)model.getValueAt( r, 3 ) )
             .findFirst().orElse( 0 );
         insertRow( position );
+    }
+    
+    @SuppressWarnings("rawtypes")
+    private void deleteAction( ActionEvent evt )
+    {
+        Vector<Vector>      data    = model.getDataVector();
+        Iterator<Vector>    iter    = data.iterator();
+        while ( iter.hasNext() )
+        {
+            Vector  vec     = iter.next();
+            Object  obj     = vec.get( 3 );
+            if ( !(obj instanceof Boolean ) )
+                throw new ComponentException( "Malfunction" );
+            if ( (Boolean)obj )
+                iter.remove();
+        }
+        List<Object>    cHeaders    = Arrays.asList( headers );
+        Vector<Object>  vHeaders    = new Vector<>( cHeaders );
+        model.setDataVector( data, vHeaders );
     }
     
     /**
