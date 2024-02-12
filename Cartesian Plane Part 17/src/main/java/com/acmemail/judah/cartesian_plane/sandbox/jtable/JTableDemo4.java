@@ -30,11 +30,12 @@ import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
  */
 public class JTableDemo4
 {
-    private static final String prompt  = 
+    private static final String prompt          = 
         "Enter name, abbreviation and population, separated by commas.";
-    private final Object[]      headers = 
+    private static final String selectHeader    = "Select";
+    private final Object[]      headers         = 
     { "State", "Abbrev", "Population" };
-    private final Object[][]    data    =
+    private final Object[][]    data            =
     State.getDataSet( "state", "abbreviation", "population" );
     
     /** JTable's data model. */
@@ -137,13 +138,14 @@ public class JTableDemo4
         {
             Vector  vec     = iter.next();
             Object  obj     = vec.get( 3 );
-            if ( !(obj instanceof Boolean ) )
+            if ( !(obj instanceof Boolean) )
                 throw new ComponentException( "Malfunction" );
             if ( (Boolean)obj )
                 iter.remove();
         }
         List<Object>    cHeaders    = Arrays.asList( headers );
         Vector<Object>  vHeaders    = new Vector<>( cHeaders );
+        vHeaders.add( selectHeader );
         model.setDataVector( data, vHeaders );
     }
     
@@ -245,7 +247,7 @@ public class JTableDemo4
         int         rowCount    = model.getRowCount();
         Object[]    colData     = new Object[rowCount];
         Arrays.fill( colData, false );
-        model.addColumn( "Select", colData );
+        model.addColumn( selectHeader, colData );
     }
     
     /**
