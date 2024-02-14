@@ -25,7 +25,6 @@ import javax.swing.table.DefaultTableModel;
 
 import com.acmemail.judah.cartesian_plane.components.PButtonGroup;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
 /**

@@ -11,8 +11,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
-
 /**
  * Minor modification of {@linkplain TableModelDemo2B}.
  * This code uses an anonymous class

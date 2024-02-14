@@ -12,8 +12,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.ComponentException;
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 /**
  * This application demonstrates how to 

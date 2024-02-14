@@ -10,8 +10,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
-
 /**
  * This application is part one
  * of a demonstration of how to use column types.

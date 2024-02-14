@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.jtable.panels;
+package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.io.BufferedReader;
 import java.io.FileWriter;
@@ -9,6 +9,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
+
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 public class StateParser
 {

@@ -5,8 +5,6 @@ import java.util.stream.IntStream;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
-
 /**
  * Demonstrates to instantiate a JTable from a TableModel.
  * The TableModel itself is constructed using the 

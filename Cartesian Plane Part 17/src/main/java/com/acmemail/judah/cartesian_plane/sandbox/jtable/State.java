@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.jtable.panels;
+package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.List;
+
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 public class State
 {

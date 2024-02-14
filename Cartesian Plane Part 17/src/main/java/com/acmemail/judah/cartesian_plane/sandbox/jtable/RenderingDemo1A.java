@@ -10,8 +10,6 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
-
 public class RenderingDemo1A
 {
     /** Header array for configuring GUI's JTable. */

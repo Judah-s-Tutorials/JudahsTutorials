@@ -15,8 +15,6 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import com.acmemail.judah.cartesian_plane.sandbox.jtable.panels.State;
-
 public class RenderingDemo1B
 {
     /** Header array for configuring GUI's JTable. */
