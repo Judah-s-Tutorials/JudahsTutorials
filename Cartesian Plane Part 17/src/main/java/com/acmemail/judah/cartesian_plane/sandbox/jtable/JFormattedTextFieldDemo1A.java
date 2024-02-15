@@ -2,9 +2,11 @@ package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
-import java.util.OptionalInt;
 
 import javax.swing.BorderFactory;
 import javax.swing.InputVerifier;
@@ -18,22 +20,31 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
-import javax.swing.text.JTextComponent;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
+
+import temp.NameValidator;
 
 public class JFormattedTextFieldDemo1A
 {
-//    /** Formatter for use with JFormattedTextField. */
-//    private final IdentFormatter      formatter = new IdentFormatter();
     /** JFormattedTextField to display in demo GUI. */
     private final JFormattedTextField fmtField  = 
-        new JFormattedTextField();
+        new JFormattedTextField( new NameFormatter() );
     /** 
      * Exit button to be displayed in the button panel. Declared as
      * an instance variable for the convenience of the constructor.
      */
-    private final JButton exit                  = new JButton( "Exit" );
+    private final JButton       exit     = new JButton( "Exit" );
+    /** 
+     * Text field to display the actual value of the JFormattedTextField.
+     * Declared as an instance variable for the convenience of the 
+     * propertyChange method.
+     */
+    private final JTextField    actField = new JTextField();
+
+    /** Activity dialog for displaying feedback. */
+    private final ActivityLog   log;
     
     /**
      * Application entry point.
@@ -56,167 +67,162 @@ public class JFormattedTextFieldDemo1A
         String      title       = "JFormattedTextField Demo 1A";
         JFrame      frame       = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        log = new ActivityLog( frame );
         
         Border  border      =
             BorderFactory.createEmptyBorder( 10, 10, 10, 10);
         JPanel  cPane       = new JPanel( new BorderLayout() );
         cPane.setBorder( border );
         cPane.add( getCenterPanel(), BorderLayout.CENTER );
-        
-        JPanel  buttonPanel = new JPanel();
-        exit.addActionListener( e -> System.exit( 0 ) );
-        buttonPanel.add( exit );
-        cPane.add( buttonPanel, BorderLayout.SOUTH );
+        cPane.add( getButtonPanel(), BorderLayout.SOUTH );
         
         frame.setContentPane( cPane );
         frame.getRootPane().setDefaultButton( exit );
         frame.pack();
         frame.setLocation( 100, 100 );
+        Dimension   frameSize   = frame.getPreferredSize();
+        log.setLocation( 110 + frameSize.width, 100 );
         frame.setVisible( true );
     }
     
+    /**
+     * Get the panel to display in the center of the content pane.
+     * 
+     * @return the panel to display in the center of the content pane
+     */
     private JPanel getCenterPanel()
     {
         JPanel              panel       = 
             new JPanel( new GridLayout( 3, 2 ) );
         fmtField.setColumns( 10 );
-        fmtField.setInputVerifier( new IdentVerifier() );
+        fmtField.setInputVerifier( new NameVerifier() );
+        fmtField.addPropertyChangeListener( this::propertyChange );
+
+        actField.setEditable( false );
         
-        JTextField          textField   = new JTextField();
-        textField.setEditable( false );
-        
-        panel.add( new JLabel( "Acc Name: " ) );
-        panel.add( textField );
+        panel.add( new JLabel( "Act Name: " ) );
+        panel.add( actField );
         panel.add( new JLabel( "Var Name: " ) );
         panel.add( fmtField );
         panel.add( new JLabel( "Dummy: " ) );
         panel.add( new JTextField() );
         return panel;
     }
-    
-    /**
-     * Determines if a given string
-     * is a valid variable name.
-     * Given that underscore is an alphabetic character,
-     * a valid variable name is one that
-     * begins with an alphabetic character,
-     * and whose remaining characters are alphanumeric.
-     * 
-     * @param name  the given string
-     * 
-     * @return  true if the given string is a valid variable name
-     */
-    private static boolean isIdentifier( String name )
-    {
-        boolean status  = false;
-        int     len     = name.length();
-        if ( len == 0 )
-            status = true; // invalid
-        else if ( !isAlpha( name.charAt( 0 ) ) )
-            ; // invalid
-        else
-        {   
-            OptionalInt optional    =
-                name.chars()
-                .filter( c -> !isAlphanumeric( c ) )
-                .findAny();
-            status = optional.isEmpty();
-        }
-        
-        return status;
-    }
-    
-    /**
-     * Determine if a given character is alphabetic:
-     * _, or [a-z] or [A-Z].
-     * 
-     * @param ccc   the given character
-     * 
-     * @return  true if the given character is alphabetic.
-     */
-    private static boolean isAlpha( char ccc )
-    {
-        boolean result  =
-            ccc == '_'
-            || (ccc >= 'A' && ccc <= 'Z')
-            || (ccc >= 'a' && ccc <= 'z');
-        return result;
-    }
-    
-    /**
-     * Determine if a given character is alphanumeric:
-     * _, or [a-z], or [A-Z] or [-,9].
-     * 
-     * @param ccc   the given character
-     * 
-     * @return  true if the given character is alphanumeric.
-     */
-    private static boolean isAlphanumeric( int ccc )
-    {
-        boolean result  =
-            ccc == '_'
-            || (ccc >= 'A' && ccc <= 'Z')
-            || (ccc >= 'a' && ccc <= 'z')
-            || (ccc >= '0' && ccc <= '9');
-        return result;
-    }
-    
-    /**
-     * Determines if a given string
-     * is a valid variable name.
-     * Given that underscore is an alphabetic character,
-     * a valid variable name is one that
-     * begins with an alphabetic character,
-     * and whose remaining characters are alphanumeric.
-     * 
-     * @param name  the given string
-     * 
-     * @return  true if the given string is a valid variable name
-     */
-    @SuppressWarnings("serial")
-    private static class IdentFormatter extends DefaultFormatter
-    {
-//        private final JFormattedTextField   textField;
-//        
-//        public IdentFormatter( JFormattedTextField textField )
-//        {
-//            this.textField = textField;
-//        }
-        
-        @Override
-        public String stringToValue( String input )
-            throws ParseException
-        {
-            boolean status  = input == null ?
-                true : isIdentifier( input.toString() );
-            if ( !status )
-            {
-                String  msg = 
-                    "\"" + input + "\" is not a valid identifier";
-                throw new ParseException( msg, 0 );
-            }
-            
-            return input;
-        }
-    }
 
-    private static class IdentVerifier extends InputVerifier
+    /**
+     * Get the panel containing the control buttons.
+     * For displaying at the bottom of the frame.
+     * 
+     * @return  the panel containing the control buttons
+     */
+    private JPanel getButtonPanel()
     {
+        JPanel  buttonPanel = new JPanel();
+        JButton print       = new JButton( "Print" );
+        exit.addActionListener( e -> System.exit( 0 ) );
+        print.addActionListener( this::printAction );
+        buttonPanel.add( print );
+        buttonPanel.add( exit );
+        return buttonPanel;
+    }
+    
+    /**
+     * Log the JFormattedTextField's
+     * value and text properties.
+     * 
+     * @param evt   object to accompany event; not used.
+     */
+    private void printAction( ActionEvent evt )
+    {
+        Object  actValue    = fmtField.getValue();
+        String  textValue   = fmtField.getText();
+        log.append( "Actual value: " + actValue );
+        log.append( "Display value: " + textValue );
+        log.append( "******************" );
+    }
+    
+    /**
+     * Catches PropertyChangeEvents for the JFormattedTextField.
+     * Changes to the "value" property are logged.
+     * @param evt
+     */
+    private void propertyChange( PropertyChangeEvent evt )
+    {
+        if ( evt.getPropertyName().equals( "value" ) )
+        {
+            Object  newVal  = fmtField.getValue();
+            String  strVal  = 
+                newVal != null ? newVal.toString() : "";
+            actField.setText( strVal );
+            log.append( "Value changed to: \"" + strVal + "\"" );
+        }
+    }
+    
+    /**
+     * Custom InputVerifier to install on JFormattedTextField.
+     * 
+     * @author Jack Straub
+     * 
+     * @see #verify(JComponent)
+     */
+    private class NameVerifier extends InputVerifier
+    {
+        /**
+         * Verifies that the String contained in a given component
+         * is a valid identifier.
+         * It it is valid,
+         * the color of the JFormattedTextField's text 
+         * is changed to BLACK,
+         * and true is returned.
+         * Otherwise the color of the text
+         * is changed to RED
+         * and false is returned.
+         * 
+         * @param
+         *      the given component; expected to be a JFormattedTextField
+         */
         @Override
         public boolean verify(JComponent comp)
         {
-            if ( !(comp instanceof JTextComponent) )
-                throw new ComponentException( "Invalid component" );
-            JTextComponent  jtComp  = (JTextComponent)comp;
-            String          input   = jtComp.getText();
-            boolean         status  = isIdentifier( input );
-            
-            if ( !status )
-                jtComp.setForeground( Color.RED );
-            else
-                jtComp.setForeground( Color.BLACK );
-            
+            String  text    = fmtField.getText();
+            boolean status  = NameValidator.isIdentifier( text );           
+            if ( status )
+            {
+                try
+                {
+                    fmtField.commitEdit();
+                }
+                catch ( ParseException exc )
+                {
+                    String  message = "Unexpected parse exception";
+                    throw new ComponentException( message, exc );
+                }
+            }            
             return status;
+        }
+    }
+
+    /**
+     * Formatter to convert the JFormattedTextField's text
+     * to a value.
+     * 
+     * @author Jack Straub
+     * 
+     * @throws  ParseException  if the value is not a valid identifier
+     */
+    private class NameFormatter extends DefaultFormatter
+    {
+        @Override
+        public String stringToValue( String str )
+            throws ParseException
+        {
+            if ( !NameValidator.isIdentifier( str ) )
+            {
+                fmtField.setForeground( Color.RED );
+                throw new ParseException( "Invalid name", 0 );
+            }
+            fmtField.setForeground( Color.BLACK );
+            return str;
         }
     }
 }
