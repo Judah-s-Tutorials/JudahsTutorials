@@ -21,12 +21,11 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
 
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
 import temp.NameValidator;
 
-public class JFormattedTextFieldDemo1A
+public class JFormattedTextFieldDemo1
 {
     /** JFormattedTextField to display in demo GUI. */
     private final JFormattedTextField fmtField  = 
@@ -54,7 +53,7 @@ public class JFormattedTextFieldDemo1A
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new JFormattedTextFieldDemo1A() );
+        SwingUtilities.invokeLater( () -> new JFormattedTextFieldDemo1() );
     }
     
     /**
@@ -62,7 +61,7 @@ public class JFormattedTextFieldDemo1A
      * Initializes and displays the GUI.
      * Must be invoked from the EDT.
      */
-    private JFormattedTextFieldDemo1A()
+    private JFormattedTextFieldDemo1()
     {
         String      title       = "JFormattedTextField Demo 1A";
         JFrame      frame       = new JFrame( title );
@@ -165,7 +164,7 @@ public class JFormattedTextFieldDemo1A
      * 
      * @see #verify(JComponent)
      */
-    private class NameVerifier extends InputVerifier
+    private static class NameVerifier extends InputVerifier
     {
         /**
          * Verifies that the String contained in a given component
@@ -184,20 +183,10 @@ public class JFormattedTextFieldDemo1A
         @Override
         public boolean verify(JComponent comp)
         {
-            String  text    = fmtField.getText();
-            boolean status  = NameValidator.isIdentifier( text );           
-            if ( status )
-            {
-                try
-                {
-                    fmtField.commitEdit();
-                }
-                catch ( ParseException exc )
-                {
-                    String  message = "Unexpected parse exception";
-                    throw new ComponentException( message, exc );
-                }
-            }            
+            JFormattedTextField textField   = (JFormattedTextField)comp;
+            String              text        = textField.getText();
+            boolean             status      = 
+                NameValidator.isIdentifier( text );           
             return status;
         }
     }
@@ -210,6 +199,7 @@ public class JFormattedTextFieldDemo1A
      * 
      * @throws  ParseException  if the value is not a valid identifier
      */
+    @SuppressWarnings("serial")
     private class NameFormatter extends DefaultFormatter
     {
         @Override

@@ -1,26 +1,31 @@
 package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.awt.Color;
-import java.awt.event.ActionEvent;
+import java.text.ParseException;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
+import javax.swing.text.DefaultFormatter;
 import javax.swing.text.JTextComponent;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+
+import temp.NameValidator;
 
 @SuppressWarnings("serial")
 public class NameEditor extends DefaultCellEditor
 {
     public NameEditor()
     {
-        super( new JFormattedTextField() );
+        super( new JFormattedTextField( new NameFormatter() ) );
         JFormattedTextField textField   =
             (JFormattedTextField)getComponent();
         textField.setInputVerifier( new IdentVerifier() );
-        textField.addActionListener( this::enterAction );
+        NameFormatter   formatter   = 
+            (NameFormatter)textField.getFormatter();
+        formatter.setFormattedTextField( textField );
     }
     
     @Override
@@ -28,22 +33,9 @@ public class NameEditor extends DefaultCellEditor
     {
         Object  oValue  = getCellEditorValue();
         boolean status  = false;
-        if ( !(oValue instanceof String) )
-            throw new RuntimeException( "eh?" );
         if ( NameValidator.isIdentifier( (String)oValue ) )
             status = super.stopCellEditing();
         return status;
-    }
-    
-    private void enterAction( ActionEvent evt )
-    {
-        Object  source  = evt.getSource();
-        if ( source instanceof JFormattedTextField )
-        {
-            JFormattedTextField textField   = (JFormattedTextField)source;
-            InputVerifier       verifier    = textField.getInputVerifier();
-            verifier.verify( textField );
-        }
     }
     
     private static class IdentVerifier extends InputVerifier
@@ -65,4 +57,28 @@ public class NameEditor extends DefaultCellEditor
             return status;
         }
     }
+    
+    private static class NameFormatter extends DefaultFormatter
+    {
+        private JFormattedTextField fmtField;
+        
+        @Override
+        public String stringToValue( String str )
+            throws ParseException
+        {
+            if ( !NameValidator.isIdentifier( str ) )
+            {
+                fmtField.setForeground( Color.RED );
+                throw new ParseException( "Invalid name", 0 );
+            }
+            fmtField.setForeground( Color.BLACK );
+            return str;
+        }
+        
+        public void setFormattedTextField( JFormattedTextField field )
+        {
+            fmtField = field;
+        }
+    }
+
 }
