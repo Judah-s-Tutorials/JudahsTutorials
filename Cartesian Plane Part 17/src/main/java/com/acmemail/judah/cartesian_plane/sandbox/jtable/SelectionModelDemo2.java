@@ -18,20 +18,21 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
-
 /**
- * This application demonstrates how to 
- * dynamically delete rows from a table 
- * after the table has been created and deployed.
+ * This is a revision of JTableDemo4.
+ * Allows insertion and deletion of rows.
+ * JTableDemo4 based its logic on 
+ * which rows contained a selected check box.
+ * This application eliminates the column of check boxes,
+ * and instead uses logic based on which rows are selected
+ * as determined by a JTable's ListSelectionModel.
  * 
  * @author Jack Straub
  */
-public class JTableDemo5
+public class SelectionModelDemo2
 {
     private static final String prompt          = 
         "Enter name, abbreviation and population, separated by commas.";
-    private static final String selectHeader    = "Select";
     private final Object[]      headers         = 
     { "State", "Abbrev", "Population" };
     private final Object[][]    data            =
@@ -51,7 +52,7 @@ public class JTableDemo5
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( JTableDemo5::new );
+        SwingUtilities.invokeLater( SelectionModelDemo2::new );
     }
     
     /**
@@ -59,13 +60,12 @@ public class JTableDemo5
      * Initializes and displays the application frame.
      * Must be executed on the EDT.
      */
-    private JTableDemo5()
+    private SelectionModelDemo2()
     {
         JFrame      frame       = new JFrame( "JTable Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel      contentPane = new JPanel( new BorderLayout() );
-        addSelectColumn();
         JScrollPane scrollPane  = new JScrollPane( table );
         contentPane.add( scrollPane, BorderLayout.CENTER );
         
@@ -121,30 +121,27 @@ public class JTableDemo5
      */
     private void insertAction( ActionEvent evt )
     {
-        int position    =
-            IntStream.range( 0, model.getRowCount() )
-            .filter( r -> (Boolean)model.getValueAt( r, 3 ) )
-            .findFirst().orElse( 0 );
+        int position    = table.getSelectedRow();
+        if ( position < 0 )
+            position = 0;
         insertRow( position );
     }
     
     @SuppressWarnings("rawtypes")
     private void deleteAction( ActionEvent evt )
     {
-        Vector<Vector>      data    = model.getDataVector();
-        Iterator<Vector>    iter    = data.iterator();
+        int[]               selected    = table.getSelectedRows();
+        int                 currInx     = 0;
+        Vector<Vector>      data        = model.getDataVector();
+        Iterator<Vector>    iter        = data.iterator();
         while ( iter.hasNext() )
         {
-            Vector  vec     = iter.next();
-            Object  obj     = vec.get( 3 );
-            if ( !(obj instanceof Boolean) )
-                throw new ComponentException( "Malfunction" );
-            if ( (Boolean)obj )
+            iter.next();
+            if ( Arrays.binarySearch( selected, currInx++ ) >= 0 )
                 iter.remove();
         }
         List<Object>    cHeaders    = Arrays.asList( headers );
         Vector<Object>  vHeaders    = new Vector<>( cHeaders );
-        vHeaders.add( selectHeader );
         model.setDataVector( data, vHeaders );
     }
     
@@ -220,7 +217,7 @@ public class JTableDemo5
             String  abbr    = tizer.nextToken().trim();
             String  sPop    = tizer.nextToken().trim();
             Integer iPop    = Integer.valueOf( sPop );
-            row = new Object[]{ name, abbr, iPop, false };
+            row = new Object[]{ name, abbr, iPop };
         }
         catch ( NumberFormatException exc )
         {
@@ -233,21 +230,6 @@ public class JTableDemo5
         }
         return row;
     }
-
-    /**
-     * Adds a fourth column to a GUI's JTable's model.
-     * The header of the column is "Select",
-     * and the value of all cells in the column is (Boolean)false.
-     * 
-     * @param table the given JTable
-     */
-    private void addSelectColumn()
-    {
-        int         rowCount    = model.getRowCount();
-        Object[]    colData     = new Object[rowCount];
-        Arrays.fill( colData, false );
-        model.addColumn( selectHeader, colData );
-    }
     
     /**
      * Traverses a given table,
@@ -257,19 +239,14 @@ public class JTableDemo5
      */
     private void printAction( ActionEvent evt )
     {
-        int     rowCount    = table.getRowCount();
-        for ( int row = 0 ; row < rowCount ; ++row )
-        {
-            Object  value   = table.getValueAt( row, 3 );
-            if ( value instanceof Boolean && (Boolean)value )
-            {
-                StringBuilder   bldr    = new StringBuilder();
-                bldr.append( table.getValueAt( row, 0 ) ).append( ", " )
-                    .append( table.getValueAt( row, 1 ) ).append( ", " )
-                    .append( table.getValueAt( row, 2 ) );
-                System.out.println( bldr );
-            }
-        }
+        int[]   selected    = table.getSelectedRows();
+        IntStream.of( selected ).forEach( row -> {
+            StringBuilder   bldr    = new StringBuilder();
+            bldr.append( table.getValueAt( row, 0 ) ).append( ", " )
+                .append( table.getValueAt( row, 1 ) ).append( ", " )
+                .append( table.getValueAt( row, 2 ) );
+            System.out.println( bldr );
+        });
     }
     
     /**

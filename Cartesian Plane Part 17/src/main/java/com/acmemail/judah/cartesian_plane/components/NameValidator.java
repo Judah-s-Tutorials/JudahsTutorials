@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.jtable;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.util.OptionalInt;
 

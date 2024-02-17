@@ -12,7 +12,7 @@ import javax.swing.SwingUtilities;
 /**
  * This application is a minor revision of JTableDemo1
  * that shows how to traverse the data in a table.
- * It adds a button to the bottom of the application frame
+ * It adds a button to the bottom of the application's frame
  * which, when pushed, traverses the table
  * printing the value of every cell.
  * 

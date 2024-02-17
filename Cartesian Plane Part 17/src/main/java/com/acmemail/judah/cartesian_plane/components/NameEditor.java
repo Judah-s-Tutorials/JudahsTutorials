@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.jtable;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
 import java.text.ParseException;
@@ -10,10 +10,6 @@ import javax.swing.JFormattedTextField;
 import javax.swing.text.DefaultFormatter;
 import javax.swing.text.JTextComponent;
 
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
-
-import temp.NameValidator;
-
 @SuppressWarnings("serial")
 public class NameEditor extends DefaultCellEditor
 {
@@ -23,9 +19,6 @@ public class NameEditor extends DefaultCellEditor
         JFormattedTextField textField   =
             (JFormattedTextField)getComponent();
         textField.setInputVerifier( new IdentVerifier() );
-        NameFormatter   formatter   = 
-            (NameFormatter)textField.getFormatter();
-        formatter.setFormattedTextField( textField );
     }
     
     @Override
@@ -43,16 +36,9 @@ public class NameEditor extends DefaultCellEditor
         @Override
         public boolean verify(JComponent comp)
         {
-            if ( !(comp instanceof JTextComponent) )
-                throw new ComponentException( "Invalid component" );
             JTextComponent  jtComp  = (JTextComponent)comp;
             String          input   = jtComp.getText();
             boolean         status  = NameValidator.isIdentifier( input );
-            
-            if ( !status )
-                jtComp.setForeground( Color.RED );
-            else
-                jtComp.setForeground( Color.BLACK );
             
             return status;
         }
@@ -60,12 +46,11 @@ public class NameEditor extends DefaultCellEditor
     
     private static class NameFormatter extends DefaultFormatter
     {
-        private JFormattedTextField fmtField;
-        
         @Override
         public String stringToValue( String str )
             throws ParseException
         {
+            JFormattedTextField fmtField    = getFormattedTextField();
             if ( !NameValidator.isIdentifier( str ) )
             {
                 fmtField.setForeground( Color.RED );
@@ -73,11 +58,6 @@ public class NameEditor extends DefaultCellEditor
             }
             fmtField.setForeground( Color.BLACK );
             return str;
-        }
-        
-        public void setFormattedTextField( JFormattedTextField field )
-        {
-            fmtField = field;
         }
     }
 

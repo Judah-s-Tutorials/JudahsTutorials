@@ -11,7 +11,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
-import temp.NameValidator;
+import com.acmemail.judah.cartesian_plane.components.NameEditor;
+import com.acmemail.judah.cartesian_plane.components.NameValidator;
 
 /**
  * This application demonstrates how to 
@@ -24,7 +25,7 @@ import temp.NameValidator;
  * 
  * @see NameValidator
  */
-public class JTableDemoXA
+public class JTableDemo5B
 {
     private final String[]      headers = { "Name", "Value" };
     private final Object[][]    data    =
@@ -50,7 +51,7 @@ public class JTableDemoXA
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( JTableDemoXA::new );
+        SwingUtilities.invokeLater( JTableDemo5B::new );
     }
     
     /**
@@ -58,7 +59,7 @@ public class JTableDemoXA
      * Initializes and displays the application frame.
      * Must be executed on the EDT.
      */
-    private JTableDemoXA()
+    private JTableDemo5B()
     {
         JFrame      frame       = new JFrame( "JTable Validation Demo" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );

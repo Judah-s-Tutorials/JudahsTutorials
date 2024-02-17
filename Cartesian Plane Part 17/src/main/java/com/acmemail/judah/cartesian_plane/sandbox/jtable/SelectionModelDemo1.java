@@ -92,6 +92,11 @@ public class SelectionModelDemo1
         frame.setVisible( true );
     }
     
+    /**
+     * Returns the panel containing the operator's options.
+     * 
+     * @return  the panel containing the operator's options
+     */
     private JPanel getOptionsPanel()
     {
         JPanel      panel       = new JPanel();
@@ -111,6 +116,11 @@ public class SelectionModelDemo1
         return panel;
     }
     
+    /**
+     * Returns the panel containing the operator's mode options.
+     * 
+     * @return  the panel containing the operator's mode options
+     */
     private JPanel getSelectionModePanel()
     {
         class Pair
@@ -153,6 +163,10 @@ public class SelectionModelDemo1
         return panel;
     }
     
+    /**
+     * Returns the panel containing the application's control buttons.
+     * @return  the panel containing the application's control buttons
+     */
     private JPanel getButtonPanel()
     {
         JPanel      panel       = new JPanel();
@@ -169,6 +183,11 @@ public class SelectionModelDemo1
         return panel;
     }
     
+    /**
+     * Processes events issued by the "Allow Row Sel" check box.
+     * 
+     * @param evt   object describing the event
+     */
     private void rowSelAction( ActionEvent evt )
     {
         Object  source  = evt.getSource();
@@ -180,6 +199,11 @@ public class SelectionModelDemo1
         }
     }
     
+    /**
+     * Processes events issued by the "Allow Col Sel" check box.
+     * 
+     * @param evt   object describing the event
+     */
     private void colSelAction( ActionEvent evt )
     {
         Object  source  = evt.getSource();
@@ -191,6 +215,12 @@ public class SelectionModelDemo1
         }
     }
     
+    /**
+     * Processes events issued when 
+     * a new mode option is selected.
+     * 
+     * @param evt   object describing the event
+     */
     private void modeAction( ActionEvent evt )
     {
         Object  source  = evt.getSource();
@@ -203,6 +233,11 @@ public class SelectionModelDemo1
         }
     }
     
+    /**
+     * Processes events issued by the "Show Selected Rows" button.
+     * 
+     * @param evt   object describing the event
+     */
     private void showSelRowsAction( ActionEvent evt )
     {
         String  line;
@@ -253,6 +288,11 @@ public class SelectionModelDemo1
         log.append( bldr.toString() );
     }
     
+    /**
+     * Processes events issued by the "Show Selected Columns" button.
+     * 
+     * @param evt   object describing the event
+     */
     private void showSelColsAction( ActionEvent evt )
     {
         String  line;

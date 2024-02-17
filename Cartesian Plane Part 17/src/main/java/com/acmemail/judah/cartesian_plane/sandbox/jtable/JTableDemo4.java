@@ -22,8 +22,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 /**
  * This application demonstrates how to 
- * dynamically delete rows from a table 
- * after the table has been created and deployed.
+ * dynamically delete rows from a table.
  * 
  * @author Jack Straub
  */

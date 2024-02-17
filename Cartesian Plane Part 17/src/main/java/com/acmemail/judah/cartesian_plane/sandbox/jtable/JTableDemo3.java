@@ -1,16 +1,12 @@
 package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.event.ActionEvent;
-import java.text.ParseException;
+import java.util.Arrays;
 import java.util.StringTokenizer;
+import java.util.stream.IntStream;
 
-import javax.swing.DefaultCellEditor;
-import javax.swing.InputVerifier;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -18,30 +14,22 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.text.DefaultFormatter;
-import javax.swing.text.JTextComponent;
-
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 /**
  * This application demonstrates how to 
- * dynamically add a row to a table 
- * after the table has been created and deployed.
+ * dynamically add rows to a table.
  * 
  * @author Jack Straub
  */
 public class JTableDemo3
 {
-    private static final String prompt  =
-        "Enter an identifier and value "
-        + "separated by commas and/or spaces";
-    private final String[]      headers = { "Name", "Value" };
-    private final Object[][]    data    =
-    {
-        { "x", 25 },
-        { "y", 30 },
-        { "base", 22 }
-    };
+    private static final String prompt          = 
+        "Enter name, abbreviation and population, separated by commas.";
+    private static final String selectHeader    = "Select";
+    private final Object[]      headers         = 
+    { "State", "Abbrev", "Population" };
+    private final Object[][]    data            =
+    State.getDataSet( "state", "abbreviation", "population" );
     
     /** JTable's data model. */
     private final DefaultTableModel model   = 
@@ -71,18 +59,21 @@ public class JTableDemo3
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel      contentPane = new JPanel( new BorderLayout() );
+        addSelectColumn();
         JScrollPane scrollPane  = new JScrollPane( table );
-//        table.getColumnModel().getColumn(0).setCellEditor( new NameEditor() );
         contentPane.add( scrollPane, BorderLayout.CENTER );
         
         JPanel      buttonPanel = new JPanel();
         JButton     print       = new JButton( "Print" );
         JButton     add         = new JButton( "Add" );
+        JButton     insert      = new JButton( "Insert" );
         JButton     exit        = new JButton( "Exit" );
         print.addActionListener( this::printAction );
         add.addActionListener( this::addAction );
+        insert.addActionListener( this::insertAction );
         exit.addActionListener( e -> System.exit( 0 ) );
         buttonPanel.add( add );
+        buttonPanel.add( insert );
         buttonPanel.add( print );
         buttonPanel.add( exit );
         contentPane.add( buttonPanel, BorderLayout.SOUTH );
@@ -106,6 +97,29 @@ public class JTableDemo3
     }
     
     /**
+     * Begins the "insert" process.
+     * The goal is to insert a new row
+     * before the selected item 
+     * in the GUI's JTable.
+     * If multiple items are selected
+     * the first one found will be used;
+     * there is no guarantee as to which selected item
+     * is the first found.
+     * If no item is selected
+     * the new row is added at position 0.
+     * 
+     * @param evt   object that accompanies an action event; not used
+     */
+    private void insertAction( ActionEvent evt )
+    {
+        int position    =
+            IntStream.range( 0, model.getRowCount() )
+            .filter( r -> (Boolean)model.getValueAt( r, 3 ) )
+            .findFirst().orElse( 0 );
+        insertRow( position );
+    }
+    
+    /**
      * Inserts a row into the GUI's JTable
      * at the given position.
      * 
@@ -119,12 +133,11 @@ public class JTableDemo3
     }
     
     /**
-     * Asks the operator to enter two values
+     * Asks the operator to enter three values
      * for the columns displayed in the GUI's JTable:
-     * <pre>    name value</pre>
-     * The fields must be separated by commas at least
-     * one comma or space.
-     * The two fields are parsed
+     * <pre>    name, abbreviation, population</pre>
+     * The three fields must be separated by commas.
+     * The three fields are parsed
      * and collected into an object array,
      * and the array is returned.
      * If the operator cancels the operation
@@ -149,7 +162,7 @@ public class JTableDemo3
     
     /**
      * Parse a given input string
-     * into "name" and "value".
+     * into "state", "abbreviation" and "population".
      * The data are returned in an object array.
      * If an input error is detected,
      * an error dialog is posted
@@ -166,18 +179,19 @@ public class JTableDemo3
     private Object[] parseInput( String input )
     {
         Object[]        row     = null;
-        StringTokenizer tizer   = new StringTokenizer( input, ", " );
+        StringTokenizer tizer   = new StringTokenizer( input, "," );
         try
         {
-            if ( tizer.countTokens() != 2 )
+            if ( tizer.countTokens() != 3 )
             {
                 String  msg = "Incorrect number of fields entered";
                 throw new NumberFormatException( msg );
             }
             String  name    = tizer.nextToken().trim();
+            String  abbr    = tizer.nextToken().trim();
             String  sPop    = tizer.nextToken().trim();
             Integer iPop    = Integer.valueOf( sPop );
-            row = new Object[]{ name, iPop };
+            row = new Object[]{ name, abbr, iPop, false };
         }
         catch ( NumberFormatException exc )
         {
@@ -190,10 +204,25 @@ public class JTableDemo3
         }
         return row;
     }
+
+    /**
+     * Adds a fourth column to a GUI's JTable's model.
+     * The header of the column is "Select",
+     * and the value of all cells in the column is (Boolean)false.
+     * 
+     * @param table the given JTable
+     */
+    private void addSelectColumn()
+    {
+        int         rowCount    = model.getRowCount();
+        Object[]    colData     = new Object[rowCount];
+        Arrays.fill( colData, false );
+        model.addColumn( selectHeader, colData );
+    }
     
     /**
      * Traverses a given table,
-     * printing the all rows.
+     * printing the all selected rows.
      * 
      * @param evt   object that accompanies an action event; not used
      */
@@ -202,16 +231,22 @@ public class JTableDemo3
         int     rowCount    = table.getRowCount();
         for ( int row = 0 ; row < rowCount ; ++row )
         {
-            Object  name    = table.getValueAt( row, 0 );
-            Object  value   = table.getValueAt( row, 1 );
-            System.out.println( name + " = " + value );
+            Object  value   = table.getValueAt( row, 3 );
+            if ( value instanceof Boolean && (Boolean)value )
+            {
+                StringBuilder   bldr    = new StringBuilder();
+                bldr.append( table.getValueAt( row, 0 ) ).append( ", " )
+                    .append( table.getValueAt( row, 1 ) ).append( ", " )
+                    .append( table.getValueAt( row, 2 ) );
+                System.out.println( bldr );
+            }
         }
     }
     
     /**
      * Subclass of DefaultTableModel
      * that is used to establish the type
-     * of column 1 in the GUI's JTable.
+     * of column 2 in the GUI's JTable.
      * 
      * @author Jack Straub
      * 
@@ -235,61 +270,13 @@ public class JTableDemo3
         public Class<?> getColumnClass( int col ) 
         {
             Class<?>    clazz   = null;
-            if ( col == 1 )
-                clazz = Double.class;
+            if ( col == 2 )
+                clazz = Integer.class;
+            else if ( col == 3 )
+                clazz = Boolean.class;
             else
                 clazz = super.getColumnClass( col );
             return clazz;
-        }
-    }
-    
-    @SuppressWarnings("serial")
-    private static class NameEditor extends DefaultCellEditor
-    {
-        private final JFormattedTextField textField;
-        public NameEditor() throws ParseException
-        {
-            super( new JFormattedTextField() );// new IdentFormatter()) );
-            textField = (JFormattedTextField)getComponent();
-            textField.setInputVerifier( new NameVerifier() );
-        }
-    }
-    @SuppressWarnings("serial")
-    private static class IdentFormatter extends DefaultFormatter
-    {
-        @Override
-        public String stringToValue( String input )
-            throws ParseException
-        {
-            boolean status  = input == null ?
-                true : NameValidator.isIdentifier( input.toString() );
-            if ( !status )
-            {
-                String  msg = 
-                    "\"" + input + "\" is not a valid identifier";
-                throw new ParseException( msg, 0 );
-            }
-            
-            return input;
-        }
-    }    
-    private static class NameVerifier extends InputVerifier
-    {
-        @Override
-        public boolean verify( JComponent comp )
-        {
-            if ( !(comp instanceof JTextComponent) )
-                throw new ComponentException( "Invalid component" );
-            JTextComponent  jtComp  = (JTextComponent)comp;
-            String          input   = jtComp.getText();
-            boolean         status  = NameValidator.isIdentifier( input );
-            
-            if ( !status )
-                jtComp.setForeground( Color.RED );
-            else
-                jtComp.setForeground( Color.BLACK );
-            
-            return status;
         }
     }
 }

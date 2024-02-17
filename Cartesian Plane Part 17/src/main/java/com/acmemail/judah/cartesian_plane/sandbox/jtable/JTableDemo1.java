@@ -14,7 +14,7 @@ import javax.swing.SwingUtilities;
  * to implement a simple JTable.
  * The JTable is instantiated
  * using data and header arrays,
- * an positioned in a JScrollPane.
+ * and positioned in a JScrollPane.
  * 
  * @author Jack Straub
  */

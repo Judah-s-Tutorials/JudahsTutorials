@@ -21,9 +21,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
 
+import com.acmemail.judah.cartesian_plane.components.NameValidator;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
-
-import temp.NameValidator;
 
 public class JFormattedTextFieldDemo1
 {
@@ -200,12 +199,13 @@ public class JFormattedTextFieldDemo1
      * @throws  ParseException  if the value is not a valid identifier
      */
     @SuppressWarnings("serial")
-    private class NameFormatter extends DefaultFormatter
+    private static class NameFormatter extends DefaultFormatter
     {
         @Override
         public String stringToValue( String str )
             throws ParseException
         {
+            JFormattedTextField fmtField    = getFormattedTextField();
             if ( !NameValidator.isIdentifier( str ) )
             {
                 fmtField.setForeground( Color.RED );
