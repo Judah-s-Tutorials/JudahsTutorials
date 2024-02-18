@@ -58,7 +58,7 @@ public class TableModelDemo2A
      */
     public TableModelDemo2A()
     {
-        JFrame      frame       = new JFrame( "Tabel Model Demo 2" );
+        JFrame      frame       = new JFrame( "Tabel Model Demo 2A" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         DefaultTableModel   model       = 

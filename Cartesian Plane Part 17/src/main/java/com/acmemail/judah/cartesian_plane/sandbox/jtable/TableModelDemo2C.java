@@ -47,7 +47,7 @@ public class TableModelDemo2C
      */
     public TableModelDemo2C()
     {
-        JFrame      frame       = new JFrame( "Tabel Model Demo 2" );
+        JFrame      frame       = new JFrame( "Tabel Model Demo 2C" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         @SuppressWarnings("serial")

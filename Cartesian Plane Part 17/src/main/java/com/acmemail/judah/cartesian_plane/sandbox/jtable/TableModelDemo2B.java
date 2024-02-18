@@ -59,7 +59,7 @@ public class TableModelDemo2B
      */
     public TableModelDemo2B()
     {
-        JFrame      frame       = new JFrame( "Tabel Model Demo 2" );
+        JFrame      frame       = new JFrame( "Tabel Model Demo 2B" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         LocalTableModel     model       = 
