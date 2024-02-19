@@ -1,18 +1,14 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class VariableTableDemo2
+public class VariableTableDemo4
 {
-    private static final String inFile  = 
-        "data/VariableTableData1.csv";
-    
     /**
      * Application entry point.
      *
@@ -26,16 +22,7 @@ public class VariableTableDemo2
     
     private static void buildGUI()
     {
-        VariableTableB   table   = null;
-        try
-        {
-            table = new VariableTableB( inFile );
-        }
-        catch ( IOException exc )
-        {
-            exc.printStackTrace();
-            System.exit( 1 );
-        }
+        VariableTableB  table   = new VariableTableB();
         JPanel          cPane   = new JPanel( new BorderLayout() );
         cPane.add( table.getPanel(), BorderLayout.CENTER );
         

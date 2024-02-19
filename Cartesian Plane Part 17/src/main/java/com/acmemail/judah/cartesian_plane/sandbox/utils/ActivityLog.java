@@ -244,6 +244,18 @@ public class ActivityLog
     }
 
     /**
+     * 
+     * Gets the preferred size of the dialog.
+     *     
+     * return  the preferred size of the dialog
+     */
+    public Dimension getPreferredSize()
+    {
+        Dimension   size    = dialog.getPreferredSize();
+        return size;
+    }
+
+    /**
      * Sets the preferred size of the dialog.
      *     
      * @param size  the preferred size

@@ -2,16 +2,20 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BorderLayout;
 import java.io.IOException;
+import java.io.StringReader;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class VariableTableDemo2
+public class VariableTableDemo3
 {
-    private static final String inFile  = 
-        "data/VariableTableData1.csv";
+    private static final String lineSep = System.lineSeparator();
+    private static final String input   =
+        "x,1" + lineSep +
+        "y,2" + lineSep +
+        "z,3" + lineSep;
     
     /**
      * Application entry point.
@@ -26,10 +30,11 @@ public class VariableTableDemo2
     
     private static void buildGUI()
     {
-        VariableTableB   table   = null;
+        StringReader    reader  = new StringReader( input );
+        VariableTableB  table   = null;
         try
         {
-            table = new VariableTableB( inFile );
+            table = new VariableTableB( reader );
         }
         catch ( IOException exc )
         {
