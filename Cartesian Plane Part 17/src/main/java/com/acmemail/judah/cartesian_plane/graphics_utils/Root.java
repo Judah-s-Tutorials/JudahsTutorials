@@ -3,11 +3,15 @@ package com.acmemail.judah.cartesian_plane.graphics_utils;
 
 import java.awt.BorderLayout;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.components.CPMenuBar;
+import com.acmemail.judah.cartesian_plane.components.VariableTable;
+import com.acmemail.judah.cartesian_plane.sandbox.EquationPanel;
+import com.acmemail.judah.cartesian_plane.sandbox.ParameterPanel;
 
 /**
  * This class encapsulates the frame that is required
@@ -77,8 +81,15 @@ public class Root implements Runnable
      */
     public void run()
     {
-    	/* Instantiate the frame. */
+        /* Instantiate the frame. */
         frame = new JFrame( "Graphics Frame" );
+        
+        /* Create the menu bar and the variable table. The frame
+         * and variable table must be registered with the menu bar.
+         */
+        CPMenuBar       menuBar     = new CPMenuBar( frame );
+        VariableTable   varTable    = new VariableTable();
+        menuBar.setVariableTable( varTable );
         
         /* 
          * This will cause your application to be terminated
@@ -96,11 +107,19 @@ public class Root implements Runnable
          * https://docs.oracle.com/javase/tutorial/uiswing/layout/index.html.
          * see the JDK documentation.
          */
-        BorderLayout    layout  = new BorderLayout();
+        BorderLayout    layout      = new BorderLayout();
         contentPane = new JPanel( layout );
         
         /* Make the menu bar the north child of the content pane. */
-        contentPane.add( new CPMenuBar( frame ), BorderLayout.NORTH );
+        contentPane.add( menuBar, BorderLayout.NORTH );
+        
+        /* Make the variable panel the west child of the content pane. */
+        JPanel          varPanel    = varTable.getPanel();
+        JPanel          paramPanel  = getParameterPanel( varPanel );
+        JPanel          eqPanel     = new EquationPanel();
+        System.out.println( eqPanel.getPreferredSize() );
+        contentPane.add( paramPanel, BorderLayout.WEST );
+        contentPane.add( eqPanel, BorderLayout.SOUTH );
         
         /* Make the Canvas the center child of the content pane. */
         contentPane.add( userPanel, BorderLayout.CENTER );
@@ -110,5 +129,14 @@ public class Root implements Runnable
         frame.pack();
         /* Make the frame visible. */
         frame.setVisible( true );
+    }
+    
+    private JPanel getParameterPanel( JPanel varPanel )
+    {
+        JPanel  panel   = new JPanel();
+        panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+        panel.add( varPanel );
+        panel.add( new ParameterPanel() );
+        return panel;
     }
 }

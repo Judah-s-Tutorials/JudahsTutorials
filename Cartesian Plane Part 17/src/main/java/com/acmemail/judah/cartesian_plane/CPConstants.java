@@ -327,6 +327,14 @@ public class CPConstants
     public static final String  PLOT_COLOR_DV           = "20";
     
     /////////////////////////////////////////////////
+    //   Data model properties
+    /////////////////////////////////////////////////
+    /** Indicates if data model modified since last save. */
+    public static final String  DM_MODIFIED_PN          = "dataModified";
+    /** Default value for "data model modified */
+    public static final String  DM_MODIFIED_DV          = "false";
+    
+    /////////////////////////////////////////////////
     //   Notification properties
     /////////////////////////////////////////////////
     /** Notifies the application that the graphic must be redrawn. */

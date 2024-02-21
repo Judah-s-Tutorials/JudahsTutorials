@@ -8,6 +8,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.acmemail.judah.cartesian_plane.components.VariableTable;
+
 public class VariableTableDemo2
 {
     private static final String inFile  = 
@@ -26,10 +28,11 @@ public class VariableTableDemo2
     
     private static void buildGUI()
     {
-        VariableTableB   table   = null;
+        VariableTable   table   = null;
         try
         {
-            table = new VariableTableB( inFile );
+            table = new VariableTable();
+            table.load( inFile );
         }
         catch ( IOException exc )
         {

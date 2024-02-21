@@ -1,0 +1,6 @@
+    equation conic sections
+    start 0
+    end 2pi
+    step .001
+    set e=.5,d=1,t0=pi/2
+    r= e*d/(1-e*cos(t - t0)

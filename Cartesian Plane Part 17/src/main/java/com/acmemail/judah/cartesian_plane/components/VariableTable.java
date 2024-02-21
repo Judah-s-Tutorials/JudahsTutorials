@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -13,8 +13,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.swing.BorderFactory;
@@ -32,71 +35,58 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import com.acmemail.judah.cartesian_plane.components.NameEditor;
-import com.acmemail.judah.cartesian_plane.components.NameValidator;
+import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.input.Equation;
 
-public class VariableTableB
+/**
+ * Encapsulation of defined variable names
+ * and associated values.
+ * Maintained in a JTable with two columns:
+ * name, which must be a valid identifier,
+ * and value, which must be a valid floating point number. 
+ * 
+ * @author Jack Straub
+ * 
+ * @see #getPanel()
+ */
+public class VariableTable
 {
+    /** Platform-specific line separator. */
+    private static final String     lineSep = System.lineSeparator();
+    /** Prompt the operator for a new name and optional value. */
     private static final String     prompt  =
         "Enter [name] or [name,value]";
-    private static final String     lineSep = System.lineSeparator();
+    /** Convenient representation of the PropertyManager singleton. */
+    private static final PropertyManager    pMgr    =
+        PropertyManager.INSTANCE;
     
+    /** Header row for JTable. */
     private final Object[]          headers = { "Name", "Value" };
+    /** 
+     * Header row expressed as a vector, for the convenience
+     * of updating the JTable.
+     * @see #deleteAction(ActionEvent)
+     */
     private final Vector<Object>    vHeader = 
         new Vector<>( Arrays.asList( headers ) );
     
+    /** Underlying data model for JTable. */
     private final LocalTableModel   model   = 
         new LocalTableModel( headers );
+    /** Encapsulated JTable. */
     private final JTable            table   = new JTable( model );
     
+    /** Number of decimal points for value display. */
     private int     dPrecision  = 4;
+    /** Formatter for value display. */
     private String  format      = "%." + dPrecision + "f";
     
-    public VariableTableB()
-    {
-        ctorInit();
-    }
-    
-    public VariableTableB( String inFile )
-        throws IOException
-    {
-        ctorInit();
-        if ( inFile != null )
-        {
-            try ( 
-                FileInputStream inStream = new FileInputStream( inFile );
-                Reader reader = new InputStreamReader( inStream );
-            )
-            {
-                load( reader );
-            }
-        }
-    }
-    
-    public VariableTableB( InputStream inStream )
-        throws IOException
-    {
-        ctorInit();
-        if ( inStream != null )
-        {
-            try ( Reader reader = new InputStreamReader( inStream  ) )
-            {
-                load( reader );
-            }
-        }
-    }
-    
-    public VariableTableB( Reader reader )
-        throws IOException
-    {
-        ctorInit();
-        if ( reader != null )
-        {
-            load( reader );
-        }
-    }
-    
-    private void ctorInit()
+    /**
+     * Constructor.
+     * Creates and initializes an empty table.
+     */
+    public VariableTable()
     {
         TableColumnModel    colModel    = table.getColumnModel();
         TableColumn         column0     = colModel.getColumn( 0 );
@@ -109,6 +99,14 @@ public class VariableTableB
         model.addTableModelListener( this::tableChanged );
     }
     
+    /**
+     * Loads the variable table from a text file
+     * of comma separated values.
+     * 
+     * @param inFile    input file path
+     * 
+     * @throws IOException  if an input error occurs
+     */
     public void load( String inFile )
         throws IOException
     {
@@ -119,8 +117,18 @@ public class VariableTableB
         {
             load( reader );
         }
+        
+        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
     }
     
+    /**
+     * Loads the variable table from text stream
+     * of comma separated values.
+     * 
+     * @param inStream      input stream
+     * 
+     * @throws IOException  if an input error occurs
+     */
     public void load( InputStream inStream )
         throws IOException
     {
@@ -128,8 +136,18 @@ public class VariableTableB
         {
             load( reader );
         }
+        
+        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
     }
     
+    /**
+     * Loads the variable table from a reader
+     * whose lines consist of comma separated values.
+     * 
+     * @param inStream      input stream
+     * 
+     * @throws IOException  if an input error occurs
+     */
     public void load( Reader reader )
         throws IOException
     {
@@ -141,9 +159,33 @@ public class VariableTableB
                 .map( NameRow::new )
                 .map( r -> r.getData() )
                 .forEach( o -> model.addRow( o ) );
+            
+            pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
         }
     }
     
+    /**
+     * Loads the variable table from a reader
+     * whose lines consist of comma separated values.
+     * 
+     * @param inStream      input stream
+     * 
+     * @throws IOException  if an input error occurs
+     */
+    public void load( Equation equation )
+    {
+        Object[][]  vars    = NameRow.getDataArray( equation );
+        model.setDataVector( vars, headers );
+        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
+    }
+    
+    /**
+     * Returns a JPanel with a BorderLayout.
+     * The center region consists of a JScrollPane
+     * whose viewport viewer is the encapsulated JTable.
+     * 
+     * @return
+     */
     public JPanel getPanel()
     {
         Border      border      =
@@ -174,6 +216,10 @@ public class VariableTableB
         return panel;
     }
     
+    /**
+     * Returns a string describing all name/value pairs
+     * on separate lines.
+     */
     @Override
     public String toString()
     {
@@ -187,9 +233,12 @@ public class VariableTableB
     }
 
     /**
-     * Begins the "add" process.
-     * A new row will be added to the bottom
+     * Adds a new row 
+     * after the first selected row
      * of the GUI's JTable.
+     * If no row is selected,
+     * the new row is added
+     * to the end of the table.
      * 
      * @param evt   object that accompanies an action event; not used
      */
@@ -203,6 +252,11 @@ public class VariableTableB
             model.insertRow( position, row );
     }
     
+    /**
+     * Deletes all selected rows in the GUI's JTable.
+     * 
+     * @param evt   object that accompanies an action event; not used
+     */
     @SuppressWarnings("rawtypes")
     private void deleteAction( ActionEvent evt )
     {
@@ -220,18 +274,11 @@ public class VariableTableB
     }
     
     /**
-     * Asks the operator to enter three values
-     * for the columns displayed in the GUI's JTable:
-     * <pre>    name, abbreviation, population</pre>
-     * The three fields must be separated by commas.
-     * The three fields are parsed
-     * and collected into an object array,
-     * and the array is returned.
-     * If the operator cancels the operation
-     * null is returned.
-     * If a data entry error is detected
-     * null is returned.
-
+     * Asks the operator to enter a name
+     * and optional value
+     * for a new variable.
+     * If unspecified, the value will default to 0.
+     * The name must be a unique, valid identifier.
      * @return  
      *      a row suitable to be added to the GUI's JTable,
      *      or null if the operation is aborted
@@ -247,6 +294,12 @@ public class VariableTableB
             try
             {
                 NameRow nameRow = new NameRow( input );
+                if ( !isUniqueName( nameRow.name ) )
+                {
+                    String message = 
+                        "\"" + nameRow.name + "\" is not unique.";
+                    throw new IllegalArgumentException( message );
+                }
                 row = nameRow.getData();
             }
             catch ( IllegalArgumentException exc )
@@ -266,19 +319,45 @@ public class VariableTableB
     {
         int     row     = evt.getFirstRow();
         int     col     = evt.getColumn();
-        String  strVal  = "";
         if ( row >= 0 && col >= 0 )
         {
             Object  val = model.getValueAt( row, col );
-            strVal = val.toString();
             StringBuilder   bldr    = new StringBuilder();
             bldr.append( row ).append( "," )
                 .append( col ).append( "," )
                 .append( val );
             System.out.println( bldr );
         }
+        
+        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, true );
     }
     
+    /**
+     * Tests a given name for uniqueness compared 
+     * to all other names in the GUI's JTable.
+     * Returns true if the name is unique.
+     * 
+     * @param name  the given name
+     * 
+     * @return  true if the name is unique
+     */
+    private boolean isUniqueName( String name )
+    {
+        boolean isUnique   =
+            IntStream.range( 0, table.getRowCount() )
+                .mapToObj( r -> model.getValueAt( r, 0 ) )
+                .map( name::equals )
+                .findFirst().orElse( true );
+        return isUnique;
+    }
+    
+    /**
+     * Encapsulates a name/value pair.
+     * The name is assumed to be a valid identifer,
+     * and the value a valid double.
+     * 
+     * @author Jack Straub
+     */
     public static class NameRow
     {
         public final String     name;
@@ -290,6 +369,20 @@ public class VariableTableB
             this.value = value;
         }
         
+        /**
+         * Constructor.
+         * Converts a given string to a name value pair.
+         * The value is optional,
+         * if not present it will default to 0.
+         * If the value is present
+         * it must be separated from the name
+         * by at least one command and/or space.
+         * 
+         * @param row   the given string
+         * 
+         * @throws IllegalArgumentException
+         *      if the given string is not a valid name/value pair
+         */
         public NameRow( String row )
             throws IllegalArgumentException
         {
@@ -318,18 +411,50 @@ public class VariableTableB
             value = tempValue;
         }
         
+        /**
+         * Returns a two-element Object array
+         * containing the name and value
+         * from the encapsulated pair.
+         *
+         * @return  
+         *      a two-element Object array containing the name and value
+         *      of this pair
+         */
         public Object[] getData()
         {
             Object[]    row = { name, value };
             return row;
         }
         
+        /**
+         * Returns a string representation 
+         * of this name/value pair.
+         * 
+         * @return string representation of this name/value pair
+         */
         @Override
         public String toString()
         {
             return name + "," + value;
         }
         
+        /**
+         * Converts a given collection of NameRow values
+         * to a 2-dimensional object array.
+         * Each row in the array consists of two elements,
+         * with the name of the corresponding NameRow value
+         * on the first element,
+         * and the value in the second.
+         * This is convenient for producing
+         * an Object[][] array suitable for initializing 
+         * a JTable's data model.
+         * 
+         * @param coll  the given collection
+         * 
+         * @return  
+         *      an Object[][] array containing all values
+         *      in the given collection
+         */
         public static Object[][] getDataArray( Collection<NameRow> coll )
         {
             int     len     = coll.size();
@@ -337,6 +462,37 @@ public class VariableTableB
                 coll.stream()
                     .map( r -> new Object[] { r.name, r.value } )
                     .toArray( a -> new Object[len][] );
+            return data;
+        }
+        
+        /**
+         * Converts a given collection of NameRow values
+         * to a 2-dimensional object array.
+         * Each row in the array consists of two elements,
+         * with the name of the corresponding NameRow value
+         * on the first element,
+         * and the value in the second.
+         * This is convenient for producing
+         * an Object[][] array suitable for initializing 
+         * a JTable's data model.
+         * 
+         * @param coll  the given collection
+         * 
+         * @return  
+         *      an Object[][] array containing all values
+         *      in the given collection
+         */
+        public static Object[][] getDataArray( Equation equation )
+        {
+            Map<String,Double>  vars    = equation.getVars();
+            Set<String>         keys    = vars.keySet();
+            List<String>        keyList = 
+                keys.stream().collect( Collectors.toList() );
+            keyList.sort( (i1,i2) -> i1.compareTo( i2 ) );
+            Object[][] data =
+                keyList.stream()
+                    .map( n -> new Object[] { n, vars.get( n ) } )
+                    .toArray( a -> new Object[keys.size()][] );
             return data;
         }
     }
@@ -353,11 +509,28 @@ public class VariableTableB
     @SuppressWarnings("serial")
     private static class LocalTableModel extends DefaultTableModel
     {
+        /**
+         * Constructor.
+         * Initializes the DefaultTableModel superclass
+         * to the given header row, 
+         * and 0 rows of data.
+         * 
+         * @param headers   the given header row
+         */
         public LocalTableModel( Object[] headers )
         {
             super( headers, 0 );
         }
         
+        /**
+         * Returns Double.class for the value column of the table,
+         * otherwise defaults to the value
+         * returned by the superclass.
+         * 
+         * @param   col the index of the column to process
+         * 
+         * @return  the appropriate class for the given table column
+         */
         @Override
         public Class<?> getColumnClass( int col ) 
         {
@@ -367,9 +540,23 @@ public class VariableTableB
         }
     }
     
+    /**
+     * Table cell renderer for floating point values.
+     * Formats values with a given number of decimals,
+     * and comma separators.
+     * 
+     * @author Jack Straub
+     */
     @SuppressWarnings("serial")
     private class ValueRenderer extends DefaultTableCellRenderer
     {
+        /**
+         * Converts an Object to a String
+         * for display in a JTable cell.
+         * The object is assumed to be type double.
+         * It is formatted with a given number of decimals,
+         * and comma separators.
+         */
         @Override
         public void setValue( Object value )
         {

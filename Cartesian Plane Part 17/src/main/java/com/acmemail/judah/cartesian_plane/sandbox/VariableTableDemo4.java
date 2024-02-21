@@ -7,6 +7,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.acmemail.judah.cartesian_plane.components.VariableTable;
+
 public class VariableTableDemo4
 {
     /**
@@ -22,7 +24,7 @@ public class VariableTableDemo4
     
     private static void buildGUI()
     {
-        VariableTableB  table   = new VariableTableB();
+        VariableTable  table   = new VariableTable();
         JPanel          cPane   = new JPanel( new BorderLayout() );
         cPane.add( table.getPanel(), BorderLayout.CENTER );
         

@@ -1,0 +1,25 @@
+body
+{ 
+    background-color: #9FE2BF;
+    margin: 2em 2em 2em 2em;
+    font-family: tahoma, sans-serif;
+}
+p.odd
+{ 
+    color: #ffd700; 
+    background-color: #b22222; 
+    font-size: 150%; 
+    font-weight: bold;
+}
+p.even
+{ 
+    color: #b22222; 
+    background-color: #ffd700; 
+    font-size: 150%; 
+    font-weight: bold;
+}
+p.source
+{
+    font-size: 75%;
+    font-color: #ff0000;
+}

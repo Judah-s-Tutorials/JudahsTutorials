@@ -21,6 +21,9 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.FileManager;
+
 /**
  * The menu bar for the main window
  * of the Cartesian plane application.
@@ -38,6 +41,16 @@ public class CPMenuBar extends JMenuBar
     private final JDialog       graphDialog;
     /** Dialog to show "about application" page. */
     private final AboutDialog   aboutDialog;
+    
+    /** 
+     * Table for loading/save variable name/value pairs.
+     * Must be set at or shortly after instantiation.
+     * It is considered a design error if any menu item is activated
+     * prior to setting this value.
+     * 
+     * @see #setVariableTable
+     */
+    private VariableTable       varTable;
     
     /**
      * Constructor.
@@ -61,6 +74,11 @@ public class CPMenuBar extends JMenuBar
         add( configHelpMenu() );
     }
     
+    public void setVariableTable( VariableTable table )
+    {
+        this.varTable = table;
+    }
+    
     /**
      * Assembles the application's file menu.
      * 
@@ -80,7 +98,7 @@ public class CPMenuBar extends JMenuBar
             KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK );
         save.setAccelerator( ctrlS );
         
-        open.addActionListener( e -> log( "Open selected" ) );
+        open.addActionListener( this::openAction );
         save.addActionListener( e -> log( "Save selected" ) );
         saveAs.addActionListener( e -> log( "Save As selected" ) );
         exit.addActionListener( e -> System.exit( 0 ) );
@@ -90,10 +108,7 @@ public class CPMenuBar extends JMenuBar
         menu.add( saveAs );
         menu.add( exit );
         
-        // Not ready to be connected
-        open.setEnabled( false );
         save.setEnabled( false );
-        saveAs.setEnabled( false );
         
         return menu;
     }
@@ -223,6 +238,13 @@ public class CPMenuBar extends JMenuBar
                 null
             );
         }
+    }
+    
+    private void openAction( ActionEvent evt )
+    {
+        Equation    equation    = FileManager.open();
+        if ( equation != null )
+            varTable.load( equation );
     }
     
     /**
