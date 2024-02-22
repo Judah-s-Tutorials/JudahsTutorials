@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane.input;
 import java.awt.geom.Point2D;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Stream;
 
 /**
@@ -239,7 +240,7 @@ public interface Equation
      * 
      * @return the name of the parameter
      */
-    String getParam();
+    String getParamName();
 
     /**
      * Sets the name of the parameter
@@ -335,6 +336,47 @@ public interface Equation
     void setRangeStep(double rangeStep);
     
     /**
+     * Sets the precision for displaying 
+     * decimal values.
+     * 
+     * @param precision the given precision
+     */
+    void setPrecision( int precision );
+    
+    /**
+     * Gets the precision for displaying
+     * decimal values.
+     * 
+     * @return  the precision for displaying decimal values
+     */
+    int getPrecision();
+    
+    /**
+     * Sets the type of plot for displaying.
+     * Valid values are YPlot, XXPlot, RPlot, and TPlot.
+     * 
+     * @param precision the given precision
+     */
+    void setPlot( String plot );
+    
+    /**
+     * Returns the type of plot;
+     * 
+     * @return  the type of plot
+     */
+    String getPlot();
+    
+    /**
+     * Determines if a given string
+     * is a valid expression.
+     * 
+     * @param name  the given string
+     * 
+     * @return  true if the given string is a valid variable expression
+     */
+    boolean isValidExpression( String expr );
+    
+    /**
      * Determines if a given string
      * is a valid variable name.
      * Given that underscore is an alphabetic character,
@@ -346,7 +388,24 @@ public interface Equation
      * 
      * @return  true if the given string is a valid variable name
      */
-    boolean isValidName( String name );
+    default boolean isValidName( String name )
+    {
+        boolean status  = false;
+        int     len     = name.length();
+        if ( len == 0 )
+            ; // invalid
+        else if ( !isAlpha( name.charAt( 0 ) ) )
+            ; // invalid
+        else
+        {   
+            OptionalInt optional    =
+                name.chars()
+                .filter( c -> !isAlphanumeric( c ) )
+                .findAny();
+            status = optional.isEmpty();
+        }
+        return status;
+    }
 
     
     /**
@@ -361,7 +420,12 @@ public interface Equation
      * 
      * @see #evaluate(String)
      */
-    boolean isValidValue( String valStr );
+    default boolean isValidValue(String valStr)
+    {
+        Optional<Double>    result  = evaluate( valStr );
+        
+        return result.isPresent();
+    }
     
     /**
      * Parses and evaluates an expression in the context
@@ -396,4 +460,41 @@ public interface Equation
      *      or an empty Optional if an error occurred
      */
     Optional<Double> evaluate( String exprStr );
+    
+    /**
+     * Determine if a given character is alphabetic:
+     * _, or [a-z] or [A-Z].
+     * 
+     * @param ccc   the given character
+     * 
+     * @return  true if the given character is alphabetic.
+     * 
+     *
+     */
+    private static boolean isAlpha( char ccc )
+    {
+        boolean result  =
+            ccc == '_'
+            || (ccc >= 'A' && ccc <= 'Z')
+            || (ccc >= 'a' && ccc <= 'z');
+        return result;
+    }
+    
+    /**
+     * Determine if a given character is alphanumeric:
+     * _, or [a-z], or [A-Z] or [-,9].
+     * 
+     * @param ccc   the given character
+     * 
+     * @return  true if the given character is alphanumeric.
+     */
+    private static boolean isAlphanumeric( int ccc )
+    {
+        boolean result  =
+            ccc == '_'
+            || (ccc >= 'A' && ccc <= 'Z')
+            || (ccc >= 'a' && ccc <= 'z')
+            || (ccc >= '0' && ccc <= '9');
+        return result;
+    }
 }

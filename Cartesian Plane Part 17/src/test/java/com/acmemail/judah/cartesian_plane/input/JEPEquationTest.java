@@ -368,7 +368,7 @@ class JEPEquationTest
     {
         String  pName   = "param";
         equation.setParam( pName );
-        assertEquals( pName, equation.getParam() );
+        assertEquals( pName, equation.getParamName() );
     }
 
     @Test
@@ -528,6 +528,6 @@ class JEPEquationTest
         Set<String> vars    = equation.getVars().keySet();
         for ( String  var : defVars )
             assertTrue( vars.contains( var ), var );
-        assertEquals( "t", equation.getParam() );
+        assertEquals( "t", equation.getParamName() );
     }
 }

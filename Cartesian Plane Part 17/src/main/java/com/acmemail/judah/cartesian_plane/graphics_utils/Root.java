@@ -9,9 +9,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.components.CPMenuBar;
+import com.acmemail.judah.cartesian_plane.components.EquationPanelManager;
 import com.acmemail.judah.cartesian_plane.components.VariableTable;
-import com.acmemail.judah.cartesian_plane.sandbox.EquationPanel;
-import com.acmemail.judah.cartesian_plane.sandbox.ParameterPanel;
 
 /**
  * This class encapsulates the frame that is required
@@ -21,6 +20,10 @@ import com.acmemail.judah.cartesian_plane.sandbox.ParameterPanel;
  */
 public class Root implements Runnable
 {
+    /** The manager for the equation controls in the main frame. */
+    private EquationPanelManager    panelMgr    = 
+        new EquationPanelManager();
+    
     /** The application frame.  */
     private JFrame  frame       = null;
     /** 
@@ -88,7 +91,7 @@ public class Root implements Runnable
          * and variable table must be registered with the menu bar.
          */
         CPMenuBar       menuBar     = new CPMenuBar( frame );
-        VariableTable   varTable    = new VariableTable();
+        VariableTable   varTable    = panelMgr.getVarTable();
         menuBar.setVariableTable( varTable );
         
         /* 
@@ -113,13 +116,13 @@ public class Root implements Runnable
         /* Make the menu bar the north child of the content pane. */
         contentPane.add( menuBar, BorderLayout.NORTH );
         
-        /* Make the variable panel the west child of the content pane. */
-        JPanel          varPanel    = varTable.getPanel();
-        JPanel          paramPanel  = getParameterPanel( varPanel );
-        JPanel          eqPanel     = new EquationPanel();
-        System.out.println( eqPanel.getPreferredSize() );
-        contentPane.add( paramPanel, BorderLayout.WEST );
-        contentPane.add( eqPanel, BorderLayout.SOUTH );
+        /* Make the variable and parameter panels in the 
+         * west child of the content pane. */
+        JPanel          leftPanel   = getLeftPanel();
+        JPanel          plotPanel   = panelMgr.getPlotPanel();
+        System.out.println( plotPanel.getPreferredSize() );
+        contentPane.add( leftPanel, BorderLayout.WEST );
+        contentPane.add( plotPanel, BorderLayout.SOUTH );
         
         /* Make the Canvas the center child of the content pane. */
         contentPane.add( userPanel, BorderLayout.CENTER );
@@ -131,12 +134,12 @@ public class Root implements Runnable
         frame.setVisible( true );
     }
     
-    private JPanel getParameterPanel( JPanel varPanel )
+    private JPanel getLeftPanel()
     {
-        JPanel  panel   = new JPanel();
+        JPanel  panel       = new JPanel();
         panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
-        panel.add( varPanel );
-        panel.add( new ParameterPanel() );
+        panel.add( panelMgr.getVarPanel() );
+        panel.add( panelMgr.getParamPanel() );
         return panel;
     }
 }

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
@@ -47,6 +46,8 @@ public class JEPEquation implements Equation
     private double                      rStart      = -1;
     private double                      rEnd        = 1;
     private double                      rStep       = .05;
+    private int                         precision   = 3;
+    private String                      plot        = "YPlot";
     private String                      xExprStr    = "1";
     private String                      yExprStr    = "1";
     private String                      tExprStr    = "1";
@@ -199,7 +200,16 @@ public class JEPEquation implements Equation
     {
         return rExprStr;
     }
-
+    
+    @Override
+    public boolean isValidExpression( String exprStr )
+    {
+        JEP     parser  = newParser();
+        parser.parseExpression( exprStr );
+        boolean status  = !parser.hasError();
+        return status;
+    }
+    
     @Override
     public Stream<Point2D> yPlot()
     {
@@ -250,7 +260,7 @@ public class JEPEquation implements Equation
     }
 
     @Override
-    public String getParam()
+    public String getParamName()
     {
         return param;
     }
@@ -328,33 +338,48 @@ public class JEPEquation implements Equation
     {
         this.rStep = rangeStep;
     }
-
-    @Override
-    public boolean isValidName( String name )
+    
+    /**
+     * Sets the precision for displaying 
+     * decimal values.
+     * 
+     * @param precision the given precision
+     */
+    public void setPrecision( int precision )
     {
-        boolean status  = false;
-        int     len     = name.length();
-        if ( len == 0 )
-            ; // invalid
-        else if ( !isAlpha( name.charAt( 0 ) ) )
-            ; // invalid
-        else
-        {   
-            OptionalInt optional    =
-                name.chars()
-                .filter( c -> !isAlphanumeric( c ) )
-                .findAny();
-            status = optional.isEmpty();
-        }
-        return status;
+        this.precision = precision;
     }
-
-    @Override
-    public boolean isValidValue(String valStr)
+    
+    /**
+     * Gets the precision for displaying
+     * decimal values.
+     * 
+     * @return  the precision for displaying decimal values
+     */
+    public int getPrecision()
     {
-        Optional<Double>    result  = evaluate( valStr );
-        
-        return result.isPresent();
+        return precision;
+    }
+    
+    /**
+     * Sets the type of plot for displaying.
+     * Valid values are YPlot, XXPlot, RPlot, and TPlot.
+     * 
+     * @param precision the given precision
+     */
+    public void setPlot( String plot )
+    {
+        this.plot = plot;
+    }
+    
+    /**
+     * Returns the type of plot;
+     * 
+     * @return  the type of plot
+     */
+    public String getPlot()
+    {
+        return plot;
     }
 
     @Override
@@ -384,43 +409,6 @@ public class JEPEquation implements Equation
         setYExpression( yExprStr );
         setTExpression( tExprStr );
         setRExpression( rExprStr );
-    }
-    
-    /**
-     * Determine if a given character is alphabetic:
-     * _, or [a-z] or [A-Z].
-     * 
-     * @param ccc   the given character
-     * 
-     * @return  true if the given character is alphabetic.
-     * 
-     *
-     */
-    private static boolean isAlpha( char ccc )
-    {
-        boolean result  =
-            ccc == '_'
-            || (ccc >= 'A' && ccc <= 'Z')
-            || (ccc >= 'a' && ccc <= 'z');
-        return result;
-    }
-    
-    /**
-     * Determine if a given character is alphanumeric:
-     * _, or [a-z], or [A-Z] or [-,9].
-     * 
-     * @param ccc   the given character
-     * 
-     * @return  true if the given character is alphanumeric.
-     */
-    private static boolean isAlphanumeric( int ccc )
-    {
-        boolean result  =
-            ccc == '_'
-            || (ccc >= 'A' && ccc <= 'Z')
-            || (ccc >= 'a' && ccc <= 'z')
-            || (ccc >= '0' && ccc <= '9');
-        return result;
     }
     
     /**

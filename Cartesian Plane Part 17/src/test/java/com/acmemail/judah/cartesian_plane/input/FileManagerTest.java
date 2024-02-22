@@ -413,7 +413,7 @@ class FileManagerTest
         assertEquals( testYEq, actVal.getYExpression() );
         assertEquals( testREq, actVal.getRExpression() );
         assertEquals( testTEq, actVal.getTExpression() );
-        assertEquals( testParam, actVal.getParam() );
+        assertEquals( testParam, actVal.getParamName() );
         assertEquals( testRadius, actVal.getRadiusName() );
         assertEquals( testTheta, actVal.getThetaName() );
     }

@@ -67,7 +67,7 @@ class InputParserExp4jTest
         ParsedCommand   command = 
             new ParsedCommand( Command.PARAM, "param", expName );
         parser.parseInput( command );
-        String          actName = parser.getEquation().getParam();
+        String          actName = parser.getEquation().getParamName();
         assertEquals( expName, actName );
         
     }
@@ -128,7 +128,7 @@ class InputParserExp4jTest
     {
         Equation        equation    = parser.getEquation();
         String          newVal      = "newParamName";
-        testSetString( Command.PARAM, newVal, equation::getParam );
+        testSetString( Command.PARAM, newVal, equation::getParamName );
     }
 
     @Test

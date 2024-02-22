@@ -135,7 +135,7 @@ public class InputParser
             setName( equation::setThetaName, equation::getThetaName );
             break;
         case PARAM:
-            setName( equation::setParam, equation::getParam );
+            setName( equation::setParam, equation::getParamName );
             break;
         case INVALID:
             invalidCommand();

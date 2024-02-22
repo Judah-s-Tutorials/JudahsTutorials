@@ -247,7 +247,7 @@ public class FileManager
      */
     private static void writeParameterNames( Equation equation )
     {
-        lines.add( "param " + equation.getParam() );
+        lines.add( "param " + equation.getParamName() );
         lines.add( "radius " + equation.getRadiusName() );
         lines.add( "theta " + equation.getThetaName() );
     }
@@ -284,5 +284,14 @@ public class FileManager
         lines.add("x= " + equation.getXExpression() );
         lines.add("t= " + equation.getTExpression() );
         lines.add("r= " + equation.getRExpression() );
+    }
+    
+    /**
+     * Generates the commands to set the plot and precision.
+     */
+    private static void writeMiscellaneous( Equation equation )
+    {
+        lines.add( "precision " + equation.getPrecision() );
+        lines.add( "plot " + equation.getPlot() );
     }
 }

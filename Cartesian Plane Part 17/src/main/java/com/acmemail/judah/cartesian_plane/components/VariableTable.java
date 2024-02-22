@@ -38,6 +38,7 @@ import javax.swing.table.TableColumnModel;
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
 /**
  * Encapsulation of defined variable names
@@ -97,6 +98,8 @@ public class VariableTable
         table.getTableHeader().setReorderingAllowed( false );
         table.setAutoCreateRowSorter( true );
         model.addTableModelListener( this::tableChanged );
+        
+        load( new Exp4jEquation() );
     }
     
     /**
@@ -200,7 +203,9 @@ public class VariableTable
         int         prefWidth   =
             temp1.getPreferredSize().width + 
             temp2.getPreferredSize().width;
+        int         prefHeight  = 10 * temp1.getPreferredSize().height;
         spSize.width = prefWidth;
+        spSize.height = prefHeight;
         scrollPane.setPreferredSize( spSize );
         panel.add( scrollPane, BorderLayout.CENTER );
         

@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
@@ -49,6 +48,8 @@ public class Exp4jEquation implements Equation
     private double                      rStart      = -1;
     private double                      rEnd        = 1;
     private double                      rStep       = .05;
+    private String                      plot        = "YPlot";
+    private int                         precision   = 3;
     private String                      xExprStr    = "1";
     private String                      yExprStr    = "1";
     private String                      tExprStr    = "1";
@@ -254,6 +255,18 @@ public class Exp4jEquation implements Equation
         return result;
     }
     
+    @Override
+    public boolean isValidExpression( String exprStr )
+    {
+        Expression expr = new ExpressionBuilder( exprStr )
+            .variables( vars.keySet() )
+            .functions( Exp4jFunctions.getFunctions() )
+            .build();
+        ValidationResult    expr4jResult    = expr.validate( false );
+        boolean             status          = expr4jResult.isValid();
+        return status;
+}
+    
     /**
      * Iterates over the encapsulated range,
      * generating the (x,y) coordinates 
@@ -392,7 +405,7 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public String getParam()
+    public String getParamName()
     {
         return param;
     }
@@ -511,49 +524,46 @@ public class Exp4jEquation implements Equation
     }
     
     /**
-     * Determines if a given string
-     * is a valid variable name.
-     * Given that underscore is an alphabetic character,
-     * a valid variable name is one that
-     * begins with an alphabetic character,
-     * and whose remaining are characters alphanumeric.
+     * Sets the precision for displaying 
+     * decimal values.
      * 
-     * @param name  the given string
-     * 
-     * @return  true if the given string is a valid variable name
+     * @param precision the given precision
      */
-    public boolean isValidName( String name )
+    public void setPrecision( int precision )
     {
-        boolean status  = false;
-        int     len     = name.length();
-        if ( len == 0 )
-            ; // invalid
-        else if ( !isAlpha( name.charAt( 0 ) ) )
-            ; // invalid
-        else
-        {   
-            OptionalInt optional    =
-                name.chars()
-                .filter( c -> !isAlphanumeric( c ) )
-                .findAny();
-            status = optional.isEmpty();
-        }
-        return status;
+        this.precision = precision;
     }
     
     /**
-     * Determines if a given string
-     * is a valid double value.
+     * Gets the precision for displaying
+     * decimal values.
      * 
-     * @param valStr  the given string
-     * 
-     * @return  true if the given string is a valid double value
+     * @return  the precision for displaying decimal values
      */
-    public boolean isValidValue( String valStr )
+    public int getPrecision()
     {
-        Optional<Double>    result  = evaluate( valStr );
-        
-        return result.isPresent();
+        return precision;
+    }
+    
+    /**
+     * Sets the type of plot for displaying.
+     * Valid values are YPlot, XXPlot, RPlot, and TPlot.
+     * 
+     * @param precision the given precision
+     */
+    public void setPlot( String plot )
+    {
+        this.plot = plot;
+    }
+    
+    /**
+     * Returns the type of plot;
+     * 
+     * @return  the type of plot
+     */
+    public String getPlot()
+    {
+        return plot;
     }
     
     @Override
@@ -639,43 +649,6 @@ public class Exp4jEquation implements Equation
                 );
             result = new Result( false, list );
         }
-        return result;
-    }
-    
-    /**
-     * Determine if a given character is alphabetic:
-     * _, or [a-z] or [A-Z].
-     * 
-     * @param ccc   the given character
-     * 
-     * @return  true if the given character is alphabetic.
-     * 
-     *
-     */
-    private static boolean isAlpha( char ccc )
-    {
-        boolean result  =
-            ccc == '_'
-            || (ccc >= 'A' && ccc <= 'Z')
-            || (ccc >= 'a' && ccc <= 'z');
-        return result;
-    }
-    
-    /**
-     * Determine if a given character is alphanumeric:
-     * _, or [a-z], or [A-Z] or [-,9].
-     * 
-     * @param ccc   the given character
-     * 
-     * @return  true if the given character is alphanumeric.
-     */
-    private static boolean isAlphanumeric( int ccc )
-    {
-        boolean result  =
-            ccc == '_'
-            || (ccc >= 'A' && ccc <= 'Z')
-            || (ccc >= 'a' && ccc <= 'z')
-            || (ccc >= '0' && ccc <= '9');
         return result;
     }
     
