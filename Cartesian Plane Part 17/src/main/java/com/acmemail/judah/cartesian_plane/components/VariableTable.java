@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -27,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.event.TableModelEvent;
@@ -38,7 +40,6 @@ import javax.swing.table.TableColumnModel;
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
-import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
 /**
  * Encapsulation of defined variable names
@@ -76,12 +77,17 @@ public class VariableTable
     private final LocalTableModel   model   = 
         new LocalTableModel( headers );
     /** Encapsulated JTable. */
-    private final JTable            table   = new JTable( model );
+    private final JTable    table   = new JTable( model );
     
     /** Number of decimal points for value display. */
-    private int     dPrecision  = 4;
+    private int         dPrecision  = 4;
     /** Formatter for value display. */
-    private String  format      = "%." + dPrecision + "f";
+    private String      format      = "%." + dPrecision + "f";
+    
+    /** The currently loaded equation. */
+    private Equation    equation    = null;
+    /** The text field containing the name of the equation. */
+    JTextField          nameField   = new JTextField();
     
     /**
      * Constructor.
@@ -98,8 +104,6 @@ public class VariableTable
         table.getTableHeader().setReorderingAllowed( false );
         table.setAutoCreateRowSorter( true );
         model.addTableModelListener( this::tableChanged );
-        
-        load( new Exp4jEquation() );
     }
     
     /**
@@ -177,6 +181,7 @@ public class VariableTable
      */
     public void load( Equation equation )
     {
+        this.equation = equation;
         Object[][]  vars    = NameRow.getDataArray( equation );
         model.setDataVector( vars, headers );
         pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
@@ -217,6 +222,7 @@ public class VariableTable
         buttons.add( add );
         buttons.add( minus );
         panel.add( buttons, BorderLayout.SOUTH );
+        panel.add( getNamePanel(), BorderLayout.NORTH );
         
         return panel;
     }
@@ -235,6 +241,23 @@ public class VariableTable
             .peek( i -> bldr.append( model.getValueAt( i, 1 ) ) )
             .forEach( i -> bldr.append( lineSep ) );
         return bldr.toString();
+    }
+    
+    /**
+     * Gets the panel containing 
+     * the JTextField for the equation name
+     * preceded by a descriptive label.
+     * 
+     * @return  
+     *      panel containing a labeled text field 
+     *      for designating an equation name
+     */
+    private JPanel getNamePanel()
+    {
+        JPanel  panel   = new JPanel( new GridLayout( 2, 1 ) );
+        panel.add( new JLabel( "Eq. Name" ) );
+        panel.add( nameField );
+        return panel;
     }
 
     /**

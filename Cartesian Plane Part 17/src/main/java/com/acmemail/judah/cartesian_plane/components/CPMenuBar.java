@@ -50,7 +50,7 @@ public class CPMenuBar extends JMenuBar
      * 
      * @see #setVariableTable
      */
-    private VariableTable       varTable;
+    private CPFrame       cpFrame;
     
     /**
      * Constructor.
@@ -72,11 +72,9 @@ public class CPMenuBar extends JMenuBar
         add( getFileMenu() );
         add( getWindowMenu() );
         add( configHelpMenu() );
-    }
-    
-    public void setVariableTable( VariableTable table )
-    {
-        this.varTable = table;
+        
+        if ( topWindow instanceof CPFrame )
+            cpFrame = (CPFrame)topWindow;
     }
     
     /**
@@ -242,9 +240,12 @@ public class CPMenuBar extends JMenuBar
     
     private void openAction( ActionEvent evt )
     {
-        Equation    equation    = FileManager.open();
-        if ( equation != null )
-            varTable.load( equation );
+        if ( cpFrame != null )
+        {
+            Equation    equation    = FileManager.open();
+            if ( equation != null )
+                cpFrame.loadEquation( equation );
+        }
     }
     
     /**

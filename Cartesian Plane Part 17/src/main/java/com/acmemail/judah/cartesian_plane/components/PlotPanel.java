@@ -3,8 +3,10 @@ package com.acmemail.judah.cartesian_plane.components;
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.awt.geom.Point2D;
 import java.text.ParseException;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -18,13 +20,20 @@ import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.CartesianPlane;
+import com.acmemail.judah.cartesian_plane.NotificationManager;
+import com.acmemail.judah.cartesian_plane.PlotPointCommand;
+import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
 public class PlotPanel extends JPanel
 {
-    private static final String[]   plotTypes   =
-    { "YPlot", "XYPlot", "RPlot", "TPlot" };
+    private static final long serialVersionUID = -40771877652622561L;
+
+    private static final Command[]  plotTypes   =
+    { Command.YPLOT, Command.XYPLOT, Command.RPLOT, Command.TPLOT };
 
     private JFormattedTextField xEquals     = 
         new JFormattedTextField( new ExprFormatter( this::setXExpr ) );
@@ -34,9 +43,10 @@ public class PlotPanel extends JPanel
         new JFormattedTextField( new ExprFormatter( this::setRExpr ) );
     private JFormattedTextField tEquals     = 
         new JFormattedTextField( new ExprFormatter( this::setTExpr ) );
-    private JComboBox<String>   plots       = new JComboBox<>( plotTypes );
+    private JComboBox<Command>   plots      = new JComboBox<>( plotTypes );
     
     private Equation            equation    = null;
+    private CartesianPlane      cartPlane   = null;
     
     public PlotPanel()
     {
@@ -54,6 +64,11 @@ public class PlotPanel extends JPanel
                 
         add( getExprPanel() );
         add( getComboPanel() );
+    }
+    
+    public void setCartesianPlane( CartesianPlane plane )
+    {
+        this.cartPlane = plane;
     }
     
     public void load( Equation equation )
@@ -110,9 +125,34 @@ public class PlotPanel extends JPanel
     
     private void plotAction( ActionEvent evt )
     {
-        String  item    = plots.getSelectedItem().toString().toUpperCase();
-        if ( item.equals( "YPLOT" ) )
-            equation.yPlot();
+        int             inx         = plots.getSelectedIndex();
+        Command         command     = plots.getItemAt( inx );
+        final Stream<Point2D> pointStream;
+        switch ( command )
+        {
+        case YPLOT:
+            pointStream = equation.yPlot();
+            break;
+        case XYPLOT:
+            pointStream = equation.xyPlot();
+            break;
+        case RPLOT:
+            pointStream = equation.rPlot();
+            break;
+        case TPLOT:
+            pointStream = equation.tPlot();
+            break;
+        default:
+            pointStream = null;
+        }
+        
+        if ( pointStream != null )
+            cartPlane.setStreamSupplier( () ->
+                pointStream
+                .map( p -> PlotPointCommand.of( p, cartPlane ) )
+            );
+        NotificationManager.INSTANCE
+            .propagateNotification( CPConstants.REDRAW_NP );
     }
     
     private boolean setXExpr( String expr )

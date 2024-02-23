@@ -401,7 +401,8 @@ import javax.swing.JPanel;
  */
 @SuppressWarnings("serial")
 public class CartesianPlane 
-    extends JPanel implements PropertyChangeListener
+    extends JPanel 
+    implements PropertyChangeListener
 {
     /** 
      * This declaration is just for convenience; it saves
