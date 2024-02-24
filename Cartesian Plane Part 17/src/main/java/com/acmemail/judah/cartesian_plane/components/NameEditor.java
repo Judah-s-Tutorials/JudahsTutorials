@@ -63,6 +63,10 @@ public class NameEditor extends DefaultCellEditor
         boolean status  = false;
         if ( NameValidator.isIdentifier( (String)oValue ) )
             status = super.stopCellEditing();
+        
+        JFormattedTextField field   = (JFormattedTextField)getComponent();
+        System.out.println( field.getValue() );
+        
         return status;
     }
     

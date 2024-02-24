@@ -5,4 +5,4 @@
     set a=3,n=4,t
     x= a sin(n t)cos(t)
     y= a sin(n t)sin(t)
-    xyplot
+    plot xyplot

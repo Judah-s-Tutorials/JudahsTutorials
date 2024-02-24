@@ -2,10 +2,9 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
 import java.awt.GridLayout;
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.swing.BorderFactory;
@@ -27,15 +26,22 @@ public class ParameterPanel extends JPanel
     private static final Equation       testEquation    = 
         new Exp4jEquation();
     
-    private JFormattedTextField start       = getExprTextField();
-    private JFormattedTextField end         = getExprTextField();
-    private JFormattedTextField step        = getDecimalTextField();
-    private JFormattedTextField precision   = getIntegerTextField();
-    private JFormattedTextField radius      = new JFormattedTextField();
-    private JFormattedTextField theta       = new JFormattedTextField();
-    private JFormattedTextField param       = new JFormattedTextField();
-    
     private Equation            equation    = null;
+    
+    private JFormattedTextField start       = 
+        getExprTextField( this::setStart );
+    private JFormattedTextField end         = 
+        getExprTextField( this::setEnd );
+    private JFormattedTextField step        = 
+        getDecimalTextField( this::setStep );
+    private JFormattedTextField precision   = 
+        getIntegerTextField( this::setPrecision );
+    private JFormattedTextField radius      = 
+        getNameTextField( this::setRadiusName );
+    private JFormattedTextField theta       = 
+        getNameTextField( this::setThetaName );
+    private JFormattedTextField param       = 
+        getNameTextField( this::setParam );
     
     public ParameterPanel()
     {
@@ -68,6 +74,7 @@ public class ParameterPanel extends JPanel
     
     public void load( Equation equation )
     {
+        this.equation = equation;
         start.setValue( equation.getRangeStart() );
         end.setValue( equation.getRangeEnd() );
         step.setValue( equation.getRangeStep() );
@@ -77,35 +84,114 @@ public class ParameterPanel extends JPanel
         precision.setValue( equation.getPrecision() );
     }
     
-    private static JFormattedTextField getDecimalTextField()
+    private JFormattedTextField 
+    getDecimalTextField( Consumer<Double> consumer )
     {
         AbstractFormatter   formatter   = 
-            new NumberFormatter( Double::parseDouble );
+            new ValueFormatter( Double::parseDouble );
         JFormattedTextField textField   =
             new JFormattedTextField( formatter );
         textField.setHorizontalAlignment( SwingConstants.RIGHT );
         textField.setInputVerifier( new FieldVerifier() );
+        
+        textField.addPropertyChangeListener( "value", e -> {
+            Object  value   = e.getNewValue();
+            if ( equation != null  )
+                consumer.accept( (Double)(value) );
+        });
         return textField;
     }
     
-    private static JFormattedTextField getIntegerTextField()
+    private JFormattedTextField 
+    getIntegerTextField( Consumer<Integer> consumer )
     {
         AbstractFormatter   formatter   = 
-            new NumberFormatter( Integer::parseInt );
+            new ValueFormatter( Integer::parseInt );
         JFormattedTextField textField   = 
             new JFormattedTextField( formatter );
         textField.setHorizontalAlignment( SwingConstants.RIGHT );
+        textField.setInputVerifier( new FieldVerifier() );
+        
+        textField.addPropertyChangeListener( "value", e -> {
+            Object  value   = e.getNewValue();
+            if ( equation != null  )
+                consumer.accept( (Integer)(value) );
+        });
         return textField;
     }
     
-    private static JFormattedTextField getExprTextField()
+    private JFormattedTextField 
+    getExprTextField( Consumer<String> consumer )
     {
         AbstractFormatter   formatter   = 
-            new NumberFormatter( ParameterPanel::parseExpression );
+            new ValueFormatter( ParameterPanel::parseExpression );
         JFormattedTextField textField   = 
             new JFormattedTextField( formatter );
         textField.setHorizontalAlignment( SwingConstants.RIGHT );
+        textField.setInputVerifier( new FieldVerifier() );
+        
+        textField.addPropertyChangeListener( "value", e -> {
+            Object  value   = e.getNewValue();
+            if ( equation != null  )
+                consumer.accept( value.toString() );
+        });
         return textField;
+    }
+    
+    private JFormattedTextField 
+    getNameTextField( Consumer<String> consumer )
+    {
+        AbstractFormatter   formatter   = new NameFormatter();
+        JFormattedTextField textField   = 
+            new JFormattedTextField( formatter );
+        textField.setHorizontalAlignment( SwingConstants.RIGHT );
+        textField.setInputVerifier( new FieldVerifier() );
+        
+        textField.addPropertyChangeListener( "value", e -> {
+            if ( equation != null )
+                consumer.accept( e.getNewValue().toString() );
+        });
+        
+        return textField;
+    }
+    
+    private void setRadiusName( String name )
+    {
+        equation.setRadiusName( name );
+    }
+    
+    private void setThetaName( String name )
+    {
+        equation.setThetaName( name );
+    }
+    
+    private void setParam( String name )
+    {
+        equation.setParam( name );
+    }
+    
+    private void setStart( String val )
+    {
+        Optional<Double>  dVal    = equation.evaluate( val );
+        if ( dVal.isPresent() )
+            equation.setRangeStart( dVal.get() );
+    }
+    
+    private void setEnd( String val )
+    {
+        Optional<Double>  dVal    = equation.evaluate( val );
+        if ( dVal.isPresent() )
+            equation.setRangeEnd( dVal.get() );
+    }
+    
+    private void setStep( Double val )
+    {
+        equation.setRangeStep( val );
+    }
+    
+    private void setPrecision( Integer val )
+    {
+        equation.setPrecision( val );
     }
     
     private static Double parseExpression( String str )
@@ -117,23 +203,24 @@ public class ParameterPanel extends JPanel
         return opt.get();
     }
     
-    private static class NumberFormatter extends DefaultFormatter
+    private static class ValueFormatter extends DefaultFormatter
     {
         private static final long serialVersionUID = 5606928606415501983L;
         private final Function<String,Number>   validator;
-        public NumberFormatter( Function<String,Number> validator )
+        public ValueFormatter( Function<String,Number> validator )
         {
             this.validator = validator;
             setOverwriteMode( false );
         }
         @Override
-        public String stringToValue( String str )
+        public Object stringToValue( String str )
             throws ParseException
         {
             JFormattedTextField fmtField    = getFormattedTextField();
+            Number  num = null;
             try
             {
-                validator.apply( str );
+                num = validator.apply( str );
                 fmtField.setForeground( Color.BLACK );
             }
             catch ( NumberFormatException exc )
@@ -141,6 +228,27 @@ public class ParameterPanel extends JPanel
                 fmtField.setForeground( Color.RED );
                 throw new ParseException( "Invalid name", 0 );
             }
+            return num;
+        }
+    }
+    
+    private static class NameFormatter extends DefaultFormatter
+    {
+        public NameFormatter()
+        {
+            setOverwriteMode( false );
+        }
+        @Override
+        public String stringToValue( String str )
+            throws ParseException
+        {
+            JFormattedTextField fmtField    = getFormattedTextField();
+            if ( !NameValidator.isIdentifier( str ) )
+            {
+                fmtField.setForeground( Color.RED );
+                throw new ParseException( "Invalid name", 0 );
+            }
+            fmtField.setForeground( Color.BLACK );
             return str;
         }
     }

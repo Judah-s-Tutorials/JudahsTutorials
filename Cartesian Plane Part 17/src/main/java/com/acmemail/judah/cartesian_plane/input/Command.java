@@ -11,6 +11,9 @@ import java.util.Arrays;
  * 
  * @see Exp4jEquation
  */
+/**
+ * @author Jack Straub
+ */
 public enum Command
 {
     /** Creates a new equation. */
@@ -59,6 +62,13 @@ public enum Command
     THETA( "Describes the name of the angle variable in a polar equation" ),
     /** Sets the name of the radius variable in a polar equation. */
     RADIUS( "Describes the name of the radius variable in a polar equation" ),
+    /** 
+     * Describes the number of decimal points to format when
+     * displaying a floating point value in a GUI.
+     */
+    PREC( "For display purposes only: number of decimal points to display" ),
+    /** Records the last type of plot; mainly for internal use. */
+    PLOT( "Last recorded plot type: YPLOT, XYPLOT, RPLOT or TPLOT" ),
     /** Generates the plot of the function y=f(x). */
     YPLOT( "Generates a plot of the form (x,y) = f(x)" ),
     /** Generates the plot of the parametric equation (x,y)=f(t). */

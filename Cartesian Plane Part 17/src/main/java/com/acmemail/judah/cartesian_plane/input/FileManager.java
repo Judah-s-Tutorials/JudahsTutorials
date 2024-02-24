@@ -196,6 +196,7 @@ public class FileManager
         writeVars( equation );
         writeParameterNames( equation );
         writeExpressions( equation );
+        writeMiscellaneous( equation );
         lines.forEach( pWriter::println );
     }
     
@@ -291,7 +292,7 @@ public class FileManager
      */
     private static void writeMiscellaneous( Equation equation )
     {
-        lines.add( "precision " + equation.getPrecision() );
+        lines.add( "prec " + equation.getPrecision() );
         lines.add( "plot " + equation.getPlot() );
     }
 }

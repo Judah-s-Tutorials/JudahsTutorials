@@ -70,8 +70,8 @@ public class PlotPanel extends JPanel
     {
         this.cartPlane = plane;
     }
-    
     public void load( Equation equation )
+    
     {
         this.equation = equation;
         
@@ -85,7 +85,9 @@ public class PlotPanel extends JPanel
         yEquals.setValue( equation.getYExpression() );
         rEquals.setValue( equation.getRExpression() );
         tEquals.setValue( equation.getTExpression() );
-        plots.setSelectedItem( equation.getPlot() );
+        String  strPlot = equation.getPlot().toUpperCase();
+        Command cmdPlot = Command.valueOf( strPlot );
+        plots.setSelectedItem( cmdPlot );
     }
     
     private JPanel getExprPanel()

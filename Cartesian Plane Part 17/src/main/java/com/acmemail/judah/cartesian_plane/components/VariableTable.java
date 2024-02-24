@@ -184,6 +184,7 @@ public class VariableTable
         this.equation = equation;
         Object[][]  vars    = NameRow.getDataArray( equation );
         model.setDataVector( vars, headers );
+        nameField.setText( equation.getName() );
         pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
     }
     
@@ -566,6 +567,13 @@ public class VariableTable
                 col == 1 ? Double.class : super.getColumnClass( col );
             return clazz;
         }
+        
+//        @Override
+//        public boolean isCellEditable( int row, int col )
+//        {
+//            boolean editable    = col == 0 ? false : true;
+//            return editable;
+//        }
     }
     
     /**

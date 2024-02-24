@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -9,6 +10,7 @@ import java.util.StringTokenizer;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
 import java.util.function.Function;
+import java.util.function.IntConsumer;
 import java.util.function.Supplier;
 
 /**
@@ -20,6 +22,18 @@ import java.util.function.Supplier;
  */
 public class InputParser
 {
+    /** 
+     * List of valid values for the plot command.
+     * @see #parsePlot()
+     */
+    private static final List<Command>  validPlots  =
+        Arrays.asList( 
+            Command.YPLOT,
+            Command.XYPLOT,
+            Command.TPLOT,
+            Command.RPLOT
+        );
+    
     /** 
      * List of error message associated
      * with an attempted operation.
@@ -128,6 +142,12 @@ public class InputParser
         case STEP:
             parseExpression( equation::setRangeStep, equation::getRangeStep );
             break;
+        case PREC:
+            parseInteger( equation::setPrecision, equation::getPrecision );
+            break;
+        case PLOT:
+            parsePlot();
+            break;
         case RADIUS:
             setName( equation::setRadiusName, equation::getRadiusName );
             break;
@@ -231,6 +251,70 @@ public class InputParser
                 setter.accept( opt.get() );
             else
                 formatError( argString, "is not a valid expression" );
+        }
+    }
+    
+    /**
+     * Interprets the current argument as an expression,
+     * converts it to an int
+     * and sets the value in the encapsulated Equation.
+     * If the argument string is empty
+     * the current value of the resource
+     * is printed to stdout.
+     * If an error occurs
+     * associated messages 
+     * are stored in the <em>errors</em> list.
+     * 
+     * @param setter    method to set the converted value
+     * @param getter    method to obtain the current value
+     *                  of the indicated resource
+     */
+    private void 
+    parseInteger( IntConsumer setter, Supplier<Object> getter )
+    {
+        if ( argString.isEmpty() )
+            System.out.println( getter.get() );
+        else
+        {
+            try
+            {
+                int iVal    = Integer.parseInt( argString );
+                setter.accept( iVal );
+            }
+            catch ( NumberFormatException exc )
+            {
+                formatError( argString, "is not a valid integer" );
+            }
+        }
+    }
+    
+    /**
+     * Interprets the current argument as a type of plot,
+     * YPLOT, XPLOT, XYPLOT, RPLOT or TPLOT.
+     * Converts it to a Command
+     * and sets the value in the encapsulated Equation.
+     * If the argument string is empty
+     * the current value of the resource
+     * is printed to stdout.
+     * If an error occurs
+     * associated messages 
+     * are stored in the <em>errors</em> list.
+     * 
+     * @param setter    method to set the converted value
+     * @param getter    method to obtain the current value
+     *                  of the indicated resource
+     */
+    private void parsePlot()
+    {
+        if ( argString.isEmpty() )
+            System.out.println( equation.getPlot() );
+        else
+        {
+            Command cmd = Command.valueOf( argString.toUpperCase() );
+            if ( validPlots.contains( cmd ) )
+                equation.setPlot( argString );
+            else
+                formatError( argString, "is not a valid plot" );
         }
     }
     

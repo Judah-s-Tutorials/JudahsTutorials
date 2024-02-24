@@ -279,6 +279,7 @@ public class Exp4jEquation implements Equation
     @Override
     public Stream<Point2D> yPlot()
     {
+        plot = "YPlot";
         yExpr.setVariables( vars );
         ValidationResult    result    = yExpr.validate( true );
         if ( result != ValidationResult.SUCCESS )
@@ -305,6 +306,7 @@ public class Exp4jEquation implements Equation
     @Override
     public Stream<Point2D> xyPlot()
     {
+        plot = "XYPlot";
         xExpr.setVariables( vars );
         ValidationResult    result    = xExpr.validate( true );
         if ( !result.isValid() )
@@ -335,6 +337,7 @@ public class Exp4jEquation implements Equation
     @Override
     public Stream<Point2D> rPlot()
     {
+        plot = "RPlot";
         rExpr.setVariables( vars );
         ValidationResult    result    = rExpr.validate( true );
         if ( !result.isValid() )
@@ -354,6 +357,7 @@ public class Exp4jEquation implements Equation
     @Override
     public Stream<Point2D> tPlot()
     {
+        plot = "TPlot";
         tExpr.setVariables( vars );
         ValidationResult    result    = tExpr.validate( true );
         if ( !result.isValid() )
