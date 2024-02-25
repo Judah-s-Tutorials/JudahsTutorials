@@ -31,7 +31,7 @@ public class CPFrame extends JFrame
      * Table of variable name/value pairs to be displayed 
      * at left of content pane. 
      */
-    private final VariableTable     varTable    = new VariableTable();
+    private final VariablePanel     varPanel    = new VariablePanel();
     /** 
      * Panel containing parameters, e.g. range start/end, to be displayed 
      * at left of content pane. 
@@ -114,7 +114,7 @@ public class CPFrame extends JFrame
     public void loadEquation(Equation equation)
     {
         this.equation = equation;
-        varTable.load( equation );
+        varPanel.load( equation );
         paramPanel.load( equation );
         plotPanel.load( equation );
     }
@@ -138,7 +138,7 @@ public class CPFrame extends JFrame
     {
         JPanel  panel       = new JPanel();
         panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
-        panel.add( varTable.getPanel() );
+        panel.add( varPanel );
         panel.add( paramPanel );
         return panel;
     }

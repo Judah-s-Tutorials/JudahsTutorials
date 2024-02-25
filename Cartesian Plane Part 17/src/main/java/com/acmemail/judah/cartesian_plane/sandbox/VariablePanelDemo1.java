@@ -1,7 +1,6 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BorderLayout;
-import java.io.IOException;
 import java.util.stream.IntStream;
 
 import javax.swing.JButton;
@@ -9,11 +8,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.acmemail.judah.cartesian_plane.components.VariablePanel;
 import com.acmemail.judah.cartesian_plane.components.VariableTable;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
-public class VariableTableDemo2
+public class VariablePanelDemo1
 {
     private static final String inFile  = 
         "data/VariableTableData1.csv";
@@ -31,25 +31,15 @@ public class VariableTableDemo2
     
     private static void buildGUI()
     {
-        VariableTable   table   = null;
+        VariablePanel   table   = null;
         Equation    equation    = new Exp4jEquation();
-        IntStream.range( 0, 15 )
-            .forEach( i -> 
+        IntStream.range( 0, 15 ).forEach( i -> 
             equation.setVar("" + (char)('a' + i), i * 1.1 ) );
-        table = new VariableTable();
+        table = new VariablePanel();
         table.load( equation );
-//        try
-//        {
-//            table.load( inFile );
-//        }
-//        catch ( IOException exc )
-//        {
-//            exc.printStackTrace();
-//            System.exit( 1 );
-//        }
 
         JPanel          cPane   = new JPanel( new BorderLayout() );
-        cPane.add( table.getPanel(), BorderLayout.CENTER );
+        cPane.add( table, BorderLayout.CENTER );
         
         JButton         exit    = new JButton( "Exit" );
         JPanel          buttons = new JPanel();

@@ -4,25 +4,18 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
+import java.beans.PropertyChangeEvent;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.Vector;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -39,7 +32,9 @@ import javax.swing.table.TableColumnModel;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
 /**
  * Encapsulation of defined variable names
@@ -52,7 +47,8 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
  * 
  * @see #getPanel()
  */
-public class VariableTable
+@SuppressWarnings("serial")
+public class VariablePanel extends JPanel
 {
     /** Platform-specific line separator. */
     private static final String     lineSep = System.lineSeparator();
@@ -85,7 +81,7 @@ public class VariableTable
     private String      format      = "%." + dPrecision + "f";
     
     /** The currently loaded equation. */
-    private Equation    equation    = null;
+    private Equation    equation    = new Exp4jEquation();
     /** The text field containing the name of the equation. */
     JTextField          nameField   = new JTextField();
     
@@ -93,82 +89,51 @@ public class VariableTable
      * Constructor.
      * Creates and initializes an empty table.
      */
-    public VariableTable()
+    public VariablePanel()
     {
+        super( new BorderLayout() );
+        
         TableColumnModel    colModel    = table.getColumnModel();
         TableColumn         column0     = colModel.getColumn( 0 );
         TableColumn         column1     = colModel.getColumn( 1 );
-        column0.setCellEditor( new NameEditor() );
+        NameEditor          nameEditor  = new NameEditor();
+        column0.setCellEditor( nameEditor );
         column1.setCellRenderer( new ValueRenderer() );
         table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
         table.getTableHeader().setReorderingAllowed( false );
         table.setAutoCreateRowSorter( true );
         model.addTableModelListener( this::tableChanged );
-    }
-    
-    /**
-     * Loads the variable table from a text file
-     * of comma separated values.
-     * 
-     * @param inFile    input file path
-     * 
-     * @throws IOException  if an input error occurs
-     */
-    public void load( String inFile )
-        throws IOException
-    {
-        try ( 
-            FileInputStream inStream = new FileInputStream( inFile );
-            Reader reader = new InputStreamReader( inStream );
-        )
-        {
-            load( reader );
-        }
         
-        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
-    }
-    
-    /**
-     * Loads the variable table from text stream
-     * of comma separated values.
-     * 
-     * @param inStream      input stream
-     * 
-     * @throws IOException  if an input error occurs
-     */
-    public void load( InputStream inStream )
-        throws IOException
-    {
-        try ( Reader reader = new InputStreamReader( inStream  ) )
-        {
-            load( reader );
-        }
+        JFormattedTextField fmt = nameEditor.getComponent();
+        fmt.addPropertyChangeListener( "value", this::nameChanged );
         
-        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
-    }
-    
-    /**
-     * Loads the variable table from a reader
-     * whose lines consist of comma separated values.
-     * 
-     * @param inStream      input stream
-     * 
-     * @throws IOException  if an input error occurs
-     */
-    public void load( Reader reader )
-        throws IOException
-    {
-        try ( 
-            BufferedReader bReader = new BufferedReader( reader );
-        )
-        {
-            bReader.lines()
-                .map( NameRow::new )
-                .map( r -> r.getData() )
-                .forEach( o -> model.addRow( o ) );
-            
-            pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
-        }
+        load( equation );
+        Border      border      =
+            BorderFactory.createEmptyBorder( 3, 3, 0, 3 );
+        JScrollPane scrollPane  = new JScrollPane( table );
+        setBorder( border );
+        
+        Dimension   spSize      = scrollPane.getPreferredSize();
+        JLabel      temp1       = new JLabel( headers[0].toString() );
+        JLabel      temp2       = new JLabel( headers[1].toString() );
+        int         prefWidth   =
+            temp1.getPreferredSize().width + 
+            temp2.getPreferredSize().width;
+        int         prefHeight  = 10 * temp1.getPreferredSize().height;
+        spSize.width = prefWidth;
+        spSize.height = prefHeight;
+        scrollPane.setPreferredSize( spSize );
+        add( scrollPane, BorderLayout.CENTER );
+        
+        JPanel  buttons = new JPanel();
+        JButton add     = new JButton( "\u2795" );
+        add.addActionListener( this::addAction );
+        JButton minus   = new JButton( "\u2796" );
+        minus.addActionListener( this::deleteAction );
+        buttons.add( add );
+        buttons.add( minus );
+        add( buttons, BorderLayout.SOUTH );
+        add( getNamePanel(), BorderLayout.NORTH );
     }
     
     /**
@@ -182,59 +147,10 @@ public class VariableTable
     public void load( Equation equation )
     {
         this.equation = equation;
-//        Object[][]  vars    = NameRow.getDataArray( equation );
-//        model.setDataVector( vars, headers );
-//        nameField.setText( equation.getName() );
-//        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
-        
+        model.setRowCount( 0 );
         equation.getVars().entrySet().stream()
             .map( e -> new Object[] { e.getKey(), e.getValue() } )
             .forEach( o -> model.addRow( o ) );
-        
-//        equation.getVars().entrySet().stream()
-//            .map( e -> new NameRow( e.getKey(), e.getValue() ) )
-//            .map( r -> r.getData() )
-//            .forEach( o -> model.addRow( o ) );
-    }
-    
-    /**
-     * Returns a JPanel with a BorderLayout.
-     * The center region consists of a JScrollPane
-     * whose viewport viewer is the encapsulated JTable.
-     * 
-     * @return
-     */
-    public JPanel getPanel()
-    {
-        Border      border      =
-            BorderFactory.createEmptyBorder( 3, 3, 0, 3 );
-        JPanel      panel       = new JPanel( new BorderLayout() );
-        JScrollPane scrollPane  = new JScrollPane( table );
-        panel.setBorder( border );
-        
-        Dimension   spSize      = scrollPane.getPreferredSize();
-        JLabel      temp1       = new JLabel( headers[0].toString() );
-        JLabel      temp2       = new JLabel( headers[1].toString() );
-        int         prefWidth   =
-            temp1.getPreferredSize().width + 
-            temp2.getPreferredSize().width;
-        int         prefHeight  = 10 * temp1.getPreferredSize().height;
-        spSize.width = prefWidth;
-        spSize.height = prefHeight;
-        scrollPane.setPreferredSize( spSize );
-        panel.add( scrollPane, BorderLayout.CENTER );
-        
-        JPanel  buttons = new JPanel();
-        JButton add     = new JButton( "\u2795" );
-        add.addActionListener( this::addAction );
-        JButton minus   = new JButton( "\u2796" );
-        minus.addActionListener( this::deleteAction );
-        buttons.add( add );
-        buttons.add( minus );
-        panel.add( buttons, BorderLayout.SOUTH );
-        panel.add( getNamePanel(), BorderLayout.NORTH );
-        
-        return panel;
     }
     
     /**
@@ -331,14 +247,7 @@ public class VariableTable
         {
             try
             {
-                NameRow nameRow = new NameRow( input );
-                if ( !isUniqueName( nameRow.name ) )
-                {
-                    String message = 
-                        "\"" + nameRow.name + "\" is not unique.";
-                    throw new IllegalArgumentException( message );
-                }
-                row = nameRow.getData();
+                row = parseInput( input );
             }
             catch ( IllegalArgumentException exc )
             {
@@ -350,6 +259,54 @@ public class VariableTable
                 );
             }
         }
+        return row;
+    }
+    
+    /**
+     * Parse operator input into a name/value pair.
+     * If unspecified, the value will default to 0.
+     * If specified, the value must follow the name,
+     * and be separated from the name
+     * by at least one space and/or comma.
+     * The name must be a unique, valid identifier.
+     * 
+     * @param input the input to parse
+     * 
+     * @return  
+     *      a row suitable to be added to the GUI's JTable,
+     *      or null if the operation is aborted
+     * @throws IllegalArgumentException
+     */
+    public Object[] parseInput( String input )
+        throws IllegalArgumentException
+    {
+        StringTokenizer tizer       = new StringTokenizer( input, ", " );
+        int             tokenCount  = tizer.countTokens();
+        if ( tokenCount < 1 || tokenCount > 2 )
+            throw new IllegalArgumentException( "Invalid row" );
+        String  name = tizer.nextToken().trim();
+        if ( !NameValidator.isIdentifier( name ) )
+            throw new IllegalArgumentException( "Invalid name" );
+        Optional<?> opt = equation.getVar( name );
+        if ( opt.isPresent() )
+            throw new IllegalArgumentException( "Name not unique" );
+        double          value       = 0;
+        if ( tokenCount == 2 )
+        {
+            String  strValue    = tizer.nextToken().trim();
+            try
+            {
+                value = Double.parseDouble( strValue );
+            }
+            catch ( NumberFormatException exc )
+            {
+                String  msg = "\"" + strValue 
+                    + "\" is not a valid decimal number";
+                throw new IllegalArgumentException( msg, exc );
+            }
+        }
+        
+        Object[]    row     = new Object[]{ name, value };
         return row;
     }
 
@@ -370,169 +327,51 @@ public class VariableTable
         pMgr.setProperty( CPConstants.DM_MODIFIED_PN, true );
     }
     
-    /**
-     * Tests a given name for uniqueness compared 
-     * to all other names in the GUI's JTable.
-     * Returns true if the name is unique.
-     * 
-     * @param name  the given name
-     * 
-     * @return  true if the name is unique
-     */
-    private boolean isUniqueName( String name )
+    private void nameChanged( PropertyChangeEvent evt )
     {
-        boolean isUnique   =
-            IntStream.range( 0, table.getRowCount() )
-                .mapToObj( r -> model.getValueAt( r, 0 ) )
-                .map( name::equals )
-                .findFirst().orElse( true );
-        return isUnique;
-    }
-    
-    /**
-     * Encapsulates a name/value pair.
-     * The name is assumed to be a valid identifer,
-     * and the value a valid double.
-     * 
-     * @author Jack Straub
-     */
-    public static class NameRow
-    {
-        public final String     name;
-        public final double     value;
+        Object  source  = evt.getSource();
+        if ( !(source instanceof JFormattedTextField) )
+            throw new ComponentException( "Spurious event" );
+        JFormattedTextField field   = (JFormattedTextField)source;
+        if ( !evt.getPropertyName().equals( "value" ) )
+            throw new ComponentException( "Spurious event" );
         
-        public NameRow( String name, double value )
-        {
-            this.name = name;
-            this.value = value;
-        }
-        
-        /**
-         * Constructor.
-         * Converts a given string to a name value pair.
-         * The value is optional,
-         * if not present it will default to 0.
-         * If the value is present
-         * it must be separated from the name
-         * by at least one command and/or space.
-         * 
-         * @param row   the given string
-         * 
-         * @throws IllegalArgumentException
-         *      if the given string is not a valid name/value pair
-         */
-        public NameRow( String row )
-            throws IllegalArgumentException
-        {
-            StringTokenizer tizer       = new StringTokenizer( row, ", " );
-            int             tokenCount  = tizer.countTokens();
-            if ( tokenCount < 1 || tokenCount > 2 )
-                throw new IllegalArgumentException( "Invalid row" );
-            name = tizer.nextToken().trim();
-            if ( !NameValidator.isIdentifier( name ) )
-                throw new IllegalArgumentException( "Invalid name" );
-            double          tempValue   = 0;
-            if ( tokenCount == 2 )
-            {
-                String  strValue    = tizer.nextToken().trim();
-                try
-                {
-                    tempValue = Double.parseDouble( strValue );
-                }
-                catch ( NumberFormatException exc )
-                {
-                    String  msg = "\"" + strValue 
-                        + "\" is not a valid decimal number";
-                    throw new IllegalArgumentException( msg, exc );
-                }
-            }
-            value = tempValue;
-        }
-        
-        /**
-         * Returns a two-element Object array
-         * containing the name and value
-         * from the encapsulated pair.
-         *
-         * @return  
-         *      a two-element Object array containing the name and value
-         *      of this pair
-         */
-        public Object[] getData()
-        {
-            Object[]    row = { name, value };
-            return row;
-        }
-        
-        /**
-         * Returns a string representation 
-         * of this name/value pair.
-         * 
-         * @return string representation of this name/value pair
-         */
-        @Override
-        public String toString()
-        {
-            return name + "," + value;
-        }
-        
-        /**
-         * Converts a given collection of NameRow values
-         * to a 2-dimensional object array.
-         * Each row in the array consists of two elements,
-         * with the name of the corresponding NameRow value
-         * on the first element,
-         * and the value in the second.
-         * This is convenient for producing
-         * an Object[][] array suitable for initializing 
-         * a JTable's data model.
-         * 
-         * @param coll  the given collection
-         * 
-         * @return  
-         *      an Object[][] array containing all values
-         *      in the given collection
-         */
-        public static Object[][] getDataArray( Collection<NameRow> coll )
-        {
-            int     len     = coll.size();
-            Object[][] data =
-                coll.stream()
-                    .map( r -> new Object[] { r.name, r.value } )
-                    .toArray( a -> new Object[len][] );
-            return data;
-        }
-        
-        /**
-         * Converts a given collection of NameRow values
-         * to a 2-dimensional object array.
-         * Each row in the array consists of two elements,
-         * with the name of the corresponding NameRow value
-         * on the first element,
-         * and the value in the second.
-         * This is convenient for producing
-         * an Object[][] array suitable for initializing 
-         * a JTable's data model.
-         * 
-         * @param coll  the given collection
-         * 
-         * @return  
-         *      an Object[][] array containing all values
-         *      in the given collection
-         */
-        public static Object[][] getDataArray( Equation equation )
-        {
-            Map<String,Double>  vars    = equation.getVars();
-            Set<String>         keys    = vars.keySet();
-            List<String>        keyList = 
-                keys.stream().collect( Collectors.toList() );
-            keyList.sort( (i1,i2) -> i1.compareTo( i2 ) );
-            Object[][] data =
-                keyList.stream()
-                    .map( n -> new Object[] { n, vars.get( n ) } )
-                    .toArray( a -> new Object[keys.size()][] );
-            return data;
-        }
+        Object  oldName = evt.getOldValue();//.toString();
+        String  newName = evt.getNewValue().toString();
+        System.out.println( "x=" + oldName );
+        System.out.println( "y=" + newName );
+//        // If name was "changed" to itself, ignore
+//        if ( oldName.equals( newName ) )
+//            ;
+//        // If the new name is blank, set it back to the 
+//        // original name
+//        else if ( newName.isEmpty() )
+//            field.setValue( oldName );
+//        // Remove the original name, then check for dupes
+//        else
+//        {
+//            Optional<Double>    oldVal  = equation.getVar( oldName );
+//            equation.removeVar( oldName );
+//            // if dupe display error, then put old name back
+//            Optional<?> test    = equation.getVar( newName );
+//            if ( test.isPresent() )
+//            {
+//                String  msg =
+//                    "\"" + newName + "\" is a duplicate name";
+//                JOptionPane.showMessageDialog(
+//                    null,
+//                    msg,
+//                    "Duplicate Name Error",
+//                    JOptionPane.ERROR_MESSAGE
+//                );
+//                equation.setVar( oldName, oldVal.get() );
+//                field.setValue( oldName );
+//            }
+//            // otherwise add the new name to the equation
+//            else
+//                equation.setVar( newName, oldVal.get() );
+//        }
+            
     }
     
     /**
@@ -544,7 +383,6 @@ public class VariableTable
      * 
      * @see #getColumnClass(int)
      */
-    @SuppressWarnings("serial")
     private static class LocalTableModel extends DefaultTableModel
     {
         /**
@@ -576,13 +414,6 @@ public class VariableTable
                 col == 1 ? Double.class : super.getColumnClass( col );
             return clazz;
         }
-        
-//        @Override
-//        public boolean isCellEditable( int row, int col )
-//        {
-//            boolean editable    = col == 0 ? false : true;
-//            return editable;
-//        }
     }
     
     /**
@@ -592,7 +423,6 @@ public class VariableTable
      * 
      * @author Jack Straub
      */
-    @SuppressWarnings("serial")
     private class ValueRenderer extends DefaultTableCellRenderer
     {
         /**

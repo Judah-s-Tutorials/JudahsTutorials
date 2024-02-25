@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
 import java.text.ParseException;
+import java.util.function.Predicate;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.InputVerifier;
@@ -34,7 +35,7 @@ public class NameEditor extends DefaultCellEditor
     /**
      * Constructor.
      * Instantiates and configures
-     * the JFormattedTextField to be used
+     * a JFormattedTextField to be used
      * as a cell editor.
      */
     public NameEditor()
@@ -43,6 +44,11 @@ public class NameEditor extends DefaultCellEditor
         JFormattedTextField textField   =
             (JFormattedTextField)getComponent();
         textField.setInputVerifier( new IdentVerifier() );
+    }
+    
+    public JFormattedTextField getComponent()
+    {
+        return (JFormattedTextField)super.getComponent();
     }
     
     /**
@@ -63,9 +69,6 @@ public class NameEditor extends DefaultCellEditor
         boolean status  = false;
         if ( NameValidator.isIdentifier( (String)oValue ) )
             status = super.stopCellEditing();
-        
-        JFormattedTextField field   = (JFormattedTextField)getComponent();
-        System.out.println( field.getValue() );
         
         return status;
     }

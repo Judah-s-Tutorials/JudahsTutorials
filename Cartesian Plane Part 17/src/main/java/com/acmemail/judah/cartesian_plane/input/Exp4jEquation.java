@@ -44,7 +44,7 @@ import net.objecthunter.exp4j.ValidationResult;
 public class Exp4jEquation implements Equation
 {
     private final Map<String,Double>    vars        = new HashMap<>();
-    private String                      name        = "";
+    private String                      name        = "New Equation";
     private double                      rStart      = -1;
     private double                      rEnd        = 1;
     private double                      rStep       = .05;
