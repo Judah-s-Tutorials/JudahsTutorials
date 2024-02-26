@@ -203,7 +203,10 @@ public class VariablePanel extends JPanel
             position = table.getRowCount();
         Object[]    row = getNewRow();
         if ( row != null )
+        {
             model.insertRow( position, row );
+            equation.setVar( (String)row[0], (Double)row[1] );
+        }
     }
     
     /**
@@ -220,9 +223,13 @@ public class VariablePanel extends JPanel
         Iterator<Vector>    iter        = data.iterator();
         while ( iter.hasNext() )
         {
-            iter.next();
+            Vector<?>  next    = iter.next();
             if ( Arrays.binarySearch( selected, currInx++ ) >= 0 )
+            {
+                String  name    = (String)next.get( 0 );
+                equation.removeVar( name );
                 iter.remove();
+            }
         }
         model.setDataVector( data, vHeader );
     }
@@ -329,6 +336,10 @@ public class VariablePanel extends JPanel
     
     private void nameChanged( PropertyChangeEvent evt )
     {
+        Object  temp    = evt.getOldValue();
+        if ( temp == null )
+            return;
+
         Object  source  = evt.getSource();
         if ( !(source instanceof JFormattedTextField) )
             throw new ComponentException( "Spurious event" );
@@ -336,41 +347,37 @@ public class VariablePanel extends JPanel
         if ( !evt.getPropertyName().equals( "value" ) )
             throw new ComponentException( "Spurious event" );
         
-        Object  oldName = evt.getOldValue();//.toString();
+        String  oldName = evt.getOldValue().toString();
         String  newName = evt.getNewValue().toString();
-        System.out.println( "x=" + oldName );
-        System.out.println( "y=" + newName );
-//        // If name was "changed" to itself, ignore
-//        if ( oldName.equals( newName ) )
-//            ;
-//        // If the new name is blank, set it back to the 
-//        // original name
-//        else if ( newName.isEmpty() )
-//            field.setValue( oldName );
-//        // Remove the original name, then check for dupes
-//        else
-//        {
-//            Optional<Double>    oldVal  = equation.getVar( oldName );
-//            equation.removeVar( oldName );
-//            // if dupe display error, then put old name back
-//            Optional<?> test    = equation.getVar( newName );
-//            if ( test.isPresent() )
-//            {
-//                String  msg =
-//                    "\"" + newName + "\" is a duplicate name";
-//                JOptionPane.showMessageDialog(
-//                    null,
-//                    msg,
-//                    "Duplicate Name Error",
-//                    JOptionPane.ERROR_MESSAGE
-//                );
-//                equation.setVar( oldName, oldVal.get() );
-//                field.setValue( oldName );
-//            }
-//            // otherwise add the new name to the equation
-//            else
-//                equation.setVar( newName, oldVal.get() );
-//        }
+        System.out.println( "old=" + oldName );
+        System.out.println( "new=" + newName );
+        // If name was "changed" to itself, ignore
+        if ( oldName.equals( newName ) )
+            ;
+        // Remove the original name, then check for dupes
+        else
+        {
+            Optional<Double>    oldVal  = equation.getVar( oldName );
+            equation.removeVar( oldName );
+            // if dupe display error, then put old name back
+            Optional<?> test    = equation.getVar( newName );
+            if ( test.isPresent() )
+            {
+                String  msg =
+                    "\"" + newName + "\" is a duplicate name";
+                JOptionPane.showMessageDialog(
+                    null,
+                    msg,
+                    "Duplicate Name Error",
+                    JOptionPane.ERROR_MESSAGE
+                );
+                equation.setVar( oldName, oldVal.get() );
+                field.setValue( oldName );
+            }
+            // otherwise add the new name to the equation
+            else
+                equation.setVar( newName, oldVal.get() );
+        }
             
     }
     

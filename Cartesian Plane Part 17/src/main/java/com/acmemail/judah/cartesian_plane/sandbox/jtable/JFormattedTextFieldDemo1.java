@@ -27,7 +27,7 @@ import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 public class JFormattedTextFieldDemo1
 {
     /** JFormattedTextField to display in demo GUI. */
-    private final JFormattedTextField fmtField  = 
+    private final JFormattedTextField varField  = 
         new JFormattedTextField( new NameFormatter() );
     /** 
      * Exit button to be displayed in the button panel. Declared as
@@ -92,16 +92,16 @@ public class JFormattedTextFieldDemo1
     {
         JPanel              panel       = 
             new JPanel( new GridLayout( 3, 2 ) );
-        fmtField.setColumns( 10 );
-        fmtField.setInputVerifier( new NameVerifier() );
-        fmtField.addPropertyChangeListener( this::propertyChange );
+        varField.setColumns( 10 );
+        varField.setInputVerifier( new NameVerifier() );
+        varField.addPropertyChangeListener( this::propertyChange );
 
         actField.setEditable( false );
         
         panel.add( new JLabel( "Act Name: " ) );
         panel.add( actField );
         panel.add( new JLabel( "Var Name: " ) );
-        panel.add( fmtField );
+        panel.add( varField );
         panel.add( new JLabel( "Dummy: " ) );
         panel.add( new JTextField() );
         return panel;
@@ -132,8 +132,8 @@ public class JFormattedTextFieldDemo1
      */
     private void printAction( ActionEvent evt )
     {
-        Object  actValue    = fmtField.getValue();
-        String  textValue   = fmtField.getText();
+        Object  actValue    = varField.getValue();
+        String  textValue   = varField.getText();
         log.append( "Actual value: " + actValue );
         log.append( "Display value: " + textValue );
         log.append( "******************" );
@@ -148,7 +148,7 @@ public class JFormattedTextFieldDemo1
     {
         if ( evt.getPropertyName().equals( "value" ) )
         {
-            Object  newVal  = fmtField.getValue();
+            Object  newVal  = varField.getValue();
             String  strVal  = 
                 newVal != null ? newVal.toString() : "";
             actField.setText( strVal );

@@ -2,7 +2,6 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
 import java.text.ParseException;
-import java.util.function.Predicate;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.InputVerifier;
@@ -135,12 +134,18 @@ public class NameEditor extends DefaultCellEditor
             throws ParseException
         {
             JFormattedTextField fmtField    = getFormattedTextField();
+            if ( fmtField.getValue() == null )
+                fmtField.setValue( str );
+            System.out.println( "*** " + fmtField.getText() );
+            System.out.println( "*** " + fmtField.getValue() );
             if ( !NameValidator.isIdentifier( str ) )
             {
                 fmtField.setForeground( Color.RED );
                 throw new ParseException( "Invalid name", 0 );
             }
             fmtField.setForeground( Color.BLACK );
+            System.out.println( "@@@ " + fmtField.getText() );
+            System.out.println( "@@@ " + fmtField.getValue() );
             return str;
         }
     }

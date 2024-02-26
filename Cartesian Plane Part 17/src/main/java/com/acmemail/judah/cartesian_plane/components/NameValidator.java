@@ -28,7 +28,7 @@ public class NameValidator
         boolean status  = false;
         int     len     = name.length();
         if ( len == 0 )
-            status = true; // invalid
+            status = false; // invalid
         else if ( !isAlpha( name.charAt( 0 ) ) )
             ; // invalid
         else
