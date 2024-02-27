@@ -26,6 +26,12 @@ public class FileManager
     /** Used to prompt operator to select a file. */
     public static final JFileChooser chooser;
     
+    /**
+     * True if the previously executed operation succeeded;
+     * false if it failed, or if there is no previous operation.
+     */
+    private static boolean  lastResult  = false;
+    
     // Instantiate and configure the JFileChooser.
     static
     {
@@ -41,6 +47,28 @@ public class FileManager
      */
     private FileManager()
     {
+    }
+    
+    /**
+     * Returns a File object encapsulating
+     * the last opened file.
+     * 
+     * @return
+     */
+    public static File getLastFile()
+    {
+        File    file    = chooser.getSelectedFile();
+        return file;
+    }
+    
+    /**
+     * Returns the status of the last executed operation.
+     * 
+     * @return  the status of the last executed operation
+     */
+    public static boolean getLastResult()
+    {
+        return lastResult;
     }
     
     /**
@@ -198,6 +226,7 @@ public class FileManager
         writeExpressions( equation );
         writeMiscellaneous( equation );
         lines.forEach( pWriter::println );
+        lastResult = true;
     }
     
     /**
@@ -221,6 +250,7 @@ public class FileManager
         reader.stream().forEach( parser::parseInput );
         
         Equation    equation    = parser.getEquation();
+        lastResult = true;
         return equation;
     }
    

@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -15,7 +14,6 @@ import java.util.stream.IntStream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
-import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -24,15 +22,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
-import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-import com.acmemail.judah.cartesian_plane.CPConstants;
-import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
@@ -42,6 +36,9 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
  * Maintained in a JTable with two columns:
  * name, which must be a valid identifier,
  * and value, which must be a valid floating point number. 
+ * The name cannot be edited,
+ * however variable name/value pairs
+ * can be added and deleted.
  * 
  * @author Jack Straub
  * 
@@ -55,9 +52,6 @@ public class VariablePanel extends JPanel
     /** Prompt the operator for a new name and optional value. */
     private static final String     prompt  =
         "Enter [name] or [name,value]";
-    /** Convenient representation of the PropertyManager singleton. */
-    private static final PropertyManager    pMgr    =
-        PropertyManager.INSTANCE;
     
     /** Header row for JTable. */
     private final Object[]          headers = { "Name", "Value" };
@@ -82,8 +76,6 @@ public class VariablePanel extends JPanel
     
     /** The currently loaded equation. */
     private Equation    equation    = new Exp4jEquation();
-    /** The text field containing the name of the equation. */
-    JTextField          nameField   = new JTextField();
     
     /**
      * Constructor.
@@ -94,18 +86,11 @@ public class VariablePanel extends JPanel
         super( new BorderLayout() );
         
         TableColumnModel    colModel    = table.getColumnModel();
-        TableColumn         column0     = colModel.getColumn( 0 );
         TableColumn         column1     = colModel.getColumn( 1 );
-        NameEditor          nameEditor  = new NameEditor();
-        column0.setCellEditor( nameEditor );
         column1.setCellRenderer( new ValueRenderer() );
         table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
         table.getTableHeader().setReorderingAllowed( false );
         table.setAutoCreateRowSorter( true );
-        model.addTableModelListener( this::tableChanged );
-        
-        JFormattedTextField fmt = nameEditor.getComponent();
-        fmt.addPropertyChangeListener( "value", this::nameChanged );
         
         load( equation );
         Border      border      =
@@ -133,7 +118,6 @@ public class VariablePanel extends JPanel
         buttons.add( add );
         buttons.add( minus );
         add( buttons, BorderLayout.SOUTH );
-        add( getNamePanel(), BorderLayout.NORTH );
     }
     
     /**
@@ -167,23 +151,6 @@ public class VariablePanel extends JPanel
             .peek( i -> bldr.append( model.getValueAt( i, 1 ) ) )
             .forEach( i -> bldr.append( lineSep ) );
         return bldr.toString();
-    }
-    
-    /**
-     * Gets the panel containing 
-     * the JTextField for the equation name
-     * preceded by a descriptive label.
-     * 
-     * @return  
-     *      panel containing a labeled text field 
-     *      for designating an equation name
-     */
-    private JPanel getNamePanel()
-    {
-        JPanel  panel   = new JPanel( new GridLayout( 2, 1 ) );
-        panel.add( new JLabel( "Eq. Name" ) );
-        panel.add( nameField );
-        return panel;
     }
 
     /**
@@ -316,70 +283,6 @@ public class VariablePanel extends JPanel
         Object[]    row     = new Object[]{ name, value };
         return row;
     }
-
-    private void tableChanged( TableModelEvent evt )
-    {
-        int     row     = evt.getFirstRow();
-        int     col     = evt.getColumn();
-        if ( row >= 0 && col >= 0 )
-        {
-            Object  val = model.getValueAt( row, col );
-            StringBuilder   bldr    = new StringBuilder();
-            bldr.append( row ).append( "," )
-                .append( col ).append( "," )
-                .append( val );
-            System.out.println( bldr );
-        }
-        
-        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, true );
-    }
-    
-    private void nameChanged( PropertyChangeEvent evt )
-    {
-        Object  temp    = evt.getOldValue();
-        if ( temp == null )
-            return;
-
-        Object  source  = evt.getSource();
-        if ( !(source instanceof JFormattedTextField) )
-            throw new ComponentException( "Spurious event" );
-        JFormattedTextField field   = (JFormattedTextField)source;
-        if ( !evt.getPropertyName().equals( "value" ) )
-            throw new ComponentException( "Spurious event" );
-        
-        String  oldName = evt.getOldValue().toString();
-        String  newName = evt.getNewValue().toString();
-        System.out.println( "old=" + oldName );
-        System.out.println( "new=" + newName );
-        // If name was "changed" to itself, ignore
-        if ( oldName.equals( newName ) )
-            ;
-        // Remove the original name, then check for dupes
-        else
-        {
-            Optional<Double>    oldVal  = equation.getVar( oldName );
-            equation.removeVar( oldName );
-            // if dupe display error, then put old name back
-            Optional<?> test    = equation.getVar( newName );
-            if ( test.isPresent() )
-            {
-                String  msg =
-                    "\"" + newName + "\" is a duplicate name";
-                JOptionPane.showMessageDialog(
-                    null,
-                    msg,
-                    "Duplicate Name Error",
-                    JOptionPane.ERROR_MESSAGE
-                );
-                equation.setVar( oldName, oldVal.get() );
-                field.setValue( oldName );
-            }
-            // otherwise add the new name to the equation
-            else
-                equation.setVar( newName, oldVal.get() );
-        }
-            
-    }
     
     /**
      * Subclass of DefaultTableModel
@@ -420,6 +323,20 @@ public class VariablePanel extends JPanel
             Class<?>    clazz   = 
                 col == 1 ? Double.class : super.getColumnClass( col );
             return clazz;
+        }
+        
+        /**
+         * Returns true if the given column is 0,
+         * else returns false;
+         * 
+         * @param   row row of cell being considered; not used
+         * @param   col column of cell being considered
+         */
+        @Override
+        public boolean isCellEditable(int row, int col )
+        {
+            boolean editable    = col != 0;
+            return editable;
         }
     }
     

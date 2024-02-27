@@ -2,15 +2,24 @@ package com.acmemail.judah.cartesian_plane.components;
 
 
 import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
+
+import Jama.CholeskyDecomposition;
 
 /**
  * This class encapsulates the frame that is required
@@ -49,7 +58,9 @@ public class CPFrame extends JFrame
      * @see #loadEquation(Equation)
      */
     private Equation    equation    = new Exp4jEquation();
-    
+    /** The text field containing the name of the equation. */
+    private JTextField  nameField   = new JTextField();
+
     /**
      * Constructor.
      * Fully initializes and makes visible 
@@ -114,9 +125,20 @@ public class CPFrame extends JFrame
     public void loadEquation(Equation equation)
     {
         this.equation = equation;
+        nameField.setText( equation.getName() );
         varPanel.load( equation );
         paramPanel.load( equation );
         plotPanel.load( equation );
+    }
+    
+    /**
+     * Returns the currently loaded equation.
+     * 
+     * @return  the currently loaded equation
+     */
+    public Equation getEquation()
+    {
+        return equation;
     }
     
     /**
@@ -138,8 +160,42 @@ public class CPFrame extends JFrame
     {
         JPanel  panel       = new JPanel();
         panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+        
+        JPanel  namePanel   = new JPanel( new GridLayout( 2, 1 ) );
+        namePanel.add( new JLabel( "Eq. Name" ) );
+        namePanel.add( nameField );
+        
+        panel.add( namePanel );
         panel.add( varPanel );
         panel.add( paramPanel );
+        
+        // Notify the property manager if the name field changes
+        nameField.addKeyListener( new NameListener() );
         return panel;
+    }
+    
+    /**
+     * Monitors key events in the equation name field.
+     * When detected, sets the DM_MODIFIED_PN property
+     * to true.
+     * 
+     * @author Jack Straub
+     */
+    private static class NameListener implements KeyListener
+    {
+        @Override
+        public void keyTyped(KeyEvent e)
+        {
+            PropertyManager.INSTANCE.setProperty(
+                CPConstants.DM_MODIFIED_PN,
+                true
+            );
+        }
+        /** Required by interface; not used */
+        @Override
+        public void keyPressed(KeyEvent e) {}
+        /** Required by interface; not used */
+        @Override
+        public void keyReleased(KeyEvent e) {}
     }
 }

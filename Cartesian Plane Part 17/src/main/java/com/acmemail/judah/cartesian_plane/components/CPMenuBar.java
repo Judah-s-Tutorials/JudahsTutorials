@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
@@ -21,7 +22,10 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 import com.acmemail.judah.cartesian_plane.input.FileManager;
 
 /**
@@ -33,6 +37,13 @@ import com.acmemail.judah.cartesian_plane.input.FileManager;
 @SuppressWarnings("serial")
 public class CPMenuBar extends JMenuBar
 {
+    /** 
+     * This declaration is just for convenience; it saves
+     * having to write "PropertyManager.INSTANCE" over and over.
+     */
+    private static final PropertyManager pmgr           = 
+        PropertyManager.INSTANCE;
+    
     /** The owner of this dialog. */
     private final Window        topWindow;
     /** Dialog to configure line properties in the Cartesian plane. */
@@ -41,6 +52,9 @@ public class CPMenuBar extends JMenuBar
     private final JDialog       graphDialog;
     /** Dialog to show "about application" page. */
     private final AboutDialog   aboutDialog;
+    
+    /** Currently open equation file; null if none. */
+    private File    currFile    = null;
     
     /** 
      * Table for loading/save variable name/value pairs.
@@ -87,6 +101,7 @@ public class CPMenuBar extends JMenuBar
         JMenu   menu    = new JMenu( "File" );
         menu.setMnemonic( KeyEvent.VK_F );
         
+        JMenuItem   newI    = new JMenuItem( "New", KeyEvent.VK_N );
         JMenuItem   open    = new JMenuItem( "Open", KeyEvent.VK_O );
         JMenuItem   save    = new JMenuItem( "Save", KeyEvent.VK_S );
         JMenuItem   saveAs  = new JMenuItem( "Save As", KeyEvent.VK_A );
@@ -96,8 +111,9 @@ public class CPMenuBar extends JMenuBar
             KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK );
         save.setAccelerator( ctrlS );
         
+        newI.addActionListener( this::newAction );
         open.addActionListener( this::openAction );
-        save.addActionListener( e -> log( "Save selected" ) );
+        save.addActionListener( this::saveAction );
         saveAs.addActionListener( e -> log( "Save As selected" ) );
         exit.addActionListener( e -> System.exit( 0 ) );
         
@@ -107,6 +123,13 @@ public class CPMenuBar extends JMenuBar
         menu.add( exit );
         
         save.setEnabled( false );
+        pmgr.addPropertyChangeListener(
+            CPConstants.DM_MODIFIED_PN, e -> {
+                boolean isModified  = pmgr.asBoolean(
+                    CPConstants.DM_MODIFIED_PN
+                );
+                save.setEnabled( currFile != null && isModified );
+        });
         
         return menu;
     }
@@ -238,13 +261,102 @@ public class CPMenuBar extends JMenuBar
         }
     }
     
+    /**
+     * Processes the file/new button,
+     * which constructs a new equation.
+     * If previous work has not been saved
+     * the operator has the choice 
+     * to cancel the operation.
+     * 
+     * @param evt   object accompanying action event notification
+     */
+    private void newAction( ActionEvent evt )
+    {
+        if ( cpFrame != null )
+        {
+            Equation    equation    = new Exp4jEquation();
+            cpFrame.loadEquation( equation );
+            currFile = null;
+            pmgr.setProperty( 
+                CPConstants.DM_MODIFIED_PN,
+                false
+                );
+
+        }
+    }
+    
+    /**
+     * Processes the file/open button,
+     * which allows the operator
+     * to open an existing equation file.
+     * If previous work has not been saved
+     * the operator has the choice 
+     * to cancel the operation.
+     * 
+     * @param evt   object accompanying action event notification
+     */
     private void openAction( ActionEvent evt )
     {
         if ( cpFrame != null )
         {
             Equation    equation    = FileManager.open();
             if ( equation != null )
+            {
+                currFile = FileManager.getLastFile();
                 cpFrame.loadEquation( equation );
+                pmgr.setProperty(
+                    CPConstants.DM_MODIFIED_PN,
+                    false
+                );
+            }
+        }
+    }
+    
+    /**
+     * Processes the file/save button,
+     * saving the current equation'
+     * to the currently open file.
+     * 
+     * @param evt   object accompanying action event notification
+     */
+    private void saveAction( ActionEvent evt )
+    {
+        if ( cpFrame != null && currFile != null )
+        {
+            Equation    equation    = cpFrame.getEquation();
+            FileManager.save( currFile, equation );
+            if ( FileManager.getLastResult() )
+            {
+                pmgr.setProperty( 
+                    CPConstants.DM_MODIFIED_PN,
+                    false
+                );
+            }
+        }
+    }
+    
+    /**
+     * Processes the file/saveAs button,
+     * saving the current equation
+     * to a destination file chosen
+     * by the operator.
+     * 
+     * @param evt   object accompanying action event notification
+     */
+    private void saveAsAction( ActionEvent evt )
+    {
+        if ( cpFrame != null  )
+        {
+            Equation    equation    = cpFrame.getEquation();
+            FileManager.save( equation );
+            if ( FileManager.getLastResult() )
+            {
+                currFile = FileManager.getLastFile();
+                pmgr.setProperty( 
+                    CPConstants.DM_MODIFIED_PN,
+                    false
+                );
+            }
         }
     }
     
