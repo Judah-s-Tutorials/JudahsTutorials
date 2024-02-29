@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -77,6 +78,19 @@ public class VariablePanel extends JPanel
     /** The currently loaded equation. */
     private Equation    equation    = new Exp4jEquation();
     
+    /** 
+     * Button to add a variable; declared here for the convenience
+     * of the load method.
+     * @see #load(Equation)
+     */
+    private JButton     plus;
+    /** 
+     * Button to delete a variable; declared here for the convenience
+     * of the load method.
+     * @see #load(Equation)
+     */
+    private JButton     minus;
+    
     /**
      * Constructor.
      * Creates and initializes an empty table.
@@ -92,7 +106,6 @@ public class VariablePanel extends JPanel
         table.getTableHeader().setReorderingAllowed( false );
         table.setAutoCreateRowSorter( true );
         
-        load( equation );
         Border      border      =
             BorderFactory.createEmptyBorder( 3, 3, 0, 3 );
         JScrollPane scrollPane  = new JScrollPane( table );
@@ -111,13 +124,15 @@ public class VariablePanel extends JPanel
         add( scrollPane, BorderLayout.CENTER );
         
         JPanel  buttons = new JPanel();
-        JButton add     = new JButton( "\u2795" );
-        add.addActionListener( this::addAction );
-        JButton minus   = new JButton( "\u2796" );
+        plus = new JButton( "\u2795" );
+        plus.addActionListener( this::addAction );
+        minus = new JButton( "\u2796" );
         minus.addActionListener( this::deleteAction );
-        buttons.add( add );
+        buttons.add( plus );
         buttons.add( minus );
         add( buttons, BorderLayout.SOUTH );
+
+        load( equation );
     }
     
     /**
@@ -131,10 +146,18 @@ public class VariablePanel extends JPanel
     public void load( Equation equation )
     {
         this.equation = equation;
+        boolean newState    = equation != null;
         model.setRowCount( 0 );
-        equation.getVars().entrySet().stream()
-            .map( e -> new Object[] { e.getKey(), e.getValue() } )
-            .forEach( o -> model.addRow( o ) );
+        if ( equation != null )
+        {
+            equation.getVars().entrySet().stream()
+                .map( e -> new Object[] { e.getKey(), e.getValue() } )
+                .forEach( o -> model.addRow( o ) );
+            table.setEnabled( true );
+        }
+        
+        Stream.of( table, plus, minus )
+            .forEach( c -> c.setEnabled( newState ) );
     }
     
     /**

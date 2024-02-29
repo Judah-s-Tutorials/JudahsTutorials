@@ -331,8 +331,12 @@ public class CPConstants
     /////////////////////////////////////////////////
     /** Indicates if data model modified since last save. */
     public static final String  DM_MODIFIED_PN          = "dataModified";
-    /** Default value for "data model modified */
+    /** Default value for "data model modified. */
     public static final String  DM_MODIFIED_DV          = "false";
+    /** True if an equation file is open. */
+    public static final String  DM_OPEN_FILE_PN         = "fileOpen";
+    /** Default value for "equation file is open". */
+    public static final String  DM_OPEN_FILE_DV         = "false";
     
     /////////////////////////////////////////////////
     //   Notification properties

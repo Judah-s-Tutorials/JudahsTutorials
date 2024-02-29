@@ -19,8 +19,6 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
-import Jama.CholeskyDecomposition;
-
 /**
  * This class encapsulates the frame that is required
  * to assemble the GUI for our project.
@@ -57,7 +55,7 @@ public class CPFrame extends JFrame
      * can be loaded at will.
      * @see #loadEquation(Equation)
      */
-    private Equation    equation    = new Exp4jEquation();
+    private Equation    equation    = null;
     /** The text field containing the name of the equation. */
     private JTextField  nameField   = new JTextField();
 
@@ -125,10 +123,15 @@ public class CPFrame extends JFrame
     public void loadEquation(Equation equation)
     {
         this.equation = equation;
-        nameField.setText( equation.getName() );
         varPanel.load( equation );
         paramPanel.load( equation );
         plotPanel.load( equation );
+        if ( equation != null )
+        {
+            nameField.setText( equation.getName() );
+        }
+        else
+            nameField.setText( "" );
     }
     
     /**

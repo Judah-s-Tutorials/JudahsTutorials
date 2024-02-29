@@ -61,8 +61,6 @@ public class CPMenuBar extends JMenuBar
      * Must be set at or shortly after instantiation.
      * It is considered a design error if any menu item is activated
      * prior to setting this value.
-     * 
-     * @see #setVariableTable
      */
     private CPFrame       cpFrame;
     
@@ -105,6 +103,7 @@ public class CPMenuBar extends JMenuBar
         JMenuItem   open    = new JMenuItem( "Open", KeyEvent.VK_O );
         JMenuItem   save    = new JMenuItem( "Save", KeyEvent.VK_S );
         JMenuItem   saveAs  = new JMenuItem( "Save As", KeyEvent.VK_A );
+        JMenuItem   delete  = new JMenuItem( "Delete", KeyEvent.VK_D );
         JMenuItem   exit    = new JMenuItem( "Exit", KeyEvent.VK_X );
         
         KeyStroke   ctrlS       =
@@ -114,24 +113,49 @@ public class CPMenuBar extends JMenuBar
         newI.addActionListener( this::newAction );
         open.addActionListener( this::openAction );
         save.addActionListener( this::saveAction );
-        saveAs.addActionListener( e -> log( "Save As selected" ) );
+        saveAs.addActionListener( this::saveAsAction );
+        delete.addActionListener( this::deleteAction );
         exit.addActionListener( e -> System.exit( 0 ) );
         
+        menu.add( newI );
         menu.add( open );
         menu.add( save );
         menu.add( saveAs );
+        menu.add( delete );
         menu.add( exit );
         
         save.setEnabled( false );
         pmgr.addPropertyChangeListener(
+            CPConstants.DM_MODIFIED_PN, e -> configureSave( save ) );
+        pmgr.addPropertyChangeListener(
+            CPConstants.DM_OPEN_FILE_PN, e -> configureSave( save ) );
+        saveAs.setEnabled( false );
+        pmgr.addPropertyChangeListener(
             CPConstants.DM_MODIFIED_PN, e -> {
-                boolean isModified  = pmgr.asBoolean(
-                    CPConstants.DM_MODIFIED_PN
-                );
-                save.setEnabled( currFile != null && isModified );
+                boolean isModified  = 
+                    getProperty( CPConstants.DM_MODIFIED_PN );
+                saveAs.setEnabled( isModified );
+        });
+        delete.setEnabled( false );
+        pmgr.addPropertyChangeListener(
+            CPConstants.DM_OPEN_FILE_PN, e -> {
+                boolean isOpen  = 
+                    pmgr.asBoolean( CPConstants.DM_OPEN_FILE_PN );
+                delete.setEnabled( isOpen );
         });
         
         return menu;
+    }
+    
+    /**
+     * Disable the save button unless a) there is a file open,
+     * and b) data has been modified.
+     */
+    private void configureSave( JMenuItem save )
+    {
+        boolean isModified  = getProperty( CPConstants.DM_MODIFIED_PN );
+        boolean isOpen      = getProperty( CPConstants.DM_OPEN_FILE_PN );
+        save.setEnabled( isModified && isOpen );
     }
     
     /**
@@ -276,12 +300,8 @@ public class CPMenuBar extends JMenuBar
         {
             Equation    equation    = new Exp4jEquation();
             cpFrame.loadEquation( equation );
-            currFile = null;
-            pmgr.setProperty( 
-                CPConstants.DM_MODIFIED_PN,
-                false
-                );
-
+            setCurrFile( null );
+            setProperty( CPConstants.DM_MODIFIED_DV, false );
         }
     }
     
@@ -302,12 +322,9 @@ public class CPMenuBar extends JMenuBar
             Equation    equation    = FileManager.open();
             if ( equation != null )
             {
-                currFile = FileManager.getLastFile();
+                setCurrFile( FileManager.getLastFile() );
                 cpFrame.loadEquation( equation );
-                pmgr.setProperty(
-                    CPConstants.DM_MODIFIED_PN,
-                    false
-                );
+                setProperty( CPConstants.DM_MODIFIED_DV, false );
             }
         }
     }
@@ -327,10 +344,7 @@ public class CPMenuBar extends JMenuBar
             FileManager.save( currFile, equation );
             if ( FileManager.getLastResult() )
             {
-                pmgr.setProperty( 
-                    CPConstants.DM_MODIFIED_PN,
-                    false
-                );
+                setProperty( CPConstants.DM_MODIFIED_DV, false );
             }
         }
     }
@@ -351,25 +365,105 @@ public class CPMenuBar extends JMenuBar
             FileManager.save( equation );
             if ( FileManager.getLastResult() )
             {
-                currFile = FileManager.getLastFile();
-                pmgr.setProperty( 
-                    CPConstants.DM_MODIFIED_PN,
-                    false
-                );
+                setCurrFile( FileManager.getLastFile() );
+                setProperty( CPConstants.DM_MODIFIED_DV, false );
             }
         }
     }
     
     /**
-     * Temporary facility to simulate 
-     * as-of-yet implemented functionality.
-     * Prints a given string to stdout.
+     * Processes the file/saveAs button,
+     * saving the current equation
+     * to a destination file chosen
+     * by the operator.
      * 
-     * @param str   the given string
+     * @param evt   object accompanying action event notification
      */
-    private static void log( String str )
+    private void deleteAction( ActionEvent evt )
     {
-        System.out.println( str );
+        try
+        {
+            if ( currFile == null )
+                throw new IOException( "Nothing to delete" );
+            String  query   =
+                "Really delete " + currFile.getName() + "?";
+            if ( askBoolean( query ) )
+            {
+                currFile.delete();
+                setCurrFile( null );
+                newAction( evt );
+            }
+        }
+        catch( IOException exc)
+        {
+            exc.printStackTrace();
+            JOptionPane.showMessageDialog(
+                topWindow, 
+                exc.getMessage(),
+                "Delete File Error",
+                JOptionPane.ERROR_MESSAGE,
+                null
+            );
+        }
+    }
+    
+    /**
+     * Sets the value of currFile, 
+     * and updates DM_OPEN_FILE_PN.
+     * If currFile is null,
+     * sets DM_OPEN_FILE_PN to false,
+     * else sets it to true.
+     * 
+     * @param file  the file to update currFile; may be null
+     */
+    private void setCurrFile( File file )
+    {
+        currFile = file;
+        boolean hasFile = file != null;
+        pmgr.setProperty(
+            CPConstants.DM_OPEN_FILE_PN, 
+            hasFile
+        );
+    }
+    
+    /**
+     * Updates the given property to the given status.
+     * 
+     * @param propName  the given property
+     * @param status    the given status
+     */
+    private void setProperty( String propName, boolean status )
+    {
+        pmgr.setProperty( propName, status );
+    }
+    
+    /**
+     * Gets the status of the given property
+     * 
+     * @param propName  the given property
+     * 
+     * @return the status of the given property
+     */
+    private boolean getProperty( String propName )
+    {
+        boolean status  = pmgr.asBoolean( propName );
+        return status;
+    }
+    
+    /**
+     * Ask the operator for a yes/no response.
+     * Return true or false, as required. 
+     * 
+     * @param prompt    operator prompt
+     * 
+     * @return  true if operator selects yes
+     */
+    private static boolean askBoolean( String prompt )
+    {
+        int     choice  =
+            JOptionPane.showConfirmDialog( null, prompt );
+        boolean result  = choice == JOptionPane.YES_OPTION;
+        return result;
     }
     
     /**

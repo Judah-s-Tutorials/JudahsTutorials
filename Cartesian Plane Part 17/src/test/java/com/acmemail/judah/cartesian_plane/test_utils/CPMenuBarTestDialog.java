@@ -37,9 +37,6 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  * 
  * @author Jack Straub
  */
-/**
- * @author Jack Straub
- */
 public class CPMenuBarTestDialog
 {
     /** Singleton for this class. */
@@ -98,7 +95,7 @@ public class CPMenuBarTestDialog
         lineDialog = getDialog( "Line" );
         aboutDialog = getDialog( "About" );
     }
-    
+
     /**
      * Method to obtain the sole instance
      * of this class.
@@ -156,7 +153,7 @@ public class CPMenuBarTestDialog
     /**
      * Gets the JMenuItem with the given menu hierarchy.
      * For example,
-     * <em>getMenuItem("Help", "Math Help", "Math is Fun")</em>
+     * <em>tem("Help", "Math Help", "Math is Fun")</em>
      * will return the item with the text "Math is Fun"
      * from the "Math Help" submenu
      * of the "Help" menu.
@@ -295,6 +292,20 @@ public class CPMenuBarTestDialog
     }
     
     /**
+     * Gets the enabled state of the given component.
+     * 
+     * @param comp      the given component
+     * 
+     * @return true if the given component is enabled
+     */
+    public boolean getEnabled( Component comp )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            adHocBoolean1 = comp.isEnabled() );
+        return adHocBoolean1;
+    }
+    
+    /**
      * Finds the JMenu with the given text.
      * It is assumed that this method is invoked
      * from the EDT.
@@ -326,8 +337,8 @@ public class CPMenuBarTestDialog
      * 
      * @return  the menu item with the given menu hierarchy
      * 
-     * @see #getMenuItem(String...)
-     * @see #getMenuItem(JMenu, String)
+     * @see #tem(String...)
+     * @see #tem(JMenu, String)
      */
     private JMenuItem getMenuItemEDT( String... labels )
     {

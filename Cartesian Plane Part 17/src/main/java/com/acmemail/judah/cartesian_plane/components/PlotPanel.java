@@ -44,6 +44,7 @@ public class PlotPanel extends JPanel
     private JFormattedTextField tEquals     = 
         new JFormattedTextField( new ExprFormatter( this::setTExpr ) );
     private JComboBox<Command>   plots      = new JComboBox<>( plotTypes );
+    private JButton              plot       = new JButton( "Plot" );
     
     private Equation            equation    = null;
     private CartesianPlane      cartPlane   = null;
@@ -75,19 +76,25 @@ public class PlotPanel extends JPanel
     {
         this.equation = equation;
         
-        ExprVerifier    verifier        = new ExprVerifier();
-        xEquals.setInputVerifier( verifier );
-        yEquals.setInputVerifier( verifier );
-        rEquals.setInputVerifier( verifier );
-        tEquals.setInputVerifier( verifier );
-        
-        xEquals.setValue( equation.getXExpression() );
-        yEquals.setValue( equation.getYExpression() );
-        rEquals.setValue( equation.getRExpression() );
-        tEquals.setValue( equation.getTExpression() );
-        String  strPlot = equation.getPlot().toUpperCase();
-        Command cmdPlot = Command.valueOf( strPlot );
-        plots.setSelectedItem( cmdPlot );
+        boolean newState    = equation != null;
+        if ( newState )
+        {
+            ExprVerifier    verifier        = new ExprVerifier();
+            xEquals.setInputVerifier( verifier );
+            yEquals.setInputVerifier( verifier );
+            rEquals.setInputVerifier( verifier );
+            tEquals.setInputVerifier( verifier );
+            
+            xEquals.setValue( equation.getXExpression() );
+            yEquals.setValue( equation.getYExpression() );
+            rEquals.setValue( equation.getRExpression() );
+            tEquals.setValue( equation.getTExpression() );
+            String  strPlot = equation.getPlot().toUpperCase();
+            Command cmdPlot = Command.valueOf( strPlot );
+            plots.setSelectedItem( cmdPlot );
+        }
+        Stream.of( xEquals, yEquals, rEquals, tEquals, plots, plot )
+            .forEach( c -> c.setEnabled( newState ) );
     }
     
     private JPanel getExprPanel()
@@ -118,10 +125,9 @@ public class PlotPanel extends JPanel
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
         panel.setLayout( layout );
         
-        JButton     button  = new JButton( "Plot" );
         panel.add( plots );
-        button.addActionListener( this::plotAction );
-        panel.add( button );
+        plot.addActionListener( this::plotAction );
+        panel.add( plot );
         return panel;
     }
     

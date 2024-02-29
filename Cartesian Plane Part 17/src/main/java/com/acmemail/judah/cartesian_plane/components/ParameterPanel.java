@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.InputVerifier;
@@ -75,13 +76,19 @@ public class ParameterPanel extends JPanel
     public void load( Equation equation )
     {
         this.equation = equation;
-        start.setValue( equation.getRangeStart() );
-        end.setValue( equation.getRangeEnd() );
-        step.setValue( equation.getRangeStep() );
-        radius.setValue( equation.getRadiusName() );
-        theta.setValue( equation.getThetaName() );
-        param.setValue( equation.getParamName() );
-        precision.setValue( equation.getPrecision() );
+        boolean newState    = equation != null;
+        if ( newState )
+        {
+            start.setValue( equation.getRangeStart() );
+            end.setValue( equation.getRangeEnd() );
+            step.setValue( equation.getRangeStep() );
+            radius.setValue( equation.getRadiusName() );
+            theta.setValue( equation.getThetaName() );
+            param.setValue( equation.getParamName() );
+            precision.setValue( equation.getPrecision() );
+        }
+        Stream.of( start, end, step, radius, theta, param, precision )
+            .forEach( c -> c.setEnabled( newState ) );
     }
     
     private JFormattedTextField 
