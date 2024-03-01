@@ -344,6 +344,15 @@ public class CPConstants
     /** Notifies the application that the graphic must be redrawn. */
     public static final String  REDRAW_NP               = "redraw";
     
+    /////////////////////////////////////////////////
+    //   Component names
+    /////////////////////////////////////////////////
+    /** The component name of the main application frame. */
+    public static final String  CP_FRAME_CN             = "cpFrame";
+    /** The component name of the equation name field. */
+    public static final String  CP_EQUATION_NAME_CN     = 
+        CP_FRAME_CN + "equationName";
+    
     /**
      * Convert a String to an int and return the int.
      * 

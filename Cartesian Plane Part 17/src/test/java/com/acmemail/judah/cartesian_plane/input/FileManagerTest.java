@@ -388,6 +388,14 @@ class FileManagerTest
         return button;
     }
     
+    /**
+     * Gets the text field for entering a file path
+     * in the file chooser dialog.
+     * 
+     * @return  
+     *      text field for entering a file path
+     *      in the file chooser dialog
+     */
     private JTextField getTextField()
     {
         JTextField              textField   = null;

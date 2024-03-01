@@ -3,8 +3,9 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
@@ -17,7 +18,6 @@ import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
-import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
 /**
  * This class encapsulates the frame that is required
@@ -172,9 +172,31 @@ public class CPFrame extends JFrame
         panel.add( varPanel );
         panel.add( paramPanel );
         
+        // Sets the component name of the name field so
+        // the test classes can find it
+        nameField.setName( CPConstants.CP_EQUATION_NAME_CN );
+        
         // Notify the property manager if the name field changes
         nameField.addKeyListener( new NameListener() );
+        
+        nameField.addActionListener( this::nameAction );
         return panel;
+    }
+    
+    /**
+     * Detects when the operator types enter in the name field,
+     * and commits the name.
+     * 
+     * @param evt   object describing this event; not used
+     */
+    private void nameAction( ActionEvent evt )
+    {
+        PropertyManager.INSTANCE.setProperty(
+            CPConstants.DM_MODIFIED_PN,
+            true
+        );
+        if ( equation != null )
+            equation.setName( nameField.getText() );
     }
     
     /**
@@ -184,7 +206,7 @@ public class CPFrame extends JFrame
      * 
      * @author Jack Straub
      */
-    private static class NameListener implements KeyListener
+    private static class NameListener extends KeyAdapter
     {
         @Override
         public void keyTyped(KeyEvent e)
@@ -194,11 +216,5 @@ public class CPFrame extends JFrame
                 true
             );
         }
-        /** Required by interface; not used */
-        @Override
-        public void keyPressed(KeyEvent e) {}
-        /** Required by interface; not used */
-        @Override
-        public void keyReleased(KeyEvent e) {}
     }
 }

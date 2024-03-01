@@ -4,19 +4,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Window;
+import java.util.Scanner;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractButton;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.components.CPFrame;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.FileManager;
 
 /**
  * This class contains utilities
@@ -32,16 +39,34 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
  */
 public class CPMenuBarDMTestUtils
 {
+    private static final Scanner    scanner = new Scanner( System.in );
     /** The application window that contains the menu bar. */
     private final CPFrame           cpFrame;
     
+    private JDialog                 chooserDialog;
+    /** Save button in the file chooser dialog. */
+    private JButton                 chooserSaveButton;
+    /** Open button in the file chooser dialog. */
+    private JButton                 chooserOpenButton;
+    /** Cancel button in the file chooser dialog. */
+    private JButton                 chooserCancelButton;
+    /** Text field in the file chooser dialog. */
+    private JTextField              chooserTextField;
+    
+    /** The text field containing the equation name. */
+    private final JTextField        eqNameField;
+
     /** The object that encapsulates the File menu on the menu bar. */
     private final JMenu             fileMenu;
     /** The menu item that launches a "new" operation. */
     private final JMenuItem         newItem;
+    /** The menu item that launches an "open" operation. */
     private final JMenuItem         openItem;
+    /** The menu item that launches a "save" operation. */
     private final JMenuItem         saveItem;
+    /** The menu item that launches a "save as" operation. */
     private final JMenuItem         saveAsItem;
+    /** The menu item that launches a "delete" operation. */
     private final JMenuItem         deleteItem;
     
     /** This CPMenuBarDMTestUtils object. */
@@ -58,6 +83,30 @@ public class CPMenuBarDMTestUtils
             GUIUtils.schedEDTAndWait( () -> 
                 utils = new CPMenuBarDMTestUtils() );
         return utils;
+    }
+    
+    /**
+     * Constructor.
+     * Creates a CPFrame object,
+     * and mostly initializes this object.
+     * Object initialization is completed
+     * by the ComponentListener ChooserInit.
+     * 
+     * @see ChooserInit
+     * @see #chooserInit
+     */
+    private CPMenuBarDMTestUtils()
+    {
+        cpFrame = new CPFrame();
+        utils = this;
+        
+        fileMenu = getFileMenu();
+        newItem = getMenuItem( "New" );
+        openItem = getMenuItem( "Open" );
+        saveItem = getMenuItem( "Save" );
+        saveAsItem = getMenuItem( "Save As" );
+        deleteItem = getMenuItem( "Delete" );
+        eqNameField = getEquationNameField();
     }
     
     /**
@@ -83,6 +132,70 @@ public class CPMenuBarDMTestUtils
     }
     
     /**
+     * Sets a name in the main GUI's equation name field,
+     * then posts an action event.
+     * 
+     * @param name  the text to set in the equation name field
+     */
+    public void setEquationName( String name )
+    {
+        eqNameField.setText( name );
+        eqNameField.postActionEvent();
+    }
+    
+    /**
+     * Gets the text from the main GUI's equation name field.
+     * 
+     * @return  the text from the equation name field
+     */
+    public String getEquationName()
+    {
+        String  text    = eqNameField.getText();
+        return text;
+    }
+    
+    /**
+     * Clicks the Save button on the File menu.
+     */
+    public void save()
+    {
+        doClick( saveItem );
+    }
+    
+    /**
+     * Click the SaveAs button, 
+     * bringing up a JFileChooser dialog.
+     * Enter the given path into
+     * the dialog's text field.
+     * If the given boolean is true
+     * click the dialog's OK button,
+     * else click the cancel button.
+     * 
+     * @param path  the given path
+     * @param okay  
+     *      true to dismiss dialog with OK,
+     *      false to dismiss dialog with Cancel
+     */
+    public void saveAs( String path, boolean okay )
+    {
+        Thread  thread  = showFileChooser( saveAsItem );
+        GUIUtils.schedEDTAndWait( () -> {
+            chooserTextField.setText( path );
+            chooserSaveButton = getChooserButton( "Save" );
+        });
+        JButton terminator  = okay ? 
+            chooserSaveButton : chooserCancelButton;
+        doClick( terminator );
+        Utils.join( thread );
+    }
+    
+    private void nextLine()
+    {
+        System.out.println( "> " );
+        scanner.nextLine();
+    }
+    
+    /**
      * Dispose this object, 
      * and free all resources.
      */
@@ -91,23 +204,6 @@ public class CPMenuBarDMTestUtils
         utils = null;
         cpFrame.setVisible( false );
         cpFrame.dispose();
-    }
-    
-    /**
-     * Constructor.
-     * Creates a CPFrame object,
-     * and fully initializes this object.
-     */
-    private CPMenuBarDMTestUtils()
-    {
-        cpFrame = new CPFrame();
-        fileMenu = getFileMenu();
-        newItem = getMenuItem( "New" );
-        openItem = getMenuItem( "Open" );
-        saveItem = getMenuItem( "Save" );
-        saveAsItem = getMenuItem( "Save As" );
-        deleteItem = getMenuItem( "Delete" );
-        utils = this;
     }
     
     /**
@@ -149,6 +245,31 @@ public class CPMenuBarDMTestUtils
     {
         SwingUtilities.invokeLater(() -> button.doClick() );
         Utils.pause( 500 );
+    }
+    
+    /**
+     * Invokes {@linkplain #showFileChooserEDT(AbstractButton)},
+     * passing the given button,
+     * ensuring that the invocation occurs
+     * on the EDT.
+     * 
+     * @param button    the given button
+     * 
+     * @see #showFileChooserEDT(AbstractButton)
+     * @see #showOrHideFileChooserEDT(Thread)
+     */
+    private Thread showFileChooser( AbstractButton button )
+    {
+        Thread  thread  = new Thread( () -> doClick( button ) );
+        thread.start();
+        Utils.pause( 500 );
+        
+        chooserDialog = getChooserDialog();
+//        chooserSaveButton = getChooserButton( "Save" );
+//        chooserOpenButton = getChooserButton( "Open" );
+        chooserCancelButton = getChooserButton( "Cancel" );
+        chooserTextField = getChooserTextField();
+        return thread;
     }
 
     /**
@@ -197,5 +318,95 @@ public class CPMenuBarDMTestUtils
                 .orElse( null );
         return item;
     }
-}
+    
+    /**
+     * Gets the JTextField
+     * from the main application frame
+     * that contains the name 
+     * of an equation.
+     * 
+     * @return  the JTextField that contains the equation name
+     */
+    private JTextField getEquationNameField()
+    {
+        Predicate<JComponent>   pred    = c ->
+            CPConstants.CP_EQUATION_NAME_CN.equals( c.getName() );
+        JComponent  comp    =
+            ComponentFinder.find( cpFrame, pred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JTextField);
+        JTextField  textField   = (JTextField)comp;
+        return textField;
+    }
+    
+    /**
+     * Finds the JDiaog used by the file chooser.
+     * <p>
+     * Precondition: The chooser variable is initialized
+     * <p>
+     * Precondition: This method must be called from the EDT.
+     * 
+     * @return  
+     *      the JDiaog used by the file chooser
+     */
+    private JDialog getChooserDialog()
+    {
+        Predicate<Window>   pred    = w -> (w instanceof JDialog);
+        // can be dialog = true, can be frame = false, 
+        // must be visible = false
+        System.out.println( FileManager.chooser.getDialogTitle() );
+        ComponentFinder     finder  = 
+            new ComponentFinder( true, false, true );
+        Window              window  = finder.findWindow( pred );
+        assertNotNull( window );
+        assertTrue( window instanceof JDialog);
+        JDialog             dialog  = (JDialog)window;
+        return dialog;
+    }
+    
+    /**
+     * Finds the button with the given text
+     * in the file chooser dialog.
+     * <p>
+     * Precondition: The chooserDialog variable is initialized
+     * <p>
+     * Precondition: This method must be called from the EDT.
+     * 
+     * @param text  the given text
+     * 
+     * @return  
+     *      the button in the file chooser dialog with the given text
+     */
+    private JButton getChooserButton( String text )
+    {
+        Predicate<JComponent>   pred    = 
+            ComponentFinder.getButtonPredicate( text );
+        JComponent              comp    =
+            ComponentFinder.find( chooserDialog, pred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JButton );
+        JButton button  = (JButton)comp;
+        return button;
+    }
 
+    /**
+     * Finds the text field in the file chooser dialog.
+     * <p>
+     * Precondition: The chooserDialog variable is initialized
+     * <p>
+     * Precondition: This method must be called from the EDT.
+     * 
+     * @return  
+     *      the text field in the file chooser dialog
+     */
+    private JTextField getChooserTextField()
+    {
+        Predicate<JComponent>   pred    = c -> (c instanceof JTextField);
+        JComponent              comp    =
+            ComponentFinder.find( chooserDialog, pred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JTextField );
+        JTextField  textField   = (JTextField)comp;
+        return textField;
+    }
+}

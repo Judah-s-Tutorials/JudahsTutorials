@@ -1,8 +1,11 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Scanner;
+import java.io.File;
 
 import javax.swing.JMenuItem;
 
@@ -13,13 +16,24 @@ import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.FileManager;
 import com.acmemail.judah.cartesian_plane.test_utils.CPMenuBarDMTestUtils;
 
 class CPMenuBarDMTest
 {
-    private static final PropertyManager pmgr           = 
+    private static final PropertyManager    pmgr            = 
         PropertyManager.INSTANCE;
-    private static final Scanner    scanner = new Scanner( System.in );
+    private static final File               testFileDir     =
+        new File( "equationsTestData/CPMenuBar" );
+    private static final File               saveAsTestFile  =
+        new File( testFileDir, "saveAsTestFile.txt" );
+    private static final File               saveTestFile    =
+        new File( testFileDir, "saveAsTestFile.txt" );
+    private static final File               openTestFile    =
+        new File( testFileDir, "openTestFile.txt" );
+    private static final File               deleteTestFile  =
+        new File( testFileDir, "deleteTestFile.txt" );
     
     private static CPFrame                  plane;
     private static CPMenuBarDMTestUtils     tester;
@@ -43,6 +57,8 @@ class CPMenuBarDMTest
     public void beforeEach()
     {
         tester = CPMenuBarDMTestUtils.getUtils();
+        if ( saveAsTestFile.exists() )
+            saveAsTestFile.delete();
         setProperty( CPConstants.DM_MODIFIED_PN, false );
         setProperty( CPConstants.DM_OPEN_FILE_PN, false );
     }
@@ -94,7 +110,32 @@ class CPMenuBarDMTest
         // saved
         setProperty( CPConstants.DM_OPEN_FILE_PN, true );
         tester.testEnablement( true, true, true );
-}
+    }
+    
+    @Test
+    public void saveAsTest()
+    {
+        assertFalse( saveAsTestFile.exists() );
+        
+        String  eqName  = "Save As Test";
+        // Start a new equation and change something
+        tester.newEquation();
+        tester.setEquationName( eqName );
+        // Mark the data model changed
+        setProperty( CPConstants.DM_MODIFIED_PN, true );
+      
+        // there's no open file so it can't be Saved or Deleted,
+        // but it can be Save As'd
+        tester.testEnablement( false, true, false );
+        tester.saveAs( saveAsTestFile.getPath(), true );
+        
+        // Does the file now exist, and does it describe an
+        // equation with the correct equation name?
+        assertTrue( saveAsTestFile.exists() );
+        Equation    equation    = FileManager.open( saveAsTestFile );
+        assertNotNull( equation );
+        assertEquals( eqName, equation.getName() );
+    }
     
     /**
      * Test the value of a given property
