@@ -81,8 +81,10 @@ public class FileManager
     public static void save( Equation equation )
     {
         int     action  = chooser.showSaveDialog( null );
+        lastResult = false;
         if ( action == JFileChooser.APPROVE_OPTION )
         {
+            lastResult = true;
             save( chooser.getSelectedFile(), equation );
         }
     }
@@ -107,6 +109,7 @@ public class FileManager
         {
             equation = open( chooser.getSelectedFile() );
         }
+        lastResult = equation != null;
         return equation;
     }
     
@@ -153,6 +156,7 @@ public class FileManager
         try ( PrintWriter pWriter = new PrintWriter( file ) )
         {
             save( pWriter, equation );
+            lastResult = true;
         }
         catch ( IOException exc )
         {
@@ -166,6 +170,7 @@ public class FileManager
                 msg, 
                 JOptionPane.ERROR_MESSAGE
             );
+            lastResult = false;
         }
     }
     
@@ -203,6 +208,7 @@ public class FileManager
                 JOptionPane.ERROR_MESSAGE
             );
         }
+        lastResult = equation != null;
         return equation;
     }
 

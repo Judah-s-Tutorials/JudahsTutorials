@@ -329,6 +329,10 @@ public class CPConstants
     /////////////////////////////////////////////////
     //   Data model properties
     /////////////////////////////////////////////////
+    /** Indicates if an equation is open and can be modified. */
+    public static final String  DM_OPEN_EQUATION_PN     = "openEquation";
+    /** Default value for "data model modified. */
+    public static final String  DM_OPEN_EQUATION_DV     = "false";
     /** Indicates if data model modified since last save. */
     public static final String  DM_MODIFIED_PN          = "dataModified";
     /** Default value for "data model modified. */

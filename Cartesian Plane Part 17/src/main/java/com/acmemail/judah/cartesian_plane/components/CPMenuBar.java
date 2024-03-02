@@ -129,13 +129,24 @@ public class CPMenuBar extends JMenuBar
             CPConstants.DM_MODIFIED_PN, e -> configureSave( save ) );
         pmgr.addPropertyChangeListener(
             CPConstants.DM_OPEN_FILE_PN, e -> configureSave( save ) );
+        
         saveAs.setEnabled( false );
         pmgr.addPropertyChangeListener(
-            CPConstants.DM_MODIFIED_PN, e -> {
-                boolean isModified  = 
-                    getProperty( CPConstants.DM_MODIFIED_PN );
-                saveAs.setEnabled( isModified );
+            CPConstants.DM_OPEN_EQUATION_PN, e -> {
+                boolean hasEquation = 
+                    getProperty( CPConstants.DM_OPEN_EQUATION_PN );
+                saveAs.setEnabled( hasEquation );
         });
+
+        
+        saveAs.setEnabled( false );
+        pmgr.addPropertyChangeListener(
+            CPConstants.DM_OPEN_EQUATION_PN, e -> {
+                boolean isOpen  = 
+                    getProperty( CPConstants.DM_OPEN_EQUATION_PN );
+                saveAs.setEnabled( isOpen );
+        });
+
         delete.setEnabled( false );
         pmgr.addPropertyChangeListener(
             CPConstants.DM_OPEN_FILE_PN, e -> {
@@ -299,9 +310,8 @@ public class CPMenuBar extends JMenuBar
         if ( cpFrame != null )
         {
             Equation    equation    = new Exp4jEquation();
-            cpFrame.loadEquation( equation );
+            loadEquation( equation );
             setCurrFile( null );
-            setProperty( CPConstants.DM_MODIFIED_DV, false );
         }
     }
     
@@ -323,8 +333,7 @@ public class CPMenuBar extends JMenuBar
             if ( equation != null )
             {
                 setCurrFile( FileManager.getLastFile() );
-                cpFrame.loadEquation( equation );
-                setProperty( CPConstants.DM_MODIFIED_DV, false );
+                loadEquation( equation );
             }
         }
     }
@@ -344,7 +353,8 @@ public class CPMenuBar extends JMenuBar
             FileManager.save( currFile, equation );
             if ( FileManager.getLastResult() )
             {
-                setProperty( CPConstants.DM_MODIFIED_DV, false );
+                setCurrFile( currFile );
+                setProperty( CPConstants.DM_MODIFIED_PN, false );
             }
         }
     }
@@ -366,7 +376,7 @@ public class CPMenuBar extends JMenuBar
             if ( FileManager.getLastResult() )
             {
                 setCurrFile( FileManager.getLastFile() );
-                setProperty( CPConstants.DM_MODIFIED_DV, false );
+                setProperty( CPConstants.DM_MODIFIED_PN, false );
             }
         }
     }
@@ -385,14 +395,11 @@ public class CPMenuBar extends JMenuBar
         {
             if ( currFile == null )
                 throw new IOException( "Nothing to delete" );
-            String  query   =
-                "Really delete " + currFile.getName() + "?";
-            if ( askBoolean( query ) )
-            {
-                currFile.delete();
-                setCurrFile( null );
-                newAction( evt );
-            }
+            currFile.delete();
+            setProperty( CPConstants.DM_MODIFIED_PN, false );
+            setProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
+            loadEquation( null );
+            setCurrFile( null );
         }
         catch( IOException exc)
         {
@@ -420,10 +427,27 @@ public class CPMenuBar extends JMenuBar
     {
         currFile = file;
         boolean hasFile = file != null;
-        pmgr.setProperty(
-            CPConstants.DM_OPEN_FILE_PN, 
-            hasFile
-        );
+        pmgr.setProperty( CPConstants.DM_OPEN_FILE_PN, hasFile );
+    }
+    
+    /**
+     * Sets the value of equation, 
+     * and updates DM_OPEN_EQUATION_PN.
+     * If equation is null,
+     * sets DM_OPEN_EQUATION_PN to false,
+     * else sets it to true.
+     * 
+     * @param file  the file to update currFile; may be null
+     */
+    private void loadEquation( Equation equation )
+    {
+        if ( cpFrame != null )
+        {
+            boolean hasData = equation != null;
+            cpFrame.loadEquation( equation );
+            pmgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, hasData );
+            pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
+        }
     }
     
     /**

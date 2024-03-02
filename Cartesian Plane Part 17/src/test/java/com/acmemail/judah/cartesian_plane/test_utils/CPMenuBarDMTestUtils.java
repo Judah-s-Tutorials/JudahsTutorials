@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Window;
+import java.io.File;
 import java.util.Scanner;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -110,6 +111,18 @@ public class CPMenuBarDMTestUtils
     }
     
     /**
+     * In the file chooser,
+     * set the default directory 
+     * for file operations.
+     * 
+     * @param path  the default directory for file operations
+     */
+    public void setRelativePath( File path )
+    {
+        FileManager.chooser.setCurrentDirectory( path );
+    }
+    
+    /**
      * Tests the enabled state of all the data management
      * menu items. 
      * The user provides the expected state
@@ -168,19 +181,19 @@ public class CPMenuBarDMTestUtils
      * Enter the given path into
      * the dialog's text field.
      * If the given boolean is true
-     * click the dialog's OK button,
+     * click the dialog's Save button,
      * else click the cancel button.
      * 
      * @param path  the given path
      * @param okay  
-     *      true to dismiss dialog with OK,
+     *      true to dismiss dialog with Save,
      *      false to dismiss dialog with Cancel
      */
-    public void saveAs( String path, boolean okay )
+    public void saveAs( File path, boolean okay )
     {
         Thread  thread  = showFileChooser( saveAsItem );
         GUIUtils.schedEDTAndWait( () -> {
-            chooserTextField.setText( path );
+            chooserTextField.setText( path.getName() );
             chooserSaveButton = getChooserButton( "Save" );
         });
         JButton terminator  = okay ? 
@@ -189,10 +202,39 @@ public class CPMenuBarDMTestUtils
         Utils.join( thread );
     }
     
-    private void nextLine()
+    /**
+     * Click the Open button, 
+     * bringing up a JFileChooser dialog.
+     * Enter the given path into
+     * the dialog's text field.
+     * If the given boolean is true
+     * click the dialog's Open button,
+     * else click the cancel button.
+     * 
+     * @param path  the given path
+     * @param okay  
+     *      true to dismiss dialog with Open,
+     *      false to dismiss dialog with Cancel
+     */
+    public void open( File path, boolean okay )
     {
-        System.out.println( "> " );
-        scanner.nextLine();
+        Thread  thread  = showFileChooser( openItem );
+        GUIUtils.schedEDTAndWait( () -> {
+            chooserTextField.setText( path.getName() );
+            chooserOpenButton = getChooserButton( "Open" );
+        });
+        JButton terminator  = okay ? 
+            chooserOpenButton : chooserCancelButton;
+        doClick( terminator );
+        Utils.join( thread );
+    }
+    
+    /**
+     * Exercise the delete feature;
+     */
+    public void delete()
+    {
+        doClick( deleteItem );
     }
     
     /**
@@ -354,7 +396,6 @@ public class CPMenuBarDMTestUtils
         Predicate<Window>   pred    = w -> (w instanceof JDialog);
         // can be dialog = true, can be frame = false, 
         // must be visible = false
-        System.out.println( FileManager.chooser.getDialogTitle() );
         ComponentFinder     finder  = 
             new ComponentFinder( true, false, true );
         Window              window  = finder.findWindow( pred );
