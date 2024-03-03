@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Window;
 import java.io.File;
-import java.util.Scanner;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -40,7 +39,6 @@ import com.acmemail.judah.cartesian_plane.input.FileManager;
  */
 public class CPMenuBarDMTestUtils
 {
-    private static final Scanner    scanner = new Scanner( System.in );
     /** The application window that contains the menu bar. */
     private final CPFrame           cpFrame;
     

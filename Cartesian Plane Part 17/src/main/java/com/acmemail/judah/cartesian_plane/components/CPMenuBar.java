@@ -391,26 +391,13 @@ public class CPMenuBar extends JMenuBar
      */
     private void deleteAction( ActionEvent evt )
     {
-        try
+        if ( currFile != null )
         {
-            if ( currFile == null )
-                throw new IOException( "Nothing to delete" );
             currFile.delete();
             setProperty( CPConstants.DM_MODIFIED_PN, false );
             setProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
             loadEquation( null );
             setCurrFile( null );
-        }
-        catch( IOException exc)
-        {
-            exc.printStackTrace();
-            JOptionPane.showMessageDialog(
-                topWindow, 
-                exc.getMessage(),
-                "Delete File Error",
-                JOptionPane.ERROR_MESSAGE,
-                null
-            );
         }
     }
     
@@ -472,22 +459,6 @@ public class CPMenuBar extends JMenuBar
     {
         boolean status  = pmgr.asBoolean( propName );
         return status;
-    }
-    
-    /**
-     * Ask the operator for a yes/no response.
-     * Return true or false, as required. 
-     * 
-     * @param prompt    operator prompt
-     * 
-     * @return  true if operator selects yes
-     */
-    private static boolean askBoolean( String prompt )
-    {
-        int     choice  =
-            JOptionPane.showConfirmDialog( null, prompt );
-        boolean result  = choice == JOptionPane.YES_OPTION;
-        return result;
     }
     
     /**

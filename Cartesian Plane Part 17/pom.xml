@@ -27,6 +27,13 @@
             <version>5.9.2</version>
             <scope>test</scope>
         </dependency>
+<!--
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite-engine</artifactId>
+            <version>1.10.2</version>
+        </dependency>
+-->        
         <dependency>
             <groupId>net.objecthunter</groupId>
             <artifactId>exp4j</artifactId>

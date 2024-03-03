@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.acmemail.judah.cartesian_plane.components.VariablePanel;
 import com.acmemail.judah.cartesian_plane.components.VariableTable;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
@@ -31,25 +32,16 @@ public class VariableTableDemo2
     
     private static void buildGUI()
     {
-        VariableTable   table   = null;
-        Equation    equation    = new Exp4jEquation();
+        VariablePanel   varPanel    = new VariablePanel();
+        Equation        equation    = new Exp4jEquation();
         IntStream.range( 0, 15 )
             .forEach( i -> 
-            equation.setVar("" + (char)('a' + i), i * 1.1 ) );
-        table = new VariableTable();
-        table.load( equation );
-//        try
-//        {
-//            table.load( inFile );
-//        }
-//        catch ( IOException exc )
-//        {
-//            exc.printStackTrace();
-//            System.exit( 1 );
-//        }
+                equation.setVar("" + (char)('a' + i), i * 1.1 )
+            );
+        varPanel.load( equation );
 
         JPanel          cPane   = new JPanel( new BorderLayout() );
-        cPane.add( table.getPanel(), BorderLayout.CENTER );
+        cPane.add( varPanel, BorderLayout.CENTER );
         
         JButton         exit    = new JButton( "Exit" );
         JPanel          buttons = new JPanel();
