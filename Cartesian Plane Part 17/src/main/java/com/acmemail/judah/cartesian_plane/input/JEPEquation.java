@@ -42,7 +42,7 @@ import org.nfunk.jep.JEP;
 public class JEPEquation implements Equation
 {
     private final Map<String,Double>    vars        = new HashMap<>();
-    private String                      name        = "";
+    private String                      name        = "New Equation";
     private double                      rStart      = -1;
     private double                      rEnd        = 1;
     private double                      rStep       = .05;
@@ -213,6 +213,7 @@ public class JEPEquation implements Equation
     @Override
     public Stream<Point2D> yPlot()
     {
+        plot = "YPlot";
         updateVars( yExpr );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, d -> d <= rEnd, d -> d + rStep )
@@ -224,6 +225,7 @@ public class JEPEquation implements Equation
     @Override
     public Stream<Point2D> xyPlot()
     {
+        plot = "XYPlot";
         updateVars( xExpr );
         updateVars( yExpr );
         Stream<Point2D> stream  =
@@ -239,6 +241,7 @@ public class JEPEquation implements Equation
     @Override
     public Stream<Point2D> rPlot()
     {
+        plot = "RPlot";
         updateVars( rExpr );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
@@ -251,6 +254,7 @@ public class JEPEquation implements Equation
     @Override
     public Stream<Point2D> tPlot()
     {
+        plot = "TPlot";
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r += rStep )
                 .peek( r -> tExpr.addVariable( radius, r ) )

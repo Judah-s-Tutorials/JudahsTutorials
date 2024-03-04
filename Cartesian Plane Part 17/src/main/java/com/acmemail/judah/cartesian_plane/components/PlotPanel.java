@@ -71,6 +71,7 @@ public class PlotPanel extends JPanel
     {
         this.cartPlane = plane;
     }
+    
     public void load( Equation equation )
     
     {

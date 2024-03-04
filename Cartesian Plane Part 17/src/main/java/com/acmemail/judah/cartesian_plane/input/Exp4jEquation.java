@@ -304,9 +304,9 @@ public class Exp4jEquation implements Equation
      * @throws ValidationException if the equation is invalid
      */
     @Override
-    public Stream<Point2D> xyPlot()
-    {
-        plot = "XYPlot";
+public Stream<Point2D> xyPlot()
+{
+    plot = "XYPlot";
         xExpr.setVariables( vars );
         ValidationResult    result    = xExpr.validate( true );
         if ( !result.isValid() )
