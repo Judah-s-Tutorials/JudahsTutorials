@@ -2,8 +2,8 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
+import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -15,12 +15,12 @@ import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -28,6 +28,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
@@ -49,10 +51,14 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 public class VariablePanel extends JPanel
 {
     /** Platform-specific line separator. */
-    private static final String     lineSep = System.lineSeparator();
+    private static final String             lineSep = 
+        System.lineSeparator();
     /** Prompt the operator for a new name and optional value. */
-    private static final String     prompt  =
+    private static final String             prompt  =
         "Enter [name] or [name,value]";
+    /** Reduces typing when accessing PropertyManager singleton. */
+    private static final PropertyManager    pMgr    =
+        PropertyManager.INSTANCE;
     
     /** Header row for JTable. */
     private final Object[]          headers = { "Name", "Value" };
@@ -83,13 +89,13 @@ public class VariablePanel extends JPanel
      * of the load method.
      * @see #load(Equation)
      */
-    private JButton     plus;
+//    private JButton     plus;
     /** 
      * Button to delete a variable; declared here for the convenience
      * of the load method.
      * @see #load(Equation)
      */
-    private JButton     minus;
+//    private JButton     minus;
     
     /**
      * Constructor.
@@ -105,7 +111,9 @@ public class VariablePanel extends JPanel
         table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
         table.getTableHeader().setReorderingAllowed( false );
         table.setAutoCreateRowSorter( true );
-        
+        pMgr.addPropertyChangeListener(
+            CPConstants.DM_MODIFIED_PN, e -> openEqChange( e, table ) );
+
         Border      border      =
             BorderFactory.createEmptyBorder( 3, 3, 0, 3 );
         JScrollPane scrollPane  = new JScrollPane( table );
@@ -123,11 +131,19 @@ public class VariablePanel extends JPanel
         scrollPane.setPreferredSize( spSize );
         add( scrollPane, BorderLayout.CENTER );
         
-        JPanel  buttons = new JPanel();
-        plus = new JButton( "\u2795" );
+        JButton plus    = new JButton( "\u2795" );
         plus.addActionListener( this::addAction );
-        minus = new JButton( "\u2796" );
+        pMgr.addPropertyChangeListener(
+            CPConstants.DM_MODIFIED_PN, e -> openEqChange( e, plus ) );
+        plus.setEnabled( false );
+        
+        JButton minus   = new JButton( "\u2796" );
         minus.addActionListener( this::deleteAction );
+        pMgr.addPropertyChangeListener(
+            CPConstants.DM_MODIFIED_PN, e -> openEqChange( e, minus ) );
+        minus.setEnabled( false );
+
+        JPanel  buttons = new JPanel();
         buttons.add( plus );
         buttons.add( minus );
         add( buttons, BorderLayout.SOUTH );
@@ -156,8 +172,31 @@ public class VariablePanel extends JPanel
             table.setEnabled( true );
         }
         
-        Stream.of( table, plus, minus )
-            .forEach( c -> c.setEnabled( newState ) );
+//        Stream.of( table )
+//            .forEach( c -> c.setEnabled( newState ) );
+    }
+    
+    /**
+     * Sets the number of decimal point
+     * used to display a floating point number.
+     * 
+     * @param prec  the number of decimal point
+     */
+    public void setDPrecision( int prec )
+    {
+        dPrecision = prec;
+    }
+    
+    /**
+     * Gets the number of decimal point
+     * used to display a floating point number.
+     * @return
+     *      the number of decimal point
+     *      used to display a floating point number.
+     */
+    public int getPrecision()
+    {
+        return dPrecision;
     }
     
     /**
@@ -174,6 +213,22 @@ public class VariablePanel extends JPanel
             .peek( i -> bldr.append( model.getValueAt( i, 1 ) ) )
             .forEach( i -> bldr.append( lineSep ) );
         return bldr.toString();
+    }
+    
+    /**
+     * Enable or disable the given component
+     * whenever the DM_OPEN_EQUATION_PN
+     * value changes to true (enable) or false (disable).
+     * 
+     * @param evt   event object that describes the property change
+     * @param comp  the given component
+     */
+    private void 
+    openEqChange( PropertyChangeEvent evt, JComponent comp )
+    {
+        boolean hasEquation = 
+            pMgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
+        comp.setEnabled( hasEquation );
     }
 
     /**
@@ -274,7 +329,7 @@ public class VariablePanel extends JPanel
      *      or null if the operation is aborted
      * @throws IllegalArgumentException
      */
-    public Object[] parseInput( String input )
+    private Object[] parseInput( String input )
         throws IllegalArgumentException
     {
         StringTokenizer tizer       = new StringTokenizer( input, ", " );
