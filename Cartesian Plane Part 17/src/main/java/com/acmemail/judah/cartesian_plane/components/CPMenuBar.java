@@ -106,6 +106,14 @@ public class CPMenuBar extends JMenuBar
         JMenuItem   delete  = new JMenuItem( "Delete", KeyEvent.VK_D );
         JMenuItem   exit    = new JMenuItem( "Exit", KeyEvent.VK_X );
         
+        KeyStroke   ctrlO       =
+            KeyStroke.getKeyStroke( KeyEvent.VK_O, ActionEvent.CTRL_MASK );
+        open.setAccelerator( ctrlO );
+        
+        KeyStroke   ctrlN       =
+            KeyStroke.getKeyStroke( KeyEvent.VK_N, ActionEvent.CTRL_MASK );
+        newI.setAccelerator( ctrlN );
+        
         KeyStroke   ctrlS       =
             KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK );
         save.setAccelerator( ctrlS );

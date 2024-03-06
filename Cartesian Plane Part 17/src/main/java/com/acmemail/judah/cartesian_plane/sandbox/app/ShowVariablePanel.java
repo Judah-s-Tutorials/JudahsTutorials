@@ -8,6 +8,8 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.components.VariablePanel;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
@@ -52,6 +54,9 @@ public class ShowVariablePanel
         VariablePanel   vPanel  = new VariablePanel();
         contentPane.add( vPanel, BorderLayout.WEST );
         
+        PropertyManager.INSTANCE.setProperty(
+            CPConstants.DM_OPEN_EQUATION_PN, true
+        );
         Equation    equation    = new Exp4jEquation();
         vPanel.load( equation );
         

@@ -11,7 +11,6 @@ import java.util.Optional;
 import java.util.StringTokenizer;
 import java.util.Vector;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -21,6 +20,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -31,7 +31,6 @@ import javax.swing.table.TableColumnModel;
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
-import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
 /**
  * Encapsulation of defined variable names
@@ -78,24 +77,9 @@ public class VariablePanel extends JPanel
     
     /** Number of decimal points for value display. */
     private int         dPrecision  = 4;
-    /** Formatter for value display. */
-    private String      format      = "%." + dPrecision + "f";
     
     /** The currently loaded equation. */
-    private Equation    equation    = new Exp4jEquation();
-    
-    /** 
-     * Button to add a variable; declared here for the convenience
-     * of the load method.
-     * @see #load(Equation)
-     */
-//    private JButton     plus;
-    /** 
-     * Button to delete a variable; declared here for the convenience
-     * of the load method.
-     * @see #load(Equation)
-     */
-//    private JButton     minus;
+    private Equation    equation;
     
     /**
      * Constructor.
@@ -103,16 +87,8 @@ public class VariablePanel extends JPanel
      */
     public VariablePanel()
     {
-        super( new BorderLayout() );
-        
-        TableColumnModel    colModel    = table.getColumnModel();
-        TableColumn         column1     = colModel.getColumn( 1 );
-        column1.setCellRenderer( new ValueRenderer() );
-        table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
-        table.getTableHeader().setReorderingAllowed( false );
-        table.setAutoCreateRowSorter( true );
-        pMgr.addPropertyChangeListener(
-            CPConstants.DM_MODIFIED_PN, e -> openEqChange( e, table ) );
+        super( new BorderLayout() );        
+        configureTableModel();
 
         Border      border      =
             BorderFactory.createEmptyBorder( 3, 3, 0, 3 );
@@ -129,25 +105,9 @@ public class VariablePanel extends JPanel
         spSize.width = prefWidth;
         spSize.height = prefHeight;
         scrollPane.setPreferredSize( spSize );
+        
         add( scrollPane, BorderLayout.CENTER );
-        
-        JButton plus    = new JButton( "\u2795" );
-        plus.addActionListener( this::addAction );
-        pMgr.addPropertyChangeListener(
-            CPConstants.DM_MODIFIED_PN, e -> openEqChange( e, plus ) );
-        plus.setEnabled( false );
-        
-        JButton minus   = new JButton( "\u2796" );
-        minus.addActionListener( this::deleteAction );
-        pMgr.addPropertyChangeListener(
-            CPConstants.DM_MODIFIED_PN, e -> openEqChange( e, minus ) );
-        minus.setEnabled( false );
-
-        JPanel  buttons = new JPanel();
-        buttons.add( plus );
-        buttons.add( minus );
-        add( buttons, BorderLayout.SOUTH );
-
+        add( getButtonPanel(), BorderLayout.SOUTH );
         load( equation );
     }
     
@@ -162,18 +122,13 @@ public class VariablePanel extends JPanel
     public void load( Equation equation )
     {
         this.equation = equation;
-        boolean newState    = equation != null;
         model.setRowCount( 0 );
         if ( equation != null )
         {
             equation.getVars().entrySet().stream()
                 .map( e -> new Object[] { e.getKey(), e.getValue() } )
                 .forEach( o -> model.addRow( o ) );
-            table.setEnabled( true );
         }
-        
-//        Stream.of( table )
-//            .forEach( c -> c.setEnabled( newState ) );
     }
     
     /**
@@ -215,6 +170,53 @@ public class VariablePanel extends JPanel
         return bldr.toString();
     }
     
+    private JPanel getButtonPanel()
+    {
+        JButton plus    = new JButton( "\u2795" );
+        plus.addActionListener( this::addAction );
+        plus.setEnabled( false );
+        pMgr.addPropertyChangeListener(
+            CPConstants.DM_OPEN_EQUATION_PN, e -> openEqChange( plus ) );
+        
+        JButton minus   = new JButton( "\u2796" );
+        minus.addActionListener( this::deleteAction );
+        minus.setEnabled( false );        
+        pMgr.addPropertyChangeListener(
+            CPConstants.DM_OPEN_EQUATION_PN, e -> {
+                boolean isOpen = 
+                    pMgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
+                if ( !isOpen )
+                    minus.setEnabled( false );
+            });
+
+        ListSelectionModel  selModel  = table.getSelectionModel();
+        selModel.addListSelectionListener( e -> 
+            minus.setEnabled( table.getSelectedRowCount() != 0 )
+        );
+
+        JPanel  buttonPanel = new JPanel();
+        buttonPanel.add( plus );
+        buttonPanel.add( minus );
+        return buttonPanel;
+    }
+    
+    /**
+     * Configures JTable as required
+     * to support editing of variable name/value pairs.
+     */
+    private void configureTableModel()
+    {
+        TableColumnModel    colModel    = table.getColumnModel();
+        TableColumn         column1     = colModel.getColumn( 1 );
+        column1.setCellRenderer( new ValueRenderer() );
+        table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
+        table.getTableHeader().setReorderingAllowed( false );
+        table.setAutoCreateRowSorter( true );
+
+        pMgr.addPropertyChangeListener(
+            CPConstants.DM_MODIFIED_PN, e -> openEqChange( table ) );
+    }
+    
     /**
      * Enable or disable the given component
      * whenever the DM_OPEN_EQUATION_PN
@@ -224,7 +226,7 @@ public class VariablePanel extends JPanel
      * @param comp  the given component
      */
     private void 
-    openEqChange( PropertyChangeEvent evt, JComponent comp )
+    openEqChange( JComponent comp )
     {
         boolean hasEquation = 
             pMgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
@@ -325,8 +327,7 @@ public class VariablePanel extends JPanel
      * @param input the input to parse
      * 
      * @return  
-     *      a row suitable to be added to the GUI's JTable,
-     *      or null if the operation is aborted
+     *      a row suitable to be added to the GUI's JTable
      * @throws IllegalArgumentException
      */
     private Object[] parseInput( String input )
@@ -439,6 +440,7 @@ public class VariablePanel extends JPanel
         {
             if ( value != null )
             {
+                String  format   = "%." + dPrecision + "f";
                 String  fmtValue = String.format( format, value );
                 setText( fmtValue );
                 setHorizontalAlignment(SwingConstants.RIGHT);
