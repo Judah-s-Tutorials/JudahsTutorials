@@ -258,6 +258,27 @@ public class Exp4jEquation implements Equation
     @Override
     public boolean isValidExpression( String exprStr )
     {
+        ValidationResult    expr4jResult    = ValidationResult.SUCCESS;
+        try
+        {
+            Expression expr = new ExpressionBuilder( exprStr )
+                .variables( vars.keySet() )
+                .functions( Exp4jFunctions.getFunctions() )
+                .build();
+            expr4jResult    = expr.validate( false );
+        }
+        catch ( Exception exc )
+        {
+            List<String>    errors  = List.of( exc.getMessage() );
+            expr4jResult = new ValidationResult( false, errors );
+        }
+        boolean             status          = expr4jResult.isValid();
+        return status;
+    }
+    
+//    @Override
+    public boolean isValidExpressionOrig( String exprStr )
+    {
         Expression expr = new ExpressionBuilder( exprStr )
             .variables( vars.keySet() )
             .functions( Exp4jFunctions.getFunctions() )
@@ -265,7 +286,7 @@ public class Exp4jEquation implements Equation
         ValidationResult    expr4jResult    = expr.validate( false );
         boolean             status          = expr4jResult.isValid();
         return status;
-}
+    }
     
     /**
      * Iterates over the encapsulated range,
@@ -304,9 +325,9 @@ public class Exp4jEquation implements Equation
      * @throws ValidationException if the equation is invalid
      */
     @Override
-public Stream<Point2D> xyPlot()
-{
-    plot = "XYPlot";
+    public Stream<Point2D> xyPlot()
+    {
+        plot = "XYPlot";
         xExpr.setVariables( vars );
         ValidationResult    result    = xExpr.validate( true );
         if ( !result.isValid() )
@@ -664,12 +685,12 @@ public Stream<Point2D> xyPlot()
      */
     private void initMap()
     {
-        vars.put( "x",  0. );
-        vars.put( "y",  0. );
-        vars.put( "a",  0. );
-        vars.put( "b",  0. );
-        vars.put( "c",  0. );
-        vars.put( "r",  0. );
-        vars.put( "t",  0. );
+//        vars.put( "x",  0. );
+//        vars.put( "y",  0. );
+//        vars.put( "a",  0. );
+//        vars.put( "b",  0. );
+//        vars.put( "c",  0. );
+//        vars.put( "r",  0. );
+//        vars.put( "t",  0. );
     }
 }

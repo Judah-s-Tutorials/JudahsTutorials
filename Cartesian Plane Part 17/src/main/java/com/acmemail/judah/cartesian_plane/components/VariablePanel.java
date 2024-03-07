@@ -70,8 +70,7 @@ public class VariablePanel extends JPanel
         new Vector<>( Arrays.asList( headers ) );
     
     /** Underlying data model for JTable. */
-    private final LocalTableModel   model   = 
-        new LocalTableModel( headers );
+    private final LocalTableModel   model   = new LocalTableModel();
     /** Encapsulated JTable. */
     private final JTable    table   = new JTable( model );
     
@@ -92,18 +91,16 @@ public class VariablePanel extends JPanel
 
         Border      border      =
             BorderFactory.createEmptyBorder( 3, 3, 0, 3 );
-        JScrollPane scrollPane  = new JScrollPane( table );
         setBorder( border );
         
-        Dimension   spSize      = scrollPane.getPreferredSize();
+        JScrollPane scrollPane  = new JScrollPane( table );
         JLabel      temp1       = new JLabel( headers[0].toString() );
         JLabel      temp2       = new JLabel( headers[1].toString() );
         int         prefWidth   =
             temp1.getPreferredSize().width + 
             temp2.getPreferredSize().width;
         int         prefHeight  = 10 * temp1.getPreferredSize().height;
-        spSize.width = prefWidth;
-        spSize.height = prefHeight;
+        Dimension   spSize      = new Dimension( prefWidth, prefHeight );
         scrollPane.setPreferredSize( spSize );
         
         add( scrollPane, BorderLayout.CENTER );
@@ -170,24 +167,26 @@ public class VariablePanel extends JPanel
         return bldr.toString();
     }
     
+    /**
+     * Creates the JPanel containing the add (+) and delete (-) buttons.
+     * 
+     * @return  the JPanel containing the add and delete buttons
+     */
     private JPanel getButtonPanel()
     {
         JButton plus    = new JButton( "\u2795" );
         plus.addActionListener( this::addAction );
         plus.setEnabled( false );
         pMgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_EQUATION_PN, e -> openEqChange( plus ) );
+            CPConstants.DM_OPEN_EQUATION_PN, e -> openEqChange( plus )
+        );
         
         JButton minus   = new JButton( "\u2796" );
         minus.addActionListener( this::deleteAction );
         minus.setEnabled( false );        
         pMgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_EQUATION_PN, e -> {
-                boolean isOpen = 
-                    pMgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
-                if ( !isOpen )
-                    minus.setEnabled( false );
-            });
+            CPConstants.DM_OPEN_EQUATION_PN, e -> minus.setEnabled( false )
+        );
 
         ListSelectionModel  selModel  = table.getSelectionModel();
         selModel.addListSelectionListener( e -> 
@@ -206,15 +205,18 @@ public class VariablePanel extends JPanel
      */
     private void configureTableModel()
     {
+        model.setColumnIdentifiers( headers );
         TableColumnModel    colModel    = table.getColumnModel();
         TableColumn         column1     = colModel.getColumn( 1 );
         column1.setCellRenderer( new ValueRenderer() );
         table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
         table.getTableHeader().setReorderingAllowed( false );
-        table.setAutoCreateRowSorter( true );
-
+        model.addTableModelListener( e -> 
+            pMgr.setProperty( CPConstants.DM_MODIFIED_PN, true )
+        );
+     
         pMgr.addPropertyChangeListener(
-            CPConstants.DM_MODIFIED_PN, e -> openEqChange( table ) );
+            CPConstants.DM_OPEN_EQUATION_PN, e -> openEqChange( table ) );
     }
     
     /**
@@ -225,8 +227,7 @@ public class VariablePanel extends JPanel
      * @param evt   event object that describes the property change
      * @param comp  the given component
      */
-    private void 
-    openEqChange( JComponent comp )
+    private void openEqChange( JComponent comp )
     {
         boolean hasEquation = 
             pMgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
@@ -374,19 +375,6 @@ public class VariablePanel extends JPanel
      */
     private static class LocalTableModel extends DefaultTableModel
     {
-        /**
-         * Constructor.
-         * Initializes the DefaultTableModel superclass
-         * to the given header row, 
-         * and 0 rows of data.
-         * 
-         * @param headers   the given header row
-         */
-        public LocalTableModel( Object[] headers )
-        {
-            super( headers, 0 );
-        }
-        
         /**
          * Returns Double.class for the value column of the table,
          * otherwise defaults to the value
