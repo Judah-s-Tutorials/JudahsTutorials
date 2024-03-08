@@ -176,8 +176,16 @@ public class CPFrame extends JFrame
         // the test classes can find it
         nameField.setName( CPConstants.CP_EQUATION_NAME_CN );
         
-        // Notify the property manager if the name field changes
-        nameField.addKeyListener( new NameListener() );
+        nameField.addKeyListener( new KeyAdapter(){
+            @Override
+            public void keyTyped(KeyEvent e)
+            {
+                PropertyManager.INSTANCE.setProperty(
+                    CPConstants.DM_MODIFIED_PN,
+                    true
+                );
+            }
+        });
         
         nameField.addActionListener( this::nameAction );
         return panel;
@@ -197,24 +205,5 @@ public class CPFrame extends JFrame
         );
         if ( equation != null )
             equation.setName( nameField.getText() );
-    }
-    
-    /**
-     * Monitors key events in the equation name field.
-     * When detected, sets the DM_MODIFIED_PN property
-     * to true.
-     * 
-     * @author Jack Straub
-     */
-    private static class NameListener extends KeyAdapter
-    {
-        @Override
-        public void keyTyped(KeyEvent e)
-        {
-            PropertyManager.INSTANCE.setProperty(
-                CPConstants.DM_MODIFIED_PN,
-                true
-            );
-        }
     }
 }

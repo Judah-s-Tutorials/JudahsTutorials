@@ -10,6 +10,20 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
+/**
+ * Application to demonstrate the need for custom rendering.
+ * The table in this application has
+ * a column of integer data,
+ * and two columns of floating-point data.
+ * The data are displayed correctly,
+ * but could be formatted more aesthetically.
+ * To see how to do this
+ * refer to {@linkplain RenderingDemo1B}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see RenderingDemo1B
+ */
 public class RenderingDemo1A
 {
     /** Header array for configuring GUI's JTable. */
@@ -36,7 +50,7 @@ public class RenderingDemo1A
      */
     public RenderingDemo1A()
     {
-        JFrame      frame       = new JFrame( "Tabel Model Demo 2" );
+        JFrame      frame       = new JFrame( "Rendering Demo 1a" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         LocalTableModel     model       = 

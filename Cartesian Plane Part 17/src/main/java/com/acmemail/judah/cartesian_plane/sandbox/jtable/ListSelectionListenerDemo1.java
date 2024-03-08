@@ -134,6 +134,14 @@ public class ListSelectionListenerDemo1
             .append( "Adjusting=" ).append( isAdjusting );
         log.append( bldr.toString() );
         
+        bldr.setLength( 0 );
+        bldr.append( "<span style=background:yellow;>" )
+            .append( "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" )
+            .append( "table.getSelectedRowCount(): ")
+            .append( table.getSelectedRowCount() )
+            .append( "</span>" );
+        log.append( bldr.toString() );
+        
         if ( !isAdjusting )
         {
             int     selectedRow     = table.getSelectedRow();

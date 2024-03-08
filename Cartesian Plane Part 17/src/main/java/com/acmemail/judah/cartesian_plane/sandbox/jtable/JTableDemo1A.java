@@ -83,7 +83,7 @@ public class JTableDemo1A
      */
     private void printAction( JTable table )
     {
-        int     rowCount    = table.getRowCount();
+        int     rowCount    = table.getRowCount(); 
         int     colCount    = table.getColumnCount();
         for ( int row = 0 ; row < rowCount ; ++row )
         {

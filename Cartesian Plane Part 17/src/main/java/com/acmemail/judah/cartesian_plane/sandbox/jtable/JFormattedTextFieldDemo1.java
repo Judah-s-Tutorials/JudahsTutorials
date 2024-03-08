@@ -24,6 +24,23 @@ import javax.swing.text.DefaultFormatter;
 import com.acmemail.judah.cartesian_plane.components.NameValidator;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
+/**
+ * Demonstrates the value displayed in a JFormattedTextField,
+ * and the value actually stored in the component.
+ * The "Var Name" shows the text value entered by a operator.
+ * Once the value is committed,
+ * it will be shown in the "Act Name" field.
+ * The value is committed when you press the enter key,
+ * or click in the "Dummy" field.
+ * Variable names must be valid identifiers
+ * as dictated by Java.
+ * If you enter an invalid name in the "Var Name" field
+ * it will change color,
+ * and you will not be able
+ * to move the cursor to the "Dummy" field.
+ * 
+ * @author Jack Straub
+ */
 public class JFormattedTextFieldDemo1
 {
     /** JFormattedTextField to display in demo GUI. */
