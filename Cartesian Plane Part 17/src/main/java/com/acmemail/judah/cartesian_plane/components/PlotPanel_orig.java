@@ -5,8 +5,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.text.ParseException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -32,50 +30,31 @@ import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
-@SuppressWarnings("serial")
-public class PlotPanel extends JPanel
+public class PlotPanel_orig extends JPanel
 {
-    private final ExprFormatter[]   formatters  = new ExprFormatter[]
-    {
-        new ExprFormatter(
-            s -> getEquation().setXExpression( s ),
-            () -> getEquation().getXExpression(),
-            () -> getEquation().xyPlot(),
-            Command.XYPLOT,
-            "x="
-        ),
-        new ExprFormatter(
-            s -> getEquation().setYExpression( s ),
-            () -> getEquation().getYExpression(),
-            () -> getEquation().yPlot(),
-            Command.YPLOT,
-            "y="
-        ),
-        new ExprFormatter(
-            s -> getEquation().setRExpression( s ),
-            () -> getEquation().getRExpression(),
-            () -> getEquation().rPlot(),
-            Command.RPLOT,
-            "r="
-        ),
-        new ExprFormatter(
-            s -> getEquation().setTExpression( s ),
-            () -> getEquation().getTExpression(),
-            () -> getEquation().tPlot(),
-            Command.TPLOT,
-            "t="
-        ),
-    };
-    
-    private final ExprVerifier      verifier    = new ExprVerifier();
+    private static final long serialVersionUID = -40771877652622561L;
 
-    private final JComboBox<Command>    plots   = new JComboBox<>();
-    private final JButton               plot    = new JButton( "Plot" );
-    private final Map<Command,ExprFormatter>    exprMap = getExprMap();
+    private static final Command[]  plotTypes   =
+    { Command.YPLOT, Command.XYPLOT, Command.RPLOT, Command.TPLOT };
+    
+    private final ExprVerifier  verifier    = new ExprVerifier();
+
+    private JFormattedTextField xEquals     = 
+        getTextField( s -> getEquation().setXExpression( s ) );
+    private JFormattedTextField yEquals     = 
+        getTextField( s -> getEquation().setYExpression( s ) );
+    private JFormattedTextField rEquals     = 
+        getTextField( s -> getEquation().setRExpression( s ) );
+    private JFormattedTextField tEquals     = 
+        getTextField( s -> getEquation().setTExpression( s ) );
+    private JComboBox<Command>   plots      = new JComboBox<>( plotTypes );
+    private JButton              plot       = new JButton( "Plot" );
+    
     private Equation            equation    = null;
     private CartesianPlane      cartPlane   = null;
 
-    public PlotPanel()
+    
+    public PlotPanel_orig()
     {
         super();
         BoxLayout   layout  = new BoxLayout( this, BoxLayout.X_AXIS );
@@ -99,51 +78,39 @@ public class PlotPanel extends JPanel
         this.equation = equation;
         
         boolean newState    = equation != null;
-        exprMap.values().stream().forEach( fmt -> {
-            JFormattedTextField textField   = fmt.textField;
-            String              text        =
-                newState ? fmt.getter.get() : "";
-            textField.setValue( text );
-            textField.setEnabled( newState );
-        });
         if ( newState )
         {
+            xEquals.setValue( equation.getXExpression() );
+            yEquals.setValue( equation.getYExpression() );
+            rEquals.setValue( equation.getRExpression() );
+            tEquals.setValue( equation.getTExpression() );
             String  strPlot = equation.getPlot().toUpperCase();
             Command cmdPlot = Command.valueOf( strPlot );
             plots.setSelectedItem( cmdPlot );
         }
-        Stream.of( plots, plot )
+        Stream.of( xEquals, yEquals, rEquals, tEquals, plots, plot )
             .forEach( c -> c.setEnabled( newState ) );
-    }
-    
-    private Map<Command,ExprFormatter> getExprMap()
-    {
-        Map<Command,ExprFormatter>  map   = new HashMap<>();
-        Stream.of( formatters )
-            .forEach( f -> map.put( f.command, f ) );
-        return map;
     }
     
     private JPanel getExprPanel()
     {
         JPanel      panel   = new JPanel( new GridLayout( 2, 2 ) );
-        panel.add( getExprPanel( Command.XYPLOT ) );
-        panel.add( getExprPanel( Command.RPLOT) );
-        panel.add( getExprPanel( Command.YPLOT ) );
-        panel.add( getExprPanel( Command.TPLOT ) );
+        panel.add( getExprPanel( "x=", xEquals ) );
+        panel.add( getExprPanel( "r=", rEquals ) );
+        panel.add( getExprPanel( "y=", yEquals ) );
+        panel.add( getExprPanel( "t=", tEquals ) );
         return panel;
     }
     
-    private JPanel getExprPanel( Command command )
+    private JPanel getExprPanel( String text, JComponent comp )
     {
-        ExprFormatter   fmt     = exprMap.get( command );
-        JPanel          panel   = new JPanel();
-        BoxLayout       layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
+        JPanel      panel   = new JPanel();
+        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
         panel.setLayout( layout );
         
-        JLabel  label   = new JLabel( fmt.label );
+        JLabel  label   = new JLabel( text );
         panel.add( label );
-        panel.add( fmt.textField );
+        panel.add( comp );
         return panel;
     }
     
@@ -153,22 +120,46 @@ public class PlotPanel extends JPanel
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
         panel.setLayout( layout );
         
-        exprMap.values().stream()
-            .map( f -> f.command )
-            .forEach( plots::addItem );
         panel.add( plots );
         plot.addActionListener( this::plotAction );
         panel.add( plot );
         return panel;
     }
     
+    private JFormattedTextField getTextField( Function<String,Result> funk )
+    {
+        ExprFormatter       formatter   = new ExprFormatter( funk );
+        JFormattedTextField textField   = 
+            new JFormattedTextField( formatter );
+        textField.setInputVerifier( verifier );
+        textField.setColumns( 15 );
+        
+        return textField;
+    }
+    
     private void plotAction( ActionEvent evt )
     {
         int             inx         = plots.getSelectedIndex();
         Command         command     = plots.getItemAt( inx );
-        ExprFormatter   fmt         = exprMap.get( command );
-        Stream<Point2D> pointStream = fmt.plotter.get();
-
+        Stream<Point2D> pointStream;
+        switch ( command )
+        {
+        case YPLOT:
+            pointStream = equation.yPlot();
+            break;
+        case XYPLOT:
+            pointStream = equation.xyPlot();
+            break;
+        case RPLOT:
+            pointStream = equation.rPlot();
+            break;
+        case TPLOT:
+            pointStream = equation.tPlot();
+            break;
+        default:
+            pointStream = null;
+        }
+        
         if ( pointStream != null && cartPlane != null )
             cartPlane.setStreamSupplier( () ->
                 pointStream
@@ -186,37 +177,42 @@ public class PlotPanel extends JPanel
     private class ExprVerifier extends InputVerifier
     {
         @Override
-        public boolean verify( JComponent comp )
+        public boolean verify(JComponent comp)
         {
             JFormattedTextField textField   = (JFormattedTextField)comp;
             String              text        = textField.getText();
             boolean             status      = true;
             if ( !text.isEmpty() )
-                status = equation.isValidExpression( text );          
+                status =
+                    equation.isValidExpression( text );          
             return status;
         }
     }
     
+    @SuppressWarnings("serial")
     private class ExprFormatter extends DefaultFormatter
     {
-        public final Predicate<String>          pred;
-        public final Supplier<String>           getter;
-        public final Supplier<Stream<Point2D>>  plotter;
-        public final Command                    command;
-        public final String                     label;
-        public final JFormattedTextField        textField;
+        private final Predicate<String>         pred;
+        private final Function<String,Result>   setter;
+        private final Supplier<String>          getter;
+        private final String                    label;
+        private final JFormattedTextField       textField;
+        
+        public ExprFormatter( Function<String,Result> setter )
+        {
+            this( setter, null, null );
+//            pred = s -> setter.apply( s ).isSuccess();
+//            setOverwriteMode( false );
+        }
         
         public ExprFormatter( 
-            Function<String,Result>   setter,
-            Supplier<String>          getter,
-            Supplier<Stream<Point2D>> plotter,
-            Command                   command,
-            String                    label
+            Function<String,Result> setter,
+            Supplier<String> getter,
+            String label
         )
         {
+            this.setter = setter;
             this.getter = getter;
-            this.plotter = plotter;
-            this.command = command;
             this.label = label;
             pred = s -> setter.apply( s ).isSuccess();
             setOverwriteMode( false );
@@ -224,14 +220,10 @@ public class PlotPanel extends JPanel
             textField = new JFormattedTextField( this );
             textField.setInputVerifier( verifier );
             textField.setColumns( 15 );
-            textField.addPropertyChangeListener( e -> {
-                if ( equation != null )
-                    setter.apply( textField.getValue().toString() );
-            });
         }
         
         @Override
-        public Object stringToValue( String str )
+        public String stringToValue( String str )
             throws ParseException
         {
             JFormattedTextField fmtField    = getFormattedTextField();
@@ -246,14 +238,34 @@ public class PlotPanel extends JPanel
             fmtField.setForeground( Color.BLACK );
             return str;
         }
+    }
+    
+    @SuppressWarnings("serial")
+    private class ExprFormatterOrig extends DefaultFormatter
+    {
+        private final Predicate<String> pred;
+        
+        public ExprFormatterOrig( Function<String,Result> funk )
+        {
+            pred = s -> funk.apply( s ).isSuccess();
+            setOverwriteMode( false );
+        }
         
         @Override
-        public String valueToString( Object value )
+        public String stringToValue( String str )
+            throws ParseException
         {
-            String  rval    = value != null ? value.toString() : "";
             JFormattedTextField fmtField    = getFormattedTextField();
+            if ( equation != null && str != null && !str.isEmpty() )
+            {
+                if ( !pred.test( str ) )
+                {
+                    fmtField.setForeground( Color.RED );
+                    throw new ParseException( "Invalid name", 0 );
+                }
+            }
             fmtField.setForeground( Color.BLACK );
-            return rval;
+            return str;
         }
     }
 }
