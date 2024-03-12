@@ -5,14 +5,18 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.components.PlotPanel;
+import com.acmemail.judah.cartesian_plane.components.ParameterPanel;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
@@ -29,7 +33,7 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
  * 
  * @author Jack Straub
  */
-public class ShowPlotPanel
+public class ShowParameterPanel
 {
     /**
      * Application entry point.
@@ -56,12 +60,19 @@ public class ShowPlotPanel
         placeHolder.setBackground( Color.ORANGE );
         contentPane.add( placeHolder, BorderLayout.CENTER );
         
-        PlotPanel        pPanel      = new PlotPanel();
-        contentPane.add( pPanel, BorderLayout.SOUTH );
-        
         JPanel      leftPanel   = new JPanel();
+        BoxLayout   boxLayout   = 
+            new BoxLayout( leftPanel, BoxLayout.Y_AXIS );
+        leftPanel.setLayout( boxLayout );
+        Border  border  = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
+        leftPanel.setBorder( border );
+        
         JPanel      buttonPanel = new JPanel( new GridLayout( 2, 1 ) );
         leftPanel.add( buttonPanel );
+        leftPanel.add( Box.createRigidArea( new Dimension( 0, 10 ) ) );
+
+        ParameterPanel  pPanel  = new ParameterPanel();
+        leftPanel.add( pPanel );
         
         JButton newEquation     = new JButton( "New" );
         buttonPanel.add( newEquation );
@@ -70,7 +81,7 @@ public class ShowPlotPanel
         JButton nullEquation    = new JButton( "Close" );
         buttonPanel.add( nullEquation );
         nullEquation.addActionListener( e-> pPanel.load( null ) );
-        
+
         contentPane.add( leftPanel, BorderLayout.WEST );
         
         PropertyManager.INSTANCE.setProperty(
@@ -90,6 +101,14 @@ public class ShowPlotPanel
         equation.setVar( "a", 0 );
         equation.setVar( "b", 0 );
         equation.setVar( "c", 0 );
+        
+        equation.setRangeStart( -2  );
+        equation.setRangeEnd( 2 );
+        equation.setRangeStep( .01 );
+        equation.setPrecision( 3 );
+        equation.setRadiusName( "r" );
+        equation.setThetaName( "t" );
+        equation.setParam( "t" );
         return equation;
     }
 }

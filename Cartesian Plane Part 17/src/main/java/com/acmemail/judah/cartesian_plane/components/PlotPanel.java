@@ -29,6 +29,7 @@ import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Result;
@@ -99,9 +100,9 @@ public class PlotPanel extends JPanel
      */
     private final Map<Command,ExprFormatter>    exprMap = getExprMap();
     /** Currently open equation; null if none. */
-    private Equation            equation    = null;
+    private Equation                equation    = null;
     /** Object on which to draw plots; null if none. */
-    private CartesianPlane      cartPlane   = null;
+    private CartesianPlane          cartPlane   = null;
 
     /**
      * Constructor.
@@ -239,7 +240,7 @@ public class PlotPanel extends JPanel
      *      panel containing the plot command combo box 
      *      and plot button.
      */
-    private JPanel  getComboPanel()
+    private JPanel getComboPanel()
     {
         JPanel      panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
@@ -268,12 +269,14 @@ public class PlotPanel extends JPanel
         Stream<Point2D> pointStream = fmt.plotter.get();
 
         if ( pointStream != null && cartPlane != null )
+        {
             cartPlane.setStreamSupplier( () ->
-                pointStream
+                fmt.plotter.get()
                 .map( p -> PlotPointCommand.of( p, cartPlane ) )
             );
-        NotificationManager.INSTANCE
-            .propagateNotification( CPConstants.REDRAW_NP );
+            NotificationManager.INSTANCE
+                .propagateNotification( CPConstants.REDRAW_NP );
+        }
     }
     
     /**
@@ -397,10 +400,14 @@ public class PlotPanel extends JPanel
             textField = new JFormattedTextField( this );
             textField.setInputVerifier( verifier );
             textField.setColumns( 15 );
-            textField.addPropertyChangeListener( e -> {
-                if ( equation != null )
-                    setter.apply( textField.getValue().toString() );
-            });
+            PropertyManager pmgr        = PropertyManager.INSTANCE;
+            String          dmModified  = CPConstants.DM_MODIFIED_PN;
+            textField.addPropertyChangeListener( "value", e ->
+                pmgr.setProperty( dmModified, true )
+            );
+            TextValueListener   vListener   = new TextValueListener();
+            vListener.addThis( textField );
+
         }
         
         /**

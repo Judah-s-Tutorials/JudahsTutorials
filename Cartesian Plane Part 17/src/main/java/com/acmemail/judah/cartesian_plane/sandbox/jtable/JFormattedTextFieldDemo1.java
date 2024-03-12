@@ -111,7 +111,7 @@ public class JFormattedTextFieldDemo1
             new JPanel( new GridLayout( 3, 2 ) );
         varField.setColumns( 10 );
         varField.setInputVerifier( new NameVerifier() );
-        varField.addPropertyChangeListener( this::propertyChange );
+        varField.addPropertyChangeListener( "value", this::propertyChange );
 
         actField.setEditable( false );
         
