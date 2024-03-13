@@ -79,7 +79,9 @@ public class ParameterPanel extends JPanel
         boolean newState    = equation != null;
         if ( newState )
         {
+            start.setText( equation.getRangeStartExpr() );
             start.setValue( equation.getRangeStart() );
+            end.setText( equation.getRangeEndExpr() );
             end.setValue( equation.getRangeEnd() );
             step.setValue( equation.getRangeStep() );
             radius.setValue( equation.getRadiusName() );
@@ -179,16 +181,18 @@ public class ParameterPanel extends JPanel
     
     private void setStart( String val )
     {
-        Optional<Double>  dVal    = equation.evaluate( val );
-        if ( dVal.isPresent() )
-            equation.setRangeStart( dVal.get() );
+        equation.setRangeStart( val );
+//        Optional<Double>  dVal    = equation.evaluate( val );
+//        if ( dVal.isPresent() )
+//            equation.setRangeStart( dVal.get() );
     }
     
     private void setEnd( String val )
     {
-        Optional<Double>  dVal    = equation.evaluate( val );
-        if ( dVal.isPresent() )
-            equation.setRangeEnd( dVal.get() );
+        equation.setRangeEnd( val );
+//        Optional<Double>  dVal    = equation.evaluate( val );
+//        if ( dVal.isPresent() )
+//            equation.setRangeEnd( dVal.get() );
     }
     
     private void setStep( Double val )

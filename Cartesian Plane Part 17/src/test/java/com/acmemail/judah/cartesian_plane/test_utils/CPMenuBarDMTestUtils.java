@@ -65,6 +65,8 @@ public class CPMenuBarDMTestUtils
     private final JMenuItem         saveItem;
     /** The menu item that launches a "save as" operation. */
     private final JMenuItem         saveAsItem;
+    /** The menu item that launches a "close" operation. */
+    private final JMenuItem         closeItem;
     /** The menu item that launches a "delete" operation. */
     private final JMenuItem         deleteItem;
     
@@ -105,6 +107,7 @@ public class CPMenuBarDMTestUtils
         saveItem = getMenuItem( "Save" );
         saveAsItem = getMenuItem( "Save As" );
         deleteItem = getMenuItem( "Delete" );
+        closeItem = getMenuItem( "Close" );
         eqNameField = getEquationNameField();
     }
     
@@ -130,15 +133,21 @@ public class CPMenuBarDMTestUtils
      * 
      * @param expSave   the expected state of the "Save" item
      * @param expSaveAs the expected state of the "Save As" item
+     * @param expClose the expected state of the "Close" item
      * @param expDelete the expected state of the "Delete" item
      */
-    public void 
-    testEnablement( boolean expSave, boolean expSaveAs, boolean expDelete )
+    public void testEnablement( 
+        boolean expSave, 
+        boolean expSaveAs, 
+        boolean expClose,
+        boolean expDelete
+    )
     {
         assertTrue( newItem.isEnabled() );
         assertTrue( openItem.isEnabled() );
         assertEquals( expSave, saveItem.isEnabled() );
         assertEquals( expSaveAs, saveAsItem.isEnabled() );
+        assertEquals( expClose, closeItem.isEnabled() );
         assertEquals( expDelete, deleteItem.isEnabled() );
     }
     
@@ -225,6 +234,14 @@ public class CPMenuBarDMTestUtils
             chooserOpenButton : chooserCancelButton;
         doClick( terminator );
         Utils.join( thread );
+    }
+    
+    /**
+     * Exercise the close feature;
+     */
+    public void close()
+    {
+        doClick( closeItem );
     }
     
     /**

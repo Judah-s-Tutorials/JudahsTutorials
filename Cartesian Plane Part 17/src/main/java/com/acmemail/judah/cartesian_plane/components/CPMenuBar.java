@@ -103,6 +103,7 @@ public class CPMenuBar extends JMenuBar
         JMenuItem   open    = new JMenuItem( "Open", KeyEvent.VK_O );
         JMenuItem   save    = new JMenuItem( "Save", KeyEvent.VK_S );
         JMenuItem   saveAs  = new JMenuItem( "Save As", KeyEvent.VK_A );
+        JMenuItem   close   = new JMenuItem( "Close", KeyEvent.VK_C );
         JMenuItem   delete  = new JMenuItem( "Delete", KeyEvent.VK_D );
         JMenuItem   exit    = new JMenuItem( "Exit", KeyEvent.VK_X );
         
@@ -122,6 +123,7 @@ public class CPMenuBar extends JMenuBar
         open.addActionListener( this::openAction );
         save.addActionListener( this::saveAction );
         saveAs.addActionListener( this::saveAsAction );
+        close.addActionListener( this::closeAction );
         delete.addActionListener( this::deleteAction );
         exit.addActionListener( e -> System.exit( 0 ) );
         
@@ -129,6 +131,7 @@ public class CPMenuBar extends JMenuBar
         menu.add( open );
         menu.add( save );
         menu.add( saveAs );
+        menu.add( close );
         menu.add( delete );
         menu.add( exit );
         
@@ -155,6 +158,14 @@ public class CPMenuBar extends JMenuBar
                 saveAs.setEnabled( isOpen );
         });
 
+        close.setEnabled( false );
+        pmgr.addPropertyChangeListener(
+            CPConstants.DM_OPEN_EQUATION_PN, e -> {
+                boolean isOpen  = 
+                    pmgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
+                close.setEnabled( isOpen );
+        });
+        
         delete.setEnabled( false );
         pmgr.addPropertyChangeListener(
             CPConstants.DM_OPEN_FILE_PN, e -> {
@@ -386,6 +397,23 @@ public class CPMenuBar extends JMenuBar
                 setCurrFile( FileManager.getLastFile() );
                 setProperty( CPConstants.DM_MODIFIED_PN, false );
             }
+        }
+    }
+    
+    /**
+     * Processes the file/close button,
+     * closing the current equation.
+     * 
+     * @param evt   object accompanying action event notification
+     */
+    private void closeAction( ActionEvent evt )
+    {
+        if ( cpFrame != null  )
+        {
+            cpFrame.loadEquation(null);
+            setCurrFile( null );
+            setProperty( CPConstants.DM_MODIFIED_PN, false );
+            setProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
         }
     }
     

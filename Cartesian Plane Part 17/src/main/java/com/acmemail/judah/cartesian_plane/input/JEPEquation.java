@@ -45,6 +45,8 @@ public class JEPEquation implements Equation
     private String                      name        = "New Equation";
     private double                      rStart      = -1;
     private double                      rEnd        = 1;
+    private String                      rStartExpr  = "1";
+    private String                      rEndExpr    = "1";
     private double                      rStep       = .05;
     private int                         precision   = 3;
     private String                      plot        = "YPlot";
@@ -306,17 +308,53 @@ public class JEPEquation implements Equation
         this.rEnd = end;
         this.rStep = step;
     }
-
+    
+    /**
+     * Sets the start of the iteration range
+     * from an expression.
+     * 
+     * @param expr   iteration range start
+     */
     @Override
-    public void setRangeStart(double rangeStart)
+    public void setRangeStart( String expr )
     {
-        this.rStart = rangeStart;
+        String              str     = expr.trim();
+        Optional<Double>    dVal    = evaluate( str );
+        if ( dVal.isPresent() )
+        {
+            rStart = dVal.get();
+            rStartExpr = str;
+        }
+    }
+    
+    /**
+     * Sets the start of the iteration range.
+     * 
+     * @param rangeStart   iteration range start
+     */
+    @Override
+    public void setRangeStart( double rangeStart )
+    {
+        rStart = rangeStart;
+        rStartExpr = String.valueOf( rangeStart );
     }
 
     @Override
     public double getRangeStart()
     {
         return rStart;
+    }
+    
+    /**
+     * Returns the start of the iteration range
+     * as a String.
+     * 
+     *@return the start of the iteration range as a String
+     */
+    @Override
+    public String getRangeStartExpr()
+    {
+        return rStartExpr;
     }
 
     @Override
@@ -326,9 +364,40 @@ public class JEPEquation implements Equation
     }
 
     @Override
-    public void setRangeEnd(double rangeEnd)
+    public String getRangeEndExpr()
     {
-        this.rEnd = rangeEnd;
+        return rEndExpr;
+    }
+
+
+    /**
+     * Sets the end of the iteration range.
+     * 
+     * @param rangeEnd  iteration range end
+     */
+    @Override
+    public void setRangeEnd( double rangeEnd )
+    {
+        rEnd = rangeEnd;
+        rEndExpr = String.valueOf( rangeEnd );
+    }
+    
+    /**
+     * Sets the end of the iteration range
+     * from an expression.
+     * 
+     * @param expr  iteration range start
+     */
+    @Override
+    public void setRangeEnd( String expr )
+    {
+        String              str     = expr.trim();
+        Optional<Double>    dVal    = evaluate( str );
+        if ( dVal.isPresent() )
+        {
+            rEnd = dVal.get();
+            rEndExpr = str;
+        }
     }
 
     @Override

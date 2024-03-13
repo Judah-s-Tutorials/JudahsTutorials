@@ -269,8 +269,8 @@ public class FileManager
      */
     private static void writeRange( Equation equation )
     {
-        lines.add( "start " + equation.getRangeStart() );
-        lines.add( "end " + equation.getRangeEnd() );
+        lines.add( "start " + equation.getRangeStartExpr() );
+        lines.add( "end " + equation.getRangeEndExpr() );
         lines.add( "step " + equation.getRangeStep() );
     }
     

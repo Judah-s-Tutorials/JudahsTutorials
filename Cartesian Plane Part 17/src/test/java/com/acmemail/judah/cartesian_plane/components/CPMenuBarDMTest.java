@@ -73,17 +73,17 @@ class CPMenuBarDMTest
     @Test
     public void newTest()
     {
-        // No equation is loaded, so nothing to save or delete
-        tester.testEnablement( false, false, false );
+        // No equation is loaded, so nothing to save, close or delete
+        tester.testEnablement( false, false, false,false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
         
         // Initiate a new equation. There's still no file loaded and
         // nothing has been modified, so there's nothing to save
-        // or delete, but we should be able to save-as
+        // or delete, but we should be able to save-as or close
         tester.newEquation();
-        tester.testEnablement( false, true, false );
+        tester.testEnablement( false, true, true, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -95,8 +95,8 @@ class CPMenuBarDMTest
         String  testEquationName    = "Save Test Equation Name";
         assertTrue( saveTestFile.exists() );
         
-        // No equation is loaded, so nothing to save or delete
-        tester.testEnablement( false, false, false );
+        // No equation is loaded, so nothing to save, close, or delete
+        tester.testEnablement( false, false, false, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
@@ -105,7 +105,7 @@ class CPMenuBarDMTest
         // Open an existing equation. There's is now a file loaded
         // but nothing has been modified.
         tester.open( saveTestFile, true );
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -114,7 +114,7 @@ class CPMenuBarDMTest
         // Modify the equation, so there is now something to save.
         // Save, save-as and delete features should all be available.
         tester.setEquationName( testEquationName );
-        tester.testEnablement( true, true, true );
+        tester.testEnablement( true, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, true );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -128,7 +128,7 @@ class CPMenuBarDMTest
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         
         // Open the equation just saved, and verify that it contains
         // the correct equation name.
@@ -144,9 +144,9 @@ class CPMenuBarDMTest
         
         // The file for this test should not yet exist, data should
         // be unmodified and no file should be open. There should be
-        // nothing to save, save-as, or delete.
+        // nothing to save, save-as, close, or delete.
         assertFalse( saveAsApproveTestFile.exists() );
-        tester.testEnablement( false, false, false );
+        tester.testEnablement( false, false, false, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
@@ -155,7 +155,7 @@ class CPMenuBarDMTest
         // file should be open. There is nothing to save or delete,
         // but we should be able to save-as.
         tester.newEquation();
-        tester.testEnablement( false, true, false );
+        tester.testEnablement( false, true, true, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -164,7 +164,7 @@ class CPMenuBarDMTest
         // is no file open; the save-as feature should be available,
         // but not save or delete.
         tester.setEquationName( eqName1 );
-        tester.testEnablement( false, true, false );
+        tester.testEnablement( false, true, true, false );
         testProperty( CPConstants.DM_MODIFIED_PN, true );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -174,7 +174,7 @@ class CPMenuBarDMTest
         // be unavailable. Save-as and delete features should be
         // available.
         tester.saveAs( saveAsApproveTestFile, true );
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -192,10 +192,10 @@ class CPMenuBarDMTest
         /////////////////////////////////////////////////////////////
         
         // Modify the equation a second time. Data is now modified and
-        // there is an open file; the save-as, save, and delete features
-        // should all be available,
+        // there is an open file; the save-as, save, close, and delete
+        // features should all be available,
         tester.setEquationName( eqName2 );
-        tester.testEnablement( true, true, true );
+        tester.testEnablement( true, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, true );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -204,7 +204,7 @@ class CPMenuBarDMTest
         // the data should be marked "unchanged since last save.
         // Available features: Save NO, save-as YES, delete YES.
         tester.save();
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -224,25 +224,27 @@ class CPMenuBarDMTest
         
         // The output file for this test should not exist, but
         // the input file should. Data should be unmodified and no 
-        // file should be open. There should be nothing to save, 
-        // save-as, or delete.
+        // file or equation should be open. There should be nothing to 
+        // save, save-as, or delete.
         assertFalse( saveAsCancelTestFile.exists() );
         assertTrue( miscTestFile.exists() );
-        tester.testEnablement( false, false, false );
+        tester.testEnablement( false, false, false, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
         
-        // Open the input file. 
+        // Open the input file. There is now a file and an equation,
+        // but no modified data, so save should not be available. 
+        // save-as, close, and delete should be available.
         tester.open( miscTestFile, true );
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
         
         // Modify the data.
         tester.setEquationName( eqName );
-        tester.testEnablement( true, true, true );
+        tester.testEnablement( true, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, true );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -252,7 +254,7 @@ class CPMenuBarDMTest
         // it completes. Verify that property state hasn't
         // changed, and that specified file is not created.
         tester.saveAs( saveAsCancelTestFile, false );
-        tester.testEnablement( true, true, true );
+        tester.testEnablement( true, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, true );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -263,7 +265,7 @@ class CPMenuBarDMTest
         // Verify that the original input file is still the
         // default file for save operations.
         tester.save();
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -274,13 +276,58 @@ class CPMenuBarDMTest
     }
     
     @Test
+    public void closeTest()
+    {
+        // There is no file for this test. No file should be open,
+        // no equation should be open. 
+        // be unmodified and no file should be open. There should be
+        // nothing to save, save-as, or delete.
+        tester.testEnablement( false, false, false, false );
+        testProperty( CPConstants.DM_MODIFIED_PN, false );
+        testProperty( CPConstants.DM_OPEN_FILE_PN, false );
+        testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
+        assertNull( tester.getEquation() );
+        
+        // Start a new equation. There is an open equation, but no
+        // file. Data has not been modified. Save-as, close, and
+        // delete features should be available, but not save.
+        tester.newEquation();
+        tester.testEnablement( false, true, true, false );
+        testProperty( CPConstants.DM_MODIFIED_PN, false );
+        testProperty( CPConstants.DM_OPEN_FILE_PN, false );
+        testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
+        assertNotNull( tester.getEquation() );
+        
+        // Close the equation. Afterwards there should be no open equation,
+        // no open file, and nothing modified. Should not be able to save,
+        // save-as, close or delete.
+        tester.close();
+        tester.testEnablement( false, false, false, false );
+        testProperty( CPConstants.DM_MODIFIED_PN, false );
+        testProperty( CPConstants.DM_OPEN_FILE_PN, false );
+        testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
+        assertNull( tester.getEquation() );
+        
+        // Open a new file. Afterwards there should be an open equation,
+        // and an open file, but nothing modified. Should not be able to
+        // save, but save-as, close and delete features should all be
+        // available.
+        tester.open( miscTestFile, true );
+        tester.testEnablement( false, true, true, true );
+        testProperty( CPConstants.DM_MODIFIED_PN, false );
+        testProperty( CPConstants.DM_OPEN_FILE_PN, true );
+        testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
+        assertNotNull( tester.getEquation() );
+    }
+    
+    @Test
     public void deleteTest()
     {
         // The file for this test should exist, data should
         // be unmodified and no file should be open. There should be
         // nothing to save, save-as, or delete.
         assertTrue( deleteTestFile.exists() );
-        tester.testEnablement( false, false, false );
+        tester.testEnablement( false, false, false, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
@@ -289,7 +336,7 @@ class CPMenuBarDMTest
         // open file, but data has not been modified. Save-as and
         // delete features should be available, but not save.
         tester.open( deleteTestFile, true );
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -298,7 +345,7 @@ class CPMenuBarDMTest
         // no open file, and nothing modified. Should not be able to save,
         // save-as or delete.
         tester.delete();
-        tester.testEnablement( false, false, false );
+        tester.testEnablement( false, false, false, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
@@ -315,7 +362,7 @@ class CPMenuBarDMTest
         // be unmodified and no file should be open. There should be
         // nothing to save, save-as, or delete.
         assertTrue( openApproveTestFile.exists() );
-        tester.testEnablement( false, false, false );
+        tester.testEnablement( false, false, false, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
@@ -324,7 +371,7 @@ class CPMenuBarDMTest
         // and OPEN_EQATION should be true. Save feature should
         // be unavailable, save-as and delete should be available.
         tester.open( openApproveTestFile, true );
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -332,7 +379,7 @@ class CPMenuBarDMTest
         // Make a change to the DM. MODIFIED should switch to true,
         // save should be available, everything else is unchanged.
         tester.setEquationName( eqName );
-        tester.testEnablement( true, true, true );
+        tester.testEnablement( true, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, true );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -340,7 +387,7 @@ class CPMenuBarDMTest
         // Save the data, and verify that is is saved to the
         // correct file.
         tester.save();
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -360,7 +407,7 @@ class CPMenuBarDMTest
         // be unmodified and no file should be open. There should be
         // nothing to save, save-as, or delete.
         assertTrue( openCancelTestFile.exists() );
-        tester.testEnablement( false, false, false );
+        tester.testEnablement( false, false, false, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
@@ -368,7 +415,7 @@ class CPMenuBarDMTest
         // Start to open a file, but cancel the operation. 
         // Nothing in the state should change.
         tester.open( openCancelTestFile, false );
-        tester.testEnablement( false, false, false );
+        tester.testEnablement( false, false, false, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
@@ -390,14 +437,14 @@ class CPMenuBarDMTest
         // nothing to save, save-as, or delete.
         assertTrue( miscTestFile.exists() );
         assertTrue( openCancelTestFile.exists() );
-        tester.testEnablement( false, false, false );
+        tester.testEnablement( false, false, false, false );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
         
         // Open the input file.
         tester.open( miscTestFile, true );
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -405,7 +452,7 @@ class CPMenuBarDMTest
         // Start to open a file, but cancel the operation. 
         // Nothing in the state should change.
         tester.open( openCancelTestFile, false );
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
@@ -414,13 +461,13 @@ class CPMenuBarDMTest
         // for save operations. Save a change to the original file
         // and verify that the change is correctly saved.
         tester.setEquationName( eqName );
-        tester.testEnablement( true, true, true );
+        tester.testEnablement( true, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, true );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
         
         tester.save();
-        tester.testEnablement( false, true, true );
+        tester.testEnablement( false, true, true, true );
         testProperty( CPConstants.DM_MODIFIED_PN, false );
         testProperty( CPConstants.DM_OPEN_FILE_PN, true );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );

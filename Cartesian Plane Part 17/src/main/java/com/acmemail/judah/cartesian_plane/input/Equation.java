@@ -292,6 +292,14 @@ public interface Equation
     void setRange(double start, double end, double step);
 
     /**
+     * Sets the start of the iteration range
+     * from an expression.
+     * 
+     * @param rangeStart   iteration range start
+     */
+    void setRangeStart(String rangeStart);
+
+    /**
      * Sets the start of the iteration range.
      * 
      * @param rangeStart   iteration range start
@@ -306,11 +314,35 @@ public interface Equation
     double getRangeStart();
 
     /**
+     * Returns the start of the iteration range
+     * as a string.
+     * 
+     * @return string corresponding to the start of the iteration range
+     */
+    String getRangeStartExpr();
+
+    /**
+     * Sets the end of the iteration range
+     * from an expression.
+     * 
+     * @param rangeStart   iteration range start
+     */
+    void setRangeEnd(String rangeEnd);
+
+    /**
      * Returns the end of the iteration range.
      * 
      * @return the end of the iteration range
      */
     double getRangeEnd();
+
+    /**
+     * Returns the end of the iteration range
+     * as a string.
+     * 
+     * @return string corresponding to the end of the iteration range
+     */
+    String getRangeEndExpr();
 
     /**
      * Sets the end of the iteration range.
