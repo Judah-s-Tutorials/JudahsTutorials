@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.function.Consumer;
-import java.util.function.DoubleConsumer;
 import java.util.function.Function;
 import java.util.function.IntConsumer;
 import java.util.function.Supplier;
@@ -134,13 +133,13 @@ public class InputParser
             parseVars();
             break;
         case START:
-            parseExpression( equation::setRangeStart, equation::getRangeStart );
+            parseArg( equation::setRangeStart, equation::getRangeStartExpr );
             break;
         case END:
-            parseExpression( equation::setRangeEnd, equation::getRangeEnd );
+            parseArg( equation::setRangeEnd, equation::getRangeEndExpr );
             break;
         case STEP:
-            parseExpression( equation::setRangeStep, equation::getRangeStep );
+            parseArg( equation::setRangeStep, equation::getRangeStepExpr );
             break;
         case PREC:
             parseInteger( equation::setPrecision, equation::getPrecision );
@@ -221,36 +220,6 @@ public class InputParser
             Result  result  = setter.apply( argString );
             if ( !result.isSuccess() )
                 errors.addAll( result.getMessages() );
-        }
-    }
-    
-    /**
-     * Interprets the current argument as an expression,
-     * converts it to a double
-     * and sets the value in the encapsulated Equation.
-     * If the argument string is empty
-     * the current value of the resource
-     * is printed to stdout.
-     * If an error occurs
-     * associated messages 
-     * are stored in the <em>errors</em> list.
-     * 
-     * @param setter    method to set the converted value
-     * @param getter    method to obtain the current value
-     *                  of the indicated resource
-     */
-    private void 
-    parseExpression( DoubleConsumer setter, Supplier<Object> getter )
-    {
-        if ( argString.isEmpty() )
-            System.out.println( getter.get() );
-        else
-        {
-            Optional<Double>    opt     = equation.evaluate( argString );
-            if ( opt.isPresent() )
-                setter.accept( opt.get() );
-            else
-                formatError( argString, "is not a valid expression" );
         }
     }
     

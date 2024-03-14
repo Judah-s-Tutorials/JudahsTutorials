@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.DoubleConsumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
@@ -47,9 +48,10 @@ public class Exp4jEquation implements Equation
     private String                      name        = "New Equation";
     private double                      rStart      = -1;
     private double                      rEnd        = 1;
+    private double                      rStep       = .05;
     private String                      rStartExpr  = "1";
     private String                      rEndExpr    = "1";
-    private double                      rStep       = .05;
+    private String                      rStepExpr   = "1";
     private String                      plot        = "YPlot";
     private int                         precision   = 3;
     private String                      xExprStr    = "1";
@@ -467,48 +469,17 @@ public class Exp4jEquation implements Equation
     }
     
     /**
-     * Establishes the iteration range for this Equation.
-     * 
-     * @param start the start of the iteration range
-     * @param end   the end of the iteration range
-     * @param step  the increment to use when traversing the iteration range
-     */
-    @Override
-    public void setRange( double start, double end, double step )
-    {
-        setRangeStart( start );
-        setRangeEnd( end );
-        setRangeStep( step );
-    }
-    
-    /**
      * Sets the start of the iteration range
      * from an expression.
      * 
-     * @param expr   iteration range start
+     * @param exprStr   iteration range start
      */
     @Override
-    public void setRangeStart( String expr )
+    public Result setRangeStart( String exprStr )
     {
-        String              str     = expr.trim();
-        Optional<Double>    dVal    = evaluate( str );
-        if ( dVal.isPresent() )
-        {
-            rStart = dVal.get();
-            rStartExpr = str;
-        }
-    }
-    
-    /**
-     * Sets the start of the iteration range.
-     * 
-     * @param rangeStart   iteration range start
-     */
-    @Override
-    public void setRangeStart( double rangeStart )
-    {
-        rStart = rangeStart;
-        rStartExpr = String.valueOf( rangeStart );
+        Result  result  =
+            setExpr( exprStr, d -> rStart = d, s -> rStartExpr = s );
+        return result;
     }
     
     /**
@@ -556,35 +527,19 @@ public class Exp4jEquation implements Equation
     {
         return rEndExpr;
     }
-
-    /**
-     * Sets the end of the iteration range.
-     * 
-     * @param rangeEnd  iteration range end
-     */
-    @Override
-    public void setRangeEnd( double rangeEnd )
-    {
-        rEnd = rangeEnd;
-        rEndExpr = String.valueOf( rangeEnd );
-    }
     
     /**
      * Sets the end of the iteration range
      * from an expression.
      * 
-     * @param expr  iteration range start
+     * @param exprStr  iteration range start
      */
     @Override
-    public void setRangeEnd( String expr )
+    public Result setRangeEnd( String exprStr )
     {
-        String              str     = expr.trim();
-        Optional<Double>    dVal    = evaluate( str );
-        if ( dVal.isPresent() )
-        {
-            rEnd = dVal.get();
-            rEndExpr = str;
-        }
+        Result  result  =
+            setExpr( exprStr, d -> rEnd = d, s -> rEndExpr = s );
+        return result;
     }
     
     /**
@@ -598,17 +553,31 @@ public class Exp4jEquation implements Equation
     {
         return rStep;
     }
+    
+    /**
+     * Returns the increment expression used
+     * to iterate over the encapsulated range.
+     * 
+     * @return the start of the iteration range
+     */
+    @Override
+    public String getRangeStepExpr()
+    {
+        return rStepExpr;
+    }
 
     /**
-     * Sets the increment used
+     * Sets increment the expression used
      * to iterate over the encapsulated range.
      * 
      * @param rangeStep   iteration range increment
      */
     @Override
-    public void setRangeStep( double rangeStep )
+    public Result setRangeStep( String rangeStep )
     {
-        rStep = rangeStep;
+        Result  result  =
+            setExpr( rangeStep, d -> rStep = d, s -> rStepExpr = s );
+        return result;
     }
     
     /**
@@ -683,6 +652,40 @@ public class Exp4jEquation implements Equation
     }
     
     /**
+     * Validates an expression and, if valid,
+     * records the expression and it value.
+     * 
+     * @param exprStr       the expression to evaluate
+     * @param valSetter     setter for the value of the expression
+     * @param strSetter     setter for the expression string
+     * 
+     * @return  object indicating result of evaluation
+     */
+    private Result setExpr( 
+        String exprStr, 
+        DoubleConsumer valSetter, 
+        Consumer<String> strSetter 
+    )
+    {
+        Result              result  = null;
+        String              str     = exprStr.trim();
+        Optional<Double>    dVal    = evaluate( str );
+        if ( dVal.isPresent() )
+        {
+            valSetter.accept( dVal.get() );
+            strSetter.accept( str );
+            result = new Result( true );
+        }
+        else
+        {
+            String  invExpr =
+                "Invalid expression: \"" + str + "\"";
+            result = new Result( false, List.of( invExpr ) );
+        }
+        return result;
+    }
+        
+    /**
      * Generate and validate an exp4j Expression
      * from a given string.
      * Validation takes place
@@ -748,12 +751,12 @@ public class Exp4jEquation implements Equation
      */
     private void initMap()
     {
-//        vars.put( "x",  0. );
-//        vars.put( "y",  0. );
-//        vars.put( "a",  0. );
-//        vars.put( "b",  0. );
-//        vars.put( "c",  0. );
-//        vars.put( "r",  0. );
-//        vars.put( "t",  0. );
+        vars.put( "x",  0. );
+        vars.put( "y",  0. );
+        vars.put( "a",  0. );
+        vars.put( "b",  0. );
+        vars.put( "c",  0. );
+        vars.put( "r",  0. );
+        vars.put( "t",  0. );
     }
 }

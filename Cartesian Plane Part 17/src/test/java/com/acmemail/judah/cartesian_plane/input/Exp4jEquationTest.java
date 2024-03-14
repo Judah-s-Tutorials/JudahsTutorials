@@ -51,7 +51,9 @@ class Exp4jEquationTest
         
         // verify that y expression is set to 2 
         // (see above "new Exp4jEquation( "2x" )").
-        equation.setRange( 1, 1, 1 );
+        equation.setRangeStart( "1" );
+        equation.setRangeEnd( "1" );
+        equation.setRangeStep( "1" );
         equation.yPlot().forEach(
             p -> assertEquals( 2, p.getY(), "Y" ) 
         );
@@ -79,7 +81,9 @@ class Exp4jEquationTest
         }
         
         // validate expressions
-        equation.setRange( 1, 1, 1 );
+        equation.setRangeStart( "1" );
+        equation.setRangeEnd( "1" );
+        equation.setRangeStep( "1" );
         equation.xyPlot().forEach(
             p -> {
                 assertEquals( 1, p.getX(), "X" );
@@ -140,7 +144,9 @@ class Exp4jEquationTest
         assertTrue( result.isSuccess() );
         assertEquals( xExpr, equation.getXExpression() );
         
-        equation.setRange( 1, 1, 1 );
+        equation.setRangeStart( "1" );
+        equation.setRangeEnd( "1" );
+        equation.setRangeStep( "1" );
         equation.xyPlot()
             .forEach( p -> assertEquals( p.getX(), xier ) );
         
@@ -168,7 +174,9 @@ class Exp4jEquationTest
         assertTrue( result.isSuccess() );
         assertEquals( yExpr, equation.getYExpression() );
         
-        equation.setRange( 1, 1, 1 );
+        equation.setRangeStart( "1" );
+        equation.setRangeEnd( "1" );
+        equation.setRangeStep( "1" );
         equation.yPlot()
             .forEach( p -> assertEquals( p.getY(), xier ) );
         
@@ -195,7 +203,10 @@ class Exp4jEquationTest
         assertTrue( result.isSuccess() );
         assertEquals( rExpr, equation.getRExpression() );
         
-        equation.setRange( Math.PI, Math.PI, 1 );
+//        equation.setRange( Math.PI, Math.PI, 1 );
+        equation.setRangeStart( "pi" );
+        equation.setRangeEnd( "pi" );
+        equation.setRangeStep( "1" );
         equation.rPlot()
             .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
         
@@ -222,7 +233,9 @@ class Exp4jEquationTest
         assertTrue( result.isSuccess() );
         assertEquals( tExpr, equation.getTExpression() );
         
-        equation.setRange( 1, 1, 1 );
+        equation.setRangeStart( "1" );
+        equation.setRangeEnd( "1" );
+        equation.setRangeStep( "1" );
         equation.tPlot()
             .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
         
@@ -256,7 +269,9 @@ class Exp4jEquationTest
                 .mapToObj( x -> new Point2D.Double( x, xier * x ) )
                 .collect( Collectors.toList() );
         
-        equation.setRange( start, end, step );
+        equation.setRangeStart( String.valueOf( start ) );
+        equation.setRangeEnd( String.valueOf( end ) );
+        equation.setRangeStep( String.valueOf( step ) );
         List<Point2D>   actPoints   =
             equation.yPlot()
             .collect( Collectors.toList() );
@@ -295,7 +310,9 @@ class Exp4jEquationTest
                 .mapToObj( t -> new Point2D.Double( xXier * t, yXier * t ) )
                 .collect( Collectors.toList() );
         
-        equation.setRange( start, end, step );
+        equation.setRangeStart( String.valueOf( start ) );
+        equation.setRangeEnd( String.valueOf( end ) );
+        equation.setRangeStep( String.valueOf( step ) );
         List<Point2D>   actPoints   =
             equation.xyPlot()
             .collect( Collectors.toList() );
@@ -343,7 +360,9 @@ class Exp4jEquationTest
         double  end     = 3 * Math.PI / 2;
         double  step    = Math.PI / 2;
         
-        equation.setRange( start, end, step );
+        equation.setRangeStart( String.valueOf( start ) );
+        equation.setRangeEnd( String.valueOf( end ) );
+        equation.setRangeStep( String.valueOf( step ) );
         List<Point2D>   actPoints   =
             equation.rPlot()
             .collect( Collectors.toList() );
@@ -390,7 +409,9 @@ class Exp4jEquationTest
         double  end     = 3;
         double  step    = 1;
         
-        equation.setRange( start, end, step );
+        equation.setRangeStart( String.valueOf( start ) );
+        equation.setRangeEnd( String.valueOf( end ) );
+        equation.setRangeStep( String.valueOf( step ) );
         List<Point2D>   actPoints   =
             equation.tPlot()
             .collect( Collectors.toList() );
@@ -444,22 +465,10 @@ class Exp4jEquationTest
     }
 
     @Test
-    public void testSetRange()
-    {
-        double  start   = -2;
-        double  end     = 2;
-        double  step    = .1;
-        equation.setRange( start, end, step );
-        assertEquals( start, equation.getRangeStart() );
-        assertEquals( end, equation.getRangeEnd() );
-        assertEquals( step, equation.getRangeStep() );
-    }
-
-    @Test
     public void testSetRangeStart()
     {
         double  val     = Math.PI;
-        equation.setRangeStart( val );
+        equation.setRangeStart( String.valueOf( val ) );
         assertEquals( val, equation.getRangeStart() );
     }
 
@@ -467,7 +476,7 @@ class Exp4jEquationTest
     public void testSetRangeEnd()
     {
         double  val     = Math.PI;
-        equation.setRangeEnd( val );
+        equation.setRangeEnd( String.valueOf( val ) );
         assertEquals( val, equation.getRangeEnd() );
     }
 
@@ -475,7 +484,7 @@ class Exp4jEquationTest
     public void testSetRangeStep()
     {
         double  val     = Math.PI;
-        equation.setRangeStep( val );
+        equation.setRangeStep( String.valueOf( val ) );
         assertEquals( val, equation.getRangeStep() );
     }
 
@@ -568,7 +577,9 @@ class Exp4jEquationTest
     
     private void validateDefaultXExpression()
     {
-        equation.setRange( 1, 3, 1 );
+        equation.setRangeStart( "1" );
+        equation.setRangeEnd( "3" );
+        equation.setRangeStep( "1" );
         equation.xyPlot().forEach(
             p -> assertEquals( 1, p.getX(), "X" )
         );
@@ -576,7 +587,9 @@ class Exp4jEquationTest
     
     private void validateDefaultYExpression()
     {
-        equation.setRange( 1, 3, 1 );
+        equation.setRangeStart( "1" );
+        equation.setRangeEnd( "3" );
+        equation.setRangeStep( "1" );
         equation.yPlot().forEach(
             p -> assertEquals( 1, p.getY(), "Y" )
         );

@@ -62,20 +62,24 @@ class FileManagerTest
     private static final String testFilePath;
     private static final File   testFile;
     
-    private static final String testName    = "test noma";
+    private static final String testName        = "test noma";
     
-    private static final double testStart   = 10.1;
-    private static final double testEnd     = testStart * 5;
-    private static final double testStep    = 1.1;
+    private static final double testStart       = 10.1;
+    private static final String testStartExpr   = "" + testStart;
+    private static final double testEnd         = testStart * 5;
+    private static final String testEndExpr     = "" + testEnd;
+    private static final double testStep        = 1.1;
+    private static final String testStepExpr    = "" + testStep;
+
     
-    private static final String testXEq     = "100";
-    private static final String testYEq     = "200";
-    private static final String testTEq     = "300";
-    private static final String testREq     = "400";
+    private static final String testXEq         = "100";
+    private static final String testYEq         = "200";
+    private static final String testTEq         = "300";
+    private static final String testREq         = "400";
     
-    private static final String testParam   = "pTest";
-    private static final String testRadius  = "rTest";
-    private static final String testTheta   = "yTest";
+    private static final String testParam       = "pTest";
+    private static final String testRadius      = "rTest";
+    private static final String testTheta       = "yTest";
     
     // initialized in beforeEach
     private Equation    testEquation;
@@ -125,7 +129,9 @@ class FileManagerTest
         
         // set everything else that makes sense
         testEquation.setName( testName );
-        testEquation.setRange( testStart, testEnd, testStep );
+        testEquation.setRangeStart( testStartExpr );
+        testEquation.setRangeEnd( testEndExpr );
+        testEquation.setRangeStep( testStepExpr );
         testEquation.setXExpression( testXEq );
         testEquation.setYExpression( testYEq );
         testEquation.setRExpression( testREq );
@@ -259,7 +265,45 @@ class FileManagerTest
             exc.printStackTrace();
             fail( "I/O error", exc );
         }
+    }
+    
+    @Test
+    public void testGetLastFile()
+    {
+        Thread  thread  = startDialog( () -> execSaveCommand() );
+        SwingUtilities.invokeLater(
+            () -> pathTextField.setText( testFilePath ) );
+        SwingUtilities.invokeLater( () -> saveButton.doClick() );
+        Utils.join( thread );
         
+        File    expFile = new File( testFilePath );
+        assertEquals( expFile, FileManager.getLastFile() );
+    }
+    
+    @Test
+    public void testGetLastResultApprove()
+    {
+        // Save file via dialog w/approve;
+        // verify last result is true
+        Thread  thread  = startDialog( () -> execSaveCommand() );
+        SwingUtilities.invokeLater(
+            () -> pathTextField.setText( testFilePath ) );
+        SwingUtilities.invokeLater( () -> saveButton.doClick() );
+        Utils.join( thread );
+        assertTrue( FileManager.getLastResult() );
+    }
+    
+    @Test
+    public void testGetLastResultCancel()
+    {
+        // Save file via dialog w/cancel;
+        // verify last result is false
+        Thread  thread  = startDialog( () -> execSaveCommand() );
+        SwingUtilities.invokeLater(
+            () -> pathTextField.setText( testFilePath ) );
+        SwingUtilities.invokeLater( () -> cancelButton.doClick() );
+        Utils.join( thread );
+        assertFalse( FileManager.getLastResult() );
     }
     
     @Test
@@ -284,6 +328,7 @@ class FileManagerTest
         Utils.join( thread );
         
         // verify save failed
+        assertFalse( FileManager.getLastResult() );
         newEquation = FileManager.open( testFilePath );
         assertNotNull( newEquation );
         assertEquals( oldName, newEquation.getName() );
@@ -415,8 +460,11 @@ class FileManagerTest
         assertEquals( testVarMap, actVal.getVars() );
         assertEquals( testName, actVal.getName() );
         assertEquals( testStart, actVal.getRangeStart() );
+        assertEquals( testStartExpr, actVal.getRangeStartExpr() );
         assertEquals( testEnd, actVal.getRangeEnd() );
+        assertEquals( testEndExpr, actVal.getRangeEndExpr() );
         assertEquals( testStep, actVal.getRangeStep() );
+        assertEquals( testStepExpr, actVal.getRangeStepExpr() );
         assertEquals( testXEq, actVal.getXExpression() );
         assertEquals( testYEq, actVal.getYExpression() );
         assertEquals( testREq, actVal.getRExpression() );

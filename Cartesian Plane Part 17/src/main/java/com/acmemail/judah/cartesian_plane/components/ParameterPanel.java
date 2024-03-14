@@ -34,7 +34,7 @@ public class ParameterPanel extends JPanel
     private JFormattedTextField end         = 
         getExprTextField( this::setEnd );
     private JFormattedTextField step        = 
-        getDecimalTextField( this::setStep );
+        getExprTextField( this::setStep );
     private JFormattedTextField precision   = 
         getIntegerTextField( this::setPrecision );
     private JFormattedTextField radius      = 
@@ -79,10 +79,8 @@ public class ParameterPanel extends JPanel
         boolean newState    = equation != null;
         if ( newState )
         {
-            start.setText( equation.getRangeStartExpr() );
-            start.setValue( equation.getRangeStart() );
-            end.setText( equation.getRangeEndExpr() );
-            end.setValue( equation.getRangeEnd() );
+            start.setValue( equation.getRangeStartExpr() );
+            end.setValue( equation.getRangeEndExpr() );
             step.setValue( equation.getRangeStep() );
             radius.setValue( equation.getRadiusName() );
             theta.setValue( equation.getThetaName() );
@@ -195,7 +193,7 @@ public class ParameterPanel extends JPanel
 //            equation.setRangeEnd( dVal.get() );
     }
     
-    private void setStep( Double val )
+    private void setStep( String val )
     {
         equation.setRangeStep( val );
     }
@@ -239,7 +237,7 @@ public class ParameterPanel extends JPanel
                 fmtField.setForeground( Color.RED );
                 throw new ParseException( "Invalid name", 0 );
             }
-            return num;
+            return str;
         }
     }
     

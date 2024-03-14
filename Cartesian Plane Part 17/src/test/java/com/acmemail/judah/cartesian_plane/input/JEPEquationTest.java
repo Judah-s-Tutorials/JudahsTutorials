@@ -50,7 +50,7 @@ class JEPEquationTest
         
         // verify that y expression is set to 2 
         // (see above "new JEPEquation( "2x" )").
-        equation.setRange( 1, 1, 1 );
+        setRange( 1, 1, 1 );
         equation.yPlot().forEach(
             p -> assertEquals( 2, p.getY(), "Y" ) 
         );
@@ -78,7 +78,7 @@ class JEPEquationTest
         }
         
         // validate expressions
-        equation.setRange( 1, 1, 1 );
+        setRange( 1, 1, 1 );
         equation.xyPlot().forEach(
             p -> {
                 assertEquals( 1, p.getX(), "X" );
@@ -147,7 +147,7 @@ class JEPEquationTest
         assertTrue( result.isSuccess() );
         assertEquals( xExpr, equation.getXExpression() );
         
-        equation.setRange( 1, 1, 1 );
+        setRange( 1, 1, 1 );
         equation.xyPlot()
             .forEach( p -> assertEquals( xier, p.getX() ) );
         
@@ -175,7 +175,7 @@ class JEPEquationTest
         assertTrue( result.isSuccess() );
         assertEquals( yExpr, equation.getYExpression() );
         
-        equation.setRange( 1, 1, 1 );
+        setRange( 1, 1, 1 );
         equation.yPlot()
             .forEach( p -> assertEquals( p.getY(), xier ) );
         
@@ -202,7 +202,7 @@ class JEPEquationTest
         assertTrue( result.isSuccess() );
         assertEquals( rExpr, equation.getRExpression() );
         
-        equation.setRange( Math.PI, Math.PI, 1 );
+        setRange( Math.PI, Math.PI, 1 );
         equation.rPlot()
             .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
         
@@ -229,7 +229,7 @@ class JEPEquationTest
         assertTrue( result.isSuccess() );
         assertEquals( tExpr, equation.getTExpression() );
         
-        equation.setRange( 1, 1, 1 );
+        setRange( 1, 1, 1 );
         equation.tPlot()
             .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
         
@@ -263,7 +263,7 @@ class JEPEquationTest
                 .mapToObj( x -> new Point2D.Double( x, xier * x ) )
                 .collect( Collectors.toList() );
         
-        equation.setRange( start, end, step );
+        setRange( start, end, step );
         List<Point2D>   actPoints   =
             equation.yPlot()
             .collect( Collectors.toList() );
@@ -289,7 +289,7 @@ class JEPEquationTest
                 .mapToObj( t -> new Point2D.Double( xXier * t, yXier * t ) )
                 .collect( Collectors.toList() );
         
-        equation.setRange( start, end, step );
+        setRange( start, end, step );
         List<Point2D>   actPoints   =
             equation.xyPlot()
             .collect( Collectors.toList() );
@@ -313,7 +313,7 @@ class JEPEquationTest
         double  end     = 3 * Math.PI / 2;
         double  step    = Math.PI / 2;
         
-        equation.setRange( start, end, step );
+        setRange( start, end, step );
         List<Point2D>   actPoints   =
             equation.rPlot()
             .collect( Collectors.toList() );
@@ -347,7 +347,7 @@ class JEPEquationTest
         double  end     = 3;
         double  step    = 1;
         
-        equation.setRange( start, end, step );
+        setRange( start, end, step );
         List<Point2D>   actPoints   =
             equation.tPlot()
             .collect( Collectors.toList() );
@@ -393,7 +393,7 @@ class JEPEquationTest
         double  start   = -2;
         double  end     = 2;
         double  step    = .1;
-        equation.setRange( start, end, step );
+        setRange( start, end, step );
         assertEquals( start, equation.getRangeStart() );
         assertEquals( end, equation.getRangeEnd() );
         assertEquals( step, equation.getRangeStep() );
@@ -403,7 +403,7 @@ class JEPEquationTest
     public void testSetRangeStart()
     {
         double  val     = Math.PI;
-        equation.setRangeStart( val );
+        equation.setRangeStart( String.valueOf( val ) );
         assertEquals( val, equation.getRangeStart() );
     }
 
@@ -411,7 +411,7 @@ class JEPEquationTest
     public void testSetRangeEnd()
     {
         double  val     = Math.PI;
-        equation.setRangeEnd( val );
+        equation.setRangeEnd( String.valueOf( val ) );
         assertEquals( val, equation.getRangeEnd() );
     }
 
@@ -419,7 +419,7 @@ class JEPEquationTest
     public void testSetRangeStep()
     {
         double  val     = Math.PI;
-        equation.setRangeStep( val );
+        equation.setRangeStep( String.valueOf( val ) );
         assertEquals( val, equation.getRangeStep() );
     }
 
@@ -490,6 +490,13 @@ class JEPEquationTest
         assertFalse( optional.isPresent() );
     }
     
+    private void setRange( double start, double end, double step )
+    {
+        equation.setRangeStart( String.valueOf( start ) );
+        equation.setRangeEnd( String.valueOf( end ) );
+        equation.setRangeStep( String.valueOf( step ) );
+    }
+    
     private void testEvaluatePass( String expr, double expVal )
     {
         Optional<Double>    optional    = equation.evaluate( expr );
@@ -499,7 +506,7 @@ class JEPEquationTest
     
     private void validateDefaultXExpression()
     {
-        equation.setRange( 1, 3, 1 );
+        setRange( 1, 3, 1 );
         equation.xyPlot().forEach(
             p -> assertEquals( 1, p.getX(), "X" )
         );
@@ -507,7 +514,7 @@ class JEPEquationTest
     
     private void validateDefaultYExpression()
     {
-        equation.setRange( 1, 3, 1 );
+        setRange( 1, 3, 1 );
         equation.yPlot().forEach(
             p -> assertEquals( 1, p.getY(), "Y" )
         );

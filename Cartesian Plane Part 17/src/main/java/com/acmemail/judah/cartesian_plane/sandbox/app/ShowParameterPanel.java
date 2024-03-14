@@ -102,9 +102,9 @@ public class ShowParameterPanel
         equation.setVar( "b", 0 );
         equation.setVar( "c", 0 );
         
-        equation.setRangeStart( -2  );
-        equation.setRangeEnd( 2 );
-        equation.setRangeStep( .01 );
+        equation.setRangeStart( "-2"  );
+        equation.setRangeEnd( "2" );
+        equation.setRangeStep( ".01" );
         equation.setPrecision( 3 );
         equation.setRadiusName( "r" );
         equation.setThetaName( "t" );

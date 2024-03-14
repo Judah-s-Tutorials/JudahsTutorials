@@ -283,28 +283,12 @@ public interface Equation
     void setThetaName(String theta);
 
     /**
-     * Establishes the iteration range for this Equation.
-     * 
-     * @param start the start of the iteration range
-     * @param end   the end of the iteration range
-     * @param step  the increment to use when traversing the iteration range
-     */
-    void setRange(double start, double end, double step);
-
-    /**
      * Sets the start of the iteration range
      * from an expression.
      * 
      * @param rangeStart   iteration range start
      */
-    void setRangeStart(String rangeStart);
-
-    /**
-     * Sets the start of the iteration range.
-     * 
-     * @param rangeStart   iteration range start
-     */
-    void setRangeStart(double rangeStart);
+    Result setRangeStart(String rangeStart);
 
     /**
      * Returns the start of the iteration range.
@@ -327,7 +311,7 @@ public interface Equation
      * 
      * @param rangeStart   iteration range start
      */
-    void setRangeEnd(String rangeEnd);
+    Result setRangeEnd(String rangeEnd);
 
     /**
      * Returns the end of the iteration range.
@@ -345,13 +329,6 @@ public interface Equation
     String getRangeEndExpr();
 
     /**
-     * Sets the end of the iteration range.
-     * 
-     * @param rangeEnd  iteration range end
-     */
-    void setRangeEnd(double rangeEnd);
-
-    /**
      * Returns the increment used
      * to iterate over the encapsulated range.
      * 
@@ -360,12 +337,22 @@ public interface Equation
     double getRangeStep();
 
     /**
+     * Gets the step expression used
+     * to iterate over the encapsulated range.
+     * 
+     * @return
+     *      the step expression used to iterate over the encapsulated range
+     */
+    String getRangeStepExpr();
+
+    /**
      * Sets the increment used
      * to iterate over the encapsulated range.
      * 
-     * @param rangeStep   iteration range increment
+     * @param rangeStep   
+     *      expression that determines the iteration range increment
      */
-    void setRangeStep(double rangeStep);
+    Result setRangeStep( String expr );
     
     /**
      * Sets the precision for displaying 

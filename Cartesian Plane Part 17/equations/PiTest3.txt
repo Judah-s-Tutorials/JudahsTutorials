@@ -1,12 +1,12 @@
 EQUATION New Equation
-start -π/2
-end 2π
+start π/2
+end 1
 step 0.05
 set
 param t
 radius r
 theta t
-y= π/2
+y= 1
 x= 1
 t= 1
 r= 1
