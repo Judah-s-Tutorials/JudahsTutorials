@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>title</title>
+    <link rel="stylesheet" href="../../BlogSupport/default_forwp.css">
+</head>
+<body>
+<table class="jt-norm" style="width:100%;">
+<thead>
+<tr>
+<th class="jt-norm" colspan="2">
+<em>InputParser</em> Class, <em>parseInput(Command,String)</em> Method
+</th>
+</tr>
+<tr>
+<th class="jt-norm">Before</th>
+<th class="jt-norm">After</th>
+</tr>
+</thead>
+<tbody style="
+    background-color: #EDEDED;
+    font-size: 10px;
+">
+<tr>
+<td class="jt-norm">
+<pre>switch ( command )
+{
+// ...
+case START:
+    parseExpression( equation::setRangeStart, equation::getRangeStart );
+    break;
+case END:
+    parseExpression( equation::setRangeEnd, equation::getRangeEnd );
+    break;
+case STEP:
+    parseExpression( equation::setRangeStep, equation::getRangeStep );
+    break;
+// ...
+}</pre>
+</td>
+<td class="jt-norm">
+<pre>switch ( command )
+{
+// ...
+case START:
+    parseArg( equation::setRangeStart, equation::getRangeStartExpr );
+    break;
+case END:
+    parseArg( equation::setRangeEnd, equation::getRangeEndExpr );
+    break;
+case STEP:
+    parseArg( equation::setRangeStep, equation::getRangeStepExpr );
+    break;
+// ...
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+
+<hr>
+
+<table class="jt-norm" style="width:100%;">
+<thead>
+<tr>
+<th class="jt-norm" colspan="2">
+<em>FileManager</em> Class
+</th>
+</tr>
+<tr>
+<th class="jt-norm">Before</th>
+<th class="jt-norm">After</th>
+</tr>
+</thead>
+<tbody style="
+    background-color: #EDEDED;
+    font-size: 12px;
+">
+<tr>
+<td class="jt-norm">
+<pre>private static void writeRange( Equation equation )
+{
+    lines.add( "start " + equation.getRangeStart() );
+    lines.add( "end " + equation.getRangeEnd() );
+    lines.add( "step " + equation.getRangeStep() );
+}</pre>
+</td>
+<td class="jt-norm">
+<pre>private static void writeRange( Equation equation )
+{
+    lines.add( "start " + equation.getRangeStartExpr() );
+    lines.add( "end " + equation.getRangeEndExpr() );
+    lines.add( "step " + equation.getRangeStepExpr() );
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>
+

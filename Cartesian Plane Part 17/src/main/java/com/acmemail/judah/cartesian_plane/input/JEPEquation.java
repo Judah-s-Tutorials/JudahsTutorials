@@ -383,13 +383,13 @@ public class JEPEquation implements Equation
      * Sets increment the expression used
      * to iterate over the encapsulated range.
      * 
-     * @param rangeStep   iteration range increment
+     * @param exprStr   iteration range increment
      */
     @Override
-    public Result setRangeStep( String rangeStep )
+    public Result setRangeStep( String exprStr )
     {
         Result  result  =
-            setExpr( rangeStep, d -> rStep = d, s -> rStepExpr = s );
+            setExpr( exprStr, d -> rStep = d, s -> rStepExpr = s );
         return result;
     }
     
@@ -470,7 +470,6 @@ public class JEPEquation implements Equation
         {
             valSetter.accept( dVal.get() );
             strSetter.accept( str );
-            rEndExpr = str;
             result = new Result( true );
         }
         else

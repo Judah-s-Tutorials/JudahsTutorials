@@ -271,7 +271,7 @@ public class FileManager
     {
         lines.add( "start " + equation.getRangeStartExpr() );
         lines.add( "end " + equation.getRangeEndExpr() );
-        lines.add( "step " + equation.getRangeStep() );
+        lines.add( "step " + equation.getRangeStepExpr() );
     }
     
     /**

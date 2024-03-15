@@ -405,6 +405,7 @@ public class PlotPanel extends JPanel
             textField.addPropertyChangeListener( "value", e ->
                 pmgr.setProperty( dmModified, true )
             );
+            textField.addKeyListener( new PIListener() );
             TextValueListener   vListener   = new TextValueListener();
             vListener.addThis( textField );
 
