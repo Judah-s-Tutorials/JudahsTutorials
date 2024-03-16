@@ -37,14 +37,13 @@ public class PIListener extends KeyAdapter
         
         if ( isText && isCtrl && keyCode == keyCodeP )
         {
-            JTextField  field   = (JTextField)evt.getSource();
+            JTextField  field   = (JTextField)src;
             String      text    = field.getText();
             int         caret   = field.getCaretPosition();
-            int         backPos = caret - 2;
-            String      prev2   = "";
             if ( caret > 1 )
             {
-                prev2 = text.substring( backPos, caret );    
+                int     backPos = caret - 2;
+                String  prev2 = text.substring( backPos, caret );    
                 if ( prev2.toLowerCase().equals( "pi" ) )
                 {
                     

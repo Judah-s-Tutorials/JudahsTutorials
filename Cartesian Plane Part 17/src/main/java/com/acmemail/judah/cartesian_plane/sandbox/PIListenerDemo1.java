@@ -71,7 +71,6 @@ public class PIListenerDemo1
         JButton     exit    = new JButton( "Exit" );
         exit.addActionListener( e -> System.exit( 1 ) );
         buttons.add( exit );
-        pane.add( buttons, BorderLayout.SOUTH );
         
         JButton     print   = new JButton( "Print" );
         print.addActionListener( e -> {

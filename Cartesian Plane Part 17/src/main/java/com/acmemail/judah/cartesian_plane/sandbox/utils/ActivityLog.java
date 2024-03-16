@@ -130,6 +130,7 @@ public class ActivityLog
     {
         dialog = new JDialog( parent, title );
         textPane.setText( htmlPrefix + htmlSuffix );
+        textPane.setEditable( false );
         Dimension   dim         = new Dimension( 300, 150 );
         scrollPane.setPreferredSize( dim );
 
