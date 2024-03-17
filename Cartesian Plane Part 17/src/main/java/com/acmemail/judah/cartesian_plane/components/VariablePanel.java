@@ -3,7 +3,6 @@ package com.acmemail.judah.cartesian_plane.components;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeEvent;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;

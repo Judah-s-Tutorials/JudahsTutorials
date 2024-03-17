@@ -35,6 +35,11 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
  */
 public class ShowParameterPanel
 {
+    /** System-dependent line separator. */
+    private static String   endl        = System.lineSeparator();
+    /** Current equation */
+    private static Equation equation    = null;
+    
     /**
      * Application entry point.
      *
@@ -67,7 +72,7 @@ public class ShowParameterPanel
         Border  border  = BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
         leftPanel.setBorder( border );
         
-        JPanel      buttonPanel = new JPanel( new GridLayout( 2, 1 ) );
+        JPanel      buttonPanel = new JPanel( new GridLayout( 3, 1 ) );
         leftPanel.add( buttonPanel );
         leftPanel.add( Box.createRigidArea( new Dimension( 0, 10 ) ) );
 
@@ -81,6 +86,10 @@ public class ShowParameterPanel
         JButton nullEquation    = new JButton( "Close" );
         buttonPanel.add( nullEquation );
         nullEquation.addActionListener( e-> pPanel.load( null ) );
+        
+        JButton print           = new JButton( "Print" );
+        buttonPanel.add( print );
+        print.addActionListener( e -> printAction() );
 
         contentPane.add( leftPanel, BorderLayout.WEST );
         
@@ -95,7 +104,7 @@ public class ShowParameterPanel
 
     private static Equation newEquation()
     {
-        Equation    equation    = new Exp4jEquation();
+        equation = new Exp4jEquation();
         equation.setVar( "x", 0 );
         equation.setVar( "y", 0 );
         equation.setVar( "a", 0 );
@@ -110,5 +119,28 @@ public class ShowParameterPanel
         equation.setThetaName( "t" );
         equation.setParam( "t" );
         return equation;
+    }
+    
+    private static void printAction()
+    {
+        if ( equation != null )
+        {
+            StringBuilder   bldr    = new StringBuilder();
+            bldr.append( "Start: " ).append( equation.getRangeStartExpr() )
+                .append( endl )
+                .append( "End: " ).append( equation.getRangeEndExpr() )
+                .append( endl )
+                .append( "Step: " ).append( equation.getRangeStepExpr() )
+                .append( endl )
+                .append( "Prec: " ).append( equation.getPrecision() )
+                .append( endl )
+                .append( "Radius: " ).append( equation.getRadiusName() )
+                .append( endl )
+                .append( "Theta: " ).append( equation.getThetaName() )
+                .append( endl )
+                .append( "Param: " ).append( equation.getParamName() )
+                .append( endl );
+            System.out.println( bldr );
+        }
     }
 }
