@@ -18,21 +18,21 @@ public class TextValueListener
         textField.addPropertyChangeListener( "value", this );
     }
     
-    @Override
-    public void keyTyped( KeyEvent evt )
-    {
-        Object  src     = evt.getSource();
-        if ( src instanceof JFormattedTextField )
-        {
-            JFormattedTextField  comp    = (JFormattedTextField)src;
-            if ( !comp.getText().equals( comp.getValue() ) )
-            {
-                Font        font    = comp.getFont();
-                font = font.deriveFont( Font.ITALIC );
-                comp.setFont( font );
-            }
-        }
-    }
+//    @Override
+//    public void keyTyped( KeyEvent evt )
+//    {
+//        Object  src     = evt.getSource();
+//        if ( src instanceof JFormattedTextField )
+//        {
+//            JFormattedTextField  comp    = (JFormattedTextField)src;
+//            if ( !comp.getText().equals( comp.getValue() ) )
+//            {
+//                Font        font    = comp.getFont();
+//                font = font.deriveFont( Font.ITALIC );
+//                comp.setFont( font );
+//            }
+//        }
+//    }
     
     @Override
     public void propertyChange( PropertyChangeEvent evt )

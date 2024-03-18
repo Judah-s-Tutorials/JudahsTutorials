@@ -1,9 +1,7 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.GridLayout;
-import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -21,9 +19,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
 
-import com.acmemail.judah.cartesian_plane.CPConstants;
-import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
 /**
  * This panel allows the operator
@@ -76,14 +73,8 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class ParameterPanel extends JPanel
+public class ParameterPanel_orig extends JPanel
 {
-    /** 
-     * Input verifier for formatted text fields; declared here
-     * because we only need one object for all text fields.
-     */
-    private static InputVerifier    inputVerifier   = new FieldVerifier();
-    
     /** The currently open equation; null if none. */
     private Equation            equation    = null;
     
@@ -113,7 +104,7 @@ public class ParameterPanel extends JPanel
      * Constructor.
      * Fully initializes this panel.
      */
-    public ParameterPanel()
+    public ParameterPanel_orig()
     {
         super( new GridLayout( 8, 2 ) );
         Border  border  = BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
@@ -183,15 +174,22 @@ public class ParameterPanel extends JPanel
     private JFormattedTextField 
     getIntegerTextField( Consumer<Integer> consumer )
     {
+        AbstractFormatter   formatter   = 
+            new ValueFormatter( Integer::parseInt );
         JFormattedTextField textField   = 
-            getTextField( Integer::parseInt );
+            new JFormattedTextField( formatter );
+        textField.setColumns( 5 );
         textField.setHorizontalAlignment( SwingConstants.RIGHT );
+        textField.setInputVerifier( new FieldVerifier() );
         
         textField.addPropertyChangeListener( "value", e -> {
             Object  value   = e.getNewValue();
+            System.out.println( value.getClass().getSimpleName() );
             if ( equation != null  )
                 consumer.accept( (Integer)(value) );
         });
+        TextValueListener   vListener   = new TextValueListener();
+        vListener.addThis( textField );
 
         return textField;
     }
@@ -207,9 +205,13 @@ public class ParameterPanel extends JPanel
     private JFormattedTextField 
     getExprTextField( Consumer<String> consumer )
     {
+        AbstractFormatter   formatter   = 
+            new ValueFormatter( this::parseExpression );
         JFormattedTextField textField   = 
-            getTextField( this::parseExpression );
+            new JFormattedTextField( formatter );
+        textField.setColumns( 5 );
         textField.setHorizontalAlignment( SwingConstants.RIGHT );
+        textField.setInputVerifier( new FieldVerifier() );
         textField.addKeyListener( new PIListener() );
         
         textField.addPropertyChangeListener( "value", e -> {
@@ -217,6 +219,8 @@ public class ParameterPanel extends JPanel
             if ( equation != null  )
                 consumer.accept( value.toString() );
         });
+        TextValueListener   vListener   = new TextValueListener();
+        vListener.addThis( textField );
 
         return textField;
     }
@@ -232,30 +236,19 @@ public class ParameterPanel extends JPanel
     private JFormattedTextField 
     getNameTextField( Consumer<String> consumer )
     {
-        JFormattedTextField textField   = getTextField( this::parseName );
+        AbstractFormatter   formatter   = new NameFormatter();
+        JFormattedTextField textField   = 
+            new JFormattedTextField( formatter );
+        textField.setColumns( 5 );
+        textField.setHorizontalAlignment( SwingConstants.RIGHT );
+        textField.setInputVerifier( new FieldVerifier() );
+        
         textField.addPropertyChangeListener( "value", e -> {
             if ( equation != null )
                 consumer.accept( e.getNewValue().toString() );
         });
-        
-        return textField;
-    }
-    
-    private JFormattedTextField 
-        getTextField( Function<String,Object> validator )
-    {
-        AbstractFormatter   formatter   = new FieldFormatter( validator );
-        JFormattedTextField textField   = 
-            new JFormattedTextField( formatter );
-        textField.setColumns( 5 );
-        textField.setInputVerifier( inputVerifier );
-        textField.addPropertyChangeListener( this::propertyChange );
-        
-        PropertyManager pmgr        = PropertyManager.INSTANCE;
-        String          dmModified  = CPConstants.DM_MODIFIED_PN;
-        textField.addPropertyChangeListener( "value", e ->
-            pmgr.setProperty( dmModified, true )
-        );
+        TextValueListener   vListener   = new TextValueListener();
+        vListener.addThis( textField );
         
         return textField;
     }
@@ -271,7 +264,7 @@ public class ParameterPanel extends JPanel
      *      If there is no equation,
      *      or the given expression is invalid.
      */
-    private String parseExpression( String str )
+    private Double parseExpression( String str )
         throws NumberFormatException
     {
         if ( equation == null )
@@ -279,52 +272,14 @@ public class ParameterPanel extends JPanel
         Optional<Double>    opt     = equation.evaluate( str );
         if ( opt.isEmpty() )
             throw new NumberFormatException( "Invalid expression" );
-        return str;
+        return opt.get();
     }
     
-    /**
-     * Parses and evaluates a given name.
-     * 
-     * @param str   the given name
-     * 
-     * @return  the name
-     * 
-     * @throws NumberFormatException    
-     *      if the given name is invalid
-     */
-    private String parseName( String str )
-    {
-        if ( !NameValidator.isIdentifier( str ) )
-            throw new NumberFormatException( "not a valid name" );
-        return str;
-    }
-    
-    /**
-     * Listens for commits to a JFormattedTextField.
-     * When detected, changes the text field's font style 
-     * to plain, indicating that the commit is complete.
-     * 
-     * @param evt   event object accompanying property change events
-     */
-    private void propertyChange( PropertyChangeEvent evt )
-    {
-        if ( !evt.getPropertyName().equals( "value" ) )
-            return;
-        Object  src     = evt.getSource();
-        if ( src instanceof JFormattedTextField )
-        {
-            JFormattedTextField  comp    = (JFormattedTextField)src;
-            Font        font    = comp.getFont();
-            font = font.deriveFont( Font.PLAIN );
-            comp.setFont( font );
-        }
-    }
-    
-    private static class FieldFormatter extends DefaultFormatter
+    private static class ValueFormatter extends DefaultFormatter
     {
         private static final long serialVersionUID = 5606928606415501983L;
-        private final Function<String,Object>   validator;
-        public FieldFormatter( Function<String,Object> validator )
+        private final Function<String,Number>   validator;
+        public ValueFormatter( Function<String,Number> validator )
         {
             this.validator = validator;
             setOverwriteMode( false );
@@ -334,28 +289,39 @@ public class ParameterPanel extends JPanel
             throws ParseException
         {
             JFormattedTextField fmtField    = getFormattedTextField();
-            Font    pFont   = fmtField.getFont().deriveFont( Font.PLAIN );
-            Font    iFont   = pFont.deriveFont( Font.ITALIC );
-            Object  value   = 0;
-            if ( !str.isEmpty() )
+            try
             {
-                try
-                {
-                    value = validator.apply( str );
-                    fmtField.setForeground( Color.BLACK );
-                    if ( value.equals( fmtField.getValue() ) )
-                        fmtField.setFont( pFont );
-                    else
-                        fmtField.setFont( iFont );
-                }
-                catch ( NumberFormatException exc )
-                {
-                    fmtField.setFont( iFont );
-                    fmtField.setForeground( Color.RED );
-                    throw new ParseException( "Invalid name", 0 );
-                }
+                Number  num = validator.apply( str );
+                System.out.println( "a" + num.getClass().getSimpleName() );
+                fmtField.setForeground( Color.BLACK );
             }
-            return value;
+            catch ( NumberFormatException exc )
+            {
+                fmtField.setForeground( Color.RED );
+                throw new ParseException( "Invalid name", 0 );
+            }
+            return str;
+        }
+    }
+    
+    private static class NameFormatter extends DefaultFormatter
+    {
+        public NameFormatter()
+        {
+            setOverwriteMode( false );
+        }
+        @Override
+        public String stringToValue( String str )
+            throws ParseException
+        {
+            JFormattedTextField fmtField    = getFormattedTextField();
+            if ( !NameValidator.isIdentifier( str ) )
+            {
+                fmtField.setForeground( Color.RED );
+                throw new ParseException( "Invalid name", 0 );
+            }
+            fmtField.setForeground( Color.BLACK );
+            return str;
         }
     }
     

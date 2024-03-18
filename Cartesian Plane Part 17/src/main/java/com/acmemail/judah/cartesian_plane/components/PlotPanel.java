@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
@@ -406,9 +407,8 @@ public class PlotPanel extends JPanel
                 pmgr.setProperty( dmModified, true )
             );
             textField.addKeyListener( new PIListener() );
-            TextValueListener   vListener   = new TextValueListener();
-            vListener.addThis( textField );
-
+//            TextValueListener   vListener   = new TextValueListener();
+//            vListener.addThis( textField );
         }
         
         /**
@@ -437,13 +437,21 @@ public class PlotPanel extends JPanel
             throws ParseException
         {
             JFormattedTextField fmtField    = getFormattedTextField();
+            Font    pFont   = fmtField.getFont().deriveFont( Font.PLAIN );
+            Font    iFont   = pFont.deriveFont( Font.ITALIC );
             if ( equation != null && str != null && !str.isEmpty() )
             {
                 if ( !pred.test( str ) )
                 {
                     fmtField.setForeground( Color.RED );
+                    fmtField.setFont( iFont );
                     throw new ParseException( "Invalid name", 0 );
                 }
+                fmtField.setForeground( Color.BLACK );
+                if ( str.equals( fmtField.getValue() ) )
+                    fmtField.setFont( pFont );
+                else
+                    fmtField.setFont( iFont );
             }
             fmtField.setForeground( Color.BLACK );
             return str;
