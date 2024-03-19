@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
+import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Result;
@@ -352,6 +354,7 @@ public class PlotPanel extends JPanel
     {
         public final Predicate<String>          pred;
         public final Supplier<String>           getter;
+        public final Function<String,Result>    setter;
         public final Supplier<Stream<Point2D>>  plotter;
         public final Command                    command;
         public final String                     label;
@@ -392,23 +395,48 @@ public class PlotPanel extends JPanel
         )
         {
             this.getter = getter;
+            this.setter = setter;
             this.plotter = plotter;
             this.command = command;
             this.label = label;
-            pred = s -> setter.apply( s ).isSuccess();
+            pred = s -> getEquation().isValidExpression( s );
             setOverwriteMode( false );
             
             textField = new JFormattedTextField( this );
             textField.setInputVerifier( verifier );
             textField.setColumns( 15 );
+            textField.addKeyListener( new PIListener() );
+            textField.addPropertyChangeListener( "value", this::commit );
+        }
+        
+        private void commit( PropertyChangeEvent evt )
+        {
+            if ( !evt.getPropertyName().equals( "value" ) )
+                return;
+            if ( equation == null )
+                return;
+            JFormattedTextField comp    = getFormattedTextField();
+            String      value           = comp.getValue().toString(); 
+            Result      result          = setter.apply( value );
+            // The input to the setter should be validated at this point,
+            // so if it tests as invalid declare a malfunction.
+            if ( !result.isSuccess() )
+            {
+                String  msg     = "Invalid expression: \"" + value + '"';
+                throw new ComponentException( msg );
+            }
+            
+            // If value is committed the text field text is no longer
+            // different from the value, so set the font style to plain.
+            Font        font            = comp.getFont();
+            font = font.deriveFont( Font.PLAIN );
+            comp.setFont( font );
+            
+            // Declare that a the data in the currently open equation
+            // has been modified.
             PropertyManager pmgr        = PropertyManager.INSTANCE;
             String          dmModified  = CPConstants.DM_MODIFIED_PN;
-            textField.addPropertyChangeListener( "value", e ->
-                pmgr.setProperty( dmModified, true )
-            );
-            textField.addKeyListener( new PIListener() );
-//            TextValueListener   vListener   = new TextValueListener();
-//            vListener.addThis( textField );
+            pmgr.setProperty( dmModified, true );
         }
         
         /**
@@ -474,9 +502,10 @@ public class PlotPanel extends JPanel
         @Override
         public String valueToString( Object value )
         {
-            String  rval    = value != null ? value.toString() : "";
-            JFormattedTextField fmtField    = getFormattedTextField();
-            fmtField.setForeground( Color.BLACK );
+            String              rval        = 
+                value != null ? value.toString() : "";
+//            JFormattedTextField fmtField    = getFormattedTextField();
+//            fmtField.setForeground( Color.BLACK );
             return rval;
         }
     }
