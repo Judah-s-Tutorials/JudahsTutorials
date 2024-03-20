@@ -26,7 +26,17 @@ public class RobotAssistant
         robot.setAutoDelay( 10 );
     }
     
-    public void type( String chars, int lastKey )
+    public Robot getRobot()
+    {
+        return robot;
+    }
+    
+    public void setAutoDelay( int millis )
+    {
+        robot.setAutoDelay( millis );
+    }
+    
+    public void paste( String chars )
     {
         StringSelection selection    = new StringSelection( chars );
         clipboard.setContents( selection, null );
@@ -35,9 +45,13 @@ public class RobotAssistant
         robot.keyPress( pasteKey );
         robot.keyRelease( pasteKey );
         robot.keyRelease( pasteModifier );
+    }
+    
+    public void type( String chars, int lastKey )
+    {
+        paste( chars );
         robot.keyPress( lastKey );
         robot.keyRelease( lastKey );
-        System.out.println( lastKey );
     }
     
     public void upArrow()
