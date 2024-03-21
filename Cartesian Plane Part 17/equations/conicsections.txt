@@ -1,6 +1,14 @@
-    equation conic sections
-    start 0
-    end 2pi
-    step .001
-    set e=.5,d=1,t0=pi/2
-    r= e*d/(1-e*cos(t - t0)
+EQUATION conic sections
+start 0
+end 2pi
+step 0.001
+set a=0.000000,b=0.000000,c=0.000000,d=1.000000,e=0.500000,x=0.000000,y=0.000000,t0=1.570796,r=0.000000,t=0.000000
+param t
+radius r
+theta t
+y= 1
+x= 1
+t= 1
+r= e*d/(1-e*cos(t-t0))
+prec 3
+plot RPlot

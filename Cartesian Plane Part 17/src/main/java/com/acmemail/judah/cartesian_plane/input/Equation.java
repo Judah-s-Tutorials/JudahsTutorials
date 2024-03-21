@@ -372,7 +372,7 @@ public interface Equation
     
     /**
      * Sets the type of plot for displaying.
-     * Valid values are YPlot, XXPlot, RPlot, and TPlot.
+     * Valid values are YPlot, XYPlot, RPlot, and TPlot.
      * 
      * @param precision the given precision
      */

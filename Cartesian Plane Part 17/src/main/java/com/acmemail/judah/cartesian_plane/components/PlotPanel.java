@@ -77,14 +77,6 @@ public class PlotPanel extends JPanel
             "t="
         ),
     };
-    
-    /**
-     * InputVerifier used for all JFormattedTextFields. Declared
-     * as an instance variable so that a single object can be used
-     * for all text fields.
-     * @see ExprFormatter#ExprFormatter(Function, Supplier, Supplier, Command, String)
-     */
-    private final ExprVerifier      verifier    = new ExprVerifier();
 
     /** 
      * List of plot types. Declared as an instance variable for
@@ -254,9 +246,20 @@ public class PlotPanel extends JPanel
             .forEach( plots::addItem );
         panel.add( plots );
         panel.add( plot );
+        plots.addActionListener( this::plotsAction );
         plot.addActionListener( this::plotAction );
         plot.setAlignmentX( Component.CENTER_ALIGNMENT );
         return panel;
+    }
+    
+    private void plotsAction( ActionEvent evt )
+    {
+        Command cmd = (Command)plots.getSelectedItem();
+        if ( equation != null )
+        {
+            equation.setPlot( cmd.toString() );
+            markModified();
+        }
     }
     
     /**
@@ -293,6 +296,19 @@ public class PlotPanel extends JPanel
         return equation;
     }
     
+    /**
+     * Declare via the PropertyManager that the data
+     * in the current equation has changed.
+     */
+    private static void markModified()
+    {
+        // Declare that a the data in the currently open equation
+        // has been modified.
+        PropertyManager pmgr        = PropertyManager.INSTANCE;
+        String          dmModified  = CPConstants.DM_MODIFIED_PN;
+        pmgr.setProperty( dmModified, true );
+    }
+
     /**
      * Subclass of InputVerifier
      * used to validate the expressions
@@ -403,7 +419,7 @@ public class PlotPanel extends JPanel
             setOverwriteMode( false );
             
             textField = new JFormattedTextField( this );
-            textField.setInputVerifier( verifier );
+            textField.setInputVerifier( new ExprVerifier() );
             textField.setColumns( 15 );
             textField.addKeyListener( new PIListener() );
             textField.addPropertyChangeListener( "value", this::commit );
@@ -434,9 +450,7 @@ public class PlotPanel extends JPanel
             
             // Declare that a the data in the currently open equation
             // has been modified.
-            PropertyManager pmgr        = PropertyManager.INSTANCE;
-            String          dmModified  = CPConstants.DM_MODIFIED_PN;
-            pmgr.setProperty( dmModified, true );
+            markModified();
         }
         
         /**

@@ -1,8 +1,8 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.AWTException;
 import java.awt.BorderLayout;
@@ -33,9 +33,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.components.PlotPanel;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
@@ -45,7 +47,11 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
 public class PlotPanelTestGUI
 {
+    private static final PropertyManager    pmgr    =
+        PropertyManager.INSTANCE;
     private final Map<String,JFormattedTextField>   textFieldMap    = 
+        new HashMap<>();
+    private final Map<String,Supplier<String>>      exprMap         = 
         new HashMap<>();
     
     /** GUI main window. */
@@ -67,9 +73,6 @@ public class PlotPanelTestGUI
     /** Currently loaded equation; may be null. */
     private Equation    equation    = null;
     
-    private int     adHocInt1;
-    private boolean adHocBoolean1;
-    private String  adHocString1;
     private Object  adHocObject1;
     
     public PlotPanelTestGUI()
@@ -88,44 +91,19 @@ public class PlotPanelTestGUI
         comboBox = getComboBox();
         plotButton = getPlotButton();
         
+        exprMap.put( "y=", () -> getEquation().getYExpression() );
+        exprMap.put( "x=", () -> getEquation().getXExpression() );
+        exprMap.put( "t=", () -> getEquation().getTExpression() );
+        exprMap.put( "r=", () -> getEquation().getRExpression() );
+        
         robotAsst = makeRobot();
         robot = robotAsst.getRobot();
         robot.setAutoDelay( 100 );
     }
     
-    /**
-     * Gets the JFormattedTextField associated
-     * with the given label.
-     * 
-     * @param text  the given label
-     * 
-     * @return  the JFormattedTextField associated with the given label
-     */
-    public JFormattedTextField getEquationField( String text )
+    public Equation getEquation()
     {
-        JFormattedTextField textField   = textFieldMap.get( text );
-        assertNotNull( textField );
-        return textField;
-    }
-    
-    /**
-     * Gets the combo box that contains the plot options.
-     * 
-     * @return  the combo box that contains the plot options
-     */
-    public JComboBox<?> getOptions()
-    {
-        return comboBox;
-    }
-    
-    /**
-     * Gets the button that initiates the plot.
-     * 
-     * @return  the button that initiates the plot
-     */
-    public JButton getPlotExecutor()
-    {
-        return plotButton;
+        return equation;
     }
     
     public void clickPlotButton()
@@ -138,14 +116,6 @@ public class PlotPanelTestGUI
         JFormattedTextField textField   = textFieldMap.get( fieldID );
         assertNotNull( textField );
         click( textField );
-    }
-    
-    public void type( String textFieldID, int keyCode )
-    {
-        JFormattedTextField textField   = textFieldMap.get( textFieldID );
-        assertNotNull( textField );
-        click( textField );
-        type( keyCode );
     }
     
     public void type( int keyCode )
@@ -208,18 +178,24 @@ public class PlotPanelTestGUI
     /**
      * Instantiates and loads a new Equation.
      */
-    public void newEquation()
+    public Equation newEquation()
     {
         equation = new Exp4jEquation();
         equation.setRangeStart( "1" );
         equation.setRangeEnd( "2" );
         GUIUtils.schedEDTAndWait( () -> 
             plotPanel.load( equation ) );
+        pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
+        pmgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
+        pmgr.setProperty( CPConstants.DM_OPEN_FILE_PN, false );
+        return equation;
     }
     
     public void setPlotType( Command cmd )
     {
         comboBox.setSelectedItem( cmd );
+        assertEquals( cmd.toString(), equation.getPlot() );
+        assertTrue( pmgr.asBoolean( CPConstants.DM_MODIFIED_PN ) );
     }
     
     /**
@@ -238,12 +214,30 @@ public class PlotPanelTestGUI
         robot.mouseRelease( InputEvent.BUTTON1_DOWN_MASK );
     }
     
+    /**
+     * Enters a given equation into a text field.
+     * The text field is focused and cleared,
+     * the equation is pasted into the text field
+     * and then ENTER is typed in the text field.
+     * 
+     * @param fieldID   ID of the text field to process
+     * @param equation  the given equation
+     */
+    public void enterEquation( String fieldID, String equation )
+    {
+        JFormattedTextField textField   = textFieldMap.get( fieldID );
+        click( textField );
+        clearText( fieldID );
+        paste( equation );
+        type( KeyEvent.VK_ENTER );
+    }
+    
     public void paste( String str )
     {
         robotAsst.paste( str );
     }
     
-    public boolean isChangedText( String fieldID )
+    public boolean isChangedTextFont( String fieldID )
     {
         JTextField  textField   = textFieldMap.get( fieldID );
         Font        font        = getFont( textField );
@@ -251,7 +245,7 @@ public class PlotPanelTestGUI
         return result;
     }
     
-    public boolean isValidText( String fieldID )
+    public boolean isValidTextFont( String fieldID )
     {
         JTextField  textField   = textFieldMap.get( fieldID );
         Color       foreground  = getColor( textField );
@@ -265,14 +259,6 @@ public class PlotPanelTestGUI
         GUIUtils.schedEDTAndWait( () -> textField.setText( "" ) );
     }
     
-    public String getText()
-    {
-        JFormattedTextField textField   = getFocusedTextField();
-        assertNotNull( textField );
-        String              text        = getText( textField );
-        return text;
-    }
-    
     public String getText( String fieldID )
     {
         JFormattedTextField textField   = textFieldMap.get( fieldID );
@@ -283,43 +269,32 @@ public class PlotPanelTestGUI
     
     public String getExpression( String fieldID )
     {
-        String  expr    = null;
-        switch ( fieldID )
-        {
-        case( "x=" ):
-            expr = equation.getXExpression();
-            break;
-        case( "y=" ):
-            expr = equation.getYExpression();
-            break;
-        case( "t=" ):
-            expr = equation.getTExpression();
-            break;
-        case( "r=" ):
-            expr = equation.getRExpression();
-            break;
-        default:
-            String msg  = "Invalid expression id: " + fieldID;
-            fail( msg );
-        }
+        Supplier<String>    getter = exprMap.get( fieldID );
+        assertNotNull( getter );
+        String              expr    = getter.get();
         
         return expr;
     }
     
-    public boolean isCommitted()
+    public boolean isCommitted( String fieldID )
     {
-        String      text        = getText();
-        Object      value       = getValue();
+        String      text        = getText( fieldID );
+        Object      value       = getValue( fieldID );
         boolean     committed   = text.equals( value );
+        // if committed, make sure equation matches text field value
+        if ( committed )
+        {
+            Supplier<String>    getter  = exprMap.get( fieldID );
+            assertNotNull( getter );
+            assertEquals( value, getter.get() );
+        }
         return committed;
     }
     
-    public boolean isCommittedExpr( Supplier<String> exprGetter )
+    public JFormattedTextField getFocusedField()
     {
-        String      text        = getText();
-        Object      value       = getValue();
-        boolean     committed   = text.equals( value );
-        return committed;
+        JFormattedTextField textField   = getFocusedTextField();
+        return textField;
     }
     
     public Point2D getPlotPoint()
@@ -340,14 +315,6 @@ public class PlotPanelTestGUI
         assertNotNull( comp );
         assertTrue( comp instanceof JFormattedTextField );
         textFieldMap.put( text, (JFormattedTextField)comp );
-    }
-    
-    public Object getValue()
-    {
-        JFormattedTextField textField   = getFocusedTextField();
-        Object              value       = 
-            getProperty( () -> textField.getValue() );
-        return value;
     }
     
     public Object getValue( String fieldID )
@@ -389,8 +356,7 @@ public class PlotPanelTestGUI
         return (Font)obj;
     }
     
-    private Object 
-    getProperty( Supplier<Object> supplier )
+    private Object getProperty( Supplier<Object> supplier )
     {
         GUIUtils.schedEDTAndWait( () -> adHocObject1 = supplier.get() );
         return adHocObject1;
@@ -446,6 +412,7 @@ public class PlotPanelTestGUI
         return robot;
     }
     
+    @SuppressWarnings("serial")
     private static class PlotManager extends CartesianPlane
     {
         private Supplier<Stream<PlotCommand>>   supplier;
@@ -466,7 +433,6 @@ public class PlotPanelTestGUI
                 .map( c -> (PlotPointCommand)c )
                 .findFirst().orElse( null );
             assertNotNull( cmd );
-            System.out.println( cmd.getClass().getSimpleName() );
             cmd.execute();
             return point;
         }
@@ -474,7 +440,17 @@ public class PlotPanelTestGUI
         @Override
         public void plotPoint( float xco, float yco )
         {
-            point = new Point2D.Double( xco, yco );
+            float   xcoR    = roundToOneDecimal( xco );
+            float   ycoR    = roundToOneDecimal( yco );
+            point = new Point2D.Float( xcoR, ycoR );
+        }
+        
+        private float roundToOneDecimal( float toRound )
+        {
+            float   rounded = Math.abs( toRound ) * 10;
+            rounded = (int)(rounded + .5);
+            rounded /= 10 * Math.signum( toRound );
+            return rounded;
         }
     }
 }
