@@ -2,9 +2,7 @@ package com.acmemail.judah.cartesian_plane.sandbox.formatted_text;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -46,11 +44,14 @@ public class JFormattedTextFieldDemo1
     private static ActivityLog  log;
     
     /** Demo text field. */
-    private final JFormattedTextField   field1  = new JFormattedTextField();
+    private final JFormattedTextField   field1  = 
+        new JFormattedTextField();
     /** Demo text field. */
-    private final JFormattedTextField   field2  = new JFormattedTextField();
+    private final JFormattedTextField   field2  = 
+        new JFormattedTextField();
     /** Demo text field. */
-    private final JFormattedTextField   field3  = new JFormattedTextField();
+    private final JFormattedTextField   field3  = 
+        new JFormattedTextField();
     /**
      * Application entry point.
      *
@@ -67,7 +68,8 @@ public class JFormattedTextFieldDemo1
      */
     public JFormattedTextFieldDemo1()
     {
-        JFrame  frame   = new JFrame( "Show Variable Panel" );
+        String      title       = "JFormattedTextField Demo 1";
+        JFrame      frame       = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel  contentPane = new JPanel( new BorderLayout() );

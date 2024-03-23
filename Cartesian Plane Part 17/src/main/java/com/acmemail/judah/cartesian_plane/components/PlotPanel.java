@@ -487,7 +487,7 @@ public class PlotPanel extends JPanel
                 {
                     fmtField.setForeground( Color.RED );
                     fmtField.setFont( iFont );
-                    throw new ParseException( "Invalid name", 0 );
+                    throw new ParseException( "Invalid expression", 0 );
                 }
                 fmtField.setForeground( Color.BLACK );
                 if ( str.equals( fmtField.getValue() ) )
@@ -518,8 +518,6 @@ public class PlotPanel extends JPanel
         {
             String              rval        = 
                 value != null ? value.toString() : "";
-//            JFormattedTextField fmtField    = getFormattedTextField();
-//            fmtField.setForeground( Color.BLACK );
             return rval;
         }
     }
