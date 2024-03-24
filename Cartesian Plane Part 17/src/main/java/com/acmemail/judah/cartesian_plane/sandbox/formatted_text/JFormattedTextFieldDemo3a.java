@@ -3,7 +3,6 @@ package com.acmemail.judah.cartesian_plane.sandbox.formatted_text;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
@@ -18,7 +17,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
@@ -39,8 +37,14 @@ import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
  * @see FormatterDemo1
  * @see UnsignedIntFormatter
  */
-public class JFormattedTextFieldDemo3
+public class JFormattedTextFieldDemo3a
 {
+    /** Color to use for valid text. */
+    private static final Color      validColor      =
+        UIManager.getColor( "FormattedTextField.foreground" );
+    /** Color to use for invalid text. */
+    private static final Color      invalidColor    = Color.RED;
+
     /** Activity log. */
     private static final ActivityLog  log   = new ActivityLog();
     
@@ -52,14 +56,14 @@ public class JFormattedTextFieldDemo3
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new JFormattedTextFieldDemo3() );
+        SwingUtilities.invokeLater( () -> new JFormattedTextFieldDemo3a() );
     }
     
     /**
      * Constructor.
      * Builds and displays the application GUI.
      */
-    public JFormattedTextFieldDemo3()
+    public JFormattedTextFieldDemo3a()
     {
         String      title       = "JFormattedTextField Demo 3";
         JFrame      frame       = new JFrame( title );
@@ -197,11 +201,11 @@ public class JFormattedTextFieldDemo3
                     String  msg = "Value may not be negative.";
                     throw new IllegalArgumentException( msg );
                 }
-                fmtField.setForeground( Color.BLACK );
+                fmtField.setForeground( validColor );
             }
             catch ( IllegalArgumentException exc )
             {
-                fmtField.setForeground( Color.RED );
+                fmtField.setForeground( invalidColor );
                 throw new ParseException( exc.getMessage(), 0 );
             }
             

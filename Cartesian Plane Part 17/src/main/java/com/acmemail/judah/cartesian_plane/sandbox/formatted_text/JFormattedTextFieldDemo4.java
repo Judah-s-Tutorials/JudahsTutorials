@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
 
@@ -39,8 +40,20 @@ import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
  * @see FormatterDemo1
  * @see UnsignedIntFormatter
  */
-public class JFormattedTextFieldDemo3
+public class JFormattedTextFieldDemo4
 {
+    /** Font to use in a text field when its value is committed. */
+    private static final Font       committedFont   = 
+        UIManager.getFont( "FormattedTextField.font" );
+    /** Font to use in a text field when its value is not committed. */
+    private static final Font       uncommittedFont =
+        committedFont.deriveFont( Font.ITALIC );
+    /** Color to use for valid text. */
+    private static final Color      validColor      =
+        UIManager.getColor( "FormattedTextField.foreground" );
+    /** Color to use for invalid text. */
+    private static final Color      invalidColor    = Color.RED;
+    
     /** Activity log. */
     private static final ActivityLog  log   = new ActivityLog();
     
@@ -52,14 +65,14 @@ public class JFormattedTextFieldDemo3
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new JFormattedTextFieldDemo3() );
+        SwingUtilities.invokeLater( () -> new JFormattedTextFieldDemo4() );
     }
     
     /**
      * Constructor.
      * Builds and displays the application GUI.
      */
-    public JFormattedTextFieldDemo3()
+    public JFormattedTextFieldDemo4()
     {
         String      title       = "JFormattedTextField Demo 3";
         JFrame      frame       = new JFrame( title );
@@ -95,6 +108,8 @@ public class JFormattedTextFieldDemo3
             new JFormattedTextField( new UnsignedIntFormatter() );
         field1.setValue( 0 );
         field2.setValue( 0 );
+        field1.addPropertyChangeListener( "value", this::commit );
+        field2.addPropertyChangeListener( "value", this::commit );
         field1.addPropertyChangeListener( "value", this::valueChanged );
         field2.addPropertyChangeListener( "value", this::valueChanged );
         field1.setHorizontalAlignment( JTextField.RIGHT );
@@ -127,6 +142,26 @@ public class JFormattedTextFieldDemo3
         panel.add( exit );
         
         return panel;
+    }
+    
+    /**
+     * Listens for changes to the "value" property
+     * of a JFormattedTextField.
+     * 
+     * @param evt   property-change event object
+     * 
+     * @throws ComponentException
+     *      if source of the event is not a JFormattedTextField
+     *      or the property name is not "value"
+     */
+    private void commit( PropertyChangeEvent evt )
+    {
+        Object  src = evt.getSource();
+        if ( !evt.getPropertyName().equals( "value" ) )
+            throw new ComponentException( "Invalid property" );
+        if ( !(src instanceof JFormattedTextField) )
+            throw new ComponentException( "Invalid component" );
+        ((JFormattedTextField)src).setFont( committedFont );
     }
     
     /**
@@ -197,11 +232,16 @@ public class JFormattedTextFieldDemo3
                     String  msg = "Value may not be negative.";
                     throw new IllegalArgumentException( msg );
                 }
-                fmtField.setForeground( Color.BLACK );
+                fmtField.setForeground( validColor );
+                if ( fmtField.getValue().equals( value ) )
+                    fmtField.setFont( committedFont );
+                else
+                    fmtField.setFont( uncommittedFont );
             }
             catch ( IllegalArgumentException exc )
             {
-                fmtField.setForeground( Color.RED );
+                fmtField.setForeground( invalidColor );
+                fmtField.setFont( uncommittedFont );
                 throw new ParseException( exc.getMessage(), 0 );
             }
             
