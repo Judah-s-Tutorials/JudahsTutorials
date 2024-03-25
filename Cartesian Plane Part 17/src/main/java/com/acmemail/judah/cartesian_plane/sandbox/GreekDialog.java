@@ -21,6 +21,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
+@SuppressWarnings("serial")
 public class GreekDialog extends JDialog
 {
     private static final int    bWidth  =10;
@@ -50,8 +51,6 @@ public class GreekDialog extends JDialog
         new Desc("psi",0x03c8,0x03a8),
         new Desc("omega",0x03c9,0x03a9),
     };
-    
-    private Character   choice  = null;
     
     public static void main( String[] args )
     {

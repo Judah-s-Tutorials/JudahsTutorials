@@ -22,8 +22,10 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
+import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
 
@@ -36,10 +38,45 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Result;
+import com.acmemail.judah.cartesian_plane.sandbox.formatted_text.JFormattedTextFieldDemo4;
+import com.acmemail.judah.cartesian_plane.sandbox.formatted_text.JFormattedTextFieldDemo5;
 
+/**
+ * This class is used to create and manage a "plot panel."
+ * The panel consists of:
+ * <ul>
+ * <li> 
+ *      Four text fields expressing
+ *      the types of equation we are prepared to plot,
+ *      YPLOT, XYPLOT, TPLOT and RPLOT.
+ * </li>
+ * <li>
+ *      A combo box for selecting which equation to plot.
+ * </li>
+ * <li>
+ *      A pushbutton for initiating the plot.
+ * </li>
+ * </ul>
+ * @author Jack Straub
+ * 
+ * @see JFormattedTextFieldDemo4
+ * @see JFormattedTextFieldDemo5
+ */
 @SuppressWarnings("serial")
 public class PlotPanel extends JPanel
 {
+    /** Font to use in a text field when its value is committed. */
+    private static final Font       committedFont   = 
+        UIManager.getFont( "FormattedTextField.font" );
+    /** Font to use in a text field when its value is not committed. */
+    private static final Font       uncommittedFont =
+        committedFont.deriveFont( Font.ITALIC );
+    /** Color to use for valid text. */
+    private static final Color      validColor      =
+        UIManager.getColor( "FormattedTextField.foreground" );
+    /** Color to use for invalid text. */
+    private static final Color      invalidColor    = Color.RED;
+
     /** 
      * Configuration parameters for the four types of plot.
      * Only used for the initialization of {@linkplain #exprMap}.
@@ -317,7 +354,7 @@ public class PlotPanel extends JPanel
      * 
      * @author Jack Straub
      */
-    private class ExprVerifier extends InputVerifier
+    private static class ExprVerifier extends InputVerifier
     {
         /**
          * Validates the string entered into a text field.
@@ -334,10 +371,17 @@ public class PlotPanel extends JPanel
         public boolean verify( JComponent comp )
         {
             JFormattedTextField textField   = (JFormattedTextField)comp;
+            AbstractFormatter   formatter   = textField.getFormatter();
             String              text        = textField.getText();
             boolean             status      = true;
-            if ( !text.isEmpty() )
-                status = equation.isValidExpression( text );          
+            try
+            {
+                formatter.stringToValue( text );
+            }
+            catch ( ParseException exc )
+            {
+                status = false;
+            }
             return status;
         }
     }
@@ -425,6 +469,43 @@ public class PlotPanel extends JPanel
             textField.addPropertyChangeListener( "value", this::commit );
         }
         
+        /**
+         * Processes a commit operation.
+         * A commit operation is signaled
+         * by a change to a formatted text field's "value" property.
+         * The text field's font is updated 
+         * to indicate that a commit has taken place.
+         * The corresponding field
+         * in the current equation
+         * is updated with the committed value.
+         * <p>
+         * Precondition: 
+         * the value of the formatted text field
+         * has been validated.
+         * If the value is invalid
+         * an exception is thrown.
+         * <p>
+         * Precondition:
+         * The accompanying PropertyChangeEvent object
+         * indicates that the "value" property has change.
+         * If the name of the property is anything else
+         * the event is ignored.
+         * <p>
+         * Postcondition:
+         * The text field's font indicates 
+         * that its value has been committed.
+         * <p>
+         * Postcondition:
+         * The corresponding field of the current equation
+         * has been updated with the committed value.
+         * 
+         * @param evt   
+         *      object identifying the details 
+         *      of the PropertyChangeEvent
+         *      
+         * @throws ComponentException
+         *      if the committed value is invalid
+         */
         private void commit( PropertyChangeEvent evt )
         {
             if ( !evt.getPropertyName().equals( "value" ) )
@@ -442,11 +523,9 @@ public class PlotPanel extends JPanel
                 throw new ComponentException( msg );
             }
             
-            // If value is committed the text field text is no longer
-            // different from the value, so set the font style to plain.
-            Font        font            = comp.getFont();
-            font = font.deriveFont( Font.PLAIN );
-            comp.setFont( font );
+            // If the text field text is not different from the value,
+            // set the font style to committed.
+            comp.setFont( committedFont );
             
             // Declare that a the data in the currently open equation
             // has been modified.
@@ -479,46 +558,22 @@ public class PlotPanel extends JPanel
             throws ParseException
         {
             JFormattedTextField fmtField    = getFormattedTextField();
-            Font    pFont   = fmtField.getFont().deriveFont( Font.PLAIN );
-            Font    iFont   = pFont.deriveFont( Font.ITALIC );
             if ( equation != null && str != null && !str.isEmpty() )
             {
                 if ( !pred.test( str ) )
                 {
-                    fmtField.setForeground( Color.RED );
-                    fmtField.setFont( iFont );
+                    fmtField.setForeground( invalidColor );
+                    fmtField.setFont( uncommittedFont );
                     throw new ParseException( "Invalid expression", 0 );
                 }
-                fmtField.setForeground( Color.BLACK );
+                fmtField.setForeground( validColor );
                 if ( str.equals( fmtField.getValue() ) )
-                    fmtField.setFont( pFont );
+                    fmtField.setFont( committedFont );
                 else
-                    fmtField.setFont( iFont );
+                    fmtField.setFont( uncommittedFont );
             }
-            fmtField.setForeground( Color.BLACK );
+            fmtField.setForeground( validColor );
             return str;
-        }
-        
-        /**
-         * "Converts" the given Object to a String.
-         * Since the given object is expected to be a String
-         * little conversion is required.
-         * The given Object is assumed
-         * to constitute a valid expression.
-         * The text color of the encapsulated text field
-         * is changed explicitly to black,
-         * and the given Object is returned as a String.
-         * 
-         * @param   value   the given Object
-         * 
-         * @return  the given Object converted to a String
-         */
-        @Override
-        public String valueToString( Object value )
-        {
-            String              rval        = 
-                value != null ? value.toString() : "";
-            return rval;
         }
     }
 }

@@ -5,6 +5,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
 
@@ -16,29 +19,32 @@ import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
+import com.acmemail.judah.cartesian_plane.input.Result;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
 /**
- * Application that builds on {@linkplain FormatterDemo2}.
- * The stringToValue method in the UnsignedIntFormatter class
- * changes the color of a text field's text 
- * depending on whether the text field 
- * contains valid data (black)
- * or invalid data (red). 
+ * Application that demonstrates how we can use
+ * JFormattedTextFields to format and validate
+ * an expression from our Equation facility.
+ * Pushing the print button
+ * logs the current state
+ * of the formatted text field
+ * and the encapsulated equation.
+ * You can also invoke the print facility
+ * by typing alt-R when 
+ * the text field has focus.
  * 
  * @author Jack Straub
- * 
- * @see FormatterDemo1
- * @see UnsignedIntFormatter
  */
-public class JFormattedTextFieldDemo4
+public class JFormattedTextFieldDemo5
 {
     /** Font to use in a text field when its value is committed. */
     private static final Font       committedFont   = 
@@ -51,9 +57,17 @@ public class JFormattedTextFieldDemo4
         UIManager.getColor( "FormattedTextField.foreground" );
     /** Color to use for invalid text. */
     private static final Color      invalidColor    = Color.RED;
+    /** Initial expression to be stored in the "y=" text field. */
+    private static final String     yExpr           = "mx + b";
     
     /** Activity log. */
-    private static final ActivityLog  log   = new ActivityLog();
+    private final ActivityLog           log;
+    
+    /** Text field to hold y-expression. */
+    private final   JFormattedTextField field1  = 
+        new JFormattedTextField( new ExprFormatter() );
+    /** Source equation for y-expression. */
+    private final   Equation    equation    = new Exp4jEquation();
     
     /**
      * Application entry point.
@@ -63,16 +77,27 @@ public class JFormattedTextFieldDemo4
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new JFormattedTextFieldDemo4() );
+        SwingUtilities.invokeLater( () -> new JFormattedTextFieldDemo5() );
     }
     
     /**
      * Constructor.
      * Builds and displays the application GUI.
+     * Initializes the encapsulated equation.
      */
-    public JFormattedTextFieldDemo4()
+    public JFormattedTextFieldDemo5()
     {
-        String      title       = "JFormattedTextField Demo 3";
+        // Declare variables to be used in equation
+        equation.setVar( "x", 0 );
+        equation.setVar( "y", 0 );
+        equation.setVar( "a", 0 );
+        equation.setVar( "b", 0 );
+        equation.setVar( "c", 0 );
+        equation.setVar( "m", 0 );
+        // Initialize the y-expression
+        equation.setYExpression( yExpr );
+        
+        String      title       = "JFormattedTextField Demo 5";
         JFrame      frame       = new JFrame( title );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel      contentPane = new JPanel( new BorderLayout() );
@@ -84,41 +109,43 @@ public class JFormattedTextFieldDemo4
         frame.pack();
         frame.setVisible( true );
         
+        log = new ActivityLog( frame );
         Dimension   frameSize   = frame.getPreferredSize();
         log.setLocation( 110 + frameSize.width, 100 );
     }
     
     /**
-     * Gets the panel containing the text fields.
+     * Gets the panel containing the text field.
      *   
-     * @return  the panel containing the text fields
+     * @return  the panel containing the text field
      */
     private JPanel getTextPanel()
     {
-        JPanel  panel   = new JPanel( new GridLayout( 2, 2, 3, 0 ) );
+        JPanel  panel   = new JPanel( new GridLayout( 1, 2, 3, 0 ) );
         Border  border  = 
             BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
         panel.setBorder( border );
         
-        JFormattedTextField field1  = 
-            new JFormattedTextField( new UnsignedIntFormatter() );
-        JFormattedTextField field2  = 
-            new JFormattedTextField( new UnsignedIntFormatter() );
-        field1.setValue( 0 );
-        field2.setValue( 0 );
+        field1.setValue( equation.getYExpression() );
         field1.addPropertyChangeListener( "value", this::commit );
-        field2.addPropertyChangeListener( "value", this::commit );
         field1.addPropertyChangeListener( "value", this::valueChanged );
-        field2.addPropertyChangeListener( "value", this::valueChanged );
-        field1.setHorizontalAlignment( JTextField.RIGHT );
-        field2.setHorizontalAlignment( JTextField.RIGHT );
-        field1.setInputVerifier( new UnsignedIntVerifier() );
-        field2.setInputVerifier( new UnsignedIntVerifier() );
+        field1.setInputVerifier( new ExprVerifier() );
+        
+        KeyAdapter  kAdapter    = new KeyAdapter() {
+            @Override
+            public void keyPressed( KeyEvent evt )
+            {
+                int keyCode = evt.getKeyCode();
+                if ( evt.isAltDown() && keyCode == KeyEvent.VK_R )
+                    printAction( null );
+            }
+        };
 
-        panel.add( new JLabel( "First Unsigned Value:" ) );
+        field1.setToolTipText( "alt-R to print" );
+        field1.addKeyListener( kAdapter );
+
+        panel.add( new JLabel( "y=" ) );
         panel.add( field1 );
-        panel.add( new JLabel( "Second Unsigned Value:" ) );
-        panel.add( field2 );
         
         return panel;
     }
@@ -136,35 +163,43 @@ public class JFormattedTextFieldDemo4
         panel.setBorder( border );
         
         JButton exit    = new JButton( "Exit" );
+        JButton print   = new JButton( "Print" );
+        print.addActionListener( this::printAction );        
         exit.addActionListener( e -> System.exit( 1 ) );        
+        panel.add( print );
         panel.add( exit );
         
         return panel;
     }
     
     /**
-     * Listens for changes to the "value" property
-     * of a JFormattedTextField.
+     * Listens for commits in the JFormattedTextField.
+     * Commits occur when the text field's "value" property
+     * changes.
      * 
      * @param evt   property-change event object
      * 
      * @throws ComponentException
-     *      if source of the event is not a JFormattedTextField
-     *      or the property name is not "value"
+     *      if the text field does not contain a valid expression
      */
     private void commit( PropertyChangeEvent evt )
     {
         Object  src = evt.getSource();
-        if ( !evt.getPropertyName().equals( "value" ) )
-            throw new ComponentException( "Invalid property" );
-        if ( !(src instanceof JFormattedTextField) )
-            throw new ComponentException( "Invalid component" );
-        ((JFormattedTextField)src).setFont( committedFont );
+        if ( src instanceof JFormattedTextField )
+        {
+            JFormattedTextField textField   = (JFormattedTextField)src;
+            Result              result      =
+                equation.setYExpression( textField.getText() );
+            if ( !result.isSuccess() )
+                throw new ComponentException( "Invalid expression" );
+            textField.setFont( committedFont );
+        }
     }
     
     /**
      * Invoked when a JFormattedTextField "value"
      * property changes.
+     * Logs the current state of the application.
      * 
      * @param evt   object accompanying a property-changed event
      */
@@ -186,103 +221,96 @@ public class JFormattedTextFieldDemo4
     }
     
     /**
-     * Formatter to ensure that all values
-     * are unsigned integers.
+     * Invoked when the operator clicks the "Print" button
+     * or types alt-R in the JFormattedTextField.
+     * 
+     * @param evt   object describing the action; not used
+     */
+    private void printAction( ActionEvent evt )
+    {
+        StringBuilder   bldr    = new StringBuilder();
+        bldr.append( "<span style='color: red;'>")
+            .append( "***" ).append( "<br>" )
+            .append( "yExpression: " )
+            .append( equation.getYExpression() ).append( "<br>" )
+            .append( "text: " ).append( field1.getText() ).append( "," )
+            .append( "value: " ).append( field1.getValue() )
+            .append( "<br>" ).append( "***************" )
+            .append( "</span>" );
+        log.append( bldr.toString() );
+    }
+    
+    /**
+     * Formatter to ensure that the JFormattedTextField's text
+     * is a valid expression.
      * 
      * @author Jack Straub
      */
     @SuppressWarnings("serial")
-    static class UnsignedIntFormatter extends DefaultFormatter
+    class ExprFormatter extends DefaultFormatter
     {
         /**
          * Constructor.
          * Only necessary to put the formatter in insert mode.
          */
-        public UnsignedIntFormatter()
+        public ExprFormatter()
         {
             setOverwriteMode( false );
         }
         
         /**
-         * Converts the given text to an unsigned integer.
+         * Validates the text field's text,
+         * which is expected to be a valid expression.
          * The color of the text is changed to red
          * for invalid data, 
          * and black for valid data.
          * 
          * @param the given text
          * 
-         * @return the converted integer
+         * @return the given text
          * 
          * @throws ParseException
-         *      if the given text is not a valid unsigned integer
+         *      if the given text is not a valid expression
          */
         @Override
         public Object stringToValue( String text )
             throws ParseException
         {
             JFormattedTextField fmtField    = getFormattedTextField();
-            int                 value       = -1;
-            try
-            {
-                value = Integer.parseInt( text );
-                if ( value < 0 )
-                {
-                    String  msg = "Value may not be negative.";
-                    throw new IllegalArgumentException( msg );
-                }
-                fmtField.setForeground( validColor );
-                if ( fmtField.getValue().equals( value ) )
-                    fmtField.setFont( committedFont );
-                else
-                    fmtField.setFont( uncommittedFont );
-            }
-            catch ( IllegalArgumentException exc )
+            if ( !equation.isValidExpression( text ) )
             {
                 fmtField.setForeground( invalidColor );
                 fmtField.setFont( uncommittedFont );
-                throw new ParseException( exc.getMessage(), 0 );
+                throw new ParseException( "Invalid expression", 0 );
             }
+            fmtField.setForeground( validColor );
+            if ( fmtField.getValue().equals( text ) )
+                fmtField.setFont( committedFont );
+            else
+                fmtField.setFont( uncommittedFont );
             
-            return value;
-        }
-        
-        /**
-         * Converts the given Integer value
-         * to a String formatted with group separators.
-         * 
-         * returns value formatted as text with group separators
-         * 
-         * @throws ParseException
-         *      if the given value is not an Integer
-         */
-        @Override
-        public String valueToString( Object value )
-            throws ParseException
-        {
-            if ( !(value instanceof Integer) )
-                throw new ParseException( "Non-integer value", 0 );
-            String  text    = String.format( "%,d", value );
             return text;
         }
     }
     
     /**
-     * InputVerifier for the managed check box.
+     * InputVerifier for the formatted text field.
      * 
      * @author Jack Straub
      */
-    private static class UnsignedIntVerifier extends InputVerifier
+    private static class ExprVerifier extends InputVerifier
     {
         /**
          * Validates the string entered into a text field.
-         * If the string is empty it is ignored, 
-         * and true is returned.
-         * Otherwise returns true if the string
-         * constitutes a valid expression.
+         * The text is expected to be a valid expression.
+         * Returns true if the text is valid.
          * 
          * @return 
-         *      true if the string in a text field is empty,
-         *      or constitutes a valid expression
+         *      true if the text field's text 
+         *      constitutes a valid expression
+         *      
+         * @throws ComponentException
+         *      if the source of the text is not a JFormattedTextField
          */
         @Override
         public boolean verify( JComponent comp )

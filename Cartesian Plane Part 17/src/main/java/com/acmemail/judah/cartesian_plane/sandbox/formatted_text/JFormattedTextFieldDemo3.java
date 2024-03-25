@@ -3,7 +3,6 @@ package com.acmemail.judah.cartesian_plane.sandbox.formatted_text;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
@@ -18,8 +17,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
 
