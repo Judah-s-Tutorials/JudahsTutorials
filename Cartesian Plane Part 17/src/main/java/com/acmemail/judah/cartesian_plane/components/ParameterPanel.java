@@ -18,6 +18,7 @@ import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.text.DefaultFormatter;
 
@@ -78,12 +79,18 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
 @SuppressWarnings("serial")
 public class ParameterPanel extends JPanel
 {
-    /** 
-     * Input verifier for formatted text fields; declared here
-     * because we only need one object for all text fields.
-     */
-    private static InputVerifier    inputVerifier   = new FieldVerifier();
-    
+    /** Font to use in a text field when its value is committed. */
+    private static final Font       committedFont   = 
+        UIManager.getFont( "FormattedTextField.font" );
+    /** Font to use in a text field when its value is not committed. */
+    private static final Font       uncommittedFont =
+        committedFont.deriveFont( Font.ITALIC );
+    /** Color to use for valid text. */
+    private static final Color      validColor      =
+        UIManager.getColor( "FormattedTextField.foreground" );
+    /** Color to use for invalid text. */
+    private static final Color      invalidColor    = Color.RED;
+
     /** The currently open equation; null if none. */
     private Equation            equation    = null;
     
@@ -248,7 +255,7 @@ public class ParameterPanel extends JPanel
         JFormattedTextField textField   = 
             new JFormattedTextField( formatter );
         textField.setColumns( 5 );
-        textField.setInputVerifier( inputVerifier );
+        textField.setInputVerifier( new FieldVerifier() );
         textField.addPropertyChangeListener( this::propertyChange );
         
         PropertyManager pmgr        = PropertyManager.INSTANCE;
@@ -322,7 +329,6 @@ public class ParameterPanel extends JPanel
     
     private static class FieldFormatter extends DefaultFormatter
     {
-        private static final long serialVersionUID = 5606928606415501983L;
         private final Function<String,Object>   validator;
         public FieldFormatter( Function<String,Object> validator )
         {
@@ -334,24 +340,22 @@ public class ParameterPanel extends JPanel
             throws ParseException
         {
             JFormattedTextField fmtField    = getFormattedTextField();
-            Font    pFont   = fmtField.getFont().deriveFont( Font.PLAIN );
-            Font    iFont   = pFont.deriveFont( Font.ITALIC );
             Object  value   = 0;
             if ( !str.isEmpty() )
             {
                 try
                 {
                     value = validator.apply( str );
-                    fmtField.setForeground( Color.BLACK );
+                    fmtField.setForeground( validColor );
                     if ( value.equals( fmtField.getValue() ) )
-                        fmtField.setFont( pFont );
+                        fmtField.setFont( committedFont );
                     else
-                        fmtField.setFont( iFont );
+                        fmtField.setFont( uncommittedFont );
                 }
                 catch ( NumberFormatException exc )
                 {
-                    fmtField.setFont( iFont );
-                    fmtField.setForeground( Color.RED );
+                    fmtField.setFont( uncommittedFont );
+                    fmtField.setForeground( invalidColor );
                     throw new ParseException( "Invalid name", 0 );
                 }
             }

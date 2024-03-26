@@ -430,9 +430,8 @@ public class PlotPanel extends JPanel
          * associated with a given command.
          * 
          * @param setter
-         *      function to validate an expression and, if valid,
-         *      copy the expression into the appropriate field
-         *      of the currently open equation
+         *      function to set an expression in the 
+         *      currently open equation
          * @param getter
          *      supplier to obtain from the currently open equation
          *      the expression associated with the encapsulated command
@@ -504,17 +503,21 @@ public class PlotPanel extends JPanel
          *      of the PropertyChangeEvent
          *      
          * @throws ComponentException
-         *      if the committed value is invalid
+         *      if the committed value is invalid,
+         *      or if this method has been improperly invoked
          */
         private void commit( PropertyChangeEvent evt )
         {
-            if ( !evt.getPropertyName().equals( "value" ) )
-                return;
+            String  propName    = evt.getPropertyName();
+            if ( propName.equals( "value" ) )
+            {
+                String  msg     = "Invalid property: \"" + propName + '"';
+                throw new ComponentException( msg );
+            }
             if ( equation == null )
                 return;
-            JFormattedTextField comp    = getFormattedTextField();
-            String      value           = comp.getValue().toString(); 
-            Result      result          = setter.apply( value );
+            String      value   = textField.getValue().toString(); 
+            Result      result  = setter.apply( value );
             // The input to the setter should be validated at this point,
             // so if it tests as invalid declare a malfunction.
             if ( !result.isSuccess() )
@@ -523,9 +526,8 @@ public class PlotPanel extends JPanel
                 throw new ComponentException( msg );
             }
             
-            // If the text field text is not different from the value,
-            // set the font style to committed.
-            comp.setFont( committedFont );
+            // Set the font style to committed.
+            textField.setFont( committedFont );
             
             // Declare that a the data in the currently open equation
             // has been modified.
