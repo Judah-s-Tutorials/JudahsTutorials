@@ -509,7 +509,7 @@ public class PlotPanel extends JPanel
         private void commit( PropertyChangeEvent evt )
         {
             String  propName    = evt.getPropertyName();
-            if ( propName.equals( "value" ) )
+            if ( !propName.equals( "value" ) )
             {
                 String  msg     = "Invalid property: \"" + propName + '"';
                 throw new ComponentException( msg );
