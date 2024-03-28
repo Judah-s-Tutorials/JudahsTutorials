@@ -425,6 +425,14 @@ public class PlotPanelTestGUI
             this.supplier = supplier;
         }
         
+        @Override
+        public void plotPoint( float xco, float yco )
+        {
+            float   xcoR    = roundToOneDecimal( xco );
+            float   ycoR    = roundToOneDecimal( yco );
+            point = new Point2D.Float( xcoR, ycoR );
+        }
+        
         public Point2D getPlotPoint()
         {
             Stream<PlotCommand> stream  = supplier.get();
@@ -435,14 +443,6 @@ public class PlotPanelTestGUI
             assertNotNull( cmd );
             cmd.execute();
             return point;
-        }
-        
-        @Override
-        public void plotPoint( float xco, float yco )
-        {
-            float   xcoR    = roundToOneDecimal( xco );
-            float   ycoR    = roundToOneDecimal( yco );
-            point = new Point2D.Float( xcoR, ycoR );
         }
         
         private float roundToOneDecimal( float toRound )
