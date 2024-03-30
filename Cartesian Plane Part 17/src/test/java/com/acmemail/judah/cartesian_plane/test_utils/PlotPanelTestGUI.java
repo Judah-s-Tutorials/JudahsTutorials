@@ -276,7 +276,7 @@ public class PlotPanelTestGUI
      *      true if the indicated text field
      *      has uses a "valid" color
      */
-    public boolean isValidTextFont( String fieldID )
+    public boolean isValidTextColor( String fieldID )
     {
         JTextField  textField   = textFieldMap.get( fieldID );
         Color       foreground  = getColor( textField );
