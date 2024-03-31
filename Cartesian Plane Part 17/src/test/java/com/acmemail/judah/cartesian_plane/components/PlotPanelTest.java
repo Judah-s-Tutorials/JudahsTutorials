@@ -54,75 +54,47 @@ public class PlotPanelTest
     }
 
     @ParameterizedTest
-    @ValueSource( strings= {"x=", "y="} )
+    @ValueSource( strings= {"x=", "y=", "t=", "r="} )
     public void testTab( String fieldID )
     {
         testSimple( fieldID, KeyEvent.VK_TAB );
     }
-
-    @ParameterizedTest
-    @ValueSource( strings= {"x=", "y=", "t=", "r="} )
-    public void testPi( String fieldID )
-    {
-        String  before      = "a + 2pi - 5";
-        String  expResult   = calculateExpPIResult( before );
-        testGUI.click( fieldID );
-        testGUI.clearText( fieldID );
-        testGUI.paste( before );
-        assertTrue( testGUI.isChangedTextFont( fieldID ) );
-        assertTrue( testGUI.isValidTextColor( fieldID ) );
-        
-        assertTrue( testGUI.positionAtPI() > 0 );
-        testGUI.typeCtrlP();
-        assertTrue( testGUI.isChangedTextFont( fieldID ) );
-        assertTrue( testGUI.isValidTextColor( fieldID ) );
-
-        String  actResult   = testGUI.getText( fieldID );
-        testGUI.type( KeyEvent.VK_ENTER );
-        assertFalse( testGUI.isChangedTextFont( fieldID ) );
-        assertTrue( testGUI.isValidTextColor( fieldID ) );
-        assertEquals( expResult, actResult );
-    }
     
     @ParameterizedTest
     @ValueSource( strings= {"x=", "y=", "t=", "r="} )
-    public void testInvalid( String fieldID )
+    public void testInvalidEnter( String fieldID )
     {
-        JComponent  comp        = null;
-        String      invalidText = "ap";
-        int         finalChar   = KeyEvent.VK_I;
-        
         // Start by entering invalid text
         testGUI.click( fieldID );
-        comp = testGUI.getFocusedField();
+        JComponent  comp = testGUI.getFocusedField();
         testGUI.clearText( fieldID );
-        testGUI.paste( invalidText );
+        testGUI.paste( "ap" );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
-        assertFalse( isModifiedProperty() );
         assertFalse( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
+        assertFalse( isModifiedProperty() );
         
         // Type ENTER, make sure invalid text not committed
         testGUI.type( KeyEvent.VK_ENTER );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
-        assertFalse( isModifiedProperty() );
         assertFalse( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
+        assertFalse( isModifiedProperty() );
         
         // Type TAB, make sure focus does not move
         testGUI.type( KeyEvent.VK_TAB );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
-        assertFalse( isModifiedProperty() );
         assertFalse( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
         assertTrue( comp.isFocusOwner() );
+        assertFalse( isModifiedProperty() );
 
         // Complete text entry so equation is valid.
-        testGUI.type( finalChar );
+        testGUI.type( KeyEvent.VK_I );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
-        assertFalse( isModifiedProperty() );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
+        assertFalse( isModifiedProperty() );
         
         // Verify that enter commits the text
         testGUI.type( KeyEvent.VK_ENTER );
@@ -155,7 +127,44 @@ public class PlotPanelTest
         assertTrue( testGUI.isCommitted( fieldID ) );
         assertFalse( comp.isFocusOwner() );
         
-    }    
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings= {"x=", "y=", "t=", "r="} )
+    public void testPi( String fieldID )
+    {
+        String  before      = "a + 2pi - 5";
+        String  expResult   = calculateExpPIResult( before );
+        testGUI.click( fieldID );
+        testGUI.clearText( fieldID );
+        testGUI.paste( before );
+        assertTrue( testGUI.isChangedTextFont( fieldID ) );
+        assertTrue( testGUI.isValidTextColor( fieldID ) );
+        
+        assertTrue( testGUI.positionAtPI() > 0 );
+        testGUI.typeCtrlP();
+        assertTrue( testGUI.isChangedTextFont( fieldID ) );
+        assertTrue( testGUI.isValidTextColor( fieldID ) );
+
+        String  actResult   = testGUI.getText( fieldID );
+        testGUI.type( KeyEvent.VK_ENTER );
+        assertFalse( testGUI.isChangedTextFont( fieldID ) );
+        assertTrue( testGUI.isValidTextColor( fieldID ) );
+        assertEquals( expResult, actResult );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= {"YPLOT", "XYPLOT", "TPLOT", "RPLOT" } )
+    public void testComboBox( String strCmd )
+    {
+        pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
+        Command cmd = Command.valueOf( strCmd );
+        assertNotNull( cmd );
+        testGUI.setPlotType( cmd );
+        assertEquals( strCmd, currEquation.getPlot() );
+        assertTrue( isModifiedProperty() );
+    }
+
     @Test
     public void testPlotY()
     {
@@ -229,60 +238,47 @@ public class PlotPanelTest
         Point2D actResult   = testGUI.getPlotPoint();
         assertEquals( expResult, actResult );
     }
-    
-    @ParameterizedTest
-    @ValueSource( strings= {"YPLOT", "XYPLOT", "TPLOT", "RPLOT" } )
-    public void testComboBox( String strCmd )
-    {
-        pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
-        Command cmd = Command.valueOf( strCmd );
-        assertNotNull( cmd );
-        testGUI.setPlotType( cmd );
-    }
 
     private void testSimple( String fieldID, int keyCode )
     {
         String  orig    = testGUI.getExpression( fieldID );
         
         testGUI.click( fieldID );
-        assertEquals( orig, testGUI.getExpression( fieldID ) );
         assertFalse( testGUI.isChangedTextFont( fieldID ) );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertFalse( isModifiedProperty() );
         
         testGUI.clearText( fieldID );
         assertFalse( testGUI.isChangedTextFont( fieldID ) );
-        assertFalse( isModifiedProperty() );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertNotEquals( orig, testGUI.getText( fieldID ) );
+        assertFalse( isModifiedProperty() );
         
         testGUI.type( KeyEvent.VK_A );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
-        assertFalse( isModifiedProperty() );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertNotEquals( orig, testGUI.getText( fieldID ) );
+        assertFalse( isModifiedProperty() );
         
         testGUI.type( KeyEvent.VK_ADD );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
-        assertFalse( isModifiedProperty() );
         assertFalse( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertNotEquals( orig, testGUI.getText( fieldID ) );
+        assertFalse( isModifiedProperty() );
         
         testGUI.type( KeyEvent.VK_B );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
-        assertFalse( isModifiedProperty() );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertNotEquals( orig, testGUI.getText( fieldID ) );
+        assertFalse( isModifiedProperty() );
         
+        assertEquals( orig, testGUI.getExpression( fieldID ) );
         testGUI.type( keyCode );
         assertFalse( testGUI.isChangedTextFont( fieldID ) );
-        assertTrue( isModifiedProperty() );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertTrue( testGUI.isCommitted( fieldID ) );
+        assertTrue( isModifiedProperty() );
+
         String  currExpr    = testGUI.getExpression( fieldID );
         assertEquals( currExpr, testGUI.getValue( fieldID ) );
     }
