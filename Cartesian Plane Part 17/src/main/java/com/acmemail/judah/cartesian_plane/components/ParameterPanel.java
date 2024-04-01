@@ -5,9 +5,13 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.beans.PropertyChangeEvent;
 import java.text.ParseException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import javax.swing.BorderFactory;
@@ -94,27 +98,54 @@ public class ParameterPanel extends JPanel
     /** The currently open equation; null if none. */
     private Equation            equation    = null;
     
-    /** The text field for managing the range-start parameter. */
-    private JFormattedTextField start       = 
-        getExprTextField( e -> getEquation().setRangeStart( e ) );
-    /** The text field for managing the range-end parameter. */
-    private JFormattedTextField end         = 
-        getExprTextField( e -> getEquation().setRangeEnd( e ) );
-    /** The text field for managing the range-step parameter. */
-    private JFormattedTextField step        = 
-        getExprTextField( e -> getEquation().setRangeStep( e ) );
-    /** The text field for managing the precision parameter. */
-    private JFormattedTextField precision   = 
-        getIntegerTextField( i -> getEquation().setPrecision( i ) );
-    /** The text field for managing the radius name parameter. */
-    private JFormattedTextField radius      = 
-        getNameTextField( n -> getEquation().setRadiusName( n ) );
-    /** The text field for managing the theta name parameter. */
-    private JFormattedTextField theta       = 
-        getNameTextField( n -> getEquation().setThetaName( n ) );
-    /** The text field for managing the param name parameter. */
-    private JFormattedTextField param       = 
-        getNameTextField( n -> getEquation().setParam( n ) );
+    private TextFieldDescriptor[]   descArray  = new TextFieldDescriptor[]
+    {
+        new TextFieldDescriptor(
+            () -> getEquation().getRangeStartExpr(),
+            e -> getEquation().setRangeStart( (String)e ), 
+            s -> parseExpression( s ),
+            "Start"
+        ),
+        new TextFieldDescriptor(
+            () -> getEquation().getRangeEndExpr(),
+            e -> getEquation().setRangeEnd( (String)e ), 
+            s -> parseExpression( s ),
+            "End"
+        ),
+        new TextFieldDescriptor(
+            () -> getEquation().getRangeStepExpr(),
+            e -> getEquation().setRangeStep( (String)e ), 
+            s -> parseExpression( s ),
+            "Step"
+        ),
+        new TextFieldDescriptor(
+            () -> getEquation().getPrecision(),
+            e -> getEquation().setPrecision( (Integer)e ), 
+            s -> parseInt( s ),
+            "Prec"
+        ),
+        new TextFieldDescriptor(
+            () -> getEquation().getRadiusName(),
+            e -> getEquation().setRadiusName( (String)e ), 
+            s -> parseName( s ),
+            "Radius"
+        ),
+        new TextFieldDescriptor(
+            () -> getEquation().getThetaName(),
+            e -> getEquation().setThetaName( (String)e ), 
+            s -> parseName( s ),
+            "Theta"
+        ),
+        new TextFieldDescriptor(
+            () -> getEquation().getParamName(),
+            e -> getEquation().setParam( (String)e ), 
+            s -> parseName( s ),
+            "Param"
+        ),
+    };
+    
+    private final Map<String,TextFieldDescriptor>   fieldMap    =
+        new HashMap<>();
     
     /**
      * Constructor.
@@ -123,24 +154,26 @@ public class ParameterPanel extends JPanel
     public ParameterPanel()
     {
         super( new GridLayout( 8, 2 ) );
+        fillMap();
+        
         Border  border  = BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
         setBorder( border );
         
         add( new JLabel( "Start" ) );
         add( new JLabel( "End" ) );
-        add( start );
-        add( end );
+        add( fieldMap.get( "Start" ).textField );
+        add( fieldMap.get( "End" ).textField );
         add( new JLabel( "Step" ) );
         add( new JLabel( "Prec" ) );
-        add( step );
-        add( precision );
+        add( fieldMap.get( "Step" ).textField );
+        add( fieldMap.get( "Prec" ).textField );
         add( new JLabel( "Radius" ) );
         add( new JLabel( "Theta" ) );
-        add( radius );
-        add( theta );
+        add( fieldMap.get( "Radius" ).textField );
+        add( fieldMap.get( "Theta" ).textField );
         add( new JLabel( "Param" ) );
         add( new JLabel( "" ) );
-        add( param );
+        add( fieldMap.get( "Param" ).textField );
         add( new JLabel( "" ) );
     }
     
@@ -153,19 +186,30 @@ public class ParameterPanel extends JPanel
     public void load( Equation equation )
     {
         this.equation = equation;
-        boolean newState    = equation != null;
+        boolean                         newState    = equation != null;
+        Collection<TextFieldDescriptor> values      = fieldMap.values();
         if ( newState )
-        {
-            start.setValue( equation.getRangeStartExpr() );
-            end.setValue( equation.getRangeEndExpr() );
-            step.setValue( equation.getRangeStep() );
-            radius.setValue( equation.getRadiusName() );
-            theta.setValue( equation.getThetaName() );
-            param.setValue( equation.getParamName() );
-            precision.setValue( equation.getPrecision() );
-        }
-        Stream.of( start, end, step, radius, theta, param, precision )
-            .forEach( c -> c.setEnabled( newState ) );
+            values.forEach( 
+                f -> f.textField.setValue( f.getter.get() )
+            );
+        values.stream()
+            .map( f -> f.textField )
+            .forEach( tf -> tf.setEnabled( newState ) );
+    }
+    
+    private void fillMap()
+    {
+        Stream.of( descArray )
+            .forEach( d -> fieldMap.put( d.label, d ) );
+        
+        int         right       = SwingConstants.RIGHT;
+        PIListener  keyListener = new PIListener();
+        Stream.of( "Start", "End", "Step" )
+            .map( fieldMap::get )
+            .map( d -> d.textField )
+            .peek( tf -> tf.setHorizontalAlignment( right ) )
+            .forEach( tf -> tf.addKeyListener( keyListener ) );
+        fieldMap.get( "Prec" ).textField.setHorizontalAlignment( right );
     }
     
     /**
@@ -180,112 +224,24 @@ public class ParameterPanel extends JPanel
     }
     
     /**
-     * Gets a JFormattedTextField
-     * suitable for managing an integer value.
-     * 
-     * @param consumer
-     * 
-     * @return JFormattedTextField configured for integers
-     */
-    private JFormattedTextField 
-    getIntegerTextField( Consumer<Integer> consumer )
-    {
-        JFormattedTextField textField   = 
-            getTextField( Integer::parseInt );
-        textField.setHorizontalAlignment( SwingConstants.RIGHT );
-        
-        textField.addPropertyChangeListener( "value", e -> {
-            Object  value   = e.getNewValue();
-            if ( equation != null  )
-                consumer.accept( (Integer)(value) );
-        });
-
-        return textField;
-    }
-    
-    /**
-     * Gets a JFormattedTextField
-     * suitable for managing expressions.
-     * 
-     * @param consumer
-     * 
-     * @return JFormattedTextField configured for expressions
-     */
-    private JFormattedTextField 
-    getExprTextField( Consumer<String> consumer )
-    {
-        JFormattedTextField textField   = 
-            getTextField( this::parseExpression );
-        textField.setHorizontalAlignment( SwingConstants.RIGHT );
-        textField.addKeyListener( new PIListener() );
-        
-        textField.addPropertyChangeListener( "value", e -> {
-            Object  value   = e.getNewValue();
-            if ( equation != null  )
-                consumer.accept( value.toString() );
-        });
-
-        return textField;
-    }
-    
-    /**
-     * Gets a JFormattedTextField
-     * suitable for managing names.
-     * 
-     * @param consumer
-     * 
-     * @return JFormattedTextField configured for names
-     */
-    private JFormattedTextField 
-    getNameTextField( Consumer<String> consumer )
-    {
-        JFormattedTextField textField   = getTextField( this::parseName );
-        textField.addPropertyChangeListener( "value", e -> {
-            if ( equation != null )
-                consumer.accept( e.getNewValue().toString() );
-        });
-        
-        return textField;
-    }
-    
-    private JFormattedTextField 
-        getTextField( Function<String,Object> validator )
-    {
-        AbstractFormatter   formatter   = new FieldFormatter( validator );
-        JFormattedTextField textField   = 
-            new JFormattedTextField( formatter );
-        textField.setColumns( 5 );
-        textField.setInputVerifier( new FieldVerifier() );
-        textField.addPropertyChangeListener( this::propertyChange );
-        
-        PropertyManager pmgr        = PropertyManager.INSTANCE;
-        String          dmModified  = CPConstants.DM_MODIFIED_PN;
-        textField.addPropertyChangeListener( "value", e ->
-            pmgr.setProperty( dmModified, true )
-        );
-        
-        return textField;
-    }
-    
-    /**
      * Parses and evaluates a given expression.
      * 
      * @param str   the given expression
      * 
      * @return  the value of the expression
      * 
-     * @throws NumberFormatException    
+     * @throws IllegalArgumentException    
      *      If there is no equation,
      *      or the given expression is invalid.
      */
     private String parseExpression( String str )
-        throws NumberFormatException
+        throws IllegalArgumentException
     {
         if ( equation == null )
-            throw new NumberFormatException( "Invalid equation" );
+            throw new IllegalArgumentException( "Invalid equation" );
         Optional<Double>    opt     = equation.evaluate( str );
         if ( opt.isEmpty() )
-            throw new NumberFormatException( "Invalid expression" );
+            throw new IllegalArgumentException( "Invalid expression" );
         return str;
     }
     
@@ -296,34 +252,73 @@ public class ParameterPanel extends JPanel
      * 
      * @return  the name
      * 
-     * @throws NumberFormatException    
+     * @throws IllegalArgumentException    
      *      if the given name is invalid
      */
     private String parseName( String str )
     {
         if ( !NameValidator.isIdentifier( str ) )
-            throw new NumberFormatException( "not a valid name" );
+            throw new IllegalArgumentException( "not a valid name" );
         return str;
     }
     
     /**
-     * Listens for commits to a JFormattedTextField.
-     * When detected, changes the text field's font style 
-     * to plain, indicating that the commit is complete.
+     * Converts a given string to an integer.
      * 
-     * @param evt   event object accompanying property change events
+     * @param str   the given string
+     * 
+     * @return  the integer
+     * 
+     * @throws IllegalArgumentException    
+     *      if the given string is invalid
      */
-    private void propertyChange( PropertyChangeEvent evt )
+    private Integer parseInt( String str )
     {
-        if ( !evt.getPropertyName().equals( "value" ) )
-            return;
-        Object  src     = evt.getSource();
-        if ( src instanceof JFormattedTextField )
+        int iValue  = Integer.parseInt( str );
+        return iValue;
+    }
+    
+    private class TextFieldDescriptor
+    {
+        public final Supplier<Object>       getter;
+        public final Consumer<Object>       setter;
+        public final String                 label;
+        public final JFormattedTextField    textField;
+        public TextFieldDescriptor(
+            Supplier<Object> getter, 
+            Consumer<Object> setter, 
+            Function<String, Object> validator,
+            String label
+        )
         {
-            JFormattedTextField  comp    = (JFormattedTextField)src;
-            Font        font    = comp.getFont();
-            font = font.deriveFont( Font.PLAIN );
-            comp.setFont( font );
+            super();
+            this.getter = getter;
+            this.setter = setter;
+            this.label = label;
+
+            AbstractFormatter   formatter   = 
+                new FieldFormatter( validator );
+            textField = new JFormattedTextField( formatter );
+            textField.setColumns( 5 );
+            textField.setInputVerifier( new FieldVerifier() );
+            textField.addPropertyChangeListener( this::propertyChange );
+        }
+        
+        private void propertyChange( PropertyChangeEvent evt )
+        {
+            if ( !evt.getPropertyName().equals( "value" ) )
+                return;
+            Object  src     = evt.getSource();
+            if ( src instanceof JFormattedTextField )
+            {
+                Object              value   = evt.getNewValue();
+                JFormattedTextField comp    = (JFormattedTextField)src;
+                comp.setFont( committedFont );
+                PropertyManager.INSTANCE
+                    .setProperty( CPConstants.DM_MODIFIED_DV, true );
+                if ( equation != null  )
+                    setter.accept( value );
+            }
         }
     }
     
@@ -352,7 +347,7 @@ public class ParameterPanel extends JPanel
                     else
                         fmtField.setFont( uncommittedFont );
                 }
-                catch ( NumberFormatException exc )
+                catch ( IllegalArgumentException exc )
                 {
                     fmtField.setFont( uncommittedFont );
                     fmtField.setForeground( invalidColor );

@@ -11,6 +11,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
@@ -36,9 +38,10 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 public class ShowParameterPanel
 {
     /** System-dependent line separator. */
-    private static String   endl        = System.lineSeparator();
+    private static String       endl        = System.lineSeparator();
     /** Current equation */
-    private static Equation equation    = null;
+    private static Equation     equation    = null;
+    private static JTextArea    textArea;
     
     /**
      * Application entry point.
@@ -60,10 +63,15 @@ public class ShowParameterPanel
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel  contentPane = new JPanel( new BorderLayout() );
-        JPanel  placeHolder = new JPanel();
-        placeHolder.setPreferredSize( new Dimension( 200, 100 ));
-        placeHolder.setBackground( Color.ORANGE );
-        contentPane.add( placeHolder, BorderLayout.CENTER );
+//        JPanel  placeHolder = new JPanel();
+//        placeHolder.setPreferredSize( new Dimension( 200, 100 ));
+//        placeHolder.setBackground( Color.ORANGE );
+//        contentPane.add( placeHolder, BorderLayout.CENTER );
+        textArea = new JTextArea();
+        JScrollPane scrollPane  = new JScrollPane( textArea );
+        scrollPane.setPreferredSize( new Dimension( 200, 100 ));
+        textArea.setBackground( Color.ORANGE );
+        contentPane.add( scrollPane, BorderLayout.CENTER );
         
         JPanel      leftPanel   = new JPanel();
         BoxLayout   boxLayout   = 
@@ -139,8 +147,12 @@ public class ShowParameterPanel
                 .append( "Theta: " ).append( equation.getThetaName() )
                 .append( endl )
                 .append( "Param: " ).append( equation.getParamName() )
+                .append( endl )
+                .append( "*************************" )
                 .append( endl );
-            System.out.println( bldr );
+
+            textArea.append( bldr.toString() );
+            textArea.setCaretPosition( textArea.getText().length() );
         }
     }
 }
