@@ -308,14 +308,16 @@ public class ParameterPanel extends JPanel
         {
             if ( !evt.getPropertyName().equals( "value" ) )
                 return;
+            Object              value   = evt.getNewValue();
+            if ( value == null )
+                return;
             Object  src     = evt.getSource();
             if ( src instanceof JFormattedTextField )
             {
-                Object              value   = evt.getNewValue();
                 JFormattedTextField comp    = (JFormattedTextField)src;
                 comp.setFont( committedFont );
                 PropertyManager.INSTANCE
-                    .setProperty( CPConstants.DM_MODIFIED_DV, true );
+                    .setProperty( CPConstants.DM_MODIFIED_PN, true );
                 if ( equation != null  )
                     setter.accept( value );
             }

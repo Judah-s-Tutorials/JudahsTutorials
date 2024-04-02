@@ -42,7 +42,7 @@ public class PlotPanelTest
     public void setUp() throws Exception
     {
         currEquation = testGUI.newEquation();
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
     }
 
     @ParameterizedTest
@@ -71,14 +71,14 @@ public class PlotPanelTest
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
         assertFalse( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
         
         // Type ENTER, make sure invalid text not committed
         testGUI.type( KeyEvent.VK_ENTER );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
         assertFalse( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
         
         // Type TAB, make sure focus does not move
         testGUI.type( KeyEvent.VK_TAB );
@@ -86,19 +86,19 @@ public class PlotPanelTest
         assertFalse( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
         assertTrue( comp.isFocusOwner() );
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
 
         // Complete text entry so equation is valid.
         testGUI.type( KeyEvent.VK_I );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
         
         // Verify that enter commits the text
         testGUI.type( KeyEvent.VK_ENTER );
         assertFalse( testGUI.isChangedTextFont( fieldID ) );
-        assertTrue( isModifiedProperty() );
+        assertTrue( testGUI.isDMModified() );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertTrue( testGUI.isCommitted( fieldID ) );
     }
@@ -161,7 +161,7 @@ public class PlotPanelTest
         assertNotNull( cmd );
         testGUI.setPlotType( cmd );
         assertEquals( strCmd, currEquation.getPlot() );
-        assertTrue( isModifiedProperty() );
+        assertTrue( testGUI.isDMModified() );
     }
 
     @Test
@@ -172,15 +172,15 @@ public class PlotPanelTest
         currEquation.setRangeStart( "1" );
         currEquation.setRangeEnd( "2" );
         
-        testGUI.enterEquation( "y=", toPlot );
-        assertTrue( isModifiedProperty() );
+        testGUI.enterText( "y=", toPlot );
+        assertTrue( testGUI.isDMModified() );
         assertTrue( testGUI.isCommitted( "y=" ) );
 
         testGUI.setPlotType( Command.YPLOT );
         testGUI.clickPlotButton();
         Point2D actResult   = testGUI.getPlotPoint();
         assertEquals( expResult, actResult );
-        assertTrue( isModifiedProperty() );
+        assertTrue( testGUI.isDMModified() );
     }
     
     @Test
@@ -192,9 +192,9 @@ public class PlotPanelTest
         currEquation.setRangeStart( "pi/2" );
         currEquation.setRangeEnd( "pi/2" );
         
-        testGUI.enterEquation( "y=", toPlotY );
-        testGUI.enterEquation( "x=", toPlotX );
-        assertTrue( isModifiedProperty() );
+        testGUI.enterText( "y=", toPlotY );
+        testGUI.enterText( "x=", toPlotX );
+        assertTrue( testGUI.isDMModified() );
         assertTrue( testGUI.isCommitted( "y=" ) );
         assertTrue( testGUI.isCommitted( "x=" ) );
         
@@ -212,8 +212,8 @@ public class PlotPanelTest
         currEquation.setRangeStart( "pi" );
         currEquation.setRangeEnd( "pi" );
         
-        testGUI.enterEquation( "r=", toPlotR );
-        assertTrue( isModifiedProperty() );
+        testGUI.enterText( "r=", toPlotR );
+        assertTrue( testGUI.isDMModified() );
         assertTrue( testGUI.isCommitted( "r=" ) );
         testGUI.setPlotType( Command.RPLOT );
         testGUI.clickPlotButton();
@@ -229,8 +229,8 @@ public class PlotPanelTest
         currEquation.setRangeStart( "2" );
         currEquation.setRangeEnd( "2" );
         
-        testGUI.enterEquation( "t=", toPlotT );
-        assertTrue( isModifiedProperty() );
+        testGUI.enterText( "t=", toPlotT );
+        assertTrue( testGUI.isDMModified() );
         assertTrue( testGUI.isCommitted( "t=" ) );
         testGUI.setPlotType( Command.TPLOT );
         testGUI.clickPlotButton();
@@ -245,38 +245,38 @@ public class PlotPanelTest
         testGUI.click( fieldID );
         assertFalse( testGUI.isChangedTextFont( fieldID ) );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
         
         testGUI.clearText( fieldID );
         assertFalse( testGUI.isChangedTextFont( fieldID ) );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
         
         testGUI.type( KeyEvent.VK_A );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
         
         testGUI.type( KeyEvent.VK_ADD );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
         assertFalse( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
         
         testGUI.type( KeyEvent.VK_B );
         assertTrue( testGUI.isChangedTextFont( fieldID ) );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertFalse( testGUI.isCommitted( fieldID ) );
-        assertFalse( isModifiedProperty() );
+        assertFalse( testGUI.isDMModified() );
         
         assertEquals( orig, testGUI.getExpression( fieldID ) );
         testGUI.type( keyCode );
         assertFalse( testGUI.isChangedTextFont( fieldID ) );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertTrue( testGUI.isCommitted( fieldID ) );
-        assertTrue( isModifiedProperty() );
+        assertTrue( testGUI.isDMModified() );
 
         String  currExpr    = testGUI.getExpression( fieldID );
         assertEquals( currExpr, testGUI.getValue( fieldID ) );
@@ -312,11 +312,5 @@ public class PlotPanelTest
             expRes = bldr.toString();
         }
         return expRes;
-    }
-    
-    private boolean isModifiedProperty()
-    {
-        boolean isMod   = pmgr.asBoolean( CPConstants.DM_MODIFIED_PN );
-        return isMod;
     }
 }
