@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 import com.acmemail.judah.cartesian_plane.components.ParameterPanel;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 
-public class ParameterPanelTestGUI extends NamedFTextFieldMgr
+public class ParameterPanelTestGUI extends FTextFieldTestMgr
 {
     /** The ParameterPanel under test. */
     private final ParameterPanel    paramPanel;
@@ -30,15 +30,15 @@ public class ParameterPanelTestGUI extends NamedFTextFieldMgr
         
         getTextFields();
         
-        addSupplier( "Start", () -> getEquation().getRangeStartExpr() );
-        addSupplier( "End", () -> getEquation().getRangeEndExpr() );
-        addSupplier( "Step", () -> getEquation().getRangeStepExpr() );
-        addSupplier( "Prec", () -> 
+        putSupplier( "Start", () -> getEquation().getRangeStartExpr() );
+        putSupplier( "End", () -> getEquation().getRangeEndExpr() );
+        putSupplier( "Step", () -> getEquation().getRangeStepExpr() );
+        putSupplier( "Prec", () -> 
             String.valueOf( getEquation().getPrecision() )
         );
-        addSupplier( "Radius", () -> getEquation().getRadiusName() );
-        addSupplier( "Theta", () -> getEquation().getThetaName() );
-        addSupplier( "Param", () -> getEquation().getParamName() );
+        putSupplier( "Radius", () -> getEquation().getRadiusName() );
+        putSupplier( "Theta", () -> getEquation().getThetaName() );
+        putSupplier( "Param", () -> getEquation().getParamName() );
     }
     
     /**
@@ -77,7 +77,7 @@ public class ParameterPanelTestGUI extends NamedFTextFieldMgr
                 JLabel  label   = (JLabel)comp;
                 String  text    = label.getText();
                 if ( !text.isEmpty() )
-                    addTextField( text, allTextFields.get( currField++ ) );
+                    putTextField( text, allTextFields.get( currField++ ) );
             }
         }
     }

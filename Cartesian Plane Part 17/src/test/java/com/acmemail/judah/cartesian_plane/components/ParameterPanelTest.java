@@ -53,7 +53,7 @@ class ParameterPanelTest
     {
         String  ident       = "Prec";
         String  text        = testGUI.getText( ident );
-        String  field       = testGUI.getExpression( ident );
+        String  field       = testGUI.getEqProperty( ident );
         Object  objValue    = testGUI.getValue( ident );
         String  strValue    = getIntValue( objValue );
         assertEquals( text, field );
@@ -63,7 +63,7 @@ class ParameterPanelTest
         testGUI.clearText( ident );
         assertEquals( "", testGUI.getText( ident ) );
         assertEquals( objValue, testGUI.getValue( ident ) );
-        assertEquals( field, testGUI.getExpression( ident ) );
+        assertEquals( field, testGUI.getEqProperty( ident ) );
         
         testGUI.click( ident );
         testGUI.type( KeyEvent.VK_A );
@@ -71,7 +71,7 @@ class ParameterPanelTest
         assertFalse( testGUI.isDMModified() );
         assertFalse( testGUI.isValidTextColor( ident ) );
         assertTrue( testGUI.isChangedTextFont( ident ) );
-        assertEquals( field, testGUI.getExpression( ident ) );
+        assertEquals( field, testGUI.getEqProperty( ident ) );
         
         JFormattedTextField focused = testGUI.getFocusedField();
         testGUI.type( KeyEvent.VK_TAB );
@@ -84,14 +84,14 @@ class ParameterPanelTest
         assertFalse( testGUI.isDMModified() );
         assertTrue( testGUI.isValidTextColor( ident ) );
         assertTrue( testGUI.isChangedTextFont( ident ) );
-        assertEquals( field, testGUI.getExpression( ident ) );
+        assertEquals( field, testGUI.getEqProperty( ident ) );
     
         testGUI.type( commitKey );
         assertTrue( testGUI.isCommitted( ident ) );
         assertTrue( testGUI.isDMModified() );
         assertTrue( testGUI.isValidTextColor( ident ) );
         assertFalse( testGUI.isChangedTextFont( ident ) );
-        assertEquals( "1", testGUI.getExpression( ident ) );
+        assertEquals( "1", testGUI.getEqProperty( ident ) );
     }
     
     @ParameterizedTest
@@ -116,7 +116,7 @@ class ParameterPanelTest
         assertTrue( testGUI.isDMModified() );
         assertTrue( testGUI.isValidTextColor( ident ) );
         assertFalse( testGUI.isChangedTextFont( ident ) );
-        assertEquals( expAfter, testGUI.getExpression( ident ) );
+        assertEquals( expAfter, testGUI.getEqProperty( ident ) );
     }
     
     @ParameterizedTest
@@ -148,7 +148,7 @@ class ParameterPanelTest
     private void testStringField( String ident, int commitKey )
     {
         String  text    = testGUI.getText( ident );
-        String  field   = testGUI.getExpression( ident );
+        String  field   = testGUI.getEqProperty( ident );
         Object  value   = testGUI.getValue( ident );
         assertEquals( text, field );
         assertEquals( text, value );
@@ -157,7 +157,7 @@ class ParameterPanelTest
         testGUI.clearText( ident );
         assertEquals( "", testGUI.getText( ident ) );
         assertEquals( value, testGUI.getValue( ident ) );
-        assertEquals( field, testGUI.getExpression( ident ) );
+        assertEquals( field, testGUI.getEqProperty( ident ) );
         
         testGUI.click( ident );
         testGUI.type( KeyEvent.VK_SLASH );
@@ -165,7 +165,7 @@ class ParameterPanelTest
         assertFalse( testGUI.isDMModified() );
         assertFalse( testGUI.isValidTextColor( ident ) );
         assertTrue( testGUI.isChangedTextFont( ident ) );
-        assertEquals( field, testGUI.getExpression( ident ) );
+        assertEquals( field, testGUI.getEqProperty( ident ) );
         
         JFormattedTextField focused = testGUI.getFocusedField();
         testGUI.type( KeyEvent.VK_TAB );
@@ -178,13 +178,13 @@ class ParameterPanelTest
         assertFalse( testGUI.isDMModified() );
         assertTrue( testGUI.isValidTextColor( ident ) );
         assertTrue( testGUI.isChangedTextFont( ident ) );
-        assertEquals( field, testGUI.getExpression( ident ) );
+        assertEquals( field, testGUI.getEqProperty( ident ) );
 
         testGUI.type( commitKey );
         assertTrue( testGUI.isCommitted( ident ) );
         assertTrue( testGUI.isDMModified() );
         assertTrue( testGUI.isValidTextColor( ident ) );
         assertFalse( testGUI.isChangedTextFont( ident ) );
-        assertEquals( "x", testGUI.getExpression( ident ) );
+        assertEquals( "x", testGUI.getEqProperty( ident ) );
     }
 }

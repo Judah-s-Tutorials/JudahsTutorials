@@ -240,7 +240,7 @@ public class PlotPanelTest
 
     private void testSimple( String fieldID, int keyCode )
     {
-        String  orig    = testGUI.getExpression( fieldID );
+        String  orig    = testGUI.getEqProperty( fieldID );
         
         testGUI.click( fieldID );
         assertFalse( testGUI.isChangedTextFont( fieldID ) );
@@ -271,14 +271,14 @@ public class PlotPanelTest
         assertFalse( testGUI.isCommitted( fieldID ) );
         assertFalse( testGUI.isDMModified() );
         
-        assertEquals( orig, testGUI.getExpression( fieldID ) );
+        assertEquals( orig, testGUI.getEqProperty( fieldID ) );
         testGUI.type( keyCode );
         assertFalse( testGUI.isChangedTextFont( fieldID ) );
         assertTrue( testGUI.isValidTextColor( fieldID ) );
         assertTrue( testGUI.isCommitted( fieldID ) );
         assertTrue( testGUI.isDMModified() );
 
-        String  currExpr    = testGUI.getExpression( fieldID );
+        String  currExpr    = testGUI.getEqProperty( fieldID );
         assertEquals( currExpr, testGUI.getValue( fieldID ) );
     }
 

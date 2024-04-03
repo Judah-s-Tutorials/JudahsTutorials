@@ -35,7 +35,7 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
  * 
  * @author Jack Straub
  */
-public class NamedFTextFieldMgr
+public class FTextFieldTestMgr
 {
     /** Convenient declaration of PropertyManager singleton */
     private static final PropertyManager            pmgr            =
@@ -73,7 +73,7 @@ public class NamedFTextFieldMgr
     /**
      * Performs complete initialization of this object.
      */
-    public NamedFTextFieldMgr()
+    public FTextFieldTestMgr()
     {
         robotAsst = makeRobot();
         robot = robotAsst.getRobot();
@@ -87,7 +87,7 @@ public class NamedFTextFieldMgr
      * @param textField     test field to add
      */
     public void 
-    addTextField( String fieldID, JFormattedTextField textField )
+    putTextField( String fieldID, JFormattedTextField textField )
     {
         textFieldMap.put( fieldID, textField );
     }
@@ -98,7 +98,7 @@ public class NamedFTextFieldMgr
      * @param fieldID   field ID
      * @param supplier  the Supplier
      */
-    public void addSupplier( String fieldID, Supplier<String> supplier )
+    public void putSupplier( String fieldID, Supplier<String> supplier )
     {
         supplierMap.put( fieldID, supplier );
     }
@@ -191,24 +191,24 @@ public class NamedFTextFieldMgr
     }
     
     /**
-     * Enters a given expression into a text field.
+     * Enters the given text into a text field.
      * The text field is focused and cleared,
-     * the equation is pasted into the text field
+     * the text is pasted into the text field
      * and then ENTER is typed in the text field.
      * <p>
-     * Precondition: the expression argument is well formed.
+     * Precondition: the text argument is valid.
      * <p>
      * Postcondition: the expression argument is committed.
      * 
      * @param fieldID     ID of the text field to paste in
-     * @param expression  the given expression
+     * @param text        the given text
      */
-    public void enterText( String fieldID, String expression )
+    public void enterText( String fieldID, String text )
     {
         JFormattedTextField textField   = textFieldMap.get( fieldID );
         click( textField );
         clearText( fieldID );
-        paste( expression );
+        paste( text );
         type( KeyEvent.VK_ENTER );
     }
     
@@ -294,27 +294,27 @@ public class NamedFTextFieldMgr
     }
     
     /**
-     * Gets the expression
+     * Gets the property
      * from the currently open equation
      * indicated by the given field identifier.
      * For example,
      * if the given identifier is "y="
-     * the expression given by 
+     * the value given by 
      * equation.getYExpression() will be returned.
      * 
      * @param fieldID   the given field identifier
      * 
      * @return  
-     *      the expression from the currently open equation
+     *      the property from the currently open equation
      *      indicated by the given field identifier
      */
-    public String getExpression( String fieldID )
+    public String getEqProperty( String fieldID )
     {
         Supplier<String>    getter = supplierMap.get( fieldID );
         assertNotNull( getter );
-        String              expr    = getter.get();
+        String              prop    = getter.get();
         
-        return expr;
+        return prop;
     }
     
     /**
@@ -346,27 +346,6 @@ public class NamedFTextFieldMgr
         Object              value       = 
             getProperty( () -> textField.getValue() );
         return value;
-    }
-    
-    /**
-     * Returns the value of the DM_MODIFIED_PN property.
-     * 
-     * @return  the value of the DM_MODIFIED_PN property
-     */
-    public boolean isDMModified()
-    {
-        boolean modified    = pmgr.asBoolean( CPConstants.DM_MODIFIED_PN );
-        return modified;
-    }
-    
-    /**
-     * Updates the state of the DM_MODIFIED_PN property.
-     * 
-     * @param state new state of DM_MODIFIED_PN property
-     */
-    public void setDMModified( boolean state )
-    {
-        pmgr.setProperty( CPConstants.DM_MODIFIED_PN, state );
     }
     
     /**
@@ -404,6 +383,27 @@ public class NamedFTextFieldMgr
             assertEquals( strValue, getter.get() );
         }
         return committed;
+    }
+    
+    /**
+     * Returns the value of the DM_MODIFIED_PN property.
+     * 
+     * @return  the value of the DM_MODIFIED_PN property
+     */
+    public boolean isDMModified()
+    {
+        boolean modified    = pmgr.asBoolean( CPConstants.DM_MODIFIED_PN );
+        return modified;
+    }
+    
+    /**
+     * Updates the state of the DM_MODIFIED_PN property.
+     * 
+     * @param state new state of DM_MODIFIED_PN property
+     */
+    public void setDMModified( boolean state )
+    {
+        pmgr.setProperty( CPConstants.DM_MODIFIED_PN, state );
     }
 
     /**

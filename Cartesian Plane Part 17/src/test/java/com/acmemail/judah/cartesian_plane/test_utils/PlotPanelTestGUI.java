@@ -36,7 +36,7 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
  * 
  * @author Jack Straub
  */
-public class PlotPanelTestGUI extends NamedFTextFieldMgr
+public class PlotPanelTestGUI extends FTextFieldTestMgr
 {    
     /** PlotPanel under test. */
     private final PlotPanel         plotPanel;
@@ -68,10 +68,10 @@ public class PlotPanelTestGUI extends NamedFTextFieldMgr
         comboBox = getComboBox();
         plotButton = getPlotButton();
         
-        addSupplier( "y=", () -> getEquation().getYExpression() );
-        addSupplier( "x=", () -> getEquation().getXExpression() );
-        addSupplier( "t=", () -> getEquation().getTExpression() );
-        addSupplier( "r=", () -> getEquation().getRExpression() );
+        putSupplier( "y=", () -> getEquation().getYExpression() );
+        putSupplier( "x=", () -> getEquation().getXExpression() );
+        putSupplier( "t=", () -> getEquation().getTExpression() );
+        putSupplier( "r=", () -> getEquation().getRExpression() );
     }
     
     /**
@@ -194,7 +194,7 @@ public class PlotPanelTestGUI extends NamedFTextFieldMgr
             ComponentFinder.find( (JComponent)cont, pred );
         assertNotNull( comp );
         assertTrue( comp instanceof JFormattedTextField );
-        addTextField( text, (JFormattedTextField)comp );
+        putTextField( text, (JFormattedTextField)comp );
     }
     
     /**
