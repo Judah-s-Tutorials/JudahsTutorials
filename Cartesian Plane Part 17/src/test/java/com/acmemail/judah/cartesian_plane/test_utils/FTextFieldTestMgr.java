@@ -37,6 +37,9 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
  */
 public class FTextFieldTestMgr
 {
+    /** Unicode value for the Greek letter pi. */
+    private static final char               PII     = '\u03c0';
+
     /** Convenient declaration of PropertyManager singleton */
     private static final PropertyManager            pmgr            =
         PropertyManager.INSTANCE;
@@ -384,7 +387,39 @@ public class FTextFieldTestMgr
         }
         return committed;
     }
-    
+
+    /**
+     * Calculate the expected result
+     * of replacing "pi" with the Greek letter pi
+     * in a given string.
+     * If the given string contains more than one instance of "pi"
+     * only the first is considered.
+     * The search for "pi"
+     * is case-insensitive.
+     * If the search for "pi" fails
+     * the entire string is returned.
+     * 
+     * @param input the given string
+     * 
+     * @return  
+     *      the result of replacing "pi" with the greek letter pi
+     *      in the given string
+     */
+    public String calculateExpPIResult( String input )
+    {
+        String  expRes  = input;
+        int     piPos   = input.toLowerCase().indexOf( "pi" );
+        if ( piPos >= 0 )
+        {
+            StringBuilder   bldr    = new StringBuilder();
+            bldr.append( input.substring( 0, piPos ) )
+                .append( PII )
+                .append( input.substring( piPos + 2 ) );
+            expRes = bldr.toString();
+        }
+        return expRes;
+    }
+
     /**
      * Returns the value of the DM_MODIFIED_PN property.
      * 

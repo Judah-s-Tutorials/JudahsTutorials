@@ -98,6 +98,14 @@ public class ParameterPanel extends JPanel
     /** The currently open equation; null if none. */
     private Equation            equation    = null;
     
+    /**
+     * Array of initial values for the TextFieldDescriptors,
+     * one for each JFormattedTextField in the GUI. Converted to
+     * text field descriptors by the constructor. The descriptors
+     * are added to the fieldMap. Thereafter this array is no used.
+     * 
+     * @see #fillMap()
+     */
     private TextFieldDescriptor[]   descArray  = new TextFieldDescriptor[]
     {
         new TextFieldDescriptor(
@@ -144,6 +152,16 @@ public class ParameterPanel extends JPanel
         ),
     };
     
+    /** 
+     * Map of TextFieldDescriptors for the
+     * JFormattedTextFields in the GUI.
+     * The key to a descriptor
+     * is the descriptive label on the 
+     * encapsulated text field;
+     * "Start," "End", "Step," etc.
+     * 
+     * @see #fillMap()
+     */
     private final Map<String,TextFieldDescriptor>   fieldMap    =
         new HashMap<>();
     
@@ -280,10 +298,31 @@ public class ParameterPanel extends JPanel
     
     private class TextFieldDescriptor
     {
+        /** 
+         * Gets from the currently open equation the value
+         * of the encapsulated field.
+         */
         public final Supplier<Object>       getter;
+        /** 
+         * Used during a commit operation; sets the value of the 
+         * corresponding field of the currently open equation.
+         */
         public final Consumer<Object>       setter;
+        /** Descriptive label for the text field in the GUI. */
         public final String                 label;
+        /** Text field in the GUI. */
         public final JFormattedTextField    textField;
+        
+        /**
+         * Constructor.
+         * 
+         * @param getter    for getting the value of a field
+         *                  in and Equation object
+         * @param setter    for setting the value of a field
+         *                  in and Equation object
+         * @param validator for validating the text of a text field
+         * @param label     descriptive label to place on text field
+         */
         public TextFieldDescriptor(
             Supplier<Object> getter, 
             Consumer<Object> setter, 
@@ -304,6 +343,24 @@ public class ParameterPanel extends JPanel
             textField.addPropertyChangeListener( this::propertyChange );
         }
         
+        /**
+         * Handles property change events for the value property
+         * of a formatted text field.
+         * The value of the text field is copied
+         * to the currently open equation, 
+         * the text font is changed to "committed",
+         * and the DM_MODIFIED property is set to true.
+         * <p>
+         * Precondition:
+         * the text of the text field is valid for the
+         * corresponding field of the currently open equation.
+         * <p>
+         * Postcondition:
+         * the currently open equation is updated
+         * and the DM_MODIFIED property is set to true.
+         * 
+         * @param evt   object accompanying a property change event
+         */
         private void propertyChange( PropertyChangeEvent evt )
         {
             if ( !evt.getPropertyName().equals( "value" ) )
@@ -324,14 +381,46 @@ public class ParameterPanel extends JPanel
         }
     }
     
+    /**
+     * Formatter installed in all JFormattedTextFields.
+     * 
+     * @author Jack Straub
+     */
     private static class FieldFormatter extends DefaultFormatter
     {
+        /**
+         * Validator for this text field. 
+         * Translates a string into the type of object
+         * managed by the corresponding text field; 
+         * throws IllegalArgumentException 
+         * if the string is invalid.
+         */
         private final Function<String,Object>   validator;
+        
+        /**
+         * Constructor.
+         * Establishes the validator for the corresponding text field.
+         * Turns off overwrite mode.
+         * 
+         * @param validator 
+         *      the validator for the corresponding text field
+         */
         public FieldFormatter( Function<String,Object> validator )
         {
             this.validator = validator;
             setOverwriteMode( false );
         }
+        
+        /**
+         * Converts the text of the corresponding text field
+         * to the type of object managed by the text field.
+         * 
+         * @param   str     the text to convert
+         * 
+         * @return  the converted object
+         * 
+         * @throws ParseException if the text cannot be converted
+         */
         @Override
         public Object stringToValue( String str )
             throws ParseException
@@ -360,8 +449,27 @@ public class ParameterPanel extends JPanel
         }
     }
     
+    /**
+     * InputVerifier installed on each text field.
+     * 
+     * @author Jack Straub
+     */
     private static class FieldVerifier extends InputVerifier
     {
+        /**
+         * Validates the given object.
+         * It does this by calling the stringToValue method
+         * of the Formatter object in the corresponding text field.
+         * If the string-to-value process is successful,
+         * true is returned.
+         * 
+         * @param   comp
+         *      component on which this InputVerifier is installed;
+         *      assumed to be type JFormattedTextField
+         *      
+         * @return
+         *      true if the associated text field contains valid text
+         */
         @Override
         public boolean verify( JComponent comp )
         {

@@ -21,12 +21,55 @@ import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
+/**
+ * Builds on {@linkplain PlotProcessDemo3}
+ * to fully develop a simulation
+ * of the process that ends with a plot
+ * produced by a CartesianPlane object.
+ * It employs a nested class that extends CartesianPlane
+ * and overrides the following methods:
+ * <ul>
+ * <li>
+ *      setStreamSupplier( Supplier<Stream<PlotCommand>> supplier )
+ *      This method is called when the GUI's Plot button is pushed
+ *      passing a Supplier<Stream<PlotCommand>>.
+ * </li>
+ * <li>
+ *      redraw()<br>
+ *      This method is called
+ *      when the Notification issues a REDRAW_NP notification.
+ *      It uses the Supplier<Stream<PlotCommand>>
+ *      provided via the setStreamSupplier method
+ *      to obtain a Stream<PlotCommand>>.
+ *      It traverses the stream of PlotCommands,
+ *      finds every PlotCommand that is also
+ *      a PlotPointCommand
+ *      and invokes the PlotPointCommand's execute method,
+ *      causing the CartesianPlanes plotPoint( float xco, float yco )
+ *      method to be invoked.
+ * </li>
+ * <li>
+ *      plotPoint( float xco, float yco )
+ *      Prints the x- and y-coordinates provided
+ *      by a PlotPoint command.
+ * </li>
+ * </ul>
+ * When the Plot button is pushed a 
+ * Supplier<Stream<PlotCommand>> object is generated
+ * and registered with the CartesianPlane object
+ * via its setStreamSupplier method,
+ * then generates a REDRAW_NP notification.
+ * 
+ * @author Jack Straub
+ * 
+ * @see PlotProcessDemo3
+ */
 public class PlotProcessDemo4
 {
     private static final String endl    = System.lineSeparator();
     private final Equation  equation    = new Exp4jEquation();
     private final JTextArea textArea    = new JTextArea( 15, 20 );
-    private final Plotter   cartPlane    = new Plotter();
+    private final Plotter   cartPlane   = new Plotter();
 
     
     /**
@@ -40,6 +83,10 @@ public class PlotProcessDemo4
         SwingUtilities.invokeLater( PlotProcessDemo4::new );
     }
     
+    /**
+     * Constructor.
+     * Fully initializes the this object.
+     */
     public PlotProcessDemo4()
     {
         equation.setYExpression( "y=x^2" );
@@ -69,6 +116,18 @@ public class PlotProcessDemo4
         frame.setVisible( true );
     }
     
+    /**
+     * Invoked when the GUI's plot button is pushed.
+     * It obtains a Stream<Point2D>
+     * from an Exp4jEquation object's yPlot() method.
+     * The Stream<Point2D> is mapped to a Stream<PlotCommand>.
+     * It uses the PlotCommand stream 
+     * to create a Supplier<Stream<PlotCommand>> object
+     * which it registers with the CartesianPlane.
+     * It then generates a REDRAW_NP notification.
+     *  
+     * @param evt   object accompanying ActionEvent; not used
+     */
     private void plotAction( ActionEvent evt )
     {
         Supplier<Stream<PlotCommand>>   streamSupplier  =
@@ -81,6 +140,11 @@ public class PlotProcessDemo4
             .propagateNotification( CPConstants.REDRAW_NP );
     }
     
+    /**
+     * Appends a line to the end of the GUI's text area.
+     * 
+     * @param text  the text of the line to append
+     */
     private void append( String text )
     {
         textArea.append( text );
@@ -89,11 +153,23 @@ public class PlotProcessDemo4
         textArea.setCaretPosition( len );
     }
     
+    /**
+     * Nested class to simulate GUI interaction 
+     * with a CaertesianPlane object.
+     * 
+     * @author Jack Straub
+     */
     @SuppressWarnings("serial")
     private class Plotter extends CartesianPlane
     {
+        /** Stream supplier for generating plots. */
         private Supplier<Stream<PlotCommand>>   supplier;
         
+        /**
+         * Constructor.
+         * Registers a NotificationListener
+         * with the NotificationManager.
+         */
         public Plotter()
         {
             NotificationManager.INSTANCE.addNotificationListener(
@@ -102,6 +178,13 @@ public class PlotProcessDemo4
             );
         }
         
+        /**
+         * Method invoked by a PlotPointCommand's
+         * execute method.
+         * 
+         * @param xco   x-coordinated from PlotPointCommand
+         * @param yco   y-coordinated from PlotPointCommand
+         */
         @Override
         public void plotPoint( float xco, float yco )
         {
@@ -109,6 +192,12 @@ public class PlotProcessDemo4
             append( point.toString() );
         }
         
+        /**
+         * Registers a Supplier<Stream<PlotCommand>>
+         * for generating plots.
+         * 
+         * @param supplier Supplier to register
+         */
         @Override
         public void 
         setStreamSupplier( Supplier<Stream<PlotCommand>> supplier )
@@ -116,6 +205,14 @@ public class PlotProcessDemo4
             this.supplier = supplier;
         }
         
+        /**
+         * Invoked when a REDRAW_NP notification is issued.
+         * Traverses the Stream<PlotCommand> stream
+         * obtained using the supplier instance method.
+         * Calls the execute method 
+         * for every PlotCommand object
+         * that is also a PlotPointCommand object.
+         */
         public void redraw()
         {
             Stream<PlotCommand> stream  = supplier.get();

@@ -196,6 +196,11 @@ public class PlotPanel extends JPanel
             String  strPlot = equation.getPlot().toUpperCase();
             Command cmdPlot = Command.valueOf( strPlot );
             plots.setSelectedItem( cmdPlot );
+            // The above initialization incorrectly sets the MODIFIED
+            // state of the currently open equation to true, so set
+            // it back to false.
+            PropertyManager pmgr    = PropertyManager.INSTANCE;
+            pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
         }
         Stream.of( plots, plot )
             .forEach( c -> c.setEnabled( newState ) );

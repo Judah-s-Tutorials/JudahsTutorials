@@ -1,3 +1,4 @@
+
 package com.acmemail.judah.cartesian_plane.sandbox.plot_process;
 
 import java.awt.BorderLayout;
@@ -19,6 +20,27 @@ import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
+/**
+ * Builds on {@linkplain PlotProcessDemo2}
+ * to continuing to developing a simulation
+ * of the process that ends with a plot
+ * produced by a CartesianPlane object.
+ * When the Plot button is pushed a 
+ * Supplier<Stream<Point2D>> object is registered.
+ * When the Redraw button is pushed
+ * the supplier obtains a stream
+ * by invoking Exp4jEquation.yPlot()
+ * and prints the result is printed.
+ * If you push the Redraw button a second time
+ * the supplier obtains a new stream
+ * by invoking Exp4jEquation.yPlot()
+ * that can be traversed without error.
+ * 
+ * @author Jack Straub
+ * 
+ * @see PlotProcessDemo2
+ * @see PlotProcessDemo4
+ */
 public class PlotProcessDemo3
 {
     private static final String endl    = System.lineSeparator();
@@ -37,9 +59,13 @@ public class PlotProcessDemo3
         SwingUtilities.invokeLater( PlotProcessDemo3::new );
     }
     
+    /**
+     * Constructor.
+     * Fully initializes the this object.
+     */
     public PlotProcessDemo3()
     {
-        equation.setYExpression( "y=x^2" );
+        equation.setYExpression( "x^2" );
         equation.setRangeStart( "-1" );
         equation.setRangeEnd( "1" );
         equation.setRangeStep( "1" );
@@ -74,11 +100,31 @@ public class PlotProcessDemo3
         );
     }
     
+    /**
+     * Invoked when the GUI's plot button is pushed.
+     * Creates a Supplier<Stream<Point2D>> object
+     * which can be used
+     * to generates a plot stream
+     * by calling Exp4jEquation.yPlot().
+     *  
+     * @param evt   object accompanying ActionEvent; not used
+     */
     private void plotAction( ActionEvent evt )
     {
         streamSupplier = () -> equation.yPlot();
     }
     
+    /**
+     * Processes a REDRAW_NP notification
+     * issued by the NotificationManager.
+     * Uses the Supplier<Stream<Point2D>> produced by plotAction
+     * to obtain an traverse the stream obtained
+     * by invoking Exp4jEquation.yPlot().
+     *  
+     * @param evt   object accompanying ActionEvent; not used
+     * 
+     * @see #plotAction(ActionEvent)
+     */
     private void redraw( NotificationEvent evt )
     {
         if ( streamSupplier != null )
@@ -89,6 +135,13 @@ public class PlotProcessDemo3
         append( "****** END PLOT ******" );
     }
     
+    /**
+     * Invoked when the GUI's redraw button is pushed.
+     * Generates a REDRAW_NP notification
+     * via the NotificationManager.
+     *  
+     * @param evt   object accompanying ActionEvent; not used
+     */
     private void redrawAction( ActionEvent evt )
     {
         append( "***** BEGIN PLOT *****" );
@@ -96,6 +149,11 @@ public class PlotProcessDemo3
             .propagateNotification( CPConstants.REDRAW_NP );
     }
     
+    /**
+     * Appends a line to the end of the GUI's text area.
+     * 
+     * @param text  the text of the line to append
+     */
     private void append( String text )
     {
         textArea.append( text );

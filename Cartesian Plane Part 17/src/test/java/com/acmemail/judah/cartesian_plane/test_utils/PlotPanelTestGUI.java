@@ -87,11 +87,11 @@ public class PlotPanelTestGUI extends FTextFieldTestMgr
     /**
      * Instantiates and loads a new Equation.
      */
+    @Override
     public Equation newEquation()
     {
         Equation    equation    = super.newEquation();
         plotPanel.load( equation );
-        setDMModified( false );
         return equation;
     }
     
