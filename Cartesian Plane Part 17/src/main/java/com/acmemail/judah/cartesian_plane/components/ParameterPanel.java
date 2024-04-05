@@ -104,7 +104,7 @@ public class ParameterPanel extends JPanel
      * text field descriptors by the constructor. The descriptors
      * are added to the fieldMap. Thereafter this array is no used.
      * 
-     * @see #fillMap()
+     * @see #initTextFieldMap()  
      */
     private TextFieldDescriptor[]   descArray  = new TextFieldDescriptor[]
     {
@@ -160,7 +160,7 @@ public class ParameterPanel extends JPanel
      * encapsulated text field;
      * "Start," "End", "Step," etc.
      * 
-     * @see #fillMap()
+     * @see #initTextFieldMap()
      */
     private final Map<String,TextFieldDescriptor>   fieldMap    =
         new HashMap<>();
@@ -172,7 +172,8 @@ public class ParameterPanel extends JPanel
     public ParameterPanel()
     {
         super( new GridLayout( 8, 2 ) );
-        fillMap();
+        Stream.of( descArray )
+            .forEach( d -> fieldMap.put( d.label, d ) );
         
         Border  border  = BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
         setBorder( border );
@@ -193,6 +194,15 @@ public class ParameterPanel extends JPanel
         add( new JLabel( "" ) );
         add( fieldMap.get( "Param" ).textField );
         add( new JLabel( "" ) );
+        
+        int         right       = SwingConstants.RIGHT;
+        PIListener  keyListener = new PIListener();
+        Stream.of( "Start", "End", "Step" )
+            .map( fieldMap::get )
+            .map( d -> d.textField )
+            .peek( tf -> tf.setHorizontalAlignment( right ) )
+            .forEach( tf -> tf.addKeyListener( keyListener ) );
+        fieldMap.get( "Prec" ).textField.setHorizontalAlignment( right );
     }
     
     /**
@@ -213,21 +223,6 @@ public class ParameterPanel extends JPanel
         values.stream()
             .map( f -> f.textField )
             .forEach( tf -> tf.setEnabled( newState ) );
-    }
-    
-    private void fillMap()
-    {
-        Stream.of( descArray )
-            .forEach( d -> fieldMap.put( d.label, d ) );
-        
-        int         right       = SwingConstants.RIGHT;
-        PIListener  keyListener = new PIListener();
-        Stream.of( "Start", "End", "Step" )
-            .map( fieldMap::get )
-            .map( d -> d.textField )
-            .peek( tf -> tf.setHorizontalAlignment( right ) )
-            .forEach( tf -> tf.addKeyListener( keyListener ) );
-        fieldMap.get( "Prec" ).textField.setHorizontalAlignment( right );
     }
     
     /**
@@ -291,6 +286,7 @@ public class ParameterPanel extends JPanel
      *      if the given string is invalid
      */
     private Integer parseInt( String str )
+        throws IllegalArgumentException
     {
         int iValue  = Integer.parseInt( str );
         return iValue;
@@ -363,13 +359,13 @@ public class ParameterPanel extends JPanel
          */
         private void propertyChange( PropertyChangeEvent evt )
         {
-            if ( !evt.getPropertyName().equals( "value" ) )
-                return;
-            Object              value   = evt.getNewValue();
-            if ( value == null )
-                return;
+            Object  value   = evt.getNewValue();
             Object  src     = evt.getSource();
-            if ( src instanceof JFormattedTextField )
+            if ( value == null )
+                ;
+            else if ( !evt.getPropertyName().equals( "value" ) )
+                ;
+            else if ( src instanceof JFormattedTextField )
             {
                 JFormattedTextField comp    = (JFormattedTextField)src;
                 comp.setFont( committedFont );
@@ -426,7 +422,7 @@ public class ParameterPanel extends JPanel
             throws ParseException
         {
             JFormattedTextField fmtField    = getFormattedTextField();
-            Object  value   = 0;
+            Object              value       = null;
             if ( !str.isEmpty() )
             {
                 try
