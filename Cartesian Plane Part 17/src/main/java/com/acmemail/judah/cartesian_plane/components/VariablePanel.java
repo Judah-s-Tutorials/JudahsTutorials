@@ -108,12 +108,16 @@ public class VariablePanel extends JPanel
     }
     
     /**
-     * Loads the variable table from a reader
-     * whose lines consist of comma separated values.
+     * Loads the variable table 
+     * from a given Equation.
+     * The given Equation may be null
+     * indicating that there is
+     * no currently open equation;
+     * in this case 
+     * all the components in the VariablePanel
+     * will be disabled.
      * 
-     * @param inStream      input stream
-     * 
-     * @throws IOException  if an input error occurs
+     * @param equation  the given equation
      */
     public void load( Equation equation )
     {
@@ -123,7 +127,7 @@ public class VariablePanel extends JPanel
         {
             equation.getVars().entrySet().stream()
                 .map( e -> new Object[] { e.getKey(), e.getValue() } )
-                .forEach( o -> model.addRow( o ) );
+                .forEach( oa -> model.addRow( oa ) );
         }
     }
     
