@@ -3,7 +3,6 @@ package com.acmemail.judah.cartesian_plane.components;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Optional;
@@ -74,7 +73,8 @@ public class VariablePanel extends JPanel
     private final JTable    table   = new JTable( model );
     
     /** Number of decimal points for value display. */
-    private int         dPrecision  = 4;
+    private int         dPrecision  = 
+        pMgr.asInt( CPConstants.VP_DPRECSION_PN );
     
     /** The currently loaded equation. */
     private Equation    equation;
@@ -87,12 +87,16 @@ public class VariablePanel extends JPanel
     {
         super( new BorderLayout() );        
         configureTableModel();
+        pMgr.addPropertyChangeListener( CPConstants.VP_DPRECSION_PN, e ->
+            setDPrecision( Integer.parseInt( e.getNewValue().toString() ) )
+        );
 
         Border      border      =
             BorderFactory.createEmptyBorder( 3, 3, 0, 3 );
         setBorder( border );
         
         JScrollPane scrollPane  = new JScrollPane( table );
+        // temp1 and temp2 are for estimating the dimensions of the panel
         JLabel      temp1       = new JLabel( headers[0].toString() );
         JLabel      temp2       = new JLabel( headers[1].toString() );
         int         prefWidth   =
@@ -140,6 +144,8 @@ public class VariablePanel extends JPanel
     public void setDPrecision( int prec )
     {
         dPrecision = prec;
+        if ( model != null )
+            model.fireTableDataChanged();
     }
     
     /**
@@ -149,7 +155,7 @@ public class VariablePanel extends JPanel
      *      the number of decimal point
      *      used to display a floating point number.
      */
-    public int getPrecision()
+    public int getDPrecision()
     {
         return dPrecision;
     }
@@ -227,7 +233,6 @@ public class VariablePanel extends JPanel
      * whenever the DM_OPEN_EQUATION_PN
      * value changes to true (enable) or false (disable).
      * 
-     * @param evt   event object that describes the property change
      * @param comp  the given component
      */
     private void openEqChange( JComponent comp )

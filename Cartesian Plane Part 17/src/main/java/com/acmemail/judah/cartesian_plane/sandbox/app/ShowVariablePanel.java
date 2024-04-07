@@ -4,9 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
@@ -52,7 +55,15 @@ public class ShowVariablePanel
         contentPane.add( placeHolder, BorderLayout.CENTER );
         
         VariablePanel   vPanel  = new VariablePanel();
+        Border          oBorder = 
+            BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
+        Border          iBorder = 
+            BorderFactory.createRaisedBevelBorder();
+        Border          border  =
+            BorderFactory.createCompoundBorder( oBorder, iBorder );
+        vPanel.setBorder( border );
         contentPane.add( vPanel, BorderLayout.WEST );
+        contentPane.add( getControlPanel( vPanel ), BorderLayout.SOUTH );
         
         PropertyManager.INSTANCE.setProperty(
             CPConstants.DM_OPEN_EQUATION_PN, true
@@ -65,4 +76,20 @@ public class ShowVariablePanel
         frame.setVisible( true );
     }
 
+    private static JPanel getControlPanel( VariablePanel vPanel )
+    {
+        JPanel  panel   = new JPanel();
+        JButton prec    = new JButton( "Change Precision" );
+        JButton exit    = new JButton( "Exit" );
+        exit.addActionListener( e -> System.exit( 0 ) );
+        prec.addActionListener( e -> {
+            int precision   = vPanel.getDPrecision() + 1;
+            precision %= 6;
+            vPanel.setDPrecision( precision );
+        });
+        
+        panel.add( prec );
+        panel.add( exit );
+        return panel;
+    }
 }

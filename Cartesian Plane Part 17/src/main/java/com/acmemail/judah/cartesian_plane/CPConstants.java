@@ -327,6 +327,14 @@ public class CPConstants
     public static final String  PLOT_COLOR_DV           = "20";
     
     /////////////////////////////////////////////////
+    //   VaiablePanelProperties properties
+    /////////////////////////////////////////////////
+    /** Decimal precision for displaying variable values. */
+    public static final String  VP_DPRECSION_PN         = "dPrecision";
+    /** Default value of precision for displaying variable values. */
+    public static final String  VP_DPRECSION_DV         = "4";
+    
+    /////////////////////////////////////////////////
     //   Data model properties
     /////////////////////////////////////////////////
     /** Indicates if an equation is open and can be modified. */

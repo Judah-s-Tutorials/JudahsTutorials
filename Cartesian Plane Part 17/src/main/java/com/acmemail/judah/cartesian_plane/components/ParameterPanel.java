@@ -83,6 +83,10 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
 @SuppressWarnings("serial")
 public class ParameterPanel extends JPanel
 {
+    /** Convenient declaration of PropertyManager singleton. */
+    private static final PropertyManager    pmgr    =
+        PropertyManager.INSTANCE;
+    
     /** Font to use in a text field when its value is committed. */
     private static final Font       committedFont   = 
         UIManager.getFont( "FormattedTextField.font" );
@@ -202,7 +206,13 @@ public class ParameterPanel extends JPanel
             .map( d -> d.textField )
             .peek( tf -> tf.setHorizontalAlignment( right ) )
             .forEach( tf -> tf.addKeyListener( keyListener ) );
-        fieldMap.get( "Prec" ).textField.setHorizontalAlignment( right );
+        
+        JFormattedTextField prec    = fieldMap.get( "Prec" ).textField; 
+        prec.setHorizontalAlignment( right );
+        prec.addPropertyChangeListener( "value", e -> {
+            int dPrec   = (Integer)e.getNewValue();
+            pmgr.setProperty( CPConstants.VP_DPRECSION_PN, dPrec );
+        });
     }
     
     /**
@@ -369,8 +379,7 @@ public class ParameterPanel extends JPanel
             {
                 JFormattedTextField comp    = (JFormattedTextField)src;
                 comp.setFont( committedFont );
-                PropertyManager.INSTANCE
-                    .setProperty( CPConstants.DM_MODIFIED_PN, true );
+                pmgr.setProperty( CPConstants.DM_MODIFIED_PN, true );
                 if ( equation != null  )
                     setter.accept( value );
             }
