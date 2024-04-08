@@ -21,6 +21,7 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
@@ -183,6 +184,7 @@ public class VariablePanel extends JPanel
      */
     private JPanel getButtonPanel()
     {
+        //////////////////// DON'T FORGET LOGIC TO UPDATE EQUATION
         JButton plus    = new JButton( "\u2795" );
         plus.addActionListener( this::addAction );
         plus.setEnabled( false );
@@ -220,9 +222,7 @@ public class VariablePanel extends JPanel
         column1.setCellRenderer( new ValueRenderer() );
         table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
         table.getTableHeader().setReorderingAllowed( false );
-        model.addTableModelListener( e -> 
-            pMgr.setProperty( CPConstants.DM_MODIFIED_PN, true )
-        );
+        model.addTableModelListener( this::tableChanged );
      
         pMgr.addPropertyChangeListener(
             CPConstants.DM_OPEN_EQUATION_PN, e -> openEqChange( table ) );
@@ -259,10 +259,7 @@ public class VariablePanel extends JPanel
             position = table.getRowCount();
         Object[]    row = getNewRow();
         if ( row != null )
-        {
             model.insertRow( position, row );
-            equation.setVar( (String)row[0], (Double)row[1] );
-        }
     }
     
     /**
@@ -370,6 +367,26 @@ public class VariablePanel extends JPanel
         
         Object[]    row     = new Object[]{ name, value };
         return row;
+    }
+    
+    /**
+     * Invoked whenever the data model changes.
+     * 
+     * @param evt   object accompanying change event
+     */
+    private void tableChanged( TableModelEvent evt )
+    {
+        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, true );
+        int     evtType     = evt.getType();
+        if ( evtType == TableModelEvent.INSERT 
+            || evtType == TableModelEvent.UPDATE
+        )
+        {
+            int     row         = evt.getFirstRow();
+            String  name        = (String)model.getValueAt( row, 0 );
+            Double  value       = (Double)model.getValueAt( row, 1 );
+            equation.setVar( name, value );
+        }
     }
     
     /**

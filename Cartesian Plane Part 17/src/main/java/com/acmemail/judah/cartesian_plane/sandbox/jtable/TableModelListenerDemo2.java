@@ -13,25 +13,23 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.TableModelEvent;
 import javax.swing.table.DefaultTableModel;
 
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
 /**
  * This application demonstrates 
- * how to write a ListSelectionListener
+ * how to write a TableModelListener
  * for a JTable-based facility.
- * Each change to the JTable's selection state is logged.
- * Also, the the application's Delete button
- * is enabled or disabled
- * depending on whether or not a row has been selected
- * (there's nothing to delete
- * if no row is selected).
+ * The user can modify existing rows of the JTable,
+ * and insert and delete rows.
+ * Each change to the JTable's data model
+ * is logged.
  * 
  * @author Jack Straub
  */
-public class ListSelectionListenerDemo1
+public class TableModelListenerDemo2
 {
     private static final String prompt          = 
         "Enter name, abbreviation and population, separated by commas.";
@@ -45,12 +43,6 @@ public class ListSelectionListenerDemo1
         new LocalTableModel( data, headers );
     /** GUI's JTable. */
     private final JTable            table   = new JTable( model );
-    /**
-     *  "Delete-row" button; declared as an instance variable
-     *  for the convenience of the 
-     *  {@linkplain #valueChanged(ListSelectionEvent)} method.
-     */
-    private final JButton           delete  = new JButton( "Delete" );
     
     /** Activity dialog for displaying feedback. */
     private final ActivityLog       log     = new ActivityLog();
@@ -64,7 +56,7 @@ public class ListSelectionListenerDemo1
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( ListSelectionListenerDemo1::new );
+        SwingUtilities.invokeLater( TableModelListenerDemo2::new );
     }
     
     /**
@@ -72,11 +64,10 @@ public class ListSelectionListenerDemo1
      * Initializes and displays the application frame.
      * Must be executed on the EDT.
      */
-    private ListSelectionListenerDemo1()
+    private TableModelListenerDemo2()
     {
         table.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
-        ListSelectionModel  selectionModel  = table.getSelectionModel();
-        selectionModel.addListSelectionListener( this::valueChanged );
+        model.addTableModelListener( this::tableChanged );
         
         JFrame      frame       = new JFrame( "JTable Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
@@ -87,16 +78,13 @@ public class ListSelectionListenerDemo1
         
         JPanel      buttonPanel = new JPanel();
         JButton     insert      = new JButton( "Insert" );
+        JButton     delete      = new JButton( "Delete" );
         JButton     exit        = new JButton( "Exit" );
-        JButton     clear       = new JButton( "Clear Selection" );
         insert.addActionListener( this::insertAction );
         delete.addActionListener( this::deleteAction );
-        delete.setEnabled( false );
-        clear.addActionListener( e -> table.clearSelection() );
         exit.addActionListener( e -> System.exit( 0 ) );
         buttonPanel.add( insert );
         buttonPanel.add( delete );
-        buttonPanel.add( clear );
         buttonPanel.add( exit );
         contentPane.add( buttonPanel, BorderLayout.SOUTH );
         
@@ -117,38 +105,44 @@ public class ListSelectionListenerDemo1
     
     /**
      * Listens for and logs
-     * all changes to the JTable's selection state.
+     * all changes to the JTable's data model.
      * 
-     * @param evt   event object describing changes to the selection state
+     * @param evt   event object describing changes to the data model
      */
-    private void valueChanged( ListSelectionEvent evt )
+    private void tableChanged( TableModelEvent evt )
     {
-        int     firstIndex  = evt.getFirstIndex();
-        int     lastIndex   = evt.getLastIndex();
-        boolean isAdjusting = evt.getValueIsAdjusting();
-        
-        StringBuilder   bldr    = new StringBuilder()
-            .append( "Selection event: " )
-            .append( "First index=" ).append( firstIndex ).append( "," )
-            .append( "Last index=" ).append( lastIndex ).append( "," )
-            .append( "Adjusting=" ).append( isAdjusting );
-        log.append( bldr.toString() );
-        
-        bldr.setLength( 0 );
-        bldr.append( "<span style=background:yellow;>" )
-            .append( "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" )
-            .append( "table.getSelectedRowCount(): ")
-            .append( table.getSelectedRowCount() )
-            .append( "</span>" );
-        log.append( bldr.toString() );
-        
-        if ( !isAdjusting )
+        Object  deleted     = null;
+        int     type        = evt.getType();
+        String  strType     = "";
+        int     firstRow    = evt.getFirstRow();
+        int     lastRow     = evt.getLastRow();
+        int     col         = evt.getColumn();
+        Object  val         = "[n/a]";
+        if ( firstRow >= 0 && col >= 0 )
+            val = model.getValueAt( firstRow, col );
+        switch ( type )
         {
-            int     selectedRow     = table.getSelectedRow();
-            boolean hasSelection    = selectedRow >= 0;
-            delete.setEnabled( hasSelection );
-            log.append( "*********************" );
+        case TableModelEvent.DELETE:
+            strType = "DELETE";
+            deleted = model.getValueAt( firstRow, 0 );
+            break;
+        case TableModelEvent.INSERT:
+            strType = "INSERT";
+            break;
+        case TableModelEvent.UPDATE:
+            strType = "UPDATE";
+            break;
+        default:
+            strType = "ERROR";
         }
+
+        StringBuilder   bldr    = new StringBuilder();
+        bldr.append( strType ).append( ": " )
+            .append("first row=").append( firstRow ).append( "," )
+            .append("last row=").append( lastRow ).append( "," )
+            .append("col=").append( col ).append( "," )
+            .append( "value=").append( val );
+        log.append( bldr.toString() );
     }
 
     /**

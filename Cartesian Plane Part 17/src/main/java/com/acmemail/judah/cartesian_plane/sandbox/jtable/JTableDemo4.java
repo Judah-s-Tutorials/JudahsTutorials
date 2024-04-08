@@ -60,7 +60,7 @@ public class JTableDemo4
      */
     private JTableDemo4()
     {
-        JFrame      frame       = new JFrame( "JTable Demo 2" );
+        JFrame      frame       = new JFrame( "JTable Demo 4" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel      contentPane = new JPanel( new BorderLayout() );
