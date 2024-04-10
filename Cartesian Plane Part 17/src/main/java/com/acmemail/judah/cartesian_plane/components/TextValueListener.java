@@ -2,7 +2,6 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Font;
 import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 

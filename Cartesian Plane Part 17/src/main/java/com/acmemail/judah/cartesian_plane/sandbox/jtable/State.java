@@ -43,7 +43,8 @@ public class State
     }
     
     public State( String csv )
-        throws NumberFormatException, IllegalArgumentException, 
+        throws NumberFormatException, 
+        IllegalArgumentException, 
         NullPointerException
     {
         String[]        fields  = csv.split( "," );
