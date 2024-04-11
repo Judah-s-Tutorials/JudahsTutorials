@@ -11,8 +11,10 @@ import java.awt.Point;
 import java.awt.Robot;
 import java.awt.Window;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalDouble;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -20,14 +22,15 @@ import java.util.stream.Stream;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
@@ -36,7 +39,6 @@ import com.acmemail.judah.cartesian_plane.components.VariablePanel;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
-import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 
 public class VariablePanelTestGUI
 {
@@ -89,16 +91,21 @@ public class VariablePanelTestGUI
     }
     
     /**
-     * Instantiates and loads a new Equation.
+     * Loads the given equation
+     * into the VariablePanel.
+     * The given equation may be null.
+     * If equation is null
+     * DM_OPEN_EQUATION_PN is set to false,
+     * otherwise it is set to true.
+     * DM_MODIFIED_PN is set to false.
      */
-    public Equation newEquation()
+    public void loadEquation( Equation equation )
     {
-        equation = new Exp4jEquation();
+        this.equation = equation;
+        boolean isOpen  = equation != null;
         varPanel.load( equation );
-        equation.setVar( "b", 111 );
-        pMgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, true);
-        setDMModified( false );
-        return equation;
+        pMgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, isOpen );
+        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
     }
     
     /**
@@ -168,6 +175,17 @@ public class VariablePanelTestGUI
         robot.keyRelease( keyCode );
     }
     
+    /**
+     * Pushes the "Add" button
+     * and pastes the given text
+     * into the resultant input dialog.
+     * The input operation is completed
+     * by typing the given key code
+     * (should be VK_ENTER or VK_ESCAPE).
+     * @param text
+     * @param keyCode
+     * @param expectError
+     */
     public void 
     doAddProcessing( String text, int keyCode, boolean expectError )
     {
@@ -175,12 +193,11 @@ public class VariablePanelTestGUI
         thread.start();
         Utils.pause( 250 );
         robotAsst.paste( text );
-        Utils.pause( 2000 );
         type( keyCode );
         if ( expectError )
         {
             String  msg = "Failed to find message dialog.";
-            Utils.pause( 2000 );
+            Utils.pause( 500 );
             ComponentFinder finder  = 
                 new ComponentFinder( true, false, true );
             Window  window  = finder.findWindow( c -> true );
@@ -224,6 +241,17 @@ public class VariablePanelTestGUI
         return value;
     }
     
+    /**
+     * Get the number of the row in the JTable
+     * that contains the given name.
+     * Returns -1 if not found.
+     * 
+     * @param name  the given name
+     * 
+     * @return
+     *      the number of the row in the JTable
+     *      that contains the given name; -1 if not found
+     */
     public int getRowOf( String name )
     {
         int     bound   = table.getRowCount();
@@ -253,6 +281,120 @@ public class VariablePanelTestGUI
         return equation.getVar( name );
     }
     
+    /**
+     * Moves the mouse to the given component
+     * and clicks on it.
+     * 
+     * @param comp  the given component
+     */
+    public void clickOn( JComponent comp )
+    {
+        Point   location    = getLocationOnScreen( comp );
+        robot.mouseMove( location.x, location.y );
+        click();
+    }
+    
+    /**
+     * Moves the mouse to the given row and column of the JTable
+     * and click on it.
+     * 
+     * @param row   the given row
+     * @param col   the given column
+     */
+    public void clickOn( int row, int col )
+    {
+        Component   comp        = getCellRendererComponent( row, col );
+        Point       location    = getLocationOnScreen( comp );
+        robot.mouseMove( location.x, location.y );
+        click();
+    }
+    
+    /**
+     * Uses robot to click the mouse.
+     */
+    public void click()
+    {
+        robot.mousePress( InputEvent.BUTTON1_DOWN_MASK );
+        robot.mouseRelease( InputEvent.BUTTON1_DOWN_MASK );
+    }
+    
+    /**
+     * Returns true if the GUI's JTable and "Add" button are enabled.
+     * 
+     * @return  true if the JTable and JButtons are enabled
+     */
+    public boolean isEnabled()
+    {
+        boolean result  = table.isEnabled() && addButton.isEnabled() ;
+        return result;
+    }
+    
+    /**
+     * Gets a name to value map of all the name/value pairs
+     * in the JTable.
+     * 
+     * @return  
+     *      a name to value map 
+     *      of all the name/value pairs in the JTable
+     */
+    public Map<String,Double> getTableVars()
+    {
+        Map<String,Double>  map = new HashMap<>();
+        IntStream.range( 0, table.getRowCount() )
+            .forEach( i -> {
+                String  name    = (String)table.getValueAt( i, 0 );
+                Double  val     = (Double)table.getValueAt( i, 1 );
+                map.put( name, val );
+            });
+        return map;
+    }   
+    
+    /**
+     * Gets a name to value map of all the name/value pairs
+     * in the currently open equation. 
+     * Returns an empty map if no equation is currently open.
+     * 
+     * @return  
+     *      a name to value map 
+     *      of all the name/value pairs in the JTable
+     */
+    public Map<String,Double> getEquationVars()
+    {
+        Map<String,Double>  map = 
+            equation == null ? null : equation.getVars();
+        
+        return map;
+    }
+    
+    /**
+     * Get the text from the label from the cell
+     * at the given row and column
+     * of the JTable.
+     * 
+     * @param row   given row
+     * @param col   given column
+     * 
+     * @return  from the label at the given row and column
+     */
+    public String getLabelText( int row, int col )
+    {
+        Component   comp    = getCellRendererComponent( row, col );
+        assertTrue( comp instanceof JLabel );
+        String              text        = ((JLabel)comp).getText();
+        return text;
+    }
+    
+    /**
+     * Returns true if the GUI's "Delete" button is enabled.
+     * 
+     * @return  true if the GUI's "Delete" button is enabled
+     */
+    public boolean isDelEnabled()
+    {
+        boolean result  = delButton.isEnabled() ;
+        return result;
+    }
+    
     public boolean isCommitted( String name )
     {
         Optional<Double>    tableValue      = getTableValue( name );
@@ -262,6 +404,23 @@ public class VariablePanelTestGUI
         boolean             result          = 
             tableValue.equals( equationValue );
         return result;
+    }
+    
+    /**
+     * Edits the value column of the row
+     * that contains the given variable name.
+     * The user specifies the value
+     * to type into the target cell
+     * and the key to terminate the edit
+     * (should be VK_ENTER or VK_TAB).
+     * 
+     * @param name      the given name
+     * @param value     the new value
+     * @param keyCode   key to terminate edit
+     */
+    public void editValue( String name, String value, int keyCode )
+    {
+        int row = getRowOf( name );
     }
     
     /**
@@ -282,17 +441,45 @@ public class VariablePanelTestGUI
         clearText( textField );
         
         robot.mouseMove( location.x, location.y );
+        clickOn( textField );
         robot.mousePress( InputEvent.BUTTON1_DOWN_MASK );
         robot.mouseRelease( InputEvent.BUTTON1_DOWN_MASK );
-//        robot.mousePress( InputEvent.BUTTON1_DOWN_MASK );
-//        robot.mouseRelease( InputEvent.BUTTON1_DOWN_MASK );
         
         robotAsst.paste( value );
         GUIUtils.schedEDTAndWait( () -> textField.postActionEvent() );
         GUIUtils.schedEDTAndWait( () -> { return; } );
-//        robot.keyPress( keyCode );
-//        robot.keyRelease( keyCode );
         Utils.pause( 250 );
+    }
+    
+    /**
+     * Selects the given rows.
+     * 
+     * @param rows  the given rows
+     */
+    public void selectRows( Integer... rows )
+    {
+        GUIUtils.schedEDTAndWait( () -> {
+            table.clearSelection();
+            adHocObject1 = table.getSelectionModel();
+        });
+        assertTrue( adHocObject1 instanceof ListSelectionModel );
+        
+        ListSelectionModel  model   = (ListSelectionModel)adHocObject1;
+        Stream.of( rows )
+            .forEach( i -> model.addSelectionInterval( i, i ) );
+    }
+    
+    /**
+     * Selects the rows containing the given names.
+     * 
+     * @param rows  the given names
+     */
+    public void selectRows( String... names )
+    {
+        Integer[]   rows    = Stream.of( names )
+            .map( this::getRowOf )
+            .toArray( Integer[]::new );
+        selectRows( rows );
     }
     
     /**
@@ -368,15 +555,17 @@ public class VariablePanelTestGUI
         );
         return (Point)adHocObject1;
     }
-
-    /**
-     * Sets the DM_MODIFIED_PN property.
-     * 
-     * @param val   new value of property
-     */
-    private void setDMModified( boolean val )
+    
+    private Component getCellRendererComponent( int row, int col )
     {
-        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, val );
+        Object              val         = table.getValueAt( row, col );
+        TableCellRenderer   renderer    = table.getCellRenderer( row, col );
+        Component           comp        = 
+            renderer.getTableCellRendererComponent(
+                table, val, false, false, row, col 
+            );
+        assertNotNull( comp );
+        return comp;
     }
     
     private JTable getTable()
@@ -422,11 +611,40 @@ public class VariablePanelTestGUI
         return robot;
     }
     
-    private class NameValuePair
+    /**
+     * Encapsulates a name/value pair.
+     * Presumably, "name" is the name of a variable
+     * and "value" is its value.
+     * 
+     * @author Jack Straub
+     */
+    public class NameValuePair
     {
+        /** Encapsulated name. */
         public final String name;
+        /** Encapsulated value. */
         public final Double value;
         
+        /**
+         * Constructor.
+         * 
+         * @param name      the name of the encapsulated pair
+         * @param value     the value of the encapsulated pair
+         */
+        public NameValuePair( String name, double value )
+        {
+            this.name = name;
+            this.value = value;
+        }
+        
+        /**
+         * Constructor.
+         * Sets the name/value pair
+         * to the values contained in the JTable row
+         * with the given index.
+         * 
+         * @param index the given index
+         */
         public NameValuePair( int index )
         {
             assert( index < tableModel.getRowCount() );

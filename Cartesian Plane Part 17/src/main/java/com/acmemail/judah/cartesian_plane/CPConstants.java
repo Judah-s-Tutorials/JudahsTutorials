@@ -330,9 +330,9 @@ public class CPConstants
     //   VaiablePanelProperties properties
     /////////////////////////////////////////////////
     /** Decimal precision for displaying variable values. */
-    public static final String  VP_DPRECSION_PN         = "dPrecision";
+    public static final String  VP_DPRECISION_PN        = "dPrecision";
     /** Default value of precision for displaying variable values. */
-    public static final String  VP_DPRECSION_DV         = "4";
+    public static final String  VP_DPRECISION_DV        = "4";
     
     /////////////////////////////////////////////////
     //   Data model properties

@@ -211,7 +211,7 @@ public class ParameterPanel extends JPanel
         prec.setHorizontalAlignment( right );
         prec.addPropertyChangeListener( "value", e -> {
             int dPrec   = (Integer)e.getNewValue();
-            pmgr.setProperty( CPConstants.VP_DPRECSION_PN, dPrec );
+            pmgr.setProperty( CPConstants.VP_DPRECISION_PN, dPrec );
         });
     }
     

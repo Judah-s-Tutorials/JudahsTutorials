@@ -75,7 +75,7 @@ public class VariablePanel extends JPanel
     
     /** Number of decimal points for value display. */
     private int         dPrecision  = 
-        pMgr.asInt( CPConstants.VP_DPRECSION_PN );
+        pMgr.asInt( CPConstants.VP_DPRECISION_PN );
     
     /** The currently loaded equation. */
     private Equation    equation;
@@ -88,7 +88,7 @@ public class VariablePanel extends JPanel
     {
         super( new BorderLayout() );        
         configureTableModel();
-        pMgr.addPropertyChangeListener( CPConstants.VP_DPRECSION_PN, e ->
+        pMgr.addPropertyChangeListener( CPConstants.VP_DPRECISION_PN, e ->
             setDPrecision( Integer.parseInt( e.getNewValue().toString() ) )
         );
 
@@ -378,11 +378,13 @@ public class VariablePanel extends JPanel
     {
         pMgr.setProperty( CPConstants.DM_MODIFIED_PN, true );
         int     evtType     = evt.getType();
-        if ( evtType == TableModelEvent.INSERT 
+        int     row         = evt.getFirstRow();
+        if ( (evtType == TableModelEvent.INSERT 
             || evtType == TableModelEvent.UPDATE
+             )
+            && row >= 0
         )
         {
-            int     row         = evt.getFirstRow();
             String  name        = (String)model.getValueAt( row, 0 );
             Double  value       = (Double)model.getValueAt( row, 1 );
             equation.setVar( name, value );
@@ -454,6 +456,8 @@ public class VariablePanel extends JPanel
             if ( value != null )
             {
                 String  format   = "%." + dPrecision + "f";
+                if ( dPrecision < 4 )
+                    System.out.println( "*** " + dPrecision );
                 String  fmtValue = String.format( format, value );
                 setText( fmtValue );
                 setHorizontalAlignment(SwingConstants.RIGHT);
