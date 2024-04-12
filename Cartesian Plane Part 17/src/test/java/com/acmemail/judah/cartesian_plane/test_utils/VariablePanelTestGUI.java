@@ -8,10 +8,10 @@ import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Robot;
 import java.awt.Window;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -65,7 +65,7 @@ public class VariablePanelTestGUI
     /** Temporary object for limited use by lambdas. */
     private Object              adHocObject1;
     /** Temporary object for limited use by lambdas. */
-    private Optional<Double>    adHocOptionalDouble1;
+    private int                 adHocInt1;
 
     /**
      * Constructor.
@@ -79,6 +79,7 @@ public class VariablePanelTestGUI
         varPanel = new VariablePanel();
         contentPane.add( varPanel );
         frame.setContentPane( contentPane );
+        frame.setLocation( 200, 200 );
         frame.pack();
         frame.setVisible( true );
         
@@ -88,6 +89,45 @@ public class VariablePanelTestGUI
         TableModel  temp    = table.getModel();
         assertTrue( temp instanceof DefaultTableModel );
         tableModel = (DefaultTableModel)temp;
+    }
+    
+    /**
+     * Exercises getDPrecision in the VariablePanel object.
+     * @param prec
+     */
+    public int getDPrecision()
+    {
+        GUIUtils.schedEDTAndWait( 
+            () -> adHocInt1 = varPanel.getDPrecision() 
+        );
+        return adHocInt1;
+    }
+    
+    /**
+     * Change the decimal precision
+     * by modifying the PropertyManater property.
+     * 
+     * @param prec  precision to change to
+     */
+    public void changeDPrecision( int prec )
+    {
+        GUIUtils.schedEDTAndWait( () ->
+            pMgr.setProperty( CPConstants.VP_DPRECISION_PN, prec )
+        );
+    }
+    
+    /**
+     * Gets the value returned by
+     * the toString method
+     * of the VariablePanel.
+     * 
+     * @return  
+     *      the value returned by the toString method 
+     *      of the VariablePanel object
+     */
+    public String panelToString()
+    {
+        return varPanel.toString();
     }
     
     /**
@@ -101,11 +141,13 @@ public class VariablePanelTestGUI
      */
     public void loadEquation( Equation equation )
     {
-        this.equation = equation;
-        boolean isOpen  = equation != null;
-        varPanel.load( equation );
-        pMgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, isOpen );
-        pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
+        GUIUtils.schedEDTAndWait( () -> {
+            this.equation = equation;
+            boolean isOpen  = equation != null;
+            varPanel.load( equation );
+            pMgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, isOpen );
+            pMgr.setProperty( CPConstants.DM_MODIFIED_PN, false );        
+        });
     }
     
     /**
@@ -121,7 +163,8 @@ public class VariablePanelTestGUI
      */
     public void pushDeleteButton()
     {
-        GUIUtils.schedEDTAndWait( () -> delButton.doClick() );
+        delButton.doClick();
+//        GUIUtils.schedEDTAndWait( () -> delButton.doClick() );
     }
     
     /**
@@ -303,9 +346,11 @@ public class VariablePanelTestGUI
      */
     public void clickOn( int row, int col )
     {
-        Component   comp        = getCellRendererComponent( row, col );
-        Point       location    = getLocationOnScreen( comp );
-        robot.mouseMove( location.x, location.y );
+        Rectangle   rect        = table.getCellRect( row, col, false );
+        Point       tableLoc    = table.getLocationOnScreen();
+        int         xco         = tableLoc.x + rect.x + rect.width / 2;
+        int         yco         = tableLoc.y + rect.y + rect.height / 2;
+        robot.mouseMove( xco, yco );
         click();
     }
     
@@ -395,34 +440,6 @@ public class VariablePanelTestGUI
         return result;
     }
     
-    public boolean isCommitted( String name )
-    {
-        Optional<Double>    tableValue      = getTableValue( name );
-        assertTrue( tableValue.isPresent() );
-        Optional<Double>    equationValue   = getTableValue( name );
-        assertTrue( equationValue.isPresent() );
-        boolean             result          = 
-            tableValue.equals( equationValue );
-        return result;
-    }
-    
-    /**
-     * Edits the value column of the row
-     * that contains the given variable name.
-     * The user specifies the value
-     * to type into the target cell
-     * and the key to terminate the edit
-     * (should be VK_ENTER or VK_TAB).
-     * 
-     * @param name      the given name
-     * @param value     the new value
-     * @param keyCode   key to terminate edit
-     */
-    public void editValue( String name, String value, int keyCode )
-    {
-        int row = getRowOf( name );
-    }
-    
     /**
      * Edits the value column of the given row.
      * The user specifies the value
@@ -461,12 +478,12 @@ public class VariablePanelTestGUI
         GUIUtils.schedEDTAndWait( () -> {
             table.clearSelection();
             adHocObject1 = table.getSelectionModel();
+            assertTrue( adHocObject1 instanceof ListSelectionModel );
+            
+            ListSelectionModel  model   = (ListSelectionModel)adHocObject1;
+            Stream.of( rows )
+                .forEach( i -> model.addSelectionInterval( i, i ) );
         });
-        assertTrue( adHocObject1 instanceof ListSelectionModel );
-        
-        ListSelectionModel  model   = (ListSelectionModel)adHocObject1;
-        Stream.of( rows )
-            .forEach( i -> model.addSelectionInterval( i, i ) );
     }
     
     /**
@@ -476,10 +493,12 @@ public class VariablePanelTestGUI
      */
     public void selectRows( String... names )
     {
-        Integer[]   rows    = Stream.of( names )
-            .map( this::getRowOf )
-            .toArray( Integer[]::new );
-        selectRows( rows );
+        GUIUtils.schedEDTAndWait( () ->
+            adHocObject1 = Stream.of( names )
+                .map( this::getRowOf )
+                .toArray( Integer[]::new )
+        );
+        selectRows( (Integer[])adHocObject1 );
     }
     
     /**

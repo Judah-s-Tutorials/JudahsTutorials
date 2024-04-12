@@ -12,13 +12,14 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
-import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 import com.acmemail.judah.cartesian_plane.test_utils.VariablePanelTestGUI;
 
 class VariablePanelTest
@@ -41,14 +42,6 @@ class VariablePanelTest
         GUIUtils.schedEDTAndWait( () -> 
             testGUI = new VariablePanelTestGUI()
         );
-        
-        pMgr.addPropertyChangeListener( CPConstants.VP_DPRECISION_PN,
-            e -> {
-                Object  newValue    = e.getNewValue();
-                String  strValue    = newValue.toString();
-                if ( Integer.parseInt( strValue ) < 4 )
-                    System.out.println( "*** " + e.getNewValue() );
-            });
     }
 
     @BeforeEach
@@ -61,12 +54,11 @@ class VariablePanelTest
         defaultPairs.entrySet()
             .forEach( s -> equation.setVar( s.getKey(), s.getValue() ) );
         testGUI.loadEquation( equation );
-        pMgr.setProperty( CPConstants.VP_DPRECISION_PN, defaultPrec );
+        testGUI.changeDPrecision( defaultPrec );
     }
     
-
     @Test
-    public void initialStateTest()
+    public void testInitialState()
     {
         assertEquals( defaultPairs, testGUI.getTableVars() );
         assertEquals( defaultPairs, testGUI.getEquationVars() );
@@ -76,7 +68,22 @@ class VariablePanelTest
     }
     
     @Test
-    public void deleteTest()
+    public void testToString()
+    {
+        String  result  = testGUI.panelToString();
+        defaultPairs.keySet().stream()
+            .map( k -> k + "," )
+            .forEach( s -> assertTrue( result.contains( s ), s ) );
+    }
+    
+    @Test
+    public void testGetDPrecision()
+    {
+        assertEquals( defaultPrec, testGUI.getDPrecision() );
+    }
+    
+    @Test
+    public void testDelete()
     {
         String[]    toDelete    = { "a", "e" };
         testGUI.selectRows( toDelete );
@@ -87,11 +94,11 @@ class VariablePanelTest
         Stream.of( toDelete ).forEach( expMap::remove );
         assertEquals( expMap, testGUI.getTableVars() );
         assertEquals( expMap, testGUI.getEquationVars() );
-//        validatePrecision();
+        validatePrecision();
     }
     
     @Test
-    public void addCancelTest()
+    public void testAddCancel()
     {
         testGUI.doAddProcessing( "aa", KeyEvent.VK_ESCAPE, false );
         assertEquals( defaultPairs, testGUI.getTableVars() );
@@ -100,7 +107,7 @@ class VariablePanelTest
     }
     
     @Test
-    public void addNameValueEnterTest()
+    public void testAddNameValueEnter()
     {
         String  newName = "aa";
         String  newVal  = "999";
@@ -115,7 +122,7 @@ class VariablePanelTest
     }
     
     @Test
-    public void addNameEnterTest()
+    public void testAddNameEnter()
     {
         String  newName = "bb";
         testGUI.doAddProcessing( newName, KeyEvent.VK_ENTER, false );
@@ -128,7 +135,41 @@ class VariablePanelTest
     }
     
     @Test
-    public void noEquationTest()
+    public void testAddNoSelection()
+    {
+        String  newName = "bb";
+        testGUI.doAddProcessing( newName, KeyEvent.VK_ENTER, false );
+        
+        Map<String,Double>  expMap  = new HashMap<>( defaultPairs );
+        expMap.put( newName, 0d );
+        assertEquals( expMap, testGUI.getTableVars() );
+        assertEquals( expMap, testGUI.getEquationVars() );
+        validatePrecision();
+        
+        int     newPos  = testGUI.getRowOf( newName );
+        assertFalse( newPos < 0 );
+        assertEquals( expMap.size() - 1, newPos );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( ints= {0,1,2} )
+    public void testAddWithSelection( int rowNum )
+    {
+        String  newName = "bb";
+        testGUI.selectRows( rowNum );
+        testGUI.doAddProcessing( newName, KeyEvent.VK_ENTER, false );
+        int     newRow  = testGUI.getRowOf( newName );
+        assertEquals( rowNum, newRow ); 
+        
+        Map<String,Double>  expMap  = new HashMap<>( defaultPairs );
+        expMap.put( newName, 0d );
+        assertEquals( expMap, testGUI.getTableVars() );
+        assertEquals( expMap, testGUI.getEquationVars() );
+        validatePrecision();
+    }
+    
+    @Test
+    public void testNoEquation()
     {
         testGUI.loadEquation( null );
         assertFalse( testGUI.isEnabled() );
@@ -136,7 +177,7 @@ class VariablePanelTest
     }
     
     @Test
-    public void addInvalidName()
+    public void testAddInvalidName()
     {
         testGUI.doAddProcessing( "#a", KeyEvent.VK_ENTER, true );
         assertEquals( defaultPairs, testGUI.getTableVars() );
@@ -144,7 +185,7 @@ class VariablePanelTest
     }
     
     @Test
-    public void addDuplicateName()
+    public void testAddDuplicateName()
     {
         testGUI.doAddProcessing( "a", KeyEvent.VK_ENTER, true );
         assertEquals( defaultPairs, testGUI.getTableVars() );
@@ -152,7 +193,7 @@ class VariablePanelTest
     }
     
     @Test
-    public void addInvalidValue()
+    public void testAddInvalidValue()
     {
         testGUI.doAddProcessing( "z,1a", KeyEvent.VK_ENTER, true );
         assertEquals( defaultPairs, testGUI.getTableVars() );
@@ -161,7 +202,7 @@ class VariablePanelTest
     }
     
     @Test
-    public void testChangePrecision()
+    public void testChangePrecisionNonZero()
     {
         int newPrecision    = defaultPrec + 1;
         validatePrecision();
@@ -171,13 +212,32 @@ class VariablePanelTest
         assertEquals( newPrecision, testPrecision );
         validatePrecision();
     }
+    
+    @Test
+    public void testChangePrecisionZero()
+    {
+        int newPrecision = 0;
+        pMgr.setProperty( CPConstants.VP_DPRECISION_PN, newPrecision );
+        // sanity check
+        int testPrecision = pMgr.asInt( CPConstants.VP_DPRECISION_PN );
+        assertEquals( newPrecision, testPrecision );
+        validatePrecision();
+    }
+    
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testIsCellEditable( int col )
+    {
+        // This is just to get test coverage of the table
+        // model used by VariablePanel
+        testGUI.clickOn( 0, col );
+    }
 
     private void validatePrecision()
     {
         int     expDec  = pMgr.asInt( CPConstants.VP_DPRECISION_PN );
         String  text    = testGUI.getLabelText( 0, 1 );
         int     decPos  = text.indexOf( "." );
-        System.out.println( text );
         if ( expDec <= 0 )
             assertEquals( decPos, -1 );
         else

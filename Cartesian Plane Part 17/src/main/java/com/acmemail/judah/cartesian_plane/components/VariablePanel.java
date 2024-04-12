@@ -88,6 +88,7 @@ public class VariablePanel extends JPanel
     {
         super( new BorderLayout() );        
         configureTableModel();
+        configureColumns();
         pMgr.addPropertyChangeListener( CPConstants.VP_DPRECISION_PN, e ->
             setDPrecision( Integer.parseInt( e.getNewValue().toString() ) )
         );
@@ -127,9 +128,9 @@ public class VariablePanel extends JPanel
     public void load( Equation equation )
     {
         this.equation = equation;
-        model.setRowCount( 0 );
         if ( equation != null )
         {
+            model.setRowCount( 0 );
             equation.getVars().entrySet().stream()
                 .map( e -> new Object[] { e.getKey(), e.getValue() } )
                 .forEach( oa -> model.addRow( oa ) );
@@ -145,15 +146,14 @@ public class VariablePanel extends JPanel
     public void setDPrecision( int prec )
     {
         dPrecision = prec;
-        if ( model != null )
-            model.fireTableDataChanged();
+        model.fireTableDataChanged();
     }
     
     /**
      * Gets the number of decimal point
      * used to display a floating point number.
      * @return
-     *      the number of decimal point
+     *      the number of decimal points
      *      used to display a floating point number.
      */
     public int getDPrecision()
@@ -169,7 +169,7 @@ public class VariablePanel extends JPanel
     public String toString()
     {
         StringBuilder   bldr    = new StringBuilder();
-        IntStream.range( 1, model.getRowCount() )
+        IntStream.range( 0, model.getRowCount() )
             .peek( i -> bldr.append( model.getValueAt( i, 0 ) ) )
             .peek( i -> bldr.append( ", " ) )
             .peek( i -> bldr.append( model.getValueAt( i, 1 ) ) )
@@ -217,15 +217,26 @@ public class VariablePanel extends JPanel
     private void configureTableModel()
     {
         model.setColumnIdentifiers( headers );
-        TableColumnModel    colModel    = table.getColumnModel();
-        TableColumn         column1     = colModel.getColumn( 1 );
-        column1.setCellRenderer( new ValueRenderer() );
         table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
         table.getTableHeader().setReorderingAllowed( false );
         model.addTableModelListener( this::tableChanged );
      
         pMgr.addPropertyChangeListener(
             CPConstants.DM_OPEN_EQUATION_PN, e -> openEqChange( table ) );
+    }
+    
+    /**
+     * Configure table columns as necessary.
+     * This operation is has its own method
+     * because it needs to be executed 
+     * when the table is created, 
+     * and after every delete operation.
+     */
+    private void configureColumns()
+    {
+        TableColumnModel    colModel    = table.getColumnModel();
+        TableColumn         column1     = colModel.getColumn( 1 );
+        column1.setCellRenderer( new ValueRenderer() );
     }
     
     /**
@@ -244,7 +255,7 @@ public class VariablePanel extends JPanel
 
     /**
      * Adds a new row 
-     * after the first selected row
+     * before the first selected row
      * of the GUI's JTable.
      * If no row is selected,
      * the new row is added
@@ -285,6 +296,7 @@ public class VariablePanel extends JPanel
             }
         }
         model.setDataVector( data, vHeader );
+        configureColumns();
     }
     
     /**
@@ -429,6 +441,7 @@ public class VariablePanel extends JPanel
         @Override
         public boolean isCellEditable(int row, int col )
         {
+            System.out.println( col );
             boolean editable    = col != 0;
             return editable;
         }
@@ -456,8 +469,6 @@ public class VariablePanel extends JPanel
             if ( value != null )
             {
                 String  format   = "%." + dPrecision + "f";
-                if ( dPrecision < 4 )
-                    System.out.println( "*** " + dPrecision );
                 String  fmtValue = String.format( format, value );
                 setText( fmtValue );
                 setHorizontalAlignment(SwingConstants.RIGHT);
