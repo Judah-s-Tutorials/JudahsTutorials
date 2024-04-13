@@ -14,7 +14,6 @@ import java.awt.Window;
 import java.awt.event.InputEvent;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -28,10 +27,8 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
@@ -59,18 +56,18 @@ public class VariablePanelTestGUI
     private final JButton           addButton;
     private final JButton           delButton;
     private final JTable            table;
-    private final DefaultTableModel tableModel;
     private Equation                equation;
     
     /** Temporary object for limited use by lambdas. */
     private Object              adHocObject1;
     /** Temporary object for limited use by lambdas. */
     private int                 adHocInt1;
+    /** Temporary object for limited use by lambdas. */
+    private String              adHocString1;
 
     /**
      * Constructor.
-     * Fully configures and displays GUI.
-     * 
+     * Fully configures the GUI and displays it.
      */
     public VariablePanelTestGUI()
     {
@@ -86,14 +83,10 @@ public class VariablePanelTestGUI
         addButton = getButton( plusLabel );
         delButton = getButton( minusLabel );
         table = getTable();
-        TableModel  temp    = table.getModel();
-        assertTrue( temp instanceof DefaultTableModel );
-        tableModel = (DefaultTableModel)temp;
     }
     
     /**
      * Exercises getDPrecision in the VariablePanel object.
-     * @param prec
      */
     public int getDPrecision()
     {
@@ -127,7 +120,11 @@ public class VariablePanelTestGUI
      */
     public String panelToString()
     {
-        return varPanel.toString();
+        GUIUtils.schedEDTAndWait( () -> 
+            adHocString1 = varPanel.toString() 
+        );
+            
+        return adHocString1;
     }
     
     /**
@@ -163,47 +160,7 @@ public class VariablePanelTestGUI
      */
     public void pushDeleteButton()
     {
-        delButton.doClick();
-//        GUIUtils.schedEDTAndWait( () -> delButton.doClick() );
-    }
-    
-    /**
-     * Selects within the GUI's JTable the rows
-     * corresponding to the given indices.
-     * 
-     * @param items the given indices
-     */
-    public void select( Integer... items )
-    {
-        GUIUtils.schedEDTAndWait( () -> {
-            ListSelectionModel  listModel   = table.getSelectionModel();
-            Stream.of( items )
-                .forEach( n -> listModel.addSelectionInterval( n, n ) );
-        });
-    }
-    
-    /**
-     * Clears all selected rows in the GUI's JTable.
-     * 
-     * @param items the given indices
-     */
-    public void clearSelection()
-    {
-        GUIUtils.schedEDTAndWait( () -> {
-            ListSelectionModel  listModel   = table.getSelectionModel();
-            listModel.clearSelection();
-        });
-    }
-    
-    /**
-     * Uses Robot to paste the given string, 
-     * presumably into a text field.
-     * 
-     * @param str   the given string
-     */
-    public void paste( String str )
-    {
-        robotAsst.paste( str );
+        GUIUtils.schedEDTAndWait( () -> delButton.doClick() );
     }
     
     /**
@@ -225,9 +182,14 @@ public class VariablePanelTestGUI
      * The input operation is completed
      * by typing the given key code
      * (should be VK_ENTER or VK_ESCAPE).
-     * @param text
-     * @param keyCode
-     * @param expectError
+     * The pasted string may or may not be valid.
+     * 
+     * @param text          the given text
+     * @param keyCode       the given key code
+     * @param expectError   
+     *      true if the operation is expected
+     *      to generate an error
+     *      (i.e. the given text is invalid).
      */
     public void 
     doAddProcessing( String text, int keyCode, boolean expectError )
@@ -258,33 +220,6 @@ public class VariablePanelTestGUI
     }
     
     /**
-     * Traverse the table's data model
-     * for a row containing a given name
-     * and return its value
-     * in an Optional.
-     * If not found,
-     * an empty Optional is returned.
-     *  
-     * @param name  the given name
-     * 
-     * @return  
-     *      Optional containing the value corresponding to name,
-     *      or empty Optional if name not found.
-     */
-    public Optional<Double> getTableValue( String name )
-    {
-        int                 bound   = table.getRowCount();
-        Optional<Double>    value   =
-        IntStream.range( 0, bound )
-            .mapToObj( NameValuePair::new )
-            .filter( p -> name.equals( p.name ) )
-            .map( p -> p.value )
-            .findFirst();
-        
-        return value;
-    }
-    
-    /**
      * Get the number of the row in the JTable
      * that contains the given name.
      * Returns -1 if not found.
@@ -304,24 +239,6 @@ public class VariablePanelTestGUI
             .findFirst().orElse( -1 );
         
         return row;
-    }
-    
-    /**
-     * Gets from the currently open equation
-     * the value associated with a given variable name
-     * and return it in an Optional.
-     * If not found,
-     * an empty Optional is returned.
-     *  
-     * @param name  the given name
-     * 
-     * @return  
-     *      Optional containing the value corresponding to name,
-     *      or empty Optional if name not found.
-     */
-    public Optional<Double> getEquationValue( String name )
-    {
-        return equation.getVar( name );
     }
     
     /**
@@ -346,11 +263,8 @@ public class VariablePanelTestGUI
      */
     public void clickOn( int row, int col )
     {
-        Rectangle   rect        = table.getCellRect( row, col, false );
-        Point       tableLoc    = table.getLocationOnScreen();
-        int         xco         = tableLoc.x + rect.x + rect.width / 2;
-        int         yco         = tableLoc.y + rect.y + rect.height / 2;
-        robot.mouseMove( xco, yco );
+        // Move the mouse to the screen coordinates and click it.
+        positionMouse( row, col );
         click();
     }
     
@@ -463,8 +377,7 @@ public class VariablePanelTestGUI
         robot.mouseRelease( InputEvent.BUTTON1_DOWN_MASK );
         
         robotAsst.paste( value );
-        GUIUtils.schedEDTAndWait( () -> textField.postActionEvent() );
-        GUIUtils.schedEDTAndWait( () -> { return; } );
+        type( keyCode );
         Utils.pause( 250 );
     }
     
@@ -502,13 +415,36 @@ public class VariablePanelTestGUI
     }
     
     /**
-     * Clears the text field with the given string identifier.
+     * Clears the given text field.
      * 
-     * @param fieldID   the given string identifier
+     * @param textField   the given text field
      */
     public void clearText( JTextField textField )
     {
         GUIUtils.schedEDTAndWait( () -> textField.setText( "" ) );
+    }
+    
+    /**
+     * Positions the mouse over the cell with the given coordinates.
+     * 
+     * @param row   given row coordinate
+     * @param col   given column coordinate
+     */
+    public void positionMouse( int row, int col )
+    {
+        // Get the rectangle, relative to the position of the table,
+        // that encloses the selected cell, and make sure it is visible.
+        Rectangle   rect        = table.getCellRect( row, col, true );
+        table.scrollRectToVisible( rect );
+        
+        // Find the location of the table on the screen, and us it
+        // to translated the rectangle to screen coordinates.
+        Point       tableLoc    = table.getLocationOnScreen();
+        int         xco         = tableLoc.x + rect.x + rect.width / 2;
+        int         yco         = tableLoc.y + rect.y + rect.height / 2;
+        
+        // Move the mouse to the screen coordinates
+        robot.mouseMove( xco, yco );
     }
 
     /**
@@ -587,6 +523,11 @@ public class VariablePanelTestGUI
         return comp;
     }
     
+    /**
+     * Gets the JTable component from the VariablePanel.
+     * 
+     * @return  the JTable component from the VariablePanel
+     */
     private JTable getTable()
     {
         Predicate<JComponent>   pred    = c -> (c instanceof JTable);
@@ -615,6 +556,13 @@ public class VariablePanelTestGUI
         return (JButton)comp;
     }
     
+    /**
+     * Instantiates a RobotAssistant.
+     * The main advantage of using this method
+     * is to encapsulate the try/catch logic.
+     * 
+     * @return  a new RobotAssistant object
+     */
     private RobotAssistant getRobot()
     {
         RobotAssistant  robot   = null;
@@ -628,51 +576,5 @@ public class VariablePanelTestGUI
             fail( "Unable to instantiate RobotAssistant" );
         }
         return robot;
-    }
-    
-    /**
-     * Encapsulates a name/value pair.
-     * Presumably, "name" is the name of a variable
-     * and "value" is its value.
-     * 
-     * @author Jack Straub
-     */
-    public class NameValuePair
-    {
-        /** Encapsulated name. */
-        public final String name;
-        /** Encapsulated value. */
-        public final Double value;
-        
-        /**
-         * Constructor.
-         * 
-         * @param name      the name of the encapsulated pair
-         * @param value     the value of the encapsulated pair
-         */
-        public NameValuePair( String name, double value )
-        {
-            this.name = name;
-            this.value = value;
-        }
-        
-        /**
-         * Constructor.
-         * Sets the name/value pair
-         * to the values contained in the JTable row
-         * with the given index.
-         * 
-         * @param index the given index
-         */
-        public NameValuePair( int index )
-        {
-            assert( index < tableModel.getRowCount() );
-            Object  oName   = tableModel.getValueAt( index, 0 );
-            Object  oValue  = tableModel.getValueAt( index, 1 );
-            assertTrue( oName instanceof String );
-            assertTrue( oValue instanceof  Double );
-            name = (String)oName;
-            value = (Double)oValue;
-        }
     }
 }

@@ -82,6 +82,32 @@ class VariablePanelTest
         assertEquals( defaultPrec, testGUI.getDPrecision() );
     }
     
+    @ParameterizedTest
+    @ValueSource( ints = {KeyEvent.VK_ENTER, KeyEvent.VK_TAB} )
+    public void testEditValue( int keyCode )
+    {
+        double              newValue    = 10;
+        String              targetVar   = "a";
+        Map<String,Double>  expMap      = new HashMap<>( defaultPairs );
+        
+        int                 row         = testGUI.getRowOf( targetVar );
+        expMap.put( targetVar, newValue );
+        testGUI.editValue( row, "" + newValue, keyCode );
+        assertEquals( expMap, testGUI.getTableVars() );
+        assertEquals( expMap, testGUI.getEquationVars() );
+    }
+    
+    @Test
+    public void testEditInvalidValue()
+    {
+        String  targetVar   = "a";
+        
+        int     row         = testGUI.getRowOf( targetVar );
+        testGUI.editValue( row, "#", KeyEvent.VK_ENTER );
+        assertEquals( defaultPairs, testGUI.getTableVars() );
+        assertEquals( defaultPairs, testGUI.getEquationVars() );
+    }
+    
     @Test
     public void testDelete()
     {
