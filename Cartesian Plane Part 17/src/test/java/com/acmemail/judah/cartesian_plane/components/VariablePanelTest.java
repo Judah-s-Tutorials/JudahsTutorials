@@ -112,6 +112,7 @@ class VariablePanelTest
     public void testDelete()
     {
         String[]    toDelete    = { "a", "e" };
+        assertFalse( testGUI.isDelEnabled() );
         testGUI.selectRows( toDelete );
         assertTrue( testGUI.isDelEnabled() );
         testGUI.pushDeleteButton();

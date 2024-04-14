@@ -111,7 +111,6 @@ public class TableModelListenerDemo2
      */
     private void tableChanged( TableModelEvent evt )
     {
-        Object  deleted     = null;
         int     type        = evt.getType();
         String  strType     = "";
         int     firstRow    = evt.getFirstRow();
@@ -124,7 +123,6 @@ public class TableModelListenerDemo2
         {
         case TableModelEvent.DELETE:
             strType = "DELETE";
-            deleted = model.getValueAt( firstRow, 0 );
             break;
         case TableModelEvent.INSERT:
             strType = "INSERT";

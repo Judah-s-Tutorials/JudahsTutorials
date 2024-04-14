@@ -293,6 +293,7 @@ public class SelectionModelDemo2X
             return clazz;
         }
     }
+    @SuppressWarnings("serial")
     private class ValueRenderer extends DefaultTableCellRenderer
     {
         /**

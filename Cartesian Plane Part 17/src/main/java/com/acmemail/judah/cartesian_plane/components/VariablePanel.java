@@ -89,9 +89,12 @@ public class VariablePanel extends JPanel
         super( new BorderLayout() );        
         configureTableModel();
         configureColumns();
-        pMgr.addPropertyChangeListener( CPConstants.VP_DPRECISION_PN, e ->
-            setDPrecision( Integer.parseInt( e.getNewValue().toString() ) )
-        );
+        pMgr.addPropertyChangeListener( 
+            CPConstants.VP_DPRECISION_PN, e -> {
+                String  strValue    = e.getNewValue().toString();
+                int     intValue    = Integer.parseInt( strValue );
+                setDPrecision( intValue );
+        });
 
         Border      border      =
             BorderFactory.createEmptyBorder( 3, 3, 0, 3 );
