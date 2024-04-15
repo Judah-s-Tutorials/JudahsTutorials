@@ -11,6 +11,7 @@ import javax.swing.JFormattedTextField;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -47,9 +48,17 @@ class ParameterPanelTest
         testStringField( ident,KeyEvent.VK_TAB );
     }
     
+    @Test
+    public void testEnabled()
+    {
+        assertTrue( testGUI.isEnabled() );
+        testGUI.closeEquation();
+        assertFalse( testGUI.isEnabled() );
+    }
+    
     @ParameterizedTest
     @ValueSource( ints= {KeyEvent.VK_ENTER,KeyEvent.VK_TAB} )
-    public void testPrecistion( int commitKey )
+    public void testPrecision( int commitKey )
     {
         String  ident       = "Prec";
         String  text        = testGUI.getText( ident );

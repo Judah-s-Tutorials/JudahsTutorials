@@ -14,6 +14,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
@@ -93,6 +94,18 @@ public class FTextFieldTestMgr
     putTextField( String fieldID, JFormattedTextField textField )
     {
         textFieldMap.put( fieldID, textField );
+    }
+    
+    /**
+     * Returns a collection of all text fields
+     * contained in the text field map.
+     * @return
+     *      a collection of all text fields
+     *      contained in the text field map
+     */
+    public Collection<JFormattedTextField> getAllTextFields()
+    {
+        return textFieldMap.values();
     }
     
     /**
@@ -191,6 +204,18 @@ public class FTextFieldTestMgr
         pmgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, true );
         pmgr.setProperty( CPConstants.DM_OPEN_FILE_PN, false );
         return equation;
+    }
+    
+    /**
+     * Simulates closing the currently open equation.
+     * Sets DM_MODIFIED_PN, DM_OPEN_EQUATION_PN,
+     * and DM_OPEN_FILE_PN to false.
+     */
+    public void closeEquation()
+    {
+        pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
+        pmgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
+        pmgr.setProperty( CPConstants.DM_OPEN_FILE_PN, false );
     }
     
     /**
@@ -432,13 +457,15 @@ public class FTextFieldTestMgr
     }
     
     /**
-     * Updates the state of the DM_MODIFIED_PN property.
+     * Updates the state of the 
+     * DM_MODIFIED_PN property.
      * 
      * @param state new state of DM_MODIFIED_PN property
      */
-    public void setDMModified( boolean state )
+    public void setDMProperties( boolean state )
     {
         pmgr.setProperty( CPConstants.DM_MODIFIED_PN, state );
+        pmgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, state );
     }
 
     /**
