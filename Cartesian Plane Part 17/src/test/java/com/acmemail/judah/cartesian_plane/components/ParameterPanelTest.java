@@ -15,16 +15,20 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.ParameterPanelTestGUI;
 
 class ParameterPanelTest
 {
+    private static final PropertyManager    pMgr    =
+        PropertyManager.INSTANCE;
     private static final char               PII     = '\u03c0';
     private static ParameterPanelTestGUI    testGUI;
 
     @BeforeAll
-    static void setUpBeforeClass() throws Exception
+    public static void setUpBeforeClass() throws Exception
     {
         GUIUtils.schedEDTAndWait( () -> 
             testGUI = new ParameterPanelTestGUI()
@@ -32,7 +36,7 @@ class ParameterPanelTest
     }
 
     @BeforeEach
-    void setUp() throws Exception
+    public void setUp() throws Exception
     {
         testGUI.newEquation();
     }
@@ -53,7 +57,7 @@ class ParameterPanelTest
     {
         assertTrue( testGUI.isEnabled() );
         testGUI.closeEquation();
-        assertFalse( testGUI.isEnabled() );
+        assertFalse( testGUI.isNotEnabled() );
     }
     
     @ParameterizedTest
@@ -61,46 +65,37 @@ class ParameterPanelTest
     public void testPrecision( int commitKey )
     {
         String  ident       = "Prec";
-        String  text        = testGUI.getText( ident );
-        String  field       = testGUI.getEqProperty( ident );
-        Object  objValue    = testGUI.getValue( ident );
-        String  strValue    = getIntValue( objValue );
-        assertEquals( text, field );
-        assertEquals( text, strValue );
         assertFalse( testGUI.isDMModified() );
+        assertTrue( testPrecision() );        
         
         testGUI.clearText( ident );
         assertEquals( "", testGUI.getText( ident ) );
-        assertEquals( objValue, testGUI.getValue( ident ) );
-        assertEquals( field, testGUI.getEqProperty( ident ) );
+        assertFalse( testPrecision() );
         
         testGUI.click( ident );
         testGUI.type( KeyEvent.VK_A );
-        assertFalse( testGUI.isCommitted( ident ) );
         assertFalse( testGUI.isDMModified() );
         assertFalse( testGUI.isValidTextColor( ident ) );
         assertTrue( testGUI.isChangedTextFont( ident ) );
-        assertEquals( field, testGUI.getEqProperty( ident ) );
+        assertFalse( testPrecision() );
         
         JFormattedTextField focused = testGUI.getFocusedField();
         testGUI.type( KeyEvent.VK_TAB );
         assertEquals( focused, testGUI.getFocusedField() );
-        assertFalse( testGUI.isCommitted( ident ) );
+        assertFalse( testPrecision() );
         
         testGUI.clearText( ident );
         testGUI.type( KeyEvent.VK_1 );
-        assertFalse( testGUI.isCommitted( ident ) );
         assertFalse( testGUI.isDMModified() );
         assertTrue( testGUI.isValidTextColor( ident ) );
         assertTrue( testGUI.isChangedTextFont( ident ) );
-        assertEquals( field, testGUI.getEqProperty( ident ) );
+        assertFalse( testPrecision() );
     
         testGUI.type( commitKey );
-        assertTrue( testGUI.isCommitted( ident ) );
         assertTrue( testGUI.isDMModified() );
         assertTrue( testGUI.isValidTextColor( ident ) );
         assertFalse( testGUI.isChangedTextFont( ident ) );
-        assertEquals( "1", testGUI.getEqProperty( ident ) );
+        assertTrue( testPrecision() );
     }
     
     @ParameterizedTest
@@ -146,14 +141,6 @@ class ParameterPanelTest
         assertTrue( testGUI.isChangedTextFont( ident ) );
     }
     
-    private String getIntValue( Object value )
-    {
-        assertNotNull( value );
-        assertTrue( value instanceof Integer );
-        String  strValue    = String.valueOf( value );
-        return strValue;
-    }
-    
     private void testStringField( String ident, int commitKey )
     {
         String  text    = testGUI.getText( ident );
@@ -195,5 +182,52 @@ class ParameterPanelTest
         assertTrue( testGUI.isValidTextColor( ident ) );
         assertFalse( testGUI.isChangedTextFont( ident ) );
         assertEquals( "x", testGUI.getEqProperty( ident ) );
+    }
+    
+    private int getPrecValue()
+    {
+        Object  value   = testGUI.getValue( "Prec" );
+        assertNotNull( value );
+        assertTrue( value instanceof Integer );
+        int intValue    = (int)value;
+        return intValue;
+    }
+    
+    private String getPrecValueAsString()
+    {
+        Object  value   = testGUI.getValue( "Prec" );
+        assertNotNull( value );
+        assertTrue( value instanceof Integer );
+        String  strValue    = String.valueOf( value );
+        return strValue;
+    }
+    
+    /**
+     * Verifies that precision property
+     * in the GUI and equation match.
+     * "Value" in the GUI 
+     * means the "value" of the "Prec" text field.
+     * Returns true if precision is committed.
+     * 
+     * @return  true if the precision property is committed
+     */
+    private boolean testPrecision()
+    {
+        // The precision property according to the PropertyManager.
+        int     pmPrecision     = 
+            pMgr.asInt( CPConstants.VP_DPRECISION_PN );
+        // The precision property according to the GUI.
+        int     guiPrecision    = getPrecValue();
+        // The precision property according to the equation.
+        String  strPrecision    = testGUI.getEqProperty( "Prec" );
+        int     eqPrecision     = Integer.parseInt( strPrecision );
+        
+        // Property manager, GUI and equation values must
+        // always match;
+        assertEquals( pmPrecision, guiPrecision );
+        assertEquals( pmPrecision, eqPrecision );
+        
+        boolean committed   = testGUI.isCommitted( "Prec" );
+        return committed;
     }
 }

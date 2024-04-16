@@ -236,6 +236,14 @@ public class PlotPanelTest
         Point2D actResult   = testGUI.getPlotPoint();
         assertEquals( expResult, actResult );
     }
+    
+    @Test
+    public void testEnabled()
+    {
+        assertTrue( testGUI.isEnabled() );
+        testGUI.closeEquation();
+        assertFalse( testGUI.isNotEnabled() );
+    }
 
     private void testSimple( String fieldID, int keyCode )
     {

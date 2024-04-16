@@ -2,9 +2,7 @@ package com.acmemail.judah.cartesian_plane.test_utils;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.swing.JFormattedTextField;
@@ -17,8 +15,6 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
 
 public class ParameterPanelTestGUI extends FTextFieldTestMgr
 {
-    /** Convenient shortcut for the PropertyManager singleton. */
-    
     /** The ParameterPanel under test. */
     private final ParameterPanel    paramPanel;
 
@@ -66,26 +62,6 @@ public class ParameterPanelTestGUI extends FTextFieldTestMgr
     {
         super.closeEquation();
         paramPanel.load( null );
-    }
-    
-    /**
-     * Returns true if all the JTextFields
-     * in the ParameterPanel are enabled.
-     * 
-     * @return  
-     *      true if all the JTextFields
-     *      in the ParameterPanel are enabled
-     */
-    public boolean isEnabled()
-    {
-        Collection<JFormattedTextField> textFields =
-            getAllTextFields();
-        Optional<JFormattedTextField>   result  =
-            textFields.stream()
-            .filter( tf -> tf.isEnabled() )
-            .findFirst();
-        boolean isEnabled   = result.isPresent();
-        return isEnabled;
     }
 
     /**

@@ -14,10 +14,10 @@ import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import javax.swing.JComponent;
@@ -94,18 +94,6 @@ public class FTextFieldTestMgr
     putTextField( String fieldID, JFormattedTextField textField )
     {
         textFieldMap.put( fieldID, textField );
-    }
-    
-    /**
-     * Returns a collection of all text fields
-     * contained in the text field map.
-     * @return
-     *      a collection of all text fields
-     *      contained in the text field map
-     */
-    public Collection<JFormattedTextField> getAllTextFields()
-    {
-        return textFieldMap.values();
     }
     
     /**
@@ -190,6 +178,46 @@ public class FTextFieldTestMgr
                 textField.setCaretPosition( caretPos + 2 );
             });
         return caretPos;
+    }
+
+    /**
+     * Returns true if all the text fields in the textFieldMap
+     * are enabled.
+     */
+    public boolean isEnabled()
+    {
+        // notEnabled contains the first text field
+        // that is not enabled.
+        Optional<?> notEnabled  = textFieldMap
+            .values()
+            .stream()
+            .filter( tf -> !tf.isEnabled() )
+            .findFirst();
+        
+        // If there is at least one text field that is
+        // not enabled, return false.
+        boolean result  = notEnabled.isEmpty();
+        return result;
+    }
+
+    /**
+     * Returns true if all the text fields in the textFieldMap
+     * are NOT enabled.
+     */
+    public boolean isNotEnabled()
+    {
+        // enabled contains the first text field
+        // that is enabled.
+        Optional<?> enabled = textFieldMap
+            .values()
+            .stream()
+            .filter( tf -> !tf.isEnabled() )
+            .findFirst();
+        
+        // If there is at least one text field that is
+        // enabled, return false.
+        boolean result  = enabled.isPresent();
+        return result;
     }
     
     /**
