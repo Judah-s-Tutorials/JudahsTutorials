@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import com.acmemail.judah.cartesian_plane.components.ParameterPanel;
+import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 
 public class ParameterPanelTestGUI extends FTextFieldTestMgr
@@ -48,7 +49,7 @@ public class ParameterPanelTestGUI extends FTextFieldTestMgr
     public Equation newEquation()
     {
         Equation    equation    = super.newEquation();
-        paramPanel.load( equation );
+        GUIUtils.schedEDTAndWait( () -> paramPanel.load( equation ) );
 
         return equation;
     }

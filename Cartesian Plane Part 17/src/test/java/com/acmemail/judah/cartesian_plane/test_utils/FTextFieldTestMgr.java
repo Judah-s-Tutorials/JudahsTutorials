@@ -211,7 +211,7 @@ public class FTextFieldTestMgr
         Optional<?> enabled = textFieldMap
             .values()
             .stream()
-            .filter( tf -> !tf.isEnabled() )
+            .filter( tf -> tf.isEnabled() )
             .findFirst();
         
         // If there is at least one text field that is

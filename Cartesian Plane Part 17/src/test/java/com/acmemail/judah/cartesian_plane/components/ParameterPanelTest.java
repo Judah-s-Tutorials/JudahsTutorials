@@ -22,8 +22,6 @@ import com.acmemail.judah.cartesian_plane.test_utils.ParameterPanelTestGUI;
 
 class ParameterPanelTest
 {
-    private static final PropertyManager    pMgr    =
-        PropertyManager.INSTANCE;
     private static final char               PII     = '\u03c0';
     private static ParameterPanelTestGUI    testGUI;
 
@@ -47,6 +45,7 @@ class ParameterPanelTest
     )
     public void testStringFields( String ident )
     {
+        testGUI.newEquation();
         testStringField( ident,KeyEvent.VK_ENTER );
         testGUI.newEquation();
         testStringField( ident,KeyEvent.VK_TAB );
@@ -64,6 +63,7 @@ class ParameterPanelTest
     @ValueSource( ints= {KeyEvent.VK_ENTER,KeyEvent.VK_TAB} )
     public void testPrecision( int commitKey )
     {
+        testGUI.newEquation();
         String  ident       = "Prec";
         assertFalse( testGUI.isDMModified() );
         assertTrue( testPrecision() );        
@@ -102,6 +102,7 @@ class ParameterPanelTest
     @ValueSource( strings= {"Start", "End", "Step"} )
     public void testHasPI( String ident )
     {
+        testGUI.newEquation();
         String  before      = "2pi/4";
         String  expAfter    = "2" + PII + "/4";
         testGUI.clearText( ident );
@@ -127,6 +128,7 @@ class ParameterPanelTest
     @ValueSource( strings= {"Radius", "Theta", "Param", } )
     public void testNotHasPI( String ident )
     {
+        testGUI.newEquation();
         String  before      = "pi";
         String  expAfter    = before;
         testGUI.clearText( ident );
@@ -184,6 +186,14 @@ class ParameterPanelTest
         assertEquals( "x", testGUI.getEqProperty( ident ) );
     }
     
+    /**
+     * Gets the value of the precision property
+     * from the PropertyManager.
+     * 
+     * @return  
+     *      the value of the precision property
+     *      as maintained by the PropertyManager
+     */
     private int getPrecValue()
     {
         Object  value   = testGUI.getValue( "Prec" );
@@ -191,15 +201,6 @@ class ParameterPanelTest
         assertTrue( value instanceof Integer );
         int intValue    = (int)value;
         return intValue;
-    }
-    
-    private String getPrecValueAsString()
-    {
-        Object  value   = testGUI.getValue( "Prec" );
-        assertNotNull( value );
-        assertTrue( value instanceof Integer );
-        String  strValue    = String.valueOf( value );
-        return strValue;
     }
     
     /**
@@ -215,7 +216,8 @@ class ParameterPanelTest
     {
         // The precision property according to the PropertyManager.
         int     pmPrecision     = 
-            pMgr.asInt( CPConstants.VP_DPRECISION_PN );
+            PropertyManager.INSTANCE 
+                .asInt( CPConstants.VP_DPRECISION_PN );
         // The precision property according to the GUI.
         int     guiPrecision    = getPrecValue();
         // The precision property according to the equation.

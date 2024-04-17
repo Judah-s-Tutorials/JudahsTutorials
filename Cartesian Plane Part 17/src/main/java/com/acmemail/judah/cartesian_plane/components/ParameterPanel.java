@@ -233,6 +233,7 @@ public class ParameterPanel extends JPanel
         values.stream()
             .map( f -> f.textField )
             .forEach( tf -> tf.setEnabled( newState ) );
+        pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
     }
     
     /**
