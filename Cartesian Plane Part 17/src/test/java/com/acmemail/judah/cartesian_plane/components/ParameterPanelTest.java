@@ -154,16 +154,17 @@ class ParameterPanelTest
         
         testGUI.clearText( ident );
         assertEquals( "", testGUI.getText( ident ) );
-        assertEquals( value, testGUI.getValue( ident ) );
+        assertFalse( testGUI.isCommitted( ident ) );
         assertEquals( field, testGUI.getEqProperty( ident ) );
+        assertFalse( testGUI.isDMModified() );
         
         testGUI.click( ident );
         testGUI.type( KeyEvent.VK_SLASH );
         assertFalse( testGUI.isCommitted( ident ) );
         assertFalse( testGUI.isDMModified() );
+        assertEquals( field, testGUI.getEqProperty( ident ) );
         assertFalse( testGUI.isValidTextColor( ident ) );
         assertTrue( testGUI.isChangedTextFont( ident ) );
-        assertEquals( field, testGUI.getEqProperty( ident ) );
         
         JFormattedTextField focused = testGUI.getFocusedField();
         testGUI.type( KeyEvent.VK_TAB );
@@ -174,9 +175,9 @@ class ParameterPanelTest
         testGUI.type( KeyEvent.VK_X );
         assertFalse( testGUI.isCommitted( ident ) );
         assertFalse( testGUI.isDMModified() );
+        assertEquals( field, testGUI.getEqProperty( ident ) );
         assertTrue( testGUI.isValidTextColor( ident ) );
         assertTrue( testGUI.isChangedTextFont( ident ) );
-        assertEquals( field, testGUI.getEqProperty( ident ) );
 
         testGUI.type( commitKey );
         assertTrue( testGUI.isCommitted( ident ) );
