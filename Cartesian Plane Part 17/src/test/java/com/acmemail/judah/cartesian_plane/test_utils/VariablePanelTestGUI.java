@@ -33,6 +33,7 @@ import javax.swing.table.TableCellRenderer;
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.components.VariablePanel;
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
@@ -337,9 +338,11 @@ public class VariablePanelTestGUI
      */
     public String getLabelText( int row, int col )
     {
-        Component   comp    = getCellRendererComponent( row, col );
-        assertTrue( comp instanceof JLabel );
-        String              text        = ((JLabel)comp).getText();
+        GUIUtils.schedEDTAndWait( () -> 
+            adHocObject1 = getCellRendererComponentEDT( row, col )
+        );
+        JLabel  comp    = (JLabel)adHocObject1;
+        String  text    = comp.getText();
         return text;
     }
     
@@ -437,8 +440,8 @@ public class VariablePanelTestGUI
         Rectangle   rect        = table.getCellRect( row, col, true );
         table.scrollRectToVisible( rect );
         
-        // Find the location of the table on the screen, and us it
-        // to translated the rectangle to screen coordinates.
+        // Find the location of the table on the screen, and use it
+        // to translate the rectangle to screen coordinates.
         Point       tableLoc    = table.getLocationOnScreen();
         int         xco         = tableLoc.x + rect.x + rect.width / 2;
         int         yco         = tableLoc.y + rect.y + rect.height / 2;
@@ -491,7 +494,7 @@ public class VariablePanelTestGUI
         
         // Sanity check. This will only fail if we coded something wrong.
         if ( !(comp instanceof JTextField) )
-            throw new Error( "component error" );
+            throw new ComponentException( "Invalid editor component." );
         return (JTextField)comp;
     }
     
@@ -511,7 +514,16 @@ public class VariablePanelTestGUI
         return (Point)adHocObject1;
     }
     
-    private Component getCellRendererComponent( int row, int col )
+    /**
+     * Gets the renderer component for a given cell.
+     * This method must be called from the EDT.
+     * 
+     * @param row   the row of the given cell
+     * @param col   the column of the given cell
+     * 
+     * @return  the renderer component for the given cell
+     */
+    private JLabel getCellRendererComponentEDT( int row, int col )
     {
         Object              val         = table.getValueAt( row, col );
         TableCellRenderer   renderer    = table.getCellRenderer( row, col );
@@ -520,7 +532,8 @@ public class VariablePanelTestGUI
                 table, val, false, false, row, col 
             );
         assertNotNull( comp );
-        return comp;
+        assertTrue( comp instanceof JLabel );
+        return (JLabel)comp;
     }
     
     /**
