@@ -52,7 +52,9 @@ public class VariablePanelTestGUI
     /** The ParameterPanel under test. */
     private final VariablePanel varPanel;
     
+    /** RobotAssistant for simulating operator actions. */
     private final RobotAssistant    robotAsst   = getRobot();
+    /** RobotAssistant for simulating operator actions. */
     private final Robot             robot       = robotAsst.getRobot();
     private final JButton           addButton;
     private final JButton           delButton;
@@ -201,23 +203,33 @@ public class VariablePanelTestGUI
         robotAsst.paste( text );
         type( keyCode );
         if ( expectError )
-        {
-            String  msg = "Failed to find message dialog.";
-            Utils.pause( 500 );
-            ComponentFinder finder  = 
-                new ComponentFinder( true, false, true );
-            Window  window  = finder.findWindow( c -> true );
-            assertNotNull( window, msg );
-            assertTrue( window instanceof JDialog, msg );
-            
-            Predicate<JComponent>   pred    = 
-                ComponentFinder.getButtonPredicate( "OK" );
-            JComponent  comp    = ComponentFinder.find( window, pred );
-            assertNotNull( comp );
-            assertTrue( comp instanceof JButton );
-            ((JButton)comp).doClick();
-        }
+            GUIUtils.schedEDTAndWait( () -> doAddFailProcessingEDT() );
         Utils.join( thread );
+    }
+    
+    /**
+     * Works in conjunction with doAddProcessing
+     * to finish tests in which an operator error is expected.
+     * This method must be invoked
+     * from the EDT.
+     */
+    private void doAddFailProcessingEDT()
+    {
+        String  msg = "Failed to find message dialog.";
+        Utils.pause( 500 );
+        ComponentFinder finder  = 
+            new ComponentFinder( true, false, true );
+        Window  window  =  finder.findWindow( c -> true );
+        assertNotNull( window, msg );
+        assertTrue( window instanceof JDialog, msg );
+        
+        Predicate<JComponent>   pred    = 
+            ComponentFinder.getButtonPredicate( "OK" );
+        JComponent  comp    = ComponentFinder.find( window, pred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JButton );
+        JButton button    = (JButton)comp;
+        button.doClick();
     }
     
     /**
@@ -285,7 +297,18 @@ public class VariablePanelTestGUI
      */
     public boolean isEnabled()
     {
-        boolean result  = table.isEnabled() && addButton.isEnabled() ;
+        boolean result  = table.isEnabled() && addButton.isEnabled();
+        return result;
+    }
+    
+    /**
+     * Returns true if the GUI's "Delete" button is enabled.
+     * 
+     * @return  true if the GUI's "Delete" button is enabled
+     */
+    public boolean isDelEnabled()
+    {
+        boolean result  = delButton.isEnabled() ;
         return result;
     }
     
@@ -347,17 +370,6 @@ public class VariablePanelTestGUI
     }
     
     /**
-     * Returns true if the GUI's "Delete" button is enabled.
-     * 
-     * @return  true if the GUI's "Delete" button is enabled
-     */
-    public boolean isDelEnabled()
-    {
-        boolean result  = delButton.isEnabled() ;
-        return result;
-    }
-    
-    /**
      * Edits the value column of the given row.
      * The user specifies the value
      * to type into the given cell
@@ -370,18 +382,14 @@ public class VariablePanelTestGUI
      */
     public void editValue( int row, String value, int keyCode )
     {
-        JTextField  textField   = getEditComponent( row, 1 );
-        Point       location    = getLocationOnScreen( textField );
+        JTextField  textField   = editComponent( row, 1 );
         clearText( textField );
         
-        robot.mouseMove( location.x, location.y );
         clickOn( textField );
-        robot.mousePress( InputEvent.BUTTON1_DOWN_MASK );
-        robot.mouseRelease( InputEvent.BUTTON1_DOWN_MASK );
+        click();
         
         robotAsst.paste( value );
         type( keyCode );
-        Utils.pause( 250 );
     }
     
     /**
@@ -462,10 +470,10 @@ public class VariablePanelTestGUI
      * 
      * @return  component used to edit the cell at the given coordinates
      */
-    private JTextField getEditComponent( int row, int col )
+    private JTextField editComponent( int row, int col )
     {
         GUIUtils.schedEDTAndWait( () -> 
-            adHocObject1 = getEditComponentEDT(row, col)
+            adHocObject1 = editComponentEDT(row, col)
         );
         return (JTextField)adHocObject1;
     }
@@ -479,7 +487,7 @@ public class VariablePanelTestGUI
      * 
      * @return  component used to edit the cell at the given coordinates
      */
-    private JTextField getEditComponentEDT( int row, int col )
+    private JTextField editComponentEDT( int row, int col )
     {
         // In addition to knowing the row and column of the target cell
         // we have to know the value it contains.

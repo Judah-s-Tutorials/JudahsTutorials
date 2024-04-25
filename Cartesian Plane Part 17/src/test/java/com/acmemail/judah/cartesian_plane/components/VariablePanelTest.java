@@ -33,7 +33,7 @@ class VariablePanelTest
     private static VariablePanelTestGUI testGUI;
 
     @BeforeAll
-    static void setUpBeforeClass() throws Exception
+    public static void setUpBeforeClass() throws Exception
     {
         "abcdefgh".chars()
             .forEach( c -> 
@@ -45,14 +45,10 @@ class VariablePanelTest
     }
 
     @BeforeEach
-    void setUp() throws Exception
+    public void setUp() throws Exception
     {
-        Equation            equation    = new Exp4jEquation();
-        Map<String,Double>  oldMap      = equation.getVars();
-        oldMap.keySet().forEach( equation::removeVar);
-        
-        defaultPairs.entrySet()
-            .forEach( s -> equation.setVar( s.getKey(), s.getValue() ) );
+        Equation            equation    = 
+            new Exp4jEquation( defaultPairs, "0" );
         testGUI.loadEquation( equation );
         testGUI.changeDPrecision( defaultPrec );
     }
@@ -74,6 +70,14 @@ class VariablePanelTest
         defaultPairs.keySet().stream()
             .map( k -> k + "," )
             .forEach( s -> assertTrue( result.contains( s ), s ) );
+    }
+
+    @Test
+    public void testNoEquation()
+    {
+        testGUI.loadEquation( null );
+        assertFalse( testGUI.isEnabled() );
+        assertFalse( testGUI.isDelEnabled() );
     }
     
     @Test
@@ -125,6 +129,19 @@ class VariablePanelTest
     }
     
     @Test
+    public void testAddNameEnter()
+    {
+        String  newName = "bb";
+        testGUI.doAddProcessing( newName, KeyEvent.VK_ENTER, false );
+        
+        Map<String,Double>  expMap  = new HashMap<>( defaultPairs );
+        expMap.put( newName, 0d );
+        assertEquals( expMap, testGUI.getTableVars() );
+        assertEquals( expMap, testGUI.getEquationVars() );
+        validatePrecision();
+    }
+    
+    @Test
     public void testAddCancel()
     {
         testGUI.doAddProcessing( "aa", KeyEvent.VK_ESCAPE, false );
@@ -149,21 +166,10 @@ class VariablePanelTest
     }
     
     @Test
-    public void testAddNameEnter()
-    {
-        String  newName = "bb";
-        testGUI.doAddProcessing( newName, KeyEvent.VK_ENTER, false );
-        
-        Map<String,Double>  expMap  = new HashMap<>( defaultPairs );
-        expMap.put( newName, 0d );
-        assertEquals( expMap, testGUI.getTableVars() );
-        assertEquals( expMap, testGUI.getEquationVars() );
-        validatePrecision();
-    }
-    
-    @Test
     public void testAddNoSelection()
     {
+        // Add with no row selected. New name/value pair should
+        // go to end of table.
         String  newName = "bb";
         testGUI.doAddProcessing( newName, KeyEvent.VK_ENTER, false );
         
@@ -182,6 +188,7 @@ class VariablePanelTest
     @ValueSource( ints= {0,1,2} )
     public void testAddWithSelection( int rowNum )
     {
+        // Add new variable above selected row
         String  newName = "bb";
         testGUI.selectRows( rowNum );
         testGUI.doAddProcessing( newName, KeyEvent.VK_ENTER, false );
@@ -193,14 +200,6 @@ class VariablePanelTest
         assertEquals( expMap, testGUI.getTableVars() );
         assertEquals( expMap, testGUI.getEquationVars() );
         validatePrecision();
-    }
-    
-    @Test
-    public void testNoEquation()
-    {
-        testGUI.loadEquation( null );
-        assertFalse( testGUI.isEnabled() );
-        assertFalse( testGUI.isDelEnabled() );
     }
     
     @Test

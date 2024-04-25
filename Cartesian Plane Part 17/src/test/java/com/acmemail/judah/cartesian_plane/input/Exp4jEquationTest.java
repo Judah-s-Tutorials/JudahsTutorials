@@ -67,18 +67,9 @@ class Exp4jEquationTest
         for ( String str : vars )
             mapIn.put( str, (double)str.charAt( 0 ) );
         
-        equation = new Exp4jEquation( mapIn, "2t" );
-        validateDefaultVariables();
+        equation = new Exp4jEquation( mapIn, "2" );
+        assertEquals( mapIn, equation.getVars() );
         validateDefaultRange();
-        
-        // validate mapped variables declared
-        Map<String,Double>  actMap  = equation.getVars();
-        for ( String var : vars )
-        {
-            Double  val = actMap.get( var );
-            assertNotNull( val );
-            assertEquals( val, (double)var.charAt( 0 ) );
-        }
         
         // validate expressions
         equation.setRangeStart( "1" );

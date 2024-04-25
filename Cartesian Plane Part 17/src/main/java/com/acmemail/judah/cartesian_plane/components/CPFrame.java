@@ -2,20 +2,12 @@ package com.acmemail.judah.cartesian_plane.components;
 
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JTextField;
 
-import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
-import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 
@@ -41,7 +33,7 @@ public class CPFrame extends JFrame
     private final VariablePanel     varPanel    = new VariablePanel();
     /** 
      * Panel containing parameters, e.g. range start/end, to be displayed 
-     * at left of content pane. 
+     * at left of content pane below NamePanel. 
      */
     private final ParameterPanel    paramPanel  = new ParameterPanel();
     /**
@@ -49,6 +41,11 @@ public class CPFrame extends JFrame
      * at bottom of content pane.
      */
     private final PlotPanel         plotPanel   = new PlotPanel();
+    /**
+     * Panel containing equation name to be displayed
+     * at left of content pane above VariablePanel.
+     */
+    private final NamePanel         namePanel   = new NamePanel();
     
     /** 
      * Equation to be plotted. Initially set to empty Exp4jEquation,
@@ -56,8 +53,6 @@ public class CPFrame extends JFrame
      * @see #loadEquation(Equation)
      */
     private Equation    equation    = null;
-    /** The text field containing the name of the equation. */
-    private JTextField  nameField   = new JTextField();
 
     /**
      * Constructor.
@@ -66,9 +61,14 @@ public class CPFrame extends JFrame
      */
     public CPFrame()
     {
+        /* 
+         * Invoke the constructor in the superclass that sets
+         * the title of the frame.
+         */
         super( title );
         
-        /* Create the menu bar and the variable table. The frame
+        /*
+         * Create the menu bar and the variable table. The frame
          * and variable table must be registered with the menu bar.
          */
         CPMenuBar       menuBar     = new CPMenuBar( this );
@@ -92,16 +92,14 @@ public class CPFrame extends JFrame
         /* Make the Canvas the center child of the content pane. */
         contentPane.add( cartPlane, BorderLayout.CENTER );
         
-        /* Make the variable and parameter panels in the 
-         * west child of the content pane. */
+        /* Make the name, variable and parameter panels in the 
+         * west child of the content pane. 
+         */
         JPanel          leftPanel   = getLeftPanel();
-        
-        /* Install the default equation in all the panels. */
-        loadEquation( equation );
-        
-        /* Install the CartesianPlane in the plot panel. */
-        plotPanel.setCartesianPlane( cartPlane );
-        
+        /* 
+         * Put the name panel, variable panel, and parameter panel
+         * on the left (west) side of the content pane.
+         */
         contentPane.add( leftPanel, BorderLayout.WEST );
         /* Put the plot controls at bottom of content pane. */
         contentPane.add( plotPanel, BorderLayout.SOUTH );
@@ -126,12 +124,7 @@ public class CPFrame extends JFrame
         varPanel.load( equation );
         paramPanel.load( equation );
         plotPanel.load( equation );
-        if ( equation != null )
-        {
-            nameField.setText( equation.getName() );
-        }
-        else
-            nameField.setText( "" );
+        namePanel.load( equation );
     }
     
     /**
@@ -161,49 +154,25 @@ public class CPFrame extends JFrame
      */
     private JPanel getLeftPanel()
     {
-        JPanel  panel       = new JPanel();
-        panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
-        
-        JPanel  namePanel   = new JPanel( new GridLayout( 2, 1 ) );
-        namePanel.add( new JLabel( "Eq. Name" ) );
-        namePanel.add( nameField );
+        JPanel      panel   = new JPanel();
+        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
+        panel.setLayout( layout );
         
         panel.add( namePanel );
         panel.add( varPanel );
         panel.add( paramPanel );
-        
-        // Sets the component name of the name field so
-        // the test classes can find it
-        nameField.setName( CPConstants.CP_EQUATION_NAME_CN );
-        
-        nameField.addKeyListener( new KeyAdapter(){
-            @Override
-            public void keyTyped(KeyEvent e)
-            {
-                PropertyManager.INSTANCE.setProperty(
-                    CPConstants.DM_MODIFIED_PN,
-                    true
-                );
-            }
-        });
-        
-        nameField.addActionListener( this::nameAction );
-        return panel;
-    }
-    
-    /**
-     * Detects when the operator types enter in the name field,
-     * and commits the name.
-     * 
-     * @param evt   object describing this event; not used
-     */
-    private void nameAction( ActionEvent evt )
-    {
-        PropertyManager.INSTANCE.setProperty(
-            CPConstants.DM_MODIFIED_PN,
-            true
-        );
-        if ( equation != null )
-            equation.setName( nameField.getText() );
+
+        // If "panel" alone were made the west child of the
+        // content pane's BorderLayout, panel's height would
+        // be stretched to fill the height of the content pane
+        // and its BoxLayout would distribute the extra space
+        // amongst its components achieving a non-aesthestic
+        // result. Instead, put "panel" in another JPanel ("outer")
+        // with a FlowLayout (the default for JPanels); now the
+        // extra space will be allocated to the end of "outer"
+        // and "panel" will not be affected.
+        JPanel      outer   = new JPanel();
+        outer.add( panel );
+        return outer;
     }
 }

@@ -51,7 +51,7 @@ public class VariablePanel extends JPanel
     /** Platform-specific line separator. */
     private static final String             lineSep = 
         System.lineSeparator();
-    /** Prompt the operator for a new name and optional value. */
+    /** Prompt the operatopmgr for a new name and optional value. */
     private static final String             prompt  =
         "Enter [name] or [name,value]";
     /** Reduces typing when accessing PropertyManager singleton. */
@@ -187,7 +187,6 @@ public class VariablePanel extends JPanel
      */
     private JPanel getButtonPanel()
     {
-        //////////////////// DON'T FORGET LOGIC TO UPDATE EQUATION
         JButton plus    = new JButton( "\u2795" );
         plus.addActionListener( this::addAction );
         plus.setEnabled( false );
@@ -444,7 +443,6 @@ public class VariablePanel extends JPanel
         @Override
         public boolean isCellEditable(int row, int col )
         {
-            System.out.println( col );
             boolean editable    = col != 0;
             return editable;
         }

@@ -116,7 +116,7 @@ public class Exp4jEquation implements Equation
     public Exp4jEquation( Map<String,Double> vars, String expr )
     {
         this.vars.putAll( vars );
-        initMap();
+//        initMap();
         setXExpression( xExprStr );
         setYExpression( expr );
         setTExpression( tExprStr );
