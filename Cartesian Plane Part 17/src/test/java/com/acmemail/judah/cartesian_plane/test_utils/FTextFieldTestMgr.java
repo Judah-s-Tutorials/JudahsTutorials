@@ -216,7 +216,7 @@ public class FTextFieldTestMgr
         
         // If there is at least one text field that is
         // enabled, return false.
-        boolean result  = enabled.isPresent();
+        boolean result  = !enabled.isPresent();
         return result;
     }
     

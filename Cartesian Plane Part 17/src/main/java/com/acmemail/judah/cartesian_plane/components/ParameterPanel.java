@@ -213,6 +213,8 @@ public class ParameterPanel extends JPanel
             int dPrec   = (Integer)e.getNewValue();
             pmgr.setProperty( CPConstants.VP_DPRECISION_PN, dPrec );
         });
+        
+        load( null );
     }
     
     /**

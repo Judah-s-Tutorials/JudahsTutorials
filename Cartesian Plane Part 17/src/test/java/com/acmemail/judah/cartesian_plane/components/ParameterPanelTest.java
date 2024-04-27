@@ -51,13 +51,13 @@ class ParameterPanelTest
         testStringField( ident,KeyEvent.VK_TAB );
     }
     
-@Test
-public void testEnabled()
-{
-    assertTrue( testGUI.isEnabled() );
-    testGUI.closeEquation();
-    assertFalse( testGUI.isNotEnabled() );
-}
+    @Test
+    public void testEnabled()
+    {
+        assertTrue( testGUI.isEnabled() );
+        testGUI.closeEquation();
+        assertTrue( testGUI.isNotEnabled() );
+    }
     
     @ParameterizedTest
     @ValueSource( ints= {KeyEvent.VK_ENTER,KeyEvent.VK_TAB} )
