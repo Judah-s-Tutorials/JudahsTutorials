@@ -2,11 +2,11 @@ package com.acmemail.judah.cartesian_plane.sandbox.experimental.line_editor_rev2
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -20,22 +20,28 @@ public class FontEditorDialog extends JDialog
     private final FontEditor        editor;
     private int                     result;
     
-    public FontEditorDialog( JFrame frame, GraphPropertySet propSet )
+    public FontEditorDialog( Window parent, GraphPropertySet propSet )
     {
-        super( frame, "Font Editor", true );
+        super( parent, "Font Editor", ModalityType.APPLICATION_MODAL );
         this.propSet = propSet;
         this.editor = new FontEditor();
         
         JPanel  contentPane = new JPanel( new BorderLayout() );
         JPanel  editorPanel = editor.getPanel();
         contentPane.add( editorPanel, BorderLayout.CENTER );
-        contentPane.add( getButtonPanel() );
+        contentPane.add( getButtonPanel(), BorderLayout.SOUTH );
         setContentPane(contentPane);
         pack();
     }
     
+    public GraphPropertySet getPropertySet()
+    {
+        return propSet;
+    }
+    
     public int showDialog()
     {
+        reset( null );
         setVisible( true );
         return result;
     }
@@ -45,24 +51,23 @@ public class FontEditorDialog extends JDialog
         JPanel  panel           = new JPanel();
         
         JButton okButton        = new JButton( "OK" );
-        JButton applyButton     = new JButton( "Apply" );
         JButton resetButton     = new JButton( "Reset" );
         JButton canButton       = new JButton( "Cancel" );
         
         okButton.addActionListener( e -> close( JOptionPane.OK_OPTION ) );        
         resetButton.addActionListener( this::reset );
-        applyButton.addActionListener( this::apply );
-        canButton.addActionListener( e -> close( JOptionPane.OK_OPTION ) );
+        canButton.addActionListener( 
+            e -> close( JOptionPane.CANCEL_OPTION )
+        );
         
         panel.add( okButton );
-        panel.add( applyButton );
         panel.add( resetButton );
         panel.add( canButton );
         
         return panel;
     }
     
-    private void apply( ActionEvent evt )
+    private void apply()
     {
         propSet.setFGColor( editor.getColor().orElse( Color.BLACK ) );
         propSet.setFontName( editor.getName() );
@@ -83,9 +88,7 @@ public class FontEditorDialog extends JDialog
     private void close( int result )
     {
         if ( result == JOptionPane.OK_OPTION )
-            apply( null );
-        else
-            reset( null );
+            apply();
         this.result = result;
         setVisible( false );
     }

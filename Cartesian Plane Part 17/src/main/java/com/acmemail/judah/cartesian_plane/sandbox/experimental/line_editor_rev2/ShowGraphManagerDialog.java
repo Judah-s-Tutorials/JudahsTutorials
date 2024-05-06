@@ -1,6 +1,5 @@
 package com.acmemail.judah.cartesian_plane.sandbox.experimental.line_editor_rev2;
 
-import java.awt.Color;
 import java.awt.event.ActionEvent;
 
 import javax.swing.BorderFactory;
@@ -11,15 +10,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
-public class ShowFontEditorDialog
+public class ShowGraphManagerDialog
 {
-    private final GraphPropertySet  propSet = new GraphPropertySetMW();
-    private final FontEditorDialog  dialog;
-    private final ActivityLog       log;
+    private final GraphManagerDialog    dialog;
+    private final ActivityLog           log;
     
     /**
      * Application entry point.
@@ -29,14 +25,14 @@ public class ShowFontEditorDialog
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater(ShowFontEditorDialog::new  );
+        SwingUtilities.invokeLater(ShowGraphManagerDialog::new  );
     }
     
-    public ShowFontEditorDialog()
+    public ShowGraphManagerDialog()
     {
         JFrame      frame   = new JFrame( "Show Font Editor" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        dialog  = new FontEditorDialog( frame, propSet );
+        dialog  = new GraphManagerDialog( frame );
         log = new ActivityLog( "Activity Log" );
 
         Border      border  = 
@@ -44,7 +40,7 @@ public class ShowFontEditorDialog
         JButton     exit    = new JButton( "Exit" );
         exit.addActionListener( e -> System.exit( 0 ) );
         JButton     edit    = new JButton( "Edit" );
-        edit.addActionListener( this::edit );
+        edit.addActionListener( this::showDialog );
         
         JPanel      panel   = new JPanel();
         panel.setBorder( border );
@@ -59,7 +55,7 @@ public class ShowFontEditorDialog
         log.setVisible( true );
     }
     
-    private void edit( ActionEvent evt )
+    private void showDialog( ActionEvent evt )
     {
         int     iResult = dialog.showDialog();
         String  sResult = null;
@@ -70,16 +66,7 @@ public class ShowFontEditorDialog
         else
             sResult = "???????";
         
-        Color   color   = propSet.getFGColor();
-        int     iColor  = color.getRGB() & 0xFFFFFF;
-        String  sColor  = String.format( "%06x", iColor );
-        
         log.append( "result: " + sResult );
-        log.append( "Name: " + propSet.getFontName() );
-        log.append( "size: " + propSet.getFontSize() );
-        log.append( "Italic: " + propSet.isItalic() );
-        log.append( "Bold: " + propSet.isBold() );
-        log.append( "Color: " + sColor );
         log.append( "*****************************" );
     }
 }

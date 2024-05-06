@@ -10,6 +10,7 @@ import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.swing.JComponent;
@@ -17,13 +18,14 @@ import javax.swing.JComponent;
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.LineGenerator;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
 
-public class DrawManager
+public class GraphManager
 {
     private final PropertyManager   pMgr    = PropertyManager.INSTANCE;
         
@@ -33,7 +35,7 @@ public class DrawManager
     private float               gridUnit;
     private Color               saveColor;
 
-    private final GraphPropertySetMW        mainWindow  =
+    private final GraphPropertySet          mainWindow  =
         new GraphPropertySetMW();
     
     private final LinePropertySetAxes       axis        =
@@ -48,13 +50,30 @@ public class DrawManager
     private final LinePropertySetGridLines  gridLine    =
         new LinePropertySetGridLines();
     
-    public DrawManager( JComponent comp )
+    public GraphManager( JComponent comp )
     {
         this.comp = comp;
         reset();
     }
     
-    public void update( Graphics2D graphics )
+    public void apply()
+    {
+        mainWindow.apply();
+        Stream.of( axis, ticMajor, ticMinor, gridLine )
+            .forEach( p -> p.apply() );
+    }
+
+    public void reset()
+    {
+        gridUnit = pMgr.asFloat( CPConstants.GRID_UNIT_PN );
+        mainWindow.reset();
+        axis.reset();
+        gridLine.reset();
+        ticMajor.reset();
+        ticMinor.reset();
+    }
+
+    public void refresh( Graphics2D graphics )
     {
         if ( gtx != null )
             gtx.dispose();
@@ -258,7 +277,7 @@ public class DrawManager
     /**
      * @return the mainWindow
      */
-    public GraphPropertySetMW getMainWindow()
+    public GraphPropertySet getMainWindow()
     {
         return mainWindow;
     }
@@ -436,15 +455,5 @@ public class DrawManager
         float       diff    = Math.abs( fVal1 - fVal2 );
         boolean     equal   = diff < epsilon;
         return equal;
-    }
-
-    private void reset()
-    {
-        gridUnit = pMgr.asFloat( CPConstants.GRID_UNIT_PN );
-        mainWindow.reset();
-        axis.reset();
-        gridLine.reset();
-        ticMajor.reset();
-        ticMinor.reset();
     }
 }

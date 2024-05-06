@@ -10,7 +10,7 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class Canvas extends JPanel
 {
-    private final DrawManager  drawManager = new DrawManager( this );
+    private final GraphManager  drawManager = new GraphManager( this );
 
     private Graphics2D          gtx;
     
@@ -32,7 +32,7 @@ public class Canvas extends JPanel
         super.paintComponent( graphics );
         gtx = (Graphics2D)graphics.create();
         
-        drawManager.update( gtx );
+        drawManager.refresh( gtx );
         drawManager.drawBackground();
         drawManager.drawGridLines();
         drawManager.drawAxes();
@@ -43,7 +43,7 @@ public class Canvas extends JPanel
         gtx.dispose();
     }
     
-    public DrawManager getDrawManager()
+    public GraphManager getDrawManager()
     {
         return drawManager;
     }

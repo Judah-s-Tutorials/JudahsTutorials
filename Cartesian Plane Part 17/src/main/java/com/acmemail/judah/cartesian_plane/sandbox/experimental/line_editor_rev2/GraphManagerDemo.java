@@ -8,16 +8,18 @@ import java.awt.Toolkit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTextField;
@@ -27,15 +29,13 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
-import com.acmemail.judah.cartesian_plane.CPConstants;
-import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.components.ColorEditor;
-import com.acmemail.judah.cartesian_plane.components.FontEditor;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
-public class Dialer2
+public class GraphManagerDemo
 {
     private static final String weightLabel     = "Weight";
     private static final String lpuLabel        = "Lines/Unit";
@@ -47,14 +47,12 @@ public class Dialer2
     private static final String majorTicsLabel  = "Major Tics";
     private static final String minorTicsLabel  = "Minor Tics";
     private static final String gridLinesLabel  = "Grid Lines";
-    
-    private final PropertyManager   pMgr    = PropertyManager.INSTANCE;
 
     private final JFrame        frame       = new JFrame( "Dialer 2" );
     private final Canvas        canvas      = new Canvas();
-    private final DrawManager   drawManager = canvas.getDrawManager();
+    private final GraphManager   drawManager = canvas.getDrawManager();
     
-    private final Map<String,SpinnerDesc>   descMap = getDescMap();
+    private final Map<String,SpinnerDesc>   descMap = new HashMap<>();
     
     /**
      * Application entry point.
@@ -64,122 +62,71 @@ public class Dialer2
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new Dialer2() );
+        SwingUtilities.invokeLater( () -> new GraphManagerDemo() );
     }
     
-    public Dialer2()
+    public GraphManagerDemo()
     {
+        getDescMap();
+        
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        JPanel  contentPane     = new JPanel( new BorderLayout() );
+        JPanel      contentPane     = new JPanel( new BorderLayout() );
         contentPane.add( BorderLayout.CENTER, canvas );
-        contentPane.add( BorderLayout.WEST, getControlPanel() );
+        JScrollPane scrollPane      = new JScrollPane( getControlPanel() );
+        contentPane.add( BorderLayout.WEST, scrollPane );
         contentPane.add( BorderLayout.SOUTH, getButtonPanel() );
         
         frame.setContentPane( contentPane );
         contentPane.setFocusable( true );
-
-        Dimension   screen  = 
+        
+        Dimension   scrollDim   = scrollPane.getPreferredSize();
+        Dimension   sbarDim     = 
+            scrollPane.getVerticalScrollBar().getPreferredSize();
+        Dimension   screenSize  = 
             Toolkit.getDefaultToolkit().getScreenSize();
-        Dimension   size    = frame.getPreferredSize();
-        int         xco     = screen.width / 2 - size.width / 2;
-        int         yco     = screen.height / 2 - size.height / 2 - 100;
-        frame.setLocation( xco, yco );
+        scrollDim.height = (int)(.6 * screenSize.height);
+        scrollDim.width += sbarDim.width;
+        scrollPane.setPreferredSize( scrollDim );
+
+        GUIUtils.center( frame );
         frame.pack();
         frame.setVisible( true );
     }
     
-    private Map<String,SpinnerDesc> getDescMap()
+    private void getDescMap()
     {
-        Map<String,SpinnerDesc> map = new HashMap<>();
-        SpinnerDesc desc    = null;
+        LinePropertySet         propSet = null;
         
-        desc = new SpinnerDesc(
-            d -> drawManager.setGridUnit( (float)d ), 
-            CPConstants.GRID_UNIT_PN, 
-            1
-        );
-        map.put( gridUnitLabel, desc );
+        makeSpinnerDesc( null, gridUnitLabel, 1 );
         
-        desc = new SpinnerDesc(
-            d -> drawManager.setAxisWeight( (float)d ),
-            CPConstants.AXIS_WEIGHT_PN,
-            1
-        );
-        map.put( axisLabel + weightLabel, desc );
+        propSet = drawManager.getAxis();
+        makeSpinnerDesc( propSet, weightLabel, 1 );
         
-        desc = new SpinnerDesc(
-            d -> drawManager.setGridLineLPU( (float)d ), 
-            CPConstants.GRID_LINE_LPU_PN, 
-            1
-        );
-        map.put( gridLinesLabel + lpuLabel, desc );
+        propSet = drawManager.getGridLine();
+        makeSpinnerDesc( propSet, lpuLabel, 1 );
+        makeSpinnerDesc( propSet, weightLabel, 1 );
         
-        desc = new SpinnerDesc(
-            d -> drawManager.setGridLineWeight( (float)d ), 
-            CPConstants.GRID_LINE_WEIGHT_PN, 
-            1
-        );
-        map.put( gridLinesLabel + weightLabel, desc );
+        propSet = drawManager.getTicMajor();
+        makeSpinnerDesc( propSet, lpuLabel, .25 );
+        makeSpinnerDesc( propSet, weightLabel, 1 );
+        makeSpinnerDesc( propSet, lenLabel, 1 );
         
-        desc = new SpinnerDesc(
-            d -> drawManager.setTicMajorMPU( (float)d ), 
-            CPConstants.TIC_MAJOR_MPU_PN, 
-            .25
-        );
-        map.put( majorTicsLabel + lpuLabel, desc );
-        
-        desc = new SpinnerDesc(
-            d -> drawManager.setTicMajorLength( (float)d ), 
-            CPConstants.TIC_MAJOR_LEN_PN, 
-            1
-        );
-        map.put( majorTicsLabel + lenLabel, desc );
-        
-        desc = new SpinnerDesc(
-            d -> drawManager.setTicMajorWeight( (float)d ), 
-            CPConstants.TIC_MAJOR_WEIGHT_PN, 
-            1
-        );
-        map.put( majorTicsLabel + weightLabel, desc );
-        
-        desc = new SpinnerDesc(
-            d -> drawManager.setTicMinorMPU( (float)d ), 
-            CPConstants.TIC_MINOR_MPU_PN, 
-            .25
-        );
-        map.put( minorTicsLabel + lpuLabel, desc );
-        
-        desc = new SpinnerDesc(
-            d -> drawManager.setTicMinorLength( (float)d ), 
-            CPConstants.TIC_MINOR_LEN_PN, 
-            1
-        );
-        map.put( minorTicsLabel + lenLabel, desc );
-        
-        desc = new SpinnerDesc(
-            d -> drawManager.setTicMinorWeight( (float)d ), 
-            CPConstants.TIC_MINOR_WEIGHT_PN, 
-            1
-        );
-        map.put( minorTicsLabel + weightLabel, desc );
-        
-        return map;
+        propSet = drawManager.getTicMinor();
+        makeSpinnerDesc( propSet, lpuLabel, .25 );
+        makeSpinnerDesc( propSet, weightLabel, 1 );
+        makeSpinnerDesc( propSet, lenLabel, 1 );
     }
     
     private JPanel getControlPanel()
     {
         JPanel      panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
-        Border      inner   =
-            BorderFactory.createLineBorder( Color.BLACK );
-        Border      outer   =
-            BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
         Border      border  =
-            BorderFactory.createCompoundBorder( outer, inner );
+            BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
         panel.setBorder( border );
         panel.setLayout( layout );
         
-        panel.add( getSpinnerPanel() );
+        panel.add( getControls() );
                 
         return panel;
     }
@@ -193,12 +140,12 @@ public class Dialer2
         return panel;
     }
     
-    private JPanel getSpinnerPanel()
+    private JPanel getControls()
     {
         JPanel      panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
         Border      inner   =
-            BorderFactory.createBevelBorder( BevelBorder.RAISED );
+            BorderFactory.createBevelBorder( BevelBorder.LOWERED );
         Border      outer   =
             BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
         Border      border  =
@@ -230,11 +177,9 @@ public class Dialer2
     private JPanel getGridPanel()
     {
         GraphPropertySet    propSet = drawManager.getMainWindow();
-        JPanel      panel   = new JPanel( new GridLayout( 3, 2 ) );
+        JPanel      panel   = new JPanel( new GridLayout( 3, 2, 3, 0 ) );
         SpinnerDesc desc    = descMap.get( gridUnitLabel );
-        JLabel      text    = new 
-            JLabel( gridUnitLabel, SwingConstants.RIGHT );
-        panel.add( text );
+        panel.add( desc.label );
         panel.add( desc.spinner );
         addColorEditor( propSet, panel );
         addFontEditor( propSet, panel );
@@ -246,19 +191,20 @@ public class Dialer2
     {
         int     rows    = 0;
         JPanel  panel   = new JPanel();
+        String  type    = propSet.getClass().getSimpleName();
         if ( propSet.hasSpacing() )
         {
-            addSpinner( title, lpuLabel, panel );
+            addSpinner( type, lpuLabel, panel );
             ++rows;
         }
         if ( propSet.hasLength() )
         {
-            addSpinner( title, lenLabel, panel );
+            addSpinner( type, lenLabel, panel );
             ++rows;
         }
         if ( propSet.hasStroke() )
         {
-            addSpinner( title, weightLabel, panel );
+            addSpinner( type, weightLabel, panel );
             ++rows;
         }
         if ( propSet.hasDraw() )
@@ -276,25 +222,22 @@ public class Dialer2
             BorderFactory.createLineBorder( Color.BLACK );
         Border      border      = 
             BorderFactory.createTitledBorder( lineBorder, title );
-        GridLayout  layout  = new GridLayout( rows, 2 );
+        GridLayout  layout  = new GridLayout( rows, 2, 3, 0 );
         panel.setBorder(border);
         panel.setLayout( layout );
         return panel;
     }
     
-    private void addSpinner( String title, String label, JPanel panel )
+    private void addSpinner( String type, String label, JPanel panel )
     {
-        SpinnerDesc desc    = descMap.get( title + label );
-        JSpinner    spinner = desc.spinner;
-        JLabel      text   = 
-            new JLabel( label, SwingConstants.RIGHT );
-        panel.add( text );
-        panel.add( spinner );
+        SpinnerDesc desc    = descMap.get( type + label );
+        panel.add( desc.label );
+        panel.add( desc.spinner );
     }
     
     private void addDraw( LinePropertySet propSet, JPanel panel )
     {
-        JLabel      label   = 
+        JLabel      label       = 
             new JLabel( drawLabel, SwingConstants.RIGHT );
         boolean     val         = propSet.getDraw();
         JCheckBox   checkBox    = new JCheckBox( "", val );
@@ -332,15 +275,38 @@ public class Dialer2
     
     private void addFontEditor( GraphPropertySet propSet, JPanel panel )
     {
-        FontEditor  fontEditor  = new FontEditor();
-        fontEditor.setBold( propSet.isBold() );
-        fontEditor.setItalic( propSet.isItalic() );
-        fontEditor.setSize( (int)propSet.getFontSize() );
-        fontEditor.setName( propSet.getFontName() );
-        fontEditor.setColor( propSet.getFGColor() );
+        FontEditorDialog    fontDialog  = 
+            new FontEditorDialog( frame, propSet );
         JButton editButton  = new JButton( "Edit Font" );
+        editButton.addActionListener( e -> showFontDialog( fontDialog ) );
         panel.add( new JLabel( "" ) );
         panel.add( editButton );
+    }
+    
+    private void showFontDialog( FontEditorDialog dialog )
+    {
+        int result  = dialog.showDialog();
+        if ( result == JOptionPane.OK_OPTION )
+        {
+            GraphPropertySet    propSet = dialog.getPropertySet();
+            propSet.apply();
+            canvas.repaint();
+        }
+    }
+    
+    public void makeSpinnerDesc( 
+        LinePropertySet propSet,
+        String labelText,
+        double step
+    )
+    {
+        SpinnerDesc desc        = 
+            new SpinnerDesc( propSet, labelText, step );
+        
+        String      propSetType = 
+            propSet == null ? "" : propSet.getClass().getSimpleName();
+        String      key         = propSetType + labelText;
+        descMap.put( key, desc );
     }
     
     private class SpinnerDesc
@@ -348,16 +314,45 @@ public class Dialer2
         private static final float      minVal  = 0;
         private static final float      maxVal  = Integer.MAX_VALUE;
         public final JSpinner           spinner;
+        public final JLabel             label;
+        private final DoubleConsumer    setter;
+        private final DoubleSupplier    getter;
         
         public SpinnerDesc(
-            DoubleConsumer setter, 
-            String property,
+            LinePropertySet propSet,
+            String labelText,
             double step
         )
         {
-            super();
+            DoubleConsumer  tempSetter  = null;
+            DoubleSupplier  tempGetter  = null;
+            switch ( labelText )
+            {
+            case weightLabel:
+                tempSetter = d -> propSet.setStroke( (float)d );
+                tempGetter = () -> propSet.getStroke();
+                break;
+            case lpuLabel:
+                tempSetter = d -> propSet.setSpacing( (float)d );
+                tempGetter = () -> propSet.getSpacing();
+                break;
+            case lenLabel:
+                tempSetter = d -> propSet.setLength( (float)d );
+                tempGetter = () -> propSet.getLength();
+                break;
+            case gridUnitLabel:
+                tempSetter = d -> drawManager.setGridUnit( (float)d );
+                tempGetter = () -> drawManager.getGridUnit();
+                break;
+            default:
+                throw new ComponentException( "Invalid Label" );
+            }
             
-            double              val     = pMgr.asFloat( property );
+            setter = tempSetter;
+            getter = tempGetter;
+            label = new JLabel( labelText, SwingConstants.RIGHT );
+            
+            double              val     = getter.getAsDouble();
             SpinnerNumberModel  model   = 
                 new SpinnerNumberModel( val, minVal, maxVal, step );
             spinner = new JSpinner( model );
@@ -374,14 +369,6 @@ public class Dialer2
                 setter.accept( value );
                 canvas.repaint();
             });
-        }
-    }
-    
-    private class FontDialog extends JDialog
-    {
-        public FontDialog( GraphPropertySet propSet )
-        {
-            super( frame, "Font Editor", true );
         }
     }
 }
