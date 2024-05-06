@@ -72,7 +72,11 @@ public class VariablePanel extends JPanel
     private final LocalTableModel   model   = new LocalTableModel();
     /** Encapsulated JTable. */
     private final JTable    table   = new JTable( model );
-    
+    /** Button to add a new variable. */
+    private final JButton   plus    = new JButton( "\u2795" );
+    /** Button to delete a new variable. */
+    private final JButton minus     = new JButton( "\u2796" );
+
     /** Number of decimal points for value display. */
     private int         dPrecision  = 
         pMgr.asInt( CPConstants.VP_DPRECISION_PN );
@@ -130,14 +134,19 @@ public class VariablePanel extends JPanel
      */
     public void load( Equation equation )
     {
+        boolean enable  = false;
         this.equation = equation;
         if ( equation != null )
         {
+            enable = true;
             model.setRowCount( 0 );
             equation.getVars().entrySet().stream()
                 .map( e -> new Object[] { e.getKey(), e.getValue() } )
                 .forEach( oa -> model.addRow( oa ) );
         }
+        table.setEnabled( enable );
+        plus.setEnabled( enable );
+        minus.setEnabled( false );
     }
     
     /**
@@ -187,19 +196,11 @@ public class VariablePanel extends JPanel
      */
     private JPanel getButtonPanel()
     {
-        JButton plus    = new JButton( "\u2795" );
         plus.addActionListener( this::addAction );
         plus.setEnabled( false );
-        pMgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_EQUATION_PN, e -> openEqChange( plus )
-        );
         
-        JButton minus   = new JButton( "\u2796" );
         minus.addActionListener( this::deleteAction );
         minus.setEnabled( false );        
-        pMgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_EQUATION_PN, e -> minus.setEnabled( false )
-        );
 
         ListSelectionModel  selModel  = table.getSelectionModel();
         selModel.addListSelectionListener( e -> 
@@ -222,9 +223,6 @@ public class VariablePanel extends JPanel
         table.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
         table.getTableHeader().setReorderingAllowed( false );
         model.addTableModelListener( this::tableChanged );
-     
-        pMgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_EQUATION_PN, e -> openEqChange( table ) );
     }
     
     /**
@@ -239,20 +237,6 @@ public class VariablePanel extends JPanel
         TableColumnModel    colModel    = table.getColumnModel();
         TableColumn         column1     = colModel.getColumn( 1 );
         column1.setCellRenderer( new ValueRenderer() );
-    }
-    
-    /**
-     * Enable or disable the given component
-     * whenever the DM_OPEN_EQUATION_PN
-     * value changes to true (enable) or false (disable).
-     * 
-     * @param comp  the given component
-     */
-    private void openEqChange( JComponent comp )
-    {
-        boolean hasEquation = 
-            pMgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
-        comp.setEnabled( hasEquation );
     }
 
     /**

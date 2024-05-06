@@ -54,10 +54,7 @@ class CPFrameTest
     public void testInitValues()
     {
         assertEquals( sampleName, testGUI.getText( NamePanel.class ) );
-        assertEquals( 
-            sampleVarValue, 
-            testGUI.getText( VariablePanel.class ) 
-        );
+        assertEquals( sampleVarValue, testGUI.getValue() );
         assertEquals( 
             sampleStartValue, 
             testGUI.getText( ParameterPanel.class ) 

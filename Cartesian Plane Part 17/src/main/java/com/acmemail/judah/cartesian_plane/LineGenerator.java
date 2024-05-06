@@ -388,7 +388,7 @@ public class LineGenerator implements Iterable<Line2D>
     /**
      * Constructor.
      * Instantiates a LineGenerator
-     * with a given bounding rectangle,
+     * with the given bounding rectangle,
      * grid unit and lines-per-unit.
      * The line length defaults to -1
      * (grid lines will span the width or height
@@ -735,8 +735,8 @@ public class LineGenerator implements Iterable<Line2D>
             next    = -halfNum;
             
             // Determine the x coordinates of the endpoints of the line.
-            // Note that length < 0 means that lines will spane the width
-            // of the grid's bounding rectangl.
+            // Note that length < 0 means that lines will span the width
+            // of the grid's bounding rectangle.
             if ( length < 0 )
             {
                 xco1 = minXco;

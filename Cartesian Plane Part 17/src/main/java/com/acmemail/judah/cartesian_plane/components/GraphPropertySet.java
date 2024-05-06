@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
+import java.awt.Font;
 
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 
@@ -212,6 +213,16 @@ public abstract class GraphPropertySet
     }
 
     /**
+     * Sets the font style to the given value.
+     * 
+     * @param style
+     */
+    public void setFontStyle( String style )
+    {
+        fontStyle = style;
+    }
+    
+    /**
      * Gets the value of the font size property.
      * 
      * @return the font size
@@ -219,6 +230,23 @@ public abstract class GraphPropertySet
     public float getFontSize()
     {
         return fontSize;
+    }
+    
+    /**
+     * Returns the font style.
+     * The style will be be get bitwise 'or'
+     * of PLAIN, BOLD, and ITALIC.
+     * 
+     * @return  the font style
+     */
+    public int getFontStyle()
+    {
+        int style   = Font.PLAIN;
+        if ( isBold() )
+            style |= Font.BOLD;
+        if ( isItalic() )
+            style |= Font.ITALIC;
+        return style;
     }
 
     /**
