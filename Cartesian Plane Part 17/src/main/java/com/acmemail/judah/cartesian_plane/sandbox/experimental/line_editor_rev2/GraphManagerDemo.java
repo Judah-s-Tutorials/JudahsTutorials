@@ -48,9 +48,10 @@ public class GraphManagerDemo
     private static final String minorTicsLabel  = "Minor Tics";
     private static final String gridLinesLabel  = "Grid Lines";
 
-    private final JFrame        frame       = new JFrame( "Dialer 2" );
+    private final String        title       = "Show GraphManager Dialog";
+    private final JFrame        frame       = new JFrame( title );
     private final Canvas        canvas      = new Canvas();
-    private final GraphManager   drawManager = canvas.getDrawManager();
+    private final GraphManager  drawManager = canvas.getDrawManager();
     
     private final Map<String,SpinnerDesc>   descMap = new HashMap<>();
     

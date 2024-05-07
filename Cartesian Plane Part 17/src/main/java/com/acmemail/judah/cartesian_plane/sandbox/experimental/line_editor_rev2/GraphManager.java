@@ -93,7 +93,7 @@ public class GraphManager
         {
             setColor( gridLine.getColor() );
             float           spacing = gridLine.getSpacing();
-            float           stroke  = gridLine.getSpacing();
+            float           stroke  = gridLine.getStroke();
             Rectangle       rect    = comp.getVisibleRect();
             LineGenerator   lineGen = 
                 new LineGenerator( rect, gridUnit, spacing );
@@ -273,6 +273,12 @@ public class GraphManager
             setColor( null );
         }
     }
+    
+    public Color getColor()
+    {
+        Color   color   = mainWindow.getBGColor();
+        return color;
+    }
 
     /**
      * @return the mainWindow
@@ -328,114 +334,6 @@ public class GraphManager
     public void setGridUnit(float gridUnit)
     {
         this.gridUnit = gridUnit;
-    }
-
-    /**
-     * @return the ticMajorMPU
-     */
-    public float getTicMajorMPU()
-    {
-        return ticMajor.getSpacing();
-    }
-
-    /**
-     * @param ticMajorMPU the ticMajorMPU to set
-     */
-    public void setTicMajorMPU(float ticMajorMPU)
-    {
-        ticMajor.setSpacing( ticMajorMPU );
-    }
-
-    /**
-     * @param ticMajorWeight
-     */
-    public void setTicMajorWeight(float ticMajorWeight)
-    {
-        ticMajor.setStroke( ticMajorWeight );
-    }
-
-    /**
-     * @param ticMajorLen
-     */
-    public void setTicMajorLength(float ticMajorLen)
-    {
-        ticMajor.setLength( ticMajorLen );
-    }
-    
-    public void setTicMajorColor( Color color )
-    {
-        ticMajor.setColor( color );
-    }
-
-    /**
-     * @return the ticMinorMPU
-     */
-    public float getTicMinorMPU()
-    {
-        return ticMinor.getSpacing();
-    }
-
-    /**
-     * @param ticMinorMPU the ticMinorMPU to set
-     */
-    public void setTicMinorMPU(float ticMinorMPU)
-    {
-        ticMinor.setSpacing( ticMinorMPU );
-    }
-
-    /**
-     * @param ticMajorWeight
-     */
-    public void setTicMinorWeight(float ticMinorWeight)
-    {
-        ticMinor.setStroke( ticMinorWeight );
-    }
-
-    /**
-     * @param ticMajorWeight
-     */
-    public void setTicMinorLength(float ticMinorLen)
-    {
-        ticMinor.setLength( ticMinorLen );
-    }
-    
-    public void setTicMinorColor( Color color )
-    {
-        ticMinor.setColor( color );
-    }
-
-    /**
-     * @return the gridLineLPU
-     */
-    public float getGridLineLPU()
-    {
-        return gridLine.getSpacing();
-    }
-
-    /**
-     * @param gridLineLPU the gridLineLPU to set
-     */
-    public void setGridLineLPU(float gridLineLPU)
-    {
-        gridLine.setSpacing( gridLineLPU );
-    }
-
-    /**
-     * @param gridLineWeight the gridLineWeight to set
-     */
-    public void setGridLineWeight(float gridLineWeight)
-    {
-        gridLine.setStroke(gridLineWeight);
-    }
-    
-    public void setGridLineColor( Color color )
-    {
-        gridLine.setColor( color );
-    }
-    
-    public void setAxisWeight( float weight )
-    {
-        axis.setStroke(weight);
     }
     
     private void setColor( Color newColor )

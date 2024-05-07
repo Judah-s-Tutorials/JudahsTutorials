@@ -83,6 +83,11 @@ public class GraphManagerDialog extends JDialog
         pack();
     }
     
+    public GraphManager getGraphManager()
+    {
+        return drawManager;
+    }
+    
     public int showDialog()
     {
         drawManager.reset();
@@ -139,7 +144,7 @@ public class GraphManagerDialog extends JDialog
     private JPanel getButtonPanel()
     {
         JPanel      panel   = new JPanel();
-        JButton     okay    = new JButton( "Okay" );
+        JButton     okay    = new JButton( "OK" );
         JButton     apply   = new JButton( "Apply" );
         JButton     reset   = new JButton( "Reset" );
         JButton     cancel  = new JButton( "Cancel" );
