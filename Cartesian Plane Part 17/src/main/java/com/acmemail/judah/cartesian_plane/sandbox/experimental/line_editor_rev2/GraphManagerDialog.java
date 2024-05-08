@@ -6,10 +6,13 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.Toolkit;
 import java.awt.Window;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -53,6 +56,9 @@ public class GraphManagerDialog extends JDialog
     private final GraphManager  drawManager = canvas.getDrawManager();
     
     private final Map<String,SpinnerDesc>   descMap = new HashMap<>();
+//    private final Map<JComponent,Runnable>
+//                                resetMap    = new HashMap<>();
+    private final List<Runnable>    resetList   = new ArrayList<>();
     
     private int result  = JOptionPane.CANCEL_OPTION;
     
@@ -90,9 +96,15 @@ public class GraphManagerDialog extends JDialog
     
     public int showDialog()
     {
-        drawManager.reset();
+        reset();
         setVisible( true );
         return result;
+    }
+    
+    private void reset()
+    {
+        drawManager.reset();
+        resetList.forEach( r -> r.run() );
     }
     
     private void close( int result )
@@ -100,6 +112,8 @@ public class GraphManagerDialog extends JDialog
         this.result = result;
         if ( result == JOptionPane.OK_OPTION )
             drawManager.apply();
+        else
+            drawManager.reset();
         setVisible( false );
     }
     
@@ -148,15 +162,18 @@ public class GraphManagerDialog extends JDialog
         JButton     apply   = new JButton( "Apply" );
         JButton     reset   = new JButton( "Reset" );
         JButton     cancel  = new JButton( "Cancel" );
+
+        okay.addActionListener( e -> close( JOptionPane.OK_OPTION ) );
+        cancel.addActionListener( e -> close( JOptionPane.CANCEL_OPTION ) );
+        apply.addActionListener( e -> drawManager.apply() );
+        reset.addActionListener( e -> reset() );
+        reset.addActionListener( e -> canvas.repaint() );
+
         panel.add( okay );
         panel.add( apply );
         panel.add( reset );
         panel.add( cancel );
-        okay.addActionListener( e -> close( JOptionPane.OK_OPTION ) );
-        cancel.addActionListener( e -> close( JOptionPane.CANCEL_OPTION ) );
-        apply.addActionListener( e -> drawManager.apply() );
-        reset.addActionListener( e -> drawManager.reset() );
-        reset.addActionListener( e -> canvas.repaint() );
+
         return panel;
     }
     
@@ -267,6 +284,8 @@ public class GraphManagerDialog extends JDialog
             propSet.setDraw( checkBox.isSelected() );
             canvas.repaint();
         });
+        
+        resetList.add( () -> checkBox.setSelected( propSet.getDraw() ) );
     }
     
     private void addColorEditor( LinePropertySet propSet, JPanel panel )
@@ -279,6 +298,11 @@ public class GraphManagerDialog extends JDialog
             propSet.setColor( colorEditor.getColor().orElse( null ) );
             canvas.repaint();
         });
+        
+        Supplier<Color> colorGetter = propSet::getColor;
+        Runnable        runner      = 
+            () -> colorEditor.setColor( colorGetter.get() );
+        resetList.add( runner );
     }
     
     private void addColorEditor( GraphPropertySet propSet, JPanel panel )
@@ -291,6 +315,11 @@ public class GraphManagerDialog extends JDialog
             propSet.setBGColor( colorEditor.getColor().orElse( null ) );
             canvas.repaint();
         });
+        
+        Supplier<Color> colorGetter = propSet::getBGColor;
+        Runnable        runner      = 
+            () -> colorEditor.setColor( colorGetter.get() );
+        resetList.add( runner );
     }
     
     private void addFontEditor( GraphPropertySet propSet, JPanel panel )
@@ -333,10 +362,10 @@ public class GraphManagerDialog extends JDialog
     {
         private static final float      minVal  = 0;
         private static final float      maxVal  = Integer.MAX_VALUE;
-        public final JSpinner           spinner;
-        public final JLabel             label;
-        private final DoubleConsumer    setter;
-        private final DoubleSupplier    getter;
+        public final    JSpinner        spinner;
+        public final    JLabel          label;
+        private final   DoubleConsumer  setter;
+        private final   DoubleSupplier  getter;
         
         public SpinnerDesc(
             LinePropertySet propSet,
@@ -389,6 +418,10 @@ public class GraphManagerDialog extends JDialog
                 setter.accept( value );
                 canvas.repaint();
             });
+            
+            resetList.add( 
+                () -> spinner.setValue( getter.getAsDouble() )
+            );
         }
     }
 }

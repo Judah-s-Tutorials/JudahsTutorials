@@ -3,17 +3,19 @@ package com.acmemail.judah.cartesian_plane.sandbox.experimental.line_editor_rev2
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.function.Predicate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -30,13 +32,15 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
 public class ShowGraphManagerDialog
 {
-    private static final String         endl    = System.lineSeparator();
+    private static final String endl    = System.lineSeparator();
+    
+    private static final DateTimeFormatter  timeFormatter   = 
+        DateTimeFormatter.ofPattern( "HH:mm:ss" );
+    
     private final PropertyManager       pMgr    = PropertyManager.INSTANCE;
     private final GraphManagerDialog    dialog;
     private final ActivityLog           log;
@@ -77,19 +81,51 @@ public class ShowGraphManagerDialog
         contentPane.add( getBottomPanel(), BorderLayout.SOUTH );
         
         frame.setContentPane( contentPane );
-        frame.setLocation( 200, 200 );
-        
-        Dimension   frameDim    = frame.getPreferredSize();
-        log.setLocation( 210 + frameDim.width, 200 );
         frame.pack();
+        
+        positionGUI( frame );
         frame.setVisible( true );
         log.setVisible( true );
         
+        addKeyListener();
+    }
+    
+    private void positionGUI( JFrame frame )
+    {
+        // Position frame near the screen upper-left corner
+        int         frameXco    = 10;
+        int         frameYco    = 10;
+        Dimension   frameDim    = frame.getPreferredSize();
+        frame.setLocation( frameXco, frameYco );
+        
+        // Position the log dialog immediately below the
+        // application frame.
+        Dimension   screenSize  = 
+            Toolkit.getDefaultToolkit().getScreenSize();
+        int         logXco      = frameXco;
+        int         logYco      = frameYco + frameDim.height;
+        log.setLocation( logXco, logYco );
+        
+        // Get remaining screen height after accounting for
+        // frame yco and frame height
+        int         availHeight = 
+            screenSize.height - frameDim.height - 2 * frameYco;
+        // Make log height 80% of remaining height.
+        int         logHeight   = (int)(availHeight * .8 + .5);
         Dimension   logDim      = log.getPreferredSize();
-        logDim.height *= 2;
+        logDim.height = logHeight;
+        log.setLocation( logXco, logYco );
         log.setPreferredSize( logDim );
         
-        addKeyListener();
+        // Figure out which of frame or log dialog is wider.
+        int         maxWidth    = frameDim.width > logDim.width ?
+            frameDim.width : logDim.width;
+        
+        // Position the graph dialog immediately to the right of
+        // frame/log.
+        int         dialogXco   = frameXco + maxWidth;
+        int         dialogYco   = frameYco;
+        dialog.setLocation( dialogXco, dialogYco );
     }
     
     private void addKeyListener()
@@ -104,12 +140,18 @@ public class ShowGraphManagerDialog
         JPanel  panel   = new JPanel();
         Border      border  = 
             BorderFactory.createEmptyBorder( 10, 10, 10, 10 );
+
         JButton     edit    = new JButton( "Edit" );
         edit.addActionListener( this::showDialog );
+        edit.setToolTipText( "ctrl-alt-e" );
+        
         JButton     print   = new JButton( "Show Log" );
         print.addActionListener( this::log );
+        print.setToolTipText( "ctrl-alt-l" );
+        
         JButton     exit    = new JButton( "Exit" );
         exit.addActionListener( e -> System.exit( 0 ) );
+        exit.setToolTipText( "ctrl-alt-x" );
         
         panel.setBorder( border );
         panel.add( edit );
@@ -136,17 +178,27 @@ public class ShowGraphManagerDialog
     
     private JPanel getCheckBoxPanel()
     {
-        JPanel      panel   = new JPanel();
+        gridCheckBox.setToolTipText( "ctrl-alt-g" );
+        axisCheckBox.setToolTipText( "ctrl-alt-a" );
+        gridLineCheckBox.setToolTipText( "ctrl-alt-r" );
+        majorTicCheckBox.setToolTipText( "ctrl-alt-m" );
+        minorTicCheckBox.setToolTipText( "ctrl-alt-i" );
+
+        JPanel      panel   = new JPanel( new GridLayout( 2, 3 ) );
         panel.add( gridCheckBox );
         panel.add( axisCheckBox );
         panel.add( gridLineCheckBox );
         panel.add( majorTicCheckBox );
         panel.add( minorTicCheckBox );
+        // Fill the unused cell in row 1, column 2
+        panel.add( new JLabel( "" ) );
         return panel;
     }
     
     private void log( ActionEvent evt )
     {
+        logTime();
+        
         if ( gridCheckBox.isSelected() )
             logGrid( graphManager.getMainWindow() );
         if ( axisCheckBox.isSelected() )
@@ -186,7 +238,6 @@ public class ShowGraphManagerDialog
     {
         GraphPropertySet    applSet = new GraphPropertySetMW();
         String              leftStr = null;
-        String              fmt     = null;
         String              fmtStr  = null;
         String              prefix  = 
             "<pre style=\"color: red;\">";
@@ -255,7 +306,6 @@ public class ShowGraphManagerDialog
     )
     {
         String              leftStr = null;
-        String              fmt     = null;
         String              fmtStr  = null;
         String              prefix  = 
             "<pre style=\"color: " + color + ";\">";
@@ -325,17 +375,28 @@ public class ShowGraphManagerDialog
     
     private void showDialog( ActionEvent evt )
     {
-        int     iResult = dialog.showDialog();
-        String  sResult = null;
-        if ( iResult == JOptionPane.OK_OPTION )
-            sResult = "OK";
-        else if ( iResult == JOptionPane.CANCEL_OPTION )
-            sResult = "Cancel";
-        else
-            sResult = "???????";
-        
-        log.append( "result: " + sResult );
-        log.append( "*****************************" );
+        if ( !dialog.isVisible() )
+        {
+            int     iResult = dialog.showDialog();
+            String  sResult = null;
+            if ( iResult == JOptionPane.OK_OPTION )
+                sResult = "OK";
+            else if ( iResult == JOptionPane.CANCEL_OPTION )
+                sResult = "Cancel";
+            else
+                sResult = "???????";
+            
+            logTime();
+            log.append( "result: " + sResult );
+            log.append( "*****************************" );
+        }
+    }
+    
+    private void logTime()
+    {
+        LocalTime   timeNow = LocalTime.now();
+        String      strNow  = timeNow.format( timeFormatter );
+        log.append( "***** " + strNow + " *****", "" );
     }
     
     private String getColorStr( Color color )
@@ -367,6 +428,12 @@ public class ShowGraphManagerDialog
         case KeyEvent.VK_L:
             log( null );
             break;
+        case KeyEvent.VK_E:
+            showDialog( null );
+            break;
+        case KeyEvent.VK_X:
+            System.exit( 0 );
+            break;
         }
     }
     
@@ -383,7 +450,6 @@ public class ShowGraphManagerDialog
             if ( ident == KeyEvent.KEY_PRESSED && mods == ctrlAltDown )
             {
                 int keyCode = evt.getKeyCode();
-                System.out.printf( "%x %x %c%n", ctrlAltDown, mods, keyCode );
                 processCtrlAltKeyEvent( keyCode );
             }
             return false;
