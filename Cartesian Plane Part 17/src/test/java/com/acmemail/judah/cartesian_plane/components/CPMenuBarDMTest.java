@@ -20,7 +20,7 @@ import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 import com.acmemail.judah.cartesian_plane.input.FileManager;
 import com.acmemail.judah.cartesian_plane.test_utils.CPMenuBarDMTestUtils;
 
-class CPMenuBarDMTest
+public class CPMenuBarDMTest
 {
     private static final PropertyManager    pmgr            = 
         PropertyManager.INSTANCE;

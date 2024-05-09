@@ -19,6 +19,7 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
  */
 public class CPFrame extends JFrame
 {
+    /** Generated serial version UID. */
     private static final long serialVersionUID = -3943393354749039355L;
 
     /** Title for this frame. */
@@ -154,13 +155,13 @@ public class CPFrame extends JFrame
      */
     private JPanel getLeftPanel()
     {
-        JPanel      panel   = new JPanel();
-        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
-        panel.setLayout( layout );
+        JPanel      outer   = new JPanel();
+        BoxLayout   layout  = new BoxLayout( outer, BoxLayout.Y_AXIS );
+        outer.setLayout( layout );
         
-        panel.add( namePanel );
-        panel.add( varPanel );
-        panel.add( paramPanel );
+        outer.add( namePanel );
+        outer.add( varPanel );
+        outer.add( paramPanel );
 
         // If "panel" alone were made the west child of the
         // content pane's BorderLayout, panel's height would
@@ -171,8 +172,8 @@ public class CPFrame extends JFrame
         // with a FlowLayout (the default for JPanels); now the
         // extra space will be allocated to the end of "outer"
         // and "panel" will not be affected.
-        JPanel      outer   = new JPanel();
-        outer.add( panel );
-        return outer;
+        JPanel      left    = new JPanel();
+        left.add( outer );
+        return left;
     }
 }

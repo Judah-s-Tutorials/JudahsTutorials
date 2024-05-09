@@ -1,8 +1,8 @@
-EQUATION Save Test
+EQUATION Save Test Equation Name
 start 1
 end 1
 step 1
-set y=0.000000,x=0.000000,t=0.000000,r=0.000000,c=0.000000,b=0.000000,a=0.000000
+set r=0.000000,t=0.000000,x=0.000000,y=0.000000,a=0.000000,b=0.000000,c=0.000000
 param t
 radius r
 theta t
@@ -11,4 +11,4 @@ x= 1
 t= 1
 r= 1
 prec 3
-plot YPlot
+plot YPLOT

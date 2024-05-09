@@ -1,13 +1,14 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import javax.swing.JPanel;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
@@ -45,9 +46,9 @@ class CPFrameTest
     @Test
     public void testEnabled()
     {
-        testAbled( true );
+        assertTrue( testGUI.isEnabled() );
         testGUI.newEquation( null );
-        testAbled( false );
+        assertTrue( testGUI.isDisabled() );
     }
 
     @Test
@@ -62,18 +63,18 @@ class CPFrameTest
         assertEquals( sampleXExpr, testGUI.getText( PlotPanel.class ) );
     }
     
-    /**
-     * Verify that all panels
-     * are either enabled or disabled
-     * as indicate by the given value.
-     * 
-     * @param exp   the given value
-     */
-    private void testAbled( boolean exp )
+    @Test
+    public void testGetEquation()
     {
-        assertEquals( exp, testGUI.isEnabled( NamePanel.class ) );
-        assertEquals( exp, testGUI.isEnabled( VariablePanel.class ) );
-        assertEquals( exp, testGUI.isEnabled( ParameterPanel.class ) );
-        assertEquals( exp, testGUI.isEnabled( PlotPanel.class ) );
+        Equation    equation    = new Exp4jEquation();
+        testGUI.newEquation( equation );
+        assertEquals( equation, testGUI.getEquation() );
+    }
+    
+    @Test
+    public void testGetCartesianPlane()
+    {
+        CartesianPlane  plane   = testGUI.getCartesianPlane();
+        assertNotNull( plane );
     }
 }

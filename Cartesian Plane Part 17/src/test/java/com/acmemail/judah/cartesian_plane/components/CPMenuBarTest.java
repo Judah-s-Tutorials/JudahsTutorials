@@ -18,7 +18,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.test_utils.CPMenuBarTestDialog;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
-class CPMenuBarTest
+public class CPMenuBarTest
 {
     private CPMenuBarTestDialog tester;
     private JDialog             lineDialog;

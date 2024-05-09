@@ -24,7 +24,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**
  * Gets coverage of CPMenuBar logic dependent on the presence
- * of a CPFrame. This entails starting JFrame (other than a CPFrame)
+ * of a CPFrame. This entails starting a JFrame (other than a CPFrame)
  * with a menu bar; then, for each File/menuItem:
  * <ul>
  * <li>Enable the menuItem;</li>
@@ -34,7 +34,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  * 
  * @author Jack Straub
  */
-class CPMenuBarNoCPFrameTest
+public class CPMenuBarNoCPFrameTest
 {
     private static TestFrame   frame;
     

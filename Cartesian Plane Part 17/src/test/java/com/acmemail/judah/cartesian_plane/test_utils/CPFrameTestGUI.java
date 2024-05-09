@@ -17,6 +17,7 @@ import javax.swing.JPanel;
 import javax.swing.JTable;
 import javax.swing.table.TableModel;
 
+import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.components.CPFrame;
 import com.acmemail.judah.cartesian_plane.components.NamePanel;
 import com.acmemail.judah.cartesian_plane.components.ParameterPanel;
@@ -92,6 +93,32 @@ public class CPFrameTestGUI
     }
     
     /**
+     * Calls the CPFrame's getEquation method 
+     * and returns the result.
+     * 
+     * @return the value returned by CPFrame.getEquation.
+     */
+    public Equation getEquation()
+    {
+        Object  obj = getProperty( () -> cpFrame.getEquation() );
+        assertTrue( obj instanceof Equation );
+        return (Equation)obj;
+    }
+    
+    /**
+     * Calls the CPFrame's getCartesianPlane method 
+     * and returns the result.
+     * 
+     * @return the value returned by CPFrame.getCartesianPlane.
+     */
+    public CartesianPlane getCartesianPlane()
+    {
+        Object  obj = getProperty( () -> cpFrame.getCartesianPlane() );
+        assertTrue( obj instanceof CartesianPlane );
+        return (CartesianPlane)obj;
+    }
+    
+    /**
      * Determines if all the panels of the CPFrame
      * that are under test should be considered enabled.
      * 
@@ -116,69 +143,9 @@ public class CPFrameTestGUI
     {
         boolean result  = sampleMap.values().stream()
             .map( this::isEnabled )
-            .filter( b -> !b )
+            .filter( b -> b )
             .findFirst().orElse( true );
         return result;
-    }
-    
-    /**
-     * Determine if the sample component
-     * for the given type of panel
-     * is enabled.
-     * 
-     * @param clazz the given type of panel
-     * 
-     * @return  
-     *      true if the sample component for the given type of panel
-     *      is enabled
-     */
-    public boolean isEnabled( Class<? extends JPanel> clazz )
-    {
-        JComponent  comp    = sampleMap.get( clazz );
-        assertNotNull( comp );
-        boolean     result  = isEnabled( comp ); 
-        return result;
-    }
-    
-    /**
-     * Determine if the value of the sample component
-     * associated with the given class
-     * is equal to the associated property
-     * in the current equation.
-     * 
-     * @param clazz the given class
-     * 
-     * @return
-     *      true if the value of the sample component
-     *      agrees with the associated equation value
-     */
-    public boolean sampleValueEquals( Class<? extends JPanel> clazz )
-    {
-        Supplier<String>    supplier    = supplierMap.get( clazz );
-        assertNotNull( supplier );
-        String              expValue    = supplier.get();
-        String              actValue    = getText( clazz );
-        boolean             equals      = expValue.equals( actValue );
-        return equals;
-    }
-    
-    /**
-     * Returns from the currently open equation
-     * the value of the property
-     * associated with sample field
-     * of the given class.
-     * All values are returned as strings.
-     * 
-     * @param clazz the given class
-     * 
-     * @return  the value of the sample property for the given class
-     */
-    public String getSampleEqValue( Class<? extends JPanel> clazz )
-    {
-        Supplier<String>    supplier    = supplierMap.get( clazz );
-        assertNotNull( supplier );
-        String              value       = supplier.get();
-        return value;
     }
     
     /**
