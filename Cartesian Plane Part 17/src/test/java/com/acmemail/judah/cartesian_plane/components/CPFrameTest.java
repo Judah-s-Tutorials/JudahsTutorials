@@ -16,7 +16,8 @@ import com.acmemail.judah.cartesian_plane.test_utils.CPFrameTestGUI;
 
 class CPFrameTest
 {
-    private static final String sampleName          = "Sample Name";
+    private static final String sampleEquationName  = "Equation Name";
+    private static final String sampleVarName       = "a";
     private static final double sampleVarDValue     = 200;
     private static final String sampleVarValue      = 
         String.valueOf( sampleVarDValue );
@@ -34,10 +35,9 @@ class CPFrameTest
     @BeforeEach
     void setUp() throws Exception
     {
-        String      testVarName     = CPFrameTestGUI.DEFAULT_VAR_NAME;
         Equation    equation    = new Exp4jEquation();
-        equation.setName( sampleName );
-        equation.setVar( testVarName, sampleVarDValue );
+        equation.setName( sampleEquationName );
+        equation.setVar( sampleVarName, sampleVarDValue );
         equation.setRangeStart( sampleStartValue );
         equation.setXExpression( sampleXExpr );
         testGUI.newEquation( equation );
@@ -54,8 +54,14 @@ class CPFrameTest
     @Test
     public void testInitValues()
     {
-        assertEquals( sampleName, testGUI.getText( NamePanel.class ) );
-        assertEquals( sampleVarValue, testGUI.getValue() );
+        assertEquals( 
+            sampleEquationName, 
+            testGUI.getText( NamePanel.class )
+        );
+        assertEquals(
+            sampleVarValue,
+            testGUI.getVarValue( sampleVarName )
+        );
         assertEquals( 
             sampleStartValue, 
             testGUI.getText( ParameterPanel.class ) 

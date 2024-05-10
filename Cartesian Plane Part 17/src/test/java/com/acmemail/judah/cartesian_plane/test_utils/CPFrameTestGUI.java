@@ -29,32 +29,15 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
 
 public class CPFrameTestGUI
 {
-    /** 
-     * Default variable name for collecting sample value
-     * for VariablePanel class.
-     */
-    public static final String  DEFAULT_VAR_NAME        = "a";
-    
     /** CPFrame under test. */
-    private final CPFrame                   cpFrame     =
-        new CPFrame();
+    private final CPFrame   cpFrame     = new CPFrame();
     
     /** Map of panel type to sample JComponent for that type. */
-    private final Map<Class<?>,JComponent>  sampleMap   =
-        new HashMap<>();
-    
-    /** 
-     * Map of panel type to Supplier for obtaining sample
-     * property value from currently open equation.
-     */
-    private final Map<Class<?>,Supplier<String>>    supplierMap =
-        new HashMap<>();
-    
-    /** Currently open equation; null if none. */
-    private Equation                        equation;
+    private final Map<Class<? extends JPanel>,JComponent>
+                            sampleMap   = new HashMap<>();
 
     /** Temporary object for limited use by lambdas. */
-    private Object  adHocObject1;
+    private Object          adHocObject1;
 
     /**
      * Constructor.
@@ -69,15 +52,6 @@ public class CPFrameTestGUI
             ParameterPanel.class,
             PlotPanel.class
         ).forEach( this::mapComponent );
-        
-        supplierMap.put( NamePanel.class, () -> equation.getName() );
-        supplierMap.put( VariablePanel.class, () -> getValue() );
-        supplierMap.put( ParameterPanel.class, () -> 
-            equation.getRangeStartExpr() 
-        );
-        supplierMap.put( PlotPanel.class, () -> 
-            equation.getXExpression() 
-        );
     }
     
     /**
@@ -88,7 +62,6 @@ public class CPFrameTestGUI
      */
     public void newEquation( Equation equation )
     {
-        this.equation = equation;
         cpFrame.loadEquation( equation );
     }
     
@@ -175,13 +148,6 @@ public class CPFrameTestGUI
         return (String)obj;
     }
     
-    public String getValue()
-    {
-        double  dValue  = getValue( DEFAULT_VAR_NAME );
-        String  sValue  = String.valueOf( dValue );
-        return sValue;
-    }
-    
     /**
      * Get from the VariablePanel's JTable
      * the value of the variable with the given name.
@@ -194,11 +160,11 @@ public class CPFrameTestGUI
      * 
      * @return  the value of the variable with the given name
      * 
-     * @see #getValueEDT(String)
+     * @see #getVarValueEDT(String)
      */
-    public double getValue( String varName )
+    public double getVarValue( String varName )
     {
-        Object  prop    = getProperty( () -> getValueEDT( varName ) );
+        Object  prop    = getProperty( () -> getVarValueEDT( varName ) );
         assertTrue( prop instanceof Double );
         return (double)prop;
     }
@@ -220,16 +186,16 @@ public class CPFrameTestGUI
     }
     
     /**
-     * Helper method for {@linkplain #getValue(String)}.
+     * Helper method for {@linkplain #getVarValue(String)}.
      * Gets the value of the variable with the given name.
      * 
      * @param varName   given name
      * 
      * @return  the value of the variable with the given name
      * 
-     * @see #getValue(String)
+     * @see #getVarValue(String)
      */
-    private double getValueEDT( String varName )
+    private double getVarValueEDT( String varName )
     {
         JComponent  comp        = sampleMap.get( VariablePanel.class );
         assertNotNull( comp );
