@@ -62,7 +62,7 @@ public class CPMenuBar extends JMenuBar
      * It is considered a design error if any menu item is activated
      * prior to setting this value.
      */
-    private CPFrame       cpFrame;
+    private final CPFrame       cpFrame;
     
     /**
      * Constructor.
@@ -87,6 +87,8 @@ public class CPMenuBar extends JMenuBar
         
         if ( topWindow instanceof CPFrame )
             cpFrame = (CPFrame)topWindow;
+        else
+            cpFrame = null;
     }
     
     /**
@@ -145,17 +147,8 @@ public class CPMenuBar extends JMenuBar
         pmgr.addPropertyChangeListener(
             CPConstants.DM_OPEN_EQUATION_PN, e -> {
                 boolean hasEquation = 
-                    getProperty( CPConstants.DM_OPEN_EQUATION_PN );
+                    pmgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
                 saveAs.setEnabled( hasEquation );
-        });
-
-        
-        saveAs.setEnabled( false );
-        pmgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_EQUATION_PN, e -> {
-                boolean isOpen  = 
-                    getProperty( CPConstants.DM_OPEN_EQUATION_PN );
-                saveAs.setEnabled( isOpen );
         });
 
         close.setEnabled( false );
@@ -183,8 +176,8 @@ public class CPMenuBar extends JMenuBar
      */
     private void configureSave( JMenuItem save )
     {
-        boolean isModified  = getProperty( CPConstants.DM_MODIFIED_PN );
-        boolean isOpen      = getProperty( CPConstants.DM_OPEN_FILE_PN );
+        boolean isModified  = pmgr.asBoolean( CPConstants.DM_MODIFIED_PN );
+        boolean isOpen      = pmgr.asBoolean( CPConstants.DM_OPEN_FILE_PN );
         save.setEnabled( isModified && isOpen );
     }
     
@@ -373,7 +366,7 @@ public class CPMenuBar extends JMenuBar
             if ( FileManager.getLastResult() )
             {
                 setCurrFile( currFile );
-                setProperty( CPConstants.DM_MODIFIED_PN, false );
+                pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
             }
         }
     }
@@ -395,7 +388,7 @@ public class CPMenuBar extends JMenuBar
             if ( FileManager.getLastResult() )
             {
                 setCurrFile( FileManager.getLastFile() );
-                setProperty( CPConstants.DM_MODIFIED_PN, false );
+                pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
             }
         }
     }
@@ -412,8 +405,8 @@ public class CPMenuBar extends JMenuBar
         {
             cpFrame.loadEquation(null);
             setCurrFile( null );
-            setProperty( CPConstants.DM_MODIFIED_PN, false );
-            setProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
+            pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
+            pmgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
         }
     }
     
@@ -430,8 +423,8 @@ public class CPMenuBar extends JMenuBar
         if ( currFile != null )
         {
             currFile.delete();
-            setProperty( CPConstants.DM_MODIFIED_PN, false );
-            setProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
+            pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
+            pmgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
             loadEquation( null );
             setCurrFile( null );
         }
@@ -471,30 +464,6 @@ public class CPMenuBar extends JMenuBar
             pmgr.setProperty( CPConstants.DM_OPEN_EQUATION_PN, hasData );
             pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
         }
-    }
-    
-    /**
-     * Updates the given property to the given status.
-     * 
-     * @param propName  the given property
-     * @param status    the given status
-     */
-    private void setProperty( String propName, boolean status )
-    {
-        pmgr.setProperty( propName, status );
-    }
-    
-    /**
-     * Gets the status of the given property
-     * 
-     * @param propName  the given property
-     * 
-     * @return the status of the given property
-     */
-    private boolean getProperty( String propName )
-    {
-        boolean status  = pmgr.asBoolean( propName );
-        return status;
     }
     
     /**
