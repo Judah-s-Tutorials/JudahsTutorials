@@ -19,10 +19,12 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
@@ -30,7 +32,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.lp_panel.LPPTestDialog;
 import com.acmemail.judah.cartesian_plane.test_utils.lp_panel.LPP_TA;
 import com.acmemail.judah.cartesian_plane.test_utils.lp_panel.LPP_TADetail;
 
-class LinePropertiesPanelVisualTest
+public class LinePropertiesPanelVisualTest
 {
     /** Path to the storage location of all test data files. */
     private static final File               lppPath     = 
@@ -59,7 +61,12 @@ class LinePropertiesPanelVisualTest
         expDialog = new ExpDialog();
         expDialog.setLocation( 400, testDialog.getHeight() + 110 );
         expDialog.setVisible( true );
-        
+    }
+    
+    @AfterAll
+    public static void afterAll()
+    {
+        ComponentFinder.disposeAll();
     }
 
     @ParameterizedTest

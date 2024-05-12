@@ -30,7 +30,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.gp_panel.GPPTestDialog;
 import com.acmemail.judah.cartesian_plane.test_utils.gp_panel.GPP_TA;
 import com.acmemail.judah.cartesian_plane.test_utils.gp_panel.GPP_TADetail;
 
-class GraphPropertiesPanelVisualTest
+public class GraphPropertiesPanelVisualTest
 {
     /** Path to the storage location of all test data files. */
     private static final File               gppPath     = 

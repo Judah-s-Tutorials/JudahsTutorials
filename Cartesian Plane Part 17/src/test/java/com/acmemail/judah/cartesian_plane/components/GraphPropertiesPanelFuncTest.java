@@ -23,7 +23,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.gp_panel.GPPTestDataInitializer;
 import com.acmemail.judah.cartesian_plane.test_utils.gp_panel.GPPTestDialog;
 
-class GraphPropertiesPanelFuncTest
+public class GraphPropertiesPanelFuncTest
 {
     private static final GPPTestDataInitializer initData    =
         new GPPTestDataInitializer();

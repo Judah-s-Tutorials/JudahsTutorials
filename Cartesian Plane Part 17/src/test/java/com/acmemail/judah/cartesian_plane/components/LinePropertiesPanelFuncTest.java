@@ -13,12 +13,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.function.Predicate;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 import com.acmemail.judah.cartesian_plane.test_utils.lp_panel.LPPTestDialog;
@@ -44,6 +46,12 @@ public class LinePropertiesPanelFuncTest
         setMapOrig.values().stream()
             .map( s -> newLinePropertySet( s ) )
             .forEach( setMapNew::put );
+    }
+    
+    @AfterAll
+    public static void afterAll()
+    {
+        ComponentFinder.disposeAll();
     }
 
     @Order( 5 )

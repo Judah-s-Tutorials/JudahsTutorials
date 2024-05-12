@@ -45,6 +45,7 @@ public class CPMenuBarDMTestUtils
     /** The application window that contains the menu bar. */
     private final CPFrame           cpFrame;
     
+    /** The file chooser dialog. */
     private JDialog                 chooserDialog;
     /** Save button in the file chooser dialog. */
     private JButton                 chooserSaveButton;
@@ -76,6 +77,9 @@ public class CPMenuBarDMTestUtils
     /** This CPMenuBarDMTestUtils object. */
     private static CPMenuBarDMTestUtils utils;
     
+    /** Variable for limited use in lambdas. */
+    private String  adHocString1;
+    
     /**
      * Returns this class's singleton,
      * creating it if necessary.
@@ -100,9 +104,12 @@ public class CPMenuBarDMTestUtils
      * and mostly initializes this object.
      * Object initialization is completed
      * by the ComponentListener ChooserInit.
+     * This constructor must be executed
+     * in the context of the EDT.
      * 
      * @see ChooserInit
      * @see #chooserInit
+     * @see #getUtils()
      */
     private CPMenuBarDMTestUtils()
     {
@@ -138,6 +145,8 @@ public class CPMenuBarDMTestUtils
      * of the "Save," "Save As" and "Delete" items;
      * all other items are
      * expected to be enabled.
+     * This method is guaranteed
+     * to run in the context of the EDT.
      * 
      * @param expSave   the expected state of the "Save" item
      * @param expSaveAs the expected state of the "Save As" item
@@ -151,12 +160,13 @@ public class CPMenuBarDMTestUtils
         boolean expDelete
     )
     {
-        assertTrue( newItem.isEnabled() );
-        assertTrue( openItem.isEnabled() );
-//        assertEquals( expSave, saveItem.isEnabled() );
-        assertEquals( expSaveAs, saveAsItem.isEnabled() );
-        assertEquals( expClose, closeItem.isEnabled() );
-        assertEquals( expDelete, deleteItem.isEnabled() );
+        GUIUtils.schedEDTAndWait( () -> {
+            assertTrue( newItem.isEnabled() );
+            assertTrue( openItem.isEnabled() );
+            assertEquals( expSaveAs, saveAsItem.isEnabled() );
+            assertEquals( expClose, closeItem.isEnabled() );
+            assertEquals( expDelete, deleteItem.isEnabled() );
+        });
     }
     
     /**
@@ -187,8 +197,10 @@ public class CPMenuBarDMTestUtils
      */
     public String getEquationName()
     {
-        String  text    = eqNameField.getText();
-        return text;
+        GUIUtils.schedEDTAndWait( () -> 
+            adHocString1 = eqNameField.getText()
+        );
+        return adHocString1;
     }
     
     /**
@@ -319,31 +331,6 @@ public class CPMenuBarDMTestUtils
     {
         SwingUtilities.invokeLater(() -> button.doClick() );
         Utils.pause( 500 );
-    }
-    
-    /**
-     * Invokes {@linkplain #showFileChooserEDT(AbstractButton)},
-     * passing the given button,
-     * ensuring that the invocation occurs
-     * on the EDT.
-     * 
-     * @param button    the given button
-     * 
-     * @see #showFileChooserEDT(AbstractButton)
-     * @see #showOrHideFileChooserEDT(Thread)
-     */
-    private Thread showFileChooser( AbstractButton button )
-    {
-        Thread  thread  = new Thread( () -> doClick( button ) );
-        thread.start();
-        Utils.pause( 500 );
-        
-        chooserDialog = getChooserDialog();
-//        chooserSaveButton = getChooserButton( "Save" );
-//        chooserOpenButton = getChooserButton( "Open" );
-        chooserCancelButton = getChooserButton( "Cancel" );
-        chooserTextField = getChooserTextField();
-        return thread;
     }
 
     /**
@@ -489,5 +476,28 @@ public class CPMenuBarDMTestUtils
         assertTrue( comp instanceof JTextField );
         JTextField  textField   = (JTextField)comp;
         return textField;
+    }
+    
+    /**
+     * Invokes {@linkplain #showFileChooserEDT(AbstractButton)},
+     * passing the given button,
+     * ensuring that the invocation occurs
+     * on the EDT.
+     * 
+     * @param button    the given button
+     * 
+     * @see #showFileChooserEDT(AbstractButton)
+     * @see #showOrHideFileChooserEDT(Thread)
+     */
+    private Thread showFileChooser( AbstractButton button )
+    {
+        Thread  thread  = new Thread( () -> doClick( button ) );
+        thread.start();
+        Utils.pause( 500 );
+        
+        chooserDialog = getChooserDialog();
+        chooserCancelButton = getChooserButton( "Cancel" );
+        chooserTextField = getChooserTextField();
+        return thread;
     }
 }
