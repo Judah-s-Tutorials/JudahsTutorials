@@ -22,7 +22,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.CPMenuBarDMTestUtils;
 
 public class CPMenuBarDMTest
 {
-    private static final PropertyManager    pmgr            = 
+    private static final PropertyManager    pmgr        = 
         PropertyManager.INSTANCE;
     private static final File   testFileDir             =
         new File( "equationsTestData/CPMenuBar" );
@@ -46,7 +46,18 @@ public class CPMenuBarDMTest
     @BeforeAll
     public static void beforeAll()
     {
-        configureTestData();
+        if ( !testFileDir.exists() )
+            testFileDir.mkdirs();
+        assertTrue( testFileDir.exists() );
+            
+        createTestData( saveTestFile, "Save Test");
+        createTestData( openApproveTestFile, "Open Approve Test");
+        createTestData( openCancelTestFile, "Open Cancel Test");
+        createTestData( deleteTestFile, "Delete Test");
+        
+        // A couple of test files should not exist
+        if ( saveAsCancelTestFile.exists() )
+            saveAsCancelTestFile.delete();
     }
     
     @BeforeEach
@@ -498,26 +509,6 @@ public class CPMenuBarDMTest
     private void setProperty( String propName, boolean value )
     {
         pmgr.setProperty( propName, value );
-
-    }
-    
-    /**
-     * Configures all necessary test data.
-     */
-    private static void configureTestData()
-    {
-        if ( !testFileDir.exists() )
-            testFileDir.mkdirs();
-        assertTrue( testFileDir.exists() );
-            
-        createTestData( saveTestFile, "Save Test");
-        createTestData( openApproveTestFile, "Open Approve Test");
-        createTestData( openCancelTestFile, "Open Cancel Test");
-        createTestData( deleteTestFile, "Delete Test");
-        
-        // A couple of test files should not exist
-        if ( saveAsCancelTestFile.exists() )
-            saveAsCancelTestFile.delete();
 
     }
     

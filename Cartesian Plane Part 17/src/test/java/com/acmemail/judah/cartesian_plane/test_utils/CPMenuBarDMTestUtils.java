@@ -83,6 +83,7 @@ public class CPMenuBarDMTestUtils
     /**
      * Returns this class's singleton,
      * creating it if necessary.
+     * 
      * @return  this class's singleton
      */
     public static CPMenuBarDMTestUtils getUtils()
@@ -163,6 +164,7 @@ public class CPMenuBarDMTestUtils
         GUIUtils.schedEDTAndWait( () -> {
             assertTrue( newItem.isEnabled() );
             assertTrue( openItem.isEnabled() );
+            assertEquals( expSave, saveItem.isEnabled() );
             assertEquals( expSaveAs, saveAsItem.isEnabled() );
             assertEquals( expClose, closeItem.isEnabled() );
             assertEquals( expDelete, deleteItem.isEnabled() );
@@ -212,6 +214,22 @@ public class CPMenuBarDMTestUtils
     }
     
     /**
+     * Exercise the close feature;
+     */
+    public void close()
+    {
+        doClick( closeItem );
+    }
+    
+    /**
+     * Exercise the delete feature;
+     */
+    public void delete()
+    {
+        doClick( deleteItem );
+    }
+    
+    /**
      * Click the SaveAs button, 
      * bringing up a JFileChooser dialog.
      * Enter the given path into
@@ -221,18 +239,18 @@ public class CPMenuBarDMTestUtils
      * else click the cancel button.
      * 
      * @param path  the given path
-     * @param okay  
+     * @param save  
      *      true to dismiss dialog with Save,
      *      false to dismiss dialog with Cancel
      */
-    public void saveAs( File path, boolean okay )
+    public void saveAs( File path, boolean save )
     {
         Thread  thread  = showFileChooser( saveAsItem );
         GUIUtils.schedEDTAndWait( () -> {
             chooserTextField.setText( path.getName() );
             chooserSaveButton = getChooserButton( "Save" );
         });
-        JButton terminator  = okay ? 
+        JButton terminator  = save ? 
             chooserSaveButton : chooserCancelButton;
         doClick( terminator );
         Utils.join( thread );
@@ -248,37 +266,21 @@ public class CPMenuBarDMTestUtils
      * else click the cancel button.
      * 
      * @param path  the given path
-     * @param okay  
+     * @param open  
      *      true to dismiss dialog with Open,
      *      false to dismiss dialog with Cancel
      */
-    public void open( File path, boolean okay )
+    public void open( File path, boolean open )
     {
         Thread  thread  = showFileChooser( openItem );
         GUIUtils.schedEDTAndWait( () -> {
             chooserTextField.setText( path.getName() );
             chooserOpenButton = getChooserButton( "Open" );
         });
-        JButton terminator  = okay ? 
+        JButton terminator  = open ? 
             chooserOpenButton : chooserCancelButton;
         doClick( terminator );
         Utils.join( thread );
-    }
-    
-    /**
-     * Exercise the close feature;
-     */
-    public void close()
-    {
-        doClick( closeItem );
-    }
-    
-    /**
-     * Exercise the delete feature;
-     */
-    public void delete()
-    {
-        doClick( deleteItem );
     }
     
     /**
@@ -329,8 +331,7 @@ public class CPMenuBarDMTestUtils
      */
     public void doClick( AbstractButton button )
     {
-        SwingUtilities.invokeLater(() -> button.doClick() );
-        Utils.pause( 500 );
+        GUIUtils.schedEDTAndWait( () -> button.doClick() );
     }
 
     /**
@@ -479,15 +480,19 @@ public class CPMenuBarDMTestUtils
     }
     
     /**
-     * Invokes {@linkplain #showFileChooserEDT(AbstractButton)},
-     * passing the given button,
-     * ensuring that the invocation occurs
-     * on the EDT.
+     * Activates the given button in a dedicated thread
+     * thereby starting the FileChooser dialog.
+     * Obtains references to the FileChooserDialog,
+     * and its text field and Cancel button.
+     * Returns the thread ID to the caller.
      * 
      * @param button    the given button
      * 
-     * @see #showFileChooserEDT(AbstractButton)
-     * @see #showOrHideFileChooserEDT(Thread)
+     * @return the ID of the thread used to start the dialog
+     * 
+     * @see #chooserDialog
+     * @see #chooserCancelButton
+     * @see #chooserTextField
      */
     private Thread showFileChooser( AbstractButton button )
     {
