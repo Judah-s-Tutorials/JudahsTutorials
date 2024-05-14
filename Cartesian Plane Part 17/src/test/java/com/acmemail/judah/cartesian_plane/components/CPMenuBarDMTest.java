@@ -41,7 +41,7 @@ public class CPMenuBarDMTest
     private static final File   miscTestFile            =
         new File( testFileDir, "miscTestFile.txt" );
     
-    private static CPMenuBarDMTestUtils     tester;
+    private CPMenuBarDMTestUtils    tester;
     
     @BeforeAll
     public static void beforeAll()
@@ -54,10 +54,7 @@ public class CPMenuBarDMTest
         createTestData( openApproveTestFile, "Open Approve Test");
         createTestData( openCancelTestFile, "Open Cancel Test");
         createTestData( deleteTestFile, "Delete Test");
-        
-        // A couple of test files should not exist
-        if ( saveAsCancelTestFile.exists() )
-            saveAsCancelTestFile.delete();
+        createTestData( miscTestFile, "Misc Test");
     }
     
     @BeforeEach
@@ -65,15 +62,15 @@ public class CPMenuBarDMTest
     {
         tester = CPMenuBarDMTestUtils.getUtils();
         tester.setRelativePath( testFileDir );
-        if ( saveAsApproveTestFile.exists() )
-            saveAsApproveTestFile.delete();
+        deleteTestData( saveAsApproveTestFile );
+        deleteTestData( saveAsCancelTestFile );
         setProperty( CPConstants.DM_MODIFIED_PN, false );
         setProperty( CPConstants.DM_OPEN_FILE_PN, false );
         setProperty( CPConstants.DM_OPEN_EQUATION_PN, false );
     }
 
     @AfterEach
-    void tearDown() throws Exception
+    public void afterEach() throws Exception
     {
         tester.dispose();
         tester = null;
@@ -228,8 +225,6 @@ public class CPMenuBarDMTest
     public void saveAsTestCancel()
     {
         String  eqName  = "Save As Cancel Test";
-        // Create an input file for this test
-        createTestData( miscTestFile, "Miscellaneous Data" );
         
         // The output file for this test should not exist, but
         // the input file should. Data should be unmodified and no 
@@ -438,8 +433,6 @@ public class CPMenuBarDMTest
     public void openFromExistingTestCancel()
     {
         String  eqName  = "Open from Existing but Cancel test";
-        // create the input file.
-        createTestData( miscTestFile, "Miscellaneous Data" );
         
         // The files for this test should exist, data should
         // be unmodified and no file should be open. There should be
@@ -535,5 +528,17 @@ public class CPMenuBarDMTest
         Equation    test    = FileManager.open( path );
         assertNotNull( test );
         assertEquals( name, test.getName() );
+    }
+    
+    /**
+     * Deletes the file in the given path
+     * if it exists.
+     * 
+     * @param path  the given path
+     */
+    private void deleteTestData( File path )
+    {
+        if ( path.exists() )
+            path.delete();
     }
 }

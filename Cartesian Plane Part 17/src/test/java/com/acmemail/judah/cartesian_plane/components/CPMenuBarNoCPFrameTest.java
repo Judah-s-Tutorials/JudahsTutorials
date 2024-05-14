@@ -52,6 +52,7 @@ public class CPMenuBarNoCPFrameTest
         frame.clickButton( frame.saveItem );        
         frame.clickButton( frame.saveAsItem );
         frame.clickButton( frame.deleteItem );
+        frame.clickButton( frame.closeItem );
     }
 
     @SuppressWarnings("serial")
@@ -63,6 +64,7 @@ public class CPMenuBarNoCPFrameTest
         public final JMenuItem  saveItem;
         public final JMenuItem  saveAsItem;
         public final JMenuItem  deleteItem;
+        public final JMenuItem  closeItem;
         
         public TestFrame()
         {
@@ -86,6 +88,7 @@ public class CPMenuBarNoCPFrameTest
             saveItem = getMenuItem( "Save" );
             saveAsItem = getMenuItem( "Save As" );
             deleteItem = getMenuItem( "Delete" );
+            closeItem = getMenuItem( "Close" );
         }
         
         public void clickButton( AbstractButton button )

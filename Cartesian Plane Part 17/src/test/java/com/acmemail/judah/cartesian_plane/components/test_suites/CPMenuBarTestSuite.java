@@ -17,5 +17,4 @@ import com.acmemail.judah.cartesian_plane.components.CPMenuBarTest;
 })
 public class CPMenuBarTestSuite
 {
-
 }
