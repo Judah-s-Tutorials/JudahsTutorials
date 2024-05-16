@@ -136,7 +136,7 @@ class FileManagerTest
         testEquation.setYExpression( testYEq );
         testEquation.setRExpression( testREq );
         testEquation.setTExpression( testTEq );
-        testEquation.setParam( testParam );
+        testEquation.setParamName( testParam );
         testEquation.setRadiusName( testRadius );
         testEquation.setThetaName( testTheta );
         

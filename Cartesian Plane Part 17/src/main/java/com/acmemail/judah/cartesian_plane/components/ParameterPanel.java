@@ -150,7 +150,7 @@ public class ParameterPanel extends JPanel
         ),
         new TextFieldDescriptor(
             () -> getEquation().getParamName(),
-            e -> getEquation().setParam( (String)e ), 
+            e -> getEquation().setParamName( (String)e ), 
             s -> parseName( s ),
             "Param"
         ),

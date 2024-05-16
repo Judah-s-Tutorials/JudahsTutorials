@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+    <title>title</title>
+    <link rel="stylesheet" href="../../BlogSupport/default_forwp.css">
+</head>
+<body>
+<pre style="padding-left: 4em;">public interface Equation
+{
+    // ...
+    <span style="text-decoration: line-through; font-style: italic;">    String getParam();</span>
+    <span style="text-decoration: line-through; font-style: italic;">    void setParam(String param);</span>
+    String getParamName();
+    void setParamName(String param);
+    // ...
+    <span style="text-decoration: line-through; font-style: italic;">    void setRange(double start, double end, double step);</span>
+    <span style="text-decoration: line-through; font-style: italic;">    void setRangeStart(double rangeStart);</span>
+    <span style="text-decoration: line-through; font-style: italic;">    void setRangeEnd(double rangeEnd);</span>
+    <span style="text-decoration: line-through; font-style: italic;">    void setRangeStep(double rangeStep);</span>
+    Result setRangeStart(String rangeStart);
+    Result setRangeEnd(String rangeEnd);
+    Result setRangeStep( String expr );
+    String getRangeStartExpr();
+    String getRangeEndExpr();
+    String getRangeStepExpr();
+    // ...
+    void setPlot( String plot );
+    String getPlot();
+    void setPrecision( int precision );
+    int getPrecision();
+    // ...
+}
+</pre>
+</body>
+</html>
+

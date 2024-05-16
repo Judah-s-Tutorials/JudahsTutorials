@@ -248,7 +248,7 @@ public interface Equation
      * 
      * @param param the name of the parameter
      */
-    void setParam(String param);
+    void setParamName(String param);
 
     /**
      * Gets the name of the radius variable

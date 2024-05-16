@@ -125,7 +125,7 @@ public class ShowParameterPanel
         equation.setPrecision( 3 );
         equation.setRadiusName( "r" );
         equation.setThetaName( "t" );
-        equation.setParam( "t" );
+        equation.setParamName( "t" );
         return equation;
     }
     

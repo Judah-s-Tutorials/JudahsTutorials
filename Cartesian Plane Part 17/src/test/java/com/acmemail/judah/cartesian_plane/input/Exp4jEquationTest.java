@@ -435,7 +435,7 @@ class Exp4jEquationTest
     public void testGetParam()
     {
         String  pName   = "param";
-        equation.setParam( pName );
+        equation.setParamName( pName );
         assertEquals( pName, equation.getParamName() );
     }
 

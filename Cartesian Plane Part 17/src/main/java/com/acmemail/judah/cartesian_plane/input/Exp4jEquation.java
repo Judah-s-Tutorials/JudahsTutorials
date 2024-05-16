@@ -440,7 +440,7 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public void setParam( String param )
+    public void setParamName( String param )
     {
         this.param = param;
     }
