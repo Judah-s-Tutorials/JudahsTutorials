@@ -29,6 +29,26 @@
     void setPrecision( int precision );
     int getPrecision();
     // ...
+    boolean isValidExpression( String expr );
+    <span style="text-decoration: line-through; font-style: italic;">    boolean isValidName( String name );</span>
+    default boolean isValidName( String name )
+    {
+        // ...
+    }
+    <span style="text-decoration: line-through; font-style: italic;">    boolean isValidValue( String valStr );( String name );</span>
+    default boolean isValidValue(String valStr)
+    {
+        // ...
+    }
+    private static boolean isAlpha( char ccc )
+    {
+        // ...
+    }
+    private static boolean isAlphanumeric( int ccc )
+    {
+        // ...
+    }
+    // ...
 }
 </pre>
 </body>

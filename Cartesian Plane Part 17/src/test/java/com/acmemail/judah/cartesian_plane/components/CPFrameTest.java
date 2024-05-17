@@ -59,7 +59,7 @@ class CPFrameTest
             testGUI.getText( NamePanel.class )
         );
         assertEquals(
-            sampleVarValue,
+            sampleVarDValue,
             testGUI.getVarValue( sampleVarName )
         );
         assertEquals( 

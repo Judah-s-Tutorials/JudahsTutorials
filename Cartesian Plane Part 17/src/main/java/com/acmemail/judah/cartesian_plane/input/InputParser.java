@@ -58,7 +58,7 @@ public class InputParser
     
     /**
      * Constructor.
-     * Established the encapsulated Equation.
+     * Establish the encapsulated Equation.
      * 
      * @param equation  the encapsulated equation; may be null,
      *                  in which case a default will be instantiated

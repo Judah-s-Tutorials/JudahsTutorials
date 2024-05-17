@@ -262,33 +262,21 @@ public class Exp4jEquation implements Equation
     @Override
     public boolean isValidExpression( String exprStr )
     {
-        ValidationResult    expr4jResult    = ValidationResult.SUCCESS;
+        ValidationResult    exp4jResult = ValidationResult.SUCCESS;
         try
         {
             Expression expr = new ExpressionBuilder( exprStr )
                 .variables( vars.keySet() )
                 .functions( Exp4jFunctions.getFunctions() )
                 .build();
-            expr4jResult    = expr.validate( false );
+            exp4jResult = expr.validate( false );
         }
         catch ( Exception exc )
         {
             List<String>    errors  = List.of( exc.getMessage() );
-            expr4jResult = new ValidationResult( false, errors );
+            exp4jResult = new ValidationResult( false, errors );
         }
-        boolean             status          = expr4jResult.isValid();
-        return status;
-    }
-    
-//    @Override
-    public boolean isValidExpressionOrig( String exprStr )
-    {
-        Expression expr = new ExpressionBuilder( exprStr )
-            .variables( vars.keySet() )
-            .functions( Exp4jFunctions.getFunctions() )
-            .build();
-        ValidationResult    expr4jResult    = expr.validate( false );
-        boolean             status          = expr4jResult.isValid();
+        boolean             status          = exp4jResult.isValid();
         return status;
     }
     

@@ -2,7 +2,7 @@ EQUATION rose
 start 0.0
 end 7.0
 step 0.001
-set n=4.000000,t=0.000000,a=3.000000
+set a=3.000000,t=0.000000,n=5.000000
 param t
 radius r
 theta t

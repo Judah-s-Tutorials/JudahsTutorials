@@ -2,7 +2,7 @@ EQUATION Open Cancel Test
 start 1
 end 1
 step 1
-set a=0.000000,b=0.000000,c=0.000000,r=0.000000,t=0.000000,x=0.000000,y=0.000000
+set b=0.000000,c=0.000000,r=0.000000,t=0.000000,x=0.000000,y=0.000000,a=0.000000
 param t
 radius r
 theta t

@@ -73,6 +73,10 @@ public class CPFrame extends JFrame
          * and variable table must be registered with the menu bar.
          */
         CPMenuBar       menuBar     = new CPMenuBar( this );
+        /*
+         * Make the PlotPanel aware of the Cartesian plane
+         */
+        plotPanel.setCartesianPlane( cartPlane );
         
         /* 
          * This will cause your application to be terminated
