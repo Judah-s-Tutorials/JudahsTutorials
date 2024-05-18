@@ -88,6 +88,11 @@ public class JFormattedTextFieldDemo1
         log.setLocation( 110 + frameSize.width, 100 );
     }
     
+    /**
+     * Gets the panel containing the buttons and options.
+     * 
+     * @return the panel containing the buttons and options
+     */
     private JPanel getLeftPanel()
     {
         JPanel      panel   = new JPanel();
@@ -122,13 +127,20 @@ public class JFormattedTextFieldDemo1
         return panel;
     }
     
+    /**
+     * Gets the panel containing the options.
+     * 
+     * @return  panel containing the options
+     */
     private JPanel getOptionsPanel()
     {
         JPanel      panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
         String      title   = "Focus Lost Behavior";
-        Border      lineB   = BorderFactory.createLineBorder( Color.BLACK );
-        Border      border  = BorderFactory.createTitledBorder( lineB, title );
+        Border      lineB   = 
+            BorderFactory.createLineBorder( Color.BLACK );
+        Border      border  = 
+            BorderFactory.createTitledBorder( lineB, title );
         panel.setLayout( layout );
         panel.setBorder( border );
         
@@ -144,6 +156,16 @@ public class JFormattedTextFieldDemo1
         return panel;
     }
     
+    /**
+     * Sets the the text fields' lost-focus-behavior
+     * to the option 
+     * selected by the operator.
+     * This method is activated
+     * every time the radio buttons
+     * change state.
+     * 
+     * @param evt   object accompanying action event
+     */
     private void selectAction( ActionEvent evt )
     {
         Object  source  = evt.getSource();
@@ -270,6 +292,19 @@ public class JFormattedTextFieldDemo1
         return bldr.toString();
     }
     
+    /**
+     * Gets the integer value
+     * of the class field
+     * with the given name.
+     * <p>
+     * Precondition: 
+     * the given name is one of 
+     * "REVERT", "COMMIT", "COMMIT_OR_REVERT", or "PERSIST."
+     * 
+     * @param name  the given name
+     * 
+     * @return   the integer value of the class field with the given name
+     */
     private int getTextFieldOption( String name )
     {
         int option  = 0;

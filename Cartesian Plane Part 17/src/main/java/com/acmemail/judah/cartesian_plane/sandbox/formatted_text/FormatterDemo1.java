@@ -149,7 +149,7 @@ public class FormatterDemo1
      * @author Jack Straub
      */
     @SuppressWarnings("serial")
-    static class UnsignedIntFormatter extends DefaultFormatter
+    private static class UnsignedIntFormatter extends DefaultFormatter
     {
         /**
          * Constructor.

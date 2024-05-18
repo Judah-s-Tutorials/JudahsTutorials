@@ -56,7 +56,7 @@ public class FormatterDemo2
      */
     public FormatterDemo2()
     {
-        JFrame      frame       = new JFrame( "Formatter Demo 1" );
+        JFrame      frame       = new JFrame( "Formatter Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel      contentPane = new JPanel( new BorderLayout() );
         contentPane.add( getTextPanel(), BorderLayout.CENTER );
