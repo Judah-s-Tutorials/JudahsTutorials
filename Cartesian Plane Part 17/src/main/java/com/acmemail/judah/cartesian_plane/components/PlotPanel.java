@@ -171,11 +171,12 @@ public class PlotPanel extends JPanel
      * If non-null, 
      * all components are enabled,
      * and given initial values
-     * base on the equation.
+     * based on the equation.
      * If null,
      * all components are disabled,
-     * and all text fields are 
-     * set to empty strings.
+     * all text fields set to empty strings,
+     * and the CartesianPlane object
+     * is notified that there is nothing to plot.
      * 
      * @param equation  the given equation
      */
@@ -202,6 +203,10 @@ public class PlotPanel extends JPanel
             PropertyManager pmgr    = PropertyManager.INSTANCE;
             pmgr.setProperty( CPConstants.DM_MODIFIED_PN, false );
         }
+        else if ( cartPlane != null )
+            cartPlane.setStreamSupplier( null );
+        else
+            ;
         Stream.of( plots, plot )
             .forEach( c -> c.setEnabled( newState ) );
     }
@@ -314,6 +319,15 @@ public class PlotPanel extends JPanel
         int             inx         = plots.getSelectedIndex();
         Command         command     = plots.getItemAt( inx );
         ExprFormatter   fmt         = exprMap.get( command );
+        // The point stream that we get here is solely for the purpose
+        // a validating the expression taken from the associated text
+        // field; we can't use it as the stream we supply to the
+        // Cartesian plane. The command that we pass to the Cartesian
+        // plane (setStreamSuppler(...) below) may be executed multiple
+        // times (for example, every time the Cartesian plane graphic is 
+        // resized) and, since a stream can only be traversed once, it
+        // must call plotter.get() in order to get a fresh stream each
+        // time.
         Stream<Point2D> pointStream = fmt.plotter.get();
 
         if ( pointStream != null && cartPlane != null )
