@@ -146,8 +146,8 @@ class ParameterPanelTest
     private void testStringField( String ident, int commitKey )
     {
         String  text    = testGUI.getText( ident );
-        String  field   = testGUI.getEqProperty( ident );
         Object  value   = testGUI.getValue( ident );
+        String  field   = testGUI.getEqProperty( ident );
         assertEquals( text, field );
         assertEquals( text, value );
         assertFalse( testGUI.isDMModified() );

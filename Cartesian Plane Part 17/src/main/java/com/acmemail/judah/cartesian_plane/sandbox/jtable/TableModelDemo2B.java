@@ -1,6 +1,9 @@
 package com.acmemail.judah.cartesian_plane.sandbox.jtable;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.util.stream.IntStream;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -10,6 +13,8 @@ import javax.swing.JTable;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+
+import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
 /**
  * Second part of an example showing how to designate a column
@@ -26,7 +31,12 @@ import javax.swing.table.TableModel;
  * @see TableModelDemo2C
  */
 public class TableModelDemo2B
-{
+{    
+    /** Activity dialog for displaying feedback. */
+    private static ActivityLog  log;
+    /** Table model for demo. */
+    private static TableModel   model;
+    
     /**
      * Application entry point.
      *
@@ -38,7 +48,7 @@ public class TableModelDemo2B
         String[]    headers = { "State", "Capital", "Population" };
         Object[][]  data    = 
             State.getDataSet( "state", "capital", "population" );
-        TableModel  model   = new LocalTableModel( data, headers );
+        model = new LocalTableModel( data, headers );
         SwingUtilities.invokeLater( () -> makeGUI( model ) );
     }
     
@@ -59,8 +69,11 @@ public class TableModelDemo2B
         contentPane.add( scrollPane, BorderLayout.CENTER );
         
         JPanel      buttonPanel = new JPanel();
+        JButton     print       = new JButton( "Print" );
         JButton     exit        = new JButton( "Exit" );
+        print.addActionListener( TableModelDemo2B::printAction );
         exit.addActionListener( e -> System.exit( 0 ) );
+        buttonPanel.add( print );
         buttonPanel.add( exit );
         contentPane.add( buttonPanel, BorderLayout.SOUTH );
         
@@ -68,6 +81,28 @@ public class TableModelDemo2B
         frame.setLocation( 200, 200 );
         frame.pack();
         frame.setVisible( true );
+        
+        log = new ActivityLog();
+        Dimension   frameSize   = frame.getPreferredSize();
+        int         logXco      = 200 + frameSize.width + 10;
+        log.setLocation( logXco, 200 );
+    }
+    
+    /**
+     * Logs the first five rows of data from the JTable.
+     * Activated when the Print button in the GUI is pressed.
+     * 
+     * @param evt   object accompanying an action event; not used
+     */
+    private static void printAction( ActionEvent evt )
+    {
+        StringBuilder   bldr    = new StringBuilder();
+        IntStream.range( 0, 5 )
+            .peek( i -> bldr.setLength( 0 ) )
+            .peek( i -> bldr.append( i ).append( ": " ) )
+            .peek( i -> bldr.append( model.getValueAt( i, 2 ) ) )
+            .forEach( i -> log.append( bldr.toString() ) );
+        log.append( "*************" );
     }
 
     /**
