@@ -27,9 +27,9 @@ public class JTableDemo3
         "Enter name, abbreviation and population, separated by commas.";
     private static final String selectHeader    = "Select";
     private final Object[]      headers         = 
-    { "State", "Abbrev", "Population" };
+        { "State", "Abbrev", "Population" };
     private final Object[][]    data            =
-    State.getDataSet( "state", "abbreviation", "population" );
+        State.getDataSet( "state", "abbreviation", "population" );
     
     /** JTable's data model. */
     private final DefaultTableModel model   = 
