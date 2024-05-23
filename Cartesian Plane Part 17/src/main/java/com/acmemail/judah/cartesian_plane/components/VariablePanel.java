@@ -51,7 +51,7 @@ public class VariablePanel extends JPanel
     /** Platform-specific line separator. */
     private static final String             lineSep = 
         System.lineSeparator();
-    /** Prompt the operatopmgr for a new name and optional value. */
+    /** Prompt the operator for a new variable name/value. */
     private static final String             prompt  =
         "Enter [name] or [name,value]";
     /** Reduces typing when accessing PropertyManager singleton. */
