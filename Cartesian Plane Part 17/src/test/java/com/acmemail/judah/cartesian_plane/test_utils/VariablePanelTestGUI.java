@@ -15,6 +15,7 @@ import java.awt.event.InputEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -93,10 +94,9 @@ public class VariablePanelTestGUI
      */
     public int getDPrecision()
     {
-        GUIUtils.schedEDTAndWait( 
-            () -> adHocInt1 = varPanel.getDPrecision() 
-        );
-        return adHocInt1;
+        Object  obj = getProperty( () -> varPanel.getDPrecision() );
+        assertTrue( obj instanceof Integer );
+        return (Integer)obj;
     }
     
     /**
@@ -245,13 +245,8 @@ public class VariablePanelTestGUI
      */
     public int getRowOf( String name )
     {
-        int     bound   = table.getRowCount();
-        int     row     =
-        IntStream.range( 0, bound )
-            .filter( i -> name.equals( table.getValueAt( i, 0 ) ) )
-            .findFirst().orElse( -1 );
-        
-        return row;
+        GUIUtils.schedEDTAndWait( () -> adHocInt1 = getRowOfEDT( name ) );
+        return adHocInt1;
     }
     
     /**
@@ -297,7 +292,11 @@ public class VariablePanelTestGUI
      */
     public boolean isEnabled()
     {
-        boolean result  = table.isEnabled() && addButton.isEnabled();
+        boolean tableEnabled    = 
+            (Boolean)getProperty( () -> table.isEnabled() );
+        boolean addEnabled      = 
+            (Boolean)getProperty( () -> addButton.isEnabled() );
+        boolean result  = tableEnabled && addEnabled;
         return result;
     }
     
@@ -308,7 +307,8 @@ public class VariablePanelTestGUI
      */
     public boolean isDelEnabled()
     {
-        boolean result  = delButton.isEnabled() ;
+        boolean result  = 
+            (Boolean)getProperty( () -> delButton.isEnabled() );
         return result;
     }
     
@@ -383,11 +383,8 @@ public class VariablePanelTestGUI
     public void editValue( int row, String value, int keyCode )
     {
         JTextField  textField   = editComponent( row, 1 );
-        clearText( textField );
-        
+        GUIUtils.schedEDTAndWait( () -> textField.setText( "" ) );
         clickOn( textField );
-        click();
-        
         robotAsst.paste( value );
         type( keyCode );
     }
@@ -417,22 +414,10 @@ public class VariablePanelTestGUI
      */
     public void selectRows( String... names )
     {
-        GUIUtils.schedEDTAndWait( () ->
-            adHocObject1 = Stream.of( names )
-                .map( this::getRowOf )
-                .toArray( Integer[]::new )
-        );
-        selectRows( (Integer[])adHocObject1 );
-    }
-    
-    /**
-     * Clears the given text field.
-     * 
-     * @param textField   the given text field
-     */
-    public void clearText( JTextField textField )
-    {
-        GUIUtils.schedEDTAndWait( () -> textField.setText( "" ) );
+        Integer[]   rows  = Stream.of( names )
+            .map( this::getRowOf )
+            .toArray( Integer[]::new );
+        selectRows( rows );
     }
     
     /**
@@ -450,12 +435,51 @@ public class VariablePanelTestGUI
         
         // Find the location of the table on the screen, and use it
         // to translate the rectangle to screen coordinates.
-        Point       tableLoc    = table.getLocationOnScreen();
+        Point       tableLoc    = getLocationOnScreen( table );
         int         xco         = tableLoc.x + rect.x + rect.width / 2;
         int         yco         = tableLoc.y + rect.y + rect.height / 2;
         
         // Move the mouse to the screen coordinates
         robot.mouseMove( xco, yco );
+    }
+    
+    /**
+     * Executes the given Supplier
+     * in the context of the EDT.
+     * Returns the object obtained.
+     * 
+     * @param supplier  the given Supplier
+     * 
+     * @return  the object obtained
+     */
+    private Object getProperty( Supplier<Object> supplier )
+    {
+        GUIUtils.schedEDTAndWait( () -> adHocObject1 = supplier.get() );
+        return adHocObject1;
+    }
+
+    /**
+     * Get the number of the row in the JTable
+     * that contains the given name.
+     * Returns -1 if not found.
+     * Must be called
+     * in the context of the EDT.
+     * 
+     * @param name  the given name
+     * 
+     * @return
+     *      the number of the row in the JTable
+     *      that contains the given name; -1 if not found
+     */
+    private int getRowOfEDT( String name )
+    {
+        int     bound   = table.getRowCount();
+        int     row     =
+        IntStream.range( 0, bound )
+            .filter( i -> name.equals( table.getValueAt( i, 0 ) ) )
+            .findFirst().orElse( -1 );
+        
+        return row;
     }
 
     /**
@@ -516,12 +540,11 @@ public class VariablePanelTestGUI
      */
     private Point getLocationOnScreen( Component comp )
     {
-        GUIUtils.schedEDTAndWait( 
-            () -> adHocObject1 = comp.getLocationOnScreen()
-        );
-        return (Point)adHocObject1;
+        Object  obj = getProperty( () -> comp.getLocationOnScreen() );
+        assertTrue( obj instanceof Point );
+        return (Point)obj;
     }
-    
+
     /**
      * Gets the renderer component for a given cell.
      * This method must be called from the EDT.
