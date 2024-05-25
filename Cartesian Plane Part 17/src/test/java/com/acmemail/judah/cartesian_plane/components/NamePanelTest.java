@@ -77,14 +77,17 @@ class NamePanelTest
         assertFalse( testGUI.isModified() );
         assertFalse( testGUI.isChangedFont() );
         assertTrue( testGUI.isCommitted() );
+        
         testGUI.paste( newName );
         assertFalse( testGUI.isModified() );
         assertTrue( testGUI.isChangedFont() );
         assertFalse( testGUI.isCommitted() );
+        
         testGUI.type( keyCode );
         assertTrue( testGUI.isModified() );
         assertFalse( testGUI.isChangedFont() );
         assertTrue( testGUI.isCommitted() );
+        
         assertEquals( newName, testGUI.getEqValue() );
     }
 }

@@ -231,7 +231,10 @@ public class NamePanelTestGUI
      */
     public void clickTextField()
     {
-        Point   location    = textField.getLocationOnScreen();
+        Object  obj         = 
+            getProperty( () -> textField.getLocationOnScreen() );
+        assertTrue( obj instanceof Point );
+        Point   location    = (Point)obj;
         robot.mouseMove( location.x, location.y );
         click();
     }

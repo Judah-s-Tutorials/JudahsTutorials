@@ -323,12 +323,14 @@ public class VariablePanelTestGUI
     public Map<String,Double> getTableVars()
     {
         Map<String,Double>  map = new HashMap<>();
-        IntStream.range( 0, table.getRowCount() )
-            .forEach( i -> {
-                String  name    = (String)table.getValueAt( i, 0 );
-                Double  val     = (Double)table.getValueAt( i, 1 );
-                map.put( name, val );
-            });
+        GUIUtils.schedEDTAndWait( () ->
+            IntStream.range( 0, table.getRowCount() )
+                .forEach( i -> {
+                    String  name    = (String)table.getValueAt( i, 0 );
+                    Double  val     = (Double)table.getValueAt( i, 1 );
+                    map.put( name, val );
+                })
+        );
         return map;
     }   
     

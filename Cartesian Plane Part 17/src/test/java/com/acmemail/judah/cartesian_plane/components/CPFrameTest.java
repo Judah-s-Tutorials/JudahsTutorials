@@ -19,8 +19,6 @@ class CPFrameTest
     private static final String sampleEquationName  = "Equation Name";
     private static final String sampleVarName       = "a";
     private static final double sampleVarDValue     = 200;
-    private static final String sampleVarValue      = 
-        String.valueOf( sampleVarDValue );
     private static final String sampleStartValue    = "1000";
     private static final String sampleXExpr         = "13";
     
