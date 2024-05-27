@@ -161,14 +161,39 @@ public class CPMenuBarDMTestUtils
         boolean expDelete
     )
     {
+        // Debugging aid: collect the value of the enabled properties
+        // of all the buttons prior to testing them. See also below.
+        class State
+        {
+            boolean newItem;
+            boolean openItem;
+            boolean saveItem;
+            boolean saveAsItem;
+            boolean closeItem;
+            boolean deleteItem;
+        }
+        State   state   = new State();
+        
+        // The schedEDTAndWait task formerly contained all the assertions.
+        // But that means, if an assertion fails, we get an 
+        // InvaocationTargetException and we have to explore the (long)
+        // stack trace in the exception to find the failure. Instead,
+        // use schedEDTAndWait to collect all the properties, then put
+        // the assertions after the schedEDTAndWait.
         GUIUtils.schedEDTAndWait( () -> {
-            assertTrue( newItem.isEnabled() );
-            assertTrue( openItem.isEnabled() );
-            assertEquals( expSave, saveItem.isEnabled() );
-            assertEquals( expSaveAs, saveAsItem.isEnabled() );
-            assertEquals( expClose, closeItem.isEnabled() );
-            assertEquals( expDelete, deleteItem.isEnabled() );
+            state.newItem =  newItem.isEnabled();
+            state.openItem =  openItem.isEnabled();
+            state.saveItem =  saveItem.isEnabled();
+            state.saveAsItem = saveAsItem.isEnabled();
+            state.closeItem = closeItem.isEnabled();
+            state.deleteItem = deleteItem.isEnabled();
         });
+        assertTrue( state.newItem );
+        assertTrue( state.openItem );
+        assertEquals( expSave, state.saveItem );
+        assertEquals( expSaveAs, state.saveAsItem );
+        assertEquals( expClose, state.closeItem );
+        assertEquals( expDelete, state.deleteItem );
     }
     
     /**

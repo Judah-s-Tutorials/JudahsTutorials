@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -137,48 +138,48 @@ public class CPMenuBar extends JMenuBar
         menu.add( delete );
         menu.add( exit );
         
-        save.setEnabled( false );
-        pmgr.addPropertyChangeListener(
-            CPConstants.DM_MODIFIED_PN, e -> configureSave( save ) );
-        pmgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_FILE_PN, e -> configureSave( save ) );
+        Stream.of( save, saveAs, close, delete )
+            .forEach( b -> b.setEnabled( false ) );
         
-        saveAs.setEnabled( false );
+        pmgr.addPropertyChangeListener(  
+            CPConstants.DM_MODIFIED_PN,
+            e -> save.setEnabled( asBoolean( e ) )
+        );
+        
         pmgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_EQUATION_PN, e -> {
-                boolean hasEquation = 
-                    pmgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
-                saveAs.setEnabled( hasEquation );
-        });
+            CPConstants.DM_OPEN_EQUATION_PN,
+            e -> saveAs.setEnabled( asBoolean( e ) )
+        );
 
-        close.setEnabled( false );
         pmgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_EQUATION_PN, e -> {
-                boolean isOpen  = 
-                    pmgr.asBoolean( CPConstants.DM_OPEN_EQUATION_PN );
-                close.setEnabled( isOpen );
-        });
+            CPConstants.DM_OPEN_EQUATION_PN,
+            e ->close.setEnabled( asBoolean( e ) )
+        );
         
-        delete.setEnabled( false );
         pmgr.addPropertyChangeListener(
-            CPConstants.DM_OPEN_FILE_PN, e -> {
-                boolean isOpen  = 
-                    pmgr.asBoolean( CPConstants.DM_OPEN_FILE_PN );
-                delete.setEnabled( isOpen );
-        });
+            CPConstants.DM_OPEN_FILE_PN,
+            e ->delete.setEnabled( asBoolean( e ) )
+        );
         
         return menu;
     }
     
     /**
-     * Disable the save button unless a) there is a file open,
-     * and b) data has been modified.
+     * Obtains the new value 
+     * from a given PropertyChangeEvent
+     * converts it to a boolean value
+     * and returns the result.
+a + 2pi - 5apap     * @param evt   the given PropertyChangeEvent
+     * 
+     * @return
+     *      the newValue property of the given PropertyChangeEvent
+     *      converted to a boolean.
      */
-    private void configureSave( JMenuItem save )
+    private boolean asBoolean( PropertyChangeEvent evt )
     {
-        boolean isModified  = pmgr.asBoolean( CPConstants.DM_MODIFIED_PN );
-        boolean isOpen      = pmgr.asBoolean( CPConstants.DM_OPEN_FILE_PN );
-        save.setEnabled( isModified && isOpen );
+        String  newVal  = evt.getNewValue().toString();
+        boolean result  = Boolean.valueOf( newVal );
+        return result;
     }
     
     /**

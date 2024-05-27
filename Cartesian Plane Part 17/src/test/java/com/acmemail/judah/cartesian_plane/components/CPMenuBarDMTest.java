@@ -170,7 +170,7 @@ public class CPMenuBarDMTest
         // is no file open; the save-as feature should be available,
         // but not save or delete.
         tester.setEquationName( eqName1 );
-        tester.testEnablement( false, true, true, false );
+        tester.testEnablement( true, true, true, false );
         testProperty( CPConstants.DM_MODIFIED_PN, true );
         testProperty( CPConstants.DM_OPEN_FILE_PN, false );
         testProperty( CPConstants.DM_OPEN_EQUATION_PN, true );

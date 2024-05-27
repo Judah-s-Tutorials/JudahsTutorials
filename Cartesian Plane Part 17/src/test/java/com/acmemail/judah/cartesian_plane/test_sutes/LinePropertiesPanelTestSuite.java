@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.components.test_suites;
+package com.acmemail.judah.cartesian_plane.test_sutes;
 
 import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
