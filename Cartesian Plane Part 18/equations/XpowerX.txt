@@ -1,0 +1,14 @@
+EQUATION New Equation
+start 0
+end 3
+step .005
+set c=0.000000,b=0.000000,a=0.000000,y=0.000000,x=0.000000,t=0.000000,r=0.000000
+param t
+radius r
+theta t
+y= abs(sin(x^x)/2^((x^x-pi/2)/pi))
+x= 1
+t= 1
+r= 1
+prec 3
+plot YPlot

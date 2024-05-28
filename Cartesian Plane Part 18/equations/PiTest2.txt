@@ -1,0 +1,14 @@
+EQUATION New Equation
+start -π/2
+end 2π
+step 0.05
+set
+param t
+radius r
+theta t
+y= π/2
+x= 1
+t= 1
+r= 1
+prec 3
+plot YPlot

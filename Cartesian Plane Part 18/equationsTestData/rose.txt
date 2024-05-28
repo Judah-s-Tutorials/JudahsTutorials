@@ -1,0 +1,8 @@
+    equation rose
+    start 0
+    end 7
+    step .001
+    set a=3,n=4,t
+    x= a sin(n t)cos(t)
+    y= a sin(n t)sin(t)
+    plot xyplot

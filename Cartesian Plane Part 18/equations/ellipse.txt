@@ -1,0 +1,14 @@
+EQUATION ellipse
+start 0
+end 2pi
+step .001
+set k=0.000000,y=0.000000,h=0.000000,x=0.000000,t=0.000000,r=0.000000,b=1.000000,a=2.000000
+param t
+radius r
+theta t
+y= b sin(t) + k
+x= a cos(t) + h
+t= 1
+r= 1
+prec 3
+plot XYPLOT
