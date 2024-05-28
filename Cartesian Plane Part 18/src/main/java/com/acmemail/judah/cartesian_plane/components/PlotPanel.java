@@ -38,8 +38,6 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Result;
-import com.acmemail.judah.cartesian_plane.sandbox.formatted_text.JFormattedTextFieldDemo4;
-import com.acmemail.judah.cartesian_plane.sandbox.formatted_text.JFormattedTextFieldDemo5;
 
 /**
  * This class is used to create and manage a "plot panel."
