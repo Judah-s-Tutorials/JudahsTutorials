@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import javax.swing.JOptionPane;
-
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
@@ -224,8 +222,6 @@ public class Profile
     /** Main window properties. */
     private final GraphPropertySet              mainWindow          =
         new GraphPropertySetMW();
-    /** If quiet is true, input parsing will not report errors. */
-    private final boolean                       quiet;
     /** 
      * Map of simple class name (Class.getSimpleName() to Class class
      * for LinePropertySet subclasses.
@@ -235,8 +231,6 @@ public class Profile
     /** Grid unit property. */
     private Float                               gridUnit;
     
-    private Object  currParseObj    = null;
-    
     /**
      * Constructor.
      * All properties are configured
@@ -244,151 +238,7 @@ public class Profile
      */
     public Profile()
     {
-        quiet = false;
         initProperties();
-    }
-    
-    public Profile( Stream<String> stream )
-    {
-        this( stream, false );
-    }
-    
-    /**
-     * Constructor.
-     * All properties are configured
-     * from the given stream.
-     * 
-     * @param stream    the given stream
-     * 
-     * @see Profile#getProperties()
-     */
-    public Profile( Stream<String> stream, boolean quiet )
-    {
-        // TODO complete
-        this.quiet = quiet;
-        initProperties();
-        stream
-            .map( String::trim )
-            .filter( s -> !s.isBlank() )
-            .map( this::splitArgString )
-            .filter( a -> a.length == 2 )
-            .forEach( this::decompile );
-    }
-    
-    private String[] splitArgString( String str )
-    {
-        String[]    args    = str.split( " *: *" );
-        if ( args.length != 2 )
-        {
-            String  error   = "Invalid input string: " + str;
-            showParseError( error );
-        }
-        return args;
-    }
-    
-    private void decompile( String[] arr )
-    {
-        if ( CLASS.equals( arr[0] ) )
-            decompileClass( arr );
-        else
-            decompileProperty( arr );
-    }
-    
-    private void decompileClass( String[] arr )
-    {
-        currParseObj = null;
-        if ( arr[1].equals( GraphPropertySet.class.getSimpleName() ) )
-            currParseObj = mainWindow;
-        else
-            currParseObj = linePropertySetMap.get(arr[1] );
-        if ( currParseObj == null )
-        {
-            String  error   = "Invalid class tag value: " + arr[1];
-            showParseError( error );
-        }
-    }
-    
-    private void decompileProperty( String[] arr )
-    {
-        if ( GRID_UNIT.equals( arr[0] ) )
-            gridUnit = parseFloat( arr[1] );
-        else if ( currParseObj == null )
-        {
-            String  error   =
-                "No context for parsing property \"" + arr[0]
-                + "\"; current parse object is null";
-            showParseError( error );
-        }
-        else if ( currParseObj instanceof GraphPropertySet )
-            decompileProperty( (GraphPropertySet)currParseObj, arr );
-        else 
-            decompileProperty( (LinePropertySet)currParseObj, arr );
-    }
-    
-    private void decompileProperty( GraphPropertySet set, String[] arr )
-    {
-        
-    }
-    
-    private void decompileProperty( LinePropertySet set, String[] arr )
-    {
-        
-    }
-    
-    private float parseFloat( String sVal )
-    {
-        float   fVal    = 0f;
-        try
-        {
-            fVal = Float.parseFloat( sVal );
-        }
-        catch ( NumberFormatException exc )
-        {
-            String  error   = "Invalid decimal number: " + fVal;
-            showParseError( error );
-        }
-        return fVal;
-    }
-    
-    private int parseInt( String sVal )
-    {
-        int iVal    = 0;
-        try
-        {
-            iVal = Integer.parseInt( sVal );
-        }
-        catch ( NumberFormatException exc )
-        {
-            String  error   = "Invalid integer: " + iVal;
-            showParseError( error );
-        }
-        return iVal;
-    }
-    
-    private boolean parseBoolean( String sVal )
-    {
-        boolean bVal    = false;
-        try
-        {
-            bVal = Boolean.parseBoolean( sVal );
-        }
-        catch ( IllegalArgumentException exc )
-        {
-            String  error   = "Invalid boolean value: " + bVal;
-            showParseError( error );
-        }
-        return bVal;
-    }
-    
-    private void showParseError( String error )
-    {
-        if ( !quiet )
-            JOptionPane.showMessageDialog(
-                null, 
-                error, 
-                "Parse Error",
-                JOptionPane.ERROR_MESSAGE
-            );
     }
     
     /**
@@ -519,7 +369,7 @@ public class Profile
     {
         bldr.add( fromClass( set.getClass() ) );
         bldr.add( fromColor( BG_COLOR, set.getBGColor() ) );
-        bldr.add( fromColor( FG_COLOR, set.getBGColor() ) );
+        bldr.add( fromColor( FG_COLOR, set.getFGColor() ) );
         bldr.add( fromBoolean( DRAW, set.isFontDraw() ) );
         bldr.add( format( FONT_NAME, set.getFontName() ) );
         bldr.add( fromFloat( FONT_SIZE, set.getFontSize() ) );
@@ -642,7 +492,7 @@ public class Profile
      */
     public String fromClass( Class<?> clazz )
     {
-        String  result  = format( "Class", clazz.getSimpleName() );
+        String  result  = format( CLASS, clazz.getSimpleName() );
         return result;
     }
     

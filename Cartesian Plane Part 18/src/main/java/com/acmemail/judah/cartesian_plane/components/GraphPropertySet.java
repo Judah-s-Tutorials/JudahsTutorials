@@ -215,7 +215,7 @@ public abstract class GraphPropertySet
     /**
      * Sets the font style to the given value.
      * 
-     * @param style
+     * @param style the given value
      */
     public void setFontStyle( String style )
     {
