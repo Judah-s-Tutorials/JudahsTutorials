@@ -5,7 +5,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.StringTokenizer;
 import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
@@ -14,6 +13,31 @@ import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 
+/**
+ * The purpose of this class
+ * is to parse a stream of strings (Stream&lt;String&gt;)
+ * equivalent to that
+ * produced by {@linkplain Profile#getProperties()},
+ * creating a Profile
+ * encapsulating the values
+ * described by the stream.
+ * The general expectation 
+ * is that the input stream
+ * was originally produced by {@linkplain Profile#getProperties()},
+ * but the stream can be modified
+ * or built from scratch by the user.
+ * For a description of the syntax
+ * of the input stream,
+ * see {@linkplain Profile}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see Profile
+ * @see Profile#getProperties()
+ */
+/**
+ * @author Jack Straub
+ */
 public class ProfileDecompiler
 {
     /** Container for decompiled Profile. */
@@ -21,8 +45,21 @@ public class ProfileDecompiler
     /** If quiet is true, input parsing will not report errors. */
     private final boolean   quiet;
     
+    /** 
+     * A reference to the GraphPropertySet or LinePropertySet
+     * that is the current target of the parse operation.
+     */
     private Object currParseObj = null;
     
+    /**
+     * Produces a Profile
+     * initialized from a Stream&lt;String&gt;
+     * obtained from the given InputStream.
+     * 
+     * @param inStream  the given input stream
+     * 
+     * @return  the Profile object
+     */
     public static Profile of( InputStream inStream )
     {
         Profile profile = null;
@@ -40,6 +77,15 @@ public class ProfileDecompiler
         return profile;
     }
     
+    /**
+     * Produces a Profile
+     * initialized from a Stream&lt;String&gt;
+     * obtained from the given InputStreamReader.
+     * 
+     * @param reader  the given InputStreamReader
+     * 
+     * @return  the Profile object
+     */
     public static Profile of( InputStreamReader reader )
     {
         Profile profile = null;
@@ -57,12 +103,28 @@ public class ProfileDecompiler
         return profile;
     }
     
+    /**
+     * Produces a Profile
+     * initialized from the given Stream&lt;String&gt;.
+     * 
+     * @param stream  the given Stream&lt;String&gt;
+     * 
+     * @return  the Profile object
+     */
     public static Profile of( Stream<String> stream )
     {
         ProfileDecompiler   compiler    = new ProfileDecompiler( stream );
         return compiler.profile;
     }
     
+    /**
+     * Constructor.
+     * Equivalent to invoking 
+     * ProfileDecompiler(Stream&lt;String&gt;,boolean)
+     * and passing false for the Boolean parameter.
+     * 
+     * @param stream
+     */
     private ProfileDecompiler( Stream<String> stream )
     {
         this( stream, false );
@@ -72,8 +134,16 @@ public class ProfileDecompiler
      * Constructor.
      * All properties are configured
      * from the given stream.
+     * Errors will be reported
+     * via error dialogs
+     * unless the <em>quiet</em> parameter is true,
+     * in which case errors
+     * will be silently ignored.
+     * Property values not provided in the given stream
+     * are initialized from the PropertyManager.
      * 
      * @param stream    the given stream
+     * @param quiet     true to suppress error reporting
      * 
      * @see Profile#getProperties()
      */
@@ -88,6 +158,20 @@ public class ProfileDecompiler
             .forEach( this::decompile );
     }
 
+    /**
+     * Parses a given string into two arguments
+     * delimited by a colon and optional spaces.
+     * If the string 
+     * does not consist of exactly two arguments
+     * an error is reported,
+     * and an array of two empty strings is returned.
+     * 
+     * @param str   the given string
+     * 
+     * @return 
+     *      a two-dimensional array 
+     *      containing the result of the parsing
+     */
     private String[] splitArgString( String str )
     {
         String[]    args    = str.split( " *: *" );
@@ -98,8 +182,10 @@ public class ProfileDecompiler
         }
         return args;
     }
-
-    private String[] splitArgString0( String str )
+/*
+    // Alternative method that uses StringTokenizer instead of 
+    // String.split to parse a string into two arguments
+    private String[] splitArgString( String str )
     {
         String[]        args    = { "", "" };
         StringTokenizer tizer   = new StringTokenizer( ": " );
@@ -115,7 +201,21 @@ public class ProfileDecompiler
         }
         return args;
     }
+end of alternative splitArgString method. */
     
+    /**
+     * Determines whether a given name/value pair
+     * contains a class declaration
+     * or a property declaration
+     * and decompiles it accordingly.
+     * If the name is Profile.CLASS,
+     * the given pair 
+     * is assumed to be a class declaration,
+     * otherwise it is assumed to be 
+     * a property declaration.
+     * 
+     * @param arr   the given name/value pair
+     */
     private void decompile( String[] arr )
     {
         if ( Profile.CLASS.equals( arr[0] ) )
@@ -124,6 +224,22 @@ public class ProfileDecompiler
             decompileProperty( arr );
     }
     
+    /**
+     * Uses the value part of a given name/value pair
+     * to locate the GraphPropertySet object
+     * of one of the LinePropertySets
+     * contained in the Profile being initialized.
+     * The value is the simple class name
+     * of the target object, for example
+     * LinePropertySetGridLines or GraphPropertySetMW.
+     * The {@linkplain #currParseObj} instance variable
+     * is initialized with a reference
+     * to the target object.
+     * If a target object cannot be found
+     * {@linkplain #currParseObj} is set to null.
+     * 
+     * @param arr   the given name/value pair
+     */
     private void decompileClass( String[] arr )
     {
         currParseObj = null;
@@ -138,6 +254,41 @@ public class ProfileDecompiler
         }
     }
     
+    /**
+     * Decompiles a name/value pair
+     * into a property value.
+     * There are four possibilities:
+     * <ol>
+     * <li>
+     *      The property name is Profile.GRID_UNIT,
+     *      in which case grid-unit property
+     *      of the target profile is initialized
+     *      from the value.
+     * </li>
+     * <li>
+     *      The {@linkplain #currParseObj} instance variable
+     *      is a reference to a GraphPropertySet object,
+     *      in which case the name/value pair
+     *      is assumed to apply to a property
+     *      in the GraphPropertySet.
+     * </li>
+     * <li>
+     *      The {@linkplain #currParseObj} instance variable
+     *      is a reference to a LinePropertySet object,
+     *      in which case the name/value pair
+     *      is assumed to apply to a property
+     *      in the LinePropertySet.
+     * </li>
+     * </ol>
+     * 
+     * Except in the case where
+     * property name is Profile.GRID_UNIT,
+     * it is an error 
+     * if {@linkplain #currParseObj} is not a reference to
+     * anything but a LinePropertySet or GraphPropertySet object.
+     * 
+     * @param arr
+     */
     private void decompileProperty( String[] arr )
     {
         if ( Profile.GRID_UNIT.equals( arr[0] ) )
@@ -154,8 +305,15 @@ public class ProfileDecompiler
         }
         else if ( currParseObj instanceof GraphPropertySet )
             decompileProperty( (GraphPropertySet)currParseObj, arr );
-        else 
+        else if ( currParseObj instanceof LinePropertySet )
             decompileProperty( (LinePropertySet)currParseObj, arr );
+        else
+        {
+            String  error   = 
+                "Internal error; currParseObj is an unexpected value.";
+            System.err.println( error );
+            postParseError( error );
+        }
     }
     
     private void decompileProperty( GraphPropertySet set, String[] arr )
@@ -187,6 +345,19 @@ public class ProfileDecompiler
         }
     }
     
+    /**
+     * Converts a given name/value pair
+     * into the value of a property
+     * in a given LinePropertySet.
+     * An error is reported
+     * if the name does not match
+     * the name of a property,
+     * or the value is not appropriate
+     * for the property type.
+     * 
+     * @param set   the given LinePropertySet
+     * @param arr   the given name/value pair
+     */
     private void decompileProperty( LinePropertySet set, String[] arr )
     {
         switch ( arr[0] )
@@ -213,6 +384,17 @@ public class ProfileDecompiler
         }
     }
     
+    /**
+     * Converts a given string to a decimal value
+     * and returns the value.
+     * If the string is not a valid number
+     * an error is reported
+     * and 0 is returned.
+     * 
+     * @param sVal  the given string
+     * 
+     * @return  the decimal value of the given string
+     */
     private float parseFloat( String sVal )
     {
         float   fVal    = 0f;
@@ -228,12 +410,26 @@ public class ProfileDecompiler
         return fVal;
     }
     
+    
+    /**
+     * Converts a given string to an integer value
+     * and returns the value.
+     * The string may be encoded
+     * using decimal, hexadecimal, or octal notation.
+     * If the string is not a valid integer
+     * an error is reported
+     * and 0 is returned.
+     * 
+     * @param sVal  the given string
+     * 
+     * @return  the integer value of the given string
+     */
     private int parseInt( String sVal )
     {
         int iVal    = 0;
         try
         {
-            iVal = Integer.parseInt( sVal );
+            iVal = Integer.decode( sVal );
         }
         catch ( NumberFormatException exc )
         {
@@ -243,6 +439,18 @@ public class ProfileDecompiler
         return iVal;
     }
     
+    
+    /**
+     * Converts a given string to a Boolean value
+     * and returns the value.
+     * If the string is not a Boolean value,
+     * an error is reported
+     * and false is returned.
+     * 
+     * @param sVal  the given string
+     * 
+     * @return  the decimal value of the given string
+     */
     private boolean parseBoolean( String sVal )
     {
         boolean bVal    = false;
@@ -258,22 +466,34 @@ public class ProfileDecompiler
         return bVal;
     }
     
+    
+    /**
+     * Converts a given string to a color
+     * and returns the color.
+     * The color is assumed 
+     * to be represented by an integer (type int).
+     * If the string is not a valid integer
+     * an error is reported
+     * and BLACK (rgb(0,0,0)) is returned.
+     * 
+     * @param sVal  the given string
+     * 
+     * @return  the decimal value of the given string
+     */
     private Color parseColor( String sVal )
     {
-        int iVal    = 0;
-        try
-        {
-            iVal = Integer.decode( sVal );
-        }
-        catch ( NumberFormatException exc )
-        {
-            String  error   = "Invalid Color: " + sVal;
-            postParseError( error );
-        }
+        int iVal    = parseInt( sVal );
         Color   color   = new Color( iVal );
         return color;
     }
     
+    /**
+     * Posts a dialog containing an error message,
+     * unless the quiet instance variable is true
+     * in which case the error is silently ignored.
+     * 
+     * @param error the error message to post
+     */
     private void postParseError( String error )
     {
         if ( !quiet )
@@ -288,6 +508,14 @@ public class ProfileDecompiler
         }
     }
     
+    /**
+     * Posts an error message
+     * obtained from the given IOException object.
+     * This operation is not affected
+     * by the quiet instance variable.
+     * 
+     * @param exc   the given exception object
+     */
     private static void postIOError( IOException exc )
     {
         String  error   = "I/O error: " + exc.getMessage();

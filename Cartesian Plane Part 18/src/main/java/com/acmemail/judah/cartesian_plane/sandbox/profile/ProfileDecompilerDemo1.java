@@ -18,12 +18,66 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
-import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
+/**
+ * This is a demonstration
+ * of the {@linkplain ProfileDecompiler}.
+ * It proceeds as follows:
+ * <ol>
+ * <li>
+ *      A Profile is created (the <em>original</em> profile).
+ *      It will contain default data 
+ *      obtained from the PropertyManager.
+ * </li>
+ * <li>
+ *      A second Profile is created 
+ *      (the <em>expected revised</em> profile).
+ *      The data it contains will be unique
+ *      from that contained in the original profile.
+ * </li>
+ * <li>
+ *      A stream from the revised profile is obtained.
+ *      The stream is fed to the 
+ *      {@linkplain ProfileDecompiler#of(Stream)} method
+ *      to obtain a third Profile (the <em>actual revised</em> profile).
+ * </li>
+ * <li>
+ *      A report is produced
+ *      comparing the three Profiles.
+ *      Examining the report,
+ *      you should be able to confirm
+ *      that the expected revised profile
+ *      contains data distinct
+ *      from the original profile,
+ *      and that the data contained
+ *      in the actual revised profile
+ *      is equivalent to the data
+ *      in the expected revised profile.
+ * </li>
+ * </ol>
+ * 
+ * @author Jack Straub
+ */
+/**
+ * @author Jack Straub
+ */
 public class ProfileDecompilerDemo1
 {
+    /**
+     * Unicode check mark. Displayed at the end of a line item
+     * in the report if the expected data matches the actual data.
+     */
     private static final char   check               = '\u2713';
-    private static final char   stop                = '\u20e0';
+    /**
+     * Unicode "no" symbol. Displayed at the end of a line item
+     * in the report if the expected data differs from the actual data.
+     */
+    private static final char   wrong               = '\u20e0';
+    
+    /**
+     * Simple names of all the LinePropertySet subclasses.
+     * Use to obtain property sets from the profiles.
+     */
     private static final String[]      lineSets     =
     {
         LinePropertySetAxes.class.getSimpleName(),
@@ -32,9 +86,13 @@ public class ProfileDecompilerDemo1
         LinePropertySetTicMinor.class.getSimpleName(),
     };
 
+    /** Window for displaying the report. */
     private final Log           log                 = new Log();
+    /** The original profile. */
     private final Profile       origProfile         = new Profile();
+    /** The expected revised profile. */
     private final Profile       expRevisedProfile   = new Profile();
+    /** The actual revised profile. */
     private final Profile       actRevisedProfile;
     
     /**
@@ -49,6 +107,12 @@ public class ProfileDecompilerDemo1
         demo.report();
     }
     
+    /**
+     * Constructor.
+     * Creates the three Profiles.
+     * Initializes, but does not make visible,
+     * the log that displays the report.
+     */
     private ProfileDecompilerDemo1()
     {
         float   origGridUnit    = expRevisedProfile.getGridUnit();
@@ -68,6 +132,14 @@ public class ProfileDecompilerDemo1
         log.setLocation( 200, 200 );
     }
     
+    /**
+     * Assigns unique values to
+     * the properties of a given GraphPropertySet
+     * that are guaranteed to be distinct
+     * from the original values.
+     * 
+     * @param set   the given GraphPropertySet
+     */
     private void revise( GraphPropertySet set )
     {
         Color   newBGColor  = getDistinctColor( set.getBGColor() );
@@ -85,6 +157,15 @@ public class ProfileDecompilerDemo1
         set.setFontDraw( newDraw );
     }
     
+    
+    /**
+     * Assigns unique values to
+     * the properties of a given LinePropertySet
+     * that are guaranteed to be distinct
+     * from the original values.
+     * 
+     * @param set   the given LinePropertySet
+     */
     private void revise( LinePropertySet set )
     {
         Color   newColor    = getDistinctColor( set.getColor() );
@@ -100,12 +181,30 @@ public class ProfileDecompilerDemo1
         set.setStroke( newStroke );
     }
     
+    /**
+     * From a given font style value,
+     * derive a new value
+     * that is distinct from the given value.
+     * 
+     * @param styleIn   the given font style value
+     * 
+     * @return  a font style value distinct from styleIn
+     */
     private String getDistinctFontStyle( int styleIn )
     {
         String  styleOut    = styleIn == Font.PLAIN ? "ITALIC" : "PLAIN";
         return styleOut;
     }
     
+    /**
+     * From a given color,
+     * derive a new color
+     * that is distinct from the given color.
+     * 
+     * @param colorIn   the given color
+     * 
+     * @return  a Color distinct from colorIn
+     */
     private Color getDistinctColor( Color colorIn )
     {
         int     iColorIn    = colorIn.getRGB() & 0xFFFFFF;
@@ -114,6 +213,15 @@ public class ProfileDecompilerDemo1
         return colorOut;
     }
     
+    /**
+     * From a font name,
+     * derive a new font name
+     * that is distinct from the given font name.
+     * 
+     * @param nameIn   the given color
+     * 
+     * @return  a Color distinct from colorIn
+     */
     private String getDistinctFontName( String nameIn )
     {
         String  nameOut = nameIn.equals( Font.MONOSPACED ) ? 
@@ -121,6 +229,12 @@ public class ProfileDecompilerDemo1
         return nameOut;
     }
     
+    /**
+     * Issues a report
+     * comparing the values
+     * of the three Profiles
+     * encapsulated by this object.
+     */
     private void report()
     {
         String  headFmt = "%10s %10s %10s %10s";
@@ -142,6 +256,12 @@ public class ProfileDecompilerDemo1
         log.setVisible( true );
     }
     
+    /**
+     * Formulates a line item
+     * that compares the grid unit
+     * from the three profiles
+     * encapsulated by this object.
+     */
     private void reportGridUnit()
     {
         float   orig    = origProfile.getGridUnit();
@@ -150,47 +270,13 @@ public class ProfileDecompilerDemo1
         append( "GridUnit", orig, exp, act );
     }
     
-    private void reportLineSet( String simpleName )
-    {
-        LinePropertySet orig    = 
-            origProfile.getLinePropertySet( simpleName );
-        LinePropertySet exp     = 
-            expRevisedProfile.getLinePropertySet( simpleName );
-        LinePropertySet act     = 
-            actRevisedProfile.getLinePropertySet( simpleName );
-        log.append( simpleName );
-        append(
-            "Color",
-            orig.getColor(),
-            exp.getColor(),
-            act.getColor()
-        );
-        append(
-            "Draw",
-            orig.getDraw(),
-            exp.getDraw(),
-            act.getDraw()
-        );
-        append(
-            "Length",
-            orig.getLength(),
-            exp.getLength(),
-            act.getLength()
-        );
-        append(
-            "Spacing",
-            orig.getSpacing(),
-            exp.getSpacing(),
-            act.getSpacing()
-        );
-        append(
-            "Stroke",
-            orig.getStroke(),
-            exp.getStroke(),
-            act.getStroke()
-        );
-    }
-    
+    /**
+     * Formulates a line item
+     * for each property in the main window property set
+     * comparing the property values
+     * from the three profiles
+     * encapsulated by this object.
+     */
     private void reportMW()
     {
         GraphPropertySet    orig    = origProfile.getMainWindow();
@@ -235,6 +321,74 @@ public class ProfileDecompilerDemo1
         );
     }
     
+    /**
+     * Formulates a line item
+     * for each property in a line property set
+     * comparing the property values
+     * from the three profiles
+     * encapsulated by this object.
+     * 
+     * @param simpleName
+     *      the simple class name of the property set
+     *      to interrogate
+     */
+    private void reportLineSet( String simpleName )
+    {
+        LinePropertySet orig    = 
+            origProfile.getLinePropertySet( simpleName );
+        LinePropertySet exp     = 
+            expRevisedProfile.getLinePropertySet( simpleName );
+        LinePropertySet act     = 
+            actRevisedProfile.getLinePropertySet( simpleName );
+        log.append( simpleName );
+        append(
+            "Color",
+            orig.getColor(),
+            exp.getColor(),
+            act.getColor()
+        );
+        append(
+            "Draw",
+            orig.getDraw(),
+            exp.getDraw(),
+            act.getDraw()
+        );
+        append(
+            "Length",
+            orig.getLength(),
+            exp.getLength(),
+            act.getLength()
+        );
+        append(
+            "Spacing",
+            orig.getSpacing(),
+            exp.getSpacing(),
+            act.getSpacing()
+        );
+        append(
+            "Stroke",
+            orig.getStroke(),
+            exp.getStroke(),
+            act.getStroke()
+        );
+    }
+    
+    /**
+     * Formulates a line item
+     * from a property name
+     * and three Boolean values.
+     * The Boolean values
+     * are assumed to come
+     * from the GraphPropertySet
+     * or LinePropertySets
+     * encapsulated in the three profiles
+     * managed by this object.
+     * 
+     * @param name  the property name
+     * @param orig  the property value from the original profile
+     * @param exp   the property value from the expected revised profile
+     * @param act   the property value from the actual revised profile
+     */
     private void 
     append( String name, boolean orig, boolean exp, boolean act )
     {
@@ -245,11 +399,28 @@ public class ProfileDecompilerDemo1
         if ( exp == act )
             str += check;
         else
-            str += stop;
+            str += wrong;
             
         log.append( str );
     }
     
+    
+    /**
+     * Formulates a line item
+     * from a property name
+     * and three integer values.
+     * The integer values
+     * are assumed to come
+     * from the GraphPropertySet
+     * or LinePropertySets
+     * encapsulated in the three profiles
+     * managed by this object.
+     * 
+     * @param name  the property name
+     * @param orig  the property value from the original profile
+     * @param exp   the property value from the expected revised profile
+     * @param act   the property value from the actual revised profile
+     */
     private void append( String name, int orig, int exp, int act )
     {
         String  fmt     = "%10s %10d %10d %10d";
@@ -259,11 +430,28 @@ public class ProfileDecompilerDemo1
         if ( exp == act )
             str += check;
         else
-            str += stop;
+            str += wrong;
             
         log.append( str );
     }
     
+    
+    /**
+     * Formulates a line item
+     * from a property name
+     * and three decimal values.
+     * The decimal values
+     * are assumed to come
+     * from the GraphPropertySet
+     * or LinePropertySets
+     * encapsulated in the three profiles
+     * managed by this object.
+     * 
+     * @param name  the property name
+     * @param orig  the property value from the original profile
+     * @param exp   the property value from the expected revised profile
+     * @param act   the property value from the actual revised profile
+     */
     private void append( String name, float orig, float exp, float act )
     {
         String  fmt     = "%10s %10.1f %10.1f %10.1f";
@@ -273,11 +461,28 @@ public class ProfileDecompilerDemo1
         if ( exp == act )
             str += check;
         else
-            str += stop;
+            str += wrong;
             
         log.append( str );
     }
     
+    
+    /**
+     * Formulates a line item
+     * from a property name
+     * and three string values.
+     * The string values
+     * are assumed to come
+     * from the GraphPropertySet
+     * or LinePropertySets
+     * encapsulated in the three profiles
+     * managed by this object.
+     * 
+     * @param name  the property name
+     * @param orig  the property value from the original profile
+     * @param exp   the property value from the expected revised profile
+     * @param act   the property value from the actual revised profile
+     */
     private void 
     append( String name, String orig, String exp, String act )
     {
@@ -287,11 +492,28 @@ public class ProfileDecompilerDemo1
         if ( exp.equals( act ) )
             str += check;
         else
-            str += stop;
+            str += wrong;
             
         log.append( str );
     }
     
+    
+    /**
+     * Formulates a line item
+     * from a property name
+     * and three color values.
+     * The color values
+     * are assumed to come
+     * from the GraphPropertySet
+     * or LinePropertySets
+     * encapsulated in the three profiles
+     * managed by this object.
+     * 
+     * @param name  the property name
+     * @param orig  the property value from the original profile
+     * @param exp   the property value from the expected revised profile
+     * @param act   the property value from the actual revised profile
+     */
     private void append( String name, Color orig, Color exp, Color act )
     {
         int     iOrig   = orig.getRGB() & 0xFFFFFF;
@@ -303,15 +525,33 @@ public class ProfileDecompilerDemo1
         if ( exp.equals( act ) )
             str += check;
         else
-            str += stop;
+            str += wrong;
             
         log.append( str );
     }
     
+    /**
+     * This class encapsulates a simple GUI
+     * used to display the report
+     * produced by the containing class.
+     * 
+     * @author Jack Straub
+     */
     private static class Log extends JFrame
     {
+        /** Default serial version UID. */
+        private static final long serialVersionUID = 1L;
+        /** Platform dependent line separator. */
         private static final String lineSep     = System.lineSeparator();
+        /** Text area in which to display the report. */
         private final JTextArea     textArea    = new JTextArea( 24, 50 );
+        
+        /**
+         * Constructor.
+         * Fully initializes the GUI
+         * encapsulated by this class,
+         * but does <em>not</em> make it visible.
+         */
         public Log()
         {
             super( "ProfileDecompilerDemo 1" );
@@ -327,6 +567,13 @@ public class ProfileDecompilerDemo1
             pack();
         }
         
+        /**
+         * Appends to the text area
+         * the given text
+         * plus a line separator.
+         * 
+         * @param text  the given text.
+         */
         public void append( String text )
         {
             textArea.append( text );
