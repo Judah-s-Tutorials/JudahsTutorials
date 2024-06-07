@@ -1,160 +1,127 @@
 package com.acmemail.judah.cartesian_plane.sandbox.profile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.DoubleConsumer;
-import java.util.function.DoubleSupplier;
+import java.awt.BorderLayout;
+import java.awt.Window;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
-import javax.swing.JSpinner.DefaultEditor;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
-import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
+/**
+ * This class represents a dialog
+ * that the operator can use
+ * to edit the properties
+ * encapsulated in a {@link Profile}.
+ * 
+ * @author Jack Straub
+ */
+@SuppressWarnings("serial")
 public class ProfileEditorDialog extends JDialog
 {
-    /** Text describing the GUI weight field. */
-    private static final String weightLabel     = "Weight";
-    /** Text describing the GUI lines/unit field. */
-    private static final String lpuLabel        = "Lines/Unit";
-    /** Text describing the GUI length field. */
-    private static final String lenLabel        = "Length";
-    /** Text describing the GUI draw field. */
-    private static final String drawLabel       = "Draw";
-    
-    /** Text describing the GUI grid unit panel. */
-    private static final String gridUnitLabel   = "Grid Unit";
-    /** Text describing the GUI axis panel. */
-    private static final String axisLabel       = "Axes";
-    /** Text describing the GUI major tics panel. */
-    private static final String majorTicsLabel  = "Major Tics";
-    /** Text describing the GUI minor tics panel. */
-    private static final String minorTicsLabel  = "Minor Tics";
-    /** Text describing the GUI grid lines panel. */
-    private static final String gridLinesLabel  = "Grid Lines";
-    
+    /** The title for this dialog. */
+    private static final String dialogTitle     = "Profile Editor";
     /** The component that the sample graph is drawn on. */
-    private final Canvas        canvas;
-    /** The object that controls detailed drawing on the canvas. */
-    private final GraphManager  drawManager;
-
+    private final JComponent        canvas;
+    private final ProfileEditor     editor;
+    
     /** 
-     * List of Runnables that set or reset the values of the 
-     * GUI's JSpinners from the properties in the profile.
-     * Initialized in the {@linkplain SpinnerDesc} constructor.
+     * Records the final status of the dialog (OK/Cancel).
+     * Updated in the {@link #close(int)} method.
+     * Returned by the {@link #showDialog} method.
      */
-    private final List<Runnable>    resetList   = new ArrayList<>();
+    private int result  = JOptionPane.CANCEL_OPTION;
 
-    /** Initialized in the constructor. */
-    private final Profile   profile;
-
-    public ProfileEditorDialog( Profile profile )
+    /**
+     * Constructor.
+     * Initializes the editor dialog.
+     * 
+     * @param profile   profile to edit
+     */
+    public ProfileEditorDialog( Window parent, Profile profile )
     {
-        this.profile = profile;
-        canvas = new Canvas( profile );
-        drawManager = canvas.getDrawManager();
+        super( parent, dialogTitle, ModalityType.APPLICATION_MODAL );
+
+        editor = new ProfileEditor( profile );
+        canvas = editor.getFeedBack();
+        
+        JPanel      contentPane     = new JPanel( new BorderLayout() );
+        contentPane.add( BorderLayout.CENTER, canvas );
+        contentPane.add( BorderLayout.WEST, editor );
+        contentPane.add( BorderLayout.SOUTH, getButtonPanel() );
+        
+        setContentPane( contentPane );
+        contentPane.setFocusable( true );
+        pack();
+
+        GUIUtils.center( this );
+    }
+    
+    public int showDialog()
+    {
+        setVisible( true );
+        return result;
     }
 
     public void apply()
     {
-        profile.apply();
+        editor.apply();
     }
 
     public void reset()
     {
-        profile.reset();
+        editor.reset();
     }
     
     /**
-     * An object of this type is used to configure
-     * that parameters of a JSpinner
-     * that controls editing of a line property.
-     * The user provides the associated LinePropertySet,
-     * the text of a label that describes
-     * the property the spinner is editing,
-     * and the spinner's step value.
-     * The property within the LinePropertySet to edit
-     * is determined by the text of the label;
-     * see <em>weightLabel, lengthLabel, et al.</em>
-     * in the outer class.
+     * Creates a panel with a FlowLayout
+     * that contains the dialog control buttons
+     * (Apply, Cancel, etc.).
      * 
-     * @author Jack Straub
+     * @return  a panel containing the dialog control buttons
      */
-    private class SpinnerDesc
+    private JPanel getButtonPanel()
     {
-        private static final float      minVal  = 0;
-        private static final float      maxVal  = Integer.MAX_VALUE;
-        public final    JSpinner        spinner;
-        public final    JLabel          label;
-        private final   DoubleConsumer  setter;
-        private final   DoubleSupplier  getter;
-        
-        public SpinnerDesc(
-            LinePropertySet propSet,
-            String labelText,
-            double step
-        )
-        {
-            // These variables are used to temporarily configure the
-            // property getters and setters for this JSpinner. Once
-            // the values are determined they are assigned to the
-            // getter and setter instance variables.
-            DoubleConsumer  tempSetter  = null;
-            DoubleSupplier  tempGetter  = null;
-            
-            switch ( labelText )
-            {
-            case weightLabel:
-                tempSetter = d -> propSet.setStroke( (float)d );
-                tempGetter = () -> propSet.getStroke();
-                break;
-            case lpuLabel:
-                tempSetter = d -> propSet.setSpacing( (float)d );
-                tempGetter = () -> propSet.getSpacing();
-                break;
-            case lenLabel:
-                tempSetter = d -> propSet.setLength( (float)d );
-                tempGetter = () -> propSet.getLength();
-                break;
-            case gridUnitLabel:
-                tempSetter = d -> profile.setGridUnit( (float)d );
-                tempGetter = () -> profile.getGridUnit();
-                break;
-            default:
-                throw new ComponentException( "Invalid Label" );
-            }
-            
-            setter = tempSetter;
-            getter = tempGetter;
-            label = new JLabel( labelText, SwingConstants.RIGHT );
-            
-            double              val     = getter.getAsDouble();
-            SpinnerNumberModel  model   = 
-                new SpinnerNumberModel( val, minVal, maxVal, step );
-            spinner = new JSpinner( model );
-            
-            JComponent  editor          = spinner.getEditor();
-            if ( !(editor instanceof DefaultEditor) )
-                throw new ComponentException( "Unexpected editor type" );
-            JTextField  textField   = 
-                ((DefaultEditor)editor).getTextField();
-            textField.setColumns( 6 );
-            
-            model.addChangeListener( e -> {
-                float   value   = model.getNumber().floatValue();
-                setter.accept( value );
-                canvas.repaint();
-            });
-            
-            resetList.add( 
-                () -> spinner.setValue( getter.getAsDouble() )
-            );
-        }
+        JPanel      panel   = new JPanel();
+        JButton     okay    = new JButton( "OK" );
+        JButton     apply   = new JButton( "Apply" );
+        JButton     reset   = new JButton( "Reset" );
+        JButton     cancel  = new JButton( "Cancel" );
+
+        okay.addActionListener( e -> close( JOptionPane.OK_OPTION ) );
+        cancel.addActionListener( e -> close( JOptionPane.CANCEL_OPTION ) );
+        apply.addActionListener( e -> editor.apply() );
+        reset.addActionListener( e -> editor.reset() );
+        reset.addActionListener( e -> canvas.repaint() );
+
+        panel.add( okay );
+        panel.add( apply );
+        panel.add( reset );
+        panel.add( cancel );
+
+        return panel;
+    }
+    
+    /**
+     * Records the final dialog result
+     * and closes the dialog.
+     * If the final result is OK
+     * the changes in the editor
+     * are applied to the encapsulated Profile,
+     * otherwise the Profile is reset.
+     * 
+     * @param result    the final dialog result
+     */
+    private void close( int result )
+    {
+        this.result = result;
+        if ( result == JOptionPane.OK_OPTION )
+            editor.apply();
+        else
+            editor.reset();
+        setVisible( false );
     }
 }

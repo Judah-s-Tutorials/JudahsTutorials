@@ -36,7 +36,7 @@ public class GraphManager
         LinePropertySetTicMajor.class.getSimpleName();
     /** Name of the LinePropertiesSetTicMinor class. */
     private static final String ticMinorPropertiesName  =
-        LinePropertySetTicMajor.class.getSimpleName();
+        LinePropertySetTicMinor.class.getSimpleName();
     /** Name of the LinePropertySetGridLines class. */
     private static final String gridLinesPropertiesName =
         LinePropertySetGridLines.class.getSimpleName();
@@ -129,6 +129,7 @@ public class GraphManager
         if ( gtx != null )
             gtx.dispose();
         gtx = (Graphics2D)graphics.create();
+        gridUnit = profile.getGridUnit();
     }
     
     /**

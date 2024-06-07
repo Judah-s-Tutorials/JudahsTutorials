@@ -5,10 +5,10 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 
-import javax.swing.JPanel;
+import javax.swing.JComponent;
 
 @SuppressWarnings("serial")
-public class Canvas extends JPanel
+public class Canvas extends JComponent
 {
     private final GraphManager  drawManager;
 

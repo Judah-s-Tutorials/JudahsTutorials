@@ -211,6 +211,11 @@ public class GraphManagerDialog extends JDialog
         return panel;
     }
     
+    /**
+     * Returns a panel containing the grid unit editor.
+     * 
+     * @return  a panel containing the grid unit editor
+     */
     private JPanel getGridPanel()
     {
         GraphPropertySet    propSet = drawManager.getMainWindow();
@@ -343,7 +348,7 @@ public class GraphManagerDialog extends JDialog
         }
     }
     
-    public void makeSpinnerDesc( 
+    private void makeSpinnerDesc( 
         LinePropertySet propSet,
         String labelText,
         double step

@@ -28,6 +28,8 @@ import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 import com.acmemail.judah.cartesian_plane.input.FileManager;
+import com.acmemail.judah.cartesian_plane.sandbox.profile.Profile;
+import com.acmemail.judah.cartesian_plane.sandbox.profile.ProfileEditorDialog;
 
 /**
  * The menu bar for the main window
@@ -169,7 +171,8 @@ public class CPMenuBar extends JMenuBar
      * from a given PropertyChangeEvent
      * converts it to a boolean value
      * and returns the result.
-a + 2pi - 5apap     * @param evt   the given PropertyChangeEvent
+     * 
+     * @param evt   the given PropertyChangeEvent
      * 
      * @return
      *      the newValue property of the given PropertyChangeEvent
@@ -196,6 +199,8 @@ a + 2pi - 5apap     * @param evt   the given PropertyChangeEvent
             new JCheckBoxMenuItem( "Edit Graph Properties", false );
         JCheckBoxMenuItem   lineItem    =
             new JCheckBoxMenuItem( "Edit Line Properties", false );
+        JCheckBoxMenuItem   profileItem =
+            new JCheckBoxMenuItem( "Edit Profile", false );
         graphItem.addItemListener( e -> 
             graphDialog.setVisible( graphItem.isSelected() )
         );
@@ -204,10 +209,23 @@ a + 2pi - 5apap     * @param evt   the given PropertyChangeEvent
         );
         lineDialog.addComponentListener( new SynchVisible( lineItem ) );
         graphDialog.addComponentListener( new SynchVisible( graphItem ) );
+        profileItem.addActionListener( this::showProfileEditorDialog );
         menu.add( graphItem );
         menu.add( lineItem );
+        menu.add( profileItem );
         
         return menu;
+    }
+    
+    private void showProfileEditorDialog( ActionEvent evt )
+    {
+        Profile             profile = new Profile();
+        ProfileEditorDialog dialog  = 
+            new ProfileEditorDialog( cpFrame, profile );
+        int                 result  = dialog.showDialog();
+        if ( result == JOptionPane.OK_OPTION )
+            profile.apply();
+            
     }
     
     /**
