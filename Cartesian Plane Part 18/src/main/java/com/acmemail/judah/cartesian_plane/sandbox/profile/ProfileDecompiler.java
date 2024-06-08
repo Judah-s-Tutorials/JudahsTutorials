@@ -12,30 +12,15 @@ import javax.swing.JOptionPane;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
+import com.acmemail.judah.cartesian_plane.components.Profile;
 
 /**
- * The purpose of this class
- * is to parse a stream of strings (Stream&lt;String&gt;)
- * equivalent to that
- * produced by {@linkplain Profile#getProperties()},
- * creating a Profile
- * encapsulating the values
- * described by the stream.
- * The general expectation 
- * is that the input stream
- * was originally produced by {@linkplain Profile#getProperties()},
- * but the stream can be modified
- * or built from scratch by the user.
- * For a description of the syntax
- * of the input stream,
- * see {@linkplain Profile}.
+ * This class parses a stream of strings,
+ * producing a Profile containing the properties
+ * encapsulated by the stream.
+ * The syntax of the input
+ * is described by the {@link Profile} class.
  * 
- * @author Jack Straub
- * 
- * @see Profile
- * @see Profile#getProperties()
- */
-/**
  * @author Jack Straub
  */
 public class ProfileDecompiler

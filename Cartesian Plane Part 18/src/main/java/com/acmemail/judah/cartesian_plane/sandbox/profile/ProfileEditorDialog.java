@@ -9,6 +9,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**
@@ -60,17 +61,34 @@ public class ProfileEditorDialog extends JDialog
         GUIUtils.center( this );
     }
     
+    /**
+     * Posts this dialog,
+     * waits for it to complete,
+     * and returns the final status
+     * (JOptionPane.OK_OPTION or JOptionPane.CANCEL_OPTION);
+
+     * @return  the status of the dialog upon closing
+     */
     public int showDialog()
     {
         setVisible( true );
         return result;
     }
 
+    /**
+     * Applies the most recent Profile edits
+     * to the PropertyManager.
+     */
     public void apply()
     {
         editor.apply();
     }
 
+    /**
+     * Rejects all the most recent Profile edits
+     * and restores Profile property values
+     * from the PropertyManaager.
+     */
     public void reset()
     {
         editor.reset();

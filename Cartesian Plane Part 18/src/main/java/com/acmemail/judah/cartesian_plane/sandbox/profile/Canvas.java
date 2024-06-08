@@ -7,13 +7,46 @@ import java.awt.Toolkit;
 
 import javax.swing.JComponent;
 
+import com.acmemail.judah.cartesian_plane.components.Profile;
+
+/**
+ * Component to display the background of a graph.
+ * The background includes the background color,
+ * grid lines, tics, 
+ * and labels displayed 
+ * on the major tics.
+ * 
+ * @author Jack Straub
+ */
 @SuppressWarnings("serial")
 public class Canvas extends JComponent
 {
+    /** 
+     * Encapsulates to various drawing operations.
+     * It is initialized in the constructor,
+     * and utilized in the {@link #paintComponent(Graphics)} method.
+     */
     private final GraphManager  drawManager;
 
+    /** 
+     * Graphics context.
+     * Initialized using a copy of the graphics context
+     * every time {@link #paintComponent(Graphics)}.
+     */
     private Graphics2D          gtx;
     
+    /**
+     * Constructor.
+     * Initializes all aspects of this components GUI.
+     * Specifically,
+     * its size is set to 50%
+     * or the screen size.
+     * 
+     * @param profile   
+     *      the Profile containing the properties that control the drawing
+     *      
+     * @see GraphManager
+     */
     public Canvas( Profile profile )
     {
         drawManager = new GraphManager( this, profile );
@@ -28,6 +61,12 @@ public class Canvas extends JComponent
         setPreferredSize( canvasSize );
     }
     
+    /**
+     * Draws the background components of a graph
+     * using the given graphics context.
+     * 
+     * @param   graphics    given graphics context
+     */
     @Override
     public void paintComponent( Graphics graphics )
     {
@@ -43,10 +82,5 @@ public class Canvas extends JComponent
         drawManager.drawText();
         
         gtx.dispose();
-    }
-    
-    public GraphManager getDrawManager()
-    {
-        return drawManager;
     }
 }

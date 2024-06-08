@@ -9,15 +9,11 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import javax.swing.JComponent;
 
-import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.LineGenerator;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
@@ -25,7 +21,22 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
+import com.acmemail.judah.cartesian_plane.components.Profile;
 
+/**
+ * An object of this class
+ * is used to control the detailed drawing
+ * of the background of a graph,
+ * color, axes, grid lines, tics,
+ * and the labels drawn on the major tics.
+ * The values of the various components
+ * are encapsulated in a Profile
+ * provided by the user.
+ * 
+ * @author Jack Straub
+ * 
+ * @see LineGenerator
+ */
 public class GraphManager
 {
     /** Name of the LinePropertiesSetAxes class. */

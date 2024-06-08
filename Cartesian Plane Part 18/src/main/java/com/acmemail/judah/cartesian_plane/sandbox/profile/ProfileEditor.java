@@ -37,6 +37,7 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
+import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 /**
@@ -107,7 +108,7 @@ public class ProfileEditor extends JPanel
         new ArrayList<>();
     /** 
      * Links a label associated with a line property
-     * (e.g. {@link #weightLalabel},{@link #lenLabel})
+     * (e.g. {@link #weightLabel},{@link #lenLabel})
      * and LineProperSet type 
      * (e.g. {@link #axesSet}, {@link #gridLinesSet}
      * to a SpinnerDescriptor that controls editing
@@ -470,7 +471,7 @@ public class ProfileEditor extends JPanel
      * the text is also used to map the spinner
      * to the given LinePropertySet,
      * and must be one of the labels defined above
-     * (see {@linkplain #weightLabel, #lenLabel, etc.}).
+     * (see {@linkplain #weightLabel}, {@link #lenLabel}, etc.).
      * 
      * @param propSet   the given LinePropertySet
      * @param labelText the text with which to label the spinner

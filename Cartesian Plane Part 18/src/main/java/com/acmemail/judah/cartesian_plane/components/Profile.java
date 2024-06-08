@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.profile;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
@@ -8,13 +8,6 @@ import java.util.stream.Stream;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 /**
@@ -490,7 +483,7 @@ public class Profile
      * 
      * @see #format(String, String)
      */
-    public String fromClass( Class<?> clazz )
+    private String fromClass( Class<?> clazz )
     {
         String  result  = format( CLASS, clazz.getSimpleName() );
         return result;

@@ -28,7 +28,6 @@ import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 import com.acmemail.judah.cartesian_plane.input.FileManager;
-import com.acmemail.judah.cartesian_plane.sandbox.profile.Profile;
 import com.acmemail.judah.cartesian_plane.sandbox.profile.ProfileEditorDialog;
 
 /**
