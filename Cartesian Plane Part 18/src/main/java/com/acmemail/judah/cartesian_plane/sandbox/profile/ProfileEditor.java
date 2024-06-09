@@ -31,6 +31,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.components.ColorEditor;
+import com.acmemail.judah.cartesian_plane.components.FontEditorDialog;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;

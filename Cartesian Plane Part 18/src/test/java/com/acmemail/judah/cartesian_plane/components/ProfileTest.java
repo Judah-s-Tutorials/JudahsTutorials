@@ -15,14 +15,42 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 
+/**
+ * This test mainly involves getters and setters,
+ * and the apply and reset function. 
+ * My position is that
+ * we don't have to put every single property
+ * to the test.
+ * For example,
+ * making sure that every property in the GraphPropertySetMW class
+ * is handled correctly
+ * is the job of GraphPropertiesMWTest;
+ * the job of validating operations
+ * for the LinePropertySet subclasses
+ * is the responsibility 
+ * of the JUnit test class
+ * for each subclass.
+ * I propose the we should test the getter and setter,
+ * and the apply and reset logic,
+ * for one property in each of the
+ * GraphPropertySetMW class
+ * and the LinePropertySet subclasses.
+ * We also have to test the logic
+ * for the Grid Unit property,
+ * which is not a member
+ * of the above classes.
+ * 
+ * @author Jack Straub
+ * 
+ * @see https://softwareengineering.stackexchange.com/questions/315815/method-returning-an-unmodifiable-list
+ */
 class ProfileTest
 {
     /**
      * Prototype Profile; 
-     * this is an unmodifiable list.
-     * Contains the values of the profile properties
+     * contains the values of the profile properties
      * obtained from the PropertyManager
-     * before any new property values
+     * before any edited property values
      * are committed.
      * 
      * @see #afterEach()
@@ -58,66 +86,28 @@ class ProfileTest
     @Test
     public void testGridUnit()
     {
-        Profile pmgrProfile = new Profile();
         testFloatProperty(
-            pmgrProfile,
             protoProfile::getGridUnit,
             distinctProfile::getGridUnit,
             workingProfile::getGridUnit,
-            pmgrProfile::getGridUnit,
             workingProfile::setGridUnit
         );
-        
     }
     
     public void testMainWindowProperties()
     {
-        Profile             pmgrProfile     = new Profile();
         GraphPropertySet    protoProps      = protoProfile.getMainWindow();
         GraphPropertySet    distinctProps   = 
             distinctProfile.getMainWindow();
         GraphPropertySet    workingProps    = 
             workingProfile.getMainWindow();
-        GraphPropertySet    pmgrProps       = pmgrProfile.getMainWindow();
 
         testFloatProperty(
-            pmgrProfile,
             protoProps::getFontSize,
             distinctProps::getFontSize,
             workingProps::getFontSize,
-            pmgrProps::getFontSize,
             workingProps::setFontSize
         );
-    }
-    
-    @Test
-    public void testGridUnit2()
-    {
-        float   protoGridUnit       = protoProfile.getGridUnit();
-        float   distinctGridUnit    = distinctProfile.getGridUnit();
-        // sanity test
-        assertNotEquals( protoGridUnit, distinctGridUnit );
-
-        assertEquals( protoGridUnit, workingProfile.getGridUnit() );
-        // change the grid unit; make sure the set sticks
-        workingProfile.setGridUnit( distinctGridUnit );
-        assertEquals( distinctGridUnit, workingProfile.getGridUnit() );
-        
-        // Reset the working profile; the working profile should return
-        // to the prototype value, and the PropertyManager should
-        // *not* be updated.
-        workingProfile.reset();
-        Profile currProfile = new Profile();
-        assertEquals( protoGridUnit, workingProfile.getGridUnit() );
-        assertEquals( protoGridUnit, currProfile.getGridUnit() );
-        
-        // Change the working profile, then apply. The working profile
-        // and the PropertyManager should reflect the updated value.
-        workingProfile.setGridUnit( distinctGridUnit );
-        workingProfile.apply();
-        currProfile.reset();
-        assertEquals( distinctGridUnit, workingProfile.getGridUnit() );
-        assertEquals( distinctGridUnit, currProfile.getGridUnit() );
     }
 
     @Test
@@ -137,18 +127,33 @@ class ProfileTest
     )
     public void testGetLinePropertySet( String name )
     {
-        LinePropertySet set     = workingProfile.getLinePropertySet( name );
+        LinePropertySet set     = 
+            workingProfile.getLinePropertySet( name );
         assertNotNull( set );
         String          actName = set.getClass().getSimpleName();
         assertEquals( name, actName );
+        
+        LinePropertySet     protoProps      = 
+            protoProfile.getLinePropertySet( name );
+        LinePropertySet     distinctProps   = 
+            distinctProfile.getLinePropertySet( name );
+        LinePropertySet     workingProps    = 
+            workingProfile.getLinePropertySet( name );
+
+        // Not all LinePropertySet classes support all properties, but
+        // they all support Stroke, which we will use in the test.
+        testFloatProperty(
+            protoProps::getStroke,
+            distinctProps::getStroke,
+            workingProps::getStroke,
+            workingProps::setStroke
+        );
     }
     
     private void testFloatProperty(
-        Profile        testProfile,
         Supplier<Float> protoGetter,
         Supplier<Float> distinctGetter,
         Supplier<Float> workingGetter,
-        Supplier<Float> pmgrGetter,
         Consumer<Float> workingSetter
     )
     {
@@ -162,11 +167,7 @@ class ProfileTest
         // change the working profile, verify getter;
         // verify PropertyManager not updated.
         workingSetter.accept( distinctVal );
-        testProfile.reset();
         assertEquals( distinctVal, workingGetter.get() );
-        assertEquals( protoVal, pmgrGetter.get() );
-        
-        // reset the working profile; verify that it resets
         workingProfile.reset();
         assertEquals( protoVal, workingGetter.get() );
         
@@ -174,8 +175,8 @@ class ProfileTest
         // working profile and property manager are changed.
         workingSetter.accept( distinctVal );
         workingProfile.apply();
-        testProfile.reset();
         assertEquals( distinctVal, workingGetter.get() );
-        assertEquals( distinctVal, pmgrGetter.get() );
+        workingProfile.reset();
+        assertEquals( distinctVal, workingGetter.get() );
     }
 }

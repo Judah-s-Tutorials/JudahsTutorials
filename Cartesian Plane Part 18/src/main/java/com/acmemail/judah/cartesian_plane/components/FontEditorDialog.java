@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.profile;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -9,9 +9,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-
-import com.acmemail.judah.cartesian_plane.components.FontEditor;
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 
 /**
  * Dialog containing a {@link FontEditor},
@@ -84,6 +81,16 @@ public class FontEditorDialog extends JDialog
         reset( null );
         setVisible( true );
         return result;
+    }
+    
+    /**
+     * Gets the encapsulated FontEditor.
+     * 
+     * @return  the encapsulated FontEditor
+     */
+    public FontEditor getFontEditor()
+    {
+        return editor;
     }
     
     /**
