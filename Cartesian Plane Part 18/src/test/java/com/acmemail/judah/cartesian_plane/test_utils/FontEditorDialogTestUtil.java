@@ -74,16 +74,6 @@ public class FontEditorDialogTestUtil
     private Object  adHocObj   = null;
     
     /**
-     * Returns the main window properties.
-     * 
-     * @return  the main window properties
-     */
-    public GraphPropertySet getMainWindow()
-    {
-        return mainWindow;
-    }
-    
-    /**
      * Restores the working profile properties
      * to their original values.
      */
@@ -153,15 +143,28 @@ public class FontEditorDialogTestUtil
     }
     
     /**
-     * Gets the font style from the current profile.
+     * Obtains the Profile being used
+     * by this test utility.
      * 
-     * @return  the font style from the current profile
+     * @return  the Profile being used by this test utility
      */
-    public int getProfileStyle()
+    public Profile getProfile()
     {
-        int style   =
-            getIntProperty( () -> mainWindow.getFontStyle() );
-        return style;
+        return profile;
+    }
+    
+    /**
+     * Get the GraphPropertySet encapsulated
+     * in the FontEditorDialog under test.
+     * 
+     * @return  GraphPropertySet encapsulated in the FontEditorDialog
+     */
+    public GraphPropertySet getPropertySet()
+    {
+        Object  value   = getProperty( () -> dialog.getPropertySet() );
+        assertNotNull( value );
+        assertTrue( value instanceof GraphPropertySet );
+        return (GraphPropertySet)value;
     }
     
     /**

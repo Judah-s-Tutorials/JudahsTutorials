@@ -163,6 +163,15 @@ class FontEditorDialogTest
             assertEquals( origProfileColor, testUtil.getProfileColor() );
     }
     
+    @Test
+    public void testGetPropertySet()
+    {
+        Profile             testProfile     = testUtil.getProfile();
+        GraphPropertySet    expPropertySet  = testProfile.getMainWindow();
+        GraphPropertySet    actPropertySet  = testUtil.getPropertySet();
+        assertEquals( expPropertySet, actPropertySet );
+    }
+    
     private void testBoolean( 
         boolean           okay,
         Consumer<Boolean> guiSetter, 

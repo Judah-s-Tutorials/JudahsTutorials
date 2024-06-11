@@ -7,6 +7,7 @@ import java.awt.Toolkit;
 
 import javax.swing.JComponent;
 
+import com.acmemail.judah.cartesian_plane.components.GraphManager;
 import com.acmemail.judah.cartesian_plane.components.Profile;
 
 /**

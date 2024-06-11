@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.profile;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -15,13 +15,6 @@ import java.util.stream.StreamSupport;
 import javax.swing.JComponent;
 
 import com.acmemail.judah.cartesian_plane.LineGenerator;
-import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
-import com.acmemail.judah.cartesian_plane.components.Profile;
 
 /**
  * An object of this class
@@ -51,9 +44,6 @@ public class GraphManager
     /** Name of the LinePropertySetGridLines class. */
     private static final String gridLinesPropertiesName =
         LinePropertySetGridLines.class.getSimpleName();
-
-    /** Convenient declaration of PropertyManager singleton. */
-    private final PropertyManager   pMgr    = PropertyManager.INSTANCE;
         
     /** The component in which the sample graph is to be drawn. */
     private final JComponent        comp;
@@ -294,9 +284,9 @@ public class GraphManager
         // Set the gridUnit to the width of the grid...
         // ... set the LPU to 1...
         // ... LineGenerator will iterate lines only for the axes.
-        Rectangle       rect    = comp.getVisibleRect();
-        float   gridUnit    = comp.getWidth();
-        LineGenerator   lineGen = 
+        Rectangle       rect        = comp.getVisibleRect();
+        float           gridUnit    = comp.getWidth();
+        LineGenerator   lineGen     = 
             new LineGenerator( rect, gridUnit, 1 );
         lineGen.forEach( gtx::draw );
         setColor( null );
