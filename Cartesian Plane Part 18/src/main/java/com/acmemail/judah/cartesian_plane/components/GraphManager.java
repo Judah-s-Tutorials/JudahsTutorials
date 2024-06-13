@@ -131,7 +131,13 @@ public class GraphManager
             gtx.dispose();
         gtx = (Graphics2D)graphics.create();
         gridUnit = profile.getGridUnit();
-    }
+        
+        int     width       = comp.getWidth();
+        int     height      = comp.getHeight();
+        Color   color       = profile.getMainWindow().getBGColor();
+        gtx.setColor( color );
+        gtx.fillRect( 0, 0, width, height );
+     }
     
     /**
      * Draw the background of the sample graph.
@@ -159,6 +165,7 @@ public class GraphManager
             gtx.setStroke( new BasicStroke( stroke ) );
             gtx.setColor( gridLine.getColor() );
             lineGen.forEach( gtx::draw );
+            
             setColor( null );
         }
     }

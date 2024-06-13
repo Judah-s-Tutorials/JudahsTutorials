@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.app;
+package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
