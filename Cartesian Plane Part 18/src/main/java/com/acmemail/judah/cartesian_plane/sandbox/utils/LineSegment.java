@@ -33,7 +33,7 @@ public class LineSegment
     /**
      * Constructor.
      * Calculates the bounding rectangle 
-     * of the line segment containing the point.
+     * of the line segment containing the given point.
      * 
      * @param origin
      *      the point from which to determine the bounding rectangle
@@ -111,12 +111,6 @@ public class LineSegment
      * Determines the right edge of the bounding rectangle.
      * 
      * @return  the right edge of the bounding rectangle
-     */
-    /**
-     * @return
-     */
-    /**
-     * @return
      */
     private int getRight()
     {

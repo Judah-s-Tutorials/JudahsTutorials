@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.components;
+package com.acmemail.judah.cartesian_plane;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -9,12 +9,17 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
-import java.util.function.Predicate;
+import java.util.Iterator;
 import java.util.stream.StreamSupport;
 
 import javax.swing.JComponent;
 
-import com.acmemail.judah.cartesian_plane.LineGenerator;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
+import com.acmemail.judah.cartesian_plane.components.Profile;
 
 /**
  * An object of this class
@@ -28,7 +33,7 @@ import com.acmemail.judah.cartesian_plane.LineGenerator;
  * 
  * @author Jack Straub
  * 
- * @see LineGenerator
+ * @see NewLineGen
  */
 public class GraphManager
 {
@@ -160,8 +165,8 @@ public class GraphManager
             float           spacing = gridLine.getSpacing();
             float           stroke  = gridLine.getStroke();
             Rectangle       rect    = comp.getVisibleRect();
-            LineGenerator   lineGen = 
-                new LineGenerator( rect, gridUnit, spacing );
+            NewLineGen   lineGen = 
+                new NewLineGen( rect, gridUnit, spacing );
             gtx.setStroke( new BasicStroke( stroke ) );
             gtx.setColor( gridLine.getColor() );
             lineGen.forEach( gtx::draw );
@@ -198,8 +203,8 @@ public class GraphManager
         gtx.setFont( labelFont );
         FontRenderContext   frc     = gtx.getFontRenderContext();
         Rectangle           rect    = comp.getVisibleRect();
-        LineGenerator       lineGen = 
-            new LineGenerator( 
+        NewLineGen       lineGen = 
+            new NewLineGen( 
                 rect, 
                 gridUnit, 
                 ticMajorMPU,
@@ -207,7 +212,7 @@ public class GraphManager
                 LineGenerator.VERTICAL
             );
         int         numLeft     = 
-            (int)(lineGen.getTotalVerticalLines() / 2);
+            (int)(lineGen.getVertLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
         float       nextLabel   = -numLeft * labelIncr;
         for ( Line2D line : lineGen )
@@ -250,16 +255,16 @@ public class GraphManager
         gtx.setFont( labelFont );
         FontRenderContext   frc = gtx.getFontRenderContext();
         Rectangle       rect    = comp.getVisibleRect();
-        LineGenerator   lineGen = 
-            new LineGenerator( 
+        NewLineGen   lineGen = 
+            new NewLineGen( 
                 rect, 
                 gridUnit, 
                 ticMajorMPU,
                 ticMajorLen,
-                LineGenerator.HORIZONTAL
+                NewLineGen.HORIZONTAL
             );
         int         numAbove    = 
-            (int)(lineGen.getTotalHorizontalLines() / 2);
+            (int)(lineGen.getHorLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
         float       nextLabel   = numAbove * labelIncr;
         for ( Line2D line : lineGen )
@@ -290,12 +295,14 @@ public class GraphManager
         
         // Set the gridUnit to the width of the grid...
         // ... set the LPU to 1...
-        // ... LineGenerator will iterate lines only for the axes.
+        // ... NewLineGen will iterate lines only for the axes.
         Rectangle       rect        = comp.getVisibleRect();
         float           gridUnit    = comp.getWidth();
-        LineGenerator   lineGen     = 
-            new LineGenerator( rect, gridUnit, 1 );
-        lineGen.forEach( gtx::draw );
+        NewLineGen   lineGen     = 
+            new NewLineGen( rect, gridUnit, 1, 0 );
+        Iterator<Line2D>    iter    = lineGen.axesIterator();
+        gtx.draw( iter.next() );
+        gtx.draw( iter.next() );
         setColor( null );
     }
 
@@ -310,20 +317,18 @@ public class GraphManager
             float           ticMinorMPU = ticMinor.getSpacing();
             float           ticMinorLen = ticMinor.getLength();
             Rectangle       rect        = comp.getVisibleRect();
-            LineGenerator   lineGen     = 
-                new LineGenerator( 
+            NewLineGen   lineGen     = 
+                new NewLineGen( 
                     rect, 
                     gridUnit, 
                     ticMinorMPU,
                     ticMinorLen,
-                    LineGenerator.BOTH
+                    NewLineGen.BOTH
                 );
             gtx.setStroke( new BasicStroke( ticMinor.getStroke() ) );
             gtx.setColor( ticMinor.getColor() );
             StreamSupport
                 .stream( lineGen.spliterator(), false )
-                .filter( Predicate.not(lineGen::isXAxis) )
-                .filter( Predicate.not(lineGen::isYAxis) )
                 .forEach( gtx:: draw );
             setColor( null );
         }
@@ -339,66 +344,22 @@ public class GraphManager
         {
             setColor( ticMajor.getColor() );
             Rectangle       rect    = comp.getVisibleRect();
-            LineGenerator   lineGen = 
-                new LineGenerator( 
+            NewLineGen   lineGen = 
+                new NewLineGen( 
                     rect, 
                     gridUnit, 
                     ticMajor.getSpacing(),
                     ticMajor.getLength(),
-                    LineGenerator.BOTH
+                    NewLineGen.BOTH
                 );
             gtx.setStroke( new BasicStroke( ticMajor.getStroke() ) );
             gtx.setColor( ticMajor.getColor() );
             StreamSupport
                 .stream( lineGen.spliterator(), false )
-                .filter( Predicate.not(lineGen::isXAxis) )
-                .filter( Predicate.not(lineGen::isYAxis) )
                 .forEach( gtx::draw );
             setColor( null );
         }
     }
-/*    
-    public Color getColor()
-    {
-        Color   color   = mainWindow.getBGColor();
-        return color;
-    }
-
-    public GraphPropertySet getMainWindow()
-    {
-        return mainWindow;
-    }
-
-    public LinePropertySetAxes getAxis()
-    {
-        return axis;
-    }
-
-    public LinePropertySetTicMajor getTicMajor()
-    {
-        return ticMajor;
-    }
-
-    public LinePropertySetTicMinor getTicMinor()
-    {
-        return ticMinor;
-    }
-
-    public LinePropertySetGridLines getGridLine()
-    {
-        return gridLine;
-    }
-
-    public float getGridUnit()
-    {
-        return gridUnit;
-    }
-
-    public void setGridUnit(float gridUnit)
-    {
-        this.gridUnit = gridUnit;
-    }
-*/
     
     /**
      * Configure the color in the graphics context.
