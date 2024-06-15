@@ -33,7 +33,7 @@ import com.acmemail.judah.cartesian_plane.components.Profile;
  * 
  * @author Jack Straub
  * 
- * @see NewLineGen
+ * @see LineGenerator
  */
 public class GraphManager
 {
@@ -165,8 +165,8 @@ public class GraphManager
             float           spacing = gridLine.getSpacing();
             float           stroke  = gridLine.getStroke();
             Rectangle       rect    = comp.getVisibleRect();
-            NewLineGen   lineGen = 
-                new NewLineGen( rect, gridUnit, spacing );
+            LineGenerator   lineGen = 
+                new LineGenerator( rect, gridUnit, spacing );
             gtx.setStroke( new BasicStroke( stroke ) );
             gtx.setColor( gridLine.getColor() );
             lineGen.forEach( gtx::draw );
@@ -203,8 +203,8 @@ public class GraphManager
         gtx.setFont( labelFont );
         FontRenderContext   frc     = gtx.getFontRenderContext();
         Rectangle           rect    = comp.getVisibleRect();
-        NewLineGen       lineGen = 
-            new NewLineGen( 
+        LineGenerator       lineGen = 
+            new LineGenerator( 
                 rect, 
                 gridUnit, 
                 ticMajorMPU,
@@ -255,13 +255,13 @@ public class GraphManager
         gtx.setFont( labelFont );
         FontRenderContext   frc = gtx.getFontRenderContext();
         Rectangle       rect    = comp.getVisibleRect();
-        NewLineGen   lineGen = 
-            new NewLineGen( 
+        LineGenerator   lineGen = 
+            new LineGenerator( 
                 rect, 
                 gridUnit, 
                 ticMajorMPU,
                 ticMajorLen,
-                NewLineGen.HORIZONTAL
+                LineGenerator.HORIZONTAL
             );
         int         numAbove    = 
             (int)(lineGen.getHorLineCount() / 2);
@@ -295,11 +295,11 @@ public class GraphManager
         
         // Set the gridUnit to the width of the grid...
         // ... set the LPU to 1...
-        // ... NewLineGen will iterate lines only for the axes.
+        // ... LineGenerator will iterate lines only for the axes.
         Rectangle       rect        = comp.getVisibleRect();
         float           gridUnit    = comp.getWidth();
-        NewLineGen   lineGen     = 
-            new NewLineGen( rect, gridUnit, 1, 0 );
+        LineGenerator   lineGen     = 
+            new LineGenerator( rect, gridUnit, 1, 0 );
         Iterator<Line2D>    iter    = lineGen.axesIterator();
         gtx.draw( iter.next() );
         gtx.draw( iter.next() );
@@ -317,13 +317,13 @@ public class GraphManager
             float           ticMinorMPU = ticMinor.getSpacing();
             float           ticMinorLen = ticMinor.getLength();
             Rectangle       rect        = comp.getVisibleRect();
-            NewLineGen   lineGen     = 
-                new NewLineGen( 
+            LineGenerator   lineGen     = 
+                new LineGenerator( 
                     rect, 
                     gridUnit, 
                     ticMinorMPU,
                     ticMinorLen,
-                    NewLineGen.BOTH
+                    LineGenerator.BOTH
                 );
             gtx.setStroke( new BasicStroke( ticMinor.getStroke() ) );
             gtx.setColor( ticMinor.getColor() );
@@ -344,13 +344,13 @@ public class GraphManager
         {
             setColor( ticMajor.getColor() );
             Rectangle       rect    = comp.getVisibleRect();
-            NewLineGen   lineGen = 
-                new NewLineGen( 
+            LineGenerator   lineGen = 
+                new LineGenerator( 
                     rect, 
                     gridUnit, 
                     ticMajor.getSpacing(),
                     ticMajor.getLength(),
-                    NewLineGen.BOTH
+                    LineGenerator.BOTH
                 );
             gtx.setStroke( new BasicStroke( ticMajor.getStroke() ) );
             gtx.setColor( ticMajor.getColor() );

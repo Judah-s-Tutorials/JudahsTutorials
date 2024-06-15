@@ -1,0 +1,30 @@
+table.js-plain
+{
+	border-collapse: collapse; 
+	border: .1em solid black; 
+	max-width: 50em;
+}
+
+th.js-plain,td.js-plain
+{
+	border: .1em solid black;
+	padding: .3em;
+}
+
+tr.js-empty
+{
+	background-color: #CCCCCC;
+	height: 1em;
+}
+
+.js-codeblock
+{
+	margin-top: .25em;
+	margin-left: 5em;
+	padding: 1em;
+	border: .1em solid black;
+	background-color: #EEEEEE;
+	color: black;
+	white-space: pre;
+	font-family: "courier new", monospace;
+}

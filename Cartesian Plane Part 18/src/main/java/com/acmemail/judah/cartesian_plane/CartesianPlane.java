@@ -886,8 +886,8 @@ public class CartesianPlane
             gtx.setColor( ticMinorColor );
           StreamSupport
               .stream( lineGen.spliterator(), false )
-              .filter( Predicate.not(lineGen::isXAxis) )
-              .filter( Predicate.not(lineGen::isYAxis) )
+//              .filter( Predicate.not(lineGen::isXAxis) )
+//              .filter( Predicate.not(lineGen::isYAxis) )
               .forEach( gtx:: draw );
         }
     }
@@ -911,8 +911,8 @@ public class CartesianPlane
             gtx.setColor( ticMajorColor );
             StreamSupport
                 .stream( lineGen.spliterator(), false )
-                .filter( Predicate.not(lineGen::isXAxis) )
-                .filter( Predicate.not(lineGen::isYAxis) )
+//                .filter( Predicate.not(lineGen::isXAxis) )
+//                .filter( Predicate.not(lineGen::isYAxis) )
                 .forEach( gtx::draw );
         }
     }
@@ -935,7 +935,7 @@ public class CartesianPlane
                 LineGenerator.HORIZONTAL
             );
         int         numAbove    = 
-            (int)(lineGen.getTotalHorizontalLines() / 2);
+            (int)(lineGen.getHorLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
         float       nextLabel   = numAbove * labelIncr;
         for ( Line2D line : lineGen )
