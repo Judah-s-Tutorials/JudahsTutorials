@@ -414,7 +414,7 @@ public class LineGenerator implements Iterable<Line2D>
             Point2D left    = new Point2D.Double( xco1, yco );
             Point2D right   = new Point2D.Double( xco2, yco );
             Line2D  line    = new Line2D.Double( left, right );
-            horLines.add( line );
+            horLines.add( 0, line );
         }
 
         for ( 
@@ -451,7 +451,7 @@ public class LineGenerator implements Iterable<Line2D>
             Point2D top     = new Point2D.Double( xco, yco1 );
             Point2D bottom  = new Point2D.Double( xco, yco2 );
             Line2D  line    = new Line2D.Double( top, bottom );
-            vertLines.add( line );
+            vertLines.add( 0, line );
         }
 
         for ( 
