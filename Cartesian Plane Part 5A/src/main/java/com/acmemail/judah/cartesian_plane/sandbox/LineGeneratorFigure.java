@@ -23,6 +23,8 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  */
 public class LineGeneratorFigure extends JPanel
 {
+    private static final long serialVersionUID = 1L;
+
     /** Background color of the Canvas. */
     private static final Color          bgColor         = 
         new Color( .9f, .9f, .9f );

@@ -25,6 +25,7 @@ import com.acmemail.judah.cartesian_plane.Root;
  */
 public class LabelDrawingFigure extends JPanel
 {
+    private static final long serialVersionUID = 1L;
     /** The initial width of the window, in pixels. */
     private static int  initWidth           = 815;
     /** The initial height of the window, in pixels. */

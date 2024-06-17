@@ -124,7 +124,7 @@ public class LineGeneratorBaseCaseTest
                 LineGenerator.HORIZONTAL
             );
         int expNumHorizLines    = horizLines.size();
-        int actNumHorizLines    = (int)gen.getTotalHorizontalLines();
+        int actNumHorizLines    = (int)gen.getHorLineCount();
         assertEquals( expNumHorizLines, actNumHorizLines );
         
         int count   = 0;
@@ -152,7 +152,7 @@ public class LineGeneratorBaseCaseTest
                 LineGenerator.VERTICAL
             );
         int expNumVertLines = vertLines.size();
-        int actNumVertLines = (int)gen.getTotalVerticalLines();
+        int actNumVertLines = (int)gen.getVertLineCount();
         assertEquals( expNumVertLines, actNumVertLines );
         
         int count   = 0;

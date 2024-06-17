@@ -1,20 +1,46 @@
 package com.acmemail.judah.cartesian_plane;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * An instance of this class
  * is used to generate the 
- * horizontal and/or vertical lines in a grid.
- * <div>
+ * horizontal and/or vertical lines in a grid
+ * encapsulated in a given rectangle.
+ * The grid is divided into <em>units</em>
+ * (the <em>gridUnit</em> parameter),
+ * where <em>1 unit = gridUnit pixels</em>.
+ * The number of lines generated
+ * is determined by a given 
+ * number of lines per unit (the <em>LPU</em> parameter).
+ * The <em>gridUnit</em> and <em>LPU</em>
+ * are provided by the user
+ * in the constructor.
+ * Users also specify,
+ * via the constructor,
+ * whether they want to generate
+ * horizontal lines, vertical lines or both.
+ * Once constructed,
+ * the user can obtain an Iterator&lt;Line2D&gt;
+ * to generate the lines,
+ * or use a for-each loop.
+ * Lines are never generated at the edges;
+ * for example, 
+ * given a rectangle=(0, 0, 200, 300)
+ * the lines x=0, x=200, y=0, and y=300
+ * <em>will not</em> be generated.
  * <img 
  *     src="doc-files/LineGeneratorFigure.png" 
  *     alt="LineGenerator Demo"
  *     style="float:right; width:15%; height:auto;"
  * >
+ * <p>
  * Given a bounding rectangle for a grid,
  * one vertical line is always generated
  * at the horizontal center of the grid
@@ -24,40 +50,75 @@ import java.util.NoSuchElementException;
  * at the vertical center of the grid
  * (as though it were the x-axis
  * of a Cartesian plane).
- * <p>
- * The grid is divided into <em>units</em>
- * (the <em>gridUnit</em>),
- * where <em>1 unit = gridUnit pixels</em>.
- * The number of lines generated
- * is determined by a given 
- * number of lines per unit (the <em>lpu</em>).
- * The <em>gridUnit</em> and <em>lpu</em>
- * are provided by the user
- * in the constructor.
- * Users also specify,
- * via the constructor,
- * whether they want to generate
- * horizontal lines, vertical lines or both.
- * Once constructed,
- * the user can obtain an Iterator&lt;Line2D&gt;
- * to generate the lines
- * or use a for-each loop.
+ * These lines are the designated <em>axes</em>
+ * and constitute a separate category
+ * from all other lines.
+ * In particular:
  * </p>
+ * <ol>
+ * <li>
+ *      You can call {@link #axesIterator()}
+ *      to obtain the axes for the encapsulated rectangle
+ *      regardless of the values
+ *      of the other configuration parameters
+ *      (gridUnit, LPU, length, orientation).
+ * </li>
+ * <li>
+ *      The method {@link #axesIterator()}
+ *      always returns an object
+ *      that iterates over exactly two objects
+ *      (the horizontal and vertical axes).
+ * </li>
+ * <li>
+ *      For convenience,
+ *      the class method {@link #axesIterator(Rectangle2D)}
+ *      returns an iterator for the two axes
+ *      encapsulated in the given rectangle.
+ * </li>
+ * <li>
+ *      Iterators for lines other than axes
+ *      (non-axial lines)
+ *      never include lines
+ *      that are coincident with the axes.
+ *      For example,
+ *      given a LineGenerator object
+ *      with rectangle = (0, 0, 400, 100 ),
+ *      gridUnit = 50, and LPU = 1,
+ *      vertical lines will be generated at
+ *      x=50, x=100, x=150, 
+ *      x=250, x=300, and x=350.
+ * </li>
+ * </ol>
  * <p>
+ * The positions of horizontal lines
+ * are determined using the x-axis as a base;
+ * positions of vertical lines use the y-axis as a base.
+ * For example,
+ * given a LineGenerator object
+ * with rectangle = (0, 0, 280, 180 ),
+ * gridUnit = 50, and LPU = 1,
+ * the axes will be generated at x=140 and y=90;
+ * non-axial vertical lines will be generated
+ * at x=40, x=90, x=190, and x=240;
+ * non-axial horizontal lines 
+ * will be generated
+ * at y=40 and y=140.
  * It is guaranteed that 
- * horizontal line are generated sequentially,
+ * iterators traverse horizontal lines sequentially,
  * from the top of the grid to the bottom,
- * and vertical lines are generated sequentially
+ * and vertical lines are traversed sequentially,
  * from left to right.
  * </p>
- * </div>
  * <p>
  * Following is a code sample
  * that was used to generate the lines
  * in the figure at the right.
  * </p>
  * <div class="js-codeblock" style="max-width: 35em;">
-   LineGenerator   hlGen   = 
+gtx.setColor( rectColor );
+gtx.draw( boundingRect );
+
+LineGenerator   hlGen   = 
     new LineGenerator( 
         boundingRect,
         gridUnit,
@@ -65,7 +126,7 @@ import java.util.NoSuchElementException;
         -1,
         LineGenerator.HORIZONTAL
     );
-gtx.setStroke( new BasicStroke( lineWeight ));
+gtx.setStroke( new BasicStroke( lineWeight, lineCap, lineJoin ));
 gtx.setColor( hlColor );
 for ( Line2D line : hlGen )
     gtx.draw( line );
@@ -81,12 +142,19 @@ LineGenerator   vlGen   =
 gtx.setColor( vlColor );
 for ( Line2D line : vlGen )
     gtx.draw( line );
+
+gtx.setStroke( new BasicStroke( axisWeight, lineCap, lineJoin ));
+gtx.setColor( axisColor );
+Iterator<Line2D>    axisIterator    = 
+    LineGenerator.axesIterator( boundingRect );
+gtx.draw( axisIterator.next() );
+gtx.draw( axisIterator.next() );
 </div>
+ *
  * @author Jack Straub
  */
 public class LineGenerator implements Iterable<Line2D>
 {
-    /** Indicates that the iterable generates horizontal lines. */
     public static final int HORIZONTAL  = 1;
     /** Indicates that the iterable generates vertical lines. */
     public static final int VERTICAL    = 2;
@@ -94,29 +162,67 @@ public class LineGenerator implements Iterable<Line2D>
      * Indicates that the iterable generates horizontal 
      * and vertical lines. 
      */
-    public static final int BOTH        = 3;
+    public static final int BOTH        = HORIZONTAL | VERTICAL;
+
+    /** Grid unit, set in constructor. */
+    private final float         gpu;
+    /** Lines-per-unit, set in constructor. */
+    private final float         lpu;
+    /** Horizontal line length, set in constructor. */
+    private final float         horLength;
+    /** Vertical line length, set in constructor. */
+    private final float         vertLength;
+    /** Orientation, set in constructor. */
+    private final int           orientation;
     
-    private final float gridWidth;      // width of the rectangle
-    private final float gridHeight;     // height of the rectangle
-    private final float centerXco;      // center x-coordinate
-    private final float maxXco;         // right-most x-coordinate
-    private final float centerYco;      // center y-coordinate
-    private final float maxYco;         // bottom-most y-coordinate
+    /** List containing the axial lines. */
+    private final List<Line2D>  axes        = new LinkedList<>();
+    /** List containing the non-axial horizontal lines. */
+    private final List<Line2D>  horLines    = new LinkedList<>();
+    /** List containing the non-axial vertical lines. */
+    private final List<Line2D>  vertLines   = new LinkedList<>();
     
-    private final float gridUnit;       // pixels per unit
-    
-    private final float lpu;            // lines per unit
-    private final float length;         // the length of a line
-    private final int   orientation;    // HORIZONTAL, VERTICAL or BOTH
-    
-    private final float gridSpacing;    // pixels between lines
-    private final float totalHorLines;  // total number of horizontal lines
-    private final float totalVerLines;  // total number of vertical lines
+    /** 
+     * X-coordinate of the origin of the encapsulated grid. Equivalent
+     * to rect.getCenterX(), declared here for convenience. Set
+     * in constructor.
+     */
+    private final float         originXco;
+    /** 
+     * Y-coordinate of the origin of the encapsulated grid. Equivalent
+     * to rect.getCenterY(), declared here for convenience. Set
+     * in constructor.
+     */
+    private final float         originYco;
+    /**
+     * X-coordinate of the left side of the rectangle. Equivalent
+     * to rect.getMinX(), declared here for convenience. Set
+     * in constructor.
+     */
+    private final float         leftLimit;
+    /**
+     * X-coordinate of the right side of the rectangle. Equivalent
+     * to rect.getMaxX(), declared here for convenience. Set
+     * in constructor.
+     */
+    private final float         rightLimit;
+    /**
+     * Y-coordinate of the top of the rectangle. Equivalent
+     * to rect.getMinY(), declared here for convenience. Set
+     * in constructor.
+     */
+    private final float         topLimit;
+    /**
+     * Y-coordinate of the bottom of the rectangle. Equivalent
+     * to rect.getMaxY(), declared here for convenience. Set
+     * in constructor.
+     */
+    private final float         bottomLimit;
     
     /**
      * Constructor.
      * Instantiates a LineGenerator
-     * with a given bounding rectangle,
+     * with the given bounding rectangle,
      * grid unit and lines-per-unit.
      * The line length defaults to -1
      * (grid lines will span the width or height
@@ -133,23 +239,38 @@ public class LineGenerator implements Iterable<Line2D>
     {
         this( rect, gridUnit, lpu, -1, BOTH );
     }
+
+    /**
+     * Constructor.
+     * Instantiates a LineGenerator
+     * with the given bounding rectangle,
+     * grid unit, lines-per-unit and line length.
+     * The orientation will default to BOTH
+     * (the iterator will generate
+     * horizontal and vertical lines).
+     * 
+     * @param rect      the given bounding rectangle
+     * @param gridUnit  the given grid unit
+     * @param lpu       the given lines-per-unit
+     * @param length    the given line length
+     */
+    public 
+    LineGenerator( 
+        Rectangle2D rect, 
+        float       gridUnit,
+        float       lpu,
+        float       length 
+    )
+    {
+        this( rect, gridUnit, lpu, length, BOTH );    
+    }
     
     /**
      * Constructor.
      * Instantiates a LineGenerator
-     * with a given bounding rectangle,
-     * grid unit, lines-per-unit,
-     * grid line length and orientation.
-     * The line length may be -1
-     * in which case grid lines will span the width or height
-     * of the bounding rectangle.
-     * The orientation may be HORIZONTAL
-     * (the iterator will generate horizontal lines),
-     * VERTICAL
-     * (the iterator will generate vertical lines)
-     * or BOTH
-     * (the iterator will generate
-     * horizontal and vertical lines)
+     * with the given bounding rectangle,
+     * grid unit, lines-per-unit line length,
+     * and orientation.
      * 
      * @param rect          the given bounding rectangle
      * @param gridUnit      the given grid unit
@@ -165,199 +286,193 @@ public class LineGenerator implements Iterable<Line2D>
         int         orientation
     )
     {
-        gridWidth = (float)rect.getWidth();
-        gridHeight = (float)rect.getHeight();
-        centerXco = (float)rect.getCenterX();
-        maxXco = (float)rect.getMaxX();
-        centerYco = (float)rect.getCenterY();
-        maxYco = (float)rect.getMaxY();
-        this.gridUnit = gridUnit;
-        
+        this.gpu = gridUnit;
         this.lpu = lpu;
-        this.length = length;
+        this.horLength = length != -1 ? length : (float)rect.getWidth();
+        this.vertLength = length != -1 ? length : (float)rect.getHeight();
         this.orientation = orientation;
-
-        gridSpacing = gridUnit / lpu;
-        totalVerLines = (float)Math.floor( gridWidth / gridSpacing );
-        totalHorLines = (float)Math.floor( gridHeight / gridSpacing );
+        
+        originXco = (float)rect.getCenterX();
+        originYco = (float)rect.getCenterY();
+        leftLimit = (float)rect.getMinX();
+        rightLimit = (float)rect.getMaxX();
+        topLimit = (float)rect.getMinY();
+        bottomLimit = (float)rect.getMaxY();
+        computeHorizontals();
+        computeVerticals();
+        computeAxes();
     }
-
+    
     /**
-     * Returns an iterator for horizontal and/or vertical lines.
-     * The lines returned are determined by the orientation,
-     * HORIZONTAL (horizontal lines only),
-     * VERTICAL (vertical lines only)
-     * or BOTH (horizontal and vertical lines).
-     * The user may assume
-     * that horizontal lines are generated 
-     * starting at the top of the bounding rectangle,
-     * then sequentially to the bottom.
-     * Vertical lines are generated 
-     * beginning at the left of the bounding rectangle
-     * then sequentially to the far right.
+     * Returns an iterator for the axes
+     * of a grid drawn in the given rectangle.
      * 
-     * @return  an iterator for horizontal and/or vertical lines
+     * @param rect  the given rectangle
+     * 
+     * @return  
+     *      an iterator for the axes
+     *      of a grid drawn in the given rectangle
      */
-    @Override
-    public Iterator<Line2D> iterator()
+    public static Iterator<Line2D> axesIterator( Rectangle2D rect )
     {
-        Iterator<Line2D>    iter    = null;
-        switch ( orientation )
-        {
-        case HORIZONTAL:
-            iter = new Line2DHorizontalIterator();
-            break;
-        case VERTICAL:
-            iter = new Line2DVerticalIterator();
-            break;
-        default:
-            iter = new Line2DIterator();
-        }
+        LineGenerator          lineGen = new LineGenerator( rect, 1, 1, -1 );
+        Iterator<Line2D>    iter    = lineGen.axesIterator();
         return iter;
     }
     
     /**
-     * Gets the total number of horizontal lines
-     * generated by this iterator.
-     * (Only meaningful if orientation is HORIZONTAL or BOTH.)
+     * Returns an iterator
+     * to traverse the non-axial lines
+     * of a grid drawn in the encapsulated rectangle.
+     * The lines may include 
+     * the vertical and/or horizontal lines
+     * depending on the parameters
+     * passed to the constructor.
      * 
-     * @return  the total number of horizontal lines
-     *          generated by the iterator
+     * @return 
+     *      an iterator to traverse
+     *      the non-axial lines of the encapsulated grid
+     * 
+     * See {@link #VERTICAL}, {@link #HORIZONTAL}, {@link #BOTH}.
      */
-    public float getTotalHorizontalLines()
+    @Override
+    public Iterator<Line2D> iterator()
     {
-        return totalHorLines;
+        List<Line2D>    allLines    = new ArrayList<>();
+        if ( (orientation & HORIZONTAL) != 0 )
+            allLines.addAll( horLines );
+        if ( (orientation & VERTICAL) != 0 )
+            allLines.addAll( vertLines );
+            
+        Iterator<Line2D>    iter    = allLines.iterator();
+        return iter;
     }
     
     /**
-     * Gets the total number of vertical lines
-     * generated by this iterator.
-     * (Only meaningful if orientation is VERTICAL or BOTH.)
-     * 
-     * @return  the total number of vertical lines
-     *          generated by the iterator
+     * Returns an iterator
+     * that traverses the x- and y-axes
+     * of the encapsulated grid.
+     * @return
+     *      iterator that traverses the x- and y-axes
+     *      of the encapsulated grid.
      */
-    public float getTotalVerticalLines()
+    public Iterator<Line2D> axesIterator()
     {
-        return totalVerLines;
+        return axes.iterator();
+    }
+    
+    /**
+     * Returns the number of horizontal lines
+     * in the encapsulated grid
+     * excluding the x-axis.
+     * 
+     * @return  
+     *      the number of non-axial horizontal lines
+     *      in the encapsulated grid
+     */
+    public float getHorLineCount()
+    {
+        return horLines.size();
     }
 
-    // produces a sequence of vertical lines from left to right.
-    private class Line2DVerticalIterator implements Iterator<Line2D>
+    /**
+     * Returns the number of vertical lines
+     * in the encapsulated grid
+     * excluding the y-axis.
+     * 
+     * @return  
+     *      the number of non-axial vertical lines
+     *      in the encapsulated grid
+     */
+    public float getVertLineCount()
     {
-        private final float yco1;
-        private final float yco2;
-        private float       xco;
-        
-        public Line2DVerticalIterator()
+        return vertLines.size();
+    }
+
+    /**
+     * Computes the non-axial horizontal lines
+     * in the encapsulated grid.
+     * Added to the horizontal line list
+     * in ascending order of the y-coordinates.
+     */
+    private void computeHorizontals()
+    {
+        float   spacing = gpu / lpu;
+        float   xco1    = originXco - horLength / 2;
+        float   xco2    = originXco + horLength / 2;
+
+        for ( 
+            float yco = originYco - spacing ; 
+            yco > topLimit ; 
+            yco -= spacing
+        )
         {
-            // Calculate the number of lines drawn left of the origin.
-            float   numLeft     = (float)Math.floor( totalVerLines / 2 );
-            
-            // The actual length is the length passed by the user, or,
-            // if the user passed a negative value, the height of the grid.
-            float   actLength   = length >= 0 ? length : gridHeight;
-            
-            // Calculate the top (yco1) and bottom (yco2) of the line
-            yco1 = centerYco - actLength / 2;
-            yco2 = yco1 + actLength;
-            
-            // Calculate the x-coordinate of the leftmost line. The
-            // x-coordinate is the same for both endpoints of a line.
-            // After generating a line, the x-coordinate is incremented
-            // to the next line.
-            xco = centerXco - numLeft * gridSpacing;
-        }
-        
-        @Override
-        // This method required by "implements Iterator<Line2D>"
-        public boolean hasNext()
-        {
-            // The iterator is exhausted when the x-coordinate
-            // exceeds the bounds of the grid.
-            boolean hasNext = xco < maxXco;
-            return hasNext;
+            Point2D left    = new Point2D.Double( xco1, yco );
+            Point2D right   = new Point2D.Double( xco2, yco );
+            Line2D  line    = new Line2D.Double( left, right );
+            horLines.add( 0, line );
         }
 
-        @Override
-        // This method required by "implements Iterator<Line2D>"
-        public Line2D next()
+        for ( 
+            float yco = originYco + spacing ; 
+            yco < bottomLimit ; 
+            yco += spacing
+        )
         {
-            // Throw an exception if there is no next line.
-            if ( xco > maxXco )
-            {
-                String  msg = "Grid bounds exceeded at x = " + xco;
-                throw new NoSuchElementException( msg );
-            }
-            Line2D  line    = 
-                new Line2D.Float( xco, yco1, xco, yco2 );
-            xco += gridSpacing;
-            return line;
+            Point2D left    = new Point2D.Double( xco1, yco );
+            Point2D right   = new Point2D.Double( xco2, yco );
+            Line2D  line    = new Line2D.Double( left, right );
+            horLines.add( line );
         }
     }
     
-    // Produces a sequence of horizontal lines from top to bottom
-    private class Line2DHorizontalIterator implements Iterator<Line2D>
+    /**
+     * Computes the non-axial vertical lines
+     * in the encapsulated grid.
+     * Added to the vertical line list
+     * in ascending order of the x-coordinates.
+     */
+    private void computeVerticals()
     {
-        private final float gridSpacing;
-        private final float xco1;
-        private final float xco2;
-        private float       yco;
-        
-        public Line2DHorizontalIterator()
+        float   spacing = gpu / lpu;
+        float   yco1    = originYco - vertLength / 2;
+        float   yco2    = originYco + vertLength / 2;
+
+        for ( 
+            float xco = originXco - spacing ;
+            xco > leftLimit ; 
+            xco -= spacing
+        )
         {
-            float   actLength = length >= 0 ? length : gridWidth;
-            float   numTop  = (float)Math.floor( totalHorLines / 2 );
-            gridSpacing = gridUnit / lpu;
-            xco1 = centerXco - actLength / 2;
-            xco2 = xco1 + actLength;
-            yco = centerYco - numTop * gridSpacing;
-        }
-        
-        @Override
-        public boolean hasNext()
-        {
-            boolean hasNext = yco < maxYco;
-            return hasNext;
+            Point2D top     = new Point2D.Double( xco, yco1 );
+            Point2D bottom  = new Point2D.Double( xco, yco2 );
+            Line2D  line    = new Line2D.Double( top, bottom );
+            vertLines.add( 0, line );
         }
 
-        @Override
-        public Line2D next()
+        for ( 
+            float xco = originXco + spacing ; 
+            xco < rightLimit ; 
+            xco += spacing
+        )
         {
-            if ( yco > maxYco )
-            {
-                String  msg = "Grid bounds exceeded at y = " + yco;
-                throw new NoSuchElementException( msg ); 
-            }
-            Line2D  line    = 
-                new Line2D.Float( xco1, yco, xco2, yco );
-            yco += gridSpacing;
-            return line;
+            Point2D top     = new Point2D.Double( xco, yco1 );
+            Point2D bottom  = new Point2D.Double( xco, yco2 );
+            Line2D  line    = new Line2D.Double( top, bottom );
+            vertLines.add( line );
         }
     }
     
-    private class Line2DIterator implements Iterator<Line2D>
+    /**
+     * Computes the axes of the encapsulated grid.
+     */
+    private void computeAxes()
     {
-        private final Iterator<Line2D>  horizontalIter  = 
-            new Line2DHorizontalIterator();
-        private final Iterator<Line2D>  verticalIter    = 
-            new Line2DVerticalIterator();
-        
-        @Override
-        public boolean hasNext()
-        {
-            boolean hasNext = horizontalIter.hasNext() | verticalIter.hasNext();
-            return hasNext;
-        }
-        
-        @Override
-        public Line2D next()
-        {
-            Line2D  next    =
-                horizontalIter.hasNext() ?
-                horizontalIter.next() :
-                verticalIter.next();
-            return next;
-        }
+        Point2D hPoint1 = new Point2D.Double( leftLimit, originYco );
+        Point2D hPoint2 = new Point2D.Double( rightLimit, originYco );
+        Point2D vPoint1 = new Point2D.Double( originXco, topLimit );
+        Point2D vPoint2 = new Point2D.Double( originXco, bottomLimit );
+        axes.add( new Line2D.Double( hPoint1, hPoint2 ) );
+        axes.add( new Line2D.Double( vPoint1, vPoint2 ) );
     }
 }

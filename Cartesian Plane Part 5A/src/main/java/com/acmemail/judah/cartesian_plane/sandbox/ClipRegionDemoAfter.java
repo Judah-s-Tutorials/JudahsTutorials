@@ -7,7 +7,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-import java.awt.font.FontRenderContext;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 

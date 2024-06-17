@@ -1,6 +1,5 @@
 package com.acmemail.judah.cartesian_plane;
 
-import java.awt.BasicStroke;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
@@ -165,8 +164,6 @@ public class LineGenerator implements Iterable<Line2D>
      */
     public static final int BOTH        = HORIZONTAL | VERTICAL;
 
-    /** Bounding rectangle, set in constructor. */
-    private final Rectangle2D   rect;
     /** Grid unit, set in constructor. */
     private final float         gpu;
     /** Lines-per-unit, set in constructor. */
@@ -289,7 +286,6 @@ public class LineGenerator implements Iterable<Line2D>
         int         orientation
     )
     {
-        this.rect = rect;
         this.gpu = gridUnit;
         this.lpu = lpu;
         this.horLength = length != -1 ? length : (float)rect.getWidth();

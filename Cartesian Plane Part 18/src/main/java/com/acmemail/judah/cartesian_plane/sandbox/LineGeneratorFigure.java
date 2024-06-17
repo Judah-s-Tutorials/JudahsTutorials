@@ -24,6 +24,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  */
 public class LineGeneratorFigure extends JPanel
 {
+    private static final long serialVersionUID = 1L;
     /** Type of line cap to use when drawing lines. */
     private static final int    lineCap         = BasicStroke.CAP_BUTT;
     /**
@@ -57,13 +58,6 @@ public class LineGeneratorFigure extends JPanel
     /** Rectangle bounding grid. */
     private static final Rectangle2D    boundingRect    =
         new Rectangle2D.Float( rectXco, rectYco, rectWidth, rectHeight );
-    
-    /** X-coordinate of center of bounding rectangle. */
-    private static final float          centerXco       =
-        rectWidth / 2 + rectXco;
-    /** Y-coordinate of center of bounding rectangle. */
-    private static final float          centerYco       =
-        rectHeight / 2 + rectYco;
     
     /** Color of the edge of the bounding rectangle. */
     private static final Color          rectColor      = Color.BLACK;

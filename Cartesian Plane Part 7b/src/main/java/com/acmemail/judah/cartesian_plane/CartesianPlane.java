@@ -781,7 +781,7 @@ public class CartesianPlane
                 LineGenerator.HORIZONTAL
             );
         int         numAbove    = 
-            (int)(lineGen.getTotalHorizontalLines() / 2);
+            (int)(lineGen.getHorLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
         float       nextLabel   = numAbove * labelIncr;
         for ( Line2D line : lineGen )
@@ -820,7 +820,7 @@ public class CartesianPlane
                 LineGenerator.VERTICAL
             );
         int         numLeft     = 
-            (int)(lineGen.getTotalVerticalLines() / 2);
+            (int)(lineGen.getVertLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
         float       nextLabel   = -numLeft * labelIncr;
         for ( Line2D line : lineGen )

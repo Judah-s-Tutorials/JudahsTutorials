@@ -13,7 +13,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.function.Predicate;
+import java.util.Iterator;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -843,13 +843,9 @@ public class CartesianPlane
         gtx.setColor( axisColor );
         gtx.setStroke( new BasicStroke( axisWeight ) );
         
-        // Set the gridUnit to the width of the grid...
-        // ... set the LPU to 1...
-        // ... LineGenerator will iterate lines only for the axes.
-        float   gridUnit    = (float)gridRect.getWidth();
-        LineGenerator   lineGen = 
-            new LineGenerator( gridRect, gridUnit, 1 );
-        lineGen.forEach( gtx::draw );
+        Iterator<Line2D>    axes    = 
+            LineGenerator.axesIterator( gridRect );
+        axes.forEachRemaining( gtx::draw );
     }
     
     /**
