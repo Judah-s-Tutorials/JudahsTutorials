@@ -45,7 +45,8 @@ public class NonAxialPositioning extends JPanel
     /** The color of non-axial lines drawn at unit coordinates. */
     private static final Color          unitColor   = Color.BLACK;
     /** The color of non-axial lines drawn at non-unit coordinates. */
-    private static final Color          lineColor   = Color.BLACK;
+    private static final Color          lineColor   = 
+        new Color( 0x00834e );
     /** The color of the text. */
     private static final Color          textColor   = Color.BLACK;
     /** The stroke used to draw axes in figure. */
@@ -99,17 +100,15 @@ public class NonAxialPositioning extends JPanel
     /** The y-coordinate of the bottom of the bounding rectangle. */
     private static final double         bottomYco   = topYco + rectHeight;
     /** Offset for non-axial lines above and below x-axis */
-    private static final double         yOffset     = rectHeight / 3;
+    private static final double         yOffset     = rectHeight / 4;
     
-    /** All vertical unit lines. */
-    private final List<Line2D>  unitLines   = new LinkedList<>();
     /** All vertical lines. */
     private final List<Line2D>  allLines    = new LinkedList<>();
     
-    /** Font for drawing coordinates. */
-    private final Font          font;
-    /** Line object for miscellaneous line drawing. */
-    private final Line2D        line    = new Line2D.Double();
+    /** Font for drawing coordinates on lines. */
+    private final Font          lineFont;
+    /** Font for drawing all other text. */
+    private final Font          textFont;
     /** Copy of the graphics context. Initialized in paintComponent. */
     private Graphics2D          gtx;
     /** Context for position coordinates. */
@@ -141,15 +140,15 @@ public class NonAxialPositioning extends JPanel
     {
         Dimension   dim     = new Dimension( winWidth, winHeight );
         setPreferredSize( dim );
-        font = getFont().deriveFont( Font.ITALIC );
+        lineFont = getFont().deriveFont( Font.PLAIN );
+        textFont = getFont().deriveFont( Font.ITALIC );
     }
     
     @Override
     public void paintComponent( Graphics graphics )
     {
         gtx = (Graphics2D)graphics.create();
-//        font = gtx.getFont();
-        gtx.setFont( font );
+        gtx.setFont( lineFont );
         frc = gtx.getFontRenderContext();
         
         gtx.setColor( winColor );
@@ -157,18 +156,23 @@ public class NonAxialPositioning extends JPanel
         gtx.setColor( rectColor );
         gtx.fill( rect );
 
+        gtx.setFont( lineFont );
         gtx.setColor( axisColor );
         gtx.setStroke( axisStroke );
         drawAxes();
 
         gtx.setColor( unitColor );
         gtx.setStroke( unitStroke );
+        drawUnitLines();
         
         gtx.setColor( lineColor );
         gtx.setStroke( lineStroke );
-        drawUnitLines();
         drawLines();
+        
+        gtx.setFont( textFont );
+        gtx.setColor( textColor );
         drawDistances();
+        drawLegend();
         
         gtx.dispose();
     }
@@ -237,7 +241,7 @@ public class NonAxialPositioning extends JPanel
     {
         double      xco         = line.getX1();
         String      label       = String.format( "x=%.0f", xco );
-        TextLayout  layout      = new TextLayout( label, font, frc );
+        TextLayout  layout      = new TextLayout( label, lineFont, frc );
         Rectangle2D bounds      = layout.getBounds();
         double      textXco     = xco - bounds.getWidth() / 2;
         double      textYco     = line.getY2() + bounds.getHeight();
@@ -254,11 +258,31 @@ public class NonAxialPositioning extends JPanel
             double      mid     = left + (right - left) / 2;
             String      label       = 
                 String.format( "%.0f pixels", spacing );
-            TextLayout  layout      = new TextLayout( label, font, frc );
+            TextLayout  layout      = new TextLayout( label, textFont, frc );
             Rectangle2D bounds      = layout.getBounds();
             double      textXco     = mid - bounds.getWidth() / 2;
             double      textYco     = midYco + 2 * bounds.getHeight();
             layout.draw( gtx, (float)textXco, (float)textYco );
         }
+    }
+    
+    private void drawLegend()
+    {
+        String      label       = 
+            String.format( "GPU: %.0f pixels", gpu );
+        drawLegend( label, 2 );
+        label = String.format( "LPU: %.0f", lpu );
+        drawLegend( label, 1 );
+        label = String.format( "Spacing: %.0f pixels", spacing );
+        drawLegend( label, 0 );
+    }
+    
+    private void drawLegend( String label, int line )
+    {
+        TextLayout  layout      = new TextLayout( label, textFont, frc );
+        Rectangle2D bounds      = layout.getBounds();
+        double      textXco     = rightXco - bounds.getWidth() - 5;
+        double      textYco     = topYco - line * (bounds.getHeight() + 2);
+        layout.draw( gtx, (float)textXco, (float)textYco );
     }
 }
