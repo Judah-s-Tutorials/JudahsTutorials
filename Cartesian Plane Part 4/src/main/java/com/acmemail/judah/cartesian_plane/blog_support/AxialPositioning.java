@@ -10,51 +10,91 @@ import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class AxesPositioning extends JPanel
+/**
+ * This application shows how to computer
+ * the axes of a grid
+ * encapsulated in a bounding rectangle.
+ * <img 
+ *     src="doc-files/AxisPositioning.png" 
+ *     alt="Axis Positioning Demo"
+ *     style="float:left; width:10%; height:auto; margin-right: 1em;"
+ * >
+ * 
+ * @author Jack Straub
+ */
+@SuppressWarnings("serial")
+public class AxialPositioning extends JPanel
 {
+    /** The width of the application window. */
     private static final int            winWidth    = 360;
+    /** The height of the application window. */
     private static final int            winHeight   = 400;
+    /** The color of the application window. */
     private static final Color          winColor    = Color.WHITE;
-    private static final Color          rectColor   = 
-        new Color( 0xefefef );
+    /** The color of the axes. */
     private static final Color          axisColor   = 
         new Color( 0xFF474C );
+    /** The color of the text. */
     private static final Color          textColor   = Color.BLACK;
-    private static final Stroke         axisStroke  = 
+    /** The stroke used to draw lines in figure. */
+    private static final Stroke         baseStroke  = 
         new BasicStroke( 3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL );
-    private static final Stroke         baseStroke  = new BasicStroke( 1 );
     
+    /**
+     * The length of the lines that delimit the dimension properties,
+     * for example width: ------- 150 -------. 
+     * Specified as a percentage of the dimension
+     * of the bounding rectangle being tagged.
+     */
     private static final double         dimLinePC   = .33;
     
+    /** X-coordinate of the bounding rectangle. */
     private static final double         ulcXco      = 70;
+    /** Y-coordinate of the bounding rectangle. */
     private static final double         ulcYco      = 50;
-    private static final Point2D        ulc         = 
-        new Point2D.Double( ulcXco, ulcYco );
+    /** Width of the bounding rectangle. */
     private static final int            rectWidth   = 250;
+    /** Height of the bounding rectangle. */
     private static final int            rectHeight  = 325;
+    /** Fill color of the bounding rectangle. */
+    private static final Color          rectColor   = 
+        new Color( 0xefefef );
+    /** The bounding rectangle. */
     private static final Rectangle2D    rect        = 
         new Rectangle2D.Double( ulcXco, ulcYco, rectWidth, rectHeight );
+    /** The x-coordinate of the origin. */
     private static final double         midXco      = rect.getCenterX();
+    /** The y-coordinate of the origin. */
     private static final double         midYco      = rect.getCenterY();
+    /** The x-coordinate of the left of the bounding rectangle. */
     private static final double         leftXco     = ulcXco;
+    /** The x-coordinate of the right of the bounding rectangle. */
     private static final double         rightXco    = leftXco + rectWidth;
+    /** The y-coordinate of the top of the bounding rectangle. */
     private static final double         topYco      = ulcYco;
+    /** The y-coordinate of the bottom of the bounding rectangle. */
     private static final double         bottomYco   = topYco + rectHeight;
     
-    private final Line2D    line    = new Line2D.Double();
+    /** Line object for miscellaneous line drawing. */
+    private final Line2D        line    = new Line2D.Double();
+    /** Copy of the graphics context. Initialized in paintComponent. */
     private Graphics2D          gtx;
-    private int                 width;
-    private int                 height;
+    /** Font for drawing coordinates. */
     private Font                font;
+    /** Context for position coordinates. */
     private FontRenderContext   frc;
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  Command line arguments, not used.
+     */
     public static void main( String[] args )
     {
         SwingUtilities.invokeLater( () -> {
@@ -62,13 +102,17 @@ public class AxesPositioning extends JPanel
             frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
             
             frame.setLocation( 100, 100 );
-            frame.setContentPane( new AxesPositioning() );
+            frame.setContentPane( new AxialPositioning() );
             frame.pack();
             frame.setVisible( true );
         });
     }
     
-    public AxesPositioning()
+    /**
+     * Constructor.
+     * Sets the size of the application window.
+     */
+    public AxialPositioning()
     {
         Dimension   dim     = new Dimension( winWidth, winHeight );
         setPreferredSize( dim );
@@ -78,80 +122,83 @@ public class AxesPositioning extends JPanel
     public void paintComponent( Graphics graphics )
     {
         gtx = (Graphics2D)graphics.create();
-        width = getWidth();
-        height = getHeight();
         font = gtx.getFont();
         frc = gtx.getFontRenderContext();
         
         gtx.setColor( winColor );
-        gtx.fillRect( 0, 0, width, height );
+        gtx.fillRect( 0, 0, getWidth(), getHeight() );
         gtx.setColor( rectColor );
         gtx.fill( rect );
         
         gtx.setColor( axisColor );
-        gtx.setStroke( axisStroke );
+        gtx.setStroke( baseStroke );
         line.setLine( midXco, topYco, midXco, bottomYco);
         gtx.draw( line );
         line.setLine( leftXco, midYco, rightXco, midYco);
         gtx.draw( line );
         
         gtx.setColor( textColor );
-        gtx.setStroke( baseStroke );
-        drawLabel( leftXco, topYco, Position.LEFT_TOP );
-        drawLabel( midXco, topYco, Position.MID_TOP );
-        drawLabel( rightXco, topYco, Position.RIGHT_TOP );
-        drawLabel( leftXco, midYco, Position.LEFT_MID );
-        drawLabel( midXco, midYco, Position.MID_MID );
-        drawLabel( rightXco, midYco, Position.RIGHT_MID );
-        drawLabel( leftXco, bottomYco, Position.LEFT_BOTTOM );
-        drawLabel( midXco, bottomYco, Position.MID_BOTTOM );
-        drawLabel( rightXco, bottomYco, Position.RIGHT_BOTTOM );
+        drawLabel( leftXco, topYco );
+        drawLabel( midXco, topYco );
+        drawLabel( rightXco, topYco );
+        drawLabel( leftXco, midYco );
+        drawLabel( midXco, midYco );
+        drawLabel( rightXco, midYco );
+        drawLabel( leftXco, bottomYco );
+        drawLabel( midXco, bottomYco );
+        drawLabel( rightXco, bottomYco );
         drawWidth();
         drawHeight();
         
         gtx.dispose();
     }
     
+    /**
+     * Draw a label at the given coordintates.
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     */
     private void 
-    drawLabel( double xco, double yco, Position pos )
+    drawLabel( double xco, double yco )
     {
         String      label       = String.format( "(%.0f,%.0f)", xco, yco );
         TextLayout  layout      = new TextLayout( label, font, frc );
         Rectangle2D bounds      = layout.getBounds();
-        double      xOffset     = bounds.getWidth() / 2;
-        double      yOffset     = bounds.getHeight();
         double      textXco     = xco;
         double      textYco     = yco;
+        double      xOffset     = -bounds.getWidth() / 2;
+        double      yOffset     = -2;
         
-        switch ( pos )
+        // The x- and y- offsets are for calculating the coordinates
+        // of the text relative to the coordinates they describe. The
+        // chosen initial values will place the text immediately above
+        // the y-coordinate, and centered on the x-coordinate. They
+        // must be adjusted based on the position of the point of the
+        // coordinates relative the upper left corner of the bounding
+        // rectangle.
+        if ( yco == topYco )
+            yOffset = bounds.getHeight(); // place text below y-coordinate
+        else if ( yco == midYco )
         {
-        case LEFT_TOP:
-        case MID_TOP:
-        case RIGHT_TOP:
-            textXco -= xOffset;
-            textYco += yOffset;
-            break;
-        case LEFT_MID:
-        case RIGHT_MID:
-            textXco -= xOffset;
-            textYco -= 2;
-            break;
-        case MID_MID:
-            textXco += 2;
-            textYco += yOffset;
-            break;
-        case LEFT_BOTTOM:
-        case MID_BOTTOM:
-        case RIGHT_BOTTOM:
-            textXco -= xOffset;
-            textYco -= 2;
-            break;
-        default:
-            System.out.println( "MALFUNCTION" );
+            if ( xco == midXco )
+            {
+                // place text below and right of origin.
+                yOffset = bounds.getHeight() + 2;
+                xOffset = 2;
+            }
         }
+        else 
+            ;
+        textXco += xOffset;
+        textYco += yOffset;
         layout.draw( gtx, (float)textXco, (float)textYco );
     }
     
+    /**
+     * Draw the width dimension label
+     * near the top of the application window.
+     */
     private void drawWidth()
     {
         double      lineLen     = dimLinePC * rectWidth;
@@ -175,6 +222,11 @@ public class AxesPositioning extends JPanel
         gtx.draw( line );
     }
     
+    
+    /**
+     * Draw the height dimension label
+     * near the top of the application window.
+     */
     private void drawHeight()
     {
         double      lineLen     = dimLinePC * rectHeight;
@@ -196,18 +248,5 @@ public class AxesPositioning extends JPanel
         yco2 = yco1 + lineLen;
         line.setLine( xco1, yco1, xco2, yco2 );
         gtx.draw( line );
-    }
-    
-    private enum Position
-    {
-        LEFT_TOP,
-        MID_TOP,
-        RIGHT_TOP,
-        LEFT_MID,
-        MID_MID,
-        RIGHT_MID,
-        LEFT_BOTTOM,
-        MID_BOTTOM,
-        RIGHT_BOTTOM,
     }
 }
