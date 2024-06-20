@@ -268,25 +268,23 @@ public class CartesianPlane extends JPanel
                 ticMajorLen,
                 LineGenerator.HORIZONTAL
             );
-        int         numAbove    = 
-            (int)(lineGen.getHorLineCount() / 2);
+        float       spacing     = gridUnit / ticMajorMPU;
         float       labelIncr   = 1 / ticMajorMPU;
-        float       nextLabel   = numAbove * labelIncr;
+        float       originYco   = (float)gridRect.getCenterY();
         for ( Line2D line : lineGen )
         {
-            // Don't draw a label at the origin
-            if ( !equal( nextLabel, 0 ) )
-            {
-                String      label   = String.format( "%3.2f", nextLabel );
-                TextLayout  layout  = 
-                    new TextLayout( label, labelFont, labelFRC );
-                Rectangle2D bounds  = layout.getBounds();
-                float       yOffset = (float)(bounds.getHeight() / 2);
-                float       xco     = (float)line.getX2() + labelPadding;
-                float       yco     = (float)line.getY2() + yOffset;
-                layout.draw( gtx, xco, yco );
-            }
-            nextLabel -= labelIncr;
+            float       xco2    = (float)line.getX2();
+            float       yco1    = (float)line.getY1();
+            int         dist    = (int)((originYco - yco1) / spacing);
+            float       next    = dist * labelIncr;
+            String      label   = String.format( "%3.2f", next );
+            TextLayout  layout  = 
+                new TextLayout( label, labelFont, labelFRC );
+            Rectangle2D bounds  = layout.getBounds();
+            float       yOffset = (float)(bounds.getHeight() / 2);
+            float       xco     = xco2 + labelPadding;
+            float       yco     = yco1 + yOffset;
+            layout.draw( gtx, xco, yco );
         }
     }
     
@@ -307,36 +305,26 @@ public class CartesianPlane extends JPanel
                 ticMajorLen,
                 LineGenerator.VERTICAL
             );
-        int         numLeft     = 
-            (int)(lineGen.getVertLineCount() / 2);
+        float       spacing     = gridUnit / ticMajorMPU;
         float       labelIncr   = 1 / ticMajorMPU;
-        float       nextLabel   = -numLeft * labelIncr;
+        float       originXco   = (float)gridRect.getCenterX();
         for ( Line2D line : lineGen )
         {
-            // Don't draw a label at the origin
-            if ( !equal( nextLabel, 0 ) )
-            {
-                String      label   = String.format( "%3.2f", nextLabel );
-                TextLayout  layout  = 
-                    new TextLayout( label, labelFont, labelFRC );
-                Rectangle2D bounds  = layout.getBounds();
-                float       yOffset = 
-                    (float)(bounds.getHeight() + labelPadding);
-                float       xOffset = (float)(bounds.getWidth() / 2);
-                float       xco     = (float)line.getX2() - xOffset;
-                float       yco     = (float)line.getY2() + yOffset;
-                layout.draw( gtx, xco, yco );
-            }
-            nextLabel += labelIncr;
+            float       xco1    = (float)line.getX2();
+            int         dist    = (int)((xco1 - originXco) / spacing);
+            float       next    = dist * labelIncr;
+            String      label   = String.format( "%3.2f", next );
+
+            TextLayout  layout  = 
+                new TextLayout( label, labelFont, labelFRC );
+            Rectangle2D bounds  = layout.getBounds();
+            float       yOffset = 
+                (float)(bounds.getHeight() + labelPadding);
+            float       xOffset = (float)(bounds.getWidth() / 2);
+            float       xco     = xco1 - xOffset;
+            float       yco     = (float)line.getY2() + yOffset;
+            layout.draw( gtx, xco, yco );
         }
-    }
-    
-    private static boolean equal( float fVal1, float fVal2 )
-    {
-        final float epsilon = .0001f;
-        float       diff    = Math.abs( fVal1 - fVal2 );
-        boolean     equal   = diff < epsilon;
-        return equal;
     }
     
     private void paintMargins()

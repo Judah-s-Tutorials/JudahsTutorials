@@ -13,7 +13,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.function.Predicate;
+import java.util.Iterator;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -842,13 +842,10 @@ public class CartesianPlane
         gtx.setColor( axisColor );
         gtx.setStroke( new BasicStroke( axisWeight ) );
         
-        // Set the gridUnit to the width of the grid...
-        // ... set the LPU to 1...
-        // ... LineGenerator will iterate lines only for the axes.
-        float   gridUnit    = (float)gridRect.getWidth();
-        LineGenerator   lineGen = 
-            new LineGenerator( gridRect, gridUnit, 1 );
-        lineGen.forEach( gtx::draw );
+        Iterator<Line2D>    axes    = 
+            LineGenerator.axesIterator( gridRect );
+        gtx.draw( axes.next() );
+        gtx.draw( axes.next() );
     }
     
     /**
@@ -885,8 +882,6 @@ public class CartesianPlane
             gtx.setColor( ticMinorColor );
           StreamSupport
               .stream( lineGen.spliterator(), false )
-              .filter( Predicate.not(lineGen::isXAxis) )
-              .filter( Predicate.not(lineGen::isYAxis) )
               .forEach( gtx:: draw );
         }
     }
@@ -910,8 +905,6 @@ public class CartesianPlane
             gtx.setColor( ticMajorColor );
             StreamSupport
                 .stream( lineGen.spliterator(), false )
-                .filter( Predicate.not(lineGen::isXAxis) )
-                .filter( Predicate.not(lineGen::isYAxis) )
                 .forEach( gtx::draw );
         }
     }
@@ -934,7 +927,7 @@ public class CartesianPlane
                 LineGenerator.HORIZONTAL
             );
         int         numAbove    = 
-            (int)(lineGen.getTotalHorizontalLines() / 2);
+            (int)(lineGen.getHorLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
         float       nextLabel   = numAbove * labelIncr;
         for ( Line2D line : lineGen )
@@ -973,7 +966,7 @@ public class CartesianPlane
                 LineGenerator.VERTICAL
             );
         int         numLeft     = 
-            (int)(lineGen.getTotalVerticalLines() / 2);
+            (int)(lineGen.getVertLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
         float       nextLabel   = -numLeft * labelIncr;
         for ( Line2D line : lineGen )

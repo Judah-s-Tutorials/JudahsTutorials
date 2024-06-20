@@ -90,7 +90,8 @@ public class TextLayoutDemo extends JPanel
         ////////////////////////////////////
 
         gtx.setColor( Color.BLACK );
-        Font                font    = new Font( Font.MONOSPACED, Font.PLAIN, 25 );
+        Font                font    = 
+            new Font( Font.MONOSPACED, Font.PLAIN, 25 );
         gtx.setFont( font );
         FontRenderContext   frc     = gtx.getFontRenderContext();
         

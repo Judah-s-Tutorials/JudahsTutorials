@@ -10,6 +10,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.util.Iterator;
 
 import javax.swing.JPanel;
 
@@ -583,14 +584,9 @@ public class CartesianPlane extends JPanel
         gtx.setColor( axisColor );
         gtx.setStroke( new BasicStroke( axisWeight ) );
         
-        // Set the gridUnit to the width of the grid...
-        // ... set the LPU to 1...
-        // ... LineGenerator will iterate lines only for the axes.
-        float   gridUnit    = (float)gridRect.getWidth();
-        LineGenerator   lineGen = 
-            new LineGenerator( gridRect, gridUnit, 1 );
-        for ( Line2D line : lineGen )
-            gtx.draw( line );
+        Iterator<Line2D>    axes    = 
+            LineGenerator.axesIterator( gridRect );
+        axes.forEachRemaining( gtx::draw );
     }
     
     private void drawGridLines()
@@ -662,7 +658,7 @@ public class CartesianPlane extends JPanel
                 LineGenerator.HORIZONTAL
             );
         int         numAbove    = 
-            (int)(lineGen.getTotalHorizontalLines() / 2);
+            (int)(lineGen.getHorLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
         float       nextLabel   = numAbove * labelIncr;
         for ( Line2D line : lineGen )
@@ -701,7 +697,7 @@ public class CartesianPlane extends JPanel
                 LineGenerator.VERTICAL
             );
         int         numLeft     = 
-            (int)(lineGen.getTotalVerticalLines() / 2);
+            (int)(lineGen.getVertLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
         float       nextLabel   = -numLeft * labelIncr;
         for ( Line2D line : lineGen )

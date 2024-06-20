@@ -6,11 +6,17 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.Iterator;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.swing.JPanel;
 
@@ -394,19 +400,27 @@ import javax.swing.JPanel;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class CartesianPlane extends JPanel
+public class CartesianPlane 
+    extends JPanel 
+    implements PropertyChangeListener
 {
+    /** 
+     * This declaration is just for convenience; it saves
+     * having to write "PropertyManager.INSTANCE" over and over.
+     */
+    private static final PropertyManager pmgr   = PropertyManager.INSTANCE;
+    
     private static final int    mainWindowWidthDV   =
-        CPConstants.asInt( CPConstants.MW_WIDTH_DV );
+        pmgr.asInt( CPConstants.MW_WIDTH_PN );
     private static final int    mainWindowHeightDV   =
-        CPConstants.asInt( CPConstants.MW_HEIGHT_DV );
+        pmgr.asInt( CPConstants.MW_HEIGHT_PN );
     
     /////////////////////////////////////////////////
     //   General grid properties
     /////////////////////////////////////////////////
     /** Grid units (pixels-per-unit) default value: float. */
     private float   gridUnit            = 
-        CPConstants.asFloat( CPConstants.GRID_UNIT_DV );
+        pmgr.asFloat( CPConstants.GRID_UNIT_PN );
 
     /////////////////////////////////////////////////
     //   Main window properties
@@ -417,84 +431,101 @@ public class CartesianPlane extends JPanel
     //   See the default constructor.
     /////////////////////////////////////////////////
     private Color   mwBGColor           = 
-        CPConstants.asColor( CPConstants.MW_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MW_BG_COLOR_PN );
     
     /////////////////////////////////////////////////
     //   Margin properties
     /////////////////////////////////////////////////
     private float   marginTopWidth      =
-        CPConstants.asFloat( CPConstants.MARGIN_TOP_WIDTH_DV );
+        pmgr.asFloat( CPConstants.MARGIN_TOP_WIDTH_PN );
     private Color   marginTopBGColor    =
-        CPConstants.asColor( CPConstants.MARGIN_TOP_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MARGIN_TOP_BG_COLOR_PN );
     private float   marginRightWidth      =
-        CPConstants.asFloat( CPConstants.MARGIN_RIGHT_WIDTH_DV );
+        pmgr.asFloat( CPConstants.MARGIN_RIGHT_WIDTH_PN );
     private Color   marginRightBGColor    =
-        CPConstants.asColor( CPConstants.MARGIN_RIGHT_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MARGIN_RIGHT_BG_COLOR_PN );
     private float   marginBottomWidth      =
-        CPConstants.asFloat( CPConstants.MARGIN_BOTTOM_WIDTH_DV );
+        pmgr.asFloat( CPConstants.MARGIN_BOTTOM_WIDTH_PN );
     private Color   marginBottomBGColor    =
-        CPConstants.asColor( CPConstants.MARGIN_BOTTOM_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MARGIN_BOTTOM_BG_COLOR_PN );
     private float   marginLeftWidth      =
-        CPConstants.asFloat( CPConstants.MARGIN_LEFT_WIDTH_DV );
+        pmgr.asFloat( CPConstants.MARGIN_LEFT_WIDTH_PN );
     private Color   marginLeftBGColor    =
-        CPConstants.asColor( CPConstants.MARGIN_LEFT_BG_COLOR_DV );
+        pmgr.asColor( CPConstants.MARGIN_LEFT_BG_COLOR_PN );
     
     /////////////////////////////////////////////////
     //   Tic mark properties
     /////////////////////////////////////////////////
     private Color   ticMinorColor       =
-        CPConstants.asColor( CPConstants.TIC_MINOR_COLOR_DV );
+        pmgr.asColor( CPConstants.TIC_MINOR_COLOR_PN );
     private float   ticMinorWeight      =
-        CPConstants.asFloat( CPConstants.TIC_MINOR_WEIGHT_DV );
+        pmgr.asFloat( CPConstants.TIC_MINOR_WEIGHT_PN );
     private float   ticMinorLen         =
-        CPConstants.asFloat( CPConstants.TIC_MINOR_LEN_DV );
+        pmgr.asFloat( CPConstants.TIC_MINOR_LEN_PN );
     private float   ticMinorMPU         =
-        CPConstants.asFloat( CPConstants.TIC_MINOR_MPU_DV );
+        pmgr.asFloat( CPConstants.TIC_MINOR_MPU_PN );
     private boolean ticMinorDraw        =
-        CPConstants.asBoolean( CPConstants.TIC_MINOR_DRAW_DV );
+        pmgr.asBoolean( CPConstants.TIC_MINOR_DRAW_PN );
     private Color   ticMajorColor       =
-        CPConstants.asColor( CPConstants.TIC_MAJOR_COLOR_DV );
+        pmgr.asColor( CPConstants.TIC_MAJOR_COLOR_PN );
     private float   ticMajorWeight      =
-        CPConstants.asFloat( CPConstants.TIC_MAJOR_WEIGHT_DV );
+        pmgr.asFloat( CPConstants.TIC_MAJOR_WEIGHT_PN );
     private float   ticMajorLen         =
-        CPConstants.asFloat( CPConstants.TIC_MAJOR_LEN_DV );
+        pmgr.asFloat( CPConstants.TIC_MAJOR_LEN_PN );
     private float   ticMajorMPU         =
-        CPConstants.asFloat( CPConstants.TIC_MAJOR_MPU_DV );
+        pmgr.asFloat( CPConstants.TIC_MAJOR_MPU_PN );
     private boolean ticMajorDraw        =
-        CPConstants.asBoolean( CPConstants.TIC_MAJOR_DRAW_DV );
+        pmgr.asBoolean( CPConstants.TIC_MAJOR_DRAW_PN );
 
     /////////////////////////////////////////////////
     //   Grid line properties
     /////////////////////////////////////////////////
     private Color   gridLineColor       = 
-        CPConstants.asColor( CPConstants.GRID_LINE_COLOR_DV );
+        pmgr.asColor( CPConstants.GRID_LINE_COLOR_PN );
     private float   gridLineWeight      = 
-        CPConstants.asFloat( CPConstants.GRID_LINE_WEIGHT_DV );
+        pmgr.asFloat( CPConstants.GRID_LINE_WEIGHT_PN );
     private float   gridLineLPU         = 
-        CPConstants.asFloat( CPConstants.GRID_LINE_LPU_DV );
+        pmgr.asFloat( CPConstants.GRID_LINE_LPU_PN );
     private boolean gridLineDraw        =
-        CPConstants.asBoolean( CPConstants.GRID_LINE_DRAW_DV );
+        pmgr.asBoolean( CPConstants.GRID_LINE_DRAW_PN );
 
     /////////////////////////////////////////////////
     //   Axis properties
     /////////////////////////////////////////////////
     private Color   axisColor           = 
-        CPConstants.asColor( CPConstants.AXIS_COLOR_DV );
+        pmgr.asColor( CPConstants.AXIS_COLOR_PN );
     private float   axisWeight          = 
-        CPConstants.asFloat( CPConstants.AXIS_WEIGHT_DV );
+        pmgr.asFloat( CPConstants.AXIS_WEIGHT_PN );
 
     /////////////////////////////////////////////////
     //   Label properties (these are the labels that
     //   go on the x- and y-axes, e.g., 1.1, 1.2)
     /////////////////////////////////////////////////
     private Color   labelFontColor      =
-        CPConstants.asColor( CPConstants.LABEL_FONT_COLOR_DV );
+        pmgr.asColor( CPConstants.LABEL_FONT_COLOR_PN );
     private String  labelFontName       =
-        CPConstants.LABEL_FONT_NAME_DV;
+        pmgr.asString( CPConstants.LABEL_FONT_NAME_PN );
     private int     labelFontStyle      =
-        CPConstants.asFontStyle( CPConstants.LABEL_FONT_STYLE_DV );
+        pmgr.asFontStyle( CPConstants.LABEL_FONT_STYLE_PN );
     private float   labelFontSize       = 
-        CPConstants.asFloat( CPConstants.LABEL_FONT_SIZE_DV );
+        pmgr.asFloat( CPConstants.LABEL_FONT_SIZE_PN );
+    private boolean labelDraw           = 
+        pmgr.asBoolean( CPConstants.LABEL_DRAW_PN );
+    
+    /** 
+     * Supplier, set by the user,
+     * to obtain a stream of PlotCommands.
+     */
+    private Supplier<Stream<PlotCommand>>   streamSupplier  = 
+        () -> Stream.empty();
+    
+    /////////////////////////////////////////////////
+    //   Plot properties (properties to use
+    //   when plotting a point on the grid)
+    /////////////////////////////////////////////////
+    private Color   plotColor           =
+        pmgr.asColor( CPConstants.PLOT_COLOR_PN );
+    private PlotShape  plotShape       = new PointShape();
 
     ///////////////////////////////////////////////////////
     //
@@ -508,6 +539,9 @@ public class CartesianPlane extends JPanel
     private Rectangle2D         gridRect;
     private Font                labelFont;
     private FontRenderContext   labelFRC;
+    private PlotShape           currPlotShape;
+    private double              xOffset;
+    private double              yOffset;
         
     /**
      * Constructor.
@@ -529,6 +563,13 @@ public class CartesianPlane extends JPanel
     {
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );
+        pmgr.addPropertyChangeListener( this );
+        
+        // Register listener for redraw notifications
+        NotificationManager.INSTANCE.addNotificationListener(
+            CPConstants.REDRAW_NP,
+            e -> repaint()
+        );
     }
     
     /**
@@ -559,19 +600,46 @@ public class CartesianPlane extends JPanel
         labelFRC = gtx.getFontRenderContext();
 
         // Describe the rectangle containing the grid
-        float   gridWidth = currWidth - marginLeftWidth - marginRightWidth;
-        float   minXco = marginLeftWidth;
-        float   gridHeight = currHeight - marginTopWidth - marginBottomWidth;
-        float   minYco = marginTopWidth;
+        float   gridWidth   = currWidth - marginLeftWidth - marginRightWidth;
+        float   minXco      = marginLeftWidth;
+        float   gridHeight  = currHeight - marginTopWidth - marginBottomWidth;
+        float   minYco      = marginTopWidth;
         gridRect = 
             new Rectangle2D.Float( minXco, minYco, gridWidth, gridHeight );
+
+
+        // Set the clip region to the rectangle bounding the grid before
+        // drawing any lines. Don't forget to restore the original clip
+        // region after drawing the lines.
+        Shape   origClip    = gtx.getClip();
+        gtx.setClip( gridRect );
+        
+        // The plot color and plot shape are set to defaults
+        // each time paintComponent is invoked. The user can
+        // change the values but they will only be in effect
+        // for the duration of one paintComponent execute; with
+        // the next paintComponent execution they will return
+        // to their default values.
+        currPlotShape = plotShape;
+        
+        // Values to use in mapping Cartesian coordinates to pixel coordinates
+        xOffset = gridRect.getX() + (gridRect.getWidth() - 1) / 2;
+        yOffset = gridRect.getY() + (gridRect.getHeight() - 1) / 2;
 
         drawGridLines();
         drawMinorTics();
         drawMajorTics();
         drawAxes();
-        drawHorizontalLabels();
-        drawVerticalLabels();
+        drawUserPlot();
+        
+        gtx.setClip( origClip );
+
+        if ( labelDraw )
+        {
+            gtx.setColor( labelFontColor );
+            drawHorizontalLabels();
+            drawVerticalLabels();
+        }
         paintMargins();
         
         // begin boilerplate
@@ -579,6 +647,197 @@ public class CartesianPlane extends JPanel
         // end boilerplate
     }
     
+    public void plotPoint( float userXco, float userYco )
+    {
+        double  xco = userXco * gridUnit + xOffset;
+        double  yco = -userYco * gridUnit + yOffset;
+        Shape   shape   = currPlotShape.getShape( xco, yco );
+        gtx.draw( shape );
+    }
+    
+    /**
+     * Sets the color to use to draw plot points for
+     * the duration of one execution of paintComponent.
+     * 
+     * @param color the color to use to draw plot points
+     */
+    public void setPlotColor( Color color )
+    {
+        gtx.setColor( color );
+    }
+    
+    /**
+     * Sets the shape to use to draw plot points for
+     * the duration of one execution of paintComponent.
+     * 
+     * @param plotShape the shape to use to draw plot points
+     */
+    public void setPlotShape( PlotShape plotShape )
+    {
+        currPlotShape = plotShape;
+    }
+    
+    public void propertyChange( PropertyChangeEvent evt )
+    {
+        String  pName   = evt.getPropertyName();
+        String  newVal  = (String)evt.getNewValue();
+        switch ( pName )
+        {
+        case CPConstants.GRID_UNIT_PN:
+            gridUnit = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.MW_BG_COLOR_PN:
+            mwBGColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.MARGIN_TOP_WIDTH_PN:
+            marginTopWidth = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.MARGIN_TOP_BG_COLOR_PN:
+            marginTopBGColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.MARGIN_RIGHT_WIDTH_PN:
+            marginRightWidth = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.MARGIN_RIGHT_BG_COLOR_PN:
+            marginRightBGColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.MARGIN_BOTTOM_WIDTH_PN:
+            marginBottomWidth = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.MARGIN_BOTTOM_BG_COLOR_PN:
+            marginBottomBGColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.MARGIN_LEFT_WIDTH_PN:
+            marginLeftWidth = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.MARGIN_LEFT_BG_COLOR_PN:
+            marginLeftBGColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MINOR_COLOR_PN:
+            ticMinorColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MINOR_WEIGHT_PN:
+            ticMinorWeight = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MINOR_LEN_PN:
+            ticMinorLen = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MINOR_MPU_PN:
+            ticMinorMPU = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MINOR_DRAW_PN:
+            ticMinorDraw = CPConstants.asBoolean( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MAJOR_COLOR_PN:
+            ticMajorColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MAJOR_WEIGHT_PN:
+            ticMajorWeight = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MAJOR_LEN_PN:
+            ticMajorLen = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MAJOR_MPU_PN:
+            ticMajorMPU = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.TIC_MAJOR_DRAW_PN:
+            ticMajorDraw = CPConstants.asBoolean( newVal );
+            repaint();
+            break;
+        case CPConstants.GRID_LINE_COLOR_PN:
+            gridLineColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.GRID_LINE_WEIGHT_PN:
+            gridLineWeight = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.GRID_LINE_LPU_PN:
+            gridLineLPU = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.GRID_LINE_DRAW_PN:
+            gridLineDraw = CPConstants.asBoolean( newVal );
+            repaint();
+            break;
+        case CPConstants.AXIS_COLOR_PN:
+            axisColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.AXIS_WEIGHT_PN:
+            axisWeight = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.LABEL_FONT_COLOR_PN:
+            labelFontColor = CPConstants.asColor( newVal );
+            repaint();
+            break;
+        case CPConstants.LABEL_FONT_NAME_PN:
+            labelFontName = newVal;
+            repaint();
+            break;
+        case CPConstants.LABEL_FONT_STYLE_PN:
+            labelFontStyle = CPConstants.asFontStyle( newVal );
+            repaint();
+            break;
+        case CPConstants.LABEL_FONT_SIZE_PN:
+            labelFontSize = CPConstants.asFloat( newVal );
+            repaint();
+            break;
+        case CPConstants.LABEL_DRAW_PN:
+            labelDraw = CPConstants.asBoolean( newVal );
+            repaint();
+            break;
+        }
+    }
+    
+    /**
+     * Sets the supplier
+     * that will fetch a stream
+     * to deliver commands
+     * for plotting a curve.
+     * 
+     * @param supplier  the stream supplier
+     */
+    public void setStreamSupplier( Supplier<Stream<PlotCommand>> supplier )
+    {
+        if ( supplier != null )
+            streamSupplier = supplier;
+        else
+            streamSupplier = () -> Stream.empty();
+    }
+    
+    /**
+     * Draws the user plot.
+     */
+    private void drawUserPlot()
+    {
+        gtx.setColor( plotColor );
+        streamSupplier.get().forEach( c -> c.execute() );
+    }
+    
+    /**
+     * Draws the x- and y-axes on the graph.
+     */
     private void drawAxes()
     {
         gtx.setColor( axisColor );
@@ -589,6 +848,9 @@ public class CartesianPlane extends JPanel
         axes.forEachRemaining( gtx::draw );
     }
     
+    /**
+     * Draws the grid lines on the graph.
+     */
     private void drawGridLines()
     {
         if ( gridLineDraw )
@@ -597,11 +859,13 @@ public class CartesianPlane extends JPanel
                 new LineGenerator( gridRect, gridUnit, gridLineLPU );
             gtx.setStroke( new BasicStroke( gridLineWeight ) );
             gtx.setColor( gridLineColor );
-            for ( Line2D line : lineGen )
-                gtx.draw( line );
+            lineGen.forEach( gtx::draw );
         }
     }
     
+    /**
+     * Draws the minor tics on the graph.
+     */
     private void drawMinorTics()
     {
         if ( ticMinorDraw )
@@ -616,11 +880,17 @@ public class CartesianPlane extends JPanel
                 );
             gtx.setStroke( new BasicStroke( ticMinorWeight ) );
             gtx.setColor( ticMinorColor );
-            for ( Line2D line : lineGen )
-                gtx.draw( line );
+          StreamSupport
+              .stream( lineGen.spliterator(), false )
+//              .filter( Predicate.not(lineGen::isXAxis) )
+//              .filter( Predicate.not(lineGen::isYAxis) )
+              .forEach( gtx:: draw );
         }
     }
     
+    /**
+     * Draws the major tics on the graph.
+     */
     private void drawMajorTics()
     {
         if ( ticMajorDraw )
@@ -635,8 +905,11 @@ public class CartesianPlane extends JPanel
                 );
             gtx.setStroke( new BasicStroke( ticMajorWeight ) );
             gtx.setColor( ticMajorColor );
-            for ( Line2D line : lineGen )
-                gtx.draw( line );
+            StreamSupport
+                .stream( lineGen.spliterator(), false )
+//                .filter( Predicate.not(lineGen::isXAxis) )
+//                .filter( Predicate.not(lineGen::isYAxis) )
+                .forEach( gtx::draw );
         }
     }
     
@@ -657,23 +930,25 @@ public class CartesianPlane extends JPanel
                 ticMajorLen,
                 LineGenerator.HORIZONTAL
             );
-        float       spacing     = gridUnit / ticMajorMPU;
+        int         numAbove    = 
+            (int)(lineGen.getHorLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
-        float       originYco   = (float)gridRect.getCenterY();
+        float       nextLabel   = numAbove * labelIncr;
         for ( Line2D line : lineGen )
         {
-            float       xco2    = (float)line.getX2();
-            float       yco1    = (float)line.getY1();
-            int         dist    = (int)((originYco - yco1) / spacing);
-            float       next    = dist * labelIncr;
-            String      label   = String.format( "%3.2f", next );
-            TextLayout  layout  = 
-                new TextLayout( label, labelFont, labelFRC );
-            Rectangle2D bounds  = layout.getBounds();
-            float       yOffset = (float)(bounds.getHeight() / 2);
-            float       xco     = xco2 + labelPadding;
-            float       yco     = yco1 + yOffset;
-            layout.draw( gtx, xco, yco );
+            // Don't draw a label at the origin
+            if ( !equal( nextLabel, 0 ) )
+            {
+                String      label   = String.format( "%3.2f", nextLabel );
+                TextLayout  layout  = 
+                    new TextLayout( label, labelFont, labelFRC );
+                Rectangle2D bounds  = layout.getBounds();
+                float       yOffset = (float)(bounds.getHeight() / 2);
+                float       xco     = (float)line.getX2() + labelPadding;
+                float       yco     = (float)line.getY2() + yOffset;
+                layout.draw( gtx, xco, yco );
+            }
+            nextLabel -= labelIncr;
         }
     }
     
@@ -694,28 +969,50 @@ public class CartesianPlane extends JPanel
                 ticMajorLen,
                 LineGenerator.VERTICAL
             );
-        float       spacing     = gridUnit / ticMajorMPU;
+        int         numLeft     = 
+            (int)(lineGen.getVertLineCount() / 2);
         float       labelIncr   = 1 / ticMajorMPU;
-        float       originXco   = (float)gridRect.getCenterX();
+        float       nextLabel   = -numLeft * labelIncr;
         for ( Line2D line : lineGen )
         {
-            float       xco1    = (float)line.getX2();
-            int         dist    = (int)((xco1 - originXco) / spacing);
-            float       next    = dist * labelIncr;
-            String      label   = String.format( "%3.2f", next );
-
-            TextLayout  layout  = 
-                new TextLayout( label, labelFont, labelFRC );
-            Rectangle2D bounds  = layout.getBounds();
-            float       yOffset = 
-                (float)(bounds.getHeight() + labelPadding);
-            float       xOffset = (float)(bounds.getWidth() / 2);
-            float       xco     = xco1 - xOffset;
-            float       yco     = (float)line.getY2() + yOffset;
-            layout.draw( gtx, xco, yco );
+            // Don't draw a label at the origin
+            if ( !equal( nextLabel, 0 ) )
+            {
+                String      label   = String.format( "%3.2f", nextLabel );
+                TextLayout  layout  = 
+                    new TextLayout( label, labelFont, labelFRC );
+                Rectangle2D bounds  = layout.getBounds();
+                float       yOffset = 
+                    (float)(bounds.getHeight() + labelPadding);
+                float       xOffset = (float)(bounds.getWidth() / 2);
+                float       xco     = (float)line.getX2() - xOffset;
+                float       yco     = (float)line.getY2() + yOffset;
+                layout.draw( gtx, xco, yco );
+            }
+            nextLabel += labelIncr;
         }
     }
     
+    /**
+     * Determines whether two floating point values
+     * are approximately equal.
+     * 
+     * @param fVal1 the first floating point value
+     * @param fVal2 the second floating point value
+     * 
+     * @return true if the given values are approximately equal
+     */
+    private static boolean equal( float fVal1, float fVal2 )
+    {
+        final float epsilon = .0001f;
+        float       diff    = Math.abs( fVal1 - fVal2 );
+        boolean     equal   = diff < epsilon;
+        return equal;
+    }
+    
+    /**
+     * Draws the margins on the graph.
+     */
     private void paintMargins()
     {
         Rectangle2D rect    = new Rectangle2D.Float();
@@ -741,492 +1038,5 @@ public class CartesianPlane extends JPanel
         rect.setRect( 0, 0, marginLeftWidth, currHeight );
         gtx.setColor( marginLeftBGColor );
         gtx.fill( rect );
-    }
-
-    /**
-     * Gets the value of the grid unit
-     * (the number of pixels consumed per unit).
-     * 
-     * @return the grid unit
-     */
-    public float getGridUnit()
-    {
-        return gridUnit;
-    }
-
-    /**
-     * Sets the grid unit
-     * (the number of pixels consumed per unit)
-     * to the given value.
-     * 
-     * @param gridUnit the given value
-     */
-    public void setGridUnit(float gridUnit)
-    {
-        this.gridUnit = gridUnit;
-    }
-
-    /**
-     * @return the mwBGColor
-     */
-    public Color getMwBGColor()
-    {
-        return mwBGColor;
-    }
-
-    /**
-     * @param mwBGColor the mwBGColor to set
-     */
-    public void setMwBGColor(Color mwBGColor)
-    {
-        this.mwBGColor = mwBGColor;
-    }
-
-    /**
-     * @return the marginTopWidth
-     */
-    public float getMarginTopWidth()
-    {
-        return marginTopWidth;
-    }
-
-    /**
-     * @param marginTopWidth the marginTopWidth to set
-     */
-    public void setMarginTopWidth(float marginTopWidth)
-    {
-        this.marginTopWidth = marginTopWidth;
-    }
-
-    /**
-     * @return the marginTopBGColor
-     */
-    public Color getMarginTopBGColor()
-    {
-        return marginTopBGColor;
-    }
-
-    /**
-     * @param marginTopBGColor the marginTopBGColor to set
-     */
-    public void setMarginTopBGColor(Color marginTopBGColor)
-    {
-        this.marginTopBGColor = marginTopBGColor;
-    }
-
-    /**
-     * @return the marginRightWidth
-     */
-    public float getMarginRightWidth()
-    {
-        return marginRightWidth;
-    }
-
-    /**
-     * @param marginRightWidth the marginRightWidth to set
-     */
-    public void setMarginRightWidth(float marginRightWidth)
-    {
-        this.marginRightWidth = marginRightWidth;
-    }
-
-    /**
-     * @return the marginRightBGColor
-     */
-    public Color getMarginRightBGColor()
-    {
-        return marginRightBGColor;
-    }
-
-    /**
-     * @param marginRightBGColor the marginRightBGColor to set
-     */
-    public void setMarginRightBGColor(Color marginRightBGColor)
-    {
-        this.marginRightBGColor = marginRightBGColor;
-    }
-
-    /**
-     * @return the marginBottomWidth
-     */
-    public float getMarginBottomWidth()
-    {
-        return marginBottomWidth;
-    }
-
-    /**
-     * @param marginBottomWidth the marginBottomWidth to set
-     */
-    public void setMarginBottomWidth(float marginBottomWidth)
-    {
-        this.marginBottomWidth = marginBottomWidth;
-    }
-
-    /**
-     * @return the marginBottomBGColor
-     */
-    public Color getMarginBottomBGColor()
-    {
-        return marginBottomBGColor;
-    }
-
-    /**
-     * @param marginBottomBGColor the marginBottomBGColor to set
-     */
-    public void setMarginBottomBGColor(Color marginBottomBGColor)
-    {
-        this.marginBottomBGColor = marginBottomBGColor;
-    }
-
-    /**
-     * @return the marginLeftWidth
-     */
-    public float getMarginLeftWidth()
-    {
-        return marginLeftWidth;
-    }
-
-    /**
-     * @param marginLeftWidth the marginLeftWidth to set
-     */
-    public void setMarginLeftWidth(float marginLeftWidth)
-    {
-        this.marginLeftWidth = marginLeftWidth;
-    }
-
-    /**
-     * @return the marginLeftBGColor
-     */
-    public Color getMarginLeftBGColor()
-    {
-        return marginLeftBGColor;
-    }
-
-    /**
-     * @param marginLeftBGColor the marginLeftBGColor to set
-     */
-    public void setMarginLeftBGColor(Color marginLeftBGColor)
-    {
-        this.marginLeftBGColor = marginLeftBGColor;
-    }
-
-    /**
-     * @return the ticMinorColor
-     */
-    public Color getTicMinorColor()
-    {
-        return ticMinorColor;
-    }
-
-    /**
-     * @param ticMinorColor the ticMinorColor to set
-     */
-    public void setTicMinorColor(Color ticMinorColor)
-    {
-        this.ticMinorColor = ticMinorColor;
-    }
-
-    /**
-     * @return the ticMinorWeight
-     */
-    public float getTicMinorWeight()
-    {
-        return ticMinorWeight;
-    }
-
-    /**
-     * @param ticMinorWeight the ticMinorWeight to set
-     */
-    public void setTicMinorWeight(float ticMinorWeight)
-    {
-        this.ticMinorWeight = ticMinorWeight;
-    }
-
-    /**
-     * @return the ticMinorLen
-     */
-    public float getTicMinorLen()
-    {
-        return ticMinorLen;
-    }
-
-    /**
-     * @param ticMinorLen the ticMinorLen to set
-     */
-    public void setTicMinorLen(float ticMinorLen)
-    {
-        this.ticMinorLen = ticMinorLen;
-    }
-
-    /**
-     * @return the ticMinorMPU
-     */
-    public float getTicMinorMPU()
-    {
-        return ticMinorMPU;
-    }
-
-    /**
-     * @param ticMinorMPU the ticMinorMPU to set
-     */
-    public void setTicMinorMPU(float ticMinorMPU)
-    {
-        this.ticMinorMPU = ticMinorMPU;
-    }
-
-    /**
-     * @return the ticMinorDraw
-     */
-    public boolean isTicMinorDraw()
-    {
-        return ticMinorDraw;
-    }
-
-    /**
-     * @param ticMinorDraw the ticMinorDraw to set
-     */
-    public void setTicMinorDraw(boolean ticMinorDraw)
-    {
-        this.ticMinorDraw = ticMinorDraw;
-    }
-
-    /**
-     * @return the ticMajorColor
-     */
-    public Color getTicMajorColor()
-    {
-        return ticMajorColor;
-    }
-
-    /**
-     * @param ticMajorColor the ticMajorColor to set
-     */
-    public void setTicMajorColor(Color ticMajorColor)
-    {
-        this.ticMajorColor = ticMajorColor;
-    }
-
-    /**
-     * @return the ticMajorWeight
-     */
-    public float getTicMajorWeight()
-    {
-        return ticMajorWeight;
-    }
-
-    /**
-     * @param ticMajorWeight the ticMajorWeight to set
-     */
-    public void setTicMajorWeight(float ticMajorWeight)
-    {
-        this.ticMajorWeight = ticMajorWeight;
-    }
-
-    /**
-     * @return the ticMajorLen
-     */
-    public float getTicMajorLen()
-    {
-        return ticMajorLen;
-    }
-
-    /**
-     * @param ticMajorLen the ticMajorLen to set
-     */
-    public void setTicMajorLen(float ticMajorLen)
-    {
-        this.ticMajorLen = ticMajorLen;
-    }
-
-    /**
-     * @return the ticMajorMPU
-     */
-    public float getTicMajorMPU()
-    {
-        return ticMajorMPU;
-    }
-
-    /**
-     * @param ticMajorMPU the ticMajorMPU to set
-     */
-    public void setTicMajorMPU(float ticMajorMPU)
-    {
-        this.ticMajorMPU = ticMajorMPU;
-    }
-
-    /**
-     * @return the ticMajorDraw
-     */
-    public boolean isTicMajorDraw()
-    {
-        return ticMajorDraw;
-    }
-
-    /**
-     * @param ticMajorDraw the ticMajorDraw to set
-     */
-    public void setTicMajorDraw(boolean ticMajorDraw)
-    {
-        this.ticMajorDraw = ticMajorDraw;
-    }
-
-    /**
-     * @return the gridLineColor
-     */
-    public Color getGridLineColor()
-    {
-        return gridLineColor;
-    }
-
-    /**
-     * @param gridLineColor the gridLineColor to set
-     */
-    public void setGridLineColor(Color gridLineColor)
-    {
-        this.gridLineColor = gridLineColor;
-    }
-
-    /**
-     * @return the gridLineWeight
-     */
-    public float getGridLineWeight()
-    {
-        return gridLineWeight;
-    }
-
-    /**
-     * @param gridLineWeight the gridLineWeight to set
-     */
-    public void setGridLineWeight(float gridLineWeight)
-    {
-        this.gridLineWeight = gridLineWeight;
-    }
-
-    /**
-     * @return the gridLineLPU
-     */
-    public float getGridLineLPU()
-    {
-        return gridLineLPU;
-    }
-
-    /**
-     * @param gridLineLPU the gridLineLPU to set
-     */
-    public void setGridLineLPU(float gridLineLPU)
-    {
-        this.gridLineLPU = gridLineLPU;
-    }
-
-    /**
-     * @return the gridLineDraw
-     */
-    public boolean isGridLineDraw()
-    {
-        return gridLineDraw;
-    }
-
-    /**
-     * @param gridLineDraw the gridLineDraw to set
-     */
-    public void setGridLineDraw(boolean gridLineDraw)
-    {
-        this.gridLineDraw = gridLineDraw;
-    }
-
-    /**
-     * @return the axisColor
-     */
-    public Color getAxisColor()
-    {
-        return axisColor;
-    }
-
-    /**
-     * @param axisColor the axisColor to set
-     */
-    public void setAxisColor(Color axisColor)
-    {
-        this.axisColor = axisColor;
-    }
-
-    /**
-     * @return the axisWeight
-     */
-    public float getAxisWeight()
-    {
-        return axisWeight;
-    }
-
-    /**
-     * @param axisWeight the axisWeight to set
-     */
-    public void setAxisWeight(float axisWeight)
-    {
-        this.axisWeight = axisWeight;
-    }
-
-    /**
-     * @return the labelFontColor
-     */
-    public Color getLabelFontColor()
-    {
-        return labelFontColor;
-    }
-
-    /**
-     * @param labelFontColor the labelFontColor to set
-     */
-    public void setLabelFontColor(Color labelFontColor)
-    {
-        this.labelFontColor = labelFontColor;
-    }
-
-    /**
-     * @return the labelFontName
-     */
-    public String getLabelFontName()
-    {
-        return labelFontName;
-    }
-
-    /**
-     * @param labelFontName the labelFontName to set
-     */
-    public void setLabelFontName(String labelFontName)
-    {
-        this.labelFontName = labelFontName;
-    }
-
-    /**
-     * @return the labelFontStyle
-     */
-    public int getLabelFontStyle()
-    {
-        return labelFontStyle;
-    }
-
-    /**
-     * @param labelFontStyle the labelFontStyle to set
-     */
-    public void setLabelFontStyle(int labelFontStyle)
-    {
-        this.labelFontStyle = labelFontStyle;
-    }
-
-    /**
-     * @return the labelFontSize
-     */
-    public float getLabelFontSize()
-    {
-        return labelFontSize;
-    }
-
-    /**
-     * @param labelFontSize the labelFontSize to set
-     */
-    public void setLabelFontSize(float labelFontSize)
-    {
-        this.labelFontSize = labelFontSize;
     }
 }
