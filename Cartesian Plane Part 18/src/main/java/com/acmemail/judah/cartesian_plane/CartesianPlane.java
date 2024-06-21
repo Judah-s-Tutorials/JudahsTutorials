@@ -1,24 +1,19 @@
 package com.acmemail.judah.cartesian_plane;
 
-import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
-import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Iterator;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import javax.swing.JPanel;
+
+import com.acmemail.judah.cartesian_plane.components.Profile;
 
 /**
  * This class encapsulates the display of a Cartesian plane.
@@ -453,65 +448,6 @@ public class CartesianPlane
     private Color   marginLeftBGColor    =
         pmgr.asColor( CPConstants.MARGIN_LEFT_BG_COLOR_PN );
     
-    /////////////////////////////////////////////////
-    //   Tic mark properties
-    /////////////////////////////////////////////////
-    private Color   ticMinorColor       =
-        pmgr.asColor( CPConstants.TIC_MINOR_COLOR_PN );
-    private float   ticMinorWeight      =
-        pmgr.asFloat( CPConstants.TIC_MINOR_WEIGHT_PN );
-    private float   ticMinorLen         =
-        pmgr.asFloat( CPConstants.TIC_MINOR_LEN_PN );
-    private float   ticMinorMPU         =
-        pmgr.asFloat( CPConstants.TIC_MINOR_MPU_PN );
-    private boolean ticMinorDraw        =
-        pmgr.asBoolean( CPConstants.TIC_MINOR_DRAW_PN );
-    private Color   ticMajorColor       =
-        pmgr.asColor( CPConstants.TIC_MAJOR_COLOR_PN );
-    private float   ticMajorWeight      =
-        pmgr.asFloat( CPConstants.TIC_MAJOR_WEIGHT_PN );
-    private float   ticMajorLen         =
-        pmgr.asFloat( CPConstants.TIC_MAJOR_LEN_PN );
-    private float   ticMajorMPU         =
-        pmgr.asFloat( CPConstants.TIC_MAJOR_MPU_PN );
-    private boolean ticMajorDraw        =
-        pmgr.asBoolean( CPConstants.TIC_MAJOR_DRAW_PN );
-
-    /////////////////////////////////////////////////
-    //   Grid line properties
-    /////////////////////////////////////////////////
-    private Color   gridLineColor       = 
-        pmgr.asColor( CPConstants.GRID_LINE_COLOR_PN );
-    private float   gridLineWeight      = 
-        pmgr.asFloat( CPConstants.GRID_LINE_WEIGHT_PN );
-    private float   gridLineLPU         = 
-        pmgr.asFloat( CPConstants.GRID_LINE_LPU_PN );
-    private boolean gridLineDraw        =
-        pmgr.asBoolean( CPConstants.GRID_LINE_DRAW_PN );
-
-    /////////////////////////////////////////////////
-    //   Axis properties
-    /////////////////////////////////////////////////
-    private Color   axisColor           = 
-        pmgr.asColor( CPConstants.AXIS_COLOR_PN );
-    private float   axisWeight          = 
-        pmgr.asFloat( CPConstants.AXIS_WEIGHT_PN );
-
-    /////////////////////////////////////////////////
-    //   Label properties (these are the labels that
-    //   go on the x- and y-axes, e.g., 1.1, 1.2)
-    /////////////////////////////////////////////////
-    private Color   labelFontColor      =
-        pmgr.asColor( CPConstants.LABEL_FONT_COLOR_PN );
-    private String  labelFontName       =
-        pmgr.asString( CPConstants.LABEL_FONT_NAME_PN );
-    private int     labelFontStyle      =
-        pmgr.asFontStyle( CPConstants.LABEL_FONT_STYLE_PN );
-    private float   labelFontSize       = 
-        pmgr.asFloat( CPConstants.LABEL_FONT_SIZE_PN );
-    private boolean labelDraw           = 
-        pmgr.asBoolean( CPConstants.LABEL_DRAW_PN );
-    
     /** 
      * Supplier, set by the user,
      * to obtain a stream of PlotCommands.
@@ -526,6 +462,8 @@ public class CartesianPlane
     private Color   plotColor           =
         pmgr.asColor( CPConstants.PLOT_COLOR_PN );
     private PlotShape  plotShape       = new PointShape();
+    
+    private GraphManager  graphMgr;
 
     ///////////////////////////////////////////////////////
     //
@@ -537,8 +475,6 @@ public class CartesianPlane
     private int                 currHeight;
     private Graphics2D          gtx;
     private Rectangle2D         gridRect;
-    private Font                labelFont;
-    private FontRenderContext   labelFRC;
     private PlotShape           currPlotShape;
     private double              xOffset;
     private double              yOffset;
@@ -570,6 +506,8 @@ public class CartesianPlane
             CPConstants.REDRAW_NP,
             e -> repaint()
         );
+        
+        graphMgr = new GraphManager( gridRect, new Profile() );
     }
     
     /**
@@ -591,13 +529,6 @@ public class CartesianPlane
         gtx.setColor( mwBGColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
-        
-        // set up the label font
-        //     round font size to nearest int
-        int     fontSize    = (int)(labelFontSize + .5);
-        labelFont = new Font( labelFontName, labelFontStyle, fontSize );
-        gtx.setFont( labelFont );
-        labelFRC = gtx.getFontRenderContext();
 
         // Describe the rectangle containing the grid
         float   gridWidth   = currWidth - marginLeftWidth - marginRightWidth;
@@ -622,24 +553,22 @@ public class CartesianPlane
         // to their default values.
         currPlotShape = plotShape;
         
-        // Values to use in mapping Cartesian coordinates to pixel coordinates
+        // Values to use in mapping Cartesian coordinates 
+        // to pixel coordinates
         xOffset = gridRect.getX() + (gridRect.getWidth() - 1) / 2;
         yOffset = gridRect.getY() + (gridRect.getHeight() - 1) / 2;
 
-        drawGridLines();
-        drawMinorTics();
-        drawMajorTics();
-        drawAxes();
+        graphMgr.refresh( gtx, gridRect );
+        graphMgr.drawGridLines();
+        graphMgr.drawMinorTics();
+        graphMgr.drawMajorTics();
+        graphMgr.drawAxes();
+        graphMgr.drawHorizontalLabels();
+        graphMgr.drawVerticalLabels();
         drawUserPlot();
         
         gtx.setClip( origClip );
 
-        if ( labelDraw )
-        {
-            gtx.setColor( labelFontColor );
-            drawHorizontalLabels();
-            drawVerticalLabels();
-        }
         paintMargins();
         
         // begin boilerplate
@@ -681,132 +610,78 @@ public class CartesianPlane
     {
         String  pName   = evt.getPropertyName();
         String  newVal  = (String)evt.getNewValue();
+        boolean update  = false;
         switch ( pName )
         {
         case CPConstants.GRID_UNIT_PN:
             gridUnit = CPConstants.asFloat( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.MW_BG_COLOR_PN:
             mwBGColor = CPConstants.asColor( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.MARGIN_TOP_WIDTH_PN:
             marginTopWidth = CPConstants.asFloat( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.MARGIN_TOP_BG_COLOR_PN:
             marginTopBGColor = CPConstants.asColor( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.MARGIN_RIGHT_WIDTH_PN:
             marginRightWidth = CPConstants.asFloat( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.MARGIN_RIGHT_BG_COLOR_PN:
             marginRightBGColor = CPConstants.asColor( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.MARGIN_BOTTOM_WIDTH_PN:
             marginBottomWidth = CPConstants.asFloat( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.MARGIN_BOTTOM_BG_COLOR_PN:
             marginBottomBGColor = CPConstants.asColor( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.MARGIN_LEFT_WIDTH_PN:
             marginLeftWidth = CPConstants.asFloat( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.MARGIN_LEFT_BG_COLOR_PN:
             marginLeftBGColor = CPConstants.asColor( newVal );
-            repaint();
+            update = true;
             break;
         case CPConstants.TIC_MINOR_COLOR_PN:
-            ticMinorColor = CPConstants.asColor( newVal );
-            repaint();
-            break;
         case CPConstants.TIC_MINOR_WEIGHT_PN:
-            ticMinorWeight = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.TIC_MINOR_LEN_PN:
-            ticMinorLen = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.TIC_MINOR_MPU_PN:
-            ticMinorMPU = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.TIC_MINOR_DRAW_PN:
-            ticMinorDraw = CPConstants.asBoolean( newVal );
-            repaint();
-            break;
         case CPConstants.TIC_MAJOR_COLOR_PN:
-            ticMajorColor = CPConstants.asColor( newVal );
-            repaint();
-            break;
         case CPConstants.TIC_MAJOR_WEIGHT_PN:
-            ticMajorWeight = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.TIC_MAJOR_LEN_PN:
-            ticMajorLen = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.TIC_MAJOR_MPU_PN:
-            ticMajorMPU = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.TIC_MAJOR_DRAW_PN:
-            ticMajorDraw = CPConstants.asBoolean( newVal );
-            repaint();
-            break;
         case CPConstants.GRID_LINE_COLOR_PN:
-            gridLineColor = CPConstants.asColor( newVal );
-            repaint();
-            break;
         case CPConstants.GRID_LINE_WEIGHT_PN:
-            gridLineWeight = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.GRID_LINE_LPU_PN:
-            gridLineLPU = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.GRID_LINE_DRAW_PN:
-            gridLineDraw = CPConstants.asBoolean( newVal );
-            repaint();
-            break;
         case CPConstants.AXIS_COLOR_PN:
-            axisColor = CPConstants.asColor( newVal );
-            repaint();
-            break;
         case CPConstants.AXIS_WEIGHT_PN:
-            axisWeight = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.LABEL_FONT_COLOR_PN:
-            labelFontColor = CPConstants.asColor( newVal );
-            repaint();
-            break;
         case CPConstants.LABEL_FONT_NAME_PN:
-            labelFontName = newVal;
-            repaint();
-            break;
         case CPConstants.LABEL_FONT_STYLE_PN:
-            labelFontStyle = CPConstants.asFontStyle( newVal );
-            repaint();
-            break;
         case CPConstants.LABEL_FONT_SIZE_PN:
-            labelFontSize = CPConstants.asFloat( newVal );
-            repaint();
-            break;
         case CPConstants.LABEL_DRAW_PN:
-            labelDraw = CPConstants.asBoolean( newVal );
-            repaint();
+            update = true;
             break;
+        }
+        
+        if ( update )
+        {
+            graphMgr.updateProfile();
+            repaint();
         }
     }
     
@@ -833,156 +708,6 @@ public class CartesianPlane
     {
         gtx.setColor( plotColor );
         streamSupplier.get().forEach( c -> c.execute() );
-    }
-    
-    /**
-     * Draws the x- and y-axes on the graph.
-     */
-    private void drawAxes()
-    {
-        gtx.setColor( axisColor );
-        gtx.setStroke( new BasicStroke( axisWeight ) );
-        
-        Iterator<Line2D>    axes    = 
-            LineGenerator.axesIterator( gridRect );
-        axes.forEachRemaining( gtx::draw );
-    }
-    
-    /**
-     * Draws the grid lines on the graph.
-     */
-    private void drawGridLines()
-    {
-        if ( gridLineDraw )
-        {
-            LineGenerator   lineGen = 
-                new LineGenerator( gridRect, gridUnit, gridLineLPU );
-            gtx.setStroke( new BasicStroke( gridLineWeight ) );
-            gtx.setColor( gridLineColor );
-            lineGen.forEach( gtx::draw );
-        }
-    }
-    
-    /**
-     * Draws the minor tics on the graph.
-     */
-    private void drawMinorTics()
-    {
-        if ( ticMinorDraw )
-        {
-            LineGenerator   lineGen = 
-                new LineGenerator( 
-                    gridRect, 
-                    gridUnit, 
-                    ticMinorMPU,
-                    ticMinorLen,
-                    LineGenerator.BOTH
-                );
-            gtx.setStroke( new BasicStroke( ticMinorWeight ) );
-            gtx.setColor( ticMinorColor );
-          StreamSupport
-              .stream( lineGen.spliterator(), false )
-              .forEach( gtx:: draw );
-        }
-    }
-    
-    /**
-     * Draws the major tics on the graph.
-     */
-    private void drawMajorTics()
-    {
-        if ( ticMajorDraw )
-        {
-            LineGenerator   lineGen = 
-                new LineGenerator( 
-                    gridRect, 
-                    gridUnit, 
-                    ticMajorMPU,
-                    ticMajorLen,
-                    LineGenerator.BOTH
-                );
-            gtx.setStroke( new BasicStroke( ticMajorWeight ) );
-            gtx.setColor( ticMajorColor );
-            StreamSupport
-                .stream( lineGen.spliterator(), false )
-                .forEach( gtx::draw );
-        }
-    }
-    
-    /**
-     * Draw the labels on the horizontal tic marks
-     * (top to bottom of y-axis).
-     */
-    private void drawHorizontalLabels()
-    {
-        // padding between tic mark and label
-        final int   labelPadding    = 3;
-        
-        LineGenerator   lineGen = 
-            new LineGenerator( 
-                gridRect, 
-                gridUnit, 
-                ticMajorMPU,
-                ticMajorLen,
-                LineGenerator.HORIZONTAL
-            );
-        float       spacing     = gridUnit / ticMajorMPU;
-        float       labelIncr   = 1 / ticMajorMPU;
-        float       originYco   = (float)gridRect.getCenterY();
-        for ( Line2D line : lineGen )
-        {
-            float       xco2    = (float)line.getX2();
-            float       yco1    = (float)line.getY1();
-            int         dist    = (int)((originYco - yco1) / spacing);
-            float       next    = dist * labelIncr;
-            String      label   = String.format( "%3.2f", next );
-            TextLayout  layout  = 
-                new TextLayout( label, labelFont, labelFRC );
-            Rectangle2D bounds  = layout.getBounds();
-            float       yOffset = (float)(bounds.getHeight() / 2);
-            float       xco     = xco2 + labelPadding;
-            float       yco     = yco1 + yOffset;
-            layout.draw( gtx, xco, yco );
-        }
-    }
-    
-    /**
-     * Draw the labels on the vertical tic marks
-     * (left to right on x-axis).
-     */
-    private void drawVerticalLabels()
-    {
-        // padding between tic mark and label
-        final int   labelPadding    = 3;
-        
-        LineGenerator   lineGen = 
-            new LineGenerator( 
-                gridRect, 
-                gridUnit, 
-                ticMajorMPU,
-                ticMajorLen,
-                LineGenerator.VERTICAL
-            );
-        float       spacing     = gridUnit / ticMajorMPU;
-        float       labelIncr   = 1 / ticMajorMPU;
-        float       originXco   = (float)gridRect.getCenterX();
-        for ( Line2D line : lineGen )
-        {
-            float       xco1    = (float)line.getX2();
-            int         dist    = (int)((xco1 - originXco) / spacing);
-            float       next    = dist * labelIncr;
-            String      label   = String.format( "%3.2f", next );
-
-            TextLayout  layout  = 
-                new TextLayout( label, labelFont, labelFRC );
-            Rectangle2D bounds  = layout.getBounds();
-            float       yOffset = 
-                (float)(bounds.getHeight() + labelPadding);
-            float       xOffset = (float)(bounds.getWidth() / 2);
-            float       xco     = xco1 - xOffset;
-            float       yco     = (float)line.getY2() + yOffset;
-            layout.draw( gtx, xco, yco );
-        }
     }
     
     private void paintMargins()

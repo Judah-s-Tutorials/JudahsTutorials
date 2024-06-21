@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
@@ -51,7 +50,8 @@ public class GraphManager
         LinePropertySetGridLines.class.getSimpleName();
         
     /** The component in which the sample graph is to be drawn. */
-    private final JComponent        comp;
+//    private final JComponent        comp;
+    private Rectangle2D       rect;
     /** The grid unit for the sample graph. */
     private float                   gridUnit;
 
@@ -97,7 +97,10 @@ public class GraphManager
     
     /**  Graphics context; updated every time refresh() is invoked. */
     private Graphics2D          gtx         = null;
-
+    public GraphManager( JComponent comp, Profile profile )
+    {
+        this( comp.getVisibleRect(), profile );
+    }
     /**
      * Constructor.
      * Fully initializes this object.
@@ -106,9 +109,9 @@ public class GraphManager
      * @param profile   
      *      the Profile containing the drawing configuration properties
      */
-    public GraphManager( JComponent comp, Profile profile )
+    public GraphManager( Rectangle2D rect, Profile profile )
     {
-        this.comp = comp;
+        this.rect = rect;
         this.profile = profile;
         mainWindow = profile.getMainWindow();
         axis = 
@@ -130,6 +133,11 @@ public class GraphManager
      * 
      * @param graphics  graphics context for redrawing the sample graph
      */
+    public void refresh( Graphics2D graphics, Rectangle2D rect )
+    {
+        this.rect = rect;
+        refresh( graphics );
+    }
     public void refresh( Graphics2D graphics )
     {
         if ( gtx != null )
@@ -137,12 +145,15 @@ public class GraphManager
         gtx = (Graphics2D)graphics.create();
         gridUnit = profile.getGridUnit();
         
-        int     width       = comp.getWidth();
-        int     height      = comp.getHeight();
         Color   color       = profile.getMainWindow().getBGColor();
         gtx.setColor( color );
-        gtx.fillRect( 0, 0, width, height );
+        gtx.fill( rect );
      }
+    
+    public void updateProfile()
+    {
+        profile.reset();
+    }
     
     /**
      * Draw the background of the sample graph.
@@ -150,7 +161,7 @@ public class GraphManager
     public void drawBackground()
     {
         setColor( mainWindow.getBGColor() );
-        gtx.fillRect( 0, 0, comp.getWidth(), comp.getHeight() );
+        gtx.fill( rect );
         setColor( null );
     }
     
@@ -164,7 +175,6 @@ public class GraphManager
             setColor( gridLine.getColor() );
             float           spacing = gridLine.getSpacing();
             float           stroke  = gridLine.getStroke();
-            Rectangle       rect    = comp.getVisibleRect();
             LineGenerator   lineGen = 
                 new LineGenerator( rect, gridUnit, spacing );
             gtx.setStroke( new BasicStroke( stroke ) );
@@ -188,50 +198,53 @@ public class GraphManager
      * Draw the labels on the major tic marks on the x-axis.
      * The origin is not labeled.
      */
-    private void drawVerticalLabels()
+    public void drawVerticalLabels()
     {
-        // padding between tic mark and label
-        final int   labelPadding    = 3;
-        
-        float   ticMajorMPU = ticMajor.getSpacing();
-        float   ticMajorLen = ticMajor.getLength();
-        String  fontName    = mainWindow.getFontName();
-        int     fontSize    = (int)mainWindow.getFontSize();
-        int     fontStyle   = mainWindow.getFontStyle();
-        Font    labelFont   = new Font( fontName, fontStyle, fontSize );
-        
-        gtx.setFont( labelFont );
-        FontRenderContext   frc     = gtx.getFontRenderContext();
-        Rectangle           rect    = comp.getVisibleRect();
-        LineGenerator       lineGen = 
-            new LineGenerator( 
-                rect, 
-                gridUnit, 
-                ticMajorMPU,
-                ticMajorLen,
-                LineGenerator.VERTICAL
-            );
-        int         numLeft     = 
-            (int)(lineGen.getVertLineCount() / 2);
-        float       labelIncr   = 1 / ticMajorMPU;
-        float       nextLabel   = -numLeft * labelIncr;
-        for ( Line2D line : lineGen )
+        if ( mainWindow.isFontDraw() )
         {
-            // Don't draw a label at the origin
-            if ( !equal( nextLabel, 0 ) )
+            // padding between tic mark and label
+            final int   labelPadding    = 3;
+            
+            float   ticMajorMPU = ticMajor.getSpacing();
+            float   ticMajorLen = ticMajor.getLength();
+            String  fontName    = mainWindow.getFontName();
+            int     fontSize    = (int)mainWindow.getFontSize();
+            int     fontStyle   = mainWindow.getFontStyle();
+            Color   fontColor   = mainWindow.getFGColor();
+            Font    labelFont   = 
+                new Font( fontName, fontStyle, fontSize );
+            
+            gtx.setColor( fontColor );
+            gtx.setFont( labelFont );
+            FontRenderContext   frc     = gtx.getFontRenderContext();
+            LineGenerator       lineGen = 
+                new LineGenerator( 
+                    rect, 
+                    gridUnit, 
+                    ticMajorMPU,
+                    ticMajorLen,
+                    LineGenerator.VERTICAL
+                );
+            float       labelIncr   = 1 / ticMajorMPU;
+            float       originXco   = (float)rect.getCenterX();
+            float       spacing     = gridUnit / ticMajorMPU;
+            for ( Line2D line : lineGen )
             {
-                String      label   = String.format( "%3.2f", nextLabel );
+                float       xco1    = (float)line.getX2();
+                int         dist    = (int)((xco1 - originXco) / spacing);
+                float       next    = dist * labelIncr;
+                String      label   = String.format( "%3.2f", next );
+    
                 TextLayout  layout  = 
                     new TextLayout( label, labelFont, frc );
                 Rectangle2D bounds  = layout.getBounds();
                 float       yOffset = 
                     (float)(bounds.getHeight() + labelPadding);
                 float       xOffset = (float)(bounds.getWidth() / 2);
-                float       xco     = (float)line.getX2() - xOffset;
+                float       xco     = xco1 - xOffset;
                 float       yco     = (float)line.getY2() + yOffset;
                 layout.draw( gtx, xco, yco );
             }
-            nextLabel += labelIncr;
         }
     }
 
@@ -242,46 +255,50 @@ public class GraphManager
      */
     public void drawHorizontalLabels()
     {
-        // padding between tic mark and label
-        final int   labelPadding    = 5;
-        
-        float   ticMajorMPU = ticMajor.getSpacing();
-        float   ticMajorLen = ticMajor.getLength();
-        String  fontName    = mainWindow.getFontName();
-        int     fontSize    = (int)mainWindow.getFontSize();
-        int     fontStyle   = mainWindow.getFontStyle();
-        Font    labelFont   = new Font( fontName, fontStyle, fontSize );
-
-        gtx.setFont( labelFont );
-        FontRenderContext   frc = gtx.getFontRenderContext();
-        Rectangle       rect    = comp.getVisibleRect();
-        LineGenerator   lineGen = 
-            new LineGenerator( 
-                rect, 
-                gridUnit, 
-                ticMajorMPU,
-                ticMajorLen,
-                LineGenerator.HORIZONTAL
-            );
-        int         numAbove    = 
-            (int)(lineGen.getHorLineCount() / 2);
-        float       labelIncr   = 1 / ticMajorMPU;
-        float       nextLabel   = numAbove * labelIncr;
-        for ( Line2D line : lineGen )
+        if ( mainWindow.isFontDraw() )
         {
-            // Don't draw a label at the origin
-            if ( !equal( nextLabel, 0 ) )
+            // padding between tic mark and label
+            final int   labelPadding    = 5;
+            
+            float   ticMajorMPU = ticMajor.getSpacing();
+            float   ticMajorLen = ticMajor.getLength();
+            String  fontName    = mainWindow.getFontName();
+            int     fontSize    = (int)mainWindow.getFontSize();
+            int     fontStyle   = mainWindow.getFontStyle();
+            Color   fontColor   = mainWindow.getFGColor();
+            Font    labelFont   = 
+                new Font( fontName, fontStyle, fontSize );
+    
+            gtx.setFont( labelFont );
+            gtx.setColor( fontColor );
+            FontRenderContext   frc = gtx.getFontRenderContext();
+            LineGenerator   lineGen = 
+                new LineGenerator( 
+                    rect, 
+                    gridUnit, 
+                    ticMajorMPU,
+                    ticMajorLen,
+                    LineGenerator.HORIZONTAL
+                );
+            float       labelIncr   = 1 / ticMajorMPU;
+            float       originYco   = (float)rect.getCenterY();
+            float       spacing     = gridUnit / ticMajorMPU;
+    
+            for ( Line2D line : lineGen )
             {
-                String      label   = String.format( "%3.2f", nextLabel );
+                float       xco2    = (float)line.getX2();
+                float       yco1    = (float)line.getY1();
+                int         dist    = (int)((originYco - yco1) / spacing);
+                float       next    = dist * labelIncr;
+                String      label   = String.format( "%3.2f", next );
                 TextLayout  layout  = 
                     new TextLayout( label, labelFont, frc );
                 Rectangle2D bounds  = layout.getBounds();
                 float       yOffset = (float)(bounds.getHeight() / 2);
-                float       xco     = (float)line.getX2() + labelPadding;
-                float       yco     = (float)line.getY2() + yOffset;
+                float       xco     = xco2 + labelPadding;
+                float       yco     = yco1 + yOffset;
                 layout.draw( gtx, xco, yco );
             }
-            nextLabel -= labelIncr;
         }
     }
 
@@ -293,14 +310,7 @@ public class GraphManager
         setColor( axis.getColor() );
         gtx.setStroke( new BasicStroke( axis.getStroke() ) );
         
-        // Set the gridUnit to the width of the grid...
-        // ... set the LPU to 1...
-        // ... LineGenerator will iterate lines only for the axes.
-        Rectangle       rect        = comp.getVisibleRect();
-        float           gridUnit    = comp.getWidth();
-        LineGenerator   lineGen     = 
-            new LineGenerator( rect, gridUnit, 1, 0 );
-        Iterator<Line2D>    iter    = lineGen.axesIterator();
+        Iterator<Line2D>    iter    = LineGenerator.axesIterator( rect );
         gtx.draw( iter.next() );
         gtx.draw( iter.next() );
         setColor( null );
@@ -316,7 +326,6 @@ public class GraphManager
             setColor( ticMinor.getColor() );
             float           ticMinorMPU = ticMinor.getSpacing();
             float           ticMinorLen = ticMinor.getLength();
-            Rectangle       rect        = comp.getVisibleRect();
             LineGenerator   lineGen     = 
                 new LineGenerator( 
                     rect, 
@@ -343,7 +352,6 @@ public class GraphManager
         if ( ticMajor.getDraw() )
         {
             setColor( ticMajor.getColor() );
-            Rectangle       rect    = comp.getVisibleRect();
             LineGenerator   lineGen = 
                 new LineGenerator( 
                     rect, 
@@ -384,22 +392,5 @@ public class GraphManager
         }
         else
             gtx.setColor( saveColor );
-    }
-
-    /**
-     * Compares two given decimal values,
-     * using the epsilon test for equality.
-     * 
-     * @param fVal1 the first given decimal value
-     * @param fVal2 the second given decimal value
-     * 
-     * @return  true if the given values are equal
-     */
-    private static boolean equal( float fVal1, float fVal2 )
-    {
-        final float epsilon = .0001f;
-        float       diff    = Math.abs( fVal1 - fVal2 );
-        boolean     equal   = diff < epsilon;
-        return equal;
     }
 }

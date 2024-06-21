@@ -3,11 +3,13 @@ package com.acmemail.judah.cartesian_plane.sandbox.utils;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
 
 /**
  * Encapsulates a line segment in a given BufferedImage.
- * The user provides the BufferedImage
- * and a point in the image.
+ * The user provides the BufferedImage,
+ * a point in the image,
+ * and a color.
  * The line segment is defined
  * as the rectangle containing the point
  * in which every point
@@ -17,18 +19,21 @@ import java.awt.image.BufferedImage;
  */
 public class LineSegment
 {
-    /** The point provided by the user. */
-    private final Point         origin;
+    /** The color of the given point (origin). */
+    private final int           rgb;
+    /** The bounding rectangle. */
+    private final Rectangle     rect;
+    
+    /** X-coordintate of the point provided by the user. */
+    private final int           originXco;
+    /** Y-coordintate of the point provided by the user. */
+    private final int           originYco;
     /** The BufferedImage provided by the user. */
     private final BufferedImage image;
     /** the width of the given image. */
     private final int           imageWidth;
     /** the height of the given image. */
     private final int           imageHeight;
-    /** The color of the given point (origin). */
-    private final int           rgb;
-    /** The bounding rectangle. */
-    private final Rectangle     rect;
     
     /**
      * Constructor.
@@ -41,8 +46,9 @@ public class LineSegment
      */
     public LineSegment( Point origin, BufferedImage image )
     {
-        this.origin = new Point( origin.x, origin.y );
         this.image = image;
+        this.originXco = origin.x;
+        this.originYco = origin.y;
         imageWidth = image.getWidth();
         imageHeight = image.getHeight();
         rgb = image.getRGB( origin.x, origin.y ) & 0xffffff;
@@ -68,6 +74,36 @@ public class LineSegment
     }
     
     /**
+     * Returns the color of the line segment.
+     * 
+     * @return  the color of the line segment
+     */
+    public int getColor()
+    {
+        return rgb;
+    }
+    
+    /**
+     * Returns true
+     * if the bounding rectangle and color
+     * of this object
+     * are equal to 
+     * the given rectangle and color.
+     * 
+     * @param rect  the given rectangle
+     * @param rgb   the given color
+     * 
+     * @return  
+     *      true if this object is equivalent to
+     *      the given rectangle and color 
+     */
+    public boolean equivalentTo( Rectangle rect, int rgb )
+    {
+        boolean result  = this.rect.equals( rect ) && this.rgb == rgb;
+        return result;
+    }
+    
+    /**
      * Returns a string 
      * describing the color
      * and bounding rectangle
@@ -89,6 +125,36 @@ public class LineSegment
         return bldr.toString();
     }
     
+    @Override
+    public int hashCode()
+    {
+        int hash    = Objects.hash( rgb, rect );
+        return hash;
+    }
+    
+    @Override
+    public boolean equals( Object other )
+    {
+        boolean result  = false;
+        if ( other == null )
+            ;
+        else if ( this == other )
+            result = true;
+        else if ( !(other instanceof LineSegment) )
+            ;
+        else
+        {
+            LineSegment that    = (LineSegment)other;
+            if ( !this.rect.equals( that.rect ) )
+                ;
+            else if ( this.rgb != that.rgb )
+                ;
+            else
+                result = true;
+        }
+        return result;
+    }
+    
     /**
      * Determines the left edge of the bounding rectangle.
      * 
@@ -96,8 +162,8 @@ public class LineSegment
      */
     private int getLeft()
     {
-        int     xco     = origin.x;
-        int     yco     = origin.y;
+        int     xco     = originXco;
+        int     yco     = originYco;
         int     testRGB = getRGB( xco - 1, yco );
         while ( xco > 0 && testRGB == rgb )
         {
@@ -114,8 +180,8 @@ public class LineSegment
      */
     private int getRight()
     {
-        int     xco     = origin.x;
-        int     yco     = origin.y;
+        int     xco     = originXco;
+        int     yco     = originYco;
         int     testRGB = getRGB( xco + 1, yco );
         while ( xco < imageWidth && testRGB == rgb )
         {
@@ -132,8 +198,8 @@ public class LineSegment
      */
     private int getTop()
     {
-        int     xco     = origin.x;
-        int     yco     = origin.y;
+        int     xco     = originXco;
+        int     yco     = originYco;
         int     testRGB = getRGB( xco, yco - 1 );
         while ( yco > 0 && testRGB == rgb )
         {
@@ -150,8 +216,8 @@ public class LineSegment
      */
     private int getBottom()
     {
-        int     xco     = origin.x;
-        int     yco     = origin.y;
+        int     xco     = originXco;
+        int     yco     = originYco;
         int     testRGB = getRGB( xco, yco + 1 );
         while ( yco < imageHeight && testRGB == rgb )
         {

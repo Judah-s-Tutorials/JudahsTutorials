@@ -83,8 +83,10 @@ public class ProfileEditor extends JPanel
     private static final String lpuLabel        = "Lines/Unit";
     /** Text describing the GUI length field. */
     private static final String lenLabel        = "Length";
-    /** Text describing the GUI draw field. */
+    /** Text describing the GUI draw field (for lines). */
     private static final String drawLabel       = "Draw";
+    /** Text describing the GUI draw field (for text). */
+    private static final String drawLabelsLabel = "Labels";
     
     /** Text describing the GUI grid unit panel. */
     private static final String gridUnitLabel   = "Grid Unit";
@@ -329,7 +331,6 @@ public class ProfileEditor extends JPanel
      */
     private void addSpinner( String type, String label, JPanel panel )
     {
-        System.out.println( type + " " + label );
         SpinnerDesc desc    = descMap.get( type + label );
         panel.add( desc.label );
         panel.add( desc.spinner );
@@ -350,6 +351,15 @@ public class ProfileEditor extends JPanel
         panel.add( desc.spinner );
         addColorEditor( propSet, panel );
         addFontEditor( propSet, panel );
+        addDraw( propSet, panel );
+        
+        Border      lineBorder  = 
+            BorderFactory.createLineBorder( Color.BLACK );
+        Border      border      = 
+            BorderFactory.createTitledBorder( lineBorder, "Grid" );
+        GridLayout  layout  = new GridLayout( 4, 2, 3, 0 );
+        panel.setBorder(border);
+        panel.setLayout( layout );
         return panel;
     }
     
@@ -419,6 +429,22 @@ public class ProfileEditor extends JPanel
         editButton.addActionListener( e -> showFontDialog( fontDialog ) );
         panel.add( new JLabel( "" ) );
         panel.add( editButton );
+    }
+    
+    private void addDraw( GraphPropertySet propSet, JPanel panel )
+    {
+        JLabel      label       = 
+            new JLabel( drawLabelsLabel, SwingConstants.RIGHT );
+        boolean     val         = propSet.isFontDraw();
+        JCheckBox   checkBox    = new JCheckBox( "", val );
+        panel.add( label );
+        panel.add( checkBox );
+        checkBox.addItemListener( e -> {
+            propSet.setFontDraw( checkBox.isSelected() );
+            canvas.repaint();
+        });
+        
+        resetList.add( () -> checkBox.setSelected( propSet.isFontDraw() ) );
     }
     
     private void addDraw( LinePropertySet propSet, JPanel panel )

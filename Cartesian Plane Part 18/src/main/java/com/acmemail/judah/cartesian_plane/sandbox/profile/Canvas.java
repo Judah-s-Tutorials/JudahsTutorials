@@ -50,7 +50,7 @@ public class Canvas extends JComponent
      */
     public Canvas( Profile profile )
     {
-        drawManager = new GraphManager( this, profile );
+        drawManager = new GraphManager( this.getVisibleRect(), profile );
         
         Dimension   screenSize  = 
             Toolkit.getDefaultToolkit().getScreenSize();
@@ -74,7 +74,7 @@ public class Canvas extends JComponent
         super.paintComponent( graphics );
         gtx = (Graphics2D)graphics.create();
         
-        drawManager.refresh( gtx );
+        drawManager.refresh( gtx, this.getVisibleRect() );
         drawManager.drawBackground();
         drawManager.drawGridLines();
         drawManager.drawAxes();
