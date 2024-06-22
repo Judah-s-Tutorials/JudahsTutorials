@@ -212,9 +212,9 @@ public class GraphManagerDemo1
             if ( (bitmap.getRGB( xco, mid ) & 0xFFFFFF) == rgb )
             {
                 LineSegment lineSeg = 
-                    new LineSegment( new Point( xco, mid ), bitmap );
+                    LineSegment.of( new Point( xco, mid ), bitmap );
                 log.append( lineSeg.toString() );
-                xco += lineSeg.getBounds().width;
+                xco += lineSeg.getBounds().getWidth();
             }
         }
         log.append( ">>>>>> <<<<<<" );
@@ -231,9 +231,9 @@ public class GraphManagerDemo1
             if ( (bitmap.getRGB( mid, yco ) & 0xFFFFFF) == rgb )
             {
                 LineSegment lineSeg = 
-                    new LineSegment( new Point( mid, yco ), bitmap );
+                    LineSegment.of( new Point( mid, yco ), bitmap );
                 log.append( lineSeg.toString() );
-                yco += lineSeg.getBounds().height;
+                yco += lineSeg.getBounds().getHeight();
             }
         }
         log.append( ">>>>>> <<<<<<" );

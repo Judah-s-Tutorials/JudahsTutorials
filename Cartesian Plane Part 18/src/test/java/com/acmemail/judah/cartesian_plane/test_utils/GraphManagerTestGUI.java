@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -10,12 +11,14 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.acmemail.judah.cartesian_plane.GraphManager;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
@@ -79,6 +82,12 @@ public class GraphManagerTestGUI
         return image;
     }
     
+    public BufferedImage drawBackground()
+    {
+        executeProc( () -> graphMgr.drawBackground() );
+        return image;
+    }
+    
     public BufferedImage drawAxes()
     {
         executeProc( () -> graphMgr.drawAxes() );
@@ -91,69 +100,288 @@ public class GraphManagerTestGUI
         return image;
     }
     
+    /**
+     * Sets the value of the gridUnit property
+     * in the active Profile.
+     * 
+     * @param gridUnit  the value of the property
+     */
     public void setGridUnit( float gridUnit )
     {
-        profile.setGridUnit( gridUnit );
+        setProperty( a -> profile.setGridUnit( (Float)a ), gridUnit );
     }
     
+    /**
+     * Gets the value of the gridUnit property
+     * from the active Profile.
+     * 
+     * @return  
+     *      the value of the gridUnit property
+     *      from the active Profile
+     */
+    public float getGridUnit()
+    {
+        float   gridUnit    = getFloat( () -> profile.getGridUnit() );
+        return gridUnit;
+    }
+    
+    /**
+     * Sets the value of the gridColor property
+     * in the active Profile.
+     * 
+     * @param color  the value of the property
+     */
     public void setGridColor( Color color )
     {
+        GraphPropertySet    win = profile.getMainWindow();
+        setProperty( a -> win.setBGColor( (Color)a ), color );
+    }
+    
+    /**
+     * Gets the value of the color property
+     * from the active Profile.
+     * 
+     * @return  
+     *      the value of the color property
+     *      from the active Profile
+     */
+    public Color getGridColor()
+    {
+        GraphPropertySet    win     = profile.getMainWindow();
+        Color               color   = getColor( () -> win.getBGColor( ));
+        return color;
+    }
+    
+    /**
+     * Sets the value of the gridColor property
+     * in the active Profile
+     * from the given RGB value
+     * 
+     * @param rgb   the given RGB value
+     */
+    public void setGridColor( int rgb )
+    {
+        Color   color   = new Color( rgb );
         profile.getMainWindow().setBGColor( color );
     }
     
+    /**
+     * Gets the RGB value of the color property
+     * from the active Profile.
+     * 
+     * @return  
+     *      the RGB value of the color property
+     *      from the active Profile
+     */
+    public int getGridColorRGB()
+    {
+        Color   color   = getGridColor();
+        int     rgb     = color.getRGB() & 0xFFFFFF;
+        return rgb;
+    }
+    
+    /**
+     * Sets the font size property
+     * in the active Profile
+     * from the given value
+     * 
+     * @param size   the given value
+     */
     public void setGridFontSize( float size )
     {
-        profile.getMainWindow().setFontSize( size );
+        GraphPropertySet    win = profile.getMainWindow();
+        setProperty( a -> win.setFontSize( (float)a ), size );
     }
     
+    /**
+     * Gets the font size
+     * from the active Profile.
+     * 
+     * @return  
+     *      the font size from the active Profile
+     */
+    public float getGridFontSize()
+    {
+        GraphPropertySet    win     = profile.getMainWindow();
+        float               size    = getFloat( () -> win.getFontSize() );
+        return size;
+    }
+    
+    /**
+     * Sets the font style property
+     * in the active Profile
+     * from the given value
+     * 
+     * @param style   the given value
+     */
     public void setGridFontStyle( String style )
     {
-        profile.getMainWindow().setFontStyle( style );
+        GraphPropertySet    win = profile.getMainWindow();
+        setProperty( a -> win.setFontStyle( (String)a ), style );
     }
     
+    /**
+     * Gets the font style
+     * from the active Profile.
+     * 
+     * @return  
+     *      the font style from the active Profile
+     */
+    public int getFontStyle()
+    {
+        GraphPropertySet    win     = profile.getMainWindow();
+        int                 style   = getInt( () -> win.getFontStyle() );
+        return style;
+    }
+    
+    /**
+     * Sets the font name property
+     * in the active Profile
+     * from the given value
+     * 
+     * @param name   the given value
+     */
     public void setGridFontName( String name )
     {
-        profile.getMainWindow().setFontName( name );
+        GraphPropertySet    win = profile.getMainWindow();
+        setProperty( a -> win.setFontName( (String)a ), name );
     }
     
+    /**
+     * Gets the font name
+     * from the active Profile.
+     * 
+     * @return  name from the active Profile
+     */
+    public String getFontName()
+    {
+        GraphPropertySet    win     = profile.getMainWindow();
+        String              name    = getString( () -> win.getFontName() );
+        return name;
+    }
+    
+    /**
+     * Sets the draw-labels property
+     * in the active Profile
+     * from the given value
+     * 
+     * @param draw   the given value
+     */
     public void setGridFontLabels( boolean draw )
     {
+        GraphPropertySet    win = profile.getMainWindow();
+        setProperty( a -> win.setFontDraw( (Boolean)a ), draw );
         profile.getMainWindow().setFontDraw( draw );
     }
     
+    /**
+     * Gets the font name
+     * from the active Profile.
+     * 
+     * @return  name from the active Profile
+     */
+    public boolean getGridFontLabelsDraw()
+    {
+        GraphPropertySet    win     = profile.getMainWindow();
+        boolean             draw    = getBoolean( () -> win.isFontDraw() );
+        return draw;
+    }
+    
+    /**
+     * Sets the draw property
+     * of the given property set
+     * to the given value.
+     * 
+     * @param propSet   the given property set
+     * @param draw      the given value
+     */
     public void setLineDraw( String propSet, boolean draw )
     {
         LinePropertySet set = profile.getLinePropertySet( propSet );
         assertNotNull( set );
-        set.setDraw( draw );
+        setProperty( a -> set.setDraw( (Boolean)a ), draw );
+    }
+    
+    /**
+     * Gets the draw property
+     * of the given line property set
+     * to the given value.
+     * 
+     * @param propSet   the given line property set
+     */
+    public boolean getLineDraw( String propSet )
+    {
+        LinePropertySet set     = profile.getLinePropertySet( propSet );
+        boolean         draw    = getBoolean( () -> set.getDraw() );
+        assertNotNull( set );
+        return draw;
     }
     
     public void setLineStroke( String propSet, float stroke )
     {
         LinePropertySet set = profile.getLinePropertySet( propSet );
         assertNotNull( set );
-        set.setStroke( stroke );
+        setProperty( a -> set.setStroke( (float)a ), stroke );
+    }
+    
+    public float getLineStroke( String propSet )
+    {
+        LinePropertySet set = profile.getLinePropertySet( propSet );
+        assertNotNull( set );
+        float   val     = getFloat( () -> set.getStroke() );
+        return val;
     }
     
     public void setLineLength( String propSet, float length )
     {
         LinePropertySet set = profile.getLinePropertySet( propSet );
         assertNotNull( set );
-        set.setLength( length );
+        setProperty( a -> set.setLength( (float)a ), length );
+    }
+    
+    public float getLineLength( String propSet )
+    {
+        LinePropertySet set = profile.getLinePropertySet( propSet );
+        assertNotNull( set );
+        float   val     = getFloat( () -> set.getLength() );
+        return val;
     }
     
     public void setLineSpacing( String propSet, float spacing )
     {
         LinePropertySet set = profile.getLinePropertySet( propSet );
         assertNotNull( set );
-        set.setLength( spacing );
+        setProperty( a -> set.setSpacing( (float)a ), spacing );
+    }
+    
+    public float getLineSpacing( String propSet )
+    {
+        LinePropertySet set = profile.getLinePropertySet( propSet );
+        assertNotNull( set );
+        float   val     = getFloat( () -> set.getSpacing() );
+        return val;
     }
     
     public void setLineColor( String propSet, Color color )
     {
         LinePropertySet set = profile.getLinePropertySet( propSet );
         assertNotNull( set );
-        set.setColor( color );
+        setProperty( a -> set.setColor( (Color)a ), color );
+    }
+    
+    public Color getLineColor( String propSet )
+    {
+        LinePropertySet set = profile.getLinePropertySet( propSet );
+        assertNotNull( set );
+        Color   val     = getColor( () -> set.getColor() );
+        return val;
+    }
+    
+    public int getLineRGB( String propSet )
+    {
+        Color   color   = getLineColor( propSet );
+        int     rgb     = color.getRGB() & 0xFFFFFF;
+        return rgb;
     }
     
     private void executeProc( Runnable runner )
@@ -166,9 +394,65 @@ public class GraphManagerTestGUI
         });
     }
     
+    /**
+     * Sets the given property value
+     * via the given consumer.
+     * Executed in the context of the EDT.
+     * 
+     * @param consumer  the given consumer
+     * @param prop      the given property value
+     */
     private void setProperty( Consumer<Object> consumer, Object prop )
     {
         GUIUtils.schedEDTAndWait( () -> consumer.accept( prop ) );
+    }
+    
+    private boolean getBoolean( Supplier<Boolean> supplier )
+    {
+        Supplier<Object>    objGetter   = () -> supplier.get();
+        Object              obj         = getProperty( objGetter );
+        assertTrue( obj instanceof Boolean );
+        return (boolean)obj;
+    }
+    
+    private int getInt( Supplier<Integer> supplier )
+    {
+        Supplier<Object>    objGetter   = () -> supplier.get();
+        Object              obj         = getProperty( objGetter );
+        assertTrue( obj instanceof Integer );
+        return (int)obj;
+    }
+    
+    private float getFloat( Supplier<Float> supplier )
+    {
+        Supplier<Object>    objGetter   = () -> supplier.get();
+        Object              obj         = getProperty( objGetter );
+        assertTrue( obj instanceof Float );
+        return (float)obj;
+    }
+    
+    private Color getColor( Supplier<Color> supplier )
+    {
+        Supplier<Object>    objGetter   = () -> supplier.get();
+        Object              obj         = getProperty( objGetter );
+        assertTrue( obj instanceof Color );
+        return (Color)obj;
+    }
+    
+    private String getString( Supplier<String> supplier )
+    {
+        Supplier<Object>    objGetter   = () -> supplier.get();
+        Object              obj         = getProperty( objGetter );
+        assertTrue( obj instanceof String );
+        return (String)obj;
+    }
+    
+    private Object getProperty( Supplier<Object> supplier )
+    {
+        Object[]    obj     = new Object[1];
+        GUIUtils.schedEDTAndWait(() -> obj[0] = supplier.get() );
+        assertNotNull( obj[0] );
+        return obj[0];
     }
     
     @SuppressWarnings("serial")
