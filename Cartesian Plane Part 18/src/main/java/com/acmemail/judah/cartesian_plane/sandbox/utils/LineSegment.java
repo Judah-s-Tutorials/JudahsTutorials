@@ -1,7 +1,7 @@
 package com.acmemail.judah.cartesian_plane.sandbox.utils;
 
-import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -56,6 +56,56 @@ public class LineSegment
     {
         LineSegment segment = new LineSegment( rect, rgb );
         return segment;
+    }
+    
+    /**
+     * Create a LineSegment
+     * from a given vertical line, stroke and color.
+     * 
+     * @param line      the given line
+     * @param stroke    the given stroke
+     * @param rgb       the given color
+     * 
+     * @return  the instantiated LineSegment
+     */
+    public static 
+    LineSegment ofVertical( Line2D line, double stroke, int rgb )
+    {
+        double      lineXco     = line.getX1();
+        double      lineYco     = line.getY1();
+        double      length      = line.getY2() - lineYco;
+        double      halfStroke  = stroke / 2;
+        double      rectXco     = lineXco - halfStroke;
+        double      rectYco     = lineYco;
+        Rectangle2D rect        = 
+            new Rectangle2D.Double( rectXco, rectYco, stroke, length );
+        LineSegment seg         = new LineSegment( rect, rgb );
+        return seg;
+    }
+    
+    /**
+     * Create a LineSegment
+     * from a given horizontal line, stroke and color.
+     * 
+     * @param line      the given line
+     * @param stroke    the given stroke
+     * @param rgb       the given color
+     * 
+     * @return  the instantiated LineSegment
+     */
+    public static LineSegment 
+    ofHorizontal( Line2D line, double stroke, int rgb )
+    {
+        double      lineXco     = line.getX1();
+        double      lineYco     = line.getY1();
+        double      length      = line.getX2() - lineXco;
+        double      halfStroke  = stroke / 2;
+        double      rectXco     = lineXco;
+        double      rectYco     = lineYco - halfStroke;
+        Rectangle2D rect        = 
+            new Rectangle2D.Double( rectXco, rectYco, length, stroke );
+        LineSegment seg         = new LineSegment( rect, rgb );
+        return seg;
     }
     
     /**

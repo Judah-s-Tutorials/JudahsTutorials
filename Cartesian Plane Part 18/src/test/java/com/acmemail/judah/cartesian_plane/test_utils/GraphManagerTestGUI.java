@@ -72,7 +72,6 @@ public class GraphManagerTestGUI
         
         frame.setContentPane( contentPane );
         frame.pack();
-//        GUIUtils.center( frame );
         frame.setVisible( true );
     }
     
@@ -97,6 +96,18 @@ public class GraphManagerTestGUI
     public BufferedImage drawMajorTics()
     {
         executeProc( () -> graphMgr.drawMajorTics() );
+        return image;
+    }
+    
+    public BufferedImage drawMinorTics()
+    {
+        executeProc( () -> graphMgr.drawMinorTics() );
+        return image;
+    }
+    
+    public BufferedImage drawGridLines()
+    {
+        executeProc( () -> graphMgr.drawGridLines() );
         return image;
     }
     
@@ -288,6 +299,23 @@ public class GraphManagerTestGUI
     }
     
     /**
+     * Gets the has-length property
+     * of the given line property set.
+     * 
+     * @param propSet   the given line property set
+     * 
+     * @return  
+     *      the value of the has-length property
+     *      for the given LinePropertySet
+     */
+    public boolean getLineHasLength( String propSet )
+    {
+        LinePropertySet set     = profile.getLinePropertySet( propSet );
+        boolean         draw    = getBoolean( () -> set.hasLength() );
+        return draw;
+    }
+    
+    /**
      * Sets the draw property
      * of the given property set
      * to the given value.
@@ -304,10 +332,13 @@ public class GraphManagerTestGUI
     
     /**
      * Gets the draw property
-     * of the given line property set
-     * to the given value.
+     * of the given line property set.
      * 
      * @param propSet   the given line property set
+     * 
+     * @return  
+     *      the value of the draw property
+     *      for the given LinePropertySet
      */
     public boolean getLineDraw( String propSet )
     {

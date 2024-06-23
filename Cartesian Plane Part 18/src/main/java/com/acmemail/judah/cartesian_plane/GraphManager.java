@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.Line2D;
@@ -14,6 +15,7 @@ import java.util.stream.StreamSupport;
 import javax.swing.JComponent;
 
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
@@ -36,6 +38,12 @@ import com.acmemail.judah.cartesian_plane.components.Profile;
  */
 public class GraphManager
 {
+    /** Type of line-cap when instantiating Stroke. */
+    private static final int    lineCap                 =
+        BasicStroke.CAP_BUTT;
+    /** Type of line-join when instantiating Stroke. */
+    private static final int    lineJoin                =
+        BasicStroke.JOIN_BEVEL;
     /** Name of the LinePropertiesSetAxes class. */
     private static final String axisPropertiesName      =
         LinePropertySetAxes.class.getSimpleName();
@@ -170,19 +178,7 @@ public class GraphManager
      */
     public void drawGridLines()
     {
-        if ( gridLine.getDraw() )
-        {
-            setColor( gridLine.getColor() );
-            float           spacing = gridLine.getSpacing();
-            float           stroke  = gridLine.getStroke();
-            LineGenerator   lineGen = 
-                new LineGenerator( rect, gridUnit, spacing );
-            gtx.setStroke( new BasicStroke( stroke ) );
-            gtx.setColor( gridLine.getColor() );
-            lineGen.forEach( gtx::draw );
-            
-            setColor( null );
-        }
+        drawLines( gridLine );
     }
     
     /**
@@ -308,7 +304,7 @@ public class GraphManager
     public void drawAxes()
     {
         setColor( axis.getColor() );
-        gtx.setStroke( new BasicStroke( axis.getStroke() ) );
+        gtx.setStroke( getStroke( axis.getStroke() ) );
         
         Iterator<Line2D>    iter    = LineGenerator.axesIterator( rect );
         gtx.draw( iter.next() );
@@ -321,50 +317,44 @@ public class GraphManager
      */
     public void drawMinorTics()
     {
-        if ( ticMinor.getDraw() )
-        {
-            setColor( ticMinor.getColor() );
-            float           ticMinorMPU = ticMinor.getSpacing();
-            float           ticMinorLen = ticMinor.getLength();
-            LineGenerator   lineGen     = 
-                new LineGenerator( 
-                    rect, 
-                    gridUnit, 
-                    ticMinorMPU,
-                    ticMinorLen,
-                    LineGenerator.BOTH
-                );
-            gtx.setStroke( new BasicStroke( ticMinor.getStroke() ) );
-            gtx.setColor( ticMinor.getColor() );
-            StreamSupport
-                .stream( lineGen.spliterator(), false )
-                .forEach( gtx:: draw );
-            setColor( null );
-        }
+        drawLines( ticMinor );
     }
-
 
     /**
      * Draw the major tic marks on the sample graph.
      */
     public void drawMajorTics()
     {
-        if ( ticMajor.getDraw() )
+        drawLines( ticMajor );
+    }
+
+    /**
+     * Draw the lines for the given line property set on the graph.
+     *
+     * @param   propSet the given line property set
+     */
+    private void drawLines( LinePropertySet propSet )
+    {
+        if ( propSet.getDraw() )
         {
-            setColor( ticMajor.getColor() );
+            float           lpu     = propSet.getSpacing();
+            float           len     = propSet.hasLength() ?
+                propSet.getLength() : -1;
+            Stroke          stroke  = getStroke( propSet.getStroke() );
+            Color           color   = propSet.getColor();
             LineGenerator   lineGen = 
                 new LineGenerator( 
                     rect, 
                     gridUnit, 
-                    ticMajor.getSpacing(),
-                    ticMajor.getLength(),
+                    lpu,
+                    len,
                     LineGenerator.BOTH
                 );
-            gtx.setStroke( new BasicStroke( ticMajor.getStroke() ) );
-            gtx.setColor( ticMajor.getColor() );
+            gtx.setStroke( stroke );
+            setColor( color );
             StreamSupport
                 .stream( lineGen.spliterator(), false )
-                .forEach( gtx::draw );
+                .forEach( gtx:: draw );
             setColor( null );
         }
     }
@@ -392,5 +382,22 @@ public class GraphManager
         }
         else
             gtx.setColor( saveColor );
+    }
+    
+    /**
+     * Instantiates a Stroke from the given width.
+     * This method ensures that a Stroke
+     * is always created consistently, 
+     * with the given width
+     * and consistent line-cap and line-join.
+     * 
+     * @param width the given width
+     * 
+     * @return  the instantiated Stroke
+     */
+    private Stroke getStroke( float width )
+    {
+        Stroke  stroke  = new BasicStroke( width, lineCap, lineJoin );
+        return stroke;
     }
 }

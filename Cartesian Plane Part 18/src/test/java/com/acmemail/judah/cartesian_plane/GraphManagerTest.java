@@ -4,15 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Color;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Scanner;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
@@ -24,6 +25,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.GraphManagerTestGUI;
 
 class GraphManagerTest
 {
+    private final Scanner scanner = new Scanner( System.in );
     private static final String             AXES        =
         LinePropertySetAxes.class.getSimpleName();
     private static final String             GRID_LINES  =
@@ -33,15 +35,39 @@ class GraphManagerTest
     private static final String             TIC_MINOR   =
         LinePropertySetTicMinor.class.getSimpleName();
     
-    private static final PropertyManager    pMgr        = 
-        PropertyManager.INSTANCE;
-    private static final Profile            baseProfile = new Profile();
+    private static final int    testRGB1        = 0x0000FF;
+    private static final int    testRGB2        = testRGB1 << 8;
+    private static final int    testGridRGB1    = testRGB2 << 8;
+    private static final int    testGridRGB2    = testGridRGB1 << 8;
+    private static final Color  testColor1      = new Color( testRGB1 );
+    private static final Color  testColor2      = new Color( testRGB2 );
+    private static final Color  testGridColor1  = new Color( testGridRGB1 );
+    private static final Color  testGridColor2  = new Color( testGridRGB2 );
+    private static final float  testGPU1        = 100;
+    private static final float  testGPU2        = testGPU1 + 20;
+    private static final float  testLPU1        = 2;
+    private static final float  testLPU2        = testLPU1 + 2;
+    private static final float  testLength1     = 20;
+    private static final float  testLength2     = testLength1 + 10;
+    private static final float  testStroke1     = 4;
+    private static final float  testStroke2     = testStroke1 + 2;
+
+    private static final Profile    baseProfile = new Profile();
     
-    private Profile             workingProfile;
-    private GraphPropertySet    mainWindow;
-    private GraphManager        graphManager;
-    private static GraphManagerTestGUI testGUI;
+    private Profile                 workingProfile  = new Profile();
+    private static GraphManagerTestGUI  testGUI;
         
+    private float                       workingGPU;
+    private Color                       workingGridColor;
+    private int                         workingGridRGB;
+    private float                       workingLPU;
+    private float                       workingStroke;
+    private float                       workingLength;
+    private Color                       workingColor;
+    private int                         workingRGB;
+    
+    private BufferedImage               workingImage;
+    private String                      workingLineSet;
     
     @BeforeAll
     public static void beforeAll()
@@ -55,8 +81,8 @@ class GraphManagerTest
     public void beforeEach() throws Exception
     {
         baseProfile.apply();
-        workingProfile = new Profile();
-        mainWindow = workingProfile.getMainWindow();
+        workingProfile.reset();
+        initTestParameters( 0 );
     }
 
     @Test
@@ -99,19 +125,21 @@ class GraphManagerTest
     @Test
     public void testDrawBackground()
     {
-        int             rgb     = testGUI.getGridColorRGB();
-        BufferedImage   image   = testGUI.drawBackground();
-        validateFill( image, rgb );
-        int             diffRGB = ~rgb & 0xFFFFFF;   
-        testGUI.setGridColor( diffRGB );
-        image = testGUI.drawBackground();
-        validateFill( image, diffRGB );
+        initTestData( AXES );
+        workingImage   = testGUI.drawBackground();
+        validateFill();
+        initTestParameters( 1 );
+        initTestData( AXES );
+        workingImage = testGUI.drawBackground();
+        validateFill();
     }
 
     @Test
     public void testDrawGridLines()
     {
-        fail("Not yet implemented");
+        initTestData( GRID_LINES );
+        workingImage = testGUI.drawGridLines();
+        testVerticalLines();
     }
 
     @Test
@@ -129,44 +157,78 @@ class GraphManagerTest
     @Test
     public void testDrawYAxis()
     {
-        testDrawYAxis( Color.RED, 4 );
-        testDrawYAxis( Color.BLUE, 6 );
-    }
-    
-    private void testDrawYAxis( Color expColor, int expStroke )
-    {
-        int             expRGB      = expColor.getRGB() & 0xFFFFFF;
-        testGUI.setLineColor( AXES, expColor );
-        testGUI.setLineStroke( AXES, expStroke );
-        BufferedImage   image       = testGUI.drawAxes();
-        
-        double          centerXco   = image.getWidth() / 2.;
-        double          centerYco   = image.getHeight() / 2.;
-        double          length      = image.getHeight();
-        LineSegment     expSeg      = getVerticalLineSegment( 
-            image, 
-            centerYco,
-            length, 
-            expStroke,
-            expRGB
-        );
-        Point2D         center      =
-            new Point2D.Double( centerXco, 0 );
-        LineSegment     actSeg      =
-            LineSegment.of( center, image );
-        assertEquals( expSeg, actSeg );
+//        testDrawYAxis( Color.RED, 4 );
+//        testDrawYAxis( Color.BLUE, 6 );
+        testDrawYAxis( 0 );
+        testDrawYAxis( 1 );
     }
 
     @Test
     public void testDrawMinorTics()
     {
-        fail("Not yet implemented");
+        initTestData( TIC_MINOR );
+        workingImage = testGUI.drawMinorTics();
+        testVerticalLines();
+    }
+    
+    private void 
+    testVerticalLines()
+    {
+        LineGenerator   lineGen     = 
+            getLineGenerator( LineGenerator.VERTICAL );
+        for ( Line2D line : lineGen )
+        {
+            LineSegment expSeg  = 
+                LineSegment.ofVertical( line, workingStroke, workingRGB );
+            LineSegment actSeg  = 
+                LineSegment.of( line.getP1(), workingImage );
+            assertEquals( expSeg, actSeg );
+        }
     }
 
     @Test
     public void testDrawMajorTics()
     {
-        fail("Not yet implemented");
+        initTestData( TIC_MAJOR );
+        workingImage = testGUI.drawMajorTics();
+        testVerticalLines();
+    }
+
+    private void initTestParameters( int num )
+    {
+        if ( num == 0 )
+        {
+            workingGPU = testGPU1;
+            workingGridColor = testGridColor1;
+            workingGridRGB = testGridRGB1;
+            workingLPU = testLPU1;
+            workingStroke = testStroke1;
+            workingLength = testLength1;
+            workingColor = testColor1;
+            workingRGB = testRGB1;
+        }
+        else
+        {
+            workingGPU = testGPU2;
+            workingGridColor = testGridColor2;
+            workingGridRGB = testGridRGB2;
+            workingLPU = testLPU2;
+            workingStroke = testStroke2;
+            workingLength = testLength2;
+            workingColor = testColor2;
+            workingRGB = testRGB2;
+        }
+    }
+    
+    private void initTestData( String propSet )
+    {
+        workingLineSet = propSet;
+        testGUI.setGridUnit( workingGPU );
+        testGUI.setGridColor( workingGridColor );
+        testGUI.setLineSpacing( propSet, workingLPU );
+        testGUI.setLineStroke( propSet, workingStroke );
+        testGUI.setLineLength( propSet, workingLength );
+        testGUI.setLineColor( propSet, workingColor );
     }
     
     /**
@@ -176,13 +238,40 @@ class GraphManagerTest
      * @param image the given image
      * @param rgb   the given color
      */
-    private static void validateFill( BufferedImage image, int rgb )
+    private void validateFill()
     {
-        int             width   = image.getWidth();
-        int             height  = image.getHeight();
+        int             width   = workingImage.getWidth();
+        int             height  = workingImage.getHeight();
         for ( int xco = 0 ; xco < width ; ++xco )
             for ( int yco = 0 ; yco < height ; ++yco )
-                assertEquals( rgb, image.getRGB( xco, yco ) & 0xFFFFFF );
+            {
+                int imageRGB    = 
+                    workingImage.getRGB( xco, yco ) & 0xFFFFFF;
+                assertEquals( workingGridRGB, imageRGB );
+            }
+    }
+    
+    private void testDrawYAxis( int paramNum )
+    {
+        initTestParameters( paramNum );
+        initTestData( AXES );
+        workingImage = testGUI.drawAxes();
+        
+        double          centerXco   = workingImage.getWidth() / 2.;
+        double          centerYco   = workingImage.getHeight() / 2.;
+        double          length      = workingImage.getHeight();
+        LineSegment     expSeg      = getVerticalLineSegment( 
+            workingImage, 
+            centerYco,
+            length, 
+            workingStroke,
+            workingRGB
+        );
+        Point2D         center      =
+            new Point2D.Double( centerXco, 0 );
+        LineSegment     actSeg      =
+            LineSegment.of( center, workingImage );
+        assertEquals( expSeg, actSeg );
     }
   
     private static LineSegment getVerticalLineSegment( 
@@ -201,11 +290,26 @@ class GraphManagerTest
         LineSegment seg     = LineSegment.of( rect, rgb );
         return seg;
     }
-
-    private static Rectangle2D getBoundingRectangle( BufferedImage image )
+    
+    private LineGenerator getLineGenerator( int orientation )
     {
-        int         width   = image.getWidth();
-        int         height  = image.getHeight();
+        boolean hasLength   = testGUI.getLineHasLength( workingLineSet );
+        float   length      = hasLength ? workingLength : -1;
+        
+        LineGenerator   lineGen = new LineGenerator( 
+            getBoundingRectangle(), 
+            workingGPU, 
+            workingLPU, 
+            length, 
+            orientation
+        );
+        return lineGen;
+    }
+
+    private Rectangle2D getBoundingRectangle()
+    {
+        int         width   = workingImage.getWidth();
+        int         height  = workingImage.getHeight();
         Rectangle2D rect    = 
             new Rectangle2D.Double( 0, 0, width, height );
         return rect;
