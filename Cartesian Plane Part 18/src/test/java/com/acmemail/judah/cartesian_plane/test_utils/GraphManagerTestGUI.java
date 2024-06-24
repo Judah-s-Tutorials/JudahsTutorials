@@ -38,10 +38,6 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  */
 public class GraphManagerTestGUI
 {
-    /** Convenient PropertyManager singleton declaration. */
-    private static final PropertyManager    pMgr    = 
-        PropertyManager.INSTANCE;
-    
     /** Application frame title. */
     private static final String title       = "GraphManager Test GUI";
     
@@ -75,36 +71,60 @@ public class GraphManagerTestGUI
         frame.setVisible( true );
     }
     
-    public BufferedImage refresh()
-    {
-        executeProc( () -> {} );
-        return image;
-    }
-    
+    /**
+     * Executes the drawBackground method
+     * in the GraphManager under test.
+     * 
+     * @return  the bitmap that the grid manager draws to
+     */
     public BufferedImage drawBackground()
     {
         executeProc( () -> graphMgr.drawBackground() );
         return image;
     }
     
+    /**
+     * Executes the drawAxes method
+     * in the GraphManager under test.
+     * 
+     * @return  the bitmap that the grid manager draws to
+     */
     public BufferedImage drawAxes()
     {
         executeProc( () -> graphMgr.drawAxes() );
         return image;
     }
     
+    /**
+     * Executes the drawMajorTics method
+     * in the GraphManager under test.
+     * 
+     * @return  the bitmap that the grid manager draws to
+     */
     public BufferedImage drawMajorTics()
     {
         executeProc( () -> graphMgr.drawMajorTics() );
         return image;
     }
     
+    /**
+     * Executes the drawMinorTics method
+     * in the GraphManager under test.
+     * 
+     * @return  the bitmap that the grid manager draws to
+     */
     public BufferedImage drawMinorTics()
     {
         executeProc( () -> graphMgr.drawMinorTics() );
         return image;
     }
     
+    /**
+     * Executes the drawGridLines method
+     * in the GraphManager under test.
+     * 
+     * @return  the bitmap that the grid manager draws to
+     */
     public BufferedImage drawGridLines()
     {
         executeProc( () -> graphMgr.drawGridLines() );
@@ -123,20 +143,6 @@ public class GraphManagerTestGUI
     }
     
     /**
-     * Gets the value of the gridUnit property
-     * from the active Profile.
-     * 
-     * @return  
-     *      the value of the gridUnit property
-     *      from the active Profile
-     */
-    public float getGridUnit()
-    {
-        float   gridUnit    = getFloat( () -> profile.getGridUnit() );
-        return gridUnit;
-    }
-    
-    /**
      * Sets the value of the gridColor property
      * in the active Profile.
      * 
@@ -146,49 +152,6 @@ public class GraphManagerTestGUI
     {
         GraphPropertySet    win = profile.getMainWindow();
         setProperty( a -> win.setBGColor( (Color)a ), color );
-    }
-    
-    /**
-     * Gets the value of the color property
-     * from the active Profile.
-     * 
-     * @return  
-     *      the value of the color property
-     *      from the active Profile
-     */
-    public Color getGridColor()
-    {
-        GraphPropertySet    win     = profile.getMainWindow();
-        Color               color   = getColor( () -> win.getBGColor( ));
-        return color;
-    }
-    
-    /**
-     * Sets the value of the gridColor property
-     * in the active Profile
-     * from the given RGB value
-     * 
-     * @param rgb   the given RGB value
-     */
-    public void setGridColor( int rgb )
-    {
-        Color   color   = new Color( rgb );
-        profile.getMainWindow().setBGColor( color );
-    }
-    
-    /**
-     * Gets the RGB value of the color property
-     * from the active Profile.
-     * 
-     * @return  
-     *      the RGB value of the color property
-     *      from the active Profile
-     */
-    public int getGridColorRGB()
-    {
-        Color   color   = getGridColor();
-        int     rgb     = color.getRGB() & 0xFFFFFF;
-        return rgb;
     }
     
     /**
@@ -205,20 +168,6 @@ public class GraphManagerTestGUI
     }
     
     /**
-     * Gets the font size
-     * from the active Profile.
-     * 
-     * @return  
-     *      the font size from the active Profile
-     */
-    public float getGridFontSize()
-    {
-        GraphPropertySet    win     = profile.getMainWindow();
-        float               size    = getFloat( () -> win.getFontSize() );
-        return size;
-    }
-    
-    /**
      * Sets the font style property
      * in the active Profile
      * from the given value
@@ -229,20 +178,6 @@ public class GraphManagerTestGUI
     {
         GraphPropertySet    win = profile.getMainWindow();
         setProperty( a -> win.setFontStyle( (String)a ), style );
-    }
-    
-    /**
-     * Gets the font style
-     * from the active Profile.
-     * 
-     * @return  
-     *      the font style from the active Profile
-     */
-    public int getFontStyle()
-    {
-        GraphPropertySet    win     = profile.getMainWindow();
-        int                 style   = getInt( () -> win.getFontStyle() );
-        return style;
     }
     
     /**
@@ -259,19 +194,6 @@ public class GraphManagerTestGUI
     }
     
     /**
-     * Gets the font name
-     * from the active Profile.
-     * 
-     * @return  name from the active Profile
-     */
-    public String getFontName()
-    {
-        GraphPropertySet    win     = profile.getMainWindow();
-        String              name    = getString( () -> win.getFontName() );
-        return name;
-    }
-    
-    /**
      * Sets the draw-labels property
      * in the active Profile
      * from the given value
@@ -283,19 +205,6 @@ public class GraphManagerTestGUI
         GraphPropertySet    win = profile.getMainWindow();
         setProperty( a -> win.setFontDraw( (Boolean)a ), draw );
         profile.getMainWindow().setFontDraw( draw );
-    }
-    
-    /**
-     * Gets the font name
-     * from the active Profile.
-     * 
-     * @return  name from the active Profile
-     */
-    public boolean getGridFontLabelsDraw()
-    {
-        GraphPropertySet    win     = profile.getMainWindow();
-        boolean             draw    = getBoolean( () -> win.isFontDraw() );
-        return draw;
     }
     
     /**
@@ -331,23 +240,13 @@ public class GraphManagerTestGUI
     }
     
     /**
-     * Gets the draw property
-     * of the given line property set.
+     * Sets the stroke property
+     * of the given property set
+     * to the given value.
      * 
-     * @param propSet   the given line property set
-     * 
-     * @return  
-     *      the value of the draw property
-     *      for the given LinePropertySet
+     * @param propSet   the given property set
+     * @param stroke      the given value
      */
-    public boolean getLineDraw( String propSet )
-    {
-        LinePropertySet set     = profile.getLinePropertySet( propSet );
-        boolean         draw    = getBoolean( () -> set.getDraw() );
-        assertNotNull( set );
-        return draw;
-    }
-    
     public void setLineStroke( String propSet, float stroke )
     {
         LinePropertySet set = profile.getLinePropertySet( propSet );
@@ -355,14 +254,14 @@ public class GraphManagerTestGUI
         setProperty( a -> set.setStroke( (float)a ), stroke );
     }
     
-    public float getLineStroke( String propSet )
-    {
-        LinePropertySet set = profile.getLinePropertySet( propSet );
-        assertNotNull( set );
-        float   val     = getFloat( () -> set.getStroke() );
-        return val;
-    }
-    
+    /**
+     * Sets the length property
+     * of the given property set
+     * to the given value.
+     * 
+     * @param propSet   the given property set
+     * @param length      the given value
+     */
     public void setLineLength( String propSet, float length )
     {
         LinePropertySet set = profile.getLinePropertySet( propSet );
@@ -370,14 +269,14 @@ public class GraphManagerTestGUI
         setProperty( a -> set.setLength( (float)a ), length );
     }
     
-    public float getLineLength( String propSet )
-    {
-        LinePropertySet set = profile.getLinePropertySet( propSet );
-        assertNotNull( set );
-        float   val     = getFloat( () -> set.getLength() );
-        return val;
-    }
-    
+    /**
+     * Sets the spacing property
+     * of the given property set
+     * to the given value.
+     * 
+     * @param propSet   the given property set
+     * @param value      the given value
+     */
     public void setLineSpacing( String propSet, float spacing )
     {
         LinePropertySet set = profile.getLinePropertySet( propSet );
@@ -385,14 +284,14 @@ public class GraphManagerTestGUI
         setProperty( a -> set.setSpacing( (float)a ), spacing );
     }
     
-    public float getLineSpacing( String propSet )
-    {
-        LinePropertySet set = profile.getLinePropertySet( propSet );
-        assertNotNull( set );
-        float   val     = getFloat( () -> set.getSpacing() );
-        return val;
-    }
-    
+    /**
+     * Sets the color property
+     * of the given property set
+     * to the given value.
+     * 
+     * @param propSet   the given property set
+     * @param color     the given value
+     */
     public void setLineColor( String propSet, Color color )
     {
         LinePropertySet set = profile.getLinePropertySet( propSet );
@@ -400,28 +299,20 @@ public class GraphManagerTestGUI
         setProperty( a -> set.setColor( (Color)a ), color );
     }
     
-    public Color getLineColor( String propSet )
-    {
-        LinePropertySet set = profile.getLinePropertySet( propSet );
-        assertNotNull( set );
-        Color   val     = getColor( () -> set.getColor() );
-        return val;
-    }
-    
-    public int getLineRGB( String propSet )
-    {
-        Color   color   = getLineColor( propSet );
-        int     rgb     = color.getRGB() & 0xFFFFFF;
-        return rgb;
-    }
-    
+    /**
+     * Executes the given procedure
+     * in the context of the EDT.
+     * 
+     * @param runner    the given procedure
+     */
     private void executeProc( Runnable runner )
     {
         GUIUtils.schedEDTAndWait( () -> {
             Graphics2D  gtx     = (Graphics2D)image.getGraphics();
             graphMgr.refresh( gtx, imageRect );
             runner.run();
-            canvas.repaint();
+//            canvas.repaint();
+//            Utils.pause( 1000 );
         });
     }
     
@@ -438,6 +329,14 @@ public class GraphManagerTestGUI
         GUIUtils.schedEDTAndWait( () -> consumer.accept( prop ) );
     }
     
+    /**
+     * Executes the given Boolean supplier
+     * in the context of the EDT.
+     * 
+     * @param supplier  the given supplier
+     * 
+     * @return  the value returned by the given supplier
+     */
     private boolean getBoolean( Supplier<Boolean> supplier )
     {
         Supplier<Object>    objGetter   = () -> supplier.get();
@@ -446,38 +345,14 @@ public class GraphManagerTestGUI
         return (boolean)obj;
     }
     
-    private int getInt( Supplier<Integer> supplier )
-    {
-        Supplier<Object>    objGetter   = () -> supplier.get();
-        Object              obj         = getProperty( objGetter );
-        assertTrue( obj instanceof Integer );
-        return (int)obj;
-    }
-    
-    private float getFloat( Supplier<Float> supplier )
-    {
-        Supplier<Object>    objGetter   = () -> supplier.get();
-        Object              obj         = getProperty( objGetter );
-        assertTrue( obj instanceof Float );
-        return (float)obj;
-    }
-    
-    private Color getColor( Supplier<Color> supplier )
-    {
-        Supplier<Object>    objGetter   = () -> supplier.get();
-        Object              obj         = getProperty( objGetter );
-        assertTrue( obj instanceof Color );
-        return (Color)obj;
-    }
-    
-    private String getString( Supplier<String> supplier )
-    {
-        Supplier<Object>    objGetter   = () -> supplier.get();
-        Object              obj         = getProperty( objGetter );
-        assertTrue( obj instanceof String );
-        return (String)obj;
-    }
-    
+    /**
+     * Executes the given Object supplier
+     * in the context of the EDT.
+     * 
+     * @param supplier  the given supplier
+     * 
+     * @return  the value returned by the given supplier
+     */
     private Object getProperty( Supplier<Object> supplier )
     {
         Object[]    obj     = new Object[1];
@@ -486,9 +361,22 @@ public class GraphManagerTestGUI
         return obj[0];
     }
     
+    /**
+     * Encapsulates the feedback panel
+     * utilized by this test GUI.
+     * All it does is display
+     * the buffered image being drawn to
+     * by the test GUI.
+     * 
+     * @author Jack Straub
+     */
     @SuppressWarnings("serial")
     private class FBPanel extends JPanel
     {
+        /**
+         * Constructor.
+         * Sets the size of this component.
+         */
         public FBPanel()
         {
             Dimension   size    = new Dimension( imageWidth, imageHeight );

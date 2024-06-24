@@ -5,14 +5,18 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Color;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Iterator;
 import java.util.Scanner;
+
+import javax.swing.JPanel;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
@@ -36,9 +40,9 @@ class GraphManagerTest
         LinePropertySetTicMinor.class.getSimpleName();
     
     private static final int    testRGB1        = 0x0000FF;
-    private static final int    testRGB2        = testRGB1 << 8;
-    private static final int    testGridRGB1    = testRGB2 << 8;
-    private static final int    testGridRGB2    = testGridRGB1 << 8;
+    private static final int    testRGB2        = testRGB1 << 4;
+    private static final int    testGridRGB1    = testRGB2  << 4;
+    private static final int    testGridRGB2    = testGridRGB1 << 4;
     private static final Color  testColor1      = new Color( testRGB1 );
     private static final Color  testColor2      = new Color( testRGB2 );
     private static final Color  testGridColor1  = new Color( testGridRGB1 );
@@ -88,84 +92,81 @@ class GraphManagerTest
     @Test
     public void testGraphManager()
     {
-//        Scanner         scanner = new Scanner( System.in );
-//        BufferedImage   image   = null;
-//        testGUI.drawAxes();
-//        scanner.nextLine();
-//        testGUI.refresh();
-//        scanner.nextLine();
-//        testGUI.setLineStroke( AXES, 5 );
-//        testGUI.setLineColor( AXES, Color.RED );
-//        image = testGUI.drawAxes();
-//        scanner.nextLine();
-//        testGUI.drawMajorTics();
-//        scanner.nextLine();
-//        testGUI.setLineStroke( TIC_MAJOR, 2 );
-//        testGUI.setLineColor( TIC_MAJOR, Color.BLUE );
-//        testGUI.drawMajorTics();
-//        scanner.nextLine();
-//        
-//        testGUI.setLineStroke( AXES, 5 );
-//        testGUI.setLineColor( AXES, Color.RED );
-//        image = testGUI.drawAxes();
-//        Rectangle2D rect    = getBoundingRectangle( image );
-//        Point       left    = new Point( 0, (int)rect.getCenterY() );
-//        LineSegment seg     = LineSegment.of( left, image );
-//        System.out.println( seg );
-//        
-        fail("Not yet implemented");
+        @SuppressWarnings("unused")
+        GraphManager    mgr = 
+            new GraphManager( new JPanel(), new Profile() );
     }
 
-    @Test
-    public void testRefresh()
-    {
-        fail("Not yet implemented");
-    }
+    // There's no good test for refresh, other than to follow it
+    // with some other action and make sure that action succeeds.
+    // Which is what happens when we execute every other test.
+//    @Test
+//    public void testRefresh()
+//    {
+//        fail("Not yet implemented");
+//    }
 
-    @Test
-    public void testDrawBackground()
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawBackground( int paramNum )
     {
+        initTestParameters( paramNum );
         initTestData( AXES );
         workingImage   = testGUI.drawBackground();
         validateFill();
-        initTestParameters( 1 );
-        initTestData( AXES );
-        workingImage = testGUI.drawBackground();
-        validateFill();
     }
 
-    @Test
-    public void testDrawGridLines()
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawGridLines( int paramNum  )
     {
+        initTestParameters( paramNum );
         initTestData( GRID_LINES );
         workingImage = testGUI.drawGridLines();
         testVerticalLines();
     }
 
-    @Test
-    public void testDrawText()
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawText( int paramNum )
     {
+        initTestParameters( paramNum );
+        initTestData( TIC_MAJOR );
         fail("Not yet implemented");
     }
 
-    @Test
-    public void testDrawHorizontalLabels()
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawHorizontalLabels( int paramNum )
     {
+        initTestParameters( paramNum );
+        initTestData( TIC_MAJOR );
         fail("Not yet implemented");
     }
 
-    @Test
-    public void testDrawYAxis()
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawVerticalLabels( int paramNum )
     {
-//        testDrawYAxis( Color.RED, 4 );
-//        testDrawYAxis( Color.BLUE, 6 );
-        testDrawYAxis( 0 );
-        testDrawYAxis( 1 );
+        initTestParameters( paramNum );
+        initTestData( TIC_MAJOR );
+        fail("Not yet implemented");
     }
 
-    @Test
-    public void testDrawMinorTics()
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawAxes( int paramNum )
     {
+        initTestParameters( paramNum );
+        initTestData( AXES );
+        testDrawAxesInternal( paramNum );
+    }
+
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawMinorTics( int paramNum )
+    {
+        initTestParameters( paramNum );
         initTestData( TIC_MINOR );
         workingImage = testGUI.drawMinorTics();
         testVerticalLines();
@@ -186,8 +187,9 @@ class GraphManagerTest
         }
     }
 
-    @Test
-    public void testDrawMajorTics()
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawMajorTics( int paramNum )
     {
         initTestData( TIC_MAJOR );
         workingImage = testGUI.drawMajorTics();
@@ -251,27 +253,38 @@ class GraphManagerTest
             }
     }
     
-    private void testDrawYAxis( int paramNum )
+    private void testDrawAxesInternal( int paramNum )
     {
         initTestParameters( paramNum );
         initTestData( AXES );
-        workingImage = testGUI.drawAxes();
-        
-        double          centerXco   = workingImage.getWidth() / 2.;
-        double          centerYco   = workingImage.getHeight() / 2.;
-        double          length      = workingImage.getHeight();
-        LineSegment     expSeg      = getVerticalLineSegment( 
-            workingImage, 
-            centerYco,
-            length, 
-            workingStroke,
-            workingRGB
-        );
-        Point2D         center      =
-            new Point2D.Double( centerXco, 0 );
-        LineSegment     actSeg      =
-            LineSegment.of( center, workingImage );
-        assertEquals( expSeg, actSeg );
+        workingImage                    = testGUI.drawAxes();
+        Rectangle2D rect                = getBoundingRectangle();
+        Iterator<Line2D>    iter        = 
+            LineGenerator.axesIterator( rect );
+        Line2D              line1       = iter.next();
+        Line2D              line2       = iter.next();
+        Line2D              expXAxis    = null;
+        Line2D              expYAxis    = null;
+        if ( line1.getY1() == line1.getY2() )
+        {
+            expXAxis = line1;
+            expYAxis = line2;
+        }
+        else
+        {
+            expXAxis = line2;
+            expYAxis = line1;
+        }
+        LineSegment         expSegX = 
+            LineSegment.ofHorizontal( expXAxis, workingStroke, workingRGB );
+        LineSegment         expSegY = 
+            LineSegment.ofVertical( expYAxis, workingStroke, workingRGB );
+        LineSegment         actSegX = 
+            LineSegment.of( expXAxis.getP1(), workingImage );
+        LineSegment         actSegY = 
+            LineSegment.of( expYAxis.getP1(), workingImage );
+        assertEquals( expSegX, actSegX );
+        assertEquals( expSegY, actSegY );
     }
   
     private static LineSegment getVerticalLineSegment( 
