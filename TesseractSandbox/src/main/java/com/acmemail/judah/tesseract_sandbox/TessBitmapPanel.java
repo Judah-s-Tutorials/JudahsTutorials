@@ -23,7 +23,7 @@ public class TessBitmapPanel extends JPanel
     {
         tesseract.setDatapath( dataPathStr );
         tesseract.setLanguage("eng");
-        tesseract.setPageSegMode(1);
+        tesseract.setPageSegMode(3);
         tesseract.setOcrEngineMode(1);
 
         add( textArea );

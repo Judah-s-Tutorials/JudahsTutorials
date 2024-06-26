@@ -11,6 +11,7 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -23,22 +24,24 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
-public class PictureMaker2 extends JPanel
+public class ImageScaleDemo extends JPanel
 {
     private static final long serialVersionUID = -6779305390811349326L;
 
-    private final TessDialog    dialog      = new TessDialog();
+    private final ScaledDialog  dialog      = new ScaledDialog();
     
     private Color               bgColor     = Color.WHITE;
     private Color               textColor   = Color.BLACK;
-    private int                 margin      = 10;
-    private float               fontSize    = 10;
-    private float               scaleFactor = 1;
+    private float               fontSize    = 12;
+    private float               scaleFactor = 1.0f;
+    
+    private BufferedImage       image;
     private int                 width;
     private int                 height;
     private Graphics2D          gtx;
@@ -54,12 +57,12 @@ public class PictureMaker2 extends JPanel
     public static void main(String[] args)
     {
         SwingUtilities.invokeLater( () -> {
-            PictureMaker2    maker   = new PictureMaker2();
-            maker.build();
+            ImageScaleDemo    demo  = new ImageScaleDemo();
+            demo.build();
         });
     }
     
-    public PictureMaker2()
+    public ImageScaleDemo()
     {
         Dimension   dim     = new Dimension( 300, 400 );
         setPreferredSize( dim );
@@ -71,7 +74,12 @@ public class PictureMaker2 extends JPanel
 
     private void build()
     {
-        JFrame      frame       = new JFrame( "Picture Maker" );
+        int         defWidth    = 300;
+        int         defHeight   = 300;
+        int         type        = BufferedImage.TYPE_INT_RGB;
+        image = new BufferedImage( defWidth, defHeight, type );
+        
+        JFrame      frame       = new JFrame( "Scale Demo" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel      contentPane = new JPanel( new BorderLayout() );
         
@@ -84,6 +92,7 @@ public class PictureMaker2 extends JPanel
         Dimension   frameSize   = frame.getPreferredSize();
         dialog.setLocation( (int)frameSize.width + 110, 200 );
         frame.setVisible( true );
+        applyAction( null );
     }
     
     private JPanel getControlPanel()
@@ -108,9 +117,7 @@ public class PictureMaker2 extends JPanel
         exitButton.addActionListener( e -> System.exit( 0 ) );
         applyButton.addActionListener( this::applyAction );
         
-        panel.add( getSizeSpinnerPanel() );
-        panel.add( getScaleSpinnerPanel() );
-        panel.add( getMarginSpinnerPanel() );
+        panel.add( getSpinnerPanel() );
         panel.add( bgButton );
         panel.add( fgButton );
         panel.add( applyButton );
@@ -121,46 +128,10 @@ public class PictureMaker2 extends JPanel
         return outerPanel;
     }
     
-    private JPanel getSizeSpinnerPanel()
+    private JPanel getSpinnerPanel()
     {
         SpinnerNumberModel    model   =
-            new SpinnerNumberModel( 10, 5, 24, 1 );
-        JSpinner        spinner = new JSpinner( model );
-        spinner.addChangeListener( e -> {
-            fontSize = model.getNumber().floatValue();
-            repaint();
-        });
-        
-        JPanel      panel   = new JPanel();
-        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
-        panel.setLayout( layout );
-        panel.add( new JLabel( "Font Size:" ) );
-        panel.add( spinner );
-        return panel;
-    }
-    
-    private JPanel getMarginSpinnerPanel()
-    {
-        SpinnerNumberModel    model   =
-            new SpinnerNumberModel( 10, 5, 50, 1 );
-        JSpinner        spinner = new JSpinner( model );
-        spinner.addChangeListener( e -> {
-            margin = model.getNumber().intValue();
-            repaint();
-        });
-        
-        JPanel      panel   = new JPanel();
-        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
-        panel.setLayout( layout );
-        panel.add( new JLabel( "Margin:" ) );
-        panel.add( spinner );
-        return panel;
-    }
-    
-    private JPanel getScaleSpinnerPanel()
-    {
-        SpinnerNumberModel    model   =
-            new SpinnerNumberModel( scaleFactor, .1f, 10f, .1f );
+            new SpinnerNumberModel( 1.0f, .1f, 10f, .1f );
         JSpinner        spinner = new JSpinner( model );
         spinner.addChangeListener( e -> {
             scaleFactor = model.getNumber().floatValue();
@@ -170,21 +141,17 @@ public class PictureMaker2 extends JPanel
         JPanel      panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
         panel.setLayout( layout );
-        panel.add( new JLabel( "Scale:" ) );
+        panel.add( new JLabel( "Scale Factor" ) );
         panel.add( spinner );
         return panel;
     }
     
     private void applyAction( ActionEvent evt )
     {
-        int             width       = getWidth();
-        int             height      = getHeight();
-        int             type        = BufferedImage.TYPE_INT_RGB;
-        BufferedImage   image       = 
-            new BufferedImage( width, height, type );
+        image = getImage();
         Graphics        graphics    = image.getGraphics();
         paintComponent( graphics );
-        dialog.update( image );
+        dialog.update();
     }
     
     private void 
@@ -210,25 +177,16 @@ public class PictureMaker2 extends JPanel
         gtx = (Graphics2D)graphics.create();
         
         gtx.setColor( bgColor );
-        applyScale();
         gtx.fillRect( 0, 0, width, height );
         
         font = gtx.getFont().deriveFont( fontSize );
         frc = gtx.getFontRenderContext();
         
         gtx.setColor( textColor );
-        drawAlphaText( 2 );
-        drawNumericText( 4 );
+        drawAlphaText( 3 );
+        drawNumericText( 5 );
         
         gtx.dispose();
-    }
-    
-    private void applyScale()
-    {
-        AffineTransform     transform       = new AffineTransform();
-        transform.scale( scaleFactor, scaleFactor );
-        transform.concatenate( gtx.getTransform() );
-        gtx.setTransform( transform );
     }
     
     private void drawAlphaText( int offset )
@@ -237,13 +195,14 @@ public class PictureMaker2 extends JPanel
         TextLayout  layout  = new TextLayout( text, font, frc );
         Rectangle2D bounds  = layout.getBounds();
         float       yco     = (float)(offset * bounds.getHeight());
-        float       xco     = margin;
+        float       xco     = 
+            (float)(width / 2 - bounds.getWidth() / 2);
         layout.draw( gtx, xco, yco );
     }
     
     private void drawNumericText( int offset )
     {
-        float   textXco = margin;
+        float   textXco = 10F;
         for ( float num = -2.123f; num < 3 ; num += 1 )
         {
             String  text    = String.format( "%.3f", num );
@@ -255,22 +214,75 @@ public class PictureMaker2 extends JPanel
         }
     }
     
-    @SuppressWarnings("serial")
-    private class TessDialog extends JDialog
+    private BufferedImage getImage()
     {
-        private TessBitmapPanel tessPanel   = new TessBitmapPanel();
-        public TessDialog()
+        int     width       = getWidth();
+        int     height      = getHeight();
+        int     type        = BufferedImage.TYPE_INT_RGB;
+        BufferedImage   image   = new BufferedImage( width, height, type );
+        paintComponent( image.getGraphics() );
+        return image;
+    }
+    
+    @SuppressWarnings("serial")
+    private class ScaledPanel extends JPanel
+    {
+        public ScaledPanel()
         {
-            setContentPane( tessPanel );
+            Dimension   size        = new Dimension( 100, 100 );
+            setPreferredSize( size );
+        }
+        
+        @Override
+        public void paintComponent( Graphics gtx )
+        {
+            super.paintComponent( gtx );
+            BufferedImage       scaledImage     = scaleImage();
+            AffineTransform     transform       = new AffineTransform();
+            transform.scale( scaleFactor, scaleFactor );
+            AffineTransformOp   scaleOp         = 
+                new AffineTransformOp( 
+                    transform, 
+                    AffineTransformOp.TYPE_BICUBIC
+                );
+            scaleOp.filter( image, scaledImage );
+            gtx.drawImage( scaledImage, 0, 0, this );
+        }
+        
+        private BufferedImage scaleImage()
+        {
+            int             imageType       = image.getType();
+            int             scaledWidth     = 
+                (int)(image.getWidth() * scaleFactor + .5);
+            int             scaledHeight    = 
+                (int)(image.getHeight() * scaleFactor + .5);
+            BufferedImage   scaledImage     = 
+                new BufferedImage( scaledWidth, scaledHeight, imageType );
+            return scaledImage;
+        }
+    }
+    
+    @SuppressWarnings({ "serial" })
+    private class ScaledDialog extends JDialog
+    {
+        private final JPanel    scaledPanel     = new ScaledPanel();
+        public ScaledDialog()
+        {
+            JPanel      contentPane     = new JPanel( new BorderLayout() );
+            JScrollPane scrollPane      = new JScrollPane( scaledPanel );
+            contentPane.add( scrollPane, BorderLayout.CENTER );
+            setContentPane( contentPane );
             setModal( false );
             pack();
             setVisible( true );
         }
         
-        public void update( BufferedImage image )
+        public void update()
         {
-            tessPanel.update( image );
-            tessPanel.repaint();
+            String  strFactor   = 
+                String.format( "ScaleFactor: %.02f", scaleFactor );
+            setTitle( strFactor );
+            scaledPanel.repaint();
         }
     }
 
