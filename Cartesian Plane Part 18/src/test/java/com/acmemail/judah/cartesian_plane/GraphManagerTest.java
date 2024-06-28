@@ -26,6 +26,7 @@ import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.LineSegment;
 import com.acmemail.judah.cartesian_plane.test_utils.GraphManagerTestGUI;
+import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class GraphManagerTest
 {
@@ -141,6 +142,8 @@ class GraphManagerTest
     {
         initTestParameters( paramNum );
         initTestData( TIC_MAJOR );
+        testGUI.drawHorizontalLabels();
+        Utils.pause( 5000 );
         fail("Not yet implemented");
     }
 
@@ -150,6 +153,8 @@ class GraphManagerTest
     {
         initTestParameters( paramNum );
         initTestData( TIC_MAJOR );
+        testGUI.drawVerticalLabels();
+        Utils.pause( 5000 );
         fail("Not yet implemented");
     }
 

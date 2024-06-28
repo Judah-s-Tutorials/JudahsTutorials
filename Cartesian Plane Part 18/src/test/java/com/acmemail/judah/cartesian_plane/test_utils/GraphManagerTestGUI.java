@@ -17,7 +17,6 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.acmemail.judah.cartesian_plane.GraphManager;
-import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.Profile;
@@ -46,7 +45,7 @@ public class GraphManagerTestGUI
     /** Profile used in testing. */
     private final Profile       profile     = new Profile();
     
-    private final int           imageWidth  = 400;
+    private final int           imageWidth  = 450;
     private final int           imageHeight = 500;
     private final int           imageType   = BufferedImage.TYPE_INT_RGB;
     private BufferedImage       image       =
@@ -128,6 +127,30 @@ public class GraphManagerTestGUI
     public BufferedImage drawGridLines()
     {
         executeProc( () -> graphMgr.drawGridLines() );
+        return image;
+    }
+    
+    /**
+     * Executes the drawHorizontalLabel method
+     * in the GraphManager under test.
+     * 
+     * @return  the bitmap that the grid manager draws to
+     */
+    public BufferedImage drawHorizontalLabels()
+    {
+        executeProc( () -> graphMgr.drawHorizontalLabels() );
+        return image;
+    }
+    
+    /**
+     * Executes the drawVerticalLabel method
+     * in the GraphManager under test.
+     * 
+     * @return  the bitmap that the grid manager draws to
+     */
+    public BufferedImage drawVerticalLabels()
+    {
+        executeProc( () -> graphMgr.drawVerticalLabels() );
         return image;
     }
     
@@ -311,8 +334,8 @@ public class GraphManagerTestGUI
             Graphics2D  gtx     = (Graphics2D)image.getGraphics();
             graphMgr.refresh( gtx, imageRect );
             runner.run();
-//            canvas.repaint();
-//            Utils.pause( 1000 );
+            canvas.repaint();
+            Utils.pause( 1000 );
         });
     }
     
