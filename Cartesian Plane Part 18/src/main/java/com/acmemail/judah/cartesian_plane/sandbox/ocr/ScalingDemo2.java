@@ -10,13 +10,17 @@ import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
@@ -41,7 +45,7 @@ import javax.swing.border.Border;
  * 
  * @see ScalingDemo2
  */
-public class ScalingDemo1 extends JPanel
+public class ScalingDemo2 extends JPanel
 {
     private static final long serialVersionUID = -6779305390811349326L;
     
@@ -67,6 +71,14 @@ public class ScalingDemo1 extends JPanel
      * See {@link #getSpinnerPanel()}.
      */
     private float               scaleFactor = 1.0f;
+    /** 
+     * Image created from the main application window.
+     * This is the image that will be scaled and displayed
+     * in the scaled dialog.
+     */
+    private BufferedImage       image;
+    /** Dialog to display the scaled image. */
+    private ScaledDialog  dialog;
     
     /** 
      * Current width of the application window. 
@@ -117,7 +129,7 @@ public class ScalingDemo1 extends JPanel
     public static void main(String[] args)
     {
         SwingUtilities.invokeLater( () -> {
-            ScalingDemo1    demo  = new ScalingDemo1();
+            ScalingDemo2    demo  = new ScalingDemo2();
             demo.build();
         });
     }
@@ -127,9 +139,9 @@ public class ScalingDemo1 extends JPanel
      * Establishes the initial size and font
      * of the principal application window.
      */
-    public ScalingDemo1()
+    public ScalingDemo2()
     {
-        Dimension   dim     = new Dimension( 500, 300 );
+        Dimension   dim     = new Dimension( 500, 200 );
         setPreferredSize( dim );
         
         Font    font    = 
@@ -153,6 +165,14 @@ public class ScalingDemo1 extends JPanel
         frame.pack();
         frame.setLocation( 100, 200 );
         frame.setVisible( true );
+        getPrincipalImage();
+        
+        Dimension   frameDim    = frame.getPreferredSize();
+        dialog = new ScaledDialog();
+        dialog.setLocation( 
+            frame.getX() + frameDim.width + 10,
+            frame.getY()
+        );
     }
     
     /**
@@ -195,7 +215,8 @@ public class ScalingDemo1 extends JPanel
         JSpinner        spinner = new JSpinner( model );
         spinner.addChangeListener( e -> {
             scaleFactor = model.getNumber().floatValue();
-            repaint();
+            getPrincipalImage();
+            dialog.repaint();
         });
         
         JPanel      panel   = new JPanel();
@@ -204,6 +225,19 @@ public class ScalingDemo1 extends JPanel
         panel.add( new JLabel( "Scale Factor" ) );
         panel.add( spinner );
         return panel;
+    }
+    
+    /**
+     * Creates a buffered image
+     * from the main application window.
+     */
+    private void getPrincipalImage()
+    {
+        int         imageWidth      = getWidth();
+        int         imageHeight     = getHeight();
+        int         imageType       = BufferedImage.TYPE_INT_RGB;
+        image = new BufferedImage( imageWidth, imageHeight, imageType );
+        paintComponent( image.getGraphics() );
     }
     
     @Override
@@ -216,8 +250,6 @@ public class ScalingDemo1 extends JPanel
         gtx.setColor( bgColor );
         gtx.fillRect( 0, 0, width, height );
         
-        applyScale();
-        
         font = gtx.getFont();
         frc = gtx.getFontRenderContext();
         
@@ -228,18 +260,6 @@ public class ScalingDemo1 extends JPanel
         drawNumericText();
         
         gtx.dispose();
-    }
-    
-    /**
-     * Applies the scaling transform 
-     * to this window's graphics context.
-     */
-    private void applyScale()
-    {
-        AffineTransform     transform       = new AffineTransform();
-        transform.scale( scaleFactor, scaleFactor );
-        transform.concatenate( gtx.getTransform() );
-        gtx.setTransform( transform );
     }
     
     /**
@@ -296,6 +316,87 @@ public class ScalingDemo1 extends JPanel
             }
             currLine++;
             yco += yOffset;
+        }
+    }
+    
+    /**
+     * Simple, non-modal dialog to display a scaled buffered image.
+     * 
+     * @author Jack Straub
+     */
+    @SuppressWarnings({ "serial" })
+    private class ScaledDialog extends JDialog
+    {
+        /**
+         * Constructor.
+         * Configures and displays this dialog.
+         */
+        public ScaledDialog()
+        {
+            Dimension   initialSize     = new Dimension( 200, 200 );
+            JPanel      contentPane     = new JPanel( new BorderLayout() );
+            JPanel      scaledPanel     = new ScaledPanel();
+            JScrollPane scrollPane      = new JScrollPane( scaledPanel );
+            scrollPane.setPreferredSize( initialSize );
+            contentPane.add( scrollPane, BorderLayout.CENTER );
+            setContentPane( contentPane );
+            setModal( false );
+            pack();
+            setVisible( true );
+        }
+    }
+    
+    /**
+     * Simple panel to scale and display a buffered image.
+     * The image to scale is located in the outer class.
+     * 
+     * @author Jack Straub
+     */
+    @SuppressWarnings("serial")
+    private class ScaledPanel extends JPanel
+    {
+        @Override
+        public void paintComponent( Graphics gtx )
+        {
+            super.paintComponent( gtx );
+            BufferedImage       scaledImage     = scaleImage();
+            
+            int         imageWidth  = scaledImage.getWidth();
+            int         imageHeight = scaledImage.getHeight();
+            Dimension   size        = 
+                new Dimension( imageWidth, imageHeight );
+            setPreferredSize( size );
+                
+            gtx.drawImage( scaledImage, 0, 0, this );
+        }
+        
+        /**
+         * Create a new BufferedImage by applying a scale factor
+         * to the principal BufferedImage located in the outer class.
+         * 
+         * @return  the scaled  BufferedImage
+         */
+        private BufferedImage scaleImage()
+        {
+            // Create a buffer big enough to hold the scaled image
+            int             imageType       = image.getType();
+            int             scaledWidth     = 
+                (int)(image.getWidth() * scaleFactor + .5);
+            int             scaledHeight    = 
+                (int)(image.getHeight() * scaleFactor + .5);
+            BufferedImage   scaledImage     = 
+                new BufferedImage( scaledWidth, scaledHeight, imageType );
+
+            // Scale the image
+            AffineTransform     transform       = new AffineTransform();
+            transform.scale( scaleFactor, scaleFactor );
+            AffineTransformOp   scaleOp         = 
+                new AffineTransformOp( 
+                    transform, 
+                    AffineTransformOp.TYPE_BICUBIC
+                );
+            scaleOp.filter( image, scaledImage );
+            return scaledImage;
         }
     }
 }
