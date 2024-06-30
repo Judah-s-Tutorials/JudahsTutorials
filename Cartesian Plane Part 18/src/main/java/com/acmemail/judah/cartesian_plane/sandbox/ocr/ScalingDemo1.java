@@ -29,7 +29,7 @@ import javax.swing.border.Border;
  * applies a scaling factor under the control of the operator
  * and draws some lines of text,
  * incorporating both alpha and numeric characters.
- * 
+ * <p>
  * For emphasis,
  * the scaling logic is encapsulated in the {@link #applyScale()} method,
  * which creates a scaling operation
@@ -238,8 +238,7 @@ public class ScalingDemo1 extends JPanel
     {
         AffineTransform     transform       = new AffineTransform();
         transform.scale( scaleFactor, scaleFactor );
-        transform.concatenate( gtx.getTransform() );
-        gtx.setTransform( transform );
+        gtx.transform( transform );
     }
     
     /**

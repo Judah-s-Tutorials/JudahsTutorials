@@ -17,7 +17,7 @@ import net.sourceforge.tess4j.TesseractException;
  * 
  * @author Jack Straub
  */
-public class HelloTesseract
+public class Tess4JDemo1
 {
     /** 
      * Location of Tesseract data files. These files are not in the 
@@ -52,7 +52,7 @@ public class HelloTesseract
         if( rVal == JFileChooser.APPROVE_OPTION )
             file = chooser.getSelectedFile();
 
-        new HelloTesseract( file );
+        new Tess4JDemo1( file );
     }
     
     /**
@@ -62,12 +62,12 @@ public class HelloTesseract
      * 
      * @param imageFile the selected image file
      */
-    public HelloTesseract( File imageFile )
+    public Tess4JDemo1( File imageFile )
     {
         Tesseract tesseract = new Tesseract();
         tesseract.setDatapath( dataPathStr );
         tesseract.setLanguage("eng");
-        tesseract.setPageSegMode(1);
+        tesseract.setPageSegMode(3);
         tesseract.setOcrEngineMode(1);
         try
         {

@@ -25,33 +25,95 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
+/**
+ * The application is a basic demonstration
+ * of what can be accomplished
+ * with AffineTransforms.
+ * It displays an image
+ * which the operator can <em>transform</em>
+ * using the controls at the left.
+ * The image can be move (translated),
+ * scaled, and rotate. 
+ * The code to manage the transformation
+ * is encapsulated in the {@link #applyTransforms()} method.
+ * 
+ * @author Jack Straub
+ * 
+ * @see 
+ * <a href="https://mathworld.wolfram.com/AffineTransformation.html">
+ *     Affine Transformation
+ * </a>
+ * at Wolfram MathWorld.
+ * 
+ * @see 
+ * <a href="https://www.mathsisfun.com/geometry/transformations.html">
+ *     Transformations
+ * </a>
+ * on the MathIsFun website.
+ * 
+ * @see 
+ * <a href="https://www.mathsisfun.com/algebra/matrix-transform.html">
+ *     Transformations and Matrices
+ * </a>
+ * on the MathIsFun website.
+ */
+@SuppressWarnings("serial")
 public class AffineTransformDemo1 extends JPanel
 {
+    /** Path to displayed image in the project resources directory. */
     private static final String         imageName   = 
         "images/vitruvian_man2.png";
-    private static final ClassLoader    loader      = 
-        AffineTransformDemo1.class.getClassLoader();
-    private static final InputStream    inStream    = 
-        loader.getResourceAsStream( imageName );
+    /** The image to display. */
+    private static final BufferedImage  image       = loadImage();;
     
+    /** Unicode for an up-arrow. */
     private static final String         upArrow     = "\u21e7";
+    /** Unicode for a down-arrow. */
     private static final String         downArrow   = "\u21e9";
+    /** Unicode for a left-arrow. */
     private static final String         leftArrow   = "\u21e6";
+    /** Unicode for a right-arrow. */
     private static final String         rightArrow  = "\u21e8";
     
+    /** Unicode for a rotate-left arrow. */
     private static final String         rotateLeft  = "\u21B6";
+    /** Unicode for a rotate-right arrow. */
     private static final String         rotateRight = "\u21B7";
     
+    /** Background color for this component. */
     private static final Color          bgColor     = 
         new Color( 0xCCCCCC );
-    private static BufferedImage        image;
     
+    /** 
+     * X-translation factor. Modified when the 
+     * left- or right-arrow button is selected.
+     * See {@link #getTranslatePanel()}.
+     */
     private int         xcoTranslate        = 0;
+    /** 
+     * Y-translation factor. Modified when the 
+     * up- or down-arrow button is selected.
+     * See {@link #getTranslatePanel()}.
+     */
     private int         ycoTranslate        = 0;
+    /** 
+     * Scale factor. 
+     * Modified when the JSpinner component is adjusted.
+     * See {@link #getScalePanel()}.
+     */
     private float       scaleFactor         = 1;
+    /** 
+     * Rotation factor. Modified when the 
+     * left- or right-rotate button is selected.
+     * See {@link #getRotatePanel()}.
+     */
     private float       rotateFactor        = 0;
+    
+    /** Graphics context; set when the paintComponent method is invoked. */
     private Graphics2D  gtx;
+    /** Component width; set when the paintComponent method is invoked. */
     private int         width;
+    /** Component height; set when the paintComponent method is invoked. */
     private int         height;
 
     /**
@@ -62,6 +124,50 @@ public class AffineTransformDemo1 extends JPanel
     */
     public static void main(String[] args)
     {
+        
+        SwingUtilities.invokeLater( () -> new AffineTransformDemo1() );
+    }
+    
+    /**
+     * Constructor.
+     * Builds and displays the application GUI.
+     */
+    public AffineTransformDemo1()
+    {
+        // Make the initial size of this component twice the size
+        // of the image to display.
+        int         panelWidth  = image.getWidth() * 2;
+        int         panelHeight = image.getHeight() * 2;
+        Dimension   dim     = new Dimension( panelWidth, panelHeight );
+        setPreferredSize( dim );
+        
+        JFrame      frame       = new JFrame( "AffineTransform Demo 1" );
+        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        JPanel      contentPane = new JPanel( new BorderLayout() );
+        contentPane.add( this, BorderLayout.CENTER );
+        contentPane.add( getControlPanel(), BorderLayout.WEST );
+        frame.setContentPane( contentPane );
+        frame.pack();
+        frame.setLocation( 200, 100 );
+        frame.setVisible( true );
+    }
+    
+    /**
+     * Loads the image to display
+     * from a file in the resources directory.
+     * If the image fails to load
+     * and error message is displayed
+     * and the application is terminated.
+     * 
+     * @return  the loaded image
+     */
+    private static BufferedImage loadImage()
+    {
+        ClassLoader     loader      = 
+            AffineTransformDemo1.class.getClassLoader();
+        InputStream     inStream    = 
+            loader.getResourceAsStream( imageName );
+        BufferedImage   image   = null;
         try
         {
             if ( inStream == null )
@@ -82,28 +188,15 @@ public class AffineTransformDemo1 extends JPanel
             exc.printStackTrace();
             System.exit( 1 );
         }
-        
-        SwingUtilities.invokeLater( () -> new AffineTransformDemo1() );
+        return image;
     }
     
-    public AffineTransformDemo1()
-    {
-        int         panelWidth  = image.getWidth() * 2;
-        int         panelHeight = image.getHeight() * 2;
-        Dimension   dim     = new Dimension( panelWidth, panelHeight );
-        setPreferredSize( dim );
-        
-        JFrame      frame       = new JFrame( "AffineTransform Demo 1" );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        JPanel      contentPane = new JPanel( new BorderLayout() );
-        contentPane.add( this, BorderLayout.CENTER );
-        contentPane.add( getControlPanel(), BorderLayout.WEST );
-        frame.setContentPane( contentPane );
-        frame.pack();
-        frame.setLocation( 200, 100 );
-        frame.setVisible( true );
-    }
-    
+    /**
+     * Builds the control panel used by the operator
+     * to transform the displayed image.
+     * 
+     * @return  the initialized control panel
+     */
     private JPanel getControlPanel()
     {
         JPanel      panel   = new JPanel();
@@ -127,7 +220,7 @@ public class AffineTransformDemo1 extends JPanel
         panel.add( Box.createRigidArea( spacing ) );
         panel.add( getRotatePanel() );
         panel.add( Box.createRigidArea( spacing ) );
-        panel.add( getScalingPanel() );
+        panel.add( getScalePanel() );
         panel.add( Box.createRigidArea( spacing ) );
         panel.add( exit );
         
@@ -136,6 +229,12 @@ public class AffineTransformDemo1 extends JPanel
         return outerPanel;
     }
     
+    /**
+     * Initializes a panel of controls to be used
+     * to translate the displayed image.
+     * 
+     * @return  the initialized panel
+     */
     private JPanel getTranslatePanel()
     {
         JPanel  panel       = new JPanel( new GridLayout( 3, 3 ) );
@@ -175,6 +274,12 @@ public class AffineTransformDemo1 extends JPanel
         return panel;
     }
     
+    /**
+     * Initializes a panel of controls to be used
+     * to rotate the displayed image.
+     * 
+     * @return  the initialized panel
+     */
     private JPanel getRotatePanel()
     {
         JPanel  panel       = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
@@ -197,7 +302,13 @@ public class AffineTransformDemo1 extends JPanel
         return panel;
     }
     
-    private JPanel getScalingPanel()
+    /**
+     * Initializes a panel of controls to be used
+     * to sale the displayed image.
+     * 
+     * @return  the initialized panel
+     */
+    private JPanel getScalePanel()
     {
         SpinnerNumberModel    model   =
             new SpinnerNumberModel( 1.0f, .1f, 10f, .1f );
@@ -215,6 +326,16 @@ public class AffineTransformDemo1 extends JPanel
         return panel;
     }
     
+    /**
+     * Executes the given procedure
+     * and repaints this panel.
+     * The expectation is that the given procedure
+     * will modify one of the variables
+     * that controls image transformation.
+     * See for example {@link #xcoTranslate}.
+     * 
+     * @param proc  the given procedure
+     */
     private void incrementAction( Runnable proc )
     {
         proc.run();
@@ -242,8 +363,15 @@ public class AffineTransformDemo1 extends JPanel
         gtx.dispose();
     }
     
+    /**
+     * Applies the translate, scale, and rotate transforms
+     * to the current graphics context.
+     */
     private void applyTransforms()
     {
+        // The translation operation first moves the origin of
+        // this component to its center, (width/2,height/2)
+        // then apples the the offsets set by the operator.
         double              centerXco   = width / 2.0 + xcoTranslate;
         double              centerYco   = height / 2.0 + ycoTranslate;
         AffineTransform     transform   = new AffineTransform();

@@ -37,7 +37,7 @@ import com.acmemail.judah.cartesian_plane.sandbox.profile.ProfileEditorDialog;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
 /**
- * This application displays a ProfileEditorDialog
+ * This application displays a CartesionPlaneWithOCR
  * and demonstrates its use. 
  * The main application frame
  * contains three pushbuttons
