@@ -26,6 +26,7 @@ import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.LineSegment;
 import com.acmemail.judah.cartesian_plane.test_utils.GraphManagerTestGUI;
+import com.acmemail.judah.cartesian_plane.test_utils.Tess4JConfig;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class GraphManagerTest
@@ -40,6 +41,17 @@ class GraphManagerTest
     private static final String             TIC_MINOR   =
         LinePropertySetTicMinor.class.getSimpleName();
     
+    private static final int    tessPageSegMode     =
+        Tess4JConfig.getSegmentationMode();
+    private static final int    tessOCREngMode      =
+        Tess4JConfig.getOCREngineMode();
+    private static final float  tessScaleFactor     =
+        Tess4JConfig.getScaleFactor();
+    private static final float  tessFontSize        =
+        Tess4JConfig.getFontSize();
+    private static final String tessFontName        =
+        Tess4JConfig.getFontName();
+    
     private static final int    testRGB1        = 0x0000FF;
     private static final int    testRGB2        = testRGB1 << 4;
     private static final int    testGridRGB1    = testRGB2  << 4;
@@ -49,6 +61,7 @@ class GraphManagerTest
     private static final Color  testGridColor1  = new Color( testGridRGB1 );
     private static final Color  testGridColor2  = new Color( testGridRGB2 );
     private static final float  testGPU1        = 100;
+    
     private static final float  testGPU2        = testGPU1 + 20;
     private static final float  testLPU1        = 2;
     private static final float  testLPU2        = testLPU1 + 2;
@@ -56,6 +69,21 @@ class GraphManagerTest
     private static final float  testLength2     = testLength1 + 10;
     private static final float  testStroke1     = 4;
     private static final float  testStroke2     = testStroke1 + 2;
+    
+    private static final float  tessGPU        = 100;
+    private static final float  tessLPU        = 2;
+    private static final int    testRGB3        = testRGB1;
+    private static final Color  testColor3      = new Color( testRGB3 );
+    private static final int    testGridRGB3    = testGridRGB1;
+    private static final Color  testGridColor3  = new Color( testGridRGB3 );
+    private static final float  testLength3     = 10;
+    private static final float  testStroke3     = 4;
+    private static final float  testScaleFactor = 
+        Tess4JConfig.getScaleFactor();
+    private static final float  testFontSize    =
+        Tess4JConfig.getFontSize();
+    private static final String testFontName    =
+        Tess4JConfig.getFontName();
 
     private static final Profile    baseProfile = new Profile();
     
@@ -71,6 +99,12 @@ class GraphManagerTest
     private Color                       workingColor;
     private int                         workingRGB;
     
+    private int                         workingSegMode;
+    private int                         workingOCREngMode;
+    private float                       workingScaleFactor;
+    private float                       workingFontSize;
+    private String                      workingFontName;
+
     private BufferedImage               workingImage;
     private String                      workingLineSet;
     
@@ -142,7 +176,9 @@ class GraphManagerTest
     {
         initTestParameters( paramNum );
         initTestData( TIC_MAJOR );
-        testGUI.drawHorizontalLabels();
+        testGUI.setGridFontSize( tessFontSize );
+        testGUI.setGridFontName( tessFontName );
+        workingImage = testGUI.drawHorizontalLabels();
         Utils.pause( 5000 );
         fail("Not yet implemented");
     }
@@ -153,7 +189,9 @@ class GraphManagerTest
     {
         initTestParameters( paramNum );
         initTestData( TIC_MAJOR );
-        testGUI.drawVerticalLabels();
+        testGUI.setGridFontSize( tessFontSize );
+        testGUI.setGridFontName( tessFontName );
+        workingImage = testGUI.drawVerticalLabels();
         Utils.pause( 5000 );
         fail("Not yet implemented");
     }
@@ -214,9 +252,11 @@ class GraphManagerTest
             workingColor = testColor1;
             workingRGB = testRGB1;
         }
-        else
+        else if ( num == 1 )
         {
             workingGPU = testGPU2;
+            workingGridColor = testGridColor2;
+            workingGridRGB = testGridRGB2;
             workingGridColor = testGridColor2;
             workingGridRGB = testGridRGB2;
             workingLPU = testLPU2;
@@ -224,6 +264,19 @@ class GraphManagerTest
             workingLength = testLength2;
             workingColor = testColor2;
             workingRGB = testRGB2;
+        }
+        else if ( num == 2 )
+        {
+            workingGPU = tessGPU;
+            workingLPU = tessLPU;
+            workingGridColor = testGridColor3;
+            workingGridRGB = testGridRGB3;
+            workingGridColor = testGridColor3;
+            workingGridRGB = testGridRGB3;
+            workingStroke = testStroke3;
+            workingLength = testLength3;
+            workingColor = testColor3;
+            workingRGB = testRGB3;
         }
     }
     

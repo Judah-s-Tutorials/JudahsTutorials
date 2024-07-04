@@ -11,13 +11,20 @@ import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.util.stream.Stream;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.ListSelectionModel;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.GraphManager;
@@ -39,6 +46,33 @@ import net.sourceforge.tess4j.TesseractException;
 @SuppressWarnings("serial")
 public class CartesionPlaneWithOCR extends JFrame
 {
+    /** Tesseract segmentation modes. */
+    private static final String[]   segModes    =
+    {
+        "0. OSD only",
+        "1. Page segmentation with OSD",
+        "2. (not implemented)",
+        "3. Page segmentation, no OSD (default)",
+        "4. Assume single column text, variable sizes",
+        "5. Assume single column text, uniform sizes",
+        "6. Assume single uniform block of text",
+        "7. Treat image as single text line",
+        "8. Treat image as single word",
+        "9. Treat image as single word in circle",
+        "10. Treat the image as single character",
+        "11. Sparse text;  no ordering",
+        "12. Sparse text with OSD",
+        "13. Raw line",
+    };
+    /** Tesseract engine modes. */
+    private static final String[]   engModes    =
+    {
+        "0. Legacy engine only",
+        "1. Neural nets LSTM engine only",
+        "2. Legacy + LSTM engines",
+        "3. Whatever is available"
+    };
+    
     private static final String dataPathStr     = 
         System.getenv( "TESSDATA_PREFIX" );
     /** Tesseract engine for performing character recognition. */
@@ -64,6 +98,8 @@ public class CartesionPlaneWithOCR extends JFrame
         new JCheckBox( "Vertical Labels" );
     
     private float                   scaleFactor         = 1;
+    private int                     segmentationMode    = 6;
+    private int                     engineMode          = 1;
     
     /**
      * Application entry point.
@@ -91,7 +127,7 @@ public class CartesionPlaneWithOCR extends JFrame
         tesseract.setDatapath( dataPathStr );
         tesseract.setLanguage("eng");
         tesseract.setPageSegMode( 6 );
-        tesseract.setOcrEngineMode(3);
+        tesseract.setOcrEngineMode( 1 );
         
         setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 
@@ -128,6 +164,7 @@ public class CartesionPlaneWithOCR extends JFrame
         BoxLayout   layout      = new BoxLayout( panel, BoxLayout.Y_AXIS );
         panel.setLayout( layout );
         panel.add( getCheckboxPanel() );
+        panel.add( getScalingPanel() );
         panel.add( getButtonPanel() );
         return panel;
     }
@@ -150,6 +187,52 @@ public class CartesionPlaneWithOCR extends JFrame
                 cbox.addChangeListener( e -> canvas.repaint() )
             );
         return panel;
+    }
+    
+    private JPanel getScalingPanel()
+    {
+        Dimension           spacer          = new Dimension( 3, 0 );
+        SpinnerNumberModel  scaleModel      =
+            new SpinnerNumberModel( 1.0f, .1f, 10f, .1f );
+        JSpinner            scaleSpinner    = new JSpinner( scaleModel );
+        scaleSpinner.addChangeListener( e -> {
+            scaleFactor = scaleModel.getNumber().floatValue();
+            repaint();
+        });
+        
+        JComboBox<String>   tessSegModes    = new JComboBox<>( segModes );
+        tessSegModes.addActionListener( e -> {
+            segmentationMode = tessSegModes.getSelectedIndex();
+            repaint();
+        });
+        tessSegModes.setSelectedIndex( segmentationMode );
+        tessSegModes.setEditable( false );
+        
+        JComboBox<String>   tessEngModes    = new JComboBox<>( engModes );
+        tessEngModes.addActionListener( e -> {
+            engineMode = tessEngModes.getSelectedIndex();
+            repaint();
+        });
+        tessEngModes.setSelectedIndex( engineMode );
+        tessEngModes.setEditable( false );
+        
+        JPanel      panel   = new JPanel();
+        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
+        panel.setLayout( layout );
+        panel.add( new JLabel( "Scale Factor" ) );
+        panel.add( scaleSpinner );
+        panel.add( Box.createRigidArea( spacer ) );
+        panel.add( new JLabel( "Seg Mode" ) );
+        panel.add( tessSegModes );
+        panel.add( Box.createRigidArea( spacer ) );
+        panel.add( new JLabel( "Eng Mode" ) );
+        panel.add( tessEngModes );
+        
+        // The extra panel prevents the BoxLayout from stretching
+        // main scale panel across the window.
+        JPanel  outerPanel  = new JPanel();
+        outerPanel.add( panel );
+        return outerPanel;
     }
     
     /**
@@ -183,8 +266,10 @@ public class CartesionPlaneWithOCR extends JFrame
         BufferedImage   image   = getScaledImage();
         try
         {
+            tesseract.setPageSegMode( segmentationMode );
+            tesseract.setOcrEngineMode( engineMode );
             String  text    = tesseract.doOCR( image );
-            System.out.println( text );
+            parseAndShowText( text );
         }
         catch ( TesseractException exc )
         {
@@ -196,6 +281,45 @@ public class CartesionPlaneWithOCR extends JFrame
                 JOptionPane.ERROR_MESSAGE
             );
         }
+        catch ( Throwable exc )
+        {
+            // This catch block is here because of a bug in Tesseract
+            // when trying to set the OCR engine mode.
+            exc.printStackTrace();
+            JOptionPane.showMessageDialog(
+                null, 
+                exc.getMessage(), 
+                "Unmanaged Tesseract Error", 
+                JOptionPane.ERROR_MESSAGE
+            );
+        }
+    }
+    
+    private void parseAndShowText( String text )
+    {
+        StringBuilder   bldr    = new StringBuilder();
+        String[]        tokens  = text.split( "\\s" );
+        String          token   = null;
+        for ( String tok : tokens )
+        {
+            token = tok;
+            try
+            {
+                double  num = Double.parseDouble( token );
+                String  str = String.format( "%.3f", num );
+                bldr.append( "(" )
+                    .append( str )
+                    .append( ")," );
+            }
+            catch ( NumberFormatException exc )
+            {
+                bldr.append( "[" )
+                    .append( token )
+                    .append( "]," );
+            }
+        }
+        
+        JOptionPane.showMessageDialog( null, bldr.toString() );
     }
     
     /**

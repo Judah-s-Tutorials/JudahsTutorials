@@ -144,7 +144,7 @@ public class Tess4JDemo4 extends JPanel
         tesseract.setDatapath( dataPathStr );
         tesseract.setLanguage("eng");
         tesseract.setPageSegMode( 6 );
-        tesseract.setOcrEngineMode(3);
+        tesseract.setOcrEngineMode(1);
         
         Dimension   dim     = new Dimension( 500, 300 );
         setPreferredSize( dim );
