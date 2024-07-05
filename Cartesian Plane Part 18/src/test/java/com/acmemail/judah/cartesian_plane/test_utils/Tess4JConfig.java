@@ -2,6 +2,8 @@ package com.acmemail.judah.cartesian_plane.test_utils;
 
 import java.awt.Font;
 
+import net.sourceforge.tess4j.Tesseract;
+
 /**
  * Manages the parameters to use
  * when testing with the Tess4J (Tesseract) API.
@@ -46,6 +48,10 @@ import java.awt.Font;
  */
 public class Tess4JConfig
 {
+    /** Tesseract language property name. */
+    public static final String  LANGUAGE_PN     = "tessLanguage";
+    /** Tesseract language language default value. */
+    public static final String  LANGUAGE_DV     = "eng";
     /** Tesseract segmentation mode property name. */
     public static final String  SEG_MODE_PN     = "tess4jSegMode";
     /** Tesseract segmentation mode default value. */
@@ -67,6 +73,27 @@ public class Tess4JConfig
     /** Tesseract font name default value. */
     public static final String  FONT_NAME_DV    = Font.MONOSPACED;
     
+    private static final String dataPath        = 
+        System.getenv( "TESSDATA_PREFIX" );
+    /** Tesseract language property name. */
+    private static final String  language       = 
+        getProperty( LANGUAGE_PN, LANGUAGE_DV );
+    /** Tesseract segmentation mode property name. */
+    private static final int     segMode        = 
+        getProperty( SEG_MODE_PN, SEG_MODE_DV );
+    /** Tesseract OCR engine mode property name. */
+    private static final int     engMode        = 
+        getProperty( ENG_MODE_PN, ENG_MODE_DV );
+    /** Tesseract scale factor property name. */
+    private static final float   scaleFactor    = 
+        getProperty( SCALE_FACTOR_PN, SCALE_FACTOR_DV );
+    /** Tesseract font size property name. */
+    private static final float   fontSize       = 
+        getProperty( FONT_SIZE_PN, FONT_SIZE_DV );
+    /** Tesseract font name default value. */
+    private static final String  fontName       =
+        getProperty( FONT_NAME_PN, FONT_NAME_DV );
+    
     /**
      * Prevent instantiation of this class.
      */
@@ -75,13 +102,35 @@ public class Tess4JConfig
     }
     
     /**
+     * Get a Tesseract object
+     * initialized with a data path
+     * and default parameters.
+     * 
+     * @return  the intialized Tesseract object
+     */
+    public static Tesseract getTesseract()
+    {
+        Tesseract   tesseract   = new Tesseract();
+        if ( dataPath != null )
+            tesseract.setDatapath( dataPath );
+        tesseract.setLanguage( language );
+        tesseract.setPageSegMode( segMode );
+        tesseract.setOcrEngineMode( engMode );
+        return tesseract;
+    }
+    
+    public static String getDataPath()
+    {
+        return dataPath;
+    }
+    
+    /**
      * Gets the designated Tesseract segmentation mode. 
      * @return  the designated Tesseract segmentation mode
      */
     public static int getSegmentationMode()
     {
-        int     val = getProperty( SEG_MODE_PN, SEG_MODE_DV );
-        return val;
+        return segMode;
     }
     
     /**
@@ -90,8 +139,7 @@ public class Tess4JConfig
      */
     public static int getOCREngineMode()
     {
-        int     val = getProperty( ENG_MODE_PN, ENG_MODE_DV );
-        return val;
+        return engMode;
     }
     
     /**
@@ -100,8 +148,8 @@ public class Tess4JConfig
      */
     public static float getScaleFactor()
     {
-        float   val = getProperty( SCALE_FACTOR_PN, SCALE_FACTOR_DV );
-        return val;
+        return scaleFactor;
+
     }
     
     /**
@@ -110,8 +158,8 @@ public class Tess4JConfig
      */
     public static float getFontSize()
     {
-        float   val = getProperty( FONT_SIZE_PN, FONT_SIZE_DV );
-        return val;
+        return fontSize;
+
     }
     
     /**
@@ -120,8 +168,8 @@ public class Tess4JConfig
      */
     public static String getFontName()
     {
-        String  val = getProperty( FONT_NAME_PN, FONT_NAME_DV );
-        return val;
+        return fontName;
+
     }
     
     /**

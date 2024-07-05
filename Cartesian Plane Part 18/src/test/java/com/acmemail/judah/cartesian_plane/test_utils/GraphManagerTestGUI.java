@@ -155,6 +155,18 @@ public class GraphManagerTestGUI
     }
     
     /**
+     * Executes the drawText method
+     * in the GraphManager under test.
+     * 
+     * @return  the bitmap that the grid manager draws to
+     */
+    public BufferedImage drawText()
+    {
+        executeProc( () -> graphMgr.drawText() );
+        return image;
+    }
+    
+    /**
      * Sets the value of the gridUnit property
      * in the active Profile.
      * 
@@ -335,7 +347,6 @@ public class GraphManagerTestGUI
             graphMgr.refresh( gtx, imageRect );
             runner.run();
             canvas.repaint();
-            Utils.pause( 1000 );
         });
     }
     

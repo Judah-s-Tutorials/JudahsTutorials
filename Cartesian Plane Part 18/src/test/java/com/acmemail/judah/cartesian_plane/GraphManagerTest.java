@@ -1,15 +1,25 @@
 package com.acmemail.judah.cartesian_plane;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Color;
+import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Scanner;
 
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -28,6 +38,9 @@ import com.acmemail.judah.cartesian_plane.sandbox.utils.LineSegment;
 import com.acmemail.judah.cartesian_plane.test_utils.GraphManagerTestGUI;
 import com.acmemail.judah.cartesian_plane.test_utils.Tess4JConfig;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
+
+import net.sourceforge.tess4j.Tesseract;
+import net.sourceforge.tess4j.TesseractException;
 
 class GraphManagerTest
 {
@@ -78,35 +91,24 @@ class GraphManagerTest
     private static final Color  testGridColor3  = new Color( testGridRGB3 );
     private static final float  testLength3     = 10;
     private static final float  testStroke3     = 4;
-    private static final float  testScaleFactor = 
-        Tess4JConfig.getScaleFactor();
-    private static final float  testFontSize    =
-        Tess4JConfig.getFontSize();
-    private static final String testFontName    =
-        Tess4JConfig.getFontName();
 
     private static final Profile    baseProfile = new Profile();
     
-    private Profile                 workingProfile  = new Profile();
+    private Profile         workingProfile  = new Profile();
+    private final Tesseract tesseract       = Tess4JConfig.getTesseract();
     private static GraphManagerTestGUI  testGUI;
         
-    private float                       workingGPU;
-    private Color                       workingGridColor;
-    private int                         workingGridRGB;
-    private float                       workingLPU;
-    private float                       workingStroke;
-    private float                       workingLength;
-    private Color                       workingColor;
-    private int                         workingRGB;
-    
-    private int                         workingSegMode;
-    private int                         workingOCREngMode;
-    private float                       workingScaleFactor;
-    private float                       workingFontSize;
-    private String                      workingFontName;
+    private float               workingGPU;
+    private Color               workingGridColor;
+    private int                 workingGridRGB;
+    private float               workingLPU;
+    private float               workingStroke;
+    private float               workingLength;
+    private Color               workingColor;
+    private int                 workingRGB;
 
-    private BufferedImage               workingImage;
-    private String                      workingLineSet;
+    private BufferedImage       workingImage;
+    private String              workingLineSet;
     
     @BeforeAll
     public static void beforeAll()
@@ -161,39 +163,100 @@ class GraphManagerTest
         testVerticalLines();
     }
 
-    @ParameterizedTest
-    @ValueSource( ints= {0,1} )
-    public void testDrawText( int paramNum )
+    @Test
+    public void testDrawText()
     {
-        initTestParameters( paramNum );
         initTestData( TIC_MAJOR );
-        fail("Not yet implemented");
+        workingImage = testGUI.drawText();
+        assertTrue( hasHorizontalLabel() );
+        assertTrue( hasVerticalLabel() );
+    }
+    
+    private boolean hasHorizontalLabel()
+    {
+        LineGenerator       lineGen = 
+            getLineGenerator( LineGenerator.HORIZONTAL );
+        Iterator<Line2D>    iter    = lineGen.iterator();
+        assertTrue( iter.hasNext() );
+        
+        int         testWidth   = 20;
+        int         testHeight  = 20;
+        Line2D      line    = iter.next();
+        int         xco     = (int)line.getX2();
+        int         yco     = (int)(line.getY1() - testHeight / 2);
+        Rectangle   rect    = 
+           new Rectangle( xco, yco, testWidth, testHeight );
+//        workingImage.getGraphics().drawRect( xco, yco, testWidth, testHeight );
+//        showImageDialog();
+        boolean             result  = hasLabel( rect );
+        return result;
+    }
+    
+    private boolean hasVerticalLabel()
+    {
+        LineGenerator       lineGen = 
+            getLineGenerator( LineGenerator.VERTICAL );
+        Iterator<Line2D>    iter    = lineGen.iterator();
+        assertTrue( iter.hasNext() );
+        
+        int         testWidth   = 20;
+        int         testHeight  = 20;
+        Line2D      line    = iter.next();
+        int         xco     = (int)line.getX1() - testWidth / 2;
+        int         yco     = (int)line.getY2();
+        Rectangle   rect    = 
+           new Rectangle( xco, yco, testWidth, testHeight );
+        workingImage.getGraphics().drawRect( xco, yco, testWidth, testHeight );
+        showImageDialog();
+        boolean             result  = hasLabel( rect );
+        return result;
+    }
+    
+    private boolean hasLabel( Rectangle rect )
+    {
+        int textRGB = 
+            workingProfile.getMainWindow().getFGColor().getRGB() & 0xFFFFFF;
+        boolean result  = false;
+        int     maxXco  = rect.x + rect.width;
+        int     maxYco  = rect.y + rect.height;
+        for ( int xco = rect.x ; xco < maxXco ; ++xco )
+            for ( int yco = rect.y ; yco < maxYco ; ++yco )
+            {
+                int rgb = workingImage.getRGB( xco, yco ) & 0xFFFFFF;
+                if ( rgb == textRGB )
+                    result = true;
+            }
+        return result;
     }
 
-    @ParameterizedTest
-    @ValueSource( ints= {0,1} )
-    public void testDrawHorizontalLabels( int paramNum )
+    @Test
+    public void testDrawHorizontalLabels()
     {
-        initTestParameters( paramNum );
+        initTestParameters( 0 );
         initTestData( TIC_MAJOR );
         testGUI.setGridFontSize( tessFontSize );
         testGUI.setGridFontName( tessFontName );
         workingImage = testGUI.drawHorizontalLabels();
-        Utils.pause( 5000 );
-        fail("Not yet implemented");
+        Utils.pause( 500 );
+        
+        List<Float>     expValues   = getExpectedHorizontalLabels();
+        List<Float>     actValues   = getLabels();
+        assertEquals( expValues, actValues );
     }
 
-    @ParameterizedTest
-    @ValueSource( ints= {0,1} )
-    public void testDrawVerticalLabels( int paramNum )
+    @Test
+    public void testDrawVerticalLabels()
     {
-        initTestParameters( paramNum );
+        initTestParameters( 0 );
         initTestData( TIC_MAJOR );
         testGUI.setGridFontSize( tessFontSize );
         testGUI.setGridFontName( tessFontName );
         workingImage = testGUI.drawVerticalLabels();
-        Utils.pause( 5000 );
-        fail("Not yet implemented");
+        Utils.pause( 500 );
+        
+        List<Float>     expValues   = getExpectedVerticalLabels();
+        List<Float>     actValues   = getLabels();
+        assertEquals( expValues, actValues );
     }
 
     @ParameterizedTest
@@ -344,24 +407,110 @@ class GraphManagerTest
         assertEquals( expSegX, actSegX );
         assertEquals( expSegY, actSegY );
     }
-  
-    private static LineSegment getVerticalLineSegment( 
-        BufferedImage   image,
-        double          centerYco,
-        double          len, 
-        double          stroke,
-        int             rgb
-    )
+    
+    private List<Float> getExpectedHorizontalLabels()
     {
-        double  centerXco   = image.getWidth() / 2;
-        double  ulcXco      = centerXco - stroke / 2;
-        double  ulcYco      = centerYco - len / 2;
-        Rectangle2D rect        =
-            new Rectangle2D.Double( ulcXco, ulcYco, stroke, len );
-        LineSegment seg     = LineSegment.of( rect, rgb );
-        return seg;
+        float           length  = workingImage.getHeight();
+        List<Float>     list    = new ArrayList<>();
+        float           half    = length / 2;
+        float           spacing = workingGPU / workingLPU;
+        float           start   = half;
+
+        int             xier    = 1;
+        for ( float mark = start - spacing ; mark > 0 ; mark -= spacing )
+            list.add( 0, xier++ / workingLPU );
+
+        xier = -1;
+        for ( 
+            float mark = start + spacing ; 
+            mark < length ; 
+            mark += spacing 
+        )
+            list.add( xier-- / workingLPU );
+        return list;
     }
     
+    private List<Float> getExpectedVerticalLabels()
+    {
+        float           length  = workingImage.getWidth();
+        List<Float>     list    = new ArrayList<>();
+        float           half    = length / 2;
+        float           spacing = workingGPU / workingLPU;
+        float           start   = half;
+
+        int             xier    = -1;
+        for ( float mark = start - spacing ; mark > 0 ; mark -= spacing )
+            list.add( 0, xier-- / workingLPU );
+
+        xier = 1;
+        for ( 
+            float mark = start + spacing ; 
+            mark < length ; 
+            mark += spacing 
+        )
+            list.add( xier++ / workingLPU );
+        return list;
+    }
+    
+    private List<Float> getLabels()
+    {
+        List<Float>     list            = null;
+        
+        // Allocate new buffered image
+        int             scaledWidth     = 
+            (int)(workingImage.getWidth() * tessScaleFactor + .5);
+        int             scaledHeight    = 
+            (int)(workingImage.getHeight() * tessScaleFactor + .5);
+        int             scaledType      = workingImage.getType();
+        BufferedImage   scaledImage     = 
+            new BufferedImage( scaledWidth, scaledHeight, scaledType );
+
+        // Scale the image
+        AffineTransform     transform       = new AffineTransform();
+        transform.scale( tessScaleFactor, tessScaleFactor );
+        AffineTransformOp   scaleOp         = 
+            new AffineTransformOp( 
+                transform, 
+                AffineTransformOp.TYPE_BICUBIC
+            );
+        scaleOp.filter( workingImage, scaledImage );
+
+        // Perform OCR
+        tesseract.setOcrEngineMode( tessOCREngMode );
+        tesseract.setPageSegMode( tessPageSegMode );
+        try
+        {
+            String      tessStr = tesseract.doOCR( scaledImage );
+            list = parseFloats( tessStr );
+        }
+        catch ( TesseractException exc )
+        {
+            String  message = "Fatal Tesseract error";
+            fail( message, exc );
+        }
+        return list;
+    }
+    
+    private List<Float> parseFloats( String string )
+    {
+        List<Float>     list    = new ArrayList<>();
+        String[]        tokens  = string.split( "\\s" );
+        for ( String token : tokens )
+        {
+            try
+            {
+                float   val = Float.parseFloat( token );
+                list.add( val );
+            }
+            catch ( NumberFormatException exc )
+            {
+                String  msg = "OCR parse failure; token = " + token;
+                System.err.println( msg );
+            }
+        }
+        return list;
+    }
+   
     private LineGenerator getLineGenerator( int orientation )
     {
         boolean hasLength   = testGUI.getLineHasLength( workingLineSet );
@@ -384,5 +533,32 @@ class GraphManagerTest
         Rectangle2D rect    = 
             new Rectangle2D.Double( 0, 0, width, height );
         return rect;
+    }
+    
+    private void showImageDialog()
+    {
+        JDialog     dialog      = new JDialog();
+        dialog.setModal( true );
+        dialog.setContentPane( new ImagePanel() );
+        dialog.pack();
+        dialog.setVisible( true );
+        dialog.dispose();
+    }
+    
+    private class ImagePanel extends JPanel
+    {
+        public ImagePanel()
+        {
+            int         width   = workingImage.getWidth();
+            int         height  = workingImage.getHeight();
+            Dimension   dim = new Dimension( width, height );
+            setPreferredSize( dim );
+        }
+        
+        @Override
+        public void paintComponent( Graphics gtx )
+        {
+            gtx.drawImage(workingImage, 0, 0, this );
+        }
     }
 }
