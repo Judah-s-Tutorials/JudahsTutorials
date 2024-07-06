@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.acmemail.judah.cartesian_plane.components.Profile;
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 
 /**

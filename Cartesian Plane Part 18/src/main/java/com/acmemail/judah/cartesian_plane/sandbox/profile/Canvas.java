@@ -8,7 +8,7 @@ import java.awt.Toolkit;
 import javax.swing.JComponent;
 
 import com.acmemail.judah.cartesian_plane.GraphManager;
-import com.acmemail.judah.cartesian_plane.components.Profile;
+import com.acmemail.judah.cartesian_plane.Profile;
 
 /**
  * Component to display the background of a graph.

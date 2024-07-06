@@ -20,7 +20,6 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
-import com.acmemail.judah.cartesian_plane.components.Profile;
 
 /**
  * An object of this class
@@ -57,8 +56,6 @@ public class GraphManager
     private static final String gridLinesPropertiesName =
         LinePropertySetGridLines.class.getSimpleName();
         
-    /** The component in which the sample graph is to be drawn. */
-//    private final JComponent        comp;
     private Rectangle2D       rect;
     /** The grid unit for the sample graph. */
     private float                   gridUnit;
@@ -158,7 +155,7 @@ public class GraphManager
         gtx.fill( rect );
      }
     
-    public void updateProfile()
+    public void resetProfile()
     {
         profile.reset();
     }

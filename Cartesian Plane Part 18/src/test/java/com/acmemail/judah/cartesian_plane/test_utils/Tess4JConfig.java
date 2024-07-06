@@ -5,7 +5,7 @@ import java.awt.Font;
 import net.sourceforge.tess4j.Tesseract;
 
 /**
- * Manages the parameters to use
+ * Manages the recommended parameters to use
  * when testing with the Tess4J (Tesseract) API.
  * Parameters are:
  * <ul>
@@ -21,6 +21,11 @@ import net.sourceforge.tess4j.Tesseract;
  *      Scale Factor:
  *      the recommended factor by which to resize a BufferedImage
  *      before attempting to perform OCR analysis.
+ * </li>
+ * <li>
+ *      GPU:
+ *      the recommended GPU (pixels-per-unit) to use in an image
+ *      that is to be inspected by the Tesseract OCR engine.
  * </li>
  * <li>
  *      Font Size:
@@ -65,6 +70,10 @@ public class Tess4JConfig
     /** Tesseract scale factor default value. */
     public static final float   SCALE_FACTOR_DV = 1.5f;
     /** Tesseract font size property name. */
+    public static final String  GPU_PN          = "tess4jGPU";
+    /** Tesseract font size default value. */
+    public static final float   GPU_DV          = 100f;
+    /** Tesseract font size property name. */
     public static final String  FONT_SIZE_PN    = "tess4jFontSize";
     /** Tesseract font size default value. */
     public static final float   FONT_SIZE_DV    = 14f;
@@ -75,22 +84,25 @@ public class Tess4JConfig
     
     private static final String dataPath        = 
         System.getenv( "TESSDATA_PREFIX" );
-    /** Tesseract language property name. */
+    /** Tesseract recommended language. */
     private static final String  language       = 
         getProperty( LANGUAGE_PN, LANGUAGE_DV );
-    /** Tesseract segmentation mode property name. */
+    /** Tesseract recommended segmentation mode. */
     private static final int     segMode        = 
         getProperty( SEG_MODE_PN, SEG_MODE_DV );
-    /** Tesseract OCR engine mode property name. */
+    /** Tesseract recommended OCR engine mode. */
     private static final int     engMode        = 
         getProperty( ENG_MODE_PN, ENG_MODE_DV );
     /** Tesseract scale factor property name. */
     private static final float   scaleFactor    = 
         getProperty( SCALE_FACTOR_PN, SCALE_FACTOR_DV );
-    /** Tesseract font size property name. */
+    /** Tesseract recommended GPU. */
+    private static final float   gpu            = 
+        getProperty( GPU_PN, GPU_DV );
+    /** Tesseract recommended font size. */
     private static final float   fontSize       = 
         getProperty( FONT_SIZE_PN, FONT_SIZE_DV );
-    /** Tesseract font name default value. */
+    /** Tesseract recommended font name. */
     private static final String  fontName       =
         getProperty( FONT_NAME_PN, FONT_NAME_DV );
     
@@ -125,8 +137,8 @@ public class Tess4JConfig
     }
     
     /**
-     * Gets the designated Tesseract segmentation mode. 
-     * @return  the designated Tesseract segmentation mode
+     * Gets the recommended Tesseract segmentation mode. 
+     * @return  the recommended Tesseract segmentation mode
      */
     public static int getSegmentationMode()
     {
@@ -134,8 +146,8 @@ public class Tess4JConfig
     }
     
     /**
-     * Gets the designated Tesseract OCR engine mode. 
-     * @return  the designated Tesseract OCR engine mode
+     * Gets the recommended Tesseract OCR engine mode. 
+     * @return  the recommended Tesseract OCR engine mode
      */
     public static int getOCREngineMode()
     {
@@ -143,8 +155,8 @@ public class Tess4JConfig
     }
     
     /**
-     * Gets the designated Tesseract scale factor. 
-     * @return  the designated Tesseract scale factor
+     * Gets the recommended Tesseract scale factor. 
+     * @return  the recommended Tesseract scale factor
      */
     public static float getScaleFactor()
     {
@@ -153,8 +165,18 @@ public class Tess4JConfig
     }
     
     /**
-     * Gets the designated Tesseract font size. 
-     * @return  the designated Tesseract font size
+     * Gets the recommended Tesseract GPU. 
+     * @return  the recommended Tesseract gpu
+     */
+    public static float getGPU()
+    {
+        return gpu;
+
+    }
+    
+    /**
+     * Gets the recommended Tesseract font size. 
+     * @return  the recommended Tesseract font size
      */
     public static float getFontSize()
     {
@@ -163,8 +185,8 @@ public class Tess4JConfig
     }
     
     /**
-     * Gets the designated Tesseract font name. 
-     * @return  the designated Tesseract font name
+     * Gets the recommended Tesseract font name. 
+     * @return  the recommended Tesseract font name
      */
     public static String getFontName()
     {

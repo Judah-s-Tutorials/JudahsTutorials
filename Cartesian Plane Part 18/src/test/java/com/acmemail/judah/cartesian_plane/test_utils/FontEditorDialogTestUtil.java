@@ -15,11 +15,11 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JTextField;
 
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.components.ColorEditor;
 import com.acmemail.judah.cartesian_plane.components.FontEditor;
 import com.acmemail.judah.cartesian_plane.components.FontEditorDialog;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
-import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 

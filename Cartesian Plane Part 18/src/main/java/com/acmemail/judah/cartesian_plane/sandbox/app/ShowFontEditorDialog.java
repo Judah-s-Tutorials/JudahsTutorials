@@ -16,9 +16,10 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
+import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.components.FontEditor;
 import com.acmemail.judah.cartesian_plane.components.FontEditorDialog;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
-import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
 /**

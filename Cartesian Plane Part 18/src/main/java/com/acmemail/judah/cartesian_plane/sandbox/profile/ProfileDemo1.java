@@ -2,7 +2,7 @@ package com.acmemail.judah.cartesian_plane.sandbox.profile;
 
 import java.util.Scanner;
 
-import com.acmemail.judah.cartesian_plane.components.Profile;
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 

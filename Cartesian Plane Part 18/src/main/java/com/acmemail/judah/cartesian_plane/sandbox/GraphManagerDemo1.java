@@ -19,10 +19,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.GraphManager;
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.PButtonGroup;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
-import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.LineSegment;

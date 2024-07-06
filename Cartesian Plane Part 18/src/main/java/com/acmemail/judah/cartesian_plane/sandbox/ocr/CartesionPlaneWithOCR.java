@@ -26,7 +26,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.GraphManager;
-import com.acmemail.judah.cartesian_plane.components.Profile;
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.sandbox.profile.ProfileEditor;
 

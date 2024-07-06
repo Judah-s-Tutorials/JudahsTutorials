@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.components;
+package com.acmemail.judah.cartesian_plane;
 
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
@@ -6,8 +6,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import com.acmemail.judah.cartesian_plane.CPConstants;
-import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 /**
@@ -103,7 +108,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  * <p>
  * You can use {@linkplain #getProperties()}
  * to produce a stream of strings (Stream&lt;String&gt;)
- * representing the encapsulate properties.
+ * representing the encapsulated properties.
  * Strings in the stream
  * consists of a tag followed by a colon
  * and a value.

@@ -24,6 +24,7 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;

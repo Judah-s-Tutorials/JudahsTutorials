@@ -13,8 +13,6 @@ import java.util.stream.Stream;
 
 import javax.swing.JPanel;
 
-import com.acmemail.judah.cartesian_plane.components.Profile;
-
 /**
  * This class encapsulates the display of a Cartesian plane.
  * The plane consists of the following components,
@@ -680,7 +678,7 @@ public class CartesianPlane
         
         if ( update )
         {
-            graphMgr.updateProfile();
+            graphMgr.resetProfile();
             repaint();
         }
     }

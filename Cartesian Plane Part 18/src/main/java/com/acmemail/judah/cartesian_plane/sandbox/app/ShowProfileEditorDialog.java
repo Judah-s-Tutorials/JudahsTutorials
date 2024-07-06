@@ -24,6 +24,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
@@ -32,7 +33,6 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
-import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.sandbox.profile.ProfileEditorDialog;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 

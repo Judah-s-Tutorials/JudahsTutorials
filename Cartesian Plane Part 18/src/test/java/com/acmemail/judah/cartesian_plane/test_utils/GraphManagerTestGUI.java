@@ -17,9 +17,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.acmemail.judah.cartesian_plane.GraphManager;
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
-import com.acmemail.judah.cartesian_plane.components.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**
@@ -43,7 +43,7 @@ public class GraphManagerTestGUI
     /** Application frame. */
     private final JFrame        frame       = new JFrame( title );
     /** Profile used in testing. */
-    private final Profile       profile     = new Profile();
+    private final Profile       profile;
     
     private final int           imageWidth  = 450;
     private final int           imageHeight = 500;
@@ -53,13 +53,14 @@ public class GraphManagerTestGUI
     Rectangle2D                 imageRect   =
         new Rectangle2D.Double( 0, 0, imageWidth, imageHeight );
     /** GraphManager under test. */
-    private GraphManager        graphMgr    = 
-        new GraphManager( imageRect, profile );
+    private final GraphManager  graphMgr;
     /** Place to draw sample graph. */
     private final JPanel        canvas      = new FBPanel();
     
-    public GraphManagerTestGUI()
+    public GraphManagerTestGUI( Profile profile )
     {
+        this.profile = profile;
+        graphMgr =  new GraphManager( imageRect, profile );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         
         JPanel  contentPane = new JPanel( new BorderLayout() );
@@ -203,19 +204,6 @@ public class GraphManagerTestGUI
     }
     
     /**
-     * Sets the font style property
-     * in the active Profile
-     * from the given value
-     * 
-     * @param style   the given value
-     */
-    public void setGridFontStyle( String style )
-    {
-        GraphPropertySet    win = profile.getMainWindow();
-        setProperty( a -> win.setFontStyle( (String)a ), style );
-    }
-    
-    /**
      * Sets the font name property
      * in the active Profile
      * from the given value
@@ -226,6 +214,20 @@ public class GraphManagerTestGUI
     {
         GraphPropertySet    win = profile.getMainWindow();
         setProperty( a -> win.setFontName( (String)a ), name );
+    }
+    
+    /**
+     * Sets the text color property
+     * in the active Profile
+     * from the given RGB value
+     * 
+     * @param name   the given value
+     */
+    public void setGridFontRGB( int rgb )
+    {
+        GraphPropertySet    win     = profile.getMainWindow();
+        Color               fgColor = new Color( rgb );
+        setProperty( a -> win.setFGColor( (Color)a ), fgColor );
     }
     
     /**
@@ -332,6 +334,14 @@ public class GraphManagerTestGUI
         LinePropertySet set = profile.getLinePropertySet( propSet );
         assertNotNull( set );
         setProperty( a -> set.setColor( (Color)a ), color );
+    }
+    
+    /**
+     * Invokes updateProfile in the graph manager under test.
+     */
+    public void invokeResetProfile()
+    {
+        GUIUtils.schedEDTAndWait( graphMgr::resetProfile );
     }
     
     /**

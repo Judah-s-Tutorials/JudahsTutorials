@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.components;
+package com.acmemail.judah.cartesian_plane;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 
 /**
