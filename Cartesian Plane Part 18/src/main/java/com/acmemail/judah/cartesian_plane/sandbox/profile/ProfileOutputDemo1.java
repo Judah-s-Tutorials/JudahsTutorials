@@ -1,8 +1,10 @@
 package com.acmemail.judah.cartesian_plane.sandbox.profile;
 
-import java.util.Scanner;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
-import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.ProfileParser;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
 
@@ -11,11 +13,11 @@ import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
  * and display the values
  * of its properties.
  * to terminate this program,
- * type Enter in the application console.
+ * close the activity log.
  * 
  * @author Jack Straub
  */
-public class ProfileDemo1
+public class ProfileOutputDemo1
 {
     /** Log for displaying Profile properties. */
     private static ActivityLog      log;
@@ -29,14 +31,18 @@ public class ProfileDemo1
     public static void main(String[] args)
     {
         GUIUtils.schedEDTAndWait( () -> build() );
-        Profile profile = new Profile();
-        profile.getProperties()
+        ProfileParser parser = new ProfileParser();
+        parser.getProperties()
             .forEach( log::append );
-        System.out.println( "Waiting..." );
-        Scanner scanner = new Scanner( System.in );
-        scanner.nextLine();
-        scanner.close();
-        System.exit( 0 );
+        
+        WindowListener  winListener = new WindowAdapter() {
+            @Override
+            public void windowClosing( WindowEvent evt )
+            {
+                System.exit( 0 );
+            }
+        };
+        log.addWindowListener( winListener );
     }
     
     /**

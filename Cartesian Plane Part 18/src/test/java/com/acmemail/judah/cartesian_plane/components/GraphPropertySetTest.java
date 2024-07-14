@@ -1,9 +1,12 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -118,6 +121,38 @@ abstract class GraphPropertySetTest
         assertEquals( newValues.isBold(), testSet.isBold() );
     }
     
+    @Test
+    public void testEquals()
+    {
+        setOrigValues();
+        calcNewValues();
+        testEqualsByField( s -> s.setWidth( newValues.getWidth() ) );
+        testEqualsByField( s -> s.setBGColor( newValues.getBGColor() ) );
+        testEqualsByField( s -> s.setFGColor( newValues.getFGColor() ) );
+        testEqualsByField( s -> s.setFontName( newValues.getFontName() ) );
+        testEqualsByField( s -> s.setFontSize( newValues.getFontSize() ) );
+        testEqualsByField( s -> s.setBold( newValues.isBold() ) );
+        testEqualsByField( s -> s.setItalic( newValues.isItalic() ) );
+        testEqualsByField( s -> s.setFontDraw( newValues.isFontDraw() ) );
+    }
+
+    private void testEqualsByField( 
+        Consumer<GraphPropertySet> mutator
+    )
+    {
+        copy( testSet, origValues );
+        assertTrue( origValues.equals( origValues ) );
+        assertFalse( origValues.equals( null ) );
+        assertFalse( origValues.equals( new Object() ) );
+        assertTrue( origValues.equals( testSet ) );
+        assertTrue( testSet.equals( origValues ) );
+        assertEquals( origValues.hashCode(), testSet.hashCode() );
+        
+        mutator.accept( testSet );
+        assertFalse( origValues.equals( testSet ) );
+        assertFalse( testSet.equals( origValues ) );
+    }
+    
     private static void 
     copy( GraphPropertySet dest, GraphPropertySet source )
     {
@@ -129,6 +164,32 @@ abstract class GraphPropertySetTest
         dest.setFontDraw( source.isFontDraw() );
         dest.setWidth( source.getWidth() );
         dest.setBGColor( source.getBGColor() );
+    }
+    
+    private static void getUniqueValues( GraphPropertySet set )
+    {
+        boolean newIsBold       = !set.isBold();
+        boolean newIsItalic     = !set.isItalic();
+        float   newWidth        = set.getWidth() + 10;
+        int     origBGColor     = set.getBGColor().getRGB() & 0xFFFFFF;
+        int     newBGColor      = (origBGColor + 10) ^ 0xFFFFFF;
+        int     origFGColor     = set.getFGColor().getRGB() & 0xFFFFFF;
+        int     newFGColor      = (origFGColor + 10) ^ 0xFFFFFF;
+        boolean newFontDraw     = !set.isFontDraw();
+        float   newFontSize     = set.getFontSize() + 1;
+        String  origFontName    = set.getFontName();
+        String  newFontName     = 
+            origFontName.equals( Font.MONOSPACED ) ?
+            Font.DIALOG : Font.MONOSPACED;
+
+        set.setBold( newIsBold );
+        set.setItalic( newIsItalic );
+        set.setWidth( newWidth );
+        set.setFGColor( new Color( newFGColor ) );
+        set.setBGColor( new Color( newBGColor ) );
+        set.setFontDraw( newFontDraw );
+        set.setFontSize( newFontSize );
+        set.setFontName( newFontName );
     }
     
     private static void 

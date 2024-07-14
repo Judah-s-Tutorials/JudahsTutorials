@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Objects;
 
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 
@@ -342,7 +343,54 @@ public abstract class GraphPropertySet
     {
         setStyle( isItalic(), isBold );
     }
+
+    @Override
+    public int hashCode()
+    {
+        int hashCode    = Objects.hash(
+            widthProperty ,
+            bgColorProperty,
+            fgColorProperty,
+            fontNameProperty,
+            fontSizeProperty,
+            fontStyleProperty,
+            fontDrawProperty,
+            width,
+            bgColor,
+            fgColor,
+            fontName,
+            fontSize,
+            fontStyle,
+            fontDraw
+        );
+        return hashCode;
+    }
     
+    @Override
+    public boolean equals( Object other )
+    {
+        boolean result  = false;
+        if ( other == null )
+            result = false;
+        else if ( this == other )
+            result = true;
+        else if ( this.getClass() != other.getClass() )
+            result = false;
+        else
+        {
+            GraphPropertySet    that    = (GraphPropertySet)other;
+            result = 
+                this.width == that.width
+                && this.fgColor.equals( that.fgColor )
+                && this.bgColor.equals( that.bgColor )
+                && this.fontName.equals( that.fontName )
+                && this.isBold() == that.isBold()
+                && this.isItalic() == that.isItalic()
+                && this.fontSize == that.fontSize;
+        }
+        return result;
+    }
+
     /**
      * Set the font style.
      * Result will be "PLAIN" (not bold or italic),

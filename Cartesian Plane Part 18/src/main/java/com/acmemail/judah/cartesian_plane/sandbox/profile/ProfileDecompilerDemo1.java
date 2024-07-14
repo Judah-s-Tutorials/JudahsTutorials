@@ -12,6 +12,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.ProfileParser;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
@@ -121,7 +122,8 @@ public class ProfileDecompilerDemo1
             .map( expRevisedProfile::getLinePropertySet )
             .forEach( this::revise );
         
-        Stream<String>  stream  = expRevisedProfile.getProperties();
+        ProfileParser   parser  = new ProfileParser( expRevisedProfile );
+        Stream<String>  stream  = parser.getProperties();
         actRevisedProfile = ProfileDecompiler.of( stream );
         
         Dimension   logDim  = log.getPreferredSize();

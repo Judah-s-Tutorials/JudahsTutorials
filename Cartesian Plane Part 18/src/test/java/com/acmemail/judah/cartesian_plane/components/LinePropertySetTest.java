@@ -1,14 +1,19 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.PropertyManager;
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 
 public abstract class LinePropertySetTest
@@ -88,6 +93,35 @@ public abstract class LinePropertySetTest
         assertHasAppliedValues();
     }
     
+    @Test
+    public void testEquals()
+    {
+        LinePropertySet left            = setSupplier.get();
+        LinePropertySet uniqueValues    = copy( left );
+        getUniqueValues( uniqueValues );
+
+        if ( left.hasDraw() )
+        {
+            Boolean diffVal = uniqueValues.getDraw();
+            testEqualsByField( left, s -> s.setDraw( diffVal ) );
+        }
+        if ( left.hasStroke() )
+        {
+            float   diffVal = uniqueValues.getStroke();
+            testEqualsByField( left, s -> s.setStroke( diffVal ) );
+        }
+        if ( left.hasSpacing() )
+        {
+            float   diffVal = uniqueValues.getSpacing();
+            testEqualsByField( left, s -> s.setSpacing( diffVal ) );
+        }
+        if ( left.hasColor() )
+        {
+            Color   diffVal = uniqueValues.getColor();
+            testEqualsByField( left, s -> s.setColor( diffVal ) );
+        }
+    }
+    
     private void assertPresentIf( LinePropertySet set )
     {
         assertEquals( set.hasDraw(), drawOrig.isPresent() );
@@ -136,6 +170,24 @@ public abstract class LinePropertySetTest
             set.setLength( lengthCurr.get() );
         if ( (spacingCurr = newFloat( spacingCurr )).isPresent() )
             set.setSpacing( spacingCurr.get() );            
+    }
+    
+    private void testEqualsByField( 
+        LinePropertySet left, 
+        Consumer<LinePropertySet> mutator
+    )
+    {
+        LinePropertySet right   = copy( left );
+        assertTrue( left.equals( left ) );
+        assertFalse( left.equals( null ) );
+        assertFalse( left.equals( new Object() ) );
+        assertTrue( left.equals( right ) );
+        assertTrue( right.equals( left ) );
+        assertEquals( left.hashCode(), right.hashCode() );
+        
+        mutator.accept( right );
+        assertFalse( left.equals( right ) );
+        assertFalse( right.equals( left ) );
     }
     
     private static void 
@@ -203,5 +255,34 @@ public abstract class LinePropertySetTest
             optional = Optional.of( newVal );
         }
         return optional;
+    }
+    
+    private static LinePropertySet copy( LinePropertySet src )
+    {
+        Class<? extends LinePropertySet>    clazz   = src.getClass();
+        LinePropertySet                     dest    = null;
+        try
+        {
+            dest = clazz.getDeclaredConstructor().newInstance();
+        }
+        catch ( 
+            NoSuchMethodException | 
+            SecurityException |
+            InvocationTargetException |
+            IllegalAccessException |
+            InstantiationException exc
+        )
+        {
+            String  msg =
+                "Could not instantiate " + clazz.getSimpleName();
+            throw new ComponentException( msg );
+        }
+        dest.setDraw( src.getDraw() );
+        dest.setStroke( src.getStroke() );
+        dest.setLength( src.getLength() );
+        dest.setSpacing( src.getSpacing() );
+        dest.setColor( src.getColor() );
+
+        return dest;
     }
 }

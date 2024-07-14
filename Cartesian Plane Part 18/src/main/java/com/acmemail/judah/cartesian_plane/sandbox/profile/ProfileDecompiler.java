@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 
 import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.ProfileParser;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
@@ -25,7 +26,7 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
  */
 public class ProfileDecompiler
 {
-    /** Container for decompiled Profile. */
+    /** Container for decompiled ProfileParser. */
     private final Profile   profile     = new Profile();
     /** If quiet is true, input parsing will not report errors. */
     private final boolean   quiet;
@@ -193,7 +194,7 @@ end of alternative splitArgString method. */
      * contains a class declaration
      * or a property declaration
      * and decompiles it accordingly.
-     * If the name is Profile.CLASS,
+     * If the name is ProfileParser.CLASS,
      * the given pair 
      * is assumed to be a class declaration,
      * otherwise it is assumed to be 
@@ -203,7 +204,7 @@ end of alternative splitArgString method. */
      */
     private void decompile( String[] arr )
     {
-        if ( Profile.CLASS.equals( arr[0] ) )
+        if ( ProfileParser.CLASS.equals( arr[0] ) )
             decompileClass( arr );
         else
             decompileProperty( arr );
@@ -245,7 +246,7 @@ end of alternative splitArgString method. */
      * There are four possibilities:
      * <ol>
      * <li>
-     *      The property name is Profile.GRID_UNIT,
+     *      The property name is ProfileParser.GRID_UNIT,
      *      in which case grid-unit property
      *      of the target profile is initialized
      *      from the value.
@@ -267,7 +268,7 @@ end of alternative splitArgString method. */
      * </ol>
      * 
      * Except in the case where
-     * property name is Profile.GRID_UNIT,
+     * property name is ProfileParser.GRID_UNIT,
      * it is an error 
      * if {@linkplain #currParseObj} is not a reference to
      * anything but a LinePropertySet or GraphPropertySet object.
@@ -276,7 +277,7 @@ end of alternative splitArgString method. */
      */
     private void decompileProperty( String[] arr )
     {
-        if ( Profile.GRID_UNIT.equals( arr[0] ) )
+        if ( ProfileParser.GRID_UNIT.equals( arr[0] ) )
         {
             float   gridUnit    = parseFloat( arr[1] );
             profile.setGridUnit( gridUnit );
@@ -305,22 +306,22 @@ end of alternative splitArgString method. */
     {
         switch ( arr[0] )
         {
-        case Profile.BG_COLOR:
+        case ProfileParser.BG_COLOR:
             set.setBGColor( parseColor( arr[1] ) );
             break;
-        case Profile.DRAW:
+        case ProfileParser.DRAW:
             set.setFontDraw( parseBoolean( arr[1] ) );
             break;
-        case Profile.FG_COLOR:
+        case ProfileParser.FG_COLOR:
             set.setFGColor( parseColor( arr[1] ) );
             break;
-        case Profile.FONT_NAME:
+        case ProfileParser.FONT_NAME:
             set.setFontName( arr[1] );
             break;
-        case Profile.FONT_SIZE:
+        case ProfileParser.FONT_SIZE:
             set.setFontSize( parseFloat( arr[1] ) );
             break;
-        case Profile.FONT_STYLE:
+        case ProfileParser.FONT_STYLE:
             set.setFontStyle( arr[1] );
             break;
         default:
@@ -347,19 +348,19 @@ end of alternative splitArgString method. */
     {
         switch ( arr[0] )
         {
-        case Profile.COLOR:
+        case ProfileParser.COLOR:
             set.setColor( parseColor( arr[1] ) );
             break;
-        case Profile.DRAW:
+        case ProfileParser.DRAW:
             set.setDraw( parseBoolean( arr[1] ) );
             break;
-        case Profile.LENGTH:
+        case ProfileParser.LENGTH:
             set.setLength( parseFloat( arr[1] ) );
             break;
-        case Profile.SPACING:
+        case ProfileParser.SPACING:
             set.setSpacing( parseFloat( arr[1] ) );
             break;
-        case Profile.STROKE:
+        case ProfileParser.STROKE:
             set.setStroke( parseFloat( arr[1] ) );
             break;
         default:

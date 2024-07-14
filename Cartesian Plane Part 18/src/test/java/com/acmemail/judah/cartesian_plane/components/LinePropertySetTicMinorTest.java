@@ -2,7 +2,7 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 
-class LinePropertySetTicMinorTest extends LinePropertySetTest
+public class LinePropertySetTicMinorTest extends LinePropertySetTest
 {
     public LinePropertySetTicMinorTest()
     {

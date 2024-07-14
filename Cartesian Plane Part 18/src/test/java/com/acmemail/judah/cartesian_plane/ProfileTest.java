@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 
 /**
@@ -96,6 +97,7 @@ class ProfileTest
         );
     }
     
+    @Test
     public void testMainWindowProperties()
     {
         GraphPropertySet    protoProps      = protoProfile.getMainWindow();
@@ -129,6 +131,7 @@ class ProfileTest
     )
     public void testGetLinePropertySet( String name )
     {
+        String          simpleName  = LinePropertySetTicMajor.class.getSimpleName();
         LinePropertySet set     = 
             workingProfile.getLinePropertySet( name );
         assertNotNull( set );

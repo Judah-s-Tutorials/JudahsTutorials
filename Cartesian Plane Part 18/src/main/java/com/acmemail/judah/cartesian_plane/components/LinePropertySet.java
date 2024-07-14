@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Color;
+import java.util.Objects;
 import java.util.Optional;
 
 import com.acmemail.judah.cartesian_plane.PropertyManager;
@@ -373,6 +374,47 @@ public abstract class LinePropertySet
     {
         if ( hasColor() )
             this.color = Optional.of( color );
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hashCode    = Objects.hash(
+            drawProperty ,
+            strokeProperty,
+            lengthProperty,
+            spacingProperty,
+            colorProperty,
+            draw,
+            stroke,
+            length,
+            spacing,
+            color
+        );
+        return hashCode;
+    }
+    
+    @Override
+    public boolean equals( Object other )
+    {
+        boolean result  = false;
+        if ( other == null )
+            result = false;
+        else if ( this == other )
+            result = true;
+        else if ( this.getClass() != other.getClass() )
+            result = false;
+        else
+        {
+            LinePropertySet that    = (LinePropertySet)other;
+            result = 
+                this.draw.equals( that.draw )
+                && this.stroke.equals( that.stroke )
+                && this.length.equals( that.length )
+                && this.spacing.equals( that.spacing )
+                && this.color.equals(that.color );
+        }
+        return result;
     }
     
     /**

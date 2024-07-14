@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane.sandbox.utils;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Window;
+import java.awt.event.WindowListener;
 
 import javax.swing.JDialog;
 import javax.swing.JEditorPane;
@@ -89,6 +90,17 @@ public class ActivityLog
     public ActivityLog()
     {
         this( null, "Activity Log" );
+    }
+    
+    /**
+     * Adds the given WindowListener
+     * to the encapsulated JDialog.
+     * 
+     * @param listener  the given WindowListener
+     */
+    public void addWindowListener( WindowListener listener )
+    {
+        dialog.addWindowListener( listener );
     }
     
     /**

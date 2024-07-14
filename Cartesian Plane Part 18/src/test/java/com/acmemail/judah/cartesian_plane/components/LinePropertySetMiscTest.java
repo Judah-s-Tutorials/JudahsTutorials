@@ -9,7 +9,7 @@ package com.acmemail.judah.cartesian_plane.components;
  * 
  * @author Jack Straub
  */
-class LinePropertySetMiscTest extends LinePropertySetTest
+public class LinePropertySetMiscTest extends LinePropertySetTest
 {   
     public LinePropertySetMiscTest()
     {
@@ -23,7 +23,9 @@ class LinePropertySetMiscTest extends LinePropertySetTest
         );
     }
 
-    private static class LinePropertySetMisc 
+    // This class must be public so that it can be instantiated from
+    // com.acmemail.judah.cartesian_plane.test_suites.LinePropertySetTestSuite.
+    public static class LinePropertySetMisc 
         extends LinePropertySetAxes
     {
         @Override

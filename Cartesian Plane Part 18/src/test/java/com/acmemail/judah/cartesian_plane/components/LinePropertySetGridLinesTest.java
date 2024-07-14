@@ -2,7 +2,7 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
 
-class LinePropertySetGridLinesTest extends LinePropertySetTest
+public class LinePropertySetGridLinesTest extends LinePropertySetTest
 {
     public LinePropertySetGridLinesTest()
     {

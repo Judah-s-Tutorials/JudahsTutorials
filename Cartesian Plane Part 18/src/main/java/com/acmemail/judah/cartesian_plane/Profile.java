@@ -1,6 +1,5 @@
 package com.acmemail.judah.cartesian_plane;
 
-import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
@@ -106,59 +105,11 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  *      </li>
  * </ol>
  * <p>
- * You can use {@linkplain #getProperties()}
- * to produce a stream of strings (Stream&lt;String&gt;)
- * representing the encapsulated properties.
- * Strings in the stream
- * consists of a tag followed by a colon
- * and a value.
- * Each string represents one of:
- * </p>
- * <ol>
- *      <li>
- *          The "class" tag
- *          followed by the name of the class of properties for
- *          the main graph window (GraphPropertySetMW)
- *          or one of the line properties classes
- *          (LinePropertySetAxes, LinePropertySetGridLines,
- *          LinePropertySetTicMajor, or LinePropertySetTicMinor).
- *          For example:<br>
- *          <span style="font-family: monospace; margin-left:2em;">
- *              Class: LinePropertySetTicMinor
- *          </span>
- *      </li>
- *      <li>
- *          The name of a property
- *          followed by a colon(:)
- *          and 0 or more spaces,
- *          and the value of the property.
- *          For example:<br>
- *          <span style="font-family: monospace; margin-left:2em;">
- *              color: 0x000000
- *          </span>
- *      </li>
- * </ol>
- * <p>
- * The first string in the stream
- * is always the name/value
- * of the grid unit.
- * Properties on a line
- * following a class name
- * apply to the properties
- * of that class.
- * Other than the grid unit property,
- * any property name/value 
- * that is not preceded by a class name
- * must be considered a severe error.
- * For the purpose of parsing the output,
- * the programmer should assume that any string
- * might containing leading or trailing spaces,
- * and the delimiter between
- * a property name and its value
- * must consist of a single colon
- * and 0 or more spaces
- * on either side of the colon.
- * </p>
+ * Property values can be saved from
+ * or applied to
+ * a profile via
+ * {@link ProfileParser#getProperties()} and
+ * {@link ProfileParser#loadProperties(Stream)}.
  * <p>
  * To interrogate or edit values
  * the programmer can obtain
@@ -189,31 +140,6 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  */
 public class Profile
 {
-    /** The tag preceding a class name. */
-    public static final String CLASS        = "class";
-    /** The tag for the grid unit property. */
-    public static final String GRID_UNIT    = CPConstants.GRID_UNIT_PN;
-    /** The tag for the draw property. */
-    public static final String DRAW         = "draw";
-    /** The tag for the width  property. */
-    public static final String STROKE       = "stroke";
-    /** The tag for the lines/unit property. */
-    public static final String SPACING      = "spacing";
-    /** The tag for the length property. */
-    public static final String LENGTH       = "length";
-    /** The tag for the color property (for lines). */
-    public static final String COLOR        = "color";
-    /** The tag for the foreground color property (for the main window). */
-    public static final String FG_COLOR     = "fgColor";
-    /** The tag for the background color property (for the main window). */
-    public static final String BG_COLOR     = "bgColor";
-    /** The tag for the font name property. */
-    public static final String FONT_NAME    = "font_name";
-    /** The tag for the font size property. */
-    public static final String FONT_SIZE    = "font_size";
-    /** The tag for the font style property. */
-    public static final String FONT_STYLE   = "font_style";
-    
     /** Convenient for accessing the PropertyManager singleton. */
     private static final PropertyManager        pMgr                =
         PropertyManager.INSTANCE;
@@ -236,7 +162,14 @@ public class Profile
      */
     public Profile()
     {
-        initProperties();
+        gridUnit = pMgr.asFloat( CPConstants.GRID_UNIT_PN );
+        // mainWindow is initialized in its declaration
+        Stream.of(
+            LinePropertySetAxes.class,
+            LinePropertySetGridLines.class,
+            LinePropertySetTicMajor.class,
+            LinePropertySetTicMinor.class
+        ).forEach( this::putClass );
     }
     
     /**
@@ -323,187 +256,6 @@ public class Profile
     {
         LinePropertySet set = linePropertySetMap.get( simpleName );
         return set;
-    }
-    
-    /**
-     * Returns a stream of strings
-     * representing the properties
-     * encapsulated in this Profile.
-     * See the class documentation
-     * for description of the format
-     * of the strings in the stream.
-     *  
-     * @return  
-     *      a stream of strings representing the encapsulate properties
-     *      of this Profile object
-     *      
-     * @see Profile
-     */
-    public Stream<String> getProperties()
-    {
-        Stream.Builder<String>  bldr    = Stream.<String>builder();
-        bldr.add( fromFloat( GRID_UNIT, gridUnit ) );
-        compile( mainWindow, bldr );
-        linePropertySetMap.values().forEach( v -> compile( v, bldr ) );
-        
-        return bldr.build();
-    }
-    
-    /**
-     * Compile the strings
-     * representing the properties of the given GraphPropertySet
-     * and add them to the given Stream builder.
-     * Each string represents a single property
-     * in the format:<br>
-     * &nbsp;&nbsp;&nbsp;&nbsp;name: value
-     * 
-     * @param set   the given GraphPropertySet
-     * @param bldr  the given Stream builder
-     * 
-     * @see Profile
-     */
-    private void 
-    compile( GraphPropertySet set, Stream.Builder<String> bldr )
-    {
-        bldr.add( fromClass( set.getClass() ) );
-        bldr.add( fromColor( BG_COLOR, set.getBGColor() ) );
-        bldr.add( fromColor( FG_COLOR, set.getFGColor() ) );
-        bldr.add( fromBoolean( DRAW, set.isFontDraw() ) );
-        bldr.add( format( FONT_NAME, set.getFontName() ) );
-        bldr.add( fromFloat( FONT_SIZE, set.getFontSize() ) );
-        bldr.add( format( FONT_STYLE, "" + set.getFontStyle() ) );
-    }
-    
-    /**
-     * Compile the strings
-     * representing the properties of the given LinePropertySet
-     * and add them to the given Stream builder.
-     * Each string represents a single property
-     * in the format:<br>
-     * &nbsp;&nbsp;&nbsp;&nbsp;name: value
-     * 
-     * @param set   the given LinePropertySet
-     * @param bldr  the given Stream builder
-     * 
-     * @see Profile
-     */
-    private void 
-    compile( LinePropertySet set, Stream.Builder<String> bldr )
-    {
-        bldr.add( fromClass( set.getClass() ) );
-        if ( set.hasColor() )
-            bldr.add( fromColor( COLOR, set.getColor() ) );
-        if ( set.hasDraw() )
-            bldr.add( fromBoolean( DRAW, set.getDraw() ) );
-        if ( set.hasLength() )
-            bldr.add( fromFloat( LENGTH, set.getLength() ) );
-        if ( set.hasSpacing() )
-            bldr.add( fromFloat( SPACING, set.getSpacing() ) );
-        if ( set.hasStroke() )
-            bldr.add( fromFloat( STROKE, set.getStroke() ) );
-    }
-    
-    /**
-     * Format a string from a given label and value
-     * as "label: value."
-     * 
-     * @param label the given label
-     * @param value the given value
-     * 
-     * @return  
-     *      a string containing the given label and value
-     *      in the form "label: value"
-     */
-    private String format( String label, String value )
-    {
-        return label + ": " + value;
-    }
-    
-    /**
-     * Format a string from a given label and value.
-     * 
-     * @param label the given label
-     * @param fVal the given value
-     * 
-     * @return  
-     *      a string formatted with the given label and value
-     * 
-     * @see #format(String, String)
-     */
-    private String fromFloat( String label, float fVal )
-    {
-        String  sVal    = String.valueOf( fVal );
-        String  result  = format( label, sVal );
-        return result;
-    }
-    
-    /**
-     * Format a string from a given label and value.
-     * 
-     * @param label the given label
-     * @param color the given value
-     * 
-     * @return  
-     *      a string formatted with the given label and value
-     * 
-     * @see #format(String, String)
-     */
-    private String fromColor( String label, Color color )
-    {
-        int     iVal    = color.getRGB() & 0xFFFFFF;
-        String  sVal    = String.format( "0x%06x", iVal );
-        String  result  = format( label, sVal );
-        return result;
-    }
-    
-    /**
-     * Format a string from a given label and value.
-     * 
-     * @param label the given label
-     * @param bVal the given value
-     * 
-     * @return  
-     *      a string formatted with the given label and value
-     * 
-     * @see #format(String, String)
-     */
-    private String fromBoolean( String label, boolean bVal )
-    {
-        String  sVal    = String.valueOf( bVal );
-        String  result  = format( label, sVal );
-        return result;
-    }
-    
-    /**
-     * Format a string
-     * consisting of the CLASS tag
-     * followed by the simple name
-     * of the given class.
-     * 
-     * @param clazz the given class
-     * 
-     * @return  
-     *      a string consisting of the CLASS tag followed by
-     *      the simple name of the given class
-     * 
-     * @see #format(String, String)
-     */
-    private String fromClass( Class<?> clazz )
-    {
-        String  result  = format( CLASS, clazz.getSimpleName() );
-        return result;
-    }
-    
-    private void  initProperties()
-    {
-        gridUnit = pMgr.asFloat( CPConstants.GRID_UNIT_PN );
-        // mainWindow is initialized in its declaration
-        Stream.of(
-            LinePropertySetAxes.class,
-            LinePropertySetGridLines.class,
-            LinePropertySetTicMajor.class,
-            LinePropertySetTicMinor.class
-        ).forEach( this::putClass );
     }
 
     /**
