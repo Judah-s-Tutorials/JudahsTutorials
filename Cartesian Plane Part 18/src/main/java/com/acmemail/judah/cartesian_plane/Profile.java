@@ -2,7 +2,9 @@ package com.acmemail.judah.cartesian_plane;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
@@ -143,6 +145,17 @@ public class Profile
     /** Convenient for accessing the PropertyManager singleton. */
     private static final PropertyManager        pMgr                =
         PropertyManager.INSTANCE;
+    
+    /** List of all concrete subclasses of LinePropertySet. */
+    private static final 
+    List<Class<? extends LinePropertySet>>      linePropertyClasses =
+        List.of( 
+            LinePropertySetAxes.class,
+            LinePropertySetGridLines.class,
+            LinePropertySetTicMajor.class,
+            LinePropertySetTicMinor.class
+        );
+    
     /** Main window properties. */
     private final GraphPropertySet              mainWindow          =
         new GraphPropertySetMW();
@@ -153,7 +166,7 @@ public class Profile
     private final Map<String,LinePropertySet>   linePropertySetMap  =
         new HashMap<>();
     /** Grid unit property. */
-    private Float                               gridUnit;
+    private float                               gridUnit;
     
     /**
      * Constructor.
@@ -164,12 +177,8 @@ public class Profile
     {
         gridUnit = pMgr.asFloat( CPConstants.GRID_UNIT_PN );
         // mainWindow is initialized in its declaration
-        Stream.of(
-            LinePropertySetAxes.class,
-            LinePropertySetGridLines.class,
-            LinePropertySetTicMajor.class,
-            LinePropertySetTicMinor.class
-        ).forEach( this::putClass );
+        linePropertyClasses.stream()
+            .forEach( this::putClass );
     }
     
     /**
@@ -256,6 +265,35 @@ public class Profile
     {
         LinePropertySet set = linePropertySetMap.get( simpleName );
         return set;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        int hashCode    =
+            Objects.hash( gridUnit, mainWindow, linePropertySetMap );
+        return hashCode;
+    }
+
+    @Override
+    public boolean equals( Object other )
+    {
+        boolean result  = false;
+        if ( this == other )
+            result = true;
+        else if ( other == null )
+            result = false;
+        else if ( getClass() != other.getClass() )
+            result = false;
+        else
+        {
+            Profile that    = (Profile)other;
+            result          =
+                this.gridUnit == that.gridUnit
+                && this.mainWindow.equals( that.mainWindow )
+                && this.linePropertySetMap.equals( that.linePropertySetMap );
+        }
+        return result;
     }
 
     /**

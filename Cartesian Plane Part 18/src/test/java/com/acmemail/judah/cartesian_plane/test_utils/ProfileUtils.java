@@ -63,18 +63,22 @@ public class ProfileUtils
     {
         GraphPropertySet    dest    =   destProfile.getMainWindow();
         
+        float   newWidth    = src.getWidth() + 10;
         Color   newBGColor  = getDistinctColor( src.getBGColor() );
         Color   newFGColor  = getDistinctColor( src.getFGColor() );
         String  newName     = getDistinctFontName( src.getFontName() );
-        String  newStyle    = getDistinctFontStyle( src.getFontStyle() );
+        boolean newBold     = !src.isBold();
+        boolean newItalic   = !src.isItalic();
         float   newSize     = (int)src.getFontSize() + 10;
         boolean newDraw     = !src.isFontDraw();
         
+        dest.setWidth( newWidth );
         dest.setBGColor( newBGColor );
         dest.setFGColor( newFGColor );
         dest.setFontName( newName );
         dest.setFontSize( newSize );
-        dest.setFontStyle( newStyle );
+        dest.setBold( newBold );
+        dest.setItalic( newItalic );
         dest.setFontDraw( newDraw );
     }
     
@@ -92,32 +96,17 @@ public class ProfileUtils
     {
         String          setName = src.getClass().getSimpleName();
         LinePropertySet dest    = destProfile.getLinePropertySet( setName );
-        Color   newColor    = getDistinctColor( src.getColor() );
         boolean newDraw     = !src.getDraw();
+        float   newStroke   = src.getStroke() + 10;
         float   newLength   = src.getLength() + 10;
         float   newSpacing  = src.getSpacing() + 10;
-        float   newStroke   = src.getStroke() + 10;
+        Color   newColor    = getDistinctColor( src.getColor() );
         
-        dest.setColor( newColor );
         dest.setDraw( newDraw );
+        dest.setStroke( newStroke );
         dest.setLength( newLength );
         dest.setSpacing( newSpacing );
-        dest.setStroke( newStroke );
-    }
-    
-    /**
-     * From a given font style value,
-     * derive a new value
-     * that is distinct from the given value.
-     * 
-     * @param styleIn   the given font style value
-     * 
-     * @return  a font style value distinct from styleIn
-     */
-    private static String getDistinctFontStyle( int styleIn )
-    {
-        String  styleOut    = styleIn == Font.PLAIN ? "ITALIC" : "PLAIN";
-        return styleOut;
+        dest.setColor( newColor );
     }
     
     /**

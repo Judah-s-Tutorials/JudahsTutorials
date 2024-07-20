@@ -386,7 +386,9 @@ public abstract class GraphPropertySet
                 && this.fontName.equals( that.fontName )
                 && this.isBold() == that.isBold()
                 && this.isItalic() == that.isItalic()
-                && this.fontSize == that.fontSize;
+                && this.fontSize == that.fontSize
+                && this.fontDraw == that.fontDraw;
+
         }
         return result;
     }
