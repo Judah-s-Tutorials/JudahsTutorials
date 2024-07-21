@@ -132,24 +132,6 @@ public abstract class GraphPropertySet
         pMgr.setProperty( fontStyleProperty, fontStyle );
         pMgr.setProperty( fontDrawProperty, fontDraw );
     }
-    
-    /**
-     * Copy the property values from this GraphPropertySet
-     * to another GraphPropertySet.
-     * 
-     * @param toSet the destination GraphPropertySet
-     */
-    public void copyTo( GraphPropertySet toSet )
-    {
-        toSet.setBGColor( this.getBGColor() );
-        toSet.setBold( this.isBold() );
-        toSet.setFGColor( this.getFGColor() );
-        toSet.setFontDraw( this.isFontDraw() );
-        toSet.setFontName( this.getFontName() );
-        toSet.setFontSize( this.getFontSize() );
-        toSet.setItalic( this.isItalic() );
-        toSet.setWidth( this.getWidth() );
-    }
 
     /**
      * Gets the value of the width property.

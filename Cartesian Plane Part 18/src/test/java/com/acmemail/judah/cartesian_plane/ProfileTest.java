@@ -27,28 +27,8 @@ import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 
 /**
  * This test mainly involves getters and setters,
- * and the apply and reset function. 
- * My position is that
- * we don't have to put every single property
- * to the test.
- * For example,
- * making sure that every property in the GraphPropertySetMW class
- * is handled correctly
- * is the job of GraphPropertiesMWTest;
- * the job of validating operations
- * for the LinePropertySet subclasses
- * is the responsibility 
- * of the JUnit test class
- * for each subclass.
- * I propose the we should test the getter and setter,
- * and the apply and reset logic,
- * for one property in each of the
- * GraphPropertySetMW class
- * and the LinePropertySet subclasses.
- * We also have to test the logic
- * for the Grid Unit property,
- * which is not a member
- * of the above classes.
+ * and the apply and reset functions
+ * of the Profile class. 
  * 
  * @author Jack Straub
  * 
@@ -220,7 +200,8 @@ class ProfileTest
         float   mutatedFontSize = 
             distinctProfile.getMainWindow().getFontSize();
         testEqualsByField( p -> 
-            p.getMainWindow().setFontSize( mutatedFontSize ) );
+            p.getMainWindow().setFontSize( mutatedFontSize ) 
+        );
         Stream.of( linePropertySetClasses )
             .forEach( s -> {
                 LinePropertySet set = 
@@ -254,7 +235,7 @@ class ProfileTest
         BiConsumer<Profile,Object> setter
     )
     {
-        // Initialize workinProfile so that it is equal to protoProfile
+        // Initialize workingProfile so that it is equal to protoProfile
         protoProfile.apply();
         workingProfile = new Profile();
         
@@ -327,5 +308,10 @@ class ProfileTest
         mutator.accept( profile2 );
         assertFalse( profile1.equals( profile2 ) );
         assertFalse( profile2.equals( profile1 ) );
+        
+        mutator.accept( profile1 );
+        assertTrue( profile1.equals( profile2 ) );
+        assertTrue( profile2.equals( profile1 ) );
+        assertEquals( profile1.hashCode(), profile2.hashCode() );
     }
 }
