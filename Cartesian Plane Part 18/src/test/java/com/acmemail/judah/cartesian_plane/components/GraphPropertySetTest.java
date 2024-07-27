@@ -166,32 +166,6 @@ abstract class GraphPropertySetTest
         dest.setBGColor( source.getBGColor() );
     }
     
-    private static void getUniqueValues( GraphPropertySet set )
-    {
-        boolean newIsBold       = !set.isBold();
-        boolean newIsItalic     = !set.isItalic();
-        float   newWidth        = set.getWidth() + 10;
-        int     origBGColor     = set.getBGColor().getRGB() & 0xFFFFFF;
-        int     newBGColor      = (origBGColor + 10) ^ 0xFFFFFF;
-        int     origFGColor     = set.getFGColor().getRGB() & 0xFFFFFF;
-        int     newFGColor      = (origFGColor + 10) ^ 0xFFFFFF;
-        boolean newFontDraw     = !set.isFontDraw();
-        float   newFontSize     = set.getFontSize() + 1;
-        String  origFontName    = set.getFontName();
-        String  newFontName     = 
-            origFontName.equals( Font.MONOSPACED ) ?
-            Font.DIALOG : Font.MONOSPACED;
-
-        set.setBold( newIsBold );
-        set.setItalic( newIsItalic );
-        set.setWidth( newWidth );
-        set.setFGColor( new Color( newFGColor ) );
-        set.setBGColor( new Color( newBGColor ) );
-        set.setFontDraw( newFontDraw );
-        set.setFontSize( newFontSize );
-        set.setFontName( newFontName );
-    }
-    
     private static void 
     assertSetsEqual( GraphPropertySet expSet, GraphPropertySet actSet )
     {

@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -13,7 +12,6 @@ import java.util.function.Supplier;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.test_utils.LinePropertySetInitializer;
 
 public abstract class LinePropertySetTest
@@ -257,26 +255,9 @@ public abstract class LinePropertySetTest
         return optional;
     }
     
-    private static LinePropertySet copy( LinePropertySet src )
+    private LinePropertySet copy( LinePropertySet src )
     {
-        Class<? extends LinePropertySet>    clazz   = src.getClass();
-        LinePropertySet                     dest    = null;
-        try
-        {
-            dest = clazz.getDeclaredConstructor().newInstance();
-        }
-        catch ( 
-            NoSuchMethodException | 
-            SecurityException |
-            InvocationTargetException |
-            IllegalAccessException |
-            InstantiationException exc
-        )
-        {
-            String  msg =
-                "Could not instantiate " + clazz.getSimpleName();
-            throw new ComponentException( msg );
-        }
+        LinePropertySet dest    = setSupplier.get();
         dest.setDraw( src.getDraw() );
         dest.setStroke( src.getStroke() );
         dest.setLength( src.getLength() );
