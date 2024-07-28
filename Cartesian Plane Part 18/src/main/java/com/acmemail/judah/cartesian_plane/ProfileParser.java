@@ -92,7 +92,7 @@ public class ProfileParser
     public static final String CLASS        = "class";
     /** The tag for the grid unit property. */
     public static final String GRID_UNIT    = CPConstants.GRID_UNIT_PN;
-    /** The tag for the draw property. */
+    /** The tag for the draw property in the LinePropertySet. */
     public static final String DRAW         = "draw";
     /** The tag for the width  property. */
     public static final String STROKE       = "stroke";
@@ -106,6 +106,8 @@ public class ProfileParser
     public static final String FG_COLOR     = "fgColor";
     /** The tag for the background color property (for the main window). */
     public static final String BG_COLOR     = "bgColor";
+    /** The tag for the font name property. */
+    public static final String FONT_DRAW    = "font_draw";
     /** The tag for the font name property. */
     public static final String FONT_NAME    = "font_name";
     /** The tag for the font size property. */
@@ -173,6 +175,7 @@ public class ProfileParser
     public Stream<String> getProperties()
     {
         Stream.Builder<String>  bldr    = Stream.<String>builder();
+        bldr.add( format ( PROFILE, " " + "profile" ) );
         bldr.add( fromFloat( GRID_UNIT, workingProfile.getGridUnit() ) );
         compile( mainWindow, bldr );
         Stream.of(
@@ -254,6 +257,9 @@ public class ProfileParser
      * an error message will be posted.
      * Error messages will also be posted
      * for invalid names or values.
+     * <p>
+     * Precondition:
+     * args is an array consisting of two non-empty strings.
      * 
      * @param args  the given name/value pair
      */
@@ -268,41 +274,68 @@ public class ProfileParser
             parseFloat( workingProfile::setGridUnit, args );
             break;
         case DRAW:
-            Consumer<Boolean>   consumer    = currGraphSet != null ?
-                currGraphSet::setFontDraw :
-                currLineSet::setDraw;
-            parseBoolean( consumer, args );
+            if ( validateCurrPropertySet( currLineSet ) )
+                parseBoolean( currLineSet::setDraw, args );
             break;
         case STROKE:
-            parseFloat( currLineSet::setStroke, args );
+            if ( validateCurrPropertySet( currLineSet ) )
+                parseFloat( currLineSet::setStroke, args );
             break;
         case SPACING:
-            parseFloat( currLineSet::setSpacing, args );
+            if ( validateCurrPropertySet( currLineSet ) )
+                parseFloat( currLineSet::setSpacing, args );
             break;
         case LENGTH:
-            parseFloat( currLineSet::setLength, args );
+            if ( validateCurrPropertySet( currLineSet ) )
+                parseFloat( currLineSet::setLength, args );
             break;
         case COLOR:
-            parseColor( currLineSet::setColor, args );
+            if ( validateCurrPropertySet( currLineSet ) )
+                parseColor( currLineSet::setColor, args );
             break;
         case FG_COLOR:
-            parseColor( currGraphSet::setFGColor, args );
+            if ( validateCurrPropertySet( currGraphSet ) )
+                parseColor( currGraphSet::setFGColor, args );
             break;
         case BG_COLOR:
-            parseColor( currGraphSet::setBGColor, args );
+            if ( validateCurrPropertySet( currGraphSet ) )
+                parseColor( currGraphSet::setBGColor, args );
             break;
         case FONT_NAME:
-            parseString( currGraphSet::setFontName, args );
+            if ( validateCurrPropertySet( currGraphSet ) )
+                parseString( currGraphSet::setFontName, args );
+            break;
+        case FONT_DRAW:
+            if ( validateCurrPropertySet( currGraphSet ) )
+                parseBoolean( currGraphSet::setFontDraw, args );
             break;
         case FONT_SIZE:
-            parseFloat( currGraphSet::setFontSize, args );
+            if ( validateCurrPropertySet( currGraphSet ) )
+                parseFloat( currGraphSet::setFontSize, args );
             break;
         case FONT_STYLE:
-            parseString( currGraphSet::setFontStyle, args );
+            if ( validateCurrPropertySet( currGraphSet ) )
+                parseString( currGraphSet::setFontStyle, args );
             break;
         default:
             postParseError( args[0], "is not a valid property" );
         }
+    }
+    
+    /**
+     * Verify that the currLineSet given object is non-null.
+     * The given object is assumed to be
+     * the currLineSet or currGraphset instance variable.
+     * If the object is null, post an error message.
+     * 
+     * @return  true if the currLineSet instance variable is non-null
+     */
+    private boolean validateCurrPropertySet( Object obj )
+    {
+        boolean result  = obj != null;
+        if ( !result )
+            postError( "Target property set not configured" );
+        return result;
     }
     
     /**
@@ -439,15 +472,8 @@ public class ProfileParser
      */
     private void parseBoolean( Consumer<Boolean> consumer, String[] pair )
     {
-        try
-        {
-            boolean val     = Boolean.parseBoolean( pair[1] );
-            consumer.accept( val );
-        }
-        catch ( NumberFormatException exc )
-        {
-            postParseError( pair );
-        }
+        boolean val     = Boolean.parseBoolean( pair[1] );
+        consumer.accept( val );
     }
     
     /**
@@ -461,7 +487,7 @@ public class ProfileParser
      */
     private void postParseError( String[] pair )
     {
-        String  fmt     = "Failed to parse \"%s\" for field \"%s";
+        String  fmt     = "Failed to parse \"%s\" for field \"%s\"";
         String  message = String.format( fmt, pair[1], pair[0] );
         postError( message );
     }
