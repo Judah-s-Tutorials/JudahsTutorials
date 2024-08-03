@@ -41,6 +41,7 @@ public class ProfileUtils
         };
         
         Profile destProfile = new Profile();
+        destProfile.setName( srcProfile.getName() + "_MUTATE" );
         destProfile.setGridUnit( srcProfile.getGridUnit() + 1 );
         getDistinctProperties( destProfile, srcProfile.getMainWindow() );
         

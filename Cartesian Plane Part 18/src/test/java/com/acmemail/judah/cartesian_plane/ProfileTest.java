@@ -89,6 +89,22 @@ class ProfileTest
     }
     
     @Test
+    public void testName()
+    {
+        String  orig        = workingProfile.getName();
+        String  diff        = distinctProfile.getName();
+        assertNotEquals( orig, diff );
+        workingProfile.setName( diff );
+        assertEquals( diff, workingProfile.getName() );
+        workingProfile.reset();
+        assertEquals( orig, workingProfile.getName() );
+        
+        workingProfile.setName( diff );
+        workingProfile.apply();
+        assertEquals( diff, workingProfile.getName() );
+    }
+    
+    @Test
     public void testGridUnit()
     {
         testProperty(
@@ -195,6 +211,8 @@ class ProfileTest
     @Test
     public void testEquals()
     {
+        String   mutatedName    = distinctProfile.getName();
+        testEqualsByField( p -> p.setName( mutatedName ) );
         float   mutatedGridUnit = distinctProfile.getGridUnit();
         testEqualsByField( p -> p.setGridUnit( mutatedGridUnit ) );
         float   mutatedFontSize = 

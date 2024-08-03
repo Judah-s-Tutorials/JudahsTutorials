@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.LayoutManager;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -88,6 +90,8 @@ public class ProfileEditor extends JPanel
     /** Text describing the GUI draw field (for text). */
     private static final String drawLabelsLabel = "Labels";
     
+    /** Text describing the GUI name panel. */
+    private static final String nameLabel       = "Name";
     /** Text describing the GUI grid unit panel. */
     private static final String gridUnitLabel   = "Grid Unit";
     /** Text describing the GUI axis panel. */
@@ -232,6 +236,7 @@ public class ProfileEditor extends JPanel
         panel.setBorder( border );
         panel.setLayout( layout );
         
+        panel.add( getNamePanel() );
         panel.add( getGridPanel() );
         
         LinePropertySet propSet;
@@ -360,6 +365,27 @@ public class ProfileEditor extends JPanel
         GridLayout  layout  = new GridLayout( 4, 2, 3, 0 );
         panel.setBorder(border);
         panel.setLayout( layout );
+        return panel;
+    }
+    
+    private JPanel getNamePanel()
+    {
+        Dimension       spacer  = new Dimension( 5, 0 );
+        Border          border  = 
+            BorderFactory.createEmptyBorder( 5, 5, 5, 5 );
+        JPanel          panel   = new JPanel();
+        LayoutManager   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
+        panel.setLayout( layout );
+        panel.setBorder( border );
+        panel.add( new JLabel( nameLabel ) );
+        panel.add( Box.createRigidArea( spacer ) );
+        JTextField      nameField   = new JTextField( 10 );
+        panel.add( nameField );
+        Runnable        runner      = 
+            () -> profile.setName( nameField.getText() );
+        resetList.add( runner );
+        nameField.setText( profile.getName() );
+
         return panel;
     }
     
@@ -541,7 +567,7 @@ public class ProfileEditor extends JPanel
 
     /**
      * An object of this type is used to configure
-     * that parameters of a JSpinner
+     * the parameters of a JSpinner
      * that controls editing of a line property.
      * The user provides the associated LinePropertySet,
      * the text of a label that describes

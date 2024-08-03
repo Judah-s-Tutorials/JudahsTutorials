@@ -95,7 +95,8 @@ public class ProfileInputDemo1
      * The list is compiled into {@link #profileMods} which,
      * after compilation,
      * will look something like this:
-<pre>class GraphPropertySetMW
+<pre>profile newName
+class GraphPropertySetMW
 font_size 20.0
 class LinePropertySetTicMajor
 stroke 15.0
@@ -118,6 +119,7 @@ length 9.0</pre>
      */
     private static void compileModifications()
     {
+        modProfile.setName( "modified name" );
         addMods( baseProfile.getMainWindow() );
         Stream.of( 
             LinePropertySetTicMajor.class.getSimpleName(),

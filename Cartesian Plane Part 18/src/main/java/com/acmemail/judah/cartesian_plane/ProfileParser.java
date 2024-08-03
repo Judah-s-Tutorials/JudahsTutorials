@@ -175,7 +175,7 @@ public class ProfileParser
     public Stream<String> getProperties()
     {
         Stream.Builder<String>  bldr    = Stream.<String>builder();
-        bldr.add( format ( PROFILE, " " + "profile" ) );
+        bldr.add( format ( PROFILE, " " + workingProfile.getName() ) );
         bldr.add( fromFloat( GRID_UNIT, workingProfile.getGridUnit() ) );
         compile( mainWindow, bldr );
         Stream.of(
@@ -269,6 +269,9 @@ public class ProfileParser
         {
         case CLASS:
             parseClass( args[1] );
+            break;
+        case PROFILE:
+            parseString( workingProfile::setName, args );
             break;
         case GRID_UNIT:
             parseFloat( workingProfile::setGridUnit, args );

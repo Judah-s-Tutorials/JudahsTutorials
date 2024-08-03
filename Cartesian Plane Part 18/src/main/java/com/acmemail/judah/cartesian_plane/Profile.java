@@ -24,6 +24,16 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  * The properties include:
  * <ol>
  *      <li>
+ *          Name (NAME):
+ *          the name of this Profile.
+ *          The default is "profile."
+ *          If otherwise not specified,
+ *          used to formulate the name
+ *          of a file 
+ *          that this Profile
+ *          can be saved to.
+ *      </li>
+ *      <li>
  *          Grid unit (GRID_UNIT):
  *          the width, in pixels,
  *          of a single unit in a graph display.
@@ -167,6 +177,15 @@ public class Profile
         new HashMap<>();
     /** Grid unit property. */
     private float                               gridUnit;
+    /** Profile name. */
+    private String                              name;
+    /**
+     * Profile name. Set to the value of {@link #name} initially.
+     * May be modified during an apply operation when if {@link #name}
+     * has changed. Will be used to set {@link #name} during a reset
+     * operation.
+     */
+    private String                              currName;
     
     /**
      * Constructor.
@@ -176,6 +195,8 @@ public class Profile
     public Profile()
     {
         gridUnit = pMgr.asFloat( CPConstants.GRID_UNIT_PN );
+        name = "default";
+        currName = name;
         // mainWindow is initialized in its declaration
         linePropertyClasses.stream()
             .forEach( this::putClass );
@@ -188,6 +209,7 @@ public class Profile
      */
     public void reset()
     {
+        name = currName;
         gridUnit = pMgr.asFloat( CPConstants.GRID_UNIT_PN );
         mainWindow.reset();
         linePropertySetMap.values().forEach( s -> s.reset() );
@@ -199,6 +221,7 @@ public class Profile
      */
     public void apply()
     {
+        currName = name;
         pMgr.setProperty( CPConstants.GRID_UNIT_PN, gridUnit );
         mainWindow.apply();
         linePropertySetMap.values().forEach( s -> s.apply() );
@@ -223,6 +246,26 @@ public class Profile
     public void setGridUnit( float gridUnit )
     {
         this.gridUnit = gridUnit;
+    }
+    
+    /**
+     * Returns the name of this Profile.
+     * 
+     * @return the name of this Profile
+     */
+    public String getName()
+    {
+        return name;
+    }
+    
+    /**
+     * Sets the name of this Profile.
+     * 
+     * @param name  the name of this Profile
+     */
+    public void setName( String name )
+    {
+        this.name = name;
     }
     
     /**
@@ -289,7 +332,8 @@ public class Profile
         {
             Profile that    = (Profile)other;
             result          =
-                this.gridUnit == that.gridUnit
+                this.name.equals( that.name )
+                && this.gridUnit == that.gridUnit
                 && this.mainWindow.equals( that.mainWindow )
                 && this.linePropertySetMap.equals( that.linePropertySetMap );
         }
