@@ -87,7 +87,7 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
 public class ProfileParser
 {
     /** The tag preceding a profile name. */
-    public static final String PROFILE      = "profile";
+    public static final String PROFILE      = "PROFILE";
     /** The tag preceding a class name. */
     public static final String CLASS        = "class";
     /** The tag for the grid unit property. */
@@ -102,6 +102,8 @@ public class ProfileParser
     public static final String LENGTH       = "length";
     /** The tag for the color property (for lines). */
     public static final String COLOR        = "color";
+    /** The tag for the width property (for the main window). */
+    public static final String WIDTH        = "width";
     /** The tag for the foreground color property (for the main window). */
     public static final String FG_COLOR     = "fgColor";
     /** The tag for the background color property (for the main window). */
@@ -112,8 +114,10 @@ public class ProfileParser
     public static final String FONT_NAME    = "font_name";
     /** The tag for the font size property. */
     public static final String FONT_SIZE    = "font_size";
-    /** The tag for the font style property. */
-    public static final String FONT_STYLE   = "font_style";
+    /** The tag for the font bold property. */
+    public static final String FONT_BOLD    = "font_bold";
+    /** The tag for the font italic property. */
+    public static final String FONT_ITALIC  = "font_italic";
     
     /** Working profile, to be parse from or into. */
     private final Profile                       workingProfile;
@@ -175,7 +179,7 @@ public class ProfileParser
     public Stream<String> getProperties()
     {
         Stream.Builder<String>  bldr    = Stream.<String>builder();
-        bldr.add( format ( PROFILE, " " + workingProfile.getName() ) );
+        bldr.add( format( PROFILE, workingProfile.getName() ) );
         bldr.add( fromFloat( GRID_UNIT, workingProfile.getGridUnit() ) );
         compile( mainWindow, bldr );
         Stream.of(
@@ -265,7 +269,11 @@ public class ProfileParser
      */
     private void parseNameValue( String[] args )
     {
-        switch ( args[0] )
+        // make the colon at the end of the name optional
+        String  name    = args[0];
+        if ( name.endsWith( ":" ) )
+            name = name.substring( 0, name.length() - 1 );
+        switch ( name )
         {
         case CLASS:
             parseClass( args[1] );
@@ -296,6 +304,10 @@ public class ProfileParser
             if ( validateCurrPropertySet( currLineSet ) )
                 parseColor( currLineSet::setColor, args );
             break;
+        case WIDTH:
+            if ( validateCurrPropertySet( currGraphSet ) )
+                parseFloat( currGraphSet::setWidth, args );
+            break;
         case FG_COLOR:
             if ( validateCurrPropertySet( currGraphSet ) )
                 parseColor( currGraphSet::setFGColor, args );
@@ -316,9 +328,13 @@ public class ProfileParser
             if ( validateCurrPropertySet( currGraphSet ) )
                 parseFloat( currGraphSet::setFontSize, args );
             break;
-        case FONT_STYLE:
+        case FONT_BOLD:
             if ( validateCurrPropertySet( currGraphSet ) )
-                parseString( currGraphSet::setFontStyle, args );
+                parseBoolean( currGraphSet::setBold, args );
+            break;
+        case FONT_ITALIC:
+            if ( validateCurrPropertySet( currGraphSet ) )
+                parseBoolean( currGraphSet::setItalic, args );
             break;
         default:
             postParseError( args[0], "is not a valid property" );
@@ -543,12 +559,14 @@ public class ProfileParser
     compile( GraphPropertySet set, Stream.Builder<String> bldr )
     {
         bldr.add( fromClass( set.getClass() ) );
+        bldr.add( fromFloat( WIDTH, set.getWidth() ) );
         bldr.add( fromColor( BG_COLOR, set.getBGColor() ) );
         bldr.add( fromColor( FG_COLOR, set.getFGColor() ) );
-        bldr.add( fromBoolean( DRAW, set.isFontDraw() ) );
+        bldr.add( fromBoolean( FONT_DRAW, set.isFontDraw() ) );
         bldr.add( format( FONT_NAME, set.getFontName() ) );
         bldr.add( fromFloat( FONT_SIZE, set.getFontSize() ) );
-        bldr.add( format( FONT_STYLE, "" + set.getFontStyle() ) );
+        bldr.add( fromBoolean( FONT_BOLD, set.isBold() ) );
+        bldr.add( fromBoolean( FONT_ITALIC, set.isItalic() ) );
     }
     
     /**
@@ -593,7 +611,8 @@ public class ProfileParser
      */
     private String format( String label, String value )
     {
-        return label + ": " + value;
+        String  result  = label + ": " + value;
+        return result;
     }
     
     /**

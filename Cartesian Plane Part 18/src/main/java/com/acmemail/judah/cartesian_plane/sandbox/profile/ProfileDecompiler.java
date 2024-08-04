@@ -321,8 +321,11 @@ end of alternative splitArgString method. */
         case ProfileParser.FONT_SIZE:
             set.setFontSize( parseFloat( arr[1] ) );
             break;
-        case ProfileParser.FONT_STYLE:
-            set.setFontStyle( arr[1] );
+        case ProfileParser.FONT_BOLD:
+            set.setBold( parseBoolean( arr[1] ) );
+            break;
+        case ProfileParser.FONT_ITALIC:
+            set.setItalic( parseBoolean( arr[1] ) );
             break;
         default:
             String  error   =
