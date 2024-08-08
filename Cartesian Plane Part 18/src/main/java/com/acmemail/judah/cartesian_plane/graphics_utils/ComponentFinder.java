@@ -247,8 +247,10 @@ public class ComponentFinder
     public Window findWindow( Predicate<Window> pred )
     {
         Window  window  = Arrays.stream( Window.getWindows() )
+//            .peek( System.out::println )
             .filter( topWindowFilter )
-//            .filter( w -> (w instanceof JDialog))
+//            .peek( System.out::println )
+            .filter( w -> (w instanceof JDialog))
 //            .peek( System.out::println )
             .filter( pred )
             .findFirst()

@@ -213,7 +213,7 @@ public class ProfileParser
         inStream
             .map( String::trim )
             .filter( s -> !s.isEmpty() )
-            .map( s -> s.split( "\\s" ) )
+            .map( s -> s.split( "\\s+" ) )
             .filter( a -> isNameValue( a ) )
             .forEach( this::parseNameValue );
     }
@@ -240,6 +240,14 @@ public class ProfileParser
     {
         boolean result  = 
             args.length == 2 && !args[1].isEmpty();
+        if ( !result )
+        {
+            StringBuilder   bldr    = new StringBuilder();
+            bldr.append( "Invalid name/value pair: " );
+            for ( String arg : args )
+                bldr.append( '"').append( arg ).append( "\" " );
+            postError( bldr.toString() );
+        }
         return result;
     }
     
@@ -269,7 +277,7 @@ public class ProfileParser
      */
     private void parseNameValue( String[] args )
     {
-        // make the colon at the end of the name optional
+        // Remove the colon at the end of the name.
         String  name    = args[0];
         if ( name.endsWith( ":" ) )
             name = name.substring( 0, name.length() - 1 );
@@ -405,15 +413,8 @@ public class ProfileParser
      */
     private void parseString( Consumer<String> consumer, String[] pair )
     {
-        try
-        {
-            String  val = pair[1];
-            consumer.accept( val );
-        }
-        catch ( NullPointerException exc )
-        {
-            postError( "No current property set" );
-        }
+        String  val = pair[1];
+        consumer.accept( val );
     }
 
     /**
