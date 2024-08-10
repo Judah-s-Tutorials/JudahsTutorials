@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.profile;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -33,15 +33,8 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.Profile;
-import com.acmemail.judah.cartesian_plane.components.ColorEditor;
-import com.acmemail.judah.cartesian_plane.components.FontEditorDialog;
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+import com.acmemail.judah.cartesian_plane.sandbox.profile.Canvas;
 
 /**
  * This facility represents a set of controls

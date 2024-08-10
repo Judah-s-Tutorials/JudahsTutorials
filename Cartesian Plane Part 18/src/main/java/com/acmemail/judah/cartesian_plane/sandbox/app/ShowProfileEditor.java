@@ -7,8 +7,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.components.ProfileEditor;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
-import com.acmemail.judah.cartesian_plane.sandbox.profile.ProfileEditor;
 
 /**
  * Displays the panel containing the profile editor.

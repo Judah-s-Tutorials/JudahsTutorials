@@ -14,6 +14,15 @@ import com.acmemail.judah.cartesian_plane.components.ParameterPanel;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 
+/**
+ * An instance of this class
+ * is used to display and manage a ParameterPanel.
+ * Interaction with the ParameterPanel
+ * is conducted via operations
+ * performed on the EDT.
+ * 
+ * @author Jack Straub
+ */
 public class ParameterPanelTestGUI extends FTextFieldTestMgr
 {
     /** The ParameterPanel under test. */
