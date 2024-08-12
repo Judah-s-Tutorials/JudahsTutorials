@@ -3,17 +3,25 @@ package com.acmemail.judah.cartesian_plane.test_utils;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.AWTException;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Robot;
+import java.awt.Window;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -58,7 +66,7 @@ public class ProfileEditorTestGUI
     private static final String ticMajorSet     =
         LinePropertySetTicMajor.class.getSimpleName();
     private static final String ticMinorSet     =
-        LinePropertySetTicMajor.class.getSimpleName();
+        LinePropertySetTicMinor.class.getSimpleName();
 
     private static final String gridTitle       = "Grid";
     private static final String axesTitle       = "Axes";
@@ -71,6 +79,18 @@ public class ProfileEditorTestGUI
     private static final String lengthLabel     = "Lines/Unit";
     private static final String weightLabel     = "Weight";
     private static final String drawLabel       = "Draw";
+    
+    private static final String fontDialogTitle = "Font Editor";
+    private static final String boldLabel       = "Bold";
+    private static final String italicLabel     = "Italic";
+    private static final String sizeLabel       = "Size";
+    private static final String okLabel         = "OK";
+    private static final String resetLabel      = "Reset";
+    private static final String cancelLabel     = "Cancel";
+    
+    private static final String gridUnitLabel   = "Grid Unit";
+    private static final String editFontLabel   = "Edit Font";
+    private static final String labelsLabel     = "Labels";
     
     /** The GUI test object. */
     private static ProfileEditorTestGUI testGUI;
@@ -97,8 +117,21 @@ public class ProfileEditorTestGUI
             ticMinorTitle, LinePropertySetTicMinor.class
         );
     private final Map<String,JPanel>    propSetPanelMap = new HashMap<>();
+    private final GraphPropertyComponents   graphPropertyComponents;
     private final Map<String, LinePropertyComponents>   
         propSetToCompMap    = new HashMap<>();
+    private final JTextField            nameComponent;
+    
+    /** For simulating key strokes and mouse button pushes. */
+    private final RobotAssistant    robotAsst;
+    /** Robot object from RobotAssistant. */
+    private final Robot             robot;
+    
+    /** 
+     * For transient use in lambdas.
+     * See, for example, {@link #getValue(Supplier)}.
+     */
+    private Object  adHocObject = null;
     
     /**
      * Instantiates and returns a ProfileEditorTestGUI.
@@ -136,11 +169,221 @@ public class ProfileEditorTestGUI
         profileEditor = new ProfileEditor( profile );
         contentPane.add( profileEditor, BorderLayout.CENTER );
         
+        editorFrame.setContentPane( contentPane );
         editorFrame.pack();
         editorFrame.setVisible( true );
         
         getAllTitledPanels( profileEditor );
         getAllLinePropertyComponents();
+        graphPropertyComponents = new GraphPropertyComponents();
+        nameComponent = getLabeledJTextField( nameLabel, profileEditor );
+        
+        robotAsst = makeRobot();
+        robot = robotAsst.getRobot();
+        robot.setAutoDelay( 100 );
+    }
+    
+    public void setName( String name )
+    {
+        GUIUtils.schedEDTAndWait( () -> nameComponent.setText( name ) );
+    }
+
+    public String getName()
+    {
+        String  name    = getStringValue( () -> nameComponent.getText() );
+        return name;
+    }
+    
+    public void setGridUnit( float value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropertyComponents.setGridUnit( value ) 
+        );
+    }
+
+    public float getGridUnit()
+    {
+        float   value   = getFloatValue( () -> 
+            graphPropertyComponents.getGridUnit()
+        );
+        return value;
+    }
+
+    public String getFontName()
+    {
+        String  value   = getStringValue( () -> 
+            graphPropertyComponents.getFontName()
+        );
+        return value;
+    }
+
+    public void setFontName( String value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropertyComponents.setFontName( value ) 
+        );
+    }
+
+    public float getFontSize()
+    {
+        float   value   = getFloatValue( () -> 
+            graphPropertyComponents.getFontSize()
+        );
+        return value;
+    }
+
+    public void setFontSize( float value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropertyComponents.setFontSize( value ) 
+        );
+    }
+
+    public boolean isFontBold()
+    {
+        boolean value   = getBooleanValue( () -> 
+            graphPropertyComponents.isBold()
+        );
+        return value;
+    }
+
+    public void setFontBold( boolean value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropertyComponents.setBold( value ) 
+        );
+    }
+
+    public boolean isFontItalic()
+    {
+        boolean value   = getBooleanValue( () -> 
+            graphPropertyComponents.isItalic()
+        );
+        return value;
+    }
+
+    public void setFontItalic( boolean value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropertyComponents.setItalic( value ) 
+        );
+    }
+
+    public boolean isFontDraw()
+    {
+        boolean value   = getBooleanValue( () -> 
+            graphPropertyComponents.isFontDraw()
+        );
+        return value;
+    }
+
+    public void setFontDraw( boolean value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropertyComponents.setFontDraw( value ) 
+        );
+    }
+
+    public float getFontColor()
+    {
+        int     value   = getIntValue( () -> 
+            graphPropertyComponents.getColor()
+        );
+        return value;
+    }
+
+    public void setFontColor( int value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropertyComponents.setColor( value ) 
+        );
+    }
+
+    public boolean isDrawLabels()
+    {
+        boolean value   = getBooleanValue( () -> 
+            graphPropertyComponents.isFontDraw()
+        );
+        return value;
+    }
+
+    public void setDrawLabels( boolean value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropertyComponents.setFontDraw( value ) 
+        );
+    }
+    
+    public Thread editFont()
+    {
+        Thread  thread  = graphPropertyComponents.startFontEditor();
+        return thread;
+    }
+    
+    public void selectFDOK()
+    {
+        graphPropertyComponents.selectOK();
+    }
+    
+    public void selectFDReset()
+    {
+        graphPropertyComponents.selectReset();
+    }
+    
+    public void selectFDCancel()
+    {
+        graphPropertyComponents.selectCancel();
+    }
+    
+    private void setValue( Consumer<Float> consumer, float value )
+    {
+        GUIUtils.schedEDTAndWait( () -> consumer.accept( value ) );
+    }
+    
+    private void setValue( Consumer<String> consumer, String value )
+    {
+        GUIUtils.schedEDTAndWait( () -> consumer.accept( value ) );
+    }
+    
+    private boolean getBooleanValue( Supplier<Object> supplier )
+    {
+        Object  oVal    = getValue( supplier );
+        assertTrue( oVal instanceof Boolean );
+        return (boolean)oVal;
+    }
+    
+    private float getFloatValue( Supplier<Object> supplier )
+    {
+        Object  oVal    = getValue( supplier );
+        assertTrue( oVal instanceof Float );
+        return (float)oVal;
+    }
+    
+    private int getIntValue( Supplier<Object> supplier )
+    {
+        Object  oVal    = getValue( supplier );
+        assertTrue( oVal instanceof Integer );
+        return (int)oVal;
+    }
+    
+    private String getStringValue( Supplier<Object> supplier )
+    {
+        Object  oVal    = getValue( supplier );
+        assertTrue( oVal instanceof String );
+        return (String)oVal;
+    }
+    
+    private void setValue( Consumer<Object> consumer, Object value )
+    {
+        GUIUtils.schedEDTAndWait( () -> consumer.accept( value ) );
+    }
+    
+    private Object getValue( Supplier<Object> supplier )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            adHocObject = supplier.get()
+        );
+        return adHocObject;
     }
     
     private void getAllTitledPanels( Container source )
@@ -178,6 +421,11 @@ public class ProfileEditorTestGUI
                 title = getBorderTitle( outside );
         }
         return title;
+    }
+    
+    private void getAllGraphPropertyComponents()
+    {
+        
     }
     
     private void getAllLinePropertyComponents()
@@ -270,6 +518,25 @@ public class ProfileEditorTestGUI
         return (JSpinner)comp;
     }
     
+    private JTextField
+    getLabeledJTextField( String text, JComponent source )
+    {
+        JComponent  comp    =
+            getLabeledComponent( text, source, JTextField.class );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JTextField );
+        return (JTextField)comp;
+    }
+    
+    private JCheckBox getLabeledJCheckBox( String text, JComponent source )
+    {
+        JComponent  comp    =
+            getLabeledComponent( text, source, JCheckBox.class );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JCheckBox );
+        return (JCheckBox)comp;
+    }
+    
     private JCheckBox getJCheckBox( JComponent source )
     {
         JComponent  comp    =
@@ -277,6 +544,40 @@ public class ProfileEditorTestGUI
         assertNotNull( comp );
         assertTrue( comp instanceof JCheckBox );
         return (JCheckBox)comp;
+    }
+    
+    private JCheckBox getJCheckBox( String text, JComponent source )
+    {
+        Predicate<JComponent>   isCheckBox  = 
+            c -> (c instanceof JCheckBox);
+        Predicate<JComponent>   hasText     =
+            c -> text.equals( ((JCheckBox)c).getText() );
+        Predicate<JComponent>   pred        = isCheckBox.and( hasText );        
+        JComponent  comp    =
+            ComponentFinder.find( source, c -> (c instanceof JCheckBox) );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JCheckBox );
+        return (JCheckBox)comp;
+    }
+    
+    private JComboBox<String> getJComboBox( JComponent source )
+    {
+        JComponent  comp    =
+            ComponentFinder.find( source, c -> (c instanceof JComboBox) );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JComboBox );
+        return (JComboBox<String>)comp;
+    }
+    
+    private JButton getJButton( String text, JComponent source )
+    {
+        Predicate<JComponent>   pred    =
+            ComponentFinder.getButtonPredicate( text );
+        JComponent              comp    = 
+            ComponentFinder.find( source, pred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JButton );
+        return (JButton)comp;
     }
     
     private JTextField getColorText( JComponent source )
@@ -295,6 +596,217 @@ public class ProfileEditorTestGUI
             .findFirst().orElse( null );
         assertNotNull( target );
         return target;
+    }
+    
+    private static float getFloat( JSpinner spinner )
+    {
+        SpinnerModel        model       = spinner.getModel();
+        assertTrue( model instanceof SpinnerNumberModel );
+        SpinnerNumberModel  numberModel = (SpinnerNumberModel)model;    
+        float           val             = 
+            numberModel.getNumber().floatValue();
+        return val;
+    }
+    
+    private static int getColor( JTextField colorComponent )
+    {
+        int iColor  = -1;
+        try
+        {
+            iColor = Integer.parseInt( colorComponent.getText() );
+        }
+        catch ( NumberFormatException exc )
+        {
+            // ignore
+        }
+        return iColor;
+    }
+        
+    /**
+     * Instantiates a RobotAssictant.
+     * 
+     * @return the instantiate RobotAssistant.
+     */
+    private RobotAssistant makeRobot()
+    {
+        RobotAssistant  robot   = null;
+        try
+        {
+            robot = new RobotAssistant();
+        }
+        catch ( AWTException exc )
+        {
+            exc.printStackTrace();
+            System.exit( 1 );
+        }
+        
+        return robot;
+    }
+
+    private class FontDialogComponents
+    {
+        private final JDialog           fontDialog;
+        private final JComboBox<String> nameComponent;
+        private final JCheckBox         boldComponent;
+        private final JCheckBox         italicComponent;
+        private final JSpinner          sizeComponent;
+        private final JTextField        colorComponent;
+        private final JButton           okButton;
+        private final JButton           resetButton;
+        private final JButton           cancelButton;
+        
+        public FontDialogComponents( JDialog fontDialog )
+        {
+            this.fontDialog = fontDialog;
+            Container   comp    = fontDialog.getContentPane();
+            assertTrue( comp instanceof JComponent );
+            JComponent  pane    = (JComponent)comp;
+            
+            nameComponent = getJComboBox( pane );
+            boldComponent = getJCheckBox( boldLabel, pane );
+            italicComponent = getJCheckBox( italicLabel, pane );
+            sizeComponent = getLabeledJSpinner( sizeLabel, pane );
+            colorComponent = getColorText( pane );
+            okButton = getJButton( okLabel, pane );
+            resetButton = getJButton( resetLabel, pane );
+            cancelButton = getJButton( cancelLabel, pane );
+        }
+    }
+    
+    private class GraphPropertyComponents
+    {
+        private final FontDialogComponents  fontComponents;
+        private final JSpinner              gridUnitComponent;
+        private final JTextField            colorComponent;
+        private final JButton               editFontComponent;
+        private final JCheckBox             labelsComponent;
+        
+        public GraphPropertyComponents()
+        {
+            JPanel  panel   = propSetPanelMap.get( graphSet );
+            gridUnitComponent = getLabeledJSpinner( gridUnitLabel, panel );
+            colorComponent = getColorText( panel );
+            editFontComponent = getJButton( editFontLabel, panel );
+            labelsComponent = getLabeledJCheckBox( labelsLabel, panel );
+            
+            boolean         canBeDialog     = true;
+            boolean         canBeFrame      = false;
+            boolean         mustBeVisible   = false;
+            Predicate<Window>   pred            = w -> 
+                fontDialogTitle.equals( ((JDialog)w).getTitle() );
+            ComponentFinder finder  = new ComponentFinder(
+                canBeDialog, 
+                canBeFrame, 
+                mustBeVisible
+            );
+            Window  window  = finder.findWindow( pred );
+            assertNotNull( window );
+            assertTrue( window instanceof JDialog );
+            fontComponents = new FontDialogComponents( (JDialog)window );
+        }
+        
+        public float getGridUnit()
+        {
+            float   val = getFloat( gridUnitComponent );
+            return val;
+        }
+        
+        public void setGridUnit( float val )
+        {
+            gridUnitComponent.setValue( val );
+        }
+        
+        public String getFontName()
+        {
+            String  val     = 
+                (String)fontComponents.nameComponent.getSelectedItem();
+            return val;
+        }
+        
+        public void setFontName( String name )
+        {
+            fontComponents.nameComponent.setSelectedItem( name );
+        }
+        
+        public float getFontSize()
+        {
+            float   val     = getFloat( fontComponents.sizeComponent );
+            return val;
+        }
+        
+        public void setFontSize( float size )
+        {
+            fontComponents.sizeComponent.setValue( size );
+        }
+        
+        public boolean isBold()
+        {
+            boolean value   = fontComponents.boldComponent.isSelected();
+            return value;
+        }
+        
+        public void setBold( boolean value )
+        {
+            fontComponents.boldComponent.setSelected( value );
+        }
+        
+        public boolean isItalic()
+        {
+            boolean value   = fontComponents.italicComponent.isSelected();
+            return value;
+        }
+        
+        public void setItalic( boolean value )
+        {
+            fontComponents.italicComponent.setSelected( value );
+        }
+        
+        public int getColor()
+        {
+            int iColor  = ProfileEditorTestGUI.getColor( colorComponent );
+            return iColor;
+        }
+        
+        public void setColor( int iColor )
+        {
+            colorComponent.setText( String.valueOf( iColor ) );
+        }
+        
+        public boolean isFontDraw()
+        {
+            return labelsComponent.isSelected();
+        }
+        
+        public void setFontDraw( boolean draw )
+        {
+            labelsComponent.setSelected( draw );
+        }
+        
+        public Thread startFontEditor()
+        {
+            Thread  thread  = new Thread( () ->
+                editFontComponent.doClick()
+            );
+            thread.start();
+            while ( !fontComponents.fontDialog.isVisible() )
+                Utils.pause( 1 );
+            return thread;
+        }
+        
+        public void selectOK()
+        {
+            fontComponents.okButton.doClick();
+        }
+        
+        public void selectReset()
+        {
+            fontComponents.resetButton.doClick();
+        }
+        
+        public void selectCancel()
+        {
+            fontComponents.cancelButton.doClick();
+        }
     }
     
     private class LinePropertyComponents
@@ -324,7 +836,7 @@ public class ProfileEditorTestGUI
                 getJCheckBox( panel ) :
                 null;
             colorComponent = propSet.hasColor() ?
-                null :
+                getColorText( panel ) :
                 null;
             propSetToCompMap.put( propSetName, this );
         }
@@ -373,33 +885,15 @@ public class ProfileEditorTestGUI
             drawComponent.setSelected( val );
         }
         
-        public int getColor()
-        {
-            int iColor  = -1;
-            try
-            {
-                iColor = Integer.parseInt( colorComponent.getText() );
-            }
-            catch ( NumberFormatException exc )
-            {
-                // ignore
-            }
-            return iColor;
-        }
-        
         public void setColor( int iColor )
         {
             colorComponent.setText( String.valueOf( iColor ) );
         }
         
-        private static float getFloat( JSpinner spinner )
+        public int getColor()
         {
-            SpinnerModel        model       = spinner.getModel();
-            assertTrue( model instanceof SpinnerNumberModel );
-            SpinnerNumberModel  numberModel = (SpinnerNumberModel)model;    
-            float           val             = 
-                numberModel.getNumber().floatValue();
-            return val;
+            int iColor  = ProfileEditorTestGUI.getColor( colorComponent );
+            return iColor;
         }
     }
 }

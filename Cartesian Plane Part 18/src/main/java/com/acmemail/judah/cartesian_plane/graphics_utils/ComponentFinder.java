@@ -236,7 +236,7 @@ public class ComponentFinder
     
     /**
      * Returns the first top-level window
-     * that passes this instances default filters
+     * that passes this instance's default filters
      * and the given predicate.
      * 
      * @param pred  the given predicate

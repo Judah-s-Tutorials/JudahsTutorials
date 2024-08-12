@@ -4,6 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
 
+import org.junit.platform.commons.util.ExceptionUtils;
+
 public class GUIUtils
 {
     /**
@@ -30,7 +32,11 @@ public class GUIUtils
         catch ( InterruptedException | InvocationTargetException exc )
         {
             exc.printStackTrace();
-            throw new RuntimeException( exc );
+            Throwable   cause   = exc.getCause();
+            if ( cause != null )
+                ExceptionUtils.throwAsUncheckedException( cause );
+            else
+                throw new RuntimeException( exc );
         }
     }
 }
