@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.Arrays;
 import java.util.Scanner;
 
 import javax.swing.JOptionPane;
@@ -17,6 +18,17 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 class ProfileEditorTest
 {
+    private static final String axesSetName         =
+        LinePropertySetAxes.class.getSimpleName();
+    private static final String gridLinesSetName    =
+        LinePropertySetGridLines.class.getSimpleName();
+    private static final String ticMajorSetName     =
+        LinePropertySetTicMajor.class.getSimpleName();
+    private static final String ticMinorSetName     =
+        LinePropertySetTicMinor.class.getSimpleName();
+    private static final String[]   allSetNames     =
+    { axesSetName, gridLinesSetName, ticMajorSetName, ticMinorSetName };
+
     private static Profile          profile         = new Profile();
     private static Profile          distinctProfile = 
         ProfileUtils.getDistinctProfile( profile );
@@ -54,6 +66,12 @@ class ProfileEditorTest
         System.out.println( "font name: " + fontName );
         testGUI.setFontName( distinctVals.getFontName() );
         
+        boolean isDraw = testGUI.isFontDraw();
+        System.out.println( "isDraw: " + isDraw );
+        testGUI.setFontDraw( distinctVals.isFontDraw() );
+
+        Thread  thread  = testGUI.editFont();
+        
         float fontSize      = testGUI.getFontSize();
         System.out.println( "font size: " + fontSize );
         testGUI.setFontSize( distinctVals.getFontSize() );
@@ -66,14 +84,65 @@ class ProfileEditorTest
         System.out.println( "isItalic: " + isItalic );
         testGUI.setFontItalic( distinctVals.isItalic() );
         
-        boolean isDraw = testGUI.isFontDraw();
-        System.out.println( "isDraw: " + isDraw );
-        testGUI.setFontDraw( distinctVals.isFontDraw() );
+        int     color   = testGUI.getFGColor();
+        System.out.println( "fontColor: " + color );
+        testGUI.setFGColor( distinctVals.getFGColor().getRGB() );
         
-        int     color   = testGUI.get
+        JOptionPane.showMessageDialog( null, "Done" );
+        testGUI.selectFDCancel();
         
-        Thread  thread  = testGUI.editFont();
         Utils.join( thread );
+    }
+    
+    @Test
+    public void tempLinePropertyTest()
+    {
+        Arrays.stream( allSetNames )
+            .forEach( this::tempLinePropertyTest );
+    }
+    
+    private void tempLinePropertyTest( String setName )
+    {
+        LinePropertySet distinct    = 
+            distinctProfile.getLinePropertySet( setName );
+        println( setName + ":" );
+        
+        if ( distinct.hasLength() )
+        {
+            println( "    Length: " + testGUI.getLength( setName ) );
+            testGUI.setLength( setName, distinct.getLength() );
+        }
+        
+        if ( distinct.hasSpacing() )
+        {
+            println( "    Spacing: " + testGUI.getSpacing( setName ) );
+            testGUI.setSpacing( setName, distinct.getSpacing() );
+        }
+        
+        if ( distinct.hasStroke() )
+        {
+            println( "    Stroke: " + testGUI.getStroke( setName ) );
+            testGUI.setStroke( setName, distinct.getStroke() );
+        }
+        
+        if ( distinct.hasDraw() )
+        {
+            println( "    Draw: " + testGUI.getDraw( setName ) );
+            testGUI.setDraw( setName, distinct.getDraw() );
+        }
+        
+        if ( distinct.hasColor() )
+        {
+            println( "    Color: " + testGUI.getColor( setName ) );
+            testGUI.setColor( setName, distinct.getColor().getRGB() );
+        }
+
+        JOptionPane.showMessageDialog( null, "Done" );
+    }
+    
+    private void println( String text )
+    {
+        System.out.println( text );
     }
 
     @Test

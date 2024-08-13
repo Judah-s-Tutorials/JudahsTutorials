@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.AWTException;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Robot;
@@ -117,7 +118,7 @@ public class ProfileEditorTestGUI
             ticMinorTitle, LinePropertySetTicMinor.class
         );
     private final Map<String,JPanel>    propSetPanelMap = new HashMap<>();
-    private final GraphPropertyComponents   graphPropertyComponents;
+    private final GraphPropertyComponents   graphPropComps;
     private final Map<String, LinePropertyComponents>   
         propSetToCompMap    = new HashMap<>();
     private final JTextField            nameComponent;
@@ -175,7 +176,7 @@ public class ProfileEditorTestGUI
         
         getAllTitledPanels( profileEditor );
         getAllLinePropertyComponents();
-        graphPropertyComponents = new GraphPropertyComponents();
+        graphPropComps = new GraphPropertyComponents();
         nameComponent = getLabeledJTextField( nameLabel, profileEditor );
         
         robotAsst = makeRobot();
@@ -197,14 +198,14 @@ public class ProfileEditorTestGUI
     public void setGridUnit( float value )
     {
         GUIUtils.schedEDTAndWait( () -> 
-            graphPropertyComponents.setGridUnit( value ) 
+            graphPropComps.setGridUnit( value ) 
         );
     }
 
     public float getGridUnit()
     {
         float   value   = getFloatValue( () -> 
-            graphPropertyComponents.getGridUnit()
+            graphPropComps.getGridUnit()
         );
         return value;
     }
@@ -212,7 +213,7 @@ public class ProfileEditorTestGUI
     public String getFontName()
     {
         String  value   = getStringValue( () -> 
-            graphPropertyComponents.getFontName()
+            graphPropComps.getFontName()
         );
         return value;
     }
@@ -220,14 +221,14 @@ public class ProfileEditorTestGUI
     public void setFontName( String value )
     {
         GUIUtils.schedEDTAndWait( () -> 
-            graphPropertyComponents.setFontName( value ) 
+            graphPropComps.setFontName( value ) 
         );
     }
 
     public float getFontSize()
     {
         float   value   = getFloatValue( () -> 
-            graphPropertyComponents.getFontSize()
+            graphPropComps.getFontSize()
         );
         return value;
     }
@@ -235,14 +236,14 @@ public class ProfileEditorTestGUI
     public void setFontSize( float value )
     {
         GUIUtils.schedEDTAndWait( () -> 
-            graphPropertyComponents.setFontSize( value ) 
+            graphPropComps.setFontSize( value ) 
         );
     }
 
     public boolean isFontBold()
     {
         boolean value   = getBooleanValue( () -> 
-            graphPropertyComponents.isBold()
+            graphPropComps.isBold()
         );
         return value;
     }
@@ -250,14 +251,14 @@ public class ProfileEditorTestGUI
     public void setFontBold( boolean value )
     {
         GUIUtils.schedEDTAndWait( () -> 
-            graphPropertyComponents.setBold( value ) 
+            graphPropComps.setBold( value ) 
         );
     }
 
     public boolean isFontItalic()
     {
         boolean value   = getBooleanValue( () -> 
-            graphPropertyComponents.isItalic()
+            graphPropComps.isItalic()
         );
         return value;
     }
@@ -265,14 +266,14 @@ public class ProfileEditorTestGUI
     public void setFontItalic( boolean value )
     {
         GUIUtils.schedEDTAndWait( () -> 
-            graphPropertyComponents.setItalic( value ) 
+            graphPropComps.setItalic( value ) 
         );
     }
 
     public boolean isFontDraw()
     {
         boolean value   = getBooleanValue( () -> 
-            graphPropertyComponents.isFontDraw()
+            graphPropComps.isFontDraw()
         );
         return value;
     }
@@ -280,61 +281,149 @@ public class ProfileEditorTestGUI
     public void setFontDraw( boolean value )
     {
         GUIUtils.schedEDTAndWait( () -> 
-            graphPropertyComponents.setFontDraw( value ) 
+            graphPropComps.setFontDraw( value ) 
         );
     }
 
-    public float getFontColor()
+    public int getFGColor()
     {
         int     value   = getIntValue( () -> 
-            graphPropertyComponents.getColor()
+            graphPropComps.getFGColor()
         );
         return value;
     }
 
-    public void setFontColor( int value )
+    public void setFGColor( int value )
     {
         GUIUtils.schedEDTAndWait( () -> 
-            graphPropertyComponents.setColor( value ) 
+            graphPropComps.setFGColor( value ) 
         );
     }
 
-    public boolean isDrawLabels()
+    public int getBGColor()
     {
-        boolean value   = getBooleanValue( () -> 
-            graphPropertyComponents.isFontDraw()
+        int     value   = getIntValue( () -> 
+            graphPropComps.getBGColor()
         );
         return value;
+    }
+
+    public void setBGColor( int value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropComps.setBGColor( value ) 
+        );
     }
 
     public void setDrawLabels( boolean value )
     {
         GUIUtils.schedEDTAndWait( () -> 
-            graphPropertyComponents.setFontDraw( value ) 
+            graphPropComps.setFontDraw( value ) 
         );
     }
     
     public Thread editFont()
     {
-        Thread  thread  = graphPropertyComponents.startFontEditor();
+        Thread  thread  = graphPropComps.startFontEditor();
         return thread;
     }
     
     public void selectFDOK()
     {
-        graphPropertyComponents.selectOK();
+        graphPropComps.selectOK();
     }
     
     public void selectFDReset()
     {
-        graphPropertyComponents.selectReset();
+        graphPropComps.selectReset();
     }
     
     public void selectFDCancel()
     {
-        graphPropertyComponents.selectCancel();
+        graphPropComps.selectCancel();
     }
     
+    public float getSpacing( String setName )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        float   value   = getFloatValue( () -> propComps.getSpacing() );
+        return value;
+    }
+    
+    public void setSpacing( String setName, float value )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        GUIUtils.schedEDTAndWait( () -> propComps.setSpacing( value ) );
+    }
+    
+    public float getLength( String setName )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        float   value   = getFloatValue( () -> propComps.getLength() );
+        return value;
+    }
+    
+    public void setDraw( String setName, boolean value )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        GUIUtils.schedEDTAndWait( () ->  propComps.setDraw( value ) );
+    }
+    
+    public int getColor( String setName )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        int value   = getIntValue( () -> propComps.getColor() );
+        return value;
+    }
+    
+    public void setColor( String setName, int value )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        GUIUtils.schedEDTAndWait( () -> propComps.setColor( value ) );
+    }
+    
+    public boolean getDraw( String setName )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        boolean value   = getBooleanValue( () -> propComps.getDraw() );
+        return value;
+    }
+    
+    public void setLength( String setName, float value )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        GUIUtils.schedEDTAndWait( () -> 
+            propComps.setLength( value ) 
+        );
+    }
+    
+    public float getStroke( String setName )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        float   value   = getFloatValue( () ->
+            propComps.getStroke()
+        );
+        return value;
+    }
+    
+    public void setStroke( String setName, float value )
+    {
+        LinePropertyComponents  propComps   = 
+            propSetToCompMap.get( setName );
+        GUIUtils.schedEDTAndWait( () -> 
+            propComps.setStroke( value ) 
+        );
+    }
+
     private void setValue( Consumer<Float> consumer, float value )
     {
         GUIUtils.schedEDTAndWait( () -> consumer.accept( value ) );
@@ -421,11 +510,6 @@ public class ProfileEditorTestGUI
                 title = getBorderTitle( outside );
         }
         return title;
-    }
-    
-    private void getAllGraphPropertyComponents()
-    {
-        
     }
     
     private void getAllLinePropertyComponents()
@@ -613,7 +697,7 @@ public class ProfileEditorTestGUI
         int iColor  = -1;
         try
         {
-            iColor = Integer.parseInt( colorComponent.getText() );
+            iColor = Integer.decode( colorComponent.getText() );
         }
         catch ( NumberFormatException exc )
         {
@@ -641,6 +725,12 @@ public class ProfileEditorTestGUI
         }
         
         return robot;
+    }
+    
+    private static String toHexString( int value )
+    {
+        String  hex = String.format( "0x%x", value );
+        return hex;
     }
 
     private class FontDialogComponents
@@ -716,6 +806,18 @@ public class ProfileEditorTestGUI
             gridUnitComponent.setValue( val );
         }
         
+        public int getBGColor()
+        {
+            int iColor  = ProfileEditorTestGUI.getColor( colorComponent );
+            return iColor;
+        }
+        
+        public void setBGColor( int iColor )
+        {
+            colorComponent.setText( toHexString( iColor ) );
+            colorComponent.postActionEvent();
+        }
+        
         public String getFontName()
         {
             String  val     = 
@@ -761,15 +863,18 @@ public class ProfileEditorTestGUI
             fontComponents.italicComponent.setSelected( value );
         }
         
-        public int getColor()
+        public int getFGColor()
         {
-            int iColor  = ProfileEditorTestGUI.getColor( colorComponent );
+            int iColor  = ProfileEditorTestGUI
+                .getColor( fontComponents.colorComponent );
             return iColor;
         }
         
-        public void setColor( int iColor )
+        public void setFGColor( int iColor )
         {
-            colorComponent.setText( String.valueOf( iColor ) );
+            fontComponents.colorComponent
+                .setText( toHexString( iColor ) );
+            fontComponents.colorComponent.postActionEvent();
         }
         
         public boolean isFontDraw()
@@ -809,6 +914,12 @@ public class ProfileEditorTestGUI
         }
     }
     
+    private static int getIColor( Color color )
+    {
+        int iColor  = color.getRGB() & 0xFFFFFF;
+        return iColor;
+    }
+
     private class LinePropertyComponents
     {
         private final String        propSetName;
@@ -852,13 +963,13 @@ public class ProfileEditorTestGUI
             spacingComponent.setValue( val );
         }
         
-        public float getWeight()
+        public float getStroke()
         {
             float   val = getFloat( weightComponent );
             return val;
         }
         
-        public void setWeight( float val )
+        public void setStroke( float val )
         {
             weightComponent.setValue( val );
         }
@@ -887,7 +998,7 @@ public class ProfileEditorTestGUI
         
         public void setColor( int iColor )
         {
-            colorComponent.setText( String.valueOf( iColor ) );
+            colorComponent.setText( toHexString( iColor ) );
         }
         
         public int getColor()
