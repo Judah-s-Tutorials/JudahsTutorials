@@ -62,7 +62,7 @@ import javax.swing.border.Border;
  * </ul>
  * <p>
  * The user can obtain a JPanel
- * displaying the componentsd
+ * displaying the component
  * in a default configuration
  * (see {@linkplain #getPanel()},
  * or individual components can be retrieved
@@ -82,6 +82,17 @@ import javax.swing.border.Border;
  */
 public class FontEditor
 {
+    /** Label on the bold check box. */
+    public static final String      BOLD_LABEL      = "Bold";
+    /** Label on the bold italic box. */
+    public static final String      ITALIC_LABEL    = "Italic";
+    /** Name of the font-name component. */
+    public static final String      NAME_LABEL      = "Name";
+    /** Label on the font-size component. */
+    public static final String      SIZE_LABEL      = "Size";
+    /** Name of the feedback component. */
+    public static final String      FEEDBACK_LABEL  = "Feedback";
+    
     /** Text to display in feedback area. */
     private static final String     sampleString    =
         "<html>1313 Mockingbird Lane, Wisdom NB 68101</html>";
@@ -108,10 +119,10 @@ public class FontEditor
         new JComboBox<>( fontNames );
     /** Bold face toggle. */
     private final JCheckBox             boldToggle      = 
-        new JCheckBox( "Bold" );
+        new JCheckBox( BOLD_LABEL );
     /** Slope face toggle. */
     private final JCheckBox             italicToggle    = 
-        new JCheckBox( "Italic" );
+        new JCheckBox( ITALIC_LABEL );
     /** Spinner model for size selector */
     private final SpinnerNumberModel    sizeModel       =
         new SpinnerNumberModel( 10, 1, 40, 1 );
@@ -144,6 +155,9 @@ public class FontEditor
         fontList.addActionListener( e -> feedback.update() );
         colorEditor.addActionListener( e -> feedback.update() );
         sizeEditor.addChangeListener( e -> feedback.update() );
+        
+        boldToggle.setName( BOLD_LABEL );
+        italicToggle.setName( BOLD_LABEL );
         
         feedback.update();
     }
@@ -426,9 +440,10 @@ public class FontEditor
         panel.add( boldToggle );
         panel.add( italicToggle );
         
-        JLabel sizeLabel = new JLabel( "Size" );
+        JLabel sizeLabel = new JLabel( SIZE_LABEL );
         sizeLabel.setAlignmentX( JComponent.CENTER_ALIGNMENT );
         sizeEditor.setAlignmentX( JComponent.CENTER_ALIGNMENT );
+        sizeEditor.setName( SIZE_LABEL );
         
         JPanel  sizePanel   = new JPanel();
         sizePanel.setLayout( new GridLayout( 1, 2, 3, 0 ) );

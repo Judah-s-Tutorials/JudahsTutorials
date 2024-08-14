@@ -106,6 +106,10 @@ import javax.swing.JTextField;
  */
 public class ColorEditor
 {
+    public static final String  COLOR_BUTTON_LABEL  = "Color";
+    public static final String  TEXT_EDITOR_NAME    = "Text Editor";
+    public static final String  FEEDBACK_NAME       = "Feedback";
+    
     /** The default color, encoded as an integer string. */
     private static final String defColorString  = "0x0000FF";
     /** The default color. */
@@ -113,7 +117,8 @@ public class ColorEditor
         Color.decode( defColorString );
     
     /** The colorButton component. */
-    private final JButton       colorButton = new JButton( "Color" );
+    private final JButton       colorButton = 
+        new JButton( COLOR_BUTTON_LABEL );
     /** The textEditor component. */
     private final JTextField    textEditor  = 
         new JTextField( defColorString, 10 );
@@ -151,6 +156,10 @@ public class ColorEditor
         feedback.setBackground( defColor );
         textEditor.addActionListener( e -> editColor() );
         colorButton.addActionListener( e -> selectColor() );
+        
+        feedback.setName( FEEDBACK_NAME );
+        textEditor.setName( TEXT_EDITOR_NAME );
+        colorButton.setName( COLOR_BUTTON_LABEL );
     }
     
     /**

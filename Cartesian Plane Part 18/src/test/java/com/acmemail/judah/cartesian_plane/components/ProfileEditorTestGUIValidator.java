@@ -6,6 +6,8 @@ import javax.swing.JOptionPane;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorTestGUI;
@@ -35,6 +37,20 @@ class ProfileEditorTestGUIValidator
     public static void beforeAll()
     {
         testGUI = ProfileEditorTestGUI.getTestGUI( baseProfile );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= 
+        {
+            "LinePropertySetAxes", 
+            "LinePropertySetGridLines", 
+            "LinePropertySetTicMajor",
+            "LinePropertySetTicMinor"
+        }
+    )
+    public void testLinePropertySets( String setName )
+    {
+        testLineProperties( setName );
     }
     
     @Test
@@ -166,7 +182,7 @@ class ProfileEditorTestGUIValidator
         assertEquals( fontItalicExp, fontItalicAct );
     }
     
-    private void tempLinePropertyTest( String setName )
+    private void testLineProperties( String setName )
     {
         LinePropertySet distinct    = 
             distinctProfile.getLinePropertySet( setName );
@@ -186,13 +202,10 @@ class ProfileEditorTestGUIValidator
         int     colorOrig       = 0; 
         int     colorExp        = -1;
         int     colorAct        = 0;
-        String  sColorAct       = "";
         
         boolean drawOrig        = false;
         boolean drawExp         = false;
         boolean drawAct         = false;
-        
-        System.out.println( setName + ":" );
         
         if ( distinct.hasLength() )
         {
@@ -218,18 +231,66 @@ class ProfileEditorTestGUIValidator
         if ( distinct.hasDraw() )
         {
             drawOrig = testGUI.getDraw( setName );
-            drawExp = distinct.hasDraw();
+            drawExp = distinct.getDraw();
             testGUI.setDraw( setName, drawExp );
         }
         
         if ( distinct.hasColor() )
         {
             colorOrig = testGUI.getColor( setName );
-            colorExp = distinct.getColor().getRGB() &0xffffff;
+            colorExp = distinct.getColor().getRGB() & 0xffffff;
             testGUI.setColor( setName, colorExp );
         }
+        
+        if ( distinct.hasLength() )
+            lengthAct = testGUI.getLength( setName );
+        if ( distinct.hasSpacing() )
+            spacingAct = testGUI.getSpacing( setName );
+        if ( distinct.hasStroke() )
+            strokeAct = testGUI.getStroke( setName );
+        if ( distinct.hasDraw() )
+            drawAct = testGUI.getDraw( setName );
+        if ( distinct.hasColor() )
+            colorAct = testGUI.getColor( setName );
+
+        System.out.println( setName + ":" );
+        printThreeValues( 
+            "    Length", 
+            lengthOrig, 
+            lengthExp, 
+            lengthAct
+        );
+        printThreeValues( 
+            "    Spacing", 
+            spacingOrig, 
+            spacingExp, 
+            spacingAct
+        );
+        printThreeValues( 
+            "    Stroke", 
+            strokeOrig, 
+            strokeExp, 
+            strokeAct
+        );
+        printThreeValues( 
+            "    Draw", 
+            drawOrig, 
+            drawExp, 
+            drawAct
+        );
+        printThreeValues( 
+            "    Color", 
+            colorOrig, 
+            toHexString( colorExp ), 
+            toHexString( colorAct )
+        );
 
         JOptionPane.showMessageDialog( null, "Done" );
+        assertEquals( lengthExp, lengthAct, "length" );
+        assertEquals( spacingExp, spacingAct, "spacing" );
+        assertEquals( strokeExp, strokeAct, "stroke" );
+        assertEquals( drawExp, drawAct, "draw" );
+        assertEquals( colorExp, colorAct, "color" );
     }
 
     private static void 

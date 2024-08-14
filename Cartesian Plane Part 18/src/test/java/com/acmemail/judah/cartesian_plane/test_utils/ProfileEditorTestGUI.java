@@ -3,17 +3,13 @@ package com.acmemail.judah.cartesian_plane.test_utils;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.awt.AWTException;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Robot;
 import java.awt.Window;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -24,19 +20,15 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.TitledBorder;
 
 import com.acmemail.judah.cartesian_plane.Profile;
-import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
+import com.acmemail.judah.cartesian_plane.components.FontEditor;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
@@ -68,30 +60,9 @@ public class ProfileEditorTestGUI
         LinePropertySetTicMajor.class.getSimpleName();
     private static final String ticMinorSet     =
         LinePropertySetTicMinor.class.getSimpleName();
-
-    private static final String gridTitle       = "Grid";
-    private static final String axesTitle       = "Axes";
-    private static final String gridLinesTitle  = "Grid Lines";
-    private static final String ticMajorTitle   = "Major Tics";
-    private static final String ticMinorTitle   = "Minor Tics";
-    
-    private static final String nameLabel       = "Name";
-    private static final String spacingLabel    = "Lines/Unit";
-    private static final String lengthLabel     = "Lines/Unit";
-    private static final String weightLabel     = "Weight";
-    private static final String drawLabel       = "Draw";
-    
-    private static final String fontDialogTitle = "Font Editor";
-    private static final String boldLabel       = "Bold";
-    private static final String italicLabel     = "Italic";
-    private static final String sizeLabel       = "Size";
     private static final String okLabel         = "OK";
     private static final String resetLabel      = "Reset";
     private static final String cancelLabel     = "Cancel";
-    
-    private static final String gridUnitLabel   = "Grid Unit";
-    private static final String editFontLabel   = "Edit Font";
-    private static final String labelsLabel     = "Labels";
     
     /** The GUI test object. */
     private static ProfileEditorTestGUI testGUI;
@@ -101,32 +72,26 @@ public class ProfileEditorTestGUI
     private final JFrame                editorFrame;
     /** The ProfileEditor under test. */
     private final ProfileEditor         profileEditor;
-    private final Map<String,String>    titlePropSetMap =
-        Map.of( 
-            gridTitle, graphSet,
-            axesTitle, axesSet,
-            gridLinesTitle, gridLinesSet,
-            ticMajorTitle, ticMajorSet,
-            ticMinorTitle, ticMinorSet
-        );
-    private final Map<String,Class<?>>  titlePropSetMapA =
-        Map.of( 
-            gridTitle, GraphPropertySet.class,
-            axesTitle, LinePropertySetAxes.class,
-            gridLinesTitle, LinePropertySetGridLines.class,
-            ticMajorTitle, LinePropertySetTicMajor.class,
-            ticMinorTitle, LinePropertySetTicMinor.class
-        );
+    /** Title of the font editor dialog. */
+    private static final String fontDialogTitle = "Font Editor";
+    /**
+     * Maps the name of a property set to a JPanel used to
+     * interrogate and modify the property set.
+     */
     private final Map<String,JPanel>    propSetPanelMap = new HashMap<>();
+    /** The set of components in the panel titled "Grid." */
     private final GraphPropertyComponents   graphPropComps;
+    /**
+     * Maps the name of a LinePropertySet to the set of components
+     * associated with the encapsulated properties.
+     */
     private final Map<String, LinePropertyComponents>   
         propSetToCompMap    = new HashMap<>();
+    /** 
+     * The component in the ProfileEditor 
+     * that contains the profile name.
+     */
     private final JTextField            nameComponent;
-    
-    /** For simulating key strokes and mouse button pushes. */
-    private final RobotAssistant    robotAsst;
-    /** Robot object from RobotAssistant. */
-    private final Robot             robot;
     
     /** 
      * For transient use in lambdas.
@@ -177,11 +142,8 @@ public class ProfileEditorTestGUI
         getAllTitledPanels( profileEditor );
         getAllLinePropertyComponents();
         graphPropComps = new GraphPropertyComponents();
-        nameComponent = getLabeledJTextField( nameLabel, profileEditor );
-        
-        robotAsst = makeRobot();
-        robot = robotAsst.getRobot();
-        robot.setAutoDelay( 100 );
+        nameComponent = 
+            getTextFieldByName( ProfileEditor.NAME_LABEL, profileEditor );
     }
     
     public void setName( String name )
@@ -423,16 +385,6 @@ public class ProfileEditorTestGUI
             propComps.setStroke( value ) 
         );
     }
-
-    private void setValue( Consumer<Float> consumer, float value )
-    {
-        GUIUtils.schedEDTAndWait( () -> consumer.accept( value ) );
-    }
-    
-    private void setValue( Consumer<String> consumer, String value )
-    {
-        GUIUtils.schedEDTAndWait( () -> consumer.accept( value ) );
-    }
     
     private boolean getBooleanValue( Supplier<Object> supplier )
     {
@@ -462,11 +414,6 @@ public class ProfileEditorTestGUI
         return (String)oVal;
     }
     
-    private void setValue( Consumer<Object> consumer, Object value )
-    {
-        GUIUtils.schedEDTAndWait( () -> consumer.accept( value ) );
-    }
-    
     private Object getValue( Supplier<Object> supplier )
     {
         GUIUtils.schedEDTAndWait( () -> 
@@ -477,39 +424,31 @@ public class ProfileEditorTestGUI
     
     private void getAllTitledPanels( Container source )
     {
-        if ( source instanceof JPanel )
-        {
-            JPanel  panel   = (JPanel)source;
-            String  title   = getBorderTitle( panel.getBorder() );
-            if ( title != null )
-            {
-                String  propSet = titlePropSetMap.get( title );
-                assertNotNull( propSet );
-                propSetPanelMap.put( propSet, panel );
-            }
-        }
-        Arrays.stream( source.getComponents() )
-            .filter( c -> c instanceof Container )
-            .map( c -> (Container)c )
-            .forEach( c -> getAllTitledPanels( c ) );
-    }
-    
-    private String getBorderTitle( Border border )
-    {
-        String  title   = null;
-        if ( border instanceof TitledBorder )
-        {
-            title = ((TitledBorder)border).getTitle();
-        }
-        else if ( border instanceof CompoundBorder )
-        {
-            CompoundBorder  compBorder  = (CompoundBorder)border;
-            Border          inside      = compBorder.getInsideBorder();
-            Border          outside     = compBorder.getOutsideBorder();
-            if ( (title = getBorderTitle( inside )) == null )
-                title = getBorderTitle( outside );
-        }
-        return title;
+        /* Define the correspondence between a titled panel in the GUI
+         * and the property set that the panel maps to. For example
+         * the panel labeled "Grid" maps to GraphPropertySetMW and the 
+         * panel labeled "Axes" maps to LinePropertySetAxes.
+         */
+        Map<String,String>    titlePropSetMap =
+            Map.of( 
+                ProfileEditor.GRID_TITLE, graphSet,
+                ProfileEditor.AXES_TITLE, axesSet,
+                ProfileEditor.GRID_LINES_TITLE, gridLinesSet,
+                ProfileEditor.MAJOR_TICS_TITLE, ticMajorSet,
+                ProfileEditor.MINOR_TICS_TITLE, ticMinorSet
+            );
+        Stream.of(
+            ProfileEditor.GRID_TITLE,
+            ProfileEditor.AXES_TITLE,
+            ProfileEditor.GRID_LINES_TITLE,
+            ProfileEditor.MAJOR_TICS_TITLE,
+            ProfileEditor.MINOR_TICS_TITLE
+        ).forEach( title -> {
+            JPanel  panel   = getPanelByName( title );
+            String  propSet = titlePropSetMap.get( title );
+            assertNotNull( propSet );
+            propSetPanelMap.put( propSet, panel );
+        });
     }
     
     private void getAllLinePropertyComponents()
@@ -522,103 +461,45 @@ public class ProfileEditorTestGUI
         ).forEach( LinePropertyComponents::new );
     }
     
-    /**
-     * Within the given source,
-     * find the JLabel with the given text.
-     * Interrogate the JLabel's parent
-     * for the first JComponent with the given type.
-     * Throws assertion if the target JComponent
-     * cannot be found.
-     * 
-     * @param text      the given text
-     * @param source    the given source
-     * @param type      the given type
-     * 
-     * @return 
-     *      the first JComponent of the given type
-     *      that is a sibling of the JLabel 
-     *      with the given text
-     */
-    private JComponent 
-    getComponentType( JComponent source, Class<? extends JComponent> type )
+    private JPanel getPanelByName( String name )
     {
-        Predicate<JComponent>   pred    = 
-            c -> type.isAssignableFrom( c.getClass() );
-        JComponent              comp    = 
-            ComponentFinder.find( source, pred );
-        assertNotNull( comp );
-        assertTrue( type.isAssignableFrom( comp.getClass() ) );
-        return comp;
+        JComponent  comp    = getComponentByName( name, profileEditor );
+        assertTrue( comp instanceof JPanel);
+        return (JPanel)comp;
     }
     
-    /**
-     * Within the given source,
-     * find the JLabel with the given text.
-     * Interrogate the JLabel's parent
-     * for the first JComponent with the given type.
-     * Throws assertion if the target JComponent
-     * cannot be found.
-     * 
-     * @param text      the given text
-     * @param source    the given source
-     * @param type      the given type
-     * 
-     * @return 
-     *      the first JComponent of the given type
-     *      that is a sibling of the JLabel 
-     *      with the given text
-     */
-    private JComponent getLabeledComponent( 
-        String text, 
-        JComponent source, 
-        Class<? extends JComponent> type
-    )
+    private JSpinner getSpinnerByName( String name, JComponent source )
     {
-        Predicate<JComponent>   isLabel = c -> (c instanceof JLabel);
-        Predicate<JComponent>   hasText = c -> 
-            text.equals( ((JLabel)c).getText() );
-        Predicate<JComponent>   pred    = isLabel.and( hasText );
-        JComponent              comp    = 
-            ComponentFinder.find( source, pred );
-        assertNotNull( comp );
-        assertTrue( comp instanceof JLabel );
-        
-        Container   parent  = comp.getParent();
-        JComponent  target  = Arrays.stream( parent.getComponents() )
-            .filter( c -> (c instanceof JComponent) )
-            .map( c -> (JComponent)c )
-            .filter( jc -> type.isAssignableFrom( jc.getClass() ) )
-            .findFirst().orElse( null );
-        assertNotNull( target );
-        return target;
-    }
-    
-    private JSpinner getLabeledJSpinner( String text, JComponent source )
-    {
-        JComponent  comp    =
-            getLabeledComponent( text, source, JSpinner.class );
+        JComponent  comp    = getComponentByName( name, source );
         assertNotNull( comp );
         assertTrue( comp instanceof JSpinner );
         return (JSpinner)comp;
     }
     
-    private JTextField
-    getLabeledJTextField( String text, JComponent source )
+    private JCheckBox getCheckBoxByName( String name, JComponent source )
     {
-        JComponent  comp    =
-            getLabeledComponent( text, source, JTextField.class );
+        JComponent  comp    = getComponentByName( name, source );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JCheckBox );
+        return (JCheckBox)comp;
+    }
+    
+    private JTextField getTextFieldByName( String name, JComponent source )
+    {
+        JComponent  comp    = getComponentByName( name, source );
         assertNotNull( comp );
         assertTrue( comp instanceof JTextField );
         return (JTextField)comp;
     }
     
-    private JCheckBox getLabeledJCheckBox( String text, JComponent source )
+    private JComponent 
+    getComponentByName( String name, JComponent source )
     {
-        JComponent  comp    =
-            getLabeledComponent( text, source, JCheckBox.class );
+        Predicate<JComponent>   pred    = 
+            jc -> name.equals( jc.getName() );
+        JComponent  comp    = ComponentFinder.find( source, pred );
         assertNotNull( comp );
-        assertTrue( comp instanceof JCheckBox );
-        return (JCheckBox)comp;
+        return comp;
     }
     
     private JCheckBox getJCheckBox( JComponent source )
@@ -637,13 +518,14 @@ public class ProfileEditorTestGUI
         Predicate<JComponent>   hasText     =
             c -> text.equals( ((JCheckBox)c).getText() );
         Predicate<JComponent>   pred        = isCheckBox.and( hasText );        
-        JComponent  comp    =
-            ComponentFinder.find( source, c -> (c instanceof JCheckBox) );
+        JComponent              comp        =
+            ComponentFinder.find( source, pred );
         assertNotNull( comp );
         assertTrue( comp instanceof JCheckBox );
         return (JCheckBox)comp;
     }
     
+    @SuppressWarnings("unchecked")
     private JComboBox<String> getJComboBox( JComponent source )
     {
         JComponent  comp    =
@@ -705,27 +587,6 @@ public class ProfileEditorTestGUI
         }
         return iColor;
     }
-        
-    /**
-     * Instantiates a RobotAssictant.
-     * 
-     * @return the instantiate RobotAssistant.
-     */
-    private RobotAssistant makeRobot()
-    {
-        RobotAssistant  robot   = null;
-        try
-        {
-            robot = new RobotAssistant();
-        }
-        catch ( AWTException exc )
-        {
-            exc.printStackTrace();
-            System.exit( 1 );
-        }
-        
-        return robot;
-    }
     
     private static String toHexString( int value )
     {
@@ -753,9 +614,9 @@ public class ProfileEditorTestGUI
             JComponent  pane    = (JComponent)comp;
             
             nameComponent = getJComboBox( pane );
-            boldComponent = getJCheckBox( boldLabel, pane );
-            italicComponent = getJCheckBox( italicLabel, pane );
-            sizeComponent = getLabeledJSpinner( sizeLabel, pane );
+            boldComponent = getJCheckBox( FontEditor.BOLD_LABEL, pane );
+            italicComponent = getJCheckBox( FontEditor.ITALIC_LABEL, pane );
+            sizeComponent = getSpinnerByName( FontEditor.SIZE_LABEL, pane );
             colorComponent = getColorText( pane );
             okButton = getJButton( okLabel, pane );
             resetButton = getJButton( resetLabel, pane );
@@ -774,10 +635,13 @@ public class ProfileEditorTestGUI
         public GraphPropertyComponents()
         {
             JPanel  panel   = propSetPanelMap.get( graphSet );
-            gridUnitComponent = getLabeledJSpinner( gridUnitLabel, panel );
+            gridUnitComponent = 
+                getSpinnerByName( ProfileEditor.GRID_UNIT_LABEL, panel );
             colorComponent = getColorText( panel );
-            editFontComponent = getJButton( editFontLabel, panel );
-            labelsComponent = getLabeledJCheckBox( labelsLabel, panel );
+            editFontComponent = 
+                getJButton( ProfileEditor.EDIT_FONT_LABEL, panel );
+            labelsComponent = 
+                getCheckBoxByName( ProfileEditor.DRAW_FONT_LABEL, panel );
             
             boolean         canBeDialog     = true;
             boolean         canBeFrame      = false;
@@ -913,18 +777,12 @@ public class ProfileEditorTestGUI
             fontComponents.cancelButton.doClick();
         }
     }
-    
-    private static int getIColor( Color color )
-    {
-        int iColor  = color.getRGB() & 0xFFFFFF;
-        return iColor;
-    }
 
     private class LinePropertyComponents
     {
         private final String        propSetName;
         private final JSpinner      spacingComponent;
-        private final JSpinner      weightComponent;
+        private final JSpinner      strokeComponent;
         private final JSpinner      lengthComponent;
         private final JCheckBox     drawComponent;
         private final JTextField    colorComponent;
@@ -935,13 +793,13 @@ public class ProfileEditorTestGUI
             JPanel  panel   = propSetPanelMap.get( propSetName );
             assertNotNull( panel );
             spacingComponent = propSet.hasSpacing() ?
-                getLabeledJSpinner( spacingLabel, panel ) :
+                getSpinnerByName( ProfileEditor.SPACING_LABEL, panel ) :
                 null;
-            weightComponent = propSet.hasStroke() ?
-                getLabeledJSpinner( weightLabel, panel ) :
+            strokeComponent = propSet.hasStroke() ?
+                getSpinnerByName( ProfileEditor.STROKE_LABEL, panel ) :
                 null;
             lengthComponent = propSet.hasLength() ?
-                getLabeledJSpinner( lengthLabel, panel ) :
+                getSpinnerByName( ProfileEditor.LENGTH_LABEL, panel ) :
                 null;
             drawComponent = propSet.hasDraw() ?
                 getJCheckBox( panel ) :
@@ -965,13 +823,13 @@ public class ProfileEditorTestGUI
         
         public float getStroke()
         {
-            float   val = getFloat( weightComponent );
+            float   val = getFloat( strokeComponent );
             return val;
         }
         
         public void setStroke( float val )
         {
-            weightComponent.setValue( val );
+            strokeComponent.setValue( val );
         }
         
         public float getLength()

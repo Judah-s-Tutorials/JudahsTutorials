@@ -31,6 +31,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
+import javax.swing.text.JTextComponent;
 
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
@@ -73,28 +74,34 @@ public class ProfileEditor extends JPanel
         LinePropertySetGridLines.class.getSimpleName();
     
     /** Text describing the GUI weight field. */
-    private static final String weightLabel     = "Weight";
+    public static final String STROKE_LABEL     = "Weight";
     /** Text describing the GUI lines/unit field. */
-    private static final String lpuLabel        = "Lines/Unit";
+    public static final String SPACING_LABEL    = "Lines/Unit";
     /** Text describing the GUI length field. */
-    private static final String lenLabel        = "Length";
+    public static final String LENGTH_LABEL     = "Length";
     /** Text describing the GUI draw field (for lines). */
-    private static final String drawLabel       = "Draw";
+    public static final String DRAW_LABEL       = "Draw";
     /** Text describing the GUI draw field (for text). */
-    private static final String drawLabelsLabel = "Labels";
-    
+    public static final String DRAW_FONT_LABEL  = "Labels";
+    /** Text describing a color editor (text field). */
+    public static final String COLOR_EDITOR     = "Color Editor";
     /** Text describing the GUI name panel. */
-    private static final String nameLabel       = "Name";
+    public static final String NAME_LABEL       = "Name";
     /** Text describing the GUI grid unit panel. */
-    private static final String gridUnitLabel   = "Grid Unit";
+    public static final String GRID_UNIT_LABEL  = "Grid Unit";
+    /** Text on the edit-font button. " */
+    public static final String EDIT_FONT_LABEL        = "Edit Font";
+    
+    /** Text describing the grid panel. */
+    public static final String GRID_TITLE       = "Grid";
     /** Text describing the GUI axis panel. */
-    private static final String axisLabel       = "Axes";
+    public static final String AXES_TITLE       = "Axes";
     /** Text describing the GUI major tics panel. */
-    private static final String majorTicsLabel  = "Major Tics";
+    public static final String MAJOR_TICS_TITLE = "Major Tics";
     /** Text describing the GUI minor tics panel. */
-    private static final String minorTicsLabel  = "Minor Tics";
+    public static final String MINOR_TICS_TITLE = "Minor Tics";
     /** Text describing the GUI grid lines panel. */
-    private static final String gridLinesLabel  = "Grid Lines";
+    public static final String GRID_LINES_TITLE = "Grid Lines";
     
     /** The component that the sample graph is drawn on. */
     private final Canvas        canvas;
@@ -108,14 +115,14 @@ public class ProfileEditor extends JPanel
         new ArrayList<>();
     /** 
      * Links a label associated with a line property
-     * (e.g. {@link #weightLabel},{@link #lenLabel})
+     * (e.g. {@link #STROKE_LABEL},{@link #LENGTH_LABEL})
      * and LineProperSet type 
      * (e.g. {@link #axesSet}, {@link #gridLinesSet}
      * to a SpinnerDescriptor that controls editing
      * for the a property.
      * The key is the line property set type
      * concatenated with the property label,
-     * for example "gridLinesSet + lenLabel."
+     * for example "gridLinesSet + LENGTH_LABEL."
      * 
      * @see #makeSpinnerDesc
      * @see #addSpinner
@@ -236,22 +243,22 @@ public class ProfileEditor extends JPanel
         
         propSet = profile.getLinePropertySet( axesSet );
         JPanel  axisPanel    =
-            getPropertyPanel( axisLabel, propSet );
+            getPropertyPanel( AXES_TITLE, propSet );
         panel.add( axisPanel );
         
         propSet = profile.getLinePropertySet( gridLinesSet );
         JPanel  gridLinePanel    =
-            getPropertyPanel( gridLinesLabel, propSet );
+            getPropertyPanel( GRID_LINES_TITLE, propSet );
         panel.add( gridLinePanel );
 
         propSet = profile.getLinePropertySet( ticMajorSet );
         JPanel  majorTicPanel    =
-            getPropertyPanel( majorTicsLabel, propSet );
+            getPropertyPanel( MAJOR_TICS_TITLE, propSet );
         panel.add( majorTicPanel );
         
         propSet = profile.getLinePropertySet( ticMinorSet );
         JPanel  minorTicPanel    =
-            getPropertyPanel( minorTicsLabel, propSet );
+            getPropertyPanel( MINOR_TICS_TITLE, propSet );
         panel.add( minorTicPanel );
         
         return panel;
@@ -276,17 +283,17 @@ public class ProfileEditor extends JPanel
         String  type    = propSet.getClass().getSimpleName();
         if ( propSet.hasSpacing() )
         {
-            addSpinner( type, lpuLabel, panel );
+            addSpinner( type, SPACING_LABEL, panel );
             ++rows;
         }
         if ( propSet.hasLength() )
         {
-            addSpinner( type, lenLabel, panel );
+            addSpinner( type, LENGTH_LABEL, panel );
             ++rows;
         }
         if ( propSet.hasStroke() )
         {
-            addSpinner( type, weightLabel, panel );
+            addSpinner( type, STROKE_LABEL, panel );
             ++rows;
         }
         if ( propSet.hasDraw() )
@@ -305,7 +312,8 @@ public class ProfileEditor extends JPanel
         Border      border      = 
             BorderFactory.createTitledBorder( lineBorder, title );
         GridLayout  layout  = new GridLayout( rows, 2, 3, 0 );
-        panel.setBorder(border);
+        panel.setName( title );
+        panel.setBorder( border );
         panel.setLayout( layout );
         return panel;
     }
@@ -317,7 +325,7 @@ public class ProfileEditor extends JPanel
      * The user passes the type of LinePropertySet
      * (e.g. {@link #axesSet}, {@link #gridLinesSet}
      * and the label on the spinner
-     * (e.g. {@link #weightLabel}, {@link #lenLabel}
+     * (e.g. {@link #STROKE_LABEL}, {@link #LENGTH_LABEL}
      * and these are used to 
      * locate the SpinnerDesc.
      * 
@@ -344,7 +352,8 @@ public class ProfileEditor extends JPanel
     {
         GraphPropertySet    propSet = profile.getMainWindow();
         JPanel      panel   = new JPanel( new GridLayout( 3, 2, 3, 0 ) );
-        SpinnerDesc desc    = descMap.get( gridUnitLabel );
+        SpinnerDesc desc    = descMap.get( GRID_UNIT_LABEL );
+        panel.setName( GRID_TITLE);
         panel.add( desc.label );
         panel.add( desc.spinner );
         addColorEditor( propSet, panel );
@@ -354,7 +363,7 @@ public class ProfileEditor extends JPanel
         Border      lineBorder  = 
             BorderFactory.createLineBorder( Color.BLACK );
         Border      border      = 
-            BorderFactory.createTitledBorder( lineBorder, "Grid" );
+            BorderFactory.createTitledBorder( lineBorder, GRID_TITLE );
         GridLayout  layout  = new GridLayout( 4, 2, 3, 0 );
         panel.setBorder(border);
         panel.setLayout( layout );
@@ -370,9 +379,10 @@ public class ProfileEditor extends JPanel
         LayoutManager   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
         panel.setLayout( layout );
         panel.setBorder( border );
-        panel.add( new JLabel( nameLabel ) );
+        panel.add( new JLabel( NAME_LABEL ) );
         panel.add( Box.createRigidArea( spacer ) );
         JTextField      nameField   = new JTextField( 10 );
+        nameField.setName( NAME_LABEL );
         panel.add( nameField );
         Runnable        runner      = 
             () -> profile.setName( nameField.getText() );
@@ -417,10 +427,11 @@ public class ProfileEditor extends JPanel
      */
     private void addColorEditor( LinePropertySet propSet, JPanel panel )
     {
-        ColorEditor colorEditor = new ColorEditor();
+        ColorEditor     colorEditor = new ColorEditor();
         colorEditor.setColor( propSet.getColor() );
+        JTextComponent  textEditor  = colorEditor.getTextEditor();
         panel.add( colorEditor.getColorButton() );
-        panel.add( colorEditor.getTextEditor() );
+        panel.add( textEditor );
         colorEditor.addActionListener( e -> {
             propSet.setColor( colorEditor.getColor().orElse( null ) );
             canvas.repaint();
@@ -444,7 +455,8 @@ public class ProfileEditor extends JPanel
     {
         FontEditorDialog    fontDialog  = 
             new FontEditorDialog( null, propSet );
-        JButton editButton  = new JButton( "Edit Font" );
+        JButton editButton  = new JButton( EDIT_FONT_LABEL );
+        editButton.setName( EDIT_FONT_LABEL );
         editButton.addActionListener( e -> showFontDialog( fontDialog ) );
         panel.add( new JLabel( "" ) );
         panel.add( editButton );
@@ -453,9 +465,10 @@ public class ProfileEditor extends JPanel
     private void addDraw( GraphPropertySet propSet, JPanel panel )
     {
         JLabel      label       = 
-            new JLabel( drawLabelsLabel, SwingConstants.RIGHT );
+            new JLabel( DRAW_FONT_LABEL, SwingConstants.RIGHT );
         boolean     val         = propSet.isFontDraw();
         JCheckBox   checkBox    = new JCheckBox( "", val );
+        checkBox.setName( DRAW_FONT_LABEL );
         panel.add( label );
         panel.add( checkBox );
         checkBox.addItemListener( e -> {
@@ -469,9 +482,10 @@ public class ProfileEditor extends JPanel
     private void addDraw( LinePropertySet propSet, JPanel panel )
     {
         JLabel      label       = 
-            new JLabel( drawLabel, SwingConstants.RIGHT );
+            new JLabel( DRAW_LABEL, SwingConstants.RIGHT );
         boolean     val         = propSet.getDraw();
         JCheckBox   checkBox    = new JCheckBox( "", val );
+        checkBox.setName( DRAW_LABEL );
         panel.add( label );
         panel.add( checkBox );
         checkBox.addItemListener( e -> {
@@ -489,24 +503,24 @@ public class ProfileEditor extends JPanel
     {
         LinePropertySet         propSet = null;
         
-        makeSpinnerDesc( null, gridUnitLabel, 1 );
+        makeSpinnerDesc( null, GRID_UNIT_LABEL, 1 );
         
         propSet = profile.getLinePropertySet( axesSet );
-        makeSpinnerDesc( propSet, weightLabel, 1 );
+        makeSpinnerDesc( propSet, STROKE_LABEL, 1 );
         
         propSet = profile.getLinePropertySet( gridLinesSet );
-        makeSpinnerDesc( propSet, lpuLabel, 1 );
-        makeSpinnerDesc( propSet, weightLabel, 1 );
+        makeSpinnerDesc( propSet, SPACING_LABEL, 1 );
+        makeSpinnerDesc( propSet, STROKE_LABEL, 1 );
         
         propSet = profile.getLinePropertySet( ticMajorSet );
-        makeSpinnerDesc( propSet, lpuLabel, .25 );
-        makeSpinnerDesc( propSet, weightLabel, 1 );
-        makeSpinnerDesc( propSet, lenLabel, 1 );
+        makeSpinnerDesc( propSet, SPACING_LABEL, .25 );
+        makeSpinnerDesc( propSet, STROKE_LABEL, 1 );
+        makeSpinnerDesc( propSet, LENGTH_LABEL, 1 );
         
         propSet = profile.getLinePropertySet( ticMinorSet );
-        makeSpinnerDesc( propSet, lpuLabel, .25 );
-        makeSpinnerDesc( propSet, weightLabel, 1 );
-        makeSpinnerDesc( propSet, lenLabel, 1 );
+        makeSpinnerDesc( propSet, SPACING_LABEL, .25 );
+        makeSpinnerDesc( propSet, STROKE_LABEL, 1 );
+        makeSpinnerDesc( propSet, LENGTH_LABEL, 1 );
     }
     
     /**
@@ -517,7 +531,7 @@ public class ProfileEditor extends JPanel
      * the text is also used to map the spinner
      * to the given LinePropertySet,
      * and must be one of the labels defined above
-     * (see {@linkplain #weightLabel}, {@link #lenLabel}, etc.).
+     * (see {@linkplain #STROKE_LABEL}, {@link #LENGTH_LABEL}, etc.).
      * 
      * @param propSet   the given LinePropertySet
      * @param labelText the text with which to label the spinner
@@ -568,7 +582,7 @@ public class ProfileEditor extends JPanel
      * and the spinner's step value.
      * The property within the LinePropertySet to edit
      * is determined by the text of the label;
-     * see <em>weightLabel, lengthLabel, et al.</em>
+     * see <em>STROKE_LABEL, lengthLabel, et al.</em>
      * in the outer class.
      * 
      * @author Jack Straub
@@ -597,19 +611,19 @@ public class ProfileEditor extends JPanel
             
             switch ( labelText )
             {
-            case weightLabel:
+            case STROKE_LABEL:
                 tempSetter = d -> propSet.setStroke( (float)d );
                 tempGetter = () -> propSet.getStroke();
                 break;
-            case lpuLabel:
+            case SPACING_LABEL:
                 tempSetter = d -> propSet.setSpacing( (float)d );
                 tempGetter = () -> propSet.getSpacing();
                 break;
-            case lenLabel:
+            case LENGTH_LABEL:
                 tempSetter = d -> propSet.setLength( (float)d );
                 tempGetter = () -> propSet.getLength();
                 break;
-            case gridUnitLabel:
+            case GRID_UNIT_LABEL:
                 tempSetter = d -> profile.setGridUnit( (float)d );
                 tempGetter = () -> profile.getGridUnit();
                 break;
@@ -625,6 +639,7 @@ public class ProfileEditor extends JPanel
             SpinnerNumberModel  model   = 
                 new SpinnerNumberModel( val, minVal, maxVal, step );
             spinner = new JSpinner( model );
+            spinner.setName( labelText );
             
             JComponent  editor          = spinner.getEditor();
             if ( !(editor instanceof DefaultEditor) )
