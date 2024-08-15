@@ -157,7 +157,7 @@ public class FontEditor
         sizeEditor.addChangeListener( e -> feedback.update() );
         
         boldToggle.setName( BOLD_LABEL );
-        italicToggle.setName( BOLD_LABEL );
+        italicToggle.setName( ITALIC_LABEL );
         
         feedback.update();
     }

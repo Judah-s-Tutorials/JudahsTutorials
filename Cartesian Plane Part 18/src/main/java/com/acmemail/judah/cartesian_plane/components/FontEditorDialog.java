@@ -23,6 +23,15 @@ import javax.swing.JPanel;
 @SuppressWarnings("serial")
 public class FontEditorDialog extends JDialog
 {
+    /** Title for this dialog. */
+    public static final String      DIALOG_TITLE    = "Font Editor";
+    /** Test and component name for the OK button. */
+    public static final String      OK_LABEL        = "OK";
+    /** Test and component name for the Cancel button. */
+    public static final String      CANCEL_LABEL    = "Reset";
+    /** Test and component name for the Reset button. */
+    public static final String      RESET_LABEL     = "Reset";
+    
     /** Property set being edited. */
     private final GraphPropertySet  propSet;
     /** Font editor. */
@@ -43,7 +52,7 @@ public class FontEditorDialog extends JDialog
      */
     public FontEditorDialog( Window parent, GraphPropertySet propSet )
     {
-        super( parent, "Font Editor", ModalityType.APPLICATION_MODAL );
+        super( parent, DIALOG_TITLE, ModalityType.APPLICATION_MODAL );
         this.propSet = propSet;
         this.editor = new FontEditor();
         
@@ -103,9 +112,12 @@ public class FontEditorDialog extends JDialog
     {
         JPanel  panel           = new JPanel();
         
-        JButton okButton        = new JButton( "OK" );
-        JButton resetButton     = new JButton( "Reset" );
-        JButton canButton       = new JButton( "Cancel" );
+        JButton okButton        = new JButton( OK_LABEL );
+        JButton resetButton     = new JButton( RESET_LABEL );
+        JButton canButton       = new JButton( CANCEL_LABEL );
+        okButton.setName( OK_LABEL );
+        resetButton.setName( RESET_LABEL );
+        canButton.setName( CANCEL_LABEL );
         
         okButton.addActionListener( e -> close( JOptionPane.OK_OPTION ) );        
         resetButton.addActionListener( this::reset );

@@ -24,8 +24,6 @@ class ProfileEditorTestGUIValidator
         LinePropertySetTicMajor.class.getSimpleName();
     private static final String ticMinorSetName     =
         LinePropertySetTicMinor.class.getSimpleName();
-    private static final String[]   allSetNames     =
-    { axesSetName, gridLinesSetName, ticMajorSetName, ticMinorSetName };
 
     private static Profile          baseProfile     = new Profile();
     private static Profile          distinctProfile = 
@@ -36,7 +34,7 @@ class ProfileEditorTestGUIValidator
     @BeforeAll
     public static void beforeAll()
     {
-        testGUI = ProfileEditorTestGUI.getTestGUI( baseProfile );
+        testGUI = ProfileEditorTestGUI.getTestGUI( profile );
     }
     
     @ParameterizedTest
@@ -70,7 +68,7 @@ class ProfileEditorTestGUIValidator
         int     gridColorAct   = 0;
         String  gridSColorAct   = "";
 
-        boolean fontDrawOrig   = testGUI.isFontDraw();
+        boolean fontDrawOrig   = testGUI.getFontDraw();
         boolean fontDrawExp    = mwDistinct.isFontDraw();
         boolean fontDrawAct    = false;
 
@@ -89,11 +87,11 @@ class ProfileEditorTestGUIValidator
         float   fontSizeExp    = mwDistinct.getFontSize();
         float   fontSizeAct    = 0;
 
-        boolean fontBoldOrig   = testGUI.isFontBold();
+        boolean fontBoldOrig   = testGUI.getFontBold();
         boolean fontBoldExp    = mwDistinct.isBold();
         boolean fontBoldAct    = false;
 
-        boolean fontItalicOrig = testGUI.isFontItalic();
+        boolean fontItalicOrig = testGUI.getFontItalic();
         boolean fontItalicExp  = mwDistinct.isItalic();
         boolean fontItalicAct  = false;
         
@@ -107,20 +105,20 @@ class ProfileEditorTestGUIValidator
         testGUI.setFontSize( fontSizeExp );
         testGUI.setFontBold( fontBoldExp );
         testGUI.setFontItalic( fontItalicExp );
-        Utils.pause( 5000 );
+//        Utils.pause( 5000 );
         testGUI.selectFDOK();
         Utils.join( thread );
         
         gridUnitAct = testGUI.getGridUnit();
-        fontDrawAct = testGUI.isFontDraw();
+        fontDrawAct = testGUI.getFontDraw();
         gridColorAct = testGUI.getBGColor();
         gridSColorAct = toHexString( gridColorAct );
         fontColorAct = testGUI.getFGColor();
         fontSColorAct = toHexString( fontColorAct );
         fontNameAct = testGUI.getFontName();
         fontSizeAct = testGUI.getFontSize();
-        fontBoldAct = testGUI.isFontBold();
-        fontItalicAct = testGUI.isFontItalic();
+        fontBoldAct = testGUI.getFontBold();
+        fontItalicAct = testGUI.getFontItalic();
         
         printThreeValues( 
             "Grid unit", 
@@ -171,7 +169,7 @@ class ProfileEditorTestGUIValidator
             fontItalicAct
         );
         
-        JOptionPane.showMessageDialog( null, "Done" );
+//        JOptionPane.showMessageDialog( null, "Done" );
         assertEquals( gridUnitExp, gridUnitAct );
         assertEquals( fontDrawExp, fontDrawAct );
         assertEquals( gridColorExp, gridColorAct );
@@ -285,7 +283,7 @@ class ProfileEditorTestGUIValidator
             toHexString( colorAct )
         );
 
-        JOptionPane.showMessageDialog( null, "Done" );
+//        JOptionPane.showMessageDialog( null, "Done" );
         assertEquals( lengthExp, lengthAct, "length" );
         assertEquals( spacingExp, spacingAct, "spacing" );
         assertEquals( strokeExp, strokeAct, "stroke" );

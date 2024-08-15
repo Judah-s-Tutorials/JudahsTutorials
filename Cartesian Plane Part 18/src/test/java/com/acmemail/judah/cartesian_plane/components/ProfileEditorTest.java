@@ -66,7 +66,7 @@ class ProfileEditorTest
         System.out.println( "font name: " + fontName );
         testGUI.setFontName( distinctVals.getFontName() );
         
-        boolean isDraw = testGUI.isFontDraw();
+        boolean isDraw = testGUI.getFontDraw();
         System.out.println( "isDraw: " + isDraw );
         testGUI.setFontDraw( distinctVals.isFontDraw() );
 
@@ -76,11 +76,11 @@ class ProfileEditorTest
         System.out.println( "font size: " + fontSize );
         testGUI.setFontSize( distinctVals.getFontSize() );
         
-        boolean isBold = testGUI.isFontBold();
+        boolean isBold = testGUI.getFontBold();
         System.out.println( "isBold: " + isBold );
         testGUI.setFontBold( distinctVals.isBold() );
         
-        boolean isItalic = testGUI.isFontItalic();
+        boolean isItalic = testGUI.getFontItalic();
         System.out.println( "isItalic: " + isItalic );
         testGUI.setFontItalic( distinctVals.isItalic() );
         
