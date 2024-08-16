@@ -1,56 +1,81 @@
-package com.acmemail.judah.cartesian_plane.components;
+package com.acmemail.judah.cartesian_plane.sandbox;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import javax.swing.JOptionPane;
-
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
+import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorTestGUI;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
+/**
+ * This application should be run as a JUnit test.
+ * It verifies that a ProfileEditorTestGUI object
+ * has read and write access 
+ * to all the components of a ProfileEditor
+ * that are necessary to edit
+ * the properties of a Profile.
+ * 
+ * @author Jack Straub
+ */
 class ProfileEditorTestGUIValidator
 {
-    private static final String axesSetName         =
-        LinePropertySetAxes.class.getSimpleName();
-    private static final String gridLinesSetName    =
-        LinePropertySetGridLines.class.getSimpleName();
-    private static final String ticMajorSetName     =
-        LinePropertySetTicMajor.class.getSimpleName();
-    private static final String ticMinorSetName     =
-        LinePropertySetTicMinor.class.getSimpleName();
+    /**
+     * Base profile with property values initialized from the
+     * PropertyManager. Never modified.
+     */
+    private static Profile              profile         = new Profile();
+    /**
+     * Profile initialized with property values guaranteed to be
+     * different from the values of the base profile ({@link #profile}).
+     */
+    private static Profile              distinctProfile = 
+        ProfileUtils.getDistinctProfile( profile );
+    /** Test GUI to be validated. */
+    private static ProfileEditorTestGUI testGUI         =     
+        ProfileEditorTestGUI.getTestGUI( profile );
 
-    private static Profile          baseProfile     = new Profile();
-    private static Profile          distinctProfile = 
-        ProfileUtils.getDistinctProfile( baseProfile );
-    private static ProfileEditorTestGUI    testGUI;
-    private static Profile          profile         = new Profile();
-    
-    @BeforeAll
-    public static void beforeAll()
-    {
-        testGUI = ProfileEditorTestGUI.getTestGUI( profile );
-    }
-    
-    @ParameterizedTest
-    @ValueSource( strings= 
-        {
-            "LinePropertySetAxes", 
-            "LinePropertySetGridLines", 
-            "LinePropertySetTicMajor",
-            "LinePropertySetTicMinor"
-        }
-    )
-    public void testLinePropertySets( String setName )
-    {
-        testLineProperties( setName );
-    }
-    
+    /**
+     * Verify that the ProfileEditorTestGUI has read/write access
+     * to all those components of the ProfileEditor
+     * that are necessary to edit the GraphPropertySetMW properties
+     * of a Profile
+     * The validation logic:
+     * <ol>
+     * <li>
+     *      Obtains the value of a component
+     *      (the component's "original" value)
+     * </li>
+     * <li>
+     *      Sets the value of the component
+     *      to a unique value
+     *      (the component's "expected" value after modification)
+     * </li>    
+     * <li>
+     *      <em>After modification of all components:</em>
+     *      <ol>
+     *      <li>
+     *          Obtains the value of the component
+     *          (the component's "actual" value after modification)
+     *      </li>
+     *      <li>
+     *          Prints a summary of the values of each component,
+     *          including the component's original, expected, and
+     *          actual values.
+     *      </li>
+     *      <li>
+     *          Compares each component's 
+     *          expected and actual values.
+     *      </li>
+     *      </ol>
+     * </li>
+     * </ol>
+     */
     @Test
     void testGraphicsProperties()
     {
@@ -105,7 +130,9 @@ class ProfileEditorTestGUIValidator
         testGUI.setFontSize( fontSizeExp );
         testGUI.setFontBold( fontBoldExp );
         testGUI.setFontItalic( fontItalicExp );
-//        Utils.pause( 5000 );
+// Uncomment the following line to pause the application
+// after displaying and modifying the FontEditorDialog
+//        JOptionPane.showMessageDialog( null, "Done" );
         testGUI.selectFDOK();
         Utils.join( thread );
         
@@ -169,6 +196,9 @@ class ProfileEditorTestGUIValidator
             fontItalicAct
         );
         
+// Uncomment the following line to pause the application with
+// the ProfileEditor displayed after modifying all components
+// associated with the GraphPropertySetMW properties.
 //        JOptionPane.showMessageDialog( null, "Done" );
         assertEquals( gridUnitExp, gridUnitAct );
         assertEquals( fontDrawExp, fontDrawAct );
@@ -180,6 +210,54 @@ class ProfileEditorTestGUIValidator
         assertEquals( fontItalicExp, fontItalicAct );
     }
     
+    /**
+     * For each LinePropertySet object contained in a Profile
+     * verify that the ProfileEditorTestGUI has read/write access
+     * to all those components of the ProfileEditor
+     * that are necessary to edit the LinePropertySet.
+     * The validation logic:
+     * <ol>
+     * <li>
+     *      Obtains the value of a component
+     *      (the component's "original" value)
+     * </li>
+     * <li>
+     *      Sets the value of the component
+     *      to a unique value
+     *      (the component's "expected" value after modification)
+     * </li>    
+     * <li>
+     *      <em>After modification of all components:</em>
+     *      <ol>
+     *      <li>
+     *          Obtains the value of the component
+     *          (the component's "actual" value after modification)
+     *      </li>
+     *      <li>
+     *          Prints a summary of the values of each component,
+     *          including the component's original, expected, and
+     *          actual values.
+     *      </li>
+     *      <li>
+     *          Compares each component's 
+     *          expected and actual values.
+     *      </li>
+     *      </ol>
+     * </li>
+     * </ol>
+     * 
+     * @param setName   
+     *      the simple name of the LinePropertySet subclass to verify
+     */
+    @ParameterizedTest
+    @ValueSource( strings= 
+        {
+            "LinePropertySetAxes", 
+            "LinePropertySetGridLines", 
+            "LinePropertySetTicMajor",
+            "LinePropertySetTicMinor"
+        }
+    )
     private void testLineProperties( String setName )
     {
         LinePropertySet distinct    = 
@@ -283,6 +361,9 @@ class ProfileEditorTestGUIValidator
             toHexString( colorAct )
         );
 
+// Uncomment the following line to pause the application with
+// the ProfileEditor displayed after modifying all components
+// associated with the give LinePropertySet properties.
 //        JOptionPane.showMessageDialog( null, "Done" );
         assertEquals( lengthExp, lengthAct, "length" );
         assertEquals( spacingExp, spacingAct, "spacing" );
@@ -291,6 +372,35 @@ class ProfileEditorTestGUIValidator
         assertEquals( colorExp, colorAct, "color" );
     }
 
+    /**
+     * Format and print a line of text
+     * detailing the values of a component
+     * under three distinct conditions.
+     * The conditions are original value
+     * (the value of the component
+     * immediately after the ProfileEditor),
+     * expected value
+     * (the expected value of the component
+     * immediately after modification
+     * by the validation logic),
+     * and the actual value
+     * (the actual value of the component
+     * immediately after modification
+     * by the validation logic).
+     * 
+     * @param label 
+     *      label describing the property being edited
+     *      by the component
+     * @param orig
+     *      the value of the component before modification
+     *      by the validation logic
+     * @param exp
+     *      the expected value of the component after modification
+     *      by the validation logic
+     * @param act
+     *      the actual value of the component after modification
+     *      by the validation logic
+     */
     private static void 
     printThreeValues( String label, Object orig, Object exp, Object act )
     {
@@ -302,6 +412,14 @@ class ProfileEditorTestGUIValidator
         System.out.println( bldr );
     }
     
+    /**
+     * Format a given integer value
+     * as a hexadecimal string.
+     * 
+     * @param value the given value
+     * 
+     * @return the formatted string
+     */
     private static String toHexString( int value )
     {
         String  hex = String.format( "0x%x", value );

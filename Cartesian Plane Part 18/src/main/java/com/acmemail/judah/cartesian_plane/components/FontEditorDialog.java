@@ -28,7 +28,7 @@ public class FontEditorDialog extends JDialog
     /** Test and component name for the OK button. */
     public static final String      OK_LABEL        = "OK";
     /** Test and component name for the Cancel button. */
-    public static final String      CANCEL_LABEL    = "Reset";
+    public static final String      CANCEL_LABEL    = "Cancel";
     /** Test and component name for the Reset button. */
     public static final String      RESET_LABEL     = "Reset";
     

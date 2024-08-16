@@ -572,6 +572,24 @@ public class ProfileEditorTestGUI
     }
     
     /**
+     * Exercises the apply method
+     * of the ProfileEditor.
+     */
+    public void apply()
+    {
+        GUIUtils.schedEDTAndWait( () -> profileEditor.apply() );
+    }
+    
+    /**
+     * Exercises the reset method
+     * of the ProfileEditor.
+     */
+    public void reset()
+    {
+        GUIUtils.schedEDTAndWait( () -> profileEditor.apply() );
+    }
+    
+    /**
      * Gets and validates a Boolean value
      * from a given supplier.
      * The value is obtained 
