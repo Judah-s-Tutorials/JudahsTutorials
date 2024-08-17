@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -27,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JSpinner.DefaultEditor;
 import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
@@ -90,7 +90,9 @@ public class ProfileEditor extends JPanel
     /** Text describing the GUI grid unit panel. */
     public static final String GRID_UNIT_LABEL  = "Grid Unit";
     /** Text on the edit-font button. " */
-    public static final String EDIT_FONT_LABEL        = "Edit Font";
+    public static final String EDIT_FONT_LABEL  = "Edit Font";
+    /** Text describing the GUI width panel. */
+    public static final String WIDTH_LABEL      = "Width";
     
     /** Text describing the grid panel. */
     public static final String GRID_TITLE       = "Grid";
@@ -108,10 +110,16 @@ public class ProfileEditor extends JPanel
     
     /** 
      * List of Runnables that set or reset the values of the 
-     * GUI's JSpinners from the properties in the profile.
-     * Initialized in the {@linkplain SpinnerDesc} constructor.
+     * GUI's components from the properties in the profile.
      */
     private final List<Runnable>            resetList   = 
+        new ArrayList<>();
+    
+    /** 
+     * List of Runnables that transfers the values of the 
+     * GUI's components to the profile.
+     */
+    private final List<Runnable>            applyList   = 
         new ArrayList<>();
     /** 
      * Links a label associated with a line property
@@ -180,6 +188,7 @@ public class ProfileEditor extends JPanel
      */
     public void apply()
     {
+        applyList.forEach( i -> i.run() );
         profile.apply();
     }
     
@@ -191,6 +200,8 @@ public class ProfileEditor extends JPanel
     public void reset()
     {
         profile.reset();
+        resetList.forEach( i -> i.run() );
+        repaint();
     }
 
     /**
@@ -351,11 +362,14 @@ public class ProfileEditor extends JPanel
     private JPanel getGridPanel()
     {
         GraphPropertySet    propSet = profile.getMainWindow();
-        JPanel      panel   = new JPanel( new GridLayout( 3, 2, 3, 0 ) );
-        SpinnerDesc desc    = descMap.get( GRID_UNIT_LABEL );
+        JPanel      panel   = new JPanel( new GridLayout( 5, 2, 3, 0 ) );
+        SpinnerDesc gUnit   = descMap.get( GRID_UNIT_LABEL );
+        SpinnerDesc width   = descMap.get( WIDTH_LABEL );
         panel.setName( GRID_TITLE);
-        panel.add( desc.label );
-        panel.add( desc.spinner );
+        panel.add( gUnit.label );
+        panel.add( gUnit.spinner );
+        panel.add( width.label );
+        panel.add( width.spinner );
         addColorEditor( propSet, panel );
         addFontEditor( propSet, panel );
         addDraw( propSet, panel );
@@ -364,9 +378,7 @@ public class ProfileEditor extends JPanel
             BorderFactory.createLineBorder( Color.BLACK );
         Border      border      = 
             BorderFactory.createTitledBorder( lineBorder, GRID_TITLE );
-        GridLayout  layout  = new GridLayout( 4, 2, 3, 0 );
         panel.setBorder(border);
-        panel.setLayout( layout );
         return panel;
     }
     
@@ -384,10 +396,14 @@ public class ProfileEditor extends JPanel
         JTextField      nameField   = new JTextField( 10 );
         nameField.setName( NAME_LABEL );
         panel.add( nameField );
-        Runnable        runner      = 
-            () -> profile.setName( nameField.getText() );
-        resetList.add( runner );
         nameField.setText( profile.getName() );
+
+        Runnable        toProfile   = 
+            () -> profile.setName( nameField.getText() );
+        Runnable        toComponent = 
+            () -> nameField.setText( profile.getName() );
+        resetList.add( toComponent );
+        applyList.add( toProfile );
 
         return panel;
     }
@@ -411,10 +427,12 @@ public class ProfileEditor extends JPanel
             canvas.repaint();
         });
         
-        Supplier<Color> colorGetter = propSet::getBGColor;
-        Runnable        runner      = 
-            () -> colorEditor.setColor( colorGetter.get() );
-        resetList.add( runner );
+        Runnable        toComponent = () ->
+            colorEditor.setColor( propSet.getBGColor());
+        Runnable        toProfile   = () ->
+            propSet.setBGColor( colorEditor.getColor().orElse( null ) );
+        resetList.add( toComponent );
+        applyList.add( toProfile );
     }
     
     /**
@@ -437,10 +455,12 @@ public class ProfileEditor extends JPanel
             canvas.repaint();
         });
         
-        Supplier<Color> colorGetter = propSet::getColor;
-        Runnable        runner      = 
-            () -> colorEditor.setColor( colorGetter.get() );
-        resetList.add( runner );
+        Runnable        toComponent = () ->
+            colorEditor.setColor( propSet.getColor() );
+        Runnable        toProfile   = () ->
+            propSet.setColor( colorEditor.getColor().orElse( null ) );
+        resetList.add( toComponent );
+        applyList.add( toProfile );
     }
 
     /**
@@ -476,7 +496,12 @@ public class ProfileEditor extends JPanel
             canvas.repaint();
         });
         
-        resetList.add( () -> checkBox.setSelected( propSet.isFontDraw() ) );
+        Runnable    toComponent = () ->
+            checkBox.setSelected( propSet.isFontDraw() );
+        Runnable    toProfile   = () ->
+            propSet.setFontDraw( checkBox.isSelected() );
+        resetList.add( toComponent );
+        applyList.add( toProfile );
     }
     
     private void addDraw( LinePropertySet propSet, JPanel panel )
@@ -493,7 +518,12 @@ public class ProfileEditor extends JPanel
             canvas.repaint();
         });
         
-        resetList.add( () -> checkBox.setSelected( propSet.getDraw() ) );
+        Runnable    toComponent = () ->
+            checkBox.setSelected( propSet.getDraw() );
+        Runnable    toProfile   = () ->
+            propSet.setDraw( checkBox.isSelected() );
+        resetList.add( toComponent );
+        applyList.add( toProfile );
     }
 
     /**
@@ -504,6 +534,7 @@ public class ProfileEditor extends JPanel
         LinePropertySet         propSet = null;
         
         makeSpinnerDesc( null, GRID_UNIT_LABEL, 1 );
+        makeSpinnerDesc( null, WIDTH_LABEL, 1 );
         
         propSet = profile.getLinePropertySet( axesSet );
         makeSpinnerDesc( propSet, STROKE_LABEL, 1 );
@@ -571,6 +602,17 @@ public class ProfileEditor extends JPanel
             canvas.repaint();
         }
     }
+    
+    private static float getFloat( JSpinner spinner )
+    {
+        float           val     = -1;
+        SpinnerModel    model   = spinner.getModel();
+        if ( !(model instanceof SpinnerNumberModel) )
+            throw new ComponentException( "Invalid SpinnerModel" );
+        val = ((SpinnerNumberModel)model).getNumber().floatValue();
+        return val;
+        
+    }
 
     /**
      * An object of this type is used to configure
@@ -627,6 +669,11 @@ public class ProfileEditor extends JPanel
                 tempSetter = d -> profile.setGridUnit( (float)d );
                 tempGetter = () -> profile.getGridUnit();
                 break;
+            case WIDTH_LABEL:
+                GraphPropertySet    graphSet    = profile.getMainWindow();
+                tempSetter = d -> graphSet.setWidth( (float)d );
+                tempGetter = () -> graphSet.getWidth();
+                break;
             default:
                 throw new ComponentException( "Invalid Label" );
             }
@@ -654,9 +701,12 @@ public class ProfileEditor extends JPanel
                 canvas.repaint();
             });
             
-            resetList.add( 
-                () -> spinner.setValue( getter.getAsDouble() )
-            );
+            Runnable    toComponent = () ->
+                spinner.setValue( getter.getAsDouble() );
+            Runnable    toProfile   = () ->
+                setter.accept( getFloat( spinner ) );
+            resetList.add( toComponent );
+            applyList.add( toProfile );
         }
     }
 }

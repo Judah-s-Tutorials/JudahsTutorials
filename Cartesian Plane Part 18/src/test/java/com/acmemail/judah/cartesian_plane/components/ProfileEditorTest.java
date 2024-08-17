@@ -48,6 +48,8 @@ class ProfileEditorTest
         baseProfile.apply();
         profile = new Profile();
         testGUI.reset();
+        assertEquals( baseProfile, profile );
+        validateCurrState( baseProfile );
     }
     
     /**
@@ -75,13 +77,16 @@ class ProfileEditorTest
         validateCurrState( baseProfile );
         
         applyDistinctGraphProperties();
+        Stream.of( allSetNames )
+            .forEach( this::applyDistinctLineProperties );
         // Verify all components have been changed to distinct values
         validateCurrState( distinctProfile );
         
         // Apply the modified values and verify that the
         // PropertyManager has been updated.
         testGUI.apply();
-        validateCurrState( new Profile() );
+        Profile profile = new Profile();
+        validateCurrState( profile );
     }
 
     @Test
@@ -124,6 +129,9 @@ class ProfileEditorTest
         
         testGUI.setFontDraw( graphSet.isFontDraw() );
         testGUI.setBGColor( iBGColor );
+        testGUI.setName( distinctProfile.getName() );
+        testGUI.setGridUnit( distinctProfile.getGridUnit() );
+        testGUI.setGridWidth( graphSet.getWidth() );
         
         Thread  thread  = testGUI.editFont();
         testGUI.setFGColor( iFGColor );
@@ -173,9 +181,6 @@ class ProfileEditorTest
     {
         Profile profile = new Profile();
         
-        float   testWidth   = currState.getMainWindow().getWidth();
-        profile.getMainWindow().setWidth( testWidth );
-        
         collectGraphProperties( profile );
         assertEquals( currState.getMainWindow(), profile.getMainWindow() );
         Stream.of( allSetNames )
@@ -210,6 +215,7 @@ class ProfileEditorTest
         
         profile.setName( testGUI.getName() );
         profile.setGridUnit( testGUI.getGridUnit() );
+        graphSet.setWidth( testGUI.getGridWidth() );
         graphSet.setBGColor( bgColor );
         graphSet.setBold( testGUI.getFontBold() );
         graphSet.setFGColor( fgColor );

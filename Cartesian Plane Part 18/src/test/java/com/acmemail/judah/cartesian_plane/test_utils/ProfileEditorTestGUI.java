@@ -191,6 +191,31 @@ public class ProfileEditorTestGUI
         );
         return value;
     }
+    
+    /**
+     * Sets the grid width in the ProfileEditor text GUI.
+     * 
+     * @param value the value to set
+     */
+    public void setGridWidth( float value )
+    {
+        GUIUtils.schedEDTAndWait( () -> 
+            graphPropComps.setWidth( value ) 
+        );
+    }
+
+    /**
+     * Gets the grid width from the ProfileEditor GUI. 
+     * 
+     * @return the grid width from the ProfileEditor GUI.
+     */
+    public float getGridWidth()
+    {
+        float   value   = getFloatValue( () -> 
+            graphPropComps.getWidth()
+        );
+        return value;
+    }
 
     /**
      * Gets the font name from the ProfileEditor GUI. 
@@ -1039,6 +1064,8 @@ public class ProfileEditorTestGUI
         private final FontDialogComponents  fontComponents;
         /** Component for editing the grid unit. */
         private final JSpinner              gridUnitComponent;
+        /** Component for editing the grid width. */
+        private final JSpinner              widthComponent;
         /** Component for editing the grid color. */
         private final JTextField            colorComponent;
         /** Component for editing the draw-labels property. */
@@ -1057,6 +1084,8 @@ public class ProfileEditorTestGUI
             JPanel  panel   = propSetPanelMap.get( graphSet );
             gridUnitComponent = 
                 getSpinnerByName( ProfileEditor.GRID_UNIT_LABEL, panel );
+            widthComponent = 
+                getSpinnerByName( ProfileEditor.WIDTH_LABEL, panel );
             colorComponent = 
                 getTextFieldByName( ColorEditor.TEXT_EDITOR_NAME, panel );
             editFontComponent = 
@@ -1102,6 +1131,30 @@ public class ProfileEditorTestGUI
         public void setGridUnit( float val )
         {
             gridUnitComponent.setValue( val );
+        }
+        
+        /**
+         * Gets the value of the component
+         * used to edit the grid width.
+         * 
+         * @return  
+         *      the value of the component used to edit the grid width 
+         */
+        public float getWidth()
+        {
+            float   width   = getFloat( widthComponent );
+            return width;
+        }
+        
+        /**
+         * Sets the value of the component
+         * used to edit the grid width
+         * 
+         * @param width the new value
+         */
+        public void setWidth( float width )
+        {
+            widthComponent.setValue( width );
         }
         
         /**

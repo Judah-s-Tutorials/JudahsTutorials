@@ -327,6 +327,14 @@ public class CPConstants
     public static final String  PLOT_COLOR_DV           = "20";
     
     /////////////////////////////////////////////////
+    //   Profile properties
+    /////////////////////////////////////////////////
+    /** Name of the current profile (if any). */
+    public static final String  PROFILE_NAME_PN         = "profileName";
+    /** Default value of profile name */
+    public static final String  PROFILE_NAME_DV         = "default";
+    
+    /////////////////////////////////////////////////
     //   VaiablePanelProperties properties
     /////////////////////////////////////////////////
     /** Decimal precision for displaying variable values. */

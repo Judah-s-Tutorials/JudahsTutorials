@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.profile;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Window;
@@ -10,7 +10,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.acmemail.judah.cartesian_plane.Profile;
-import com.acmemail.judah.cartesian_plane.components.ProfileEditor;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**

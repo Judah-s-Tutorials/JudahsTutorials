@@ -185,7 +185,7 @@ public class Profile
      * has changed. Will be used to set {@link #name} during a reset
      * operation.
      */
-    private String                              currName;
+//    private String                              currName;
     
     /**
      * Constructor.
@@ -195,8 +195,7 @@ public class Profile
     public Profile()
     {
         gridUnit = pMgr.asFloat( CPConstants.GRID_UNIT_PN );
-        name = "default";
-        currName = name;
+        name = pMgr.asString( CPConstants.PROFILE_NAME_PN );
         // mainWindow is initialized in its declaration
         linePropertyClasses.stream()
             .forEach( this::putClass );
@@ -209,8 +208,8 @@ public class Profile
      */
     public void reset()
     {
-        name = currName;
         gridUnit = pMgr.asFloat( CPConstants.GRID_UNIT_PN );
+        name = pMgr.asString( CPConstants.PROFILE_NAME_PN );
         mainWindow.reset();
         linePropertySetMap.values().forEach( s -> s.reset() );
     }
@@ -221,8 +220,8 @@ public class Profile
      */
     public void apply()
     {
-        currName = name;
         pMgr.setProperty( CPConstants.GRID_UNIT_PN, gridUnit );
+        pMgr.setProperty( CPConstants.PROFILE_NAME_PN, name );
         mainWindow.apply();
         linePropertySetMap.values().forEach( s -> s.apply() );
     }
