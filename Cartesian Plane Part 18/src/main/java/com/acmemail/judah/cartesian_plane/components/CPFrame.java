@@ -94,7 +94,7 @@ public class CPFrame extends JFrame
         /* Make the menu bar the north child of the content pane. */
         contentPane.add( menuBar, BorderLayout.NORTH );
         
-        /* Make the Canvas the center child of the content pane. */
+        /* Make the ProfileEditorFeedback the center child of the content pane. */
         contentPane.add( cartPlane, BorderLayout.CENTER );
         
         /* Make the name, variable and parameter panels in the 

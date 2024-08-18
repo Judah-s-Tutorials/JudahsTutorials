@@ -34,7 +34,7 @@ public class LineGeneratorFigure extends JPanel
      */
     private static final int    lineJoin         = BasicStroke.JOIN_ROUND;
     
-    /** Background color of the Canvas. */
+    /** Background color of the ProfileEditorFeedback. */
     private static final Color          bgColor         = 
         new Color( .9f, .9f, .9f );
     
@@ -80,14 +80,14 @@ public class LineGeneratorFigure extends JPanel
      */
     private Graphics2D  gtx         = null;
     /** 
-     * The current width of the Canvas.
+     * The current width of the ProfileEditorFeedback.
      * Made an instance variable for convenience
      * of helper methods;
      * set every time paintComponent is invoked. 
      */
     private int         currWidth   = 0;
     /** 
-     * The current height of the Canvas; 
+     * The current height of the ProfileEditorFeedback; 
      * set every time paintComponent is invoked.
      */
     private int         currHeight  = 0;

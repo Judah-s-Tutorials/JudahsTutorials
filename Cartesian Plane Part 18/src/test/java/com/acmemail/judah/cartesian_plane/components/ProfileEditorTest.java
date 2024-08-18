@@ -1,12 +1,12 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.awt.Color;
 import java.util.stream.Stream;
 
-import javax.swing.JOptionPane;
+import javax.swing.JComponent;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,10 +30,32 @@ class ProfileEditorTest
     private static final String[]   allSetNames     =
     { axesSetName, gridLinesSetName, ticMajorSetName, ticMinorSetName };
 
+    /**
+     * Represents the properties of a Profile as determined by the
+     * PropertyManager. Used as needed to return the PropertyManager
+     * to its original state (see for example, {@link #beforeEach()}.
+     * Never modified after initialization.
+     */
     private static Profile          baseProfile     = new Profile();
+    /** 
+     * Contains property values guaranteed to be different from those
+     * stored in the BaseProfile. Never modified after initialization.
+     */
     private static Profile          distinctProfile = 
         ProfileUtils.getDistinctProfile( baseProfile );
+    /** 
+     * Profile used to initialize the test GUI/ProfileEditor.
+     * After initialization the reference must not be changed,
+     * but the contents of the object may be changed as needed.
+     * The contents are restored to their original values before
+     * each test (see {@link #beforeEach()}).
+     */
     private static Profile              profile = new Profile();
+    /** 
+     * The object that displays and manager the ProfileEditor.
+     * Guarantees that all interaction with the ProfileEditor
+     * components is conducted via the EDT.
+     */
     private static ProfileEditorTestGUI testGUI;
     
     @BeforeAll
@@ -45,10 +67,21 @@ class ProfileEditorTest
     @BeforeEach
     public void beforeEach() throws Exception
     {
+        // Restore the properties in the PropertyManager
+        // to their original values.
         baseProfile.apply();
-        profile = new Profile();
+        
+        // Return the working profile to its original state;
+        // reset the components of the ProfileEditor to their
+        // original values.
         testGUI.reset();
+        
+        // Verify that the working profile has been returned
+        // to its original state.
         assertEquals( baseProfile, profile );
+        
+        // Verify that the components of the ProfileEditor GUI
+        // have been returned to their original states.
         validateCurrState( baseProfile );
     }
     
@@ -63,10 +96,16 @@ class ProfileEditorTest
         validateCurrState( baseProfile );
     }
 
+    /**
+     * This test does little beside
+     * increasing test coverage
+     * by calling ProfileEditor.getFeedback().
+     */
     @Test
     public void testGetFeedBack()
     {
-        fail("Not yet implemented");
+        JComponent  feedback    = testGUI.getFeedback();
+        assertNotNull( feedback );
     }
 
     @Test
@@ -76,10 +115,10 @@ class ProfileEditorTest
         // the expected state.
         validateCurrState( baseProfile );
         
-        applyDistinctGraphProperties();
-        Stream.of( allSetNames )
-            .forEach( this::applyDistinctLineProperties );
-        // Verify all components have been changed to distinct values
+        // Changes the values of all the ProfileEditor GUI components.
+        applyDistinctProperties();
+        
+        // Verify all components have been changed to distinct values.
         validateCurrState( distinctProfile );
         
         // Apply the modified values and verify that the
@@ -92,16 +131,20 @@ class ProfileEditorTest
     @Test
     public void testReset()
     {
+        // Sanity check: verify that the test data is in
+        // the expected state.
         validateCurrState( baseProfile );
+        
+        // Changes the values of all the ProfileEditor GUI components.
         applyDistinctProperties();
+        
+        // Verify all components have been changed to distinct values.
         validateCurrState( distinctProfile );
+
+        // Reset the GUI; verify that all components have been
+        // returned to their original values.
         testGUI.reset();
         validateCurrState( baseProfile );
-    }
-
-    private void waitOp()
-    {
-        JOptionPane.showMessageDialog( null, "Waiting" );
     }
 
     /**

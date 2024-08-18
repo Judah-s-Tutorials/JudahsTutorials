@@ -97,7 +97,7 @@ public class Root implements Runnable
         BorderLayout    layout      = new BorderLayout();
         contentPane = new JPanel( layout );
         
-        /* Make the Canvas the center child of the content pane. */
+        /* Make the ProfileEditorFeedback the center child of the content pane. */
         contentPane.add( userPanel, BorderLayout.CENTER );
         /* Set the content pane in the frame. */
         frame.setContentPane( contentPane );

@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.profile;
+package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -20,7 +20,7 @@ import com.acmemail.judah.cartesian_plane.Profile;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class Canvas extends JComponent
+public class ProfileEditorFeedback extends JComponent
 {
     /** 
      * Encapsulates to various drawing operations.
@@ -48,7 +48,7 @@ public class Canvas extends JComponent
      *      
      * @see GraphManager
      */
-    public Canvas( Profile profile )
+    public ProfileEditorFeedback( Profile profile )
     {
         drawManager = new GraphManager( this.getVisibleRect(), profile );
         

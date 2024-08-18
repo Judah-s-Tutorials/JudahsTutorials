@@ -35,7 +35,6 @@ import javax.swing.text.JTextComponent;
 
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
-import com.acmemail.judah.cartesian_plane.sandbox.profile.Canvas;
 
 /**
  * This facility represents a set of controls
@@ -106,7 +105,7 @@ public class ProfileEditor extends JPanel
     public static final String GRID_LINES_TITLE = "Grid Lines";
     
     /** The component that the sample graph is drawn on. */
-    private final Canvas        canvas;
+    private final ProfileEditorFeedback        canvas;
     
     /** 
      * List of Runnables that set or reset the values of the 
@@ -151,7 +150,7 @@ public class ProfileEditor extends JPanel
         super( new BorderLayout() );
 
         this.profile = profile;
-        canvas = new Canvas( profile );
+        canvas = new ProfileEditorFeedback( profile );
         
         getDescMap();
         
@@ -635,8 +634,8 @@ public class ProfileEditor extends JPanel
         private static final float      maxVal  = Integer.MAX_VALUE;
         public final    JSpinner        spinner;
         public final    JLabel          label;
-        private final   DoubleConsumer  setter;
-        private final   DoubleSupplier  getter;
+        private final   DoubleConsumer  profileSetter;
+        private final   DoubleSupplier  profileGetter;
         
         public SpinnerDesc(
             LinePropertySet propSet,
@@ -647,7 +646,7 @@ public class ProfileEditor extends JPanel
             // These variables are used to temporarily configure the
             // property getters and setters for this JSpinner. Once
             // the values are determined they are assigned to the
-            // getter and setter instance variables.
+            // profileGetter and profileSetter instance variables.
             DoubleConsumer  tempSetter  = null;
             DoubleSupplier  tempGetter  = null;
             
@@ -678,11 +677,11 @@ public class ProfileEditor extends JPanel
                 throw new ComponentException( "Invalid Label" );
             }
             
-            setter = tempSetter;
-            getter = tempGetter;
+            profileSetter = tempSetter;
+            profileGetter = tempGetter;
             label = new JLabel( labelText, SwingConstants.RIGHT );
             
-            double              val     = getter.getAsDouble();
+            double              val     = profileGetter.getAsDouble();
             SpinnerNumberModel  model   = 
                 new SpinnerNumberModel( val, minVal, maxVal, step );
             spinner = new JSpinner( model );
@@ -697,14 +696,14 @@ public class ProfileEditor extends JPanel
             
             model.addChangeListener( e -> {
                 float   value   = model.getNumber().floatValue();
-                setter.accept( value );
+                profileSetter.accept( value );
                 canvas.repaint();
             });
             
             Runnable    toComponent = () ->
-                spinner.setValue( getter.getAsDouble() );
+                spinner.setValue( profileGetter.getAsDouble() );
             Runnable    toProfile   = () ->
-                setter.accept( getFloat( spinner ) );
+                profileSetter.accept( getFloat( spinner ) );
             resetList.add( toComponent );
             applyList.add( toProfile );
         }

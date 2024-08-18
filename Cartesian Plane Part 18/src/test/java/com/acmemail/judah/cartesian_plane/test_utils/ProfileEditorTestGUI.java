@@ -611,7 +611,19 @@ public class ProfileEditorTestGUI
      */
     public void reset()
     {
-        GUIUtils.schedEDTAndWait( () -> profileEditor.apply() );
+        GUIUtils.schedEDTAndWait( () -> profileEditor.reset() );
+    }
+    
+    /**
+     * Gets the feedback component from the ProfileEditor GUI.
+     * 
+     * @return  the feedback component from the ProfileEditor
+     */
+    public JComponent getFeedback()
+    {
+        Object  obj = getValue( () -> profileEditor.getFeedBack() );
+        assertTrue( obj instanceof JComponent );
+        return (JComponent)obj;
     }
     
     /**
