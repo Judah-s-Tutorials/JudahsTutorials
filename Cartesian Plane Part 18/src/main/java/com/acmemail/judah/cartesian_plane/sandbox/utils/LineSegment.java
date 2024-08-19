@@ -19,6 +19,12 @@ import java.util.Objects;
  * 
  * @author Jack Straub
  */
+/**
+ * @author Jack Straub
+ */
+/**
+ * @author Jack Straub
+ */
 public class LineSegment
 {
     /** The color of the given point (origin). */
@@ -108,6 +114,70 @@ public class LineSegment
         return seg;
     }
     
+    /**
+     * Beginning with this LineSegment
+     * search a given image horizontally 
+     * for the next point with the encapsulated color
+     * and return the enclosing line segment.
+     * The search is conducted from left to right
+     * and does not include the points
+     * enclosed by this LineSegment.
+     * If the given color is not found
+     * null is returned.
+     * <p>
+     * Precondition:
+     * this LineSegments encapsulates a vertical line
+     * 
+     * @param image the given image
+     * 
+     * @return  
+     *      the next vertical LineSegment that encloses a point
+     *      with the encapsulated color
+     */
+    public LineSegment getNextVerticalLine( BufferedImage image )
+    {
+        double      xco     = rect.getX() + rect.getWidth();
+        Point2D     origin  = new Point2D.Double( xco, rect.getY() );
+        LineSegment lineSeg = getNextVerticalLine( origin, image, rgb );
+        return lineSeg;
+    }
+    
+    /**
+     * Given an image and a starting point,
+     * search the horizontally for a given color
+     * and return the LineSegment that encloses the color.
+     * The search is performed from left to right
+     * including the x-coordinate of the starting point.
+     * If the given color is not found
+     * null is returned.
+     * 
+     * @param origin    the given starting point
+     * @param image     the given image
+     * @param iColor    the given color
+     * 
+     * @return  
+     *      the line enclosing the given color
+     *      or null if no such line is found
+     */
+    public static LineSegment 
+    getNextVerticalLine( Point2D origin, BufferedImage image, int iColor )
+    {
+        LineSegment lineSeg = null;
+        int         maxXco  = image.getWidth();
+        int         yco     = (int)origin.getY();
+        int         xco     = (int)origin.getX();
+        for (  ; lineSeg == null && xco < maxXco ; ++xco )
+        {
+            int currColor   = image.getRGB( xco, yco ) & 0xFFFFFF;
+            if ( currColor == iColor )
+            {
+                Point2D point   = new Point2D.Float( xco, yco );
+                lineSeg = LineSegment.of( point, image );
+            }
+        }
+        return lineSeg;
+    }
+
     /**
      * Constructor.
      * Creates a LineSegment
