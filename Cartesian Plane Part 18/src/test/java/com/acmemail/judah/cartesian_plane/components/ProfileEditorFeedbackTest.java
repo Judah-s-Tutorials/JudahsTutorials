@@ -16,6 +16,8 @@ import javax.swing.JOptionPane;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.LineSegment;
@@ -42,6 +44,8 @@ class ProfileEditorFeedbackTest
     private static final String ticMinorSet     =
         LinePropertySetTicMinor.class.getSimpleName();
     
+    private static final Color      defColor    = Color.RED;
+    private static final Color      extColor    = Color.BLUE;
     private static final float      defGridUnit = 100;
     private static final float      extGridUnit = 2 * defGridUnit;
     private static final Color      defBGColor  = new Color( 0xEFEFEF );
@@ -55,29 +59,15 @@ class ProfileEditorFeedbackTest
     private static final boolean    extFontBold     = !defFontBold;
     private static final boolean    defFontItalic   = false;
     private static final boolean    extFontItalic   = !defFontItalic;
-    private static final Color      defFGColor      = nextColor();
-    private static final Color      extFGColor      = nextColor();
     private static final float      defWidth        = 1000;
     private static final float      extWidth        = 1.5f * defWidth;
     
-    private static final float      defLength   = 20;
-    private static final float      extLength   = 2 * defLength;
-    private static final float      defStroke   = 5;
-    private static final float      extStroke   = 2 * defStroke;
-    private static final float      defSpacing  = 5;
-    private static final float      extSpacing  = 2 * defSpacing;
-    
-    private static final int    defAxesColor        = 0xFF0000;
-    private static final int    extAxesColor        = defAxesColor + 10;
-    private static final int    defGridLinesColor   = 0x00FF00;
-    private static final int    extGridLinesColor   = 
-        defGridLinesColor + 10;
-    private static final int    defTicMajorColor    = 0x0000FF;
-    private static final int    extTicMajorColor    = 
-        defTicMajorColor + 10;
-    private static final int    defTicMinorColor    = 0x0000FF;
-    private static final int    extTicMinorColor    = 
-        defTicMinorColor + 10;
+    private static final float      defLength       = 20;
+    private static final float      extLength       = 2 * defLength;
+    private static final float      defStroke       = 2;
+    private static final float      extStroke       = 2 * defStroke;
+    private static final float      defSpacing      = 5;
+    private static final float      extSpacing      = 2 * defSpacing;
     
     /**
      * Represents the properties of a Profile as determined by the
@@ -129,36 +119,35 @@ class ProfileEditorFeedbackTest
     {
         LinePropertySet propSet     = 
             profile.getLinePropertySet( axesSet );
-        Color           defColor    = new Color( defAxesColor );
-        Color           extColor    = new Color( extAxesColor );
-        propSet.setColor( defColor );
         validateAxes();
-        waitOp();
         
         propSet.setColor( extColor );
         propSet.setStroke( extStroke );
         validateAxes();
-        waitOp();
     }
 
-    @Test
-    public void testGridLines()
+    @ParameterizedTest
+    @ValueSource( strings= {
+        "LinePropertySetGridLines",
+        "LinePropertySetTicMajor",
+        "LinePropertySetTicMinor"
+    })
+    public void testLines( String propSetName )
     {
         LinePropertySet propSet     = 
-            profile.getLinePropertySet( gridLinesSet );
-        propSet.setDraw( true );
-        Color           defColor    = new Color( defGridLinesColor );
-        Color           extColor    = new Color( extGridLinesColor );
-        propSet.setColor( defColor );
-//        validateGridLines();
-        validateVerticalLines( propSet );
-        waitOp();
+            profile.getLinePropertySet( propSetName );
+        LineEvaluator  evalA   = new LineEvaluator( propSetName );
+        evalA.validateVertical();
+        evalA.validateHorizontal();
         
+        profile.setGridUnit( extGridUnit );
         propSet.setColor( extColor );
         propSet.setStroke( extStroke );
-//        validateGridLines();
-        validateVerticalLines( propSet );
-        waitOp();
+        if ( propSet.hasLength() )
+            propSet.setLength( extLength );
+        LineEvaluator  evalB   = new LineEvaluator( propSetName );
+        evalB.validateVertical();
+        evalB.validateHorizontal();
     }
     
     private static void waitOp()
@@ -207,91 +196,6 @@ class ProfileEditorFeedbackTest
         assertEquals( expColor, xColor );
     }
 
-    private void validateGridLines()
-    {        
-        LinePropertySet props       = 
-            profile.getLinePropertySet( gridLinesSet );
-        testGUI.repaint();
-
-        int             width       = testGUI.getWidth();
-        int             height      = testGUI.getHeight();
-        float           expStroke   = props.getStroke();
-        float           xCenter     = width / 2f;
-        float           yCenter     = height / 2;
-        float           yTestCo     = yCenter + expStroke / 2 + 1;
-        int             expColor    = getRGB( props.getColor() );
-        BufferedImage   image       = testGUI.getImage();
-        Point2D         origin      = null;
-        
-        // On y-axis, above x-axis
-        origin = new Point2D.Float( xCenter, yTestCo );
-        LineSegment     seg1        = 
-            LineSegment.getNextVerticalLine( origin, image, expColor );
-        assertNotNull( seg1 );
-        Rectangle2D     bounds1     = seg1.getBounds();
-        
-        LineSegment     seg2        = seg1.getNextVerticalLine( image );
-        assertNotNull( seg2 );
-        Rectangle2D     bounds2     = seg2.getBounds();
-        System.out.println( "gl: " + seg1 );
-        System.out.println( "gl: " + seg2 );
-        
-        double          expSpacing  = 
-            profile.getGridUnit() / props.getSpacing();
-        double          actSpacing  = bounds2.getX() - bounds1.getX();
-        double          actStroke   = bounds1.getWidth();
-        
-        assertEquals( actStroke, bounds2.getWidth() );
-        assertEquals( expStroke, actStroke );
-        assertEquals( expSpacing, actSpacing );
-    }
-
-    private void validateVerticalLines( LinePropertySet props )
-    {        
-        props.setDraw( true );
-        testGUI.repaint();
-        
-        float           expLength   = props.getLength();
-        float           expStroke   = props.getStroke();
-        int             expColor    = getRGB( props.getColor() );
-
-        int             width       = testGUI.getWidth();
-        int             height      = testGUI.getHeight();
-        float           xCenter     = width / 2f;
-        float           yCenter     = height / 2;
-        float           yTest       = yCenter - expStroke / 2 - 1;
-        BufferedImage   image       = testGUI.getImage();
-        Point2D         origin      = null;
-        
-        // On y-axis, above x-axis
-        origin = new Point2D.Float( xCenter, yTest );
-        LineSegment     seg1        = 
-            LineSegment.getNextVerticalLine( origin, image, expColor );
-        assertNotNull( seg1 );
-        Rectangle2D     bounds1     = seg1.getBounds();
-        
-        LineSegment     seg2        = seg1.getNextVerticalLine( image );
-        assertNotNull( seg2 );
-        Rectangle2D     bounds2     = seg2.getBounds();
-        System.out.println( "gl: " + seg1 );
-        System.out.println( "gl: " + seg2 );
-        
-        double          expSpacing  = 
-            profile.getGridUnit() / props.getSpacing();
-        double          actSpacing  = bounds2.getX() - bounds1.getX();
-        double          actLength   = bounds1.getHeight();
-        double          actStroke   = bounds1.getWidth();
-        
-        if ( expLength > 0 )
-            assertEquals( expLength, actLength );
-        else
-            assertTrue( actLength >= height );        
-        assertEquals( actLength, bounds2.getHeight() );
-        assertEquals( actStroke, bounds2.getWidth() );
-        assertEquals( expStroke, actStroke );
-        assertEquals( expSpacing, actSpacing );
-    }
-
     private static void initBaseProfile()
     {
         baseProfile.setGridUnit( defGridUnit );
@@ -312,7 +216,7 @@ class ProfileEditorFeedbackTest
         GraphPropertySet    baseGraph   = baseProfile.getMainWindow();
         baseGraph.setBGColor( defBGColor );
         baseGraph.setBold( defFontBold );
-        baseGraph.setFGColor( defFGColor );
+        baseGraph.setFGColor( defColor );
         baseGraph.setFontName( defFontName );
         baseGraph.setFontSize( defFontSize );
         baseGraph.setItalic( defFontItalic );
@@ -327,15 +231,8 @@ class ProfileEditorFeedbackTest
         baseSet.setLength( defLength );
         baseSet.setSpacing( defSpacing );
         baseSet.setStroke( defStroke );
+        baseSet.setColor( defColor );
         baseSet.setDraw( false );
-    }
-    
-    private static Color nextColor()
-    {
-        int     iGray       = nextGray << 16 | nextGray << 8 | nextGray;
-        Color   gray        = new Color( iGray );
-        nextGray += 5;
-        return gray;
     }
     
     private static int getRGB( Point2D point, BufferedImage image )
@@ -350,5 +247,164 @@ class ProfileEditorFeedbackTest
     {
         int     iColor  = color.getRGB() & 0xFFFFFF;
         return iColor;
+    }
+    
+    /**
+     * For the current Profile
+     * and a given LinePropertySet
+     * collect the data needed to validate
+     * the properties of the encapsulated lines,
+     * and perform the validation.
+     * Two consecutive vertical lines
+     * and two consecutive horizontal lines
+     * are selected.
+     * The spacing between the lines,
+     * and their length, stroke, and color
+     * are verified.
+     * 
+     * @author Jack Straub
+     * 
+     * @see #validateHorizontal()
+     * @see #validateVertical()
+     */
+    private class LineEvaluator
+    {
+        /** 
+         * The simple name of the LinePropertySet subclass
+         * being evaluated.
+         */
+        private final String        propSetName;
+        /** The width of the containing window. */
+        private final int           width;
+        /** The height of the containing window. */
+        private final int           height;
+        /** The y-coordinate of the x-axis. */
+        private final int           xAxisYco;
+        /** The x-coordinate of the y-axis. */
+        private final int           yAxisXco;
+        /** The expected length of each line. */
+        private final float         expLength;
+        /** The expected stroke of each line. */
+        private final float         expStroke;
+        /** The expected spacing between lines. */
+        private final float         expSpacing;
+        /** The expected line color. */
+        private final int           expColor;
+        /** An image of the window containing the lines to be validated. */
+        private final BufferedImage image;
+
+        /**
+         * Constructor.
+         * Collects the data needed for line validation,
+         * and creates the image containing the lines
+         * to be validated.
+         * The color of the axes
+         * is set to the color of the lines
+         * to be evaluated,
+         * which facilitates calculating 
+         * the length of a line
+         * that crosses an axis.
+         * The stroke of the axes is set to 1,
+         * which prevents the width of the axes
+         * from overlapping the lines
+         * to be validated.
+         * 
+         * @param propSetName   
+         *      the name of the LinePropertySet to be validated
+         */
+        public LineEvaluator( String propSetName )
+        {
+            LinePropertySet props   = 
+                profile.getLinePropertySet( propSetName );
+            props.setDraw( true );
+            
+            LinePropertySet axesProps   = 
+                profile.getLinePropertySet( axesSet );
+            Color           lineColor   = props.getColor();
+            axesProps.setColor( lineColor );
+            axesProps.setStroke( 1 );
+            
+            testGUI.repaint();
+            this.propSetName = propSetName;
+            width  = testGUI.getWidth();
+            height = testGUI.getHeight();
+            xAxisYco = height / 2;
+            yAxisXco = width / 2;
+            expLength = props.getLength();
+            expStroke = props.getStroke();
+            expColor = getRGB( lineColor );
+            expSpacing = profile.getGridUnit() / props.getSpacing();
+            image = testGUI.getImage();            
+        }
+        
+        public void validateVertical()
+        {
+            float   oXco        = yAxisXco + expSpacing;
+            float   oYco        = expLength > 0 ?
+                xAxisYco + expLength / 4 : expSpacing / 2;
+            Point2D     origin  = new Point2D.Double( oXco, oYco );
+            LineSegment seg1    = LineSegment.of( origin, image );
+            Rectangle2D bounds1 = seg1.getBounds();
+            
+            origin.setLocation( oXco + expSpacing, oYco );
+            LineSegment seg2    = LineSegment.of( origin, image );
+            Rectangle2D bounds2 = seg2.getBounds();
+            
+            double      actSpacing  = bounds2.getX() - bounds1.getX();
+            double      actLength   = bounds1.getHeight();
+            double      actStroke   = bounds1.getWidth();
+            int         actColor    = seg1.getColor();
+            
+            System.out.println( propSetName + "V: " + seg1 );
+            System.out.println( propSetName + "V: " + seg2 );
+//            waitOp();
+
+            assertEquals( actStroke, bounds2.getWidth() );
+            assertEquals( actLength, bounds2.getHeight() );
+            assertEquals( actColor, seg2.getColor() );
+            
+            if ( expLength > 0 )
+                assertEquals( expLength, actLength, propSetName );
+            else
+                assertTrue( actLength >= height );
+            assertEquals( expSpacing, actSpacing, propSetName );
+            assertEquals( expStroke, actStroke, propSetName );
+            assertEquals( expColor, actColor, propSetName );
+        }
+        
+        public void validateHorizontal()
+        {
+            float   oYco        = xAxisYco + expSpacing;
+            float   oXco        = expLength > 0 ?
+                yAxisXco + expLength / 4 : expSpacing / 2;
+            Point2D     origin  = new Point2D.Double( oXco, oYco );
+            LineSegment seg1    = LineSegment.of( origin, image );
+            Rectangle2D bounds1 = seg1.getBounds();
+            
+            origin.setLocation( oXco, oYco + expSpacing );
+            LineSegment seg2    = LineSegment.of( origin, image );
+            Rectangle2D bounds2 = seg2.getBounds();
+            
+            double      actSpacing  = bounds2.getY() - bounds1.getY();
+            double      actLength   = bounds1.getWidth();
+            double      actStroke   = bounds1.getHeight();
+            int         actColor    = seg1.getColor();
+            
+            System.out.println( propSetName + "H: " + seg1 );
+            System.out.println( propSetName + "H: " + seg2 );
+//            waitOp();
+
+            assertEquals( actStroke, bounds2.getHeight() );
+            assertEquals( actLength, bounds2.getWidth() );
+            assertEquals( actColor, seg2.getColor() );
+            
+            if ( expLength > 0 )
+                assertEquals( expLength, actLength, propSetName );
+            else
+                assertTrue( actLength >= width );
+            assertEquals( expSpacing, actSpacing, propSetName );
+            assertEquals( expStroke, actStroke, propSetName );
+            assertEquals( expColor, actColor, propSetName );
+        }
     }
 }

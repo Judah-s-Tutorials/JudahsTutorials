@@ -156,11 +156,47 @@ public class LineSegment
      * @param iColor    the given color
      * 
      * @return  
-     *      the line enclosing the given color
+     *      the first vertical line enclosing the given color
      *      or null if no such line is found
      */
     public static LineSegment 
     getNextVerticalLine( Point2D origin, BufferedImage image, int iColor )
+    {
+        LineSegment lineSeg = null;
+        int         maxXco  = image.getWidth();
+        int         yco     = (int)origin.getY();
+        int         xco     = (int)origin.getX();
+        for (  ; lineSeg == null && xco < maxXco ; ++xco )
+        {
+            int currColor   = image.getRGB( xco, yco ) & 0xFFFFFF;
+            if ( currColor == iColor )
+            {
+                Point2D point   = new Point2D.Float( xco, yco );
+                lineSeg = LineSegment.of( point, image );
+            }
+        }
+        return lineSeg;
+    }
+    
+    /**
+     * Given an image and a starting point,
+     * search the vertically for a given color
+     * and return the LineSegment that encloses the color.
+     * The search is performed from top to bottom
+     * including the y-coordinate of the starting point.
+     * If the given color is not found
+     * null is returned.
+     * 
+     * @param origin    the given starting point
+     * @param image     the given image
+     * @param iColor    the given color
+     * 
+     * @return  
+     *      the first horizontal line enclosing the given color
+     *      or null if no such line is found
+     */
+    public static LineSegment 
+    getNextHorizontalLine( Point2D origin, BufferedImage image, int iColor )
     {
         LineSegment lineSeg = null;
         int         maxXco  = image.getWidth();
