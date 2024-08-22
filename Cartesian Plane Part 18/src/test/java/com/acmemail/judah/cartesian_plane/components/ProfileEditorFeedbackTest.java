@@ -1,11 +1,12 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -59,6 +60,8 @@ class ProfileEditorFeedbackTest
     private static final boolean    extFontBold     = !defFontBold;
     private static final boolean    defFontItalic   = false;
     private static final boolean    extFontItalic   = !defFontItalic;
+    private static final Color      defFontColor    = Color.BLUE;
+    private static final Color      extFontColor    = Color.GREEN;
     private static final float      defWidth        = 1000;
     private static final float      extWidth        = 1.5f * defWidth;
     
@@ -150,6 +153,75 @@ class ProfileEditorFeedbackTest
         evalB.validateHorizontal();
     }
     
+    @Test
+    public void testGridColor()
+    {
+        GraphPropertySet    props   = profile.getMainWindow();
+        BufferedImage       image   = testGUI.getImage();
+        int                 xco     = image.getWidth() / 4;
+        int                 yco     = image.getWidth() / 4;
+        int                 actRGB  = image.getRGB( xco, yco ) & 0xFFFFFF;
+        int                 expRGB  = getRGB( props.getBGColor() );
+//        waitOp();
+        assertEquals( actRGB, expRGB );
+        
+        expRGB = getRGB( extBGColor );
+        props.setBGColor( extBGColor );
+        testGUI.repaint();
+        image= testGUI.getImage();
+        actRGB = image.getRGB( xco, yco ) & 0xFFFFFF;
+//        waitOp();
+        assertEquals( actRGB, expRGB );
+    }
+    
+    @Test
+    public void testFontSize()
+    {
+        LinePropertySet     ticMajor    = 
+            profile.getLinePropertySet( ticMajorSet );
+        GraphPropertySet    graph       = profile.getMainWindow();
+        ticMajor.setDraw( true );
+        ticMajor.setSpacing( 1 );
+        graph.setFontDraw( true );
+        
+        int                 heightA     = getTextHeight();
+        System.out.println( "text height: " +  heightA );
+        
+        graph.setFGColor( extFontColor );
+        int                 heightB     = getTextHeight();
+        System.out.println( "text height: " +  heightB );
+        assertEquals( heightA, heightB );
+        
+        graph.setFontSize( extFontSize );
+        System.out.println( "text height: " + getTextHeight() );
+        int                 heightC     = getTextHeight();
+        System.out.println( "text height: " +  heightB );
+        assertTrue( heightA < heightC );
+    }
+    
+    private int getTextHeight()
+    {
+        GraphPropertySet    graph       = profile.getMainWindow();
+        LinePropertySet     ticMajor    = 
+            profile.getLinePropertySet( ticMajorSet );
+        testGUI.repaint();
+        BufferedImage       image       = testGUI.getImage();
+        waitOp();
+        
+        int         width   = image.getWidth();
+        int         height  = image.getHeight();
+        double      spacing = profile.getGridUnit() / ticMajor.getSpacing();
+        double      xco     = width / 2 + spacing;
+        double      yco     = height / 2 + ticMajor.getLength() / 2 + 1;
+        Point       origin  = new Point( (int)xco, (int)yco );
+        int         rgb     = getRGB( graph.getFGColor() );
+        
+        TextRect    rect        = 
+            new TextRect( origin, rgb, image );
+        int         textHeight  = rect.bottom - rect.top;
+        return textHeight;
+    }
+    
     private static void waitOp()
     {
         JOptionPane.showMessageDialog( null, "Waiting..." );
@@ -183,9 +255,6 @@ class ProfileEditorFeedbackTest
         LineSegment xAxis   = LineSegment.of( origin, image );
         Rectangle2D xBounds = xAxis.getBounds();
         int         xColor  = getRGB( origin, image );
-        
-        System.out.println( "ax: " + yAxis );
-        System.out.println( "ax: " + xAxis );
 
         assertTrue( yBounds.getHeight() >= height );
         assertEquals( yBounds.getWidth(), stroke );
@@ -216,7 +285,7 @@ class ProfileEditorFeedbackTest
         GraphPropertySet    baseGraph   = baseProfile.getMainWindow();
         baseGraph.setBGColor( defBGColor );
         baseGraph.setBold( defFontBold );
-        baseGraph.setFGColor( defColor );
+        baseGraph.setFGColor( defFontColor );
         baseGraph.setFontName( defFontName );
         baseGraph.setFontSize( defFontSize );
         baseGraph.setItalic( defFontItalic );
@@ -247,6 +316,62 @@ class ProfileEditorFeedbackTest
     {
         int     iColor  = color.getRGB() & 0xFFFFFF;
         return iColor;
+    }
+    
+    private class TextRect
+    {
+        private static final int    range   = 20;
+        private final int           oXco;
+        private final int           oYco;
+        private final int           rgb;
+        private final BufferedImage image;
+        private final int           width;
+        private final int           height;
+        
+        private int top     = Integer.MAX_VALUE;
+        private int bottom  = -1;
+        private int left    = -1;
+        private int right   = Integer.MAX_VALUE;
+        public TextRect( Point origin, int color, BufferedImage image )
+        {
+            oXco = origin.x;
+            oYco = origin.y;
+            rgb = color;
+            this.image = image;
+            width = image.getWidth();
+            height = image.getHeight();
+            getTop();
+        }
+        
+        private void getTop()
+        {
+            int first       = Integer.MAX_VALUE;
+            int topLimit    = oYco;
+            int bottomLimit = oYco + range;
+            int leftLimit   = oXco - range;
+            int rightLimit  = oXco + range;
+            
+            for ( int xco = leftLimit ; xco < rightLimit ; ++ xco )
+            {
+                int emptyCount  = 0;
+                for ( int yco = oYco ; oYco < height ; ++yco )
+                {
+                    int nextColor   = image.getRGB( xco, yco ) & 0xffffff;
+                    if ( nextColor == rgb )
+                    {
+                        if ( yco < top )
+                            top = yco;
+                        if ( yco > bottom )
+                            bottom = yco;
+                    }
+                    else
+                    {
+                        if ( ++emptyCount > 10 )
+                            break;
+                    }
+                }
+            }
+        }
     }
     
     /**
@@ -355,8 +480,8 @@ class ProfileEditorFeedbackTest
             double      actStroke   = bounds1.getWidth();
             int         actColor    = seg1.getColor();
             
-            System.out.println( propSetName + "V: " + seg1 );
-            System.out.println( propSetName + "V: " + seg2 );
+//            System.out.println( propSetName + "V: " + seg1 );
+//            System.out.println( propSetName + "V: " + seg2 );
 //            waitOp();
 
             assertEquals( actStroke, bounds2.getWidth() );
@@ -390,8 +515,8 @@ class ProfileEditorFeedbackTest
             double      actStroke   = bounds1.getHeight();
             int         actColor    = seg1.getColor();
             
-            System.out.println( propSetName + "H: " + seg1 );
-            System.out.println( propSetName + "H: " + seg2 );
+//            System.out.println( propSetName + "H: " + seg1 );
+//            System.out.println( propSetName + "H: " + seg2 );
 //            waitOp();
 
             assertEquals( actStroke, bounds2.getHeight() );
