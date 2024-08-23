@@ -65,6 +65,55 @@ public class LineSegment
     }
     
     /**
+     * Given a rectangle within an image
+     * find the smallest rectangle
+     * that encloses all points
+     * of a given color.
+     * For example, 
+     * given the color 0xFF 
+     * and the following rectangle:
+     * <pre style="margin-left:2em">
+     *      10 12 13 14 15 16 17 18 19 10
+     *      -----------------------------
+     * 100| 00 00 00 00 00 00 00 00 00 00
+     * 101| 00 FF 00 00 00 00 FF FF 00 00
+     * 102| 00 00 FF 00 00 FF 00 00 FF 00
+     * 103| 00 00 FF 00 00 FF 00 00 FF 00
+     * 104| 00 00 FF 00 00 FF 00 00 FF 00
+     * 105| 00 FF FF FF FF 00 FF FF 00 00
+     * 106| 00 00 00 00 00 00 00 00 00 00
+     * 107| 00 00 00 00 00 00 00 00 00 00
+     * 108| 00 00 00 00 00 00 00 00 00 00
+     * 109| 00 00 00 00 00 00 00 00 00 00
+     * 110| 00 00 00 00 00 00 00 00 00 00</pre>
+     * <p>
+     * Construct the rectangle x=12, y=101, width=8, and height=5.
+     * 
+     * @param rect  constraining rectangle
+     * @param image given image
+     * @param rgb   given color
+     * 
+     * @return  
+     *      the smallest rectangle within the given constraints
+     *      that encloses all pixels of the given color
+     */
+    public static LineSegment 
+    ofRect( Rectangle2D rect, BufferedImage image, int rgb )
+    {
+        LineSeg seg =
+            new LineSeg( 
+                image,
+                rgb,
+                (int)rect.getMinX(),
+                (int)rect.getMaxX(),
+                (int)rect.getMinY(),
+                (int)rect.getMaxY()
+            );
+        LineSegment lineSegment = new LineSegment( seg.rect, seg.rgb );
+        return lineSegment;
+    }
+    
+    /**
      * Create a LineSegment
      * from a given vertical line, stroke and color.
      * 
@@ -112,106 +161,6 @@ public class LineSegment
             new Rectangle2D.Double( rectXco, rectYco, length, stroke );
         LineSegment seg         = new LineSegment( rect, rgb );
         return seg;
-    }
-    
-    /**
-     * Beginning with this LineSegment
-     * search a given image horizontally 
-     * for the next point with the encapsulated color
-     * and return the enclosing line segment.
-     * The search is conducted from left to right
-     * and does not include the points
-     * enclosed by this LineSegment.
-     * If the given color is not found
-     * null is returned.
-     * <p>
-     * Precondition:
-     * this LineSegments encapsulates a vertical line
-     * 
-     * @param image the given image
-     * 
-     * @return  
-     *      the next vertical LineSegment that encloses a point
-     *      with the encapsulated color
-     */
-    public LineSegment getNextVerticalLine( BufferedImage image )
-    {
-        double      xco     = rect.getX() + rect.getWidth();
-        Point2D     origin  = new Point2D.Double( xco, rect.getY() );
-        LineSegment lineSeg = getNextVerticalLine( origin, image, rgb );
-        return lineSeg;
-    }
-    
-    /**
-     * Given an image and a starting point,
-     * search the horizontally for a given color
-     * and return the LineSegment that encloses the color.
-     * The search is performed from left to right
-     * including the x-coordinate of the starting point.
-     * If the given color is not found
-     * null is returned.
-     * 
-     * @param origin    the given starting point
-     * @param image     the given image
-     * @param iColor    the given color
-     * 
-     * @return  
-     *      the first vertical line enclosing the given color
-     *      or null if no such line is found
-     */
-    public static LineSegment 
-    getNextVerticalLine( Point2D origin, BufferedImage image, int iColor )
-    {
-        LineSegment lineSeg = null;
-        int         maxXco  = image.getWidth();
-        int         yco     = (int)origin.getY();
-        int         xco     = (int)origin.getX();
-        for (  ; lineSeg == null && xco < maxXco ; ++xco )
-        {
-            int currColor   = image.getRGB( xco, yco ) & 0xFFFFFF;
-            if ( currColor == iColor )
-            {
-                Point2D point   = new Point2D.Float( xco, yco );
-                lineSeg = LineSegment.of( point, image );
-            }
-        }
-        return lineSeg;
-    }
-    
-    /**
-     * Given an image and a starting point,
-     * search the vertically for a given color
-     * and return the LineSegment that encloses the color.
-     * The search is performed from top to bottom
-     * including the y-coordinate of the starting point.
-     * If the given color is not found
-     * null is returned.
-     * 
-     * @param origin    the given starting point
-     * @param image     the given image
-     * @param iColor    the given color
-     * 
-     * @return  
-     *      the first horizontal line enclosing the given color
-     *      or null if no such line is found
-     */
-    public static LineSegment 
-    getNextHorizontalLine( Point2D origin, BufferedImage image, int iColor )
-    {
-        LineSegment lineSeg = null;
-        int         maxXco  = image.getWidth();
-        int         yco     = (int)origin.getY();
-        int         xco     = (int)origin.getX();
-        for (  ; lineSeg == null && xco < maxXco ; ++xco )
-        {
-            int currColor   = image.getRGB( xco, yco ) & 0xFFFFFF;
-            if ( currColor == iColor )
-            {
-                Point2D point   = new Point2D.Float( xco, yco );
-                lineSeg = LineSegment.of( point, image );
-            }
-        }
-        return lineSeg;
     }
 
     /**
@@ -378,6 +327,78 @@ public class LineSegment
             int     height  = bottom - top + 1;
             rect = new Rectangle( left, top, width, height );
         }
+        
+        /**
+         * 
+         * In a given image
+         * find the smallest rectangle
+         * that encapsulates all pixels
+         * of a given color
+         * within the given constraints.
+         * If necessary,
+         * constraints will be adjusted
+         * to be greater than or equal to 0,
+         * and less than the width or height
+         * of the given image.
+         * 
+         * @param image         the given image
+         * @param rgb           the given color
+         * @param leftLimit     the left constraint
+         * @param rightLimit    the right constraint
+         * @param topLimit      the top constraint
+         * @param bottomLimit   the bottom constraint
+         */
+        public LineSeg( 
+            BufferedImage image,
+            int rgb,
+            int leftLimit,
+            int rightLimit,
+            int topLimit,
+            int bottomLimit 
+        )
+        {
+            this.image = image;
+            imageWidth = image.getWidth();
+            imageHeight = image.getHeight();
+            originXco = limitXco( leftLimit );
+            originYco = limitYco( topLimit );
+            this.rgb        = rgb;
+            
+            int xEnd        = limitXco( rightLimit );
+            int yEnd        = limitYco( bottomLimit );
+            
+            // These four variables will ultimately 
+            // describe the enclosing rectangle.
+            int leftXco     = Integer.MAX_VALUE;
+            int rightXco    = -1;
+            int topYco      = Integer.MAX_VALUE;
+            int bottomYco   = -1;
+            
+            for ( int xco = originXco ; xco <= xEnd ; ++xco )
+                for ( int yco = originYco ; yco <= yEnd ; ++yco )
+                {
+                    int testRGB = image.getRGB( xco, yco ) & 0xffffff;
+                    if ( testRGB == rgb )
+                    {
+                        if ( xco < leftXco )
+                            leftXco = xco;
+                        if ( xco > rightXco )
+                            rightXco = xco;
+                        if ( yco < topYco )
+                            topYco = yco;
+                        if ( yco > bottomYco )
+                            bottomYco = yco;
+                    }
+                }
+            if ( leftXco >= 0 )
+            {
+                int width   = rightXco - leftXco + 1;
+                int height  = bottomYco - topYco + 1;
+                rect = new Rectangle( leftXco, topYco, width, height );
+            }
+            else
+                rect = null;
+        }
 
         /**
          * Determines the left edge of the bounding rectangle.
@@ -475,6 +496,52 @@ public class LineSegment
             )
                 rgb = image.getRGB( xco, yco ) & 0xFFFFFF;
             return rgb;
+        }
+        
+        /**
+         * Makes sure that a given y-coordinate is sane.
+         * If the input value is less than 0, the returned value
+         * will be 0. 
+         * If the input value is greater than the
+         * height of the current image,
+         * the returned value will be the height.
+         * 
+         * @param testLimit y-coordinate to test
+         * 
+         * @return  
+         *      testLimit if within range of the bounds
+         *      of the current image; 
+         *      otherwise 0 or image height
+         */
+        private int limitYco( int testLimit )
+        {
+            int limit   = Math.min( testLimit, imageHeight );
+            limit = Math.max( 0, limit );
+            return limit;
+            
+        }
+        
+        /**
+         * Makes sure that a given x-coordinate is sane.
+         * If the input value is less than 0, the returned value
+         * will be 0. 
+         * If the input value is greater than the
+         * width of the current image,
+         * the returned value will be the width.
+         * 
+         * @param testLimit x-coordinate to test
+         * 
+         * @return  
+         *      testLimit if within range of the bounds
+         *      of the current image; 
+         *      otherwise 0 or image width
+         */
+        private int limitXco( int testLimit )
+        {
+            int limit   = Math.min( testLimit, imageWidth );
+            limit = Math.max( 0, limit );
+            return limit;
+            
         }
     }
 }

@@ -1,12 +1,13 @@
 package com.acmemail.judah.cartesian_plane.components;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -177,49 +178,92 @@ class ProfileEditorFeedbackTest
     @Test
     public void testFontSize()
     {
-        LinePropertySet     ticMajor    = 
-            profile.getLinePropertySet( ticMajorSet );
         GraphPropertySet    graph       = profile.getMainWindow();
-        ticMajor.setDraw( true );
-        ticMajor.setSpacing( 1 );
-        graph.setFontDraw( true );
+
+        // Get a rectangle that encloses the text at the smaller font size
+        Rectangle2D rectA   = getTextRect();
+        assertNotNull( rectA );
         
-        int                 heightA     = getTextHeight();
-        System.out.println( "text height: " +  heightA );
-        
-        graph.setFGColor( extFontColor );
-        int                 heightB     = getTextHeight();
-        System.out.println( "text height: " +  heightB );
-        assertEquals( heightA, heightB );
-        
+        // Get a rectangle that encloses the text at the larger font size
         graph.setFontSize( extFontSize );
-        System.out.println( "text height: " + getTextHeight() );
-        int                 heightC     = getTextHeight();
-        System.out.println( "text height: " +  heightB );
-        assertTrue( heightA < heightC );
+        Rectangle2D rectB   = getTextRect();
+        assertNotNull( rectB );
+        
+        // Verify that the larger starts to the left of the smaller
+        // and has a greater width and height.
+        assertTrue( rectA.getX() > rectB.getX() );
+        assertTrue( rectA.getWidth() < rectB.getWidth() );
+        assertTrue( rectA.getHeight() < rectB.getHeight() );
     }
     
-    private int getTextHeight()
+    /**
+     * Get an image of the test GUI with labels turned on,
+     * and calculate the minimum rectangle that encloses one label.
+     * 
+     * @return the calculated rectangle
+     */
+    private Rectangle2D getTextRect()
     {
-        GraphPropertySet    graph       = profile.getMainWindow();
+        LinePropertySet     axes        = 
+            profile.getLinePropertySet( axesSet );
         LinePropertySet     ticMajor    = 
             profile.getLinePropertySet( ticMajorSet );
+        GraphPropertySet    graph       = profile.getMainWindow();
+        Color               textColor   = graph.getFGColor();
+        
+        // Sanity check. The text color should be different from the
+        // axis color and the major tic color in order to eliminate
+        // possible confusion.
+        assertNotEquals( textColor, axes.getColor() );
+        assertNotEquals( textColor, ticMajor.getColor() );
+        
+        // Turn on display of major tics in case the tester requires
+        // visual confirmation from the GUI; the text should be centered
+        // below the major tic.
+        ticMajor.setDraw( true );
+        
+        // Labels are displayed between each major tic. With spacing
+        // set to one a major tic will be drawn at one unit distance
+        // to the right of the y axis.
+        ticMajor.setSpacing( 1 );
+        
+        // Turn on display of labels; get an image of the GUI, but
+        // also redisplay the GUI in case visual inspection of the GUI
+        // is desired.
+        graph.setFontDraw( true );
         testGUI.repaint();
         BufferedImage       image       = testGUI.getImage();
-        waitOp();
+//        waitOp();
         
-        int         width   = image.getWidth();
-        int         height  = image.getHeight();
-        double      spacing = profile.getGridUnit() / ticMajor.getSpacing();
-        double      xco     = width / 2 + spacing;
-        double      yco     = height / 2 + ticMajor.getLength() / 2 + 1;
-        Point       origin  = new Point( (int)xco, (int)yco );
-        int         rgb     = getRGB( graph.getFGColor() );
+        // For the center/top of text, use x= 1 unit to the right
+        // of the y-axis (the same as the first major tic) and y=
+        // one-half the length of a major tic below the x-axis.
+        double      yAxisXco    = image.getWidth() / 2;
+        double      xAxisYco    = image.getHeight() / 2;
+        double      spacing     = profile.getGridUnit();
+        double      ticLen      = ticMajor.getLength() / 2;
+        double      midX        = yAxisXco + spacing;
+        double      topY        = xAxisYco + ticLen / 2;
         
-        TextRect    rect        = 
-            new TextRect( origin, rgb, image );
-        int         textHeight  = rect.bottom - rect.top;
-        return textHeight;
+        // Given that the text to be located is four characters
+        // ("1.00") and the font is monospaced, estimate the left edge
+        // of the search area to be midX - 2.5 * font size and the width
+        // to be 5 * font size. Assume there are no more than 10 pixels
+        // of padding between the major tic and the text, and the
+        // maximum height of the text to be 1.5 * the font size.
+        double      fontSize    = graph.getFontSize();
+        double      leftX       = midX - 2.5 * fontSize;
+        double      width       = 5 * fontSize;
+        double      maxPadding  = 10;
+        double      height      = 1.5 * fontSize + maxPadding;
+        
+        int         color       = getRGB( graph.getFGColor() );
+        Rectangle2D rect        = 
+            new Rectangle2D.Double( leftX, topY, width, height );
+        LineSegment lineSeg     = LineSegment.ofRect( rect, image, color );
+        Rectangle2D result      = lineSeg.getBounds();
+        assertNotNull( result );
+        return result;
     }
     
     private static void waitOp()
