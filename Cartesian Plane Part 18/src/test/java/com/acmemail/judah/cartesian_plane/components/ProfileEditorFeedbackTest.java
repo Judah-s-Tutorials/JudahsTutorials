@@ -55,7 +55,7 @@ class ProfileEditorFeedbackTest
     
     private static final String     defFontName     = Font.DIALOG;
     private static final String     extFontName     = Font.MONOSPACED;
-    private static final float      defFontSize     = 10;
+    private static final float      defFontSize     = 20;
     private static final float      extFontSize     = 2 * defFontSize;
     private static final boolean    defFontBold     = false;
     private static final boolean    extFontBold     = !defFontBold;
@@ -175,9 +175,24 @@ class ProfileEditorFeedbackTest
         assertEquals( actRGB, expRGB );
     }
     
+    /**
+     * Measure the bounds of a text label
+     * with the default font size,
+     * then change to the extended font size
+     * and measure the bounds of the label
+     * with the larger size.
+     * Verify that the bounds of the label
+     * with the larger font
+     * is greater than  the bounds of the label
+     * with the smaller font.
+     */
     @Test
     public void testFontSize()
     {
+        // Sanity check: the default label font size is expected to be
+        // smaller than the extended font size.
+        assertTrue( defFontSize < extFontSize );
+        
         GraphPropertySet    graph       = profile.getMainWindow();
 
         // Get a rectangle that encloses the text at the smaller font size
@@ -194,6 +209,69 @@ class ProfileEditorFeedbackTest
         assertTrue( rectA.getX() > rectB.getX() );
         assertTrue( rectA.getWidth() < rectB.getWidth() );
         assertTrue( rectA.getHeight() < rectB.getHeight() );
+    }
+    
+    /**
+     * Verify that label text is displayed in bold
+     * after the fontBold property is changed to true.
+     * <p>
+     * Precondition: the grid background color is <em>colorA</em>,
+     * the font color is <em>colorB</em>, 
+     * and <em>colorA</em> is not equal to <em>colorB</em>.
+     * <p>
+     * Obtain the rectangle enclosing a label
+     * display in non-bold text.
+     * Change the fontBold property to true
+     * and obtain its new bounding rectangle.
+     * Verify that the ration <em>colorA</em>/<em>colorB</em>
+     * is greater in the second rectangle.
+     */
+    @Test
+    public void testFontBold()
+    {
+        GraphPropertySet    graph   = profile.getMainWindow();
+        int                 rgb     = getRGB( graph.getFGColor() );
+
+        graph.setBold( false );
+        Rectangle2D rectA   = getTextRect();
+        assertNotNull( rectA );
+        double      countA  = 
+            countPixels( testGUI.getImage(), rectA, rgb );
+        double      areaA   = rectA.getWidth() * rectA.getHeight();
+        System.out.println( countA + "," + countA / areaA );
+        waitOp();
+        
+        graph.setBold( true );
+        Rectangle2D rectB   = getTextRect();
+        assertNotNull( rectB );
+        double      countB  = 
+            countPixels( testGUI.getImage(), rectB, rgb );
+        double      areaB   = rectB.getWidth() * rectB.getHeight();
+        System.out.println( countB + "," + countB / areaA );
+        waitOp();
+        
+        
+        // Verify that the larger starts to the left of the smaller
+        // and has a greater width and height.
+        assertTrue( countA / areaA < countB / areaB );
+    }
+    
+    private static int 
+    countPixels( BufferedImage image, Rectangle2D rect, int rgb )
+    {
+        int startXco    = (int)rect.getX();
+        int endXco      = (int)(startXco + rect.getWidth());
+        int startYco    = (int)rect.getY();
+        int endYco      = (int)(startYco + rect.getHeight());
+        int count       = 0;
+        for ( int xco = startXco ; xco < endXco ; ++xco )
+            for ( int yco = startYco ; yco < endYco ; ++yco )
+            {
+                int testRGB = image.getRGB( xco, yco ) & 0xffffff;
+                if ( rgb == testRGB )
+                    ++count;
+            }
+        return count;
     }
     
     /**
