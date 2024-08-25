@@ -11,6 +11,9 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
@@ -48,7 +51,7 @@ class ProfileEditorFeedbackTest
     
     private static final Color      defColor    = Color.RED;
     private static final Color      extColor    = Color.BLUE;
-    private static final float      defGridUnit = 100;
+    private static final float      defGridUnit = 175;
     private static final float      extGridUnit = 2 * defGridUnit;
     private static final Color      defBGColor  = new Color( 0xEFEFEF );
     private static final Color      extBGColor  = Color.WHITE;
@@ -196,17 +199,15 @@ class ProfileEditorFeedbackTest
         GraphPropertySet    graph       = profile.getMainWindow();
 
         // Get a rectangle that encloses the text at the smaller font size
-        Rectangle2D rectA   = getTextRect();
-        assertNotNull( rectA );
+        ImageRect   rectA   = getTextRect();
         
         // Get a rectangle that encloses the text at the larger font size
         graph.setFontSize( extFontSize );
-        Rectangle2D rectB   = getTextRect();
-        assertNotNull( rectB );
+        ImageRect   rectB   = getTextRect();
+        int         rgb     = getRGB( graph.getFGColor() );
         
-        // Verify that the larger starts to the left of the smaller
-        // and has a greater width and height.
-        assertTrue( rectA.getX() > rectB.getX() );
+        // Verify that the bounds of the text in the smaller font
+        // is less than the bounds of the text in the larger font.
         assertTrue( rectA.getWidth() < rectB.getWidth() );
         assertTrue( rectA.getHeight() < rectB.getHeight() );
     }
@@ -233,45 +234,19 @@ class ProfileEditorFeedbackTest
         int                 rgb     = getRGB( graph.getFGColor() );
 
         graph.setBold( false );
-        Rectangle2D rectA   = getTextRect();
-        assertNotNull( rectA );
-        double      countA  = 
-            countPixels( testGUI.getImage(), rectA, rgb );
-        double      areaA   = rectA.getWidth() * rectA.getHeight();
-        System.out.println( countA + "," + countA / areaA );
-        waitOp();
+        ImageRect   rectA   = getTextRect();
+        double      countA  = rectA.count( rgb );
+//        waitOp();
         
         graph.setBold( true );
-        Rectangle2D rectB   = getTextRect();
-        assertNotNull( rectB );
-        double      countB  = 
-            countPixels( testGUI.getImage(), rectB, rgb );
-        double      areaB   = rectB.getWidth() * rectB.getHeight();
-        System.out.println( countB + "," + countB / areaA );
-        waitOp();
+        ImageRect   rectB   = getTextRect();
+        double      countB  = rectB.count( rgb );
+//        waitOp();
         
         
-        // Verify that the larger starts to the left of the smaller
-        // and has a greater width and height.
-        assertTrue( countA / areaA < countB / areaB );
-    }
-    
-    private static int 
-    countPixels( BufferedImage image, Rectangle2D rect, int rgb )
-    {
-        int startXco    = (int)rect.getX();
-        int endXco      = (int)(startXco + rect.getWidth());
-        int startYco    = (int)rect.getY();
-        int endYco      = (int)(startYco + rect.getHeight());
-        int count       = 0;
-        for ( int xco = startXco ; xco < endXco ; ++xco )
-            for ( int yco = startYco ; yco < endYco ; ++yco )
-            {
-                int testRGB = image.getRGB( xco, yco ) & 0xffffff;
-                if ( rgb == testRGB )
-                    ++count;
-            }
-        return count;
+        // Verify that the plain text bounding box contains fewer
+        // pixels of the text color than the bold text bounding box.
+        assertTrue( countA < countB );
     }
     
     /**
@@ -280,7 +255,7 @@ class ProfileEditorFeedbackTest
      * 
      * @return the calculated rectangle
      */
-    private Rectangle2D getTextRect()
+    private ImageRect getTextRect()
     {
         LinePropertySet     axes        = 
             profile.getLinePropertySet( axesSet );
@@ -296,26 +271,25 @@ class ProfileEditorFeedbackTest
         assertNotEquals( textColor, ticMajor.getColor() );
         
         // Turn on display of major tics in case the tester requires
-        // visual confirmation from the GUI; the text should be centered
-        // below the major tic.
+        // visual confirmation from the GUI; displayed correctly, the 
+        // text will be centered below the first major tic on the x-axis.
         ticMajor.setDraw( true );
         
-        // Labels are displayed between each major tic. With spacing
+        // Labels are displayed on each major tic. With spacing
         // set to one a major tic will be drawn at one unit distance
         // to the right of the y axis.
         ticMajor.setSpacing( 1 );
         
         // Turn on display of labels; get an image of the GUI, but
-        // also redisplay the GUI in case visual inspection of the GUI
-        // is desired.
+        // also redisplay the GUI in case visual inspection is desired.
         graph.setFontDraw( true );
         testGUI.repaint();
         BufferedImage       image       = testGUI.getImage();
-//        waitOp();
+        waitOp();
         
-        // For the center/top of text, use x= 1 unit to the right
-        // of the y-axis (the same as the first major tic) and y=
-        // one-half the length of a major tic below the x-axis.
+        // To locate the center/top of text, start with x= 1 unit 
+        // to the right of the y-axis (the same as the first major tic)
+        // and y= one-half the length of a major tic below the x-axis.
         double      yAxisXco    = image.getWidth() / 2;
         double      xAxisYco    = image.getHeight() / 2;
         double      spacing     = profile.getGridUnit();
@@ -324,29 +298,33 @@ class ProfileEditorFeedbackTest
         double      topY        = xAxisYco + ticLen / 2;
         
         // Given that the text to be located is four characters
-        // ("1.00") and the font is monospaced, estimate the left edge
-        // of the search area to be midX - 2.5 * font size and the width
-        // to be 5 * font size. Assume there are no more than 10 pixels
-        // of padding between the major tic and the text, and the
-        // maximum height of the text to be 1.5 * the font size.
+        // ("1.00") estimate the left edge of the text to be no more 
+        // midX - 2.5 * font-size and the right edge to be no more than
+        // midX + 2.5 * font-size. Assume there are no more than 10 
+        // pixels of padding between the tic mark and the text, and the
+        // maximum height of the text to be no more than 1.5 * the 
+        // font-size. For accurate results the width of the search area 
+        // should be no more than 1 unit.
         double      fontSize    = graph.getFontSize();
-        double      leftX       = midX - 2.5 * fontSize;
-        double      width       = 5 * fontSize;
+        double      leftX       = midX - 2 * fontSize;
+        double      width       = 4 * fontSize;
         double      maxPadding  = 10;
         double      height      = 1.5 * fontSize + maxPadding;
+        assertTrue( width < spacing, width + "," + spacing );
         
         int         color       = getRGB( graph.getFGColor() );
         Rectangle2D rect        = 
             new Rectangle2D.Double( leftX, topY, width, height );
         LineSegment lineSeg     = LineSegment.ofRect( rect, image, color );
-        Rectangle2D result      = lineSeg.getBounds();
-        assertNotNull( result );
+        Rectangle2D resultRect  = lineSeg.getBounds();
+        assertNotNull( resultRect );
+        ImageRect   result      = new ImageRect( image, resultRect );
         return result;
     }
     
     private static void waitOp()
     {
-        JOptionPane.showMessageDialog( null, "Waiting..." );
+//        JOptionPane.showMessageDialog( null, "Waiting..." );
     }
     
     private void validateAxes()
@@ -440,59 +418,80 @@ class ProfileEditorFeedbackTest
         return iColor;
     }
     
-    private class TextRect
+    private class ImageRect
     {
-        private static final int    range   = 20;
-        private final int           oXco;
-        private final int           oYco;
-        private final int           rgb;
-        private final BufferedImage image;
-        private final int           width;
-        private final int           height;
+        private final int[][]   data;
         
-        private int top     = Integer.MAX_VALUE;
-        private int bottom  = -1;
-        private int left    = -1;
-        private int right   = Integer.MAX_VALUE;
-        public TextRect( Point origin, int color, BufferedImage image )
+        public ImageRect( BufferedImage image, Rectangle2D rect )
         {
-            oXco = origin.x;
-            oYco = origin.y;
-            rgb = color;
-            this.image = image;
-            width = image.getWidth();
-            height = image.getHeight();
-            getTop();
+            int width       = (int)rect.getWidth();
+            int height      = (int)rect.getHeight();
+            int firstRow    = (int)rect.getY();
+            int firstCol    = (int)rect.getX();
+            data = new int[height][width];
+            
+            int row         = firstRow;
+            for ( int yco = 0 ; yco < height ; ++yco, row++ )
+            {
+                int col = firstCol;
+                for ( int xco = 0 ; xco < width ; ++xco, ++col )
+                    data[yco][xco] = image.getRGB( col, row ) & 0xFFFFFF;
+            }
         }
         
-        private void getTop()
+        private int count( int rgb )
         {
-            int first       = Integer.MAX_VALUE;
-            int topLimit    = oYco;
-            int bottomLimit = oYco + range;
-            int leftLimit   = oXco - range;
-            int rightLimit  = oXco + range;
-            
-            for ( int xco = leftLimit ; xco < rightLimit ; ++ xco )
+            long    count   = stream()
+                .filter( i -> i == rgb )
+                .count();
+            return (int)count;
+        }
+        
+        public int getWidth()
+        {
+            int width   = 0;
+            if ( data.length > 0 )
+                width = data[0].length;
+            return width;
+        }
+        
+        public int getHeight()
+        {
+            int height  = data.length;
+            return height;
+        }
+        
+        public IntStream stream()
+        {
+            IntStream   stream  =
+                Arrays.stream( data )
+                    .flatMapToInt( r -> Arrays.stream( r ) );
+            return stream;
+        }
+        
+        @Override
+        public int hashCode()
+        {
+            int hash    = Arrays.deepHashCode( data );
+            return hash;
+        }
+        
+        @Override
+        public boolean equals( Object obj )
+        {
+            boolean result  = false;
+            if ( obj == null )
+                result = false;
+            else if ( obj == this )
+                result = true;
+            else if ( !(obj instanceof ImageRect) )
+                result = false;
+            else
             {
-                int emptyCount  = 0;
-                for ( int yco = oYco ; oYco < height ; ++yco )
-                {
-                    int nextColor   = image.getRGB( xco, yco ) & 0xffffff;
-                    if ( nextColor == rgb )
-                    {
-                        if ( yco < top )
-                            top = yco;
-                        if ( yco > bottom )
-                            bottom = yco;
-                    }
-                    else
-                    {
-                        if ( ++emptyCount > 10 )
-                            break;
-                    }
-                }
+                ImageRect   that    = (ImageRect)obj;
+                result = Arrays.deepEquals(this.data, that.data );
             }
+            return result;
         }
     }
     
@@ -601,9 +600,6 @@ class ProfileEditorFeedbackTest
             double      actLength   = bounds1.getHeight();
             double      actStroke   = bounds1.getWidth();
             int         actColor    = seg1.getColor();
-            
-//            System.out.println( propSetName + "V: " + seg1 );
-//            System.out.println( propSetName + "V: " + seg2 );
 //            waitOp();
 
             assertEquals( actStroke, bounds2.getWidth() );
@@ -636,9 +632,6 @@ class ProfileEditorFeedbackTest
             double      actLength   = bounds1.getWidth();
             double      actStroke   = bounds1.getHeight();
             int         actColor    = seg1.getColor();
-            
-//            System.out.println( propSetName + "H: " + seg1 );
-//            System.out.println( propSetName + "H: " + seg2 );
 //            waitOp();
 
             assertEquals( actStroke, bounds2.getHeight() );
