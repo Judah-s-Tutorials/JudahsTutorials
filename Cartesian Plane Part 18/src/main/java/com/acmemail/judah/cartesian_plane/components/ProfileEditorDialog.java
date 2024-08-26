@@ -27,6 +27,7 @@ public class ProfileEditorDialog extends JDialog
     private static final String dialogTitle     = "Profile Editor";
     /** The component that the sample graph is drawn on. */
     private final JComponent        canvas;
+    /** The encapsulated ProfileEditor. */
     private final ProfileEditor     editor;
     
     /** 
@@ -57,8 +58,18 @@ public class ProfileEditorDialog extends JDialog
         setContentPane( contentPane );
         contentPane.setFocusable( true );
         pack();
-
+        
         GUIUtils.center( this );
+    }
+    
+    /**
+     * Gets the ProfileEditor encapsulated in this dialog.
+     * 
+     * @return  the ProfileEditor encapsulated in this dialog
+     */
+    public ProfileEditor getProfileEditor()
+    {
+        return editor;
     }
     
     /**

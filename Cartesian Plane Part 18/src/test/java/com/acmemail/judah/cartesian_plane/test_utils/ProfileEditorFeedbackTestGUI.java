@@ -1,6 +1,8 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
 import java.awt.BorderLayout;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -16,6 +18,7 @@ public class ProfileEditorFeedbackTestGUI
 {
     private static ProfileEditorFeedbackTestGUI testGUI     = null;
     
+    private final JFrame      feedbackFrame;
     private final ProfileEditorFeedback feedbackPanel;
     private BufferedImage   image;
     
@@ -38,7 +41,7 @@ public class ProfileEditorFeedbackTestGUI
     private ProfileEditorFeedbackTestGUI( Profile profile )
     {
         feedbackPanel = new ProfileEditorFeedback( profile );
-        JFrame      feedbackFrame   = new JFrame( "ProfileEditor Test GUI" );
+        feedbackFrame = new JFrame( "ProfileEditor Test GUI" );
         JPanel      contentPane     = new JPanel( new BorderLayout() );
         contentPane.add( feedbackPanel, BorderLayout.CENTER );
         

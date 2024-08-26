@@ -9,13 +9,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
-import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorTestGUI;
+import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorTestGUI_old;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 /**
  * This application should be run as a JUnit test.
- * It verifies that a ProfileEditorTestGUI object
+ * It verifies that a ProfileEditorTestGUI_old object
  * has read and write access 
  * to all the components of a ProfileEditor
  * that are necessary to edit
@@ -37,11 +37,11 @@ class ProfileEditorTestGUIValidator
     private static Profile              distinctProfile = 
         ProfileUtils.getDistinctProfile( profile );
     /** Test GUI to be validated. */
-    private static ProfileEditorTestGUI testGUI         =     
-        ProfileEditorTestGUI.getTestGUI( profile );
+    private static ProfileEditorTestGUI_old testGUI         =     
+        ProfileEditorTestGUI_old.getTestGUI( profile );
 
     /**
-     * Verify that the ProfileEditorTestGUI has read/write access
+     * Verify that the ProfileEditorTestGUI_old has read/write access
      * to all those components of the ProfileEditor
      * that are necessary to edit the GraphPropertySetMW properties
      * of a Profile
@@ -212,7 +212,7 @@ class ProfileEditorTestGUIValidator
     
     /**
      * For each LinePropertySet object contained in a Profile
-     * verify that the ProfileEditorTestGUI has read/write access
+     * verify that the ProfileEditorTestGUI_old has read/write access
      * to all those components of the ProfileEditor
      * that are necessary to edit the LinePropertySet.
      * The validation logic:

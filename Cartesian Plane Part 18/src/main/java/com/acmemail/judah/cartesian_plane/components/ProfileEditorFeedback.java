@@ -7,8 +7,10 @@ import java.awt.Toolkit;
 
 import javax.swing.JComponent;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.GraphManager;
 import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.PropertyManager;
 
 /**
  * Component to display the background of a graph.
@@ -54,11 +56,13 @@ public class ProfileEditorFeedback extends JComponent
         
         Dimension   screenSize  = 
             Toolkit.getDefaultToolkit().getScreenSize();
-        int         targetWidth     = (int)(.5 * screenSize.width + .5);
+        float       targetWidth     = 
+            PropertyManager.INSTANCE.asFloat(CPConstants.MW_WIDTH_PN );
+            //(int)(.5 * screenSize.width + .5);
         int         targetHeight    = (int)(.5 * screenSize.height + .5);
         
         Dimension   canvasSize  =
-            new Dimension( targetWidth, targetHeight );
+            new Dimension( (int)targetWidth, targetHeight );
         setPreferredSize( canvasSize );
     }
     

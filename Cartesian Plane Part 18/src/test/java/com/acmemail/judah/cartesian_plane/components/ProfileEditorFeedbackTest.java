@@ -66,7 +66,7 @@ class ProfileEditorFeedbackTest
     private static final boolean    extFontItalic   = !defFontItalic;
     private static final Color      defFontColor    = Color.BLUE;
     private static final Color      extFontColor    = Color.GREEN;
-    private static final float      defWidth        = 1000;
+    private static final float      defWidth        = 750;
     private static final float      extWidth        = 1.5f * defWidth;
     
     private static final float      defLength       = 20;
@@ -114,7 +114,7 @@ class ProfileEditorFeedbackTest
     }
     
     @BeforeEach
-    public void beforeEAch() throws Exception
+    public void beforeEach()
     {
         baseProfile.apply();
         profile.reset();
@@ -163,10 +163,10 @@ class ProfileEditorFeedbackTest
         GraphPropertySet    props   = profile.getMainWindow();
         BufferedImage       image   = testGUI.getImage();
         int                 xco     = image.getWidth() / 4;
-        int                 yco     = image.getWidth() / 4;
+        int                 yco     = image.getHeight() / 4;
         int                 actRGB  = image.getRGB( xco, yco ) & 0xFFFFFF;
         int                 expRGB  = getRGB( props.getBGColor() );
-//        waitOp();
+        waitOp();
         assertEquals( actRGB, expRGB );
         
         expRGB = getRGB( extBGColor );
@@ -174,7 +174,7 @@ class ProfileEditorFeedbackTest
         testGUI.repaint();
         image= testGUI.getImage();
         actRGB = image.getRGB( xco, yco ) & 0xFFFFFF;
-//        waitOp();
+//        //waitOp();
         assertEquals( actRGB, expRGB );
     }
     
@@ -224,7 +224,7 @@ class ProfileEditorFeedbackTest
      * display in non-bold text.
      * Change the fontBold property to true
      * and obtain its new bounding rectangle.
-     * Verify that the ration <em>colorA</em>/<em>colorB</em>
+     * Verify that the ratio <em>colorA</em>/<em>colorB</em>
      * is greater in the second rectangle.
      */
     @Test
@@ -236,17 +236,121 @@ class ProfileEditorFeedbackTest
         graph.setBold( false );
         ImageRect   rectA   = getTextRect();
         double      countA  = rectA.count( rgb );
-//        waitOp();
+        waitOp();
         
         graph.setBold( true );
         ImageRect   rectB   = getTextRect();
         double      countB  = rectB.count( rgb );
-//        waitOp();
+//        //waitOp();
         
         
         // Verify that the plain text bounding box contains fewer
         // pixels of the text color than the bold text bounding box.
         assertTrue( countA < countB );
+    }
+    
+    /**
+     * Verify that label text is displayed in italics
+     * after the fontItalic property is changed to true.
+     * <p>
+     * Precondition: the grid background color is <em>colorA</em>,
+     * the font color is <em>colorB</em>, 
+     * and <em>colorA</em> is not equal to <em>colorB</em>.
+     * <p>
+     * Obtain the rectangle enclosing a label
+     * display in non-italic text.
+     * Change the fontItalic property to true
+     * and obtain its new bounding rectangle.
+     * Verify that the content 
+     * of the first rectangle
+     * is different from the content
+     * of the second rectangle.
+     */
+    @Test
+    public void testFontItalic()
+    {
+        GraphPropertySet    graph   = profile.getMainWindow();
+
+        graph.setItalic( false );
+        ImageRect   rectA   = getTextRect();
+//        //waitOp();
+        
+        graph.setItalic( true );
+        ImageRect   rectB   = getTextRect();
+//        //waitOp();
+        assertNotEquals( rectA, rectB );
+    }
+    
+    /**
+     * Verify that the displayed label text
+     * changes when the font name changes.
+     * <p>
+     * Precondition: the grid background color is <em>colorA</em>,
+     * the font color is <em>colorB</em>, 
+     * and <em>colorA</em> is not equal to <em>colorB</em>.
+     * <p>
+     * Obtain the rectangle enclosing a label
+     * display in non-italic text.
+     * Change the fontItalic property to true
+     * and obtain its new bounding rectangle.
+     * Verify that the content 
+     * of the first rectangle
+     * is different from the content
+     * of the second rectangle.
+     */
+    @Test
+    public void testFontName()
+    {
+        GraphPropertySet    graph   = profile.getMainWindow();
+
+        ImageRect   rectA   = getTextRect();
+//        //waitOp();
+        
+        graph.setFontName( extFontName );
+        ImageRect   rectB   = getTextRect();
+//        //waitOp();
+        assertNotEquals( rectA, rectB );
+    }
+    
+    /**
+     * Verify that the test display changes correctly
+     * when the grid unit is changed.
+     * <ol>
+     * <li>
+     * Turn on display of grid lines and major tics.
+     * </li>
+     * <li>
+     * Set spacing for grid lines to  1 and major tics to 2.
+     * </li>
+     * <li>
+     * Obtain an image of the display. 
+     * Verify that there is a grid line at unit distance of 1.
+     * Verify that there is a major tic at unit distance .5.
+     * </li>
+     * <li>
+     * Change the grid unit.
+     * </li>
+     * <li>
+     * Obtain an image of the display. 
+     * Verify that there is a grid line at (new) unit distance of 1.
+     * Verify that there is a major tic at (new) unit distance .5.
+     * </li>
+     * </ol>
+     */
+    @ParameterizedTest
+    @ValueSource( 
+        strings= {"LinePropertySetGridLines", "LinePropertySetTicMajor"}
+    )
+    public void testGridUnit( String propSet ) 
+    {
+        beforeEach();
+        LineEvaluator   lineEvalA   = new LineEvaluator( propSet );
+        lineEvalA.validateVertical();
+        
+        
+        LineEvaluator   lineEvalB   = new LineEvaluator( propSet );
+        profile.setGridUnit( extGridUnit );
+        lineEvalB.validateVertical();
     }
     
     /**
@@ -285,7 +389,7 @@ class ProfileEditorFeedbackTest
         graph.setFontDraw( true );
         testGUI.repaint();
         BufferedImage       image       = testGUI.getImage();
-        waitOp();
+        //waitOp();
         
         // To locate the center/top of text, start with x= 1 unit 
         // to the right of the y-axis (the same as the first major tic)
@@ -324,7 +428,7 @@ class ProfileEditorFeedbackTest
     
     private static void waitOp()
     {
-//        JOptionPane.showMessageDialog( null, "Waiting..." );
+        JOptionPane.showMessageDialog( null, "Waiting..." );
     }
     
     private void validateAxes()
@@ -600,7 +704,7 @@ class ProfileEditorFeedbackTest
             double      actLength   = bounds1.getHeight();
             double      actStroke   = bounds1.getWidth();
             int         actColor    = seg1.getColor();
-//            waitOp();
+//            //waitOp();
 
             assertEquals( actStroke, bounds2.getWidth() );
             assertEquals( actLength, bounds2.getHeight() );
@@ -632,7 +736,7 @@ class ProfileEditorFeedbackTest
             double      actLength   = bounds1.getWidth();
             double      actStroke   = bounds1.getHeight();
             int         actColor    = seg1.getColor();
-//            waitOp();
+//            //waitOp();
 
             assertEquals( actStroke, bounds2.getHeight() );
             assertEquals( actLength, bounds2.getWidth() );
