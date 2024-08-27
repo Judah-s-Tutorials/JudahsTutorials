@@ -25,10 +25,10 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  * 
  * @see ProfileEditorTestBase
  */
-public class ProfileEditorTestDialogGUI extends ProfileEditorTestBase
+public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
 {
     /** The singleton for this GUI test object. */
-    private static ProfileEditorTestDialogGUI testGUI;
+    private static ProfileEditorDialogTestGUI testGUI;
     
     /** The dialog under test. */
     private final ProfileEditorDialog  testDialog;
@@ -56,7 +56,7 @@ public class ProfileEditorTestDialogGUI extends ProfileEditorTestBase
      *      
      * @return the instantiated ProfileEditorTestGUI_old
      */
-    public static ProfileEditorTestDialogGUI getTestGUI( Profile profile )
+    public static ProfileEditorDialogTestGUI getTestGUI( Profile profile )
     {
         if ( testGUI != null )
             ;
@@ -78,7 +78,7 @@ public class ProfileEditorTestDialogGUI extends ProfileEditorTestBase
     {
         ProfileEditorDialog dialog = 
             new ProfileEditorDialog( null, profile );
-        testGUI = new ProfileEditorTestDialogGUI( dialog );
+        testGUI = new ProfileEditorDialogTestGUI( dialog );
     }
     
     /**
@@ -88,7 +88,7 @@ public class ProfileEditorTestDialogGUI extends ProfileEditorTestBase
      * 
      * @param profile   Profile to install in the ProfileEditor
      */
-    private ProfileEditorTestDialogGUI( ProfileEditorDialog dialog )
+    private ProfileEditorDialogTestGUI( ProfileEditorDialog dialog )
     {
         super( dialog.getProfileEditor() );
         testDialog = dialog;
@@ -106,11 +106,46 @@ public class ProfileEditorTestDialogGUI extends ProfileEditorTestBase
      */
     public Thread postDialog()
     {
-        Thread  thread  = new Thread( () -> testDialog.showDialog() );
+        Thread  thread  = new Thread( 
+            () -> lastDialogResult = testDialog.showDialog()
+        );
         GUIUtils.schedEDTAndWait( () -> thread.start() );
         while ( !testDialog.isVisible() )
             Utils.pause( 1 );
         return thread;
+    }
+    
+    /**
+     * This is not the method to invoke
+     * to push the test dialog's cancel button.
+     * It is a cleanup method to be called
+     * in the event that a test aborts
+     * with the test dialog still displayed.
+     * It cancels the dialog
+     * and waits for it to become invisible.
+     * 
+     * @see #pushCancelButton()
+     */
+    public void cancelDialog()
+    {
+        cancelFontDialog();
+        if ( testDialog.isVisible() )
+        {
+            pushCancelButton();
+            while ( testDialog.isVisible() )
+                Utils.pause( 2 );
+        }
+    }
+    
+    /**
+     * Indicates whether or not the dialog under test
+     * is visible.
+     * 
+     * @return  true if the dialog under test is visible
+     */
+    public boolean isVisible()
+    {
+        return testDialog.isVisible();
     }
     
     /**

@@ -24,7 +24,7 @@ public class LinePropertySetMiscTest extends LinePropertySetTest
     }
 
     // This class must be public so that it can be instantiated from
-    // com.acmemail.judah.cartesian_plane.test_suites.LinePropertySetTestSuite.
+    // com.acmemail.judah.cartesian_plane.test_suites.ProfilEditorTestSuite.
     public static class LinePropertySetMisc 
         extends LinePropertySetAxes
     {

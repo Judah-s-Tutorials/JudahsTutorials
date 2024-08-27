@@ -1,8 +1,6 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
 import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 

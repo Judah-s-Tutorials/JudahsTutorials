@@ -85,25 +85,6 @@ public class ProfileEditorDialog extends JDialog
         setVisible( true );
         return result;
     }
-
-    /**
-     * Applies the most recent Profile edits
-     * to the PropertyManager.
-     */
-    public void apply()
-    {
-        editor.apply();
-    }
-
-    /**
-     * Rejects all the most recent Profile edits
-     * and restores Profile property values
-     * from the PropertyManaager.
-     */
-    public void reset()
-    {
-        editor.reset();
-    }
     
     /**
      * Creates a panel with a FlowLayout

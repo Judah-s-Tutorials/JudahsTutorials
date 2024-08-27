@@ -93,6 +93,19 @@ public class FontEditorDialog extends JDialog
     }
     
     /**
+     * Discards the current value of the dialog's property editors
+     * and refreshes them from the current property set.
+     */
+    public void reset()
+    {
+        editor.setColor( propSet.getFGColor() );
+        editor.setName( propSet.getFontName() );
+        editor.setSize( (int)propSet.getFontSize() );
+        editor.setBold( propSet.isBold() );
+        editor.setItalic( propSet.isItalic() );
+    }
+
+    /**
      * Gets the encapsulated FontEditor.
      * 
      * @return  the encapsulated FontEditor
@@ -148,18 +161,14 @@ public class FontEditorDialog extends JDialog
     }
     
     /**
-     * Discards the current value of the dialog's property editors
-     * and refreshes them from the given property set.
+     * Event handler for the reset button;
+     * invokes {@link #reset()};
      * 
      * @param evt   object that accompanies an ActionEvent; not used
      */
     private void reset( ActionEvent evt )
     {
-        editor.setColor( propSet.getFGColor() );
-        editor.setName( propSet.getFontName() );
-        editor.setSize( (int)propSet.getFontSize() );
-        editor.setBold( propSet.isBold() );
-        editor.setItalic( propSet.isItalic() );
+        reset();
     }
     
     /**

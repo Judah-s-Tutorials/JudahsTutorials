@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane.test_utils;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Window;
 import java.util.HashMap;
@@ -22,9 +23,11 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerNumberModel;
 
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.components.ColorEditor;
 import com.acmemail.judah.cartesian_plane.components.FontEditor;
 import com.acmemail.judah.cartesian_plane.components.FontEditorDialog;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;
@@ -565,6 +568,28 @@ public abstract class ProfileEditorTestBase
     }
     
     /**
+     * This is not the method to invoke
+     * to push the font dialog's cancel button.
+     * It is a cleanup method to be called
+     * in the event that a test aborts
+     * with the font dialog still displayed.
+     * It cancels the dialog
+     * and waits for it to become invisible.
+     * 
+     * @see #selectFDCancel()
+     */
+    public void cancelFontDialog()
+    {
+        JDialog dialog  = graphPropComps.fontComponents.fontDialog;
+        if ( dialog.isVisible() )
+        {
+            selectFDCancel();
+            while ( dialog.isVisible() )
+                Utils.pause( 2 );
+        }
+    }
+
+    /**
      * Exercises the apply method
      * of the ProfileEditor.
      */
@@ -592,6 +617,25 @@ public abstract class ProfileEditorTestBase
         Object  obj = getValue( () -> profileEditor.getFeedBack() );
         assertTrue( obj instanceof JComponent );
         return (JComponent)obj;
+    }
+    
+    /**
+     * Get the values of all the GUI components
+     * used to edit Profile properties.
+     * 
+     * @return  
+     *      the values of all the components
+     *      used to edit Profile properties
+     */
+    public Profile getComponentValues()
+    {
+        Profile profile = new Profile();
+        profile.setName( getName() );
+        profile.setGridUnit( getGridUnit() );
+        graphPropComps.getComponentValues( profile );
+        propSetToCompMap.values().stream()
+            .forEach( s -> s.getComponentValues( profile ) );
+        return profile;
     }
     
     /**
@@ -1344,6 +1388,28 @@ public abstract class ProfileEditorTestBase
         {
             fontComponents.cancelButton.doClick();
         }
+        
+        /**
+         * Get the values of all the GUI components
+         * used to edit GraphPropertySet properties.
+         * 
+         * @return  
+         *      the values of all the components
+         *      used to edit Profile properties
+         */
+        public void getComponentValues( Profile profile )
+        {
+            GraphPropertySet    props   = 
+                profile.getMainWindow();
+            props.setWidth( getWidth() );
+            props.setBGColor( new Color( getBGColor() ) );
+            props.setBold( getBold() );
+            props.setItalic( getItalic() );
+            props.setFGColor( new Color( getFGColor() ) );
+            props.setFontDraw( getFontDraw() );
+            props.setFontName( getFontName() );
+            props.setFontSize( getFontSize() );
+        }
     }
 
     /**
@@ -1525,6 +1591,30 @@ public abstract class ProfileEditorTestBase
         public void setColor( int iColor )
         {
             colorComponent.setText( toHexString( iColor ) );
+        }
+        
+        /**
+         * Get the values of all the GUI components
+         * used to edit LinePropertySet properties.
+         * 
+         * @return  
+         *      the values of all the components
+         *      used to edit Profile properties
+         */
+        public void getComponentValues( Profile profile )
+        {
+            LinePropertySet props   = 
+                profile.getLinePropertySet( propSetName );
+            if ( props.hasSpacing() )
+                props.setSpacing( getSpacing() );
+            if ( props.hasLength() )
+                props.setLength( getLength() );
+            if ( props.hasStroke() )
+                props.setStroke( getStroke() );
+            if ( props.hasDraw() )
+                props.setDraw( getDraw() );
+            if ( props.hasColor() )
+                props.setColor( new Color( getColor() ) );
         }
     }
 }

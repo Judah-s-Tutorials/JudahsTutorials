@@ -479,6 +479,10 @@ public class ProfileEditor extends JPanel
         editButton.addActionListener( e -> showFontDialog( fontDialog ) );
         panel.add( new JLabel( "" ) );
         panel.add( editButton );
+        
+        Runnable    toComponent = () -> fontDialog.reset();
+        resetList.add( toComponent );
+
     }
     
     private void addDraw( GraphPropertySet propSet, JPanel panel )

@@ -7,17 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,17 +24,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.LineSegment;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorFeedbackTestGUI;
-import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 
-class ProfileEditorFeedbackTest
+public class ProfileEditorFeedbackTest
 {
-    private static int  nextGray    = 1;
-    
-    /** The simple name of the GraphPropertySetMW class. */
-    private static final String graphSet        =
-        GraphPropertySetMW.class.getSimpleName();
     /** The simple name of the LinePropertySetAxes class. */
     private static final String axesSet         =
         LinePropertySetAxes.class.getSimpleName();
@@ -61,13 +55,15 @@ class ProfileEditorFeedbackTest
     private static final float      defFontSize     = 20;
     private static final float      extFontSize     = 2 * defFontSize;
     private static final boolean    defFontBold     = false;
-    private static final boolean    extFontBold     = !defFontBold;
+    // The bold properly is handled explicitly in the bold test,
+    // hence no extFontBold variable.
     private static final boolean    defFontItalic   = false;
-    private static final boolean    extFontItalic   = !defFontItalic;
+    // The bold properly is handled explicitly in the italic test,
+    // hence no extFontItalic variable.
     private static final Color      defFontColor    = Color.BLUE;
     private static final Color      extFontColor    = Color.GREEN;
     private static final float      defWidth        = 750;
-    private static final float      extWidth        = 1.5f * defWidth;
+    // there is no test based on changing size, hence no extWidth variable
     
     private static final float      defLength       = 20;
     private static final float      extLength       = 2 * defLength;
@@ -83,12 +79,6 @@ class ProfileEditorFeedbackTest
      * Never modified after initialization.
      */
     private static Profile          baseProfile     = new Profile();
-    /** 
-     * Contains property values guaranteed to be different from those
-     * stored in the BaseProfile. Never modified after initialization.
-     */
-    private static Profile          distinctProfile = 
-        ProfileUtils.getDistinctProfile( baseProfile );
     /** 
      * Profile used to initialize the test GUI/ProfileEditor.
      * After initialization the reference must not be changed,
@@ -111,6 +101,16 @@ class ProfileEditorFeedbackTest
         profile = new Profile();
         testGUI = ProfileEditorFeedbackTestGUI.getTestGUI( profile );
         testGUI.repaint();
+    }
+    
+    @AfterAll
+    public static void afterAll()
+    {
+        // For the sake of tests run in suites, make sure
+        // the original profile is restored at the end of the test.
+        // Also make sure all GUI windows are disposed.
+        baseProfile.apply();
+        ComponentFinder.disposeAll();
     }
     
     @BeforeEach
@@ -150,6 +150,7 @@ class ProfileEditorFeedbackTest
         profile.setGridUnit( extGridUnit );
         propSet.setColor( extColor );
         propSet.setStroke( extStroke );
+        propSet.setSpacing( extSpacing );
         if ( propSet.hasLength() )
             propSet.setLength( extLength );
         LineEvaluator  evalB   = new LineEvaluator( propSetName );
@@ -166,7 +167,7 @@ class ProfileEditorFeedbackTest
         int                 yco     = image.getHeight() / 4;
         int                 actRGB  = image.getRGB( xco, yco ) & 0xFFFFFF;
         int                 expRGB  = getRGB( props.getBGColor() );
-        waitOp();
+//        waitOp();
         assertEquals( actRGB, expRGB );
         
         expRGB = getRGB( extBGColor );
@@ -204,7 +205,6 @@ class ProfileEditorFeedbackTest
         // Get a rectangle that encloses the text at the larger font size
         graph.setFontSize( extFontSize );
         ImageRect   rectB   = getTextRect();
-        int         rgb     = getRGB( graph.getFGColor() );
         
         // Verify that the bounds of the text in the smaller font
         // is less than the bounds of the text in the larger font.
@@ -236,7 +236,7 @@ class ProfileEditorFeedbackTest
         graph.setBold( false );
         ImageRect   rectA   = getTextRect();
         double      countA  = rectA.count( rgb );
-        waitOp();
+//        waitOp();
         
         graph.setBold( true );
         ImageRect   rectB   = getTextRect();
@@ -247,6 +247,36 @@ class ProfileEditorFeedbackTest
         // Verify that the plain text bounding box contains fewer
         // pixels of the text color than the bold text bounding box.
         assertTrue( countA < countB );
+    }
+    
+    /**
+     * Verify that label text is redisplayed in 
+     * after the fontColor property is changed.
+     * <p>
+     * Verify that a rectangle enclosing a label
+     * in the default color 
+     * can be obtained.
+     * Change the font color.
+     * Verify that a rectangle enclosing a label
+     * in the new color 
+     * can be obtained.
+     */
+    @Test
+    public void testFontColor()
+    {
+        GraphPropertySet    graph   = profile.getMainWindow();
+
+        // If the following operation succeeds it means that labels
+        // are displayed in the default color.
+        ImageRect   rectA   = getTextRect();
+        assertNotNull( rectA );
+
+        graph.setFGColor( extFontColor );
+        // If the following operation succeeds it means that labels
+        // are displayed in the new color.
+        ImageRect   rectB   = getTextRect();
+        assertNotNull( rectB );
+//        waitOp();
     }
     
     /**
@@ -426,6 +456,7 @@ class ProfileEditorFeedbackTest
         return result;
     }
     
+    @SuppressWarnings("unused")
     private static void waitOp()
     {
         JOptionPane.showMessageDialog( null, "Waiting..." );

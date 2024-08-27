@@ -8,16 +8,18 @@ import java.util.stream.Stream;
 
 import javax.swing.JComponent;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorTestGUI;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
-class ProfileEditorTest
+public class ProfileEditorTest
 {
     private static final String axesSetName         =
         LinePropertySetAxes.class.getSimpleName();
@@ -59,9 +61,19 @@ class ProfileEditorTest
     private static ProfileEditorTestGUI testGUI;
     
     @BeforeAll
-    static void setUpBeforeClass() throws Exception
+    static void beforeAll() throws Exception
     {
         testGUI = ProfileEditorTestGUI.getTestGUI( profile );
+    }
+    
+    @AfterAll
+    public static void afterAll()
+    {
+        // For the sake of tests run in suites, make sure
+        // the original profile is restored at the end of the test.
+        // Also make sure all GUI windows are disposed.
+        baseProfile.apply();
+        ComponentFinder.disposeAll();
     }
 
     @BeforeEach
