@@ -122,7 +122,7 @@ public class ProfileUtils
     private static Color getDistinctColor( Color colorIn )
     {
         int     iColorIn    = colorIn.getRGB() & 0xFFFFFF;
-        int     iColorOut   = ~iColorIn;
+        int     iColorOut   = ~iColorIn & 0xFFFFFF;
         Color   colorOut    = new Color( iColorOut );
         return colorOut;
     }
@@ -142,5 +142,4 @@ public class ProfileUtils
             Font.DIALOG : Font.MONOSPACED;
         return nameOut;
     }
-
 }

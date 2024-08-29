@@ -179,13 +179,6 @@ public class Profile
     private float                               gridUnit;
     /** Profile name. */
     private String                              name;
-    /**
-     * Profile name. Set to the value of {@link #name} initially.
-     * May be modified during an apply operation when if {@link #name}
-     * has changed. Will be used to set {@link #name} during a reset
-     * operation.
-     */
-//    private String                              currName;
     
     /**
      * Constructor.

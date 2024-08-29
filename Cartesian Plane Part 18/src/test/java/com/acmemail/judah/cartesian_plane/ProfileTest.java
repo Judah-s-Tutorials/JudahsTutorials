@@ -91,17 +91,10 @@ class ProfileTest
     @Test
     public void testName()
     {
-        String  orig        = workingProfile.getName();
-        String  diff        = distinctProfile.getName();
-        assertNotEquals( orig, diff );
-        workingProfile.setName( diff );
-        assertEquals( diff, workingProfile.getName() );
-        workingProfile.reset();
-        assertEquals( orig, workingProfile.getName() );
-        
-        workingProfile.setName( diff );
-        workingProfile.apply();
-        assertEquals( diff, workingProfile.getName() );
+        testProperty(
+            p -> p.getName(),
+            (p,v) -> p.setName( (String)v )
+        );
     }
     
     @Test
