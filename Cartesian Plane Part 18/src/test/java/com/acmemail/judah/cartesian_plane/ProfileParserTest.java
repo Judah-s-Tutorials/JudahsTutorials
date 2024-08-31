@@ -1,25 +1,27 @@
 package com.acmemail.judah.cartesian_plane;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Window;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
@@ -29,22 +31,28 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLines;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajor;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
+import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 /**
  * @author Jack Straub
  */
+@Timeout( 2 )
 class ProfileParserTest
 {
-    /** Names of the LinePropertySet subclasses. */
-    private static final String[]   linePropertySetClasses  =
-    {
-        LinePropertySetAxes.class.getSimpleName(),
-        LinePropertySetGridLines.class.getSimpleName(),
-        LinePropertySetTicMajor.class.getSimpleName(),
-        LinePropertySetTicMinor.class.getSimpleName()
-    };
+    /** 
+     * The number of milliseconds to wait for an error errorDialog to post
+     * before failing the operation under test.
+     * @see #expectDialog(Runnable)
+     */
+    private static final int    errorDialogTimeoutMillis    = 2000;
+    /** 
+     * Error message to accompany assertion when a timeout occurs
+     * while waiting for an error errorDialog to post.
+     */
+    private static final String errorDialogTimeoutMessage   =
+        "Timeout while wating for error errorDialog to post.";
     
     /**
      * Prototype Profile; 
@@ -73,6 +81,10 @@ class ProfileParserTest
      * returned to initial value in {@link #beforeEach()}.
      */
     private Profile workingProfile;
+    
+    private JDialog errorDialog  = null;
+    
+    private AbstractButton errorDialogOKButton;
     
     @BeforeEach
     public void beforeEach() throws Exception
@@ -280,6 +292,7 @@ class ProfileParserTest
         assertEquals( testProfile, workingProfile );
     }
     
+    @Timeout( 5 )
     @Test
     public void testMisplacedPropertyMisc()
     {
@@ -467,6 +480,18 @@ class ProfileParserTest
         return bldr.toString();
     }
     
+    /**
+     * This method adds to a list 
+     * the directive and property name/value pairs
+     * necessary to record a font size.
+     * The font size is guaranteed to be different
+     * from the font size declared
+     * in the working profile.
+     * 
+     * @param list  
+     *      the list to which to add
+     *      the directive and property name/value pairs
+     */
     private void addFontSize( List<String> list )
     {
         String              propSetName     = 
@@ -485,6 +510,26 @@ class ProfileParserTest
         list.add( propDecl );
     }
     
+    /**
+     * Execute a given operation,
+     * wait for an error errorDialog to post,
+     * then dismiss the error errorDialog
+     * by selecting its OK button.
+     * The given operation
+     * is executed via a dedicated thread
+     * and this method does not return
+     * until the thread
+     * has reached the terminated state.
+     * The given operation may post many error dialogs;
+     * the number of dialogs posted is returned.
+     * 
+     * 
+     * @param runner    the given operation
+     * 
+     * @return  
+     *      the number of dialogs posted 
+     *      while executing the given operation
+     */
     private int expectDialog( Runnable runner )
     {
         Thread  thread          = new Thread( runner );
@@ -493,46 +538,113 @@ class ProfileParserTest
         while ( thread.isAlive() )
         {
             Utils.pause( 250 );
-            AbstractButton  okButton    = getDialogOKButton();
-            if ( okButton != null )
+            getDialogOKButton();
+            if ( errorDialogOKButton != null )
             {
                 ++dialogCounter;
-                okButton.doClick();
+                System.out.println( dialogCounter );
+                okAndWait();
             }
         }
         return dialogCounter;
     }
     
-    private AbstractButton getDialogOKButton()
+    /**
+     * Pushes the OK button
+     * indicated by {@link #errorDialogOKButton}
+     * and wait for its constituent dialog to terminate.
+     * The {@link #errorDialogOKButton} is set to null
+     * after being pushed.
+     * <p>
+     * Precondition:<br>
+     * The {@link #errorDialogOKButton} is non-null.
+     * Postcondition:<br>
+     * The {@link #errorDialogOKButton} is null.
+     * Postcondition:<br>
+     * The error dialog is no longer visible.
+     */
+    private void okAndWait()
+    {
+        errorDialogOKButton.doClick();
+        errorDialogOKButton = null;
+        while ( errorDialog.isVisible() )
+            Utils.pause( 125 );
+    }
+    
+    /**
+     * Searches for the first visible JDialog,
+     * locates its constituent OK button,
+     * and sets {@link #errorDialogOKButton}
+     * to the ID of the button.
+     * If no dialog is visible
+     * {@link #errorDialogOKButton} is set to null.
+     */
+    private void getDialogOKButton()
     {
         final boolean canBeFrame    = false;
         final boolean canBeDialog   = true;
-        final boolean mustBeVisible = true;
-        AbstractButton  button  = null;
-        ComponentFinder finder  = 
-            new ComponentFinder( canBeDialog, canBeFrame, mustBeVisible );
-        Window          window  = finder.findWindow( c -> true );
-        if ( window != null )
-        {
-            Predicate<JComponent>   pred    = 
-                ComponentFinder.getButtonPredicate( "OK" );
-            JComponent              comp    = 
-                ComponentFinder.find( window, pred );
-            assertNotNull( comp );
-            assertTrue( comp instanceof AbstractButton );
-            button = (AbstractButton)comp;
-        }
-        return button;
+        final boolean mustBeVis     = true;
+        GUIUtils.schedEDTAndWait( () ->  {
+            errorDialogOKButton = null;
+            ComponentFinder finder  = 
+                new ComponentFinder( canBeDialog, canBeFrame, mustBeVis );
+            Window          window  = finder.findWindow( c -> true );
+            if ( window != null )
+            {
+                assertTrue( window instanceof JDialog );
+                errorDialog = (JDialog)window;
+                Predicate<JComponent>   pred    = 
+                    ComponentFinder.getButtonPredicate( "OK" );
+                JComponent              comp    = 
+                    ComponentFinder.find( window, pred );
+                assertNotNull( comp );
+                assertTrue( comp instanceof AbstractButton );
+                errorDialogOKButton = (AbstractButton)comp;
+            }
+        });
     }
     
+    /**
+     * Encapsulates a getter and setter
+     * for one property of type float
+     * in a concrete LinePropertySet.
+     * The principal purpose of the class
+     * is to support the transfer of a unique property value
+     * from the Profile containing unique property values
+     * (#distinctProfile)
+     * to the working Profile (#workingProfile).
+     * 
+     * @author Jack Straub
+     */
     private class Mutator
     {
+        /** 
+         * The simple name of the LinePropertySet class 
+         * containing the encapsulated property.
+         */
         private final String                                propSetName;
+        /** The name of the encapsulated property, e.g. "stroke." */
         private final String                                propName;
+        /** The getter for the encapsulated property. */
         private final Function< LinePropertySet, Float>     getter;
+        /** The setter for the encapsulated property. */
         private final BiConsumer<LinePropertySet, Float>    setter;
         
         
+        /**
+         * Constructor.
+         * Full initializes an instance of this class.
+         * `
+         * @param propSetName
+         *      the simple class name of the property set
+         *      that contains the encapsulated Profile property
+         * @param propName
+         *      the name of the encapsulated property
+         * @param getter
+         *      the getter for the encapsulated property
+         * @param setter
+         *      the setter for the encapsulated property
+         */
         public Mutator(
             String propSetName, 
             String propName, 
@@ -547,6 +659,24 @@ class ProfileParserTest
             this.setter = setter;
         }
 
+        /**
+         * Adds to a given list of strings
+         * a class declaration for the encapsulated property
+         * and a name/value pair
+         * incorporating the distinct value
+         * of the encapsulated property.
+         * For example:
+         * <p>
+         * class: LinePropertySetAxes<br>
+         * stroke: 3
+         * <p>
+         * The new property value
+         * is also recorded in the #workingProfile,
+         * presumably for later use
+         * in test validation.
+         * 
+         * @param list  the given list of strings
+         */
         public void add( List<String> list )
         {
             LinePropertySet dstPropSet  = 
