@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Window;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
@@ -41,19 +39,6 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 @Timeout( 2 )
 class ProfileParserTest
 {
-    /** 
-     * The number of milliseconds to wait for an error errorDialog to post
-     * before failing the operation under test.
-     * @see #expectDialog(Runnable)
-     */
-    private static final int    errorDialogTimeoutMillis    = 2000;
-    /** 
-     * Error message to accompany assertion when a timeout occurs
-     * while waiting for an error errorDialog to post.
-     */
-    private static final String errorDialogTimeoutMessage   =
-        "Timeout while wating for error errorDialog to post.";
-    
     /**
      * Prototype Profile; 
      * contains the values of the profile properties
@@ -82,8 +67,10 @@ class ProfileParserTest
      */
     private Profile workingProfile;
     
+    /** The JOptionPane dialog used to display error messages. */
     private JDialog errorDialog  = null;
     
+    /** The OK button from {@link #errorDialog}. */
     private AbstractButton errorDialogOKButton;
     
     @BeforeEach
@@ -426,7 +413,7 @@ class ProfileParserTest
      * <li>[2]  class: GraphPropertySetMW</li>
      * <li>[3]  fontSize: distinctFontSize</li>
      * <li>[4]  class: LinePropertySetAxes</li>
-     * <li>[6]  stroke: distinceStroke</li>
+     * <li>[6]  stroke: distinctStroke</li>
      * </ul>
      * @return
      */
@@ -622,13 +609,13 @@ class ProfileParserTest
          * The simple name of the LinePropertySet class 
          * containing the encapsulated property.
          */
-        private final String                                propSetName;
+        public final String                             propSetName;
         /** The name of the encapsulated property, e.g. "stroke." */
-        private final String                                propName;
+        public final String                             propName;
         /** The getter for the encapsulated property. */
-        private final Function< LinePropertySet, Float>     getter;
+        public final Function<LinePropertySet,Float>    getter;
         /** The setter for the encapsulated property. */
-        private final BiConsumer<LinePropertySet, Float>    setter;
+        public final BiConsumer<LinePropertySet,Float>  setter;
         
         
         /**
