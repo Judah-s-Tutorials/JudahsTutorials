@@ -1,5 +1,6 @@
 package com.acmemail.judah.cartesian_plane;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -109,6 +110,7 @@ class ProfileParserTest
         ProfileParser   parser          = 
             new ProfileParser( workingProfile );
         Profile         testProfile     = parser.getProfile();
+        assertSame( workingProfile, testProfile );
         assertEquals( diffGridUnit, testProfile.getGridUnit() );
     }
 
@@ -179,6 +181,7 @@ class ProfileParserTest
         List<String>    list            = new ArrayList<>();
         String          distinctName    = distinctProfile.getName();
         list.add( ProfileParser.PROFILE + ": " + distinctName );
+        workingProfile.setName( distinctName );
         
         // Change the main window font size
         addFontSize( list );
@@ -189,6 +192,7 @@ class ProfileParserTest
         
         ProfileParser   testParser  = new ProfileParser();
         testParser.loadProperties( list.stream() );
+        assertEquals( workingProfile, testParser.getProfile() );
     }
 
     @Test
@@ -405,6 +409,14 @@ class ProfileParserTest
     }
     
     /**
+     * This method produces list of strings
+     * to use as the starting point
+     * of an input stream
+     * suitable for processing by ProfileParser. 
+     * All values are taken from {@link #distinctProfile}.
+     * The list returned
+     * contains the following strings
+     * in the given order.
      * <p>
      * List returned:
      * <ul>
@@ -415,16 +427,19 @@ class ProfileParserTest
      * <li>[4]  class: LinePropertySetAxes</li>
      * <li>[6]  stroke: distinctStroke</li>
      * </ul>
-     * @return
+     * 
+     * @return 
+     *      a list of strings from which to generate
+     *      a Profile data input stream
      */
     private List<String> getTestPropertyList()
     {
         String  name        = distinctProfile.getName();
         float   gridUnit    = distinctProfile.getGridUnit();
-        float   fontSize    = 
-            distinctProfile.getMainWindow().getFontSize();
         String  lineName    = LinePropertySetAxes.class.getSimpleName();
         String  graphName   = GraphPropertySetMW.class.getSimpleName();
+        float   fontSize    = 
+            distinctProfile.getMainWindow().getFontSize();
         float   stroke      = 
             distinctProfile.getLinePropertySet( lineName ).getStroke();
         
@@ -448,9 +463,13 @@ class ProfileParserTest
      * Given a properly formatted name/value pair,
      * formulate a new string containing the original name/value pair
      * but with extra whitespace inserted 
-     * before and after each toke.
-     * @param nvPair
-     * @return
+     * before and after each token.
+     * 
+     * @param nvPair    the given name/value pair
+     * 
+     * @return  
+     *      a string containing the name/value pair
+     *      with excess whitespace inserted
      */
     private String excessWhitespace( String nvPair )
     {
@@ -525,11 +544,10 @@ class ProfileParserTest
         while ( thread.isAlive() )
         {
             Utils.pause( 250 );
-            getDialogOKButton();
+            getDialogAndOKButton();
             if ( errorDialogOKButton != null )
             {
                 ++dialogCounter;
-                System.out.println( dialogCounter );
                 okAndWait();
             }
         }
@@ -566,13 +584,14 @@ class ProfileParserTest
      * If no dialog is visible
      * {@link #errorDialogOKButton} is set to null.
      */
-    private void getDialogOKButton()
+    private void getDialogAndOKButton()
     {
         final boolean canBeFrame    = false;
         final boolean canBeDialog   = true;
         final boolean mustBeVis     = true;
         GUIUtils.schedEDTAndWait( () ->  {
             errorDialogOKButton = null;
+            errorDialog = null;
             ComponentFinder finder  = 
                 new ComponentFinder( canBeDialog, canBeFrame, mustBeVis );
             Window          window  = finder.findWindow( c -> true );
