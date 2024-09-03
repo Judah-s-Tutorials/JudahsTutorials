@@ -8,9 +8,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractButton;
@@ -38,7 +40,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
  * @author Jack Straub
  */
 @Timeout( 2 )
-class ProfileParserTest
+public class ProfileParserTest
 {
     /**
      * Prototype Profile; 
@@ -371,7 +373,6 @@ class ProfileParserTest
         // Before adding stroke property (line 6) add:
         // a) a property with an invalid float value;
         // b) a property with an invalid Color value; and
-        // c) a property with an invalid boolean value.
         // Note: for any value other than "true," parseBoolean returns
         // false, so we can't test for an invalid Boolean value.
         // Should yield two error dialogs.
@@ -455,7 +456,7 @@ class ProfileParserTest
         props.add( ProfileParser.FONT_SIZE + ": " + fontSize  );
         props.add( ProfileParser.CLASS + ": " + lineName ) ;
         props.add( ProfileParser.STROKE + ": " + stroke );
-        
+
         return props;
     }
    
