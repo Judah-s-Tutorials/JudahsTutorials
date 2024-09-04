@@ -202,28 +202,6 @@ public class ProfileEditor extends JPanel
         resetList.forEach( i -> i.run() );
         repaint();
     }
-
-    /**
-     * Creates a panel with a vertical layout
-     * that encloses the panel containing
-     * the property editors.
-     * 
-     * @return  
-     *      panel enclosing the panel containing the property editors
-     */
-    private JPanel getControlPanel()
-    {
-        JPanel      panel   = new JPanel();
-        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
-        Border      border  =
-            BorderFactory.createEmptyBorder( 3, 3, 3, 3 );
-        panel.setBorder( border );
-        panel.setLayout( layout );
-        
-        panel.add( getControls() );
-                
-        return panel;
-    }
     
     /**
      * Creates a panel with a vertical layout
@@ -233,7 +211,7 @@ public class ProfileEditor extends JPanel
      * 
      * @return  a panel containing all the property editors
      */
-    private JPanel getControls()
+    private JPanel getControlPanel()
     {
         JPanel      panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
