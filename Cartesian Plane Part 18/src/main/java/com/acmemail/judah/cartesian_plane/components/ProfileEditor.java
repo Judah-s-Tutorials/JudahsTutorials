@@ -59,19 +59,9 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 @SuppressWarnings("serial")
 public class ProfileEditor extends JPanel
 {
-    /** Simple name of the LinePropertySetAxes class. */
-    private static final String axesSet         =
-        LinePropertySetAxes.class.getSimpleName();
-    /** Simple name of the LinePropertySetTicMajor class. */
-    private static final String ticMajorSet     =
-        LinePropertySetTicMajor.class.getSimpleName();
-    /** Simple name of the LinePropertySetTicMinor class. */
-    private static final String ticMinorSet     =
-        LinePropertySetTicMinor.class.getSimpleName();
-    /** Simple name of the LinePropertySetTicMinor class. */
-    private static final String gridLinesSet    =
-        LinePropertySetGridLines.class.getSimpleName();
-    
+    /** Text describing the GUI name panel. */
+    public static final String NAME_LABEL       = "Name";
+
     /** Text describing the GUI weight field. */
     public static final String STROKE_LABEL     = "Weight";
     /** Text describing the GUI lines/unit field. */
@@ -80,12 +70,9 @@ public class ProfileEditor extends JPanel
     public static final String LENGTH_LABEL     = "Length";
     /** Text describing the GUI draw field (for lines). */
     public static final String DRAW_LABEL       = "Draw";
+
     /** Text describing the GUI draw field (for text). */
     public static final String DRAW_FONT_LABEL  = "Labels";
-    /** Text describing a color editor (text field). */
-    public static final String COLOR_EDITOR     = "Color Editor";
-    /** Text describing the GUI name panel. */
-    public static final String NAME_LABEL       = "Name";
     /** Text describing the GUI grid unit panel. */
     public static final String GRID_UNIT_LABEL  = "Grid Unit";
     /** Text on the edit-font button. " */
@@ -103,6 +90,19 @@ public class ProfileEditor extends JPanel
     public static final String MINOR_TICS_TITLE = "Minor Tics";
     /** Text describing the GUI grid lines panel. */
     public static final String GRID_LINES_TITLE = "Grid Lines";
+    
+    /** Simple name of the LinePropertySetAxes class. */
+    private static final String axesSet         =
+        LinePropertySetAxes.class.getSimpleName();
+    /** Simple name of the LinePropertySetTicMajor class. */
+    private static final String ticMajorSet     =
+        LinePropertySetTicMajor.class.getSimpleName();
+    /** Simple name of the LinePropertySetTicMinor class. */
+    private static final String ticMinorSet     =
+        LinePropertySetTicMinor.class.getSimpleName();
+    /** Simple name of the LinePropertySetTicMinor class. */
+    private static final String gridLinesSet    =
+        LinePropertySetGridLines.class.getSimpleName();
     
     /** The component that the sample graph is drawn on. */
     private final ProfileEditorFeedback        canvas;
@@ -342,7 +342,7 @@ public class ProfileEditor extends JPanel
         JPanel      panel   = new JPanel( new GridLayout( 5, 2, 3, 0 ) );
         SpinnerDesc gUnit   = descMap.get( GRID_UNIT_LABEL );
         SpinnerDesc width   = descMap.get( WIDTH_LABEL );
-        panel.setName( GRID_TITLE);
+        panel.setName( GRID_TITLE );
         panel.add( gUnit.label );
         panel.add( gUnit.spinner );
         panel.add( width.label );

@@ -9,7 +9,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
-import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorTestGUI_old;
+import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorTestGUI;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
@@ -37,8 +37,8 @@ class ProfileEditorTestGUIValidator
     private static Profile              distinctProfile = 
         ProfileUtils.getDistinctProfile( profile );
     /** Test GUI to be validated. */
-    private static ProfileEditorTestGUI_old testGUI         =     
-        ProfileEditorTestGUI_old.getTestGUI( profile );
+    private static ProfileEditorTestGUI testGUI         =     
+        ProfileEditorTestGUI.getTestGUI( profile );
 
     /**
      * Verify that the ProfileEditorTestGUI_old has read/write access
