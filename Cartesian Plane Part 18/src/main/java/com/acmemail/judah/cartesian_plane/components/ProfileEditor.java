@@ -584,15 +584,26 @@ public class ProfileEditor extends JPanel
         }
     }
     
+    /**
+     * Given a JSpinner with an underlying SpinnerNumberModel
+     * get and return the spinner's value.
+     * 
+     * @param spinner   given JSpinner
+     * 
+     * @return  the given spinner's value
+     * 
+     * @throws 
+     *      ComponentException if the given spinner is not based
+     *      on a SpinnerNumberModel
+     */
     private static float getFloat( JSpinner spinner )
     {
-        float           val     = -1;
         SpinnerModel    model   = spinner.getModel();
         if ( !(model instanceof SpinnerNumberModel) )
             throw new ComponentException( "Invalid SpinnerModel" );
-        val = ((SpinnerNumberModel)model).getNumber().floatValue();
+        Number          number  = ((SpinnerNumberModel)model).getNumber();
+        float           val     = number.floatValue();
         return val;
-        
     }
 
     /**
