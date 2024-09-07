@@ -305,30 +305,6 @@ public class ProfileEditor extends JPanel
         panel.setLayout( layout );
         return panel;
     }
-    
-    /**
-     * Locate a SpinnerDesc
-     * and add its JSpinner
-     * to a given panel.
-     * The user passes the type of LinePropertySet
-     * (e.g. {@link #axesSet}, {@link #gridLinesSet}
-     * and the label on the spinner
-     * (e.g. {@link #STROKE_LABEL}, {@link #LENGTH_LABEL}
-     * and these are used to 
-     * locate the SpinnerDesc.
-     * 
-     * @param type      the type of the target spinner descriptor
-     * @param label     the label on the target JSpinner
-     * @param panel     the given panel
-     * 
-     * @see #descMap
-     */
-    private void addSpinner( String type, String label, JPanel panel )
-    {
-        SpinnerDesc desc    = descMap.get( type + label );
-        panel.add( desc.label );
-        panel.add( desc.spinner );
-    }
 
     /**
      * Returns a panel containing the grid unit 
@@ -371,8 +347,8 @@ public class ProfileEditor extends JPanel
         panel.add( new JLabel( NAME_LABEL ) );
         panel.add( Box.createRigidArea( spacer ) );
         JTextField      nameField   = new JTextField( 10 );
-        nameField.setName( NAME_LABEL );
         panel.add( nameField );
+        nameField.setName( NAME_LABEL );
         nameField.setText( profile.getName() );
 
         Runnable        toProfile   = 
@@ -383,6 +359,30 @@ public class ProfileEditor extends JPanel
         applyList.add( toProfile );
 
         return panel;
+    }
+    
+    /**
+     * Locate a SpinnerDesc
+     * and add its JSpinner
+     * to a given panel.
+     * The user passes the type of LinePropertySet
+     * (e.g. {@link #axesSet}, {@link #gridLinesSet}
+     * and the label on the spinner
+     * (e.g. {@link #STROKE_LABEL}, {@link #LENGTH_LABEL}
+     * and these are used to 
+     * locate the SpinnerDesc.
+     * 
+     * @param type      the type of the target spinner descriptor
+     * @param label     the label on the target JSpinner
+     * @param panel     the given panel
+     * 
+     * @see #descMap
+     */
+    private void addSpinner( String type, String label, JPanel panel )
+    {
+        SpinnerDesc desc    = descMap.get( type + label );
+        panel.add( desc.label );
+        panel.add( desc.spinner );
     }
     
     /**
@@ -460,7 +460,6 @@ public class ProfileEditor extends JPanel
         
         Runnable    toComponent = () -> fontDialog.reset();
         resetList.add( toComponent );
-
     }
     
     private void addDraw( GraphPropertySet propSet, JPanel panel )
