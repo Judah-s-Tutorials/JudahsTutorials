@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
@@ -55,16 +56,6 @@ public class GraphManager
     /** Name of the LinePropertySetGridLines class. */
     private static final String gridLinesPropertiesName =
         LinePropertySetGridLines.class.getSimpleName();
-        
-    private Rectangle2D       rect;
-    /** The grid unit for the sample graph. */
-    private float                   gridUnit;
-
-    /** 
-     * For transient use when temporarily switching colors
-     * in the graphics context.
-     */
-    private Color               saveColor;
 
     /** 
      * Set of properties that control the appearance of the 
@@ -100,12 +91,47 @@ public class GraphManager
      */
     private final LinePropertySetGridLines  gridLine;
     
+    
+    /** 
+     * The rectangle that determines the are of the client window
+     * within which to draw the grid. Updated every time reset
+     * is invoked.
+     */
+    private Rectangle2D         rect;
+    /** The grid unit for the sample graph. */
+    private float               gridUnit;
     /**  Graphics context; updated every time refresh() is invoked. */
-    private Graphics2D          gtx         = null;
+    private Graphics2D          gtx;
+    
+    /**
+     * Constructor.
+     * Initializes this object with the given Profile
+     * and an unconfigured Rectangle.
+     * 
+     * @param profile   the given Profile
+     * 
+     * @see GraphManager#GraphManager(Rectangle2D, Profile)
+     */
+    public GraphManager( Profile profile )
+    {
+        this( new Rectangle(), profile );
+    }
+    
+    /**
+     * Constructor.
+     * Initializes this object with the given Profile
+     * and a rectangle derived from the given Component.
+     * 
+     * @param comp      the given Component
+     * @param profile   the given Profile
+     * 
+     * @see GraphManager#GraphManager(Rectangle2D, Profile)
+     */
     public GraphManager( JComponent comp, Profile profile )
     {
         this( comp.getVisibleRect(), profile );
     }
+    
     /**
      * Constructor.
      * Fully initializes this object.
@@ -143,6 +169,13 @@ public class GraphManager
         this.rect = rect;
         refresh( graphics );
     }
+    
+    /**
+     * Update the graphics context used 
+     * to draw in the client window.
+     * 
+     * @param graphics  the updated graphics context
+     */
     public void refresh( Graphics2D graphics )
     {
         if ( gtx != null )
@@ -155,9 +188,28 @@ public class GraphManager
         gtx.fill( rect );
      }
     
+    /**
+     * Forces the encapsulated Profile
+     * to be reinitialized
+     * using the current property values
+     * from the PropertyManager.
+     */
     public void resetProfile()
     {
         profile.reset();
+    }
+    
+    /**
+     * Draw all the components of the sample graph.
+     */
+    public void drawAll()
+    {
+        drawBackground();
+        drawGridLines();
+        drawAxes();
+        drawMinorTics();
+        drawMajorTics();
+        drawText();
     }
     
     /**
@@ -165,9 +217,8 @@ public class GraphManager
      */
     public void drawBackground()
     {
-        setColor( mainWindow.getBGColor() );
+        gtx.setColor( mainWindow.getBGColor() );
         gtx.fill( rect );
-        setColor( null );
     }
     
     /**
@@ -300,13 +351,12 @@ public class GraphManager
      */
     public void drawAxes()
     {
-        setColor( axis.getColor() );
+        gtx.setColor( axis.getColor() );
         gtx.setStroke( getStroke( axis.getStroke() ) );
         
         Iterator<Line2D>    iter    = LineGenerator.axesIterator( rect );
         gtx.draw( iter.next() );
         gtx.draw( iter.next() );
-        setColor( null );
     }
 
     /**
@@ -335,8 +385,7 @@ public class GraphManager
         if ( propSet.getDraw() )
         {
             float           lpu     = propSet.getSpacing();
-            float           len     = propSet.hasLength() ?
-                propSet.getLength() : -1;
+            float           len     = propSet.getLength();
             Stroke          stroke  = getStroke( propSet.getStroke() );
             Color           color   = propSet.getColor();
             LineGenerator   lineGen = 
@@ -348,37 +397,11 @@ public class GraphManager
                     LineGenerator.BOTH
                 );
             gtx.setStroke( stroke );
-            setColor( color );
+            gtx.setColor( color );
             StreamSupport
                 .stream( lineGen.spliterator(), false )
-                .forEach( gtx:: draw );
-            setColor( null );
+                .forEach( gtx::draw );
         }
-    }
-    
-    /**
-     * Configure the color in the graphics context.
-     * If newColor is non-null,
-     * the saveColor variable
-     * is set to the current color
-     * of the graphics context,
-     * then the color of the graphics context
-     * is changed to newColor.
-     * If newColor is null
-     * the color of the graphics context
-     * is changed to saveColor.
-     * 
-     * @param newColor  determines the color in the graphics context
-     */
-    private void setColor( Color newColor )
-    {
-        if ( newColor != null )
-        {
-            saveColor = gtx.getColor();
-            gtx.setColor( newColor );
-        }
-        else
-            gtx.setColor( saveColor );
     }
     
     /**
