@@ -37,7 +37,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
  * to demonstrate how to configure a GraphPanel.
  * The center/right of the application frame
  * is a JPanel ({@link #canvas}) displaying graph
- * via an encapsulated GraphManager.
+ * via an encapsulated Temp1.
  * The left of the application frame
  * contains controls
  * that allow the operator
@@ -50,7 +50,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 public class GraphManagerDemo2
 {
     /** 
-     * The profile shared with the GraphManager.
+     * The profile shared with the Temp1.
      * @see Canvas
      */
     private final Profile   profile     = new Profile();
@@ -75,7 +75,7 @@ public class GraphManagerDemo2
     {
         JPanel      controls    = getControlPanel();
         
-        JFrame      frame       = new JFrame( "GraphManager Demo 2" );
+        JFrame      frame       = new JFrame( "Temp1 Demo 2" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel      contentPane = new JPanel( new BorderLayout() );
         
@@ -176,7 +176,7 @@ public class GraphManagerDemo2
     /**
      * An object of this class is a JPanel
      * that displays a graph
-     * under the control of a GraphManager.
+     * under the control of a Temp1.
      * 
      * @author Jack Straub
      */
@@ -250,7 +250,7 @@ public class GraphManagerDemo2
          * Fully configures the state of this window.
          * 
          * @param profile   
-         *      profile to share with the encapsulated GraphManager
+         *      profile to share with the encapsulated Temp1
          */
         public Canvas( Profile profile )
         {
@@ -263,7 +263,7 @@ public class GraphManagerDemo2
         /**
          * Redraw the content of this window.
          * The background is tiled,
-         * and the GraphManager is updated
+         * and the Temp1 is updated
          * with the values of the graph margins.
          * 
          * @param graphics  graphics context for drawing
@@ -274,9 +274,9 @@ public class GraphManagerDemo2
             width = getWidth();
             height = getHeight();
             gtx = (Graphics2D)graphics.create();
-//            tile();
-            gtx.setColor( Color.WHITE );
-            gtx.fillRect( 0, 0, width, height );
+            tile();
+//            gtx.setColor( Color.WHITE );
+//            gtx.fillRect( 0, 0, width, height );
             
             rect.x = leftMargin;
             rect.y = topMargin;

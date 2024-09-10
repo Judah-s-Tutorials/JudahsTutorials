@@ -36,7 +36,7 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
  * 
  * @see LineGenerator
  */
-public class GraphManager
+public class GraphManager_orig
 {
     /** Type of line-cap when instantiating Stroke. */
     private static final int    lineCap                 =
@@ -112,7 +112,7 @@ public class GraphManager
      * 
      * @see Temp1#GraphManager(Rectangle2D, Profile)
      */
-    public GraphManager( Profile profile )
+    public GraphManager_orig( Profile profile )
     {
         this( new Rectangle(), profile );
     }
@@ -127,7 +127,7 @@ public class GraphManager
      * 
      * @see Temp1#GraphManager(Rectangle2D, Profile)
      */
-    public GraphManager( JComponent comp, Profile profile )
+    public GraphManager_orig( JComponent comp, Profile profile )
     {
         this( comp.getVisibleRect(), profile );
     }
@@ -140,7 +140,7 @@ public class GraphManager
      * @param profile   
      *      the Profile containing the drawing configuration properties
      */
-    public GraphManager( Rectangle2D rect, Profile profile )
+    public GraphManager_orig( Rectangle2D rect, Profile profile )
     {
         this.rect = rect;
         this.profile = profile;
@@ -245,7 +245,51 @@ public class GraphManager
     public void drawVerticalLabels()
     {
         if ( mainWindow.isFontDraw() )
-            drawLabels( LineGenerator.VERTICAL );
+        {
+            // padding between tic mark and label
+            final int   labelPadding    = 3;
+            
+            float   ticMajorMPU = ticMajor.getSpacing();
+            float   ticMajorLen = ticMajor.getLength();
+            String  fontName    = mainWindow.getFontName();
+            int     fontSize    = (int)mainWindow.getFontSize();
+            int     fontStyle   = mainWindow.getFontStyle();
+            Color   fontColor   = mainWindow.getFGColor();
+            Font    labelFont   = 
+                new Font( fontName, fontStyle, fontSize );
+            
+            gtx.setColor( fontColor );
+            gtx.setFont( labelFont );
+            FontRenderContext   frc     = gtx.getFontRenderContext();
+            LineGenerator       lineGen = 
+                new LineGenerator( 
+                    rect, 
+                    gridUnit, 
+                    ticMajorMPU,
+                    ticMajorLen,
+                    LineGenerator.VERTICAL
+                );
+            float       labelIncr   = 1 / ticMajorMPU;
+            float       originXco   = (float)rect.getCenterX();
+            float       spacing     = gridUnit / ticMajorMPU;
+            for ( Line2D line : lineGen )
+            {
+                float       xco1    = (float)line.getX2();
+                int         dist    = (int)((xco1 - originXco) / spacing);
+                float       next    = dist * labelIncr;
+                String      label   = String.format( "%3.2f", next );
+    
+                TextLayout  layout  = 
+                    new TextLayout( label, labelFont, frc );
+                Rectangle2D bounds  = layout.getBounds();
+                float       yOffset = 
+                    (float)(bounds.getHeight() + labelPadding);
+                float       xOffset = (float)(bounds.getWidth() / 2);
+                float       xco     = xco1 - xOffset;
+                float       yco     = (float)line.getY2() + yOffset;
+                layout.draw( gtx, xco, yco );
+            }
+        }
     }
 
     /**
@@ -256,11 +300,54 @@ public class GraphManager
     public void drawHorizontalLabels()
     {
         if ( mainWindow.isFontDraw() )
-            drawLabels( LineGenerator.HORIZONTAL );
+        {
+            // padding between tic mark and label
+            final int   labelPadding    = 5;
+            
+            float   ticMajorMPU = ticMajor.getSpacing();
+            float   ticMajorLen = ticMajor.getLength();
+            String  fontName    = mainWindow.getFontName();
+            int     fontSize    = (int)mainWindow.getFontSize();
+            int     fontStyle   = mainWindow.getFontStyle();
+            Color   fontColor   = mainWindow.getFGColor();
+            Font    labelFont   = 
+                new Font( fontName, fontStyle, fontSize );
+    
+            gtx.setFont( labelFont );
+            gtx.setColor( fontColor );
+            FontRenderContext   frc = gtx.getFontRenderContext();
+            LineGenerator   lineGen = 
+                new LineGenerator( 
+                    rect, 
+                    gridUnit, 
+                    ticMajorMPU,
+                    ticMajorLen,
+                    LineGenerator.HORIZONTAL
+                );
+            float       labelIncr   = 1 / ticMajorMPU;
+            float       originYco   = (float)rect.getCenterY();
+            float       spacing     = gridUnit / ticMajorMPU;
+    
+            for ( Line2D line : lineGen )
+            {
+                float       xco2    = (float)line.getX2();
+                float       yco1    = (float)line.getY1();
+                int         dist    = (int)((originYco - yco1) / spacing);
+                float       next    = dist * labelIncr;
+                String      label   = String.format( "%3.2f", next );
+                TextLayout  layout  = 
+                    new TextLayout( label, labelFont, frc );
+                Rectangle2D bounds  = layout.getBounds();
+                float       yOffset = (float)(bounds.getHeight() / 2);
+                float       xco     = xco2 + labelPadding;
+                float       yco     = yco1 + yOffset;
+                layout.draw( gtx, xco, yco );
+            }
+        }
     }
 
     /**
-     * Draw the x- and y-axes.
+     * Draw the labels on the axes on the x-axis.
      */
     public void drawAxes()
     {
@@ -315,76 +402,6 @@ public class GraphManager
                 .stream( lineGen.spliterator(), false )
                 .forEach( gtx::draw );
         }
-    }
-    
-    /**
-     * Draw the text for the labels on either the vertical (x-axis)
-     * or horizontal (y-axis) major tic marks.
-     * 
-     * @param orientation   
-     *      LineGenerator.VERTICAL or LineGenerator.HORIZONTAL
-     */
-    private void drawLabels( int orientation )
-    {
-        int     labelPadding    = 
-            orientation == LineGenerator.HORIZONTAL ? 5 : 3;
-        
-        float   ticMajorMPU = ticMajor.getSpacing();
-        float   ticMajorLen = ticMajor.getLength();
-        String  fontName    = mainWindow.getFontName();
-        int     fontSize    = (int)mainWindow.getFontSize();
-        int     fontStyle   = mainWindow.getFontStyle();
-        Color   fontColor   = mainWindow.getFGColor();
-        Font    labelFont   = 
-            new Font( fontName, fontStyle, fontSize );
-
-        gtx.setColor( fontColor );
-        gtx.setFont( labelFont );
-        FontRenderContext   frc     = gtx.getFontRenderContext();
-        
-        float   labelIncr   = 1 / ticMajorMPU;
-        float   originXco   = (float)rect.getCenterX();
-        float   originYco   = (float)rect.getCenterY();
-        float   spacing     = gridUnit / ticMajorMPU;
-        LineGenerator       lineGen = 
-            new LineGenerator( 
-                rect, 
-                gridUnit, 
-                ticMajorMPU,
-                ticMajorLen,
-                orientation
-            );
-        for ( Line2D line : lineGen )
-        {
-            float       xco2    = (float)line.getX2();
-            float       yco1    = (float)line.getY1();
-            float       yco2    = (float)line.getY2();
-            float       dist    = orientation == LineGenerator.HORIZONTAL ?
-                (originYco - yco1) / spacing :
-                (xco2 - originXco) / spacing;
-            float       next    = dist * labelIncr;
-            String      label   = String.format( "%3.2f", next );
-            TextLayout  layout  = 
-                new TextLayout( label, labelFont, frc );
-            Rectangle2D bounds  = layout.getBounds();
-            float       xco     = 0;
-            float       yco     = 0;
-            if ( orientation == LineGenerator.HORIZONTAL )
-            {
-                float   yOffset = (float)(bounds.getHeight() / 2);
-                xco = xco2 + labelPadding;
-                yco = yco1 + yOffset;
-            }
-            else
-            {
-                float       yOffset = 
-                    (float)(bounds.getHeight() + labelPadding);
-                float       xOffset = (float)(bounds.getWidth() / 2);
-                xco     = xco2 - xOffset;
-                yco     = yco2 + yOffset;
-            }
-            layout.draw( gtx, xco, yco );
-       }
     }
     
     /**

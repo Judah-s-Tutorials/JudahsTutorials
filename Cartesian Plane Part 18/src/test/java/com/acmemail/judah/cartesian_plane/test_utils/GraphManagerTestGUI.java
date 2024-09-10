@@ -23,7 +23,7 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**
- * Test GUI for the GraphManager.
+ * Test GUI for the Temp1.
  * 
  * width/height = 601
  *     center pixel = 300
@@ -38,7 +38,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 public class GraphManagerTestGUI
 {
     /** Application frame title. */
-    private static final String title       = "GraphManager Test GUI";
+    private static final String title       = "Temp1 Test GUI";
     
     /** Application frame. */
     private final JFrame        frame       = new JFrame( title );
@@ -52,7 +52,7 @@ public class GraphManagerTestGUI
         new BufferedImage( imageWidth, imageHeight, imageType );
     Rectangle2D                 imageRect   =
         new Rectangle2D.Double( 0, 0, imageWidth, imageHeight );
-    /** GraphManager under test. */
+    /** Temp1 under test. */
     private final GraphManager  graphMgr;
     /** Place to draw sample graph. */
     private final JPanel        canvas      = new FBPanel();
@@ -73,7 +73,7 @@ public class GraphManagerTestGUI
     
     /**
      * Executes the drawBackground method
-     * in the GraphManager under test.
+     * in the Temp1 under test.
      * 
      * @return  the bitmap that the grid manager draws to
      */
@@ -85,7 +85,7 @@ public class GraphManagerTestGUI
     
     /**
      * Executes the drawAxes method
-     * in the GraphManager under test.
+     * in the Temp1 under test.
      * 
      * @return  the bitmap that the grid manager draws to
      */
@@ -97,7 +97,7 @@ public class GraphManagerTestGUI
     
     /**
      * Executes the drawMajorTics method
-     * in the GraphManager under test.
+     * in the Temp1 under test.
      * 
      * @return  the bitmap that the grid manager draws to
      */
@@ -109,7 +109,7 @@ public class GraphManagerTestGUI
     
     /**
      * Executes the drawMinorTics method
-     * in the GraphManager under test.
+     * in the Temp1 under test.
      * 
      * @return  the bitmap that the grid manager draws to
      */
@@ -121,7 +121,7 @@ public class GraphManagerTestGUI
     
     /**
      * Executes the drawGridLines method
-     * in the GraphManager under test.
+     * in the Temp1 under test.
      * 
      * @return  the bitmap that the grid manager draws to
      */
@@ -133,7 +133,7 @@ public class GraphManagerTestGUI
     
     /**
      * Executes the drawHorizontalLabel method
-     * in the GraphManager under test.
+     * in the Temp1 under test.
      * 
      * @return  the bitmap that the grid manager draws to
      */
@@ -145,7 +145,7 @@ public class GraphManagerTestGUI
     
     /**
      * Executes the drawVerticalLabel method
-     * in the GraphManager under test.
+     * in the Temp1 under test.
      * 
      * @return  the bitmap that the grid manager draws to
      */
@@ -157,7 +157,7 @@ public class GraphManagerTestGUI
     
     /**
      * Executes the drawText method
-     * in the GraphManager under test.
+     * in the Temp1 under test.
      * 
      * @return  the bitmap that the grid manager draws to
      */

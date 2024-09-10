@@ -393,7 +393,7 @@ public class CartesionPlaneWithOCR extends JFrame
          * @param profile   
          *      the Profile containing the properties that control the drawing
          *      
-         * @see GraphManager
+         * @see Temp1
          */
         public Canvas( Profile profile )
         {

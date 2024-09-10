@@ -48,7 +48,7 @@ public class ProfileEditorFeedback extends JComponent
      * @param profile   
      *      the Profile containing the properties that control the drawing
      *      
-     * @see GraphManager
+     * @see Temp1
      */
     public ProfileEditorFeedback( Profile profile )
     {
