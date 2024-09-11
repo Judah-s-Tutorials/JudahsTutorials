@@ -110,7 +110,7 @@ public class GraphManager
      * 
      * @param profile   the given Profile
      * 
-     * @see Temp1#GraphManager(Rectangle2D, Profile)
+     * @see GraphManager#GraphManager(Rectangle2D, Profile)
      */
     public GraphManager( Profile profile )
     {
@@ -125,7 +125,7 @@ public class GraphManager
      * @param comp      the given Component
      * @param profile   the given Profile
      * 
-     * @see Temp1#GraphManager(Rectangle2D, Profile)
+     * @see GraphManager#GraphManager(Rectangle2D, Profile)
      */
     public GraphManager( JComponent comp, Profile profile )
     {
@@ -136,7 +136,7 @@ public class GraphManager
      * Constructor.
      * Fully initializes this object.
      * 
-     * @param comp      the component where the sample graph is drawn
+     * @param rect      the rectangle that determine's the grid's bounds
      * @param profile   
      *      the Profile containing the drawing configuration properties
      */
@@ -334,18 +334,16 @@ public class GraphManager
         String  fontName    = mainWindow.getFontName();
         int     fontSize    = (int)mainWindow.getFontSize();
         int     fontStyle   = mainWindow.getFontStyle();
-        Color   fontColor   = mainWindow.getFGColor();
         Font    labelFont   = 
             new Font( fontName, fontStyle, fontSize );
-
-        gtx.setColor( fontColor );
         gtx.setFont( labelFont );
-        FontRenderContext   frc     = gtx.getFontRenderContext();
+
+        Color   fontColor   = mainWindow.getFGColor();
+        gtx.setColor( fontColor );
         
-        float   labelIncr   = 1 / ticMajorMPU;
+        FontRenderContext   frc     = gtx.getFontRenderContext();
         float   originXco   = (float)rect.getCenterX();
         float   originYco   = (float)rect.getCenterY();
-        float   spacing     = gridUnit / ticMajorMPU;
         LineGenerator       lineGen = 
             new LineGenerator( 
                 rect, 
@@ -359,11 +357,10 @@ public class GraphManager
             float       xco2    = (float)line.getX2();
             float       yco1    = (float)line.getY1();
             float       yco2    = (float)line.getY2();
-            float       dist    = orientation == LineGenerator.HORIZONTAL ?
-                (originYco - yco1) / spacing :
-                (xco2 - originXco) / spacing;
-            float       next    = dist * labelIncr;
-            String      label   = String.format( "%3.2f", next );
+            float       delta   = orientation == LineGenerator.HORIZONTAL ?
+                (originYco - yco1) : (xco2 - originXco); 
+            float       unit    = delta / gridUnit;
+            String      label   = String.format( "%3.2f", unit );
             TextLayout  layout  = 
                 new TextLayout( label, labelFont, frc );
             Rectangle2D bounds  = layout.getBounds();
