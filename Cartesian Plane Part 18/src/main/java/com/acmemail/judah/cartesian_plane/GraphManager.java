@@ -228,6 +228,35 @@ public class GraphManager
     {
         drawLines( gridLine );
     }
+
+    /**
+     * Draw the x- and y-axes.
+     */
+    public void drawAxes()
+    {
+        gtx.setColor( axis.getColor() );
+        gtx.setStroke( getStroke( axis.getStroke() ) );
+        
+        Iterator<Line2D>    iter    = LineGenerator.axesIterator( rect );
+        gtx.draw( iter.next() );
+        gtx.draw( iter.next() );
+    }
+
+    /**
+     * Draw the minor tic marks on the sample graph.
+     */
+    public void drawMinorTics()
+    {
+        drawLines( ticMinor );
+    }
+
+    /**
+     * Draw the major tic marks on the sample graph.
+     */
+    public void drawMajorTics()
+    {
+        drawLines( ticMajor );
+    }
     
     /**
      * Draw the labels on the major tic marks of the sample graph.
@@ -257,35 +286,6 @@ public class GraphManager
     {
         if ( mainWindow.isFontDraw() )
             drawLabels( LineGenerator.HORIZONTAL );
-    }
-
-    /**
-     * Draw the x- and y-axes.
-     */
-    public void drawAxes()
-    {
-        gtx.setColor( axis.getColor() );
-        gtx.setStroke( getStroke( axis.getStroke() ) );
-        
-        Iterator<Line2D>    iter    = LineGenerator.axesIterator( rect );
-        gtx.draw( iter.next() );
-        gtx.draw( iter.next() );
-    }
-
-    /**
-     * Draw the minor tic marks on the sample graph.
-     */
-    public void drawMinorTics()
-    {
-        drawLines( ticMinor );
-    }
-
-    /**
-     * Draw the major tic marks on the sample graph.
-     */
-    public void drawMajorTics()
-    {
-        drawLines( ticMajor );
     }
 
     /**

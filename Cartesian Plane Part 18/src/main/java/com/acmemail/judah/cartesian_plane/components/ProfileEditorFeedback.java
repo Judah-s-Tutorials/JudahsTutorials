@@ -30,13 +30,6 @@ public class ProfileEditorFeedback extends JComponent
      * and utilized in the {@link #paintComponent(Graphics)} method.
      */
     private final GraphManager  drawManager;
-
-    /** 
-     * Graphics context.
-     * Initialized using a copy of the graphics context
-     * every time {@link #paintComponent(Graphics)}.
-     */
-    private Graphics2D          gtx;
     
     /**
      * Constructor.
@@ -52,13 +45,12 @@ public class ProfileEditorFeedback extends JComponent
      */
     public ProfileEditorFeedback( Profile profile )
     {
-        drawManager = new GraphManager( this.getVisibleRect(), profile );
+        drawManager = new GraphManager( this, profile );
         
         Dimension   screenSize  = 
             Toolkit.getDefaultToolkit().getScreenSize();
         float       targetWidth     = 
             PropertyManager.INSTANCE.asFloat(CPConstants.MW_WIDTH_PN );
-            //(int)(.5 * screenSize.width + .5);
         int         targetHeight    = (int)(.5 * screenSize.height + .5);
         
         Dimension   canvasSize  =
@@ -76,16 +68,9 @@ public class ProfileEditorFeedback extends JComponent
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        gtx = (Graphics2D)graphics.create();
         
+        Graphics2D  gtx = (Graphics2D)graphics;
         drawManager.refresh( gtx, this.getVisibleRect() );
-        drawManager.drawBackground();
-        drawManager.drawGridLines();
-        drawManager.drawAxes();
-        drawManager.drawMinorTics();
-        drawManager.drawMajorTics();
-        drawManager.drawText();
-        
-        gtx.dispose();
+        drawManager.drawAll();
     }
 }

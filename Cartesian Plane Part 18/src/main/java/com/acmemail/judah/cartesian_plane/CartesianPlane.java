@@ -557,12 +557,7 @@ public class CartesianPlane
         yOffset = gridRect.getY() + (gridRect.getHeight() - 1) / 2;
 
         graphMgr.refresh( gtx, gridRect );
-        graphMgr.drawGridLines();
-        graphMgr.drawMinorTics();
-        graphMgr.drawMajorTics();
-        graphMgr.drawAxes();
-        graphMgr.drawHorizontalLabels();
-        graphMgr.drawVerticalLabels();
+        graphMgr.drawAll();
         drawUserPlot();
         
         gtx.setClip( origClip );

@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>diff</title>
+<meta name="Generator" content="Vim/9.0">
+<meta name="plugin-version" content="vim8.1_v2">
+<meta name="settings" content="number_lines,whole_filler,use_css,no_foldcolumn,expand_tabs,line_ids,prevent_copy=,use_input_for_pc=fallback">
+<meta name="colorscheme" content="none">
+<style>
+<!--
+pre { font-family: monospace; color: #ffffff; background-color: #000000; }
+body { font-family: monospace; color: #ffffff; background-color: #000000; }
+* { font-size: 1em; }
+.Folded { color: #ffff00; background-color: #808080; padding-bottom: 1px; }
+.LineNr { color: #00ffff; }
+.DiffText { background-color: #8080ff; padding-bottom: 1px; font-weight: bold; }
+.DiffAdd { background-color: #c00000; padding-bottom: 1px; }
+.DiffChange { background-color: #c000c0; padding-bottom: 1px; }
+.DiffDelete { color: #ff6060; background-color: #804000; padding-bottom: 1px; }
+-->
+<!--
+table { table-layout: fixed; }
+html, body, table, tbody { width: 100%; margin: 0; padding: 0; }
+table, td, th { border: 1px solid; }
+td { vertical-align: top; }
+th, td { width: 50.0%; }
+td div { overflow: auto; }
+-->
+</style>
+<script>
+<!--
+
+/* function to open any folds containing a jumped-to line before jumping to it */
+function JumpToLine()
+{
+  var lineNum;
+  lineNum = window.location.hash;
+  lineNum = lineNum.substr(1); /* strip off '#' */
+
+  if (lineNum.indexOf('L') == -1) {
+    lineNum = 'L'+lineNum;
+  }
+  if (lineNum.indexOf('W') == -1) {
+    lineNum = 'W1'+lineNum;
+  }
+  var lineElem = document.getElementById(lineNum);
+  /* Always jump to new location even if the line was hidden inside a fold, or
+   * we corrected the raw number to a line ID.
+   */
+  if (lineElem) {
+    lineElem.scrollIntoView(true);
+  }
+  return true;
+}
+if ('onhashchange' in window) {
+  window.onhashchange = JumpToLine;
+}
+
+-->
+</script>
+</head>
+<body onload='JumpToLine();'>
+<table id='vimCodeElement'>
+<tr>
+<th>Cartesian Plane Part 17\src\main\java\com\acmemail\judah\cartesian_plane\CartesianPlane.java</th>
+<th>Cartesian Plane Part 18\src\main\java\com\acmemail\judah\cartesian_plane\CartesianPlane.java</th>
+</tr><tr>
+<td><div>
+<pre>
+<span id="W1L1" class="LineNr">   1 </span>package com.acmemail.judah.cartesian_plane;
+<span id="W1L2" class="LineNr">   2 </span>
+<span id="W1L3" class="LineNr">   3 </span><span class="DiffAdd">import java.awt.BasicStroke;</span><span class="DiffAdd">                                               </span>
+<span id="W1L4" class="LineNr">   4 </span>import java.awt.Color;
+<span id="W1L5" class="LineNr">   5 </span>import java.awt.Dimension;
+<span id="W1L6" class="LineNr">   6 </span><span class="DiffAdd">import java.awt.Font;</span><span class="DiffAdd">                                                      </span>
+<span id="W1L7" class="LineNr">   7 </span>import java.awt.Graphics;
+<span id="W1L8" class="LineNr">   8 </span>import java.awt.Graphics2D;
+<span id="W1L9" class="LineNr">   9 </span>import java.awt.Shape;
+<span id="W1L10" class="LineNr">  10 </span><span class="DiffAdd">import java.awt.font.FontRenderContext;</span><span class="DiffAdd">                                    </span>
+<span id="W1L11" class="LineNr">  11 </span><span class="DiffAdd">import java.awt.font.TextLayout;</span><span class="DiffAdd">                                           </span>
+<span id="W1L12" class="LineNr">  12 </span><span class="DiffAdd">import java.awt.geom.Line2D;</span><span class="DiffAdd">                                               </span>
+<span id="W1L13" class="LineNr">  13 </span>import java.awt.geom.Rectangle2D;
+<span id="W1L14" class="LineNr">  14 </span>import java.beans.PropertyChangeEvent;
+<span id="W1L15" class="LineNr">  15 </span>import java.beans.PropertyChangeListener;
+<span id="W1L16" class="LineNr">  16 </span><span class="DiffAdd">import java.util.Iterator;</span><span class="DiffAdd">                                                 </span>
+<span id="W1L17" class="LineNr">  17 </span>import java.util.function.Supplier;
+<span id="W1L18" class="LineNr">  18 </span>import java.util.stream.Stream;
+<span id="W1L19" class="LineNr">  19 </span><span class="DiffAdd">import java.util.stream.StreamSupport;</span><span class="DiffAdd">                                     </span>
+<span id="W1L20" class="LineNr">  20 </span>
+<span id="W1L21" class="LineNr">  21 </span>import javax.swing.JPanel;
+<span id="W1L22" class="LineNr">  22 </span>
+<span id="W1L23" class="LineNr">  23 </span>/**
+<span id="W1L24" class="LineNr">  24 </span> * This class encapsulates the display of a Cartesian plane.
+<span id="W1L25" class="LineNr">  25 </span> * The plane consists of the following components,
+<span id="W1L26" class="Folded">  26 </span><span class="Folded">+--372 lines: * each of which is customizable by the user.----------------------</span>
+<span id="W1L398" class="LineNr"> 398 </span> *    &lt;/table&gt;
+<span id="W1L399" class="LineNr"> 399 </span> *
+<span id="W1L400" class="LineNr"> 400 </span> * @author Jack Straub
+<span id="W1L401" class="LineNr"> 401 </span> */
+<span id="W1L402" class="LineNr"> 402 </span>@SuppressWarnings(&quot;serial&quot;)
+<span id="W1L403" class="LineNr"> 403 </span>public class CartesianPlane
+<span id="W1L404" class="LineNr"> 404 </span><span class="DiffChange">    extends JPanel </span><span class="DiffText">implements PropertyChangeListener</span><span class="DiffChange">                       </span>
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span id="W1L405" class="LineNr"> 405 </span>{
+<span id="W1L406" class="LineNr"> 406 </span>    /**
+<span id="W1L407" class="LineNr"> 407 </span>     * This declaration is just for convenience; it saves
+<span id="W1L408" class="LineNr"> 408 </span>     * having to write &quot;PropertyManager.INSTANCE&quot; over and over.
+<span id="W1L409" class="LineNr"> 409 </span>     */
+<span id="W1L410" class="LineNr"> 410 </span>    private static final PropertyManager pmgr   = PropertyManager.INSTANCE;
+<span id="W1L411" class="Folded"> 411 </span><span class="Folded">+-- 38 lines: private static final int    mainWindowWidthDV   =-----------------</span>
+<span id="W1L449" class="LineNr"> 449 </span>        pmgr.asColor( CPConstants.MARGIN_BOTTOM_BG_COLOR_PN );
+<span id="W1L450" class="LineNr"> 450 </span>    private float   marginLeftWidth      =
+<span id="W1L451" class="LineNr"> 451 </span>        pmgr.asFloat( CPConstants.MARGIN_LEFT_WIDTH_PN );
+<span id="W1L452" class="LineNr"> 452 </span>    private Color   marginLeftBGColor    =
+<span id="W1L453" class="LineNr"> 453 </span>        pmgr.asColor( CPConstants.MARGIN_LEFT_BG_COLOR_PN );
+<span id="W1L454" class="LineNr"> 454 </span>
+<span id="W1L455" class="LineNr"> 455 </span><span class="DiffAdd">    /////////////////////////////////////////////////</span><span class="DiffAdd">                      </span>
+<span id="W1L456" class="LineNr"> 456 </span><span class="DiffAdd">    //   Tic mark properties</span><span class="DiffAdd">                                               </span>
+<span id="W1L457" class="LineNr"> 457 </span><span class="DiffAdd">    /////////////////////////////////////////////////</span><span class="DiffAdd">                      </span>
+<span id="W1L458" class="LineNr"> 458 </span><span class="DiffAdd">    private Color   ticMinorColor       =</span><span class="DiffAdd">                                  </span>
+<span id="W1L459" class="LineNr"> 459 </span><span class="DiffAdd">        pmgr.asColor( CPConstants.TIC_MINOR_COLOR_PN );</span><span class="DiffAdd">                    </span>
+<span id="W1L460" class="LineNr"> 460 </span><span class="DiffAdd">    private float   ticMinorWeight      =</span><span class="DiffAdd">                                  </span>
+<span id="W1L461" class="LineNr"> 461 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.TIC_MINOR_WEIGHT_PN );</span><span class="DiffAdd">                   </span>
+<span id="W1L462" class="LineNr"> 462 </span><span class="DiffAdd">    private float   ticMinorLen         =</span><span class="DiffAdd">                                  </span>
+<span id="W1L463" class="LineNr"> 463 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.TIC_MINOR_LEN_PN );</span><span class="DiffAdd">                      </span>
+<span id="W1L464" class="LineNr"> 464 </span><span class="DiffAdd">    private float   ticMinorMPU         =</span><span class="DiffAdd">                                  </span>
+<span id="W1L465" class="LineNr"> 465 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.TIC_MINOR_MPU_PN );</span><span class="DiffAdd">                      </span>
+<span id="W1L466" class="LineNr"> 466 </span><span class="DiffAdd">    private boolean ticMinorDraw        =</span><span class="DiffAdd">                                  </span>
+<span id="W1L467" class="LineNr"> 467 </span><span class="DiffAdd">        pmgr.asBoolean( CPConstants.TIC_MINOR_DRAW_PN );</span><span class="DiffAdd">                   </span>
+<span id="W1L468" class="LineNr"> 468 </span><span class="DiffAdd">    private Color   ticMajorColor       =</span><span class="DiffAdd">                                  </span>
+<span id="W1L469" class="LineNr"> 469 </span><span class="DiffAdd">        pmgr.asColor( CPConstants.TIC_MAJOR_COLOR_PN );</span><span class="DiffAdd">                    </span>
+<span id="W1L470" class="LineNr"> 470 </span><span class="DiffAdd">    private float   ticMajorWeight      =</span><span class="DiffAdd">                                  </span>
+<span id="W1L471" class="LineNr"> 471 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.TIC_MAJOR_WEIGHT_PN );</span><span class="DiffAdd">                   </span>
+<span id="W1L472" class="LineNr"> 472 </span><span class="DiffAdd">    private float   ticMajorLen         =</span><span class="DiffAdd">                                  </span>
+<span id="W1L473" class="LineNr"> 473 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.TIC_MAJOR_LEN_PN );</span><span class="DiffAdd">                      </span>
+<span id="W1L474" class="LineNr"> 474 </span><span class="DiffAdd">    private float   ticMajorMPU         =</span><span class="DiffAdd">                                  </span>
+<span id="W1L475" class="LineNr"> 475 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.TIC_MAJOR_MPU_PN );</span><span class="DiffAdd">                      </span>
+<span id="W1L476" class="LineNr"> 476 </span><span class="DiffAdd">    private boolean ticMajorDraw        =</span><span class="DiffAdd">                                  </span>
+<span id="W1L477" class="LineNr"> 477 </span><span class="DiffAdd">        pmgr.asBoolean( CPConstants.TIC_MAJOR_DRAW_PN );</span><span class="DiffAdd">                   </span>
+<span id="W1L478" class="LineNr"> 478 </span><span class="DiffAdd"> </span><span class="DiffAdd">                                                                          </span>
+<span id="W1L479" class="LineNr"> 479 </span><span class="DiffAdd">    /////////////////////////////////////////////////</span><span class="DiffAdd">                      </span>
+<span id="W1L480" class="LineNr"> 480 </span><span class="DiffAdd">    //   Grid line properties</span><span class="DiffAdd">                                              </span>
+<span id="W1L481" class="LineNr"> 481 </span><span class="DiffAdd">    /////////////////////////////////////////////////</span><span class="DiffAdd">                      </span>
+<span id="W1L482" class="LineNr"> 482 </span><span class="DiffAdd">    private Color   gridLineColor       = </span><span class="DiffAdd">                                 </span>
+<span id="W1L483" class="LineNr"> 483 </span><span class="DiffAdd">        pmgr.asColor( CPConstants.GRID_LINE_COLOR_PN );</span><span class="DiffAdd">                    </span>
+<span id="W1L484" class="LineNr"> 484 </span><span class="DiffAdd">    private float   gridLineWeight      = </span><span class="DiffAdd">                                 </span>
+<span id="W1L485" class="LineNr"> 485 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.GRID_LINE_WEIGHT_PN );</span><span class="DiffAdd">                   </span>
+<span id="W1L486" class="LineNr"> 486 </span><span class="DiffAdd">    private float   gridLineLPU         = </span><span class="DiffAdd">                                 </span>
+<span id="W1L487" class="LineNr"> 487 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.GRID_LINE_LPU_PN );</span><span class="DiffAdd">                      </span>
+<span id="W1L488" class="LineNr"> 488 </span><span class="DiffAdd">    private boolean gridLineDraw        =</span><span class="DiffAdd">                                  </span>
+<span id="W1L489" class="LineNr"> 489 </span><span class="DiffAdd">        pmgr.asBoolean( CPConstants.GRID_LINE_DRAW_PN );</span><span class="DiffAdd">                   </span>
+<span id="W1L490" class="LineNr"> 490 </span><span class="DiffAdd"> </span><span class="DiffAdd">                                                                          </span>
+<span id="W1L491" class="LineNr"> 491 </span><span class="DiffAdd">    /////////////////////////////////////////////////</span><span class="DiffAdd">                      </span>
+<span id="W1L492" class="LineNr"> 492 </span><span class="DiffAdd">    //   Axis properties</span><span class="DiffAdd">                                                   </span>
+<span id="W1L493" class="LineNr"> 493 </span><span class="DiffAdd">    /////////////////////////////////////////////////</span><span class="DiffAdd">                      </span>
+<span id="W1L494" class="LineNr"> 494 </span><span class="DiffAdd">    private Color   axisColor           = </span><span class="DiffAdd">                                 </span>
+<span id="W1L495" class="LineNr"> 495 </span><span class="DiffAdd">        pmgr.asColor( CPConstants.AXIS_COLOR_PN );</span><span class="DiffAdd">                         </span>
+<span id="W1L496" class="LineNr"> 496 </span><span class="DiffAdd">    private float   axisWeight          = </span><span class="DiffAdd">                                 </span>
+<span id="W1L497" class="LineNr"> 497 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.AXIS_WEIGHT_PN );</span><span class="DiffAdd">                        </span>
+<span id="W1L498" class="LineNr"> 498 </span><span class="DiffAdd"> </span><span class="DiffAdd">                                                                          </span>
+<span id="W1L499" class="LineNr"> 499 </span><span class="DiffAdd">    /////////////////////////////////////////////////</span><span class="DiffAdd">                      </span>
+<span id="W1L500" class="LineNr"> 500 </span><span class="DiffAdd">    //   Label properties (these are the labels that</span><span class="DiffAdd">                       </span>
+<span id="W1L501" class="LineNr"> 501 </span><span class="DiffAdd">    //   go on the x- and y-axes, e.g., 1.1, 1.2)</span><span class="DiffAdd">                          </span>
+<span id="W1L502" class="LineNr"> 502 </span><span class="DiffAdd">    /////////////////////////////////////////////////</span><span class="DiffAdd">                      </span>
+<span id="W1L503" class="LineNr"> 503 </span><span class="DiffAdd">    private Color   labelFontColor      =</span><span class="DiffAdd">                                  </span>
+<span id="W1L504" class="LineNr"> 504 </span><span class="DiffAdd">        pmgr.asColor( CPConstants.LABEL_FONT_COLOR_PN );</span><span class="DiffAdd">                   </span>
+<span id="W1L505" class="LineNr"> 505 </span><span class="DiffAdd">    private String  labelFontName       =</span><span class="DiffAdd">                                  </span>
+<span id="W1L506" class="LineNr"> 506 </span><span class="DiffAdd">        pmgr.asString( CPConstants.LABEL_FONT_NAME_PN );</span><span class="DiffAdd">                   </span>
+<span id="W1L507" class="LineNr"> 507 </span><span class="DiffAdd">    private int     labelFontStyle      =</span><span class="DiffAdd">                                  </span>
+<span id="W1L508" class="LineNr"> 508 </span><span class="DiffAdd">        pmgr.asFontStyle( CPConstants.LABEL_FONT_STYLE_PN );</span><span class="DiffAdd">               </span>
+<span id="W1L509" class="LineNr"> 509 </span><span class="DiffAdd">    private float   labelFontSize       = </span><span class="DiffAdd">                                 </span>
+<span id="W1L510" class="LineNr"> 510 </span><span class="DiffAdd">        pmgr.asFloat( CPConstants.LABEL_FONT_SIZE_PN );</span><span class="DiffAdd">                    </span>
+<span id="W1L511" class="LineNr"> 511 </span><span class="DiffAdd">    private boolean labelDraw           = </span><span class="DiffAdd">                                 </span>
+<span id="W1L512" class="LineNr"> 512 </span><span class="DiffAdd">        pmgr.asBoolean( CPConstants.LABEL_DRAW_PN );</span><span class="DiffAdd">                       </span>
+<span id="W1L513" class="LineNr"> 513 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                       </span>
+<span id="W1L514" class="LineNr"> 514 </span>    /**
+<span id="W1L515" class="LineNr"> 515 </span>     * Supplier, set by the user,
+<span id="W1L516" class="LineNr"> 516 </span>     * to obtain a stream of PlotCommands.
+<span id="W1L517" class="LineNr"> 517 </span>     */
+<span id="W1L518" class="LineNr"> 518 </span>    private Supplier&lt;Stream&lt;PlotCommand&gt;&gt;   streamSupplier  =
+<span id="W1L519" class="LineNr"> 519 </span>        () -&gt; Stream.empty();
+<span id="W1L520" class="Folded"> 520 </span><span class="Folded">+--  2 lines: ///////////////////////////////////////////////-------------------</span>
+<span id="W1L522" class="LineNr"> 522 </span>    //   Plot properties (properties to use
+<span id="W1L523" class="LineNr"> 523 </span>    //   when plotting a point on the grid)
+<span id="W1L524" class="LineNr"> 524 </span>    /////////////////////////////////////////////////
+<span id="W1L525" class="LineNr"> 525 </span>    private Color   plotColor           =
+<span id="W1L526" class="LineNr"> 526 </span>        pmgr.asColor( CPConstants.PLOT_COLOR_PN );
+<span id="W1L527" class="LineNr"> 527 </span>    private PlotShape  plotShape       = new PointShape();
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span id="W1L528" class="LineNr"> 528 </span>
+<span id="W1L529" class="LineNr"> 529 </span>    ///////////////////////////////////////////////////////
+<span id="W1L530" class="LineNr"> 530 </span>    //
+<span id="W1L531" class="LineNr"> 531 </span>    // The following values are recalculated every time
+<span id="W1L532" class="LineNr"> 532 </span>    // paintComponent is invoked.
+<span id="W1L533" class="LineNr"> 533 </span>    //
+<span id="W1L534" class="LineNr"> 534 </span>    ///////////////////////////////////////////////////////
+<span id="W1L535" class="LineNr"> 535 </span>    private int                 currWidth;
+<span id="W1L536" class="LineNr"> 536 </span>    private int                 currHeight;
+<span id="W1L537" class="LineNr"> 537 </span>    private Graphics2D          gtx;
+<span id="W1L538" class="LineNr"> 538 </span>    private Rectangle2D         gridRect;
+<span id="W1L539" class="LineNr"> 539 </span><span class="DiffAdd">    private Font                labelFont;</span><span class="DiffAdd">                                 </span>
+<span id="W1L540" class="LineNr"> 540 </span><span class="DiffAdd">    private FontRenderContext   labelFRC;</span><span class="DiffAdd">                                  </span>
+<span id="W1L541" class="LineNr"> 541 </span>    private PlotShape           currPlotShape;
+<span id="W1L542" class="LineNr"> 542 </span>    private double              xOffset;
+<span id="W1L543" class="LineNr"> 543 </span>    private double              yOffset;
+<span id="W1L544" class="LineNr"> 544 </span>
+<span id="W1L545" class="LineNr"> 545 </span>    /**
+<span id="W1L546" class="LineNr"> 546 </span>     * Constructor.
+<span id="W1L547" class="Folded"> 547 </span><span class="Folded">+-- 19 lines: * Builds a CartesianPlane with a default width and height.--------</span>
+<span id="W1L566" class="LineNr"> 566 </span>
+<span id="W1L567" class="LineNr"> 567 </span>        // Register listener for redraw notifications
+<span id="W1L568" class="LineNr"> 568 </span>        NotificationManager.INSTANCE.addNotificationListener(
+<span id="W1L569" class="LineNr"> 569 </span>            CPConstants.REDRAW_NP,
+<span id="W1L570" class="LineNr"> 570 </span>            e -&gt; repaint()
+<span id="W1L571" class="LineNr"> 571 </span>        );
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span id="W1L572" class="LineNr"> 572 </span>    }
+<span id="W1L573" class="LineNr"> 573 </span>
+<span id="W1L574" class="LineNr"> 574 </span>    /**
+<span id="W1L575" class="LineNr"> 575 </span>     * This method is where you do all your drawing.
+<span id="W1L576" class="LineNr"> 576 </span>     * Note the the window must be COMPLETELY redrawn
+<span id="W1L577" class="LineNr"> 577 </span>     * every time this method is called;
+<span id="W1L578" class="Folded"> 578 </span><span class="Folded">+--  9 lines: * Java does not remember anything you previously drew.------------</span>
+<span id="W1L587" class="LineNr"> 587 </span>        currWidth = getWidth();
+<span id="W1L588" class="LineNr"> 588 </span>        currHeight = getHeight();
+<span id="W1L589" class="LineNr"> 589 </span>        gtx = (Graphics2D)graphics.create();
+<span id="W1L590" class="LineNr"> 590 </span>        gtx.setColor( mwBGColor );
+<span id="W1L591" class="LineNr"> 591 </span>        gtx.fillRect( 0,  0, currWidth, currHeight );
+<span id="W1L592" class="LineNr"> 592 </span>        // end boilerplate
+<span id="W1L593" class="LineNr"> 593 </span><span class="DiffAdd">        </span><span class="DiffAdd">                                                                   </span>
+<span id="W1L594" class="LineNr"> 594 </span><span class="DiffAdd">        // set up the label font</span><span class="DiffAdd">                                           </span>
+<span id="W1L595" class="LineNr"> 595 </span><span class="DiffAdd">        //     round font size to nearest int</span><span class="DiffAdd">                              </span>
+<span id="W1L596" class="LineNr"> 596 </span><span class="DiffAdd">        int     fontSize    = (int)(labelFontSize + .5);</span><span class="DiffAdd">                   </span>
+<span id="W1L597" class="LineNr"> 597 </span><span class="DiffAdd">        labelFont = new Font( labelFontName, labelFontStyle, fontSize );</span><span class="DiffAdd">   </span>
+<span id="W1L598" class="LineNr"> 598 </span><span class="DiffAdd">        gtx.setFont( labelFont );</span><span class="DiffAdd">                                          </span>
+<span id="W1L599" class="LineNr"> 599 </span><span class="DiffAdd">        labelFRC = gtx.getFontRenderContext();</span><span class="DiffAdd">                             </span>
+<span id="W1L600" class="LineNr"> 600 </span>
+<span id="W1L601" class="LineNr"> 601 </span>        // Describe the rectangle containing the grid
+<span id="W1L602" class="LineNr"> 602 </span>        float   gridWidth   = currWidth - marginLeftWidth - marginRightWidth;
+<span id="W1L603" class="LineNr"> 603 </span>        float   minXco      = marginLeftWidth;
+<span id="W1L604" class="LineNr"> 604 </span>        float   gridHeight  = currHeight - marginTopWidth - marginBottomWidth;
+<span id="W1L605" class="LineNr"> 605 </span>        float   minYco      = marginTopWidth;
+<span id="W1L606" class="Folded"> 606 </span><span class="Folded">+-- 12 lines: gridRect = -------------------------------------------------------</span>
+<span id="W1L618" class="LineNr"> 618 </span>        // change the values but they will only be in effect
+<span id="W1L619" class="LineNr"> 619 </span>        // for the duration of one paintComponent execute; with
+<span id="W1L620" class="LineNr"> 620 </span>        // the next paintComponent execution they will return
+<span id="W1L621" class="LineNr"> 621 </span>        // to their default values.
+<span id="W1L622" class="LineNr"> 622 </span>        currPlotShape = plotShape;
+<span id="W1L623" class="LineNr"> 623 </span>
+<span id="W1L624" class="LineNr"> 624 </span><span class="DiffChange">        // Values to use in mapping Cartesian coordinates </span><span class="DiffText">to pixel coordinates</span>
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span id="W1L625" class="LineNr"> 625 </span>        xOffset = gridRect.getX() + (gridRect.getWidth() - 1) / 2;
+<span id="W1L626" class="LineNr"> 626 </span>        yOffset = gridRect.getY() + (gridRect.getHeight() - 1) / 2;
+<span id="W1L627" class="LineNr"> 627 </span>
+<span id="W1L628" class="LineNr"> 628 </span><span class="DiffChange">        </span><span class="DiffText">drawGridLines(</span><span class="DiffChange">);                                                   </span>
+<span id="W1L629" class="LineNr"> 629 </span><span class="DiffChange">        </span><span class="DiffText">drawMinorTics</span><span class="DiffChange">();                                                   </span>
+<span id="W1L630" class="LineNr"> 630 </span><span class="DiffAdd">        drawMajorTics();</span><span class="DiffAdd">                                                   </span>
+<span id="W1L631" class="LineNr"> 631 </span><span class="DiffAdd">        drawAxes();</span><span class="DiffAdd">                                                        </span>
+<span id="W1L632" class="LineNr"> 632 </span>        drawUserPlot();
+<span id="W1L633" class="LineNr"> 633 </span>
+<span id="W1L634" class="LineNr"> 634 </span>        gtx.setClip( origClip );
+<span id="W1L635" class="LineNr"> 635 </span>
+<span id="W1L636" class="LineNr"> 636 </span><span class="DiffAdd">        if ( labelDraw )</span><span class="DiffAdd">                                                   </span>
+<span id="W1L637" class="LineNr"> 637 </span><span class="DiffAdd">        {</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L638" class="LineNr"> 638 </span><span class="DiffAdd">            gtx.setColor( labelFontColor );</span><span class="DiffAdd">                                </span>
+<span id="W1L639" class="LineNr"> 639 </span><span class="DiffAdd">            drawHorizontalLabels();</span><span class="DiffAdd">                                        </span>
+<span id="W1L640" class="LineNr"> 640 </span><span class="DiffAdd">            drawVerticalLabels();</span><span class="DiffAdd">                                          </span>
+<span id="W1L641" class="LineNr"> 641 </span><span class="DiffAdd">        }</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L642" class="LineNr"> 642 </span>        paintMargins();
+<span id="W1L643" class="LineNr"> 643 </span>
+<span id="W1L644" class="LineNr"> 644 </span>        // begin boilerplate
+<span id="W1L645" class="LineNr"> 645 </span>        gtx.dispose();
+<span id="W1L646" class="LineNr"> 646 </span>        // end boilerplate
+<span id="W1L647" class="LineNr"> 647 </span>    }
+<span id="W1L648" class="Folded"> 648 </span><span class="Folded">+-- 29 lines: public void plotPoint( float userXco, float userYco )-------------</span>
+<span id="W1L677" class="LineNr"> 677 </span>    }
+<span id="W1L678" class="LineNr"> 678 </span>
+<span id="W1L679" class="LineNr"> 679 </span>    public void propertyChange( PropertyChangeEvent evt )
+<span id="W1L680" class="LineNr"> 680 </span>    {
+<span id="W1L681" class="LineNr"> 681 </span>        String  pName   = evt.getPropertyName();
+<span id="W1L682" class="LineNr"> 682 </span>        String  newVal  = (String)evt.getNewValue();
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span id="W1L683" class="LineNr"> 683 </span>        switch ( pName )
+<span id="W1L684" class="LineNr"> 684 </span>        {
+<span id="W1L685" class="LineNr"> 685 </span>        case CPConstants.GRID_UNIT_PN:
+<span id="W1L686" class="LineNr"> 686 </span>            gridUnit = CPConstants.asFloat( newVal );
+<span id="W1L687" class="LineNr"> 687 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L688" class="LineNr"> 688 </span>            break;
+<span id="W1L689" class="LineNr"> 689 </span>        case CPConstants.MW_BG_COLOR_PN:
+<span id="W1L690" class="LineNr"> 690 </span>            mwBGColor = CPConstants.asColor( newVal );
+<span id="W1L691" class="LineNr"> 691 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L692" class="LineNr"> 692 </span>            break;
+<span id="W1L693" class="LineNr"> 693 </span>        case CPConstants.MARGIN_TOP_WIDTH_PN:
+<span id="W1L694" class="LineNr"> 694 </span>            marginTopWidth = CPConstants.asFloat( newVal );
+<span id="W1L695" class="LineNr"> 695 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L696" class="LineNr"> 696 </span>            break;
+<span id="W1L697" class="LineNr"> 697 </span>        case CPConstants.MARGIN_TOP_BG_COLOR_PN:
+<span id="W1L698" class="LineNr"> 698 </span>            marginTopBGColor = CPConstants.asColor( newVal );
+<span id="W1L699" class="LineNr"> 699 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L700" class="LineNr"> 700 </span>            break;
+<span id="W1L701" class="LineNr"> 701 </span>        case CPConstants.MARGIN_RIGHT_WIDTH_PN:
+<span id="W1L702" class="LineNr"> 702 </span>            marginRightWidth = CPConstants.asFloat( newVal );
+<span id="W1L703" class="LineNr"> 703 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L704" class="LineNr"> 704 </span>            break;
+<span id="W1L705" class="LineNr"> 705 </span>        case CPConstants.MARGIN_RIGHT_BG_COLOR_PN:
+<span id="W1L706" class="LineNr"> 706 </span>            marginRightBGColor = CPConstants.asColor( newVal );
+<span id="W1L707" class="LineNr"> 707 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L708" class="LineNr"> 708 </span>            break;
+<span id="W1L709" class="LineNr"> 709 </span>        case CPConstants.MARGIN_BOTTOM_WIDTH_PN:
+<span id="W1L710" class="LineNr"> 710 </span>            marginBottomWidth = CPConstants.asFloat( newVal );
+<span id="W1L711" class="LineNr"> 711 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L712" class="LineNr"> 712 </span>            break;
+<span id="W1L713" class="LineNr"> 713 </span>        case CPConstants.MARGIN_BOTTOM_BG_COLOR_PN:
+<span id="W1L714" class="LineNr"> 714 </span>            marginBottomBGColor = CPConstants.asColor( newVal );
+<span id="W1L715" class="LineNr"> 715 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L716" class="LineNr"> 716 </span>            break;
+<span id="W1L717" class="LineNr"> 717 </span>        case CPConstants.MARGIN_LEFT_WIDTH_PN:
+<span id="W1L718" class="LineNr"> 718 </span>            marginLeftWidth = CPConstants.asFloat( newVal );
+<span id="W1L719" class="LineNr"> 719 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L720" class="LineNr"> 720 </span>            break;
+<span id="W1L721" class="LineNr"> 721 </span>        case CPConstants.MARGIN_LEFT_BG_COLOR_PN:
+<span id="W1L722" class="LineNr"> 722 </span>            marginLeftBGColor = CPConstants.asColor( newVal );
+<span id="W1L723" class="LineNr"> 723 </span><span class="DiffChange">            </span><span class="DiffText">repaint()</span><span class="DiffChange">;                                                     </span>
+<span id="W1L724" class="LineNr"> 724 </span>            break;
+<span id="W1L725" class="LineNr"> 725 </span>        case CPConstants.TIC_MINOR_COLOR_PN:
+<span id="W1L726" class="LineNr"> 726 </span><span class="DiffAdd">            ticMinorColor = CPConstants.asColor( newVal );</span><span class="DiffAdd">                 </span>
+<span id="W1L727" class="LineNr"> 727 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L728" class="LineNr"> 728 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L729" class="LineNr"> 729 </span>        case CPConstants.TIC_MINOR_WEIGHT_PN:
+<span id="W1L730" class="LineNr"> 730 </span><span class="DiffAdd">            ticMinorWeight = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                </span>
+<span id="W1L731" class="LineNr"> 731 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L732" class="LineNr"> 732 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L733" class="LineNr"> 733 </span>        case CPConstants.TIC_MINOR_LEN_PN:
+<span id="W1L734" class="LineNr"> 734 </span><span class="DiffAdd">            ticMinorLen = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                   </span>
+<span id="W1L735" class="LineNr"> 735 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L736" class="LineNr"> 736 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L737" class="LineNr"> 737 </span>        case CPConstants.TIC_MINOR_MPU_PN:
+<span id="W1L738" class="LineNr"> 738 </span><span class="DiffAdd">            ticMinorMPU = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                   </span>
+<span id="W1L739" class="LineNr"> 739 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L740" class="LineNr"> 740 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L741" class="LineNr"> 741 </span>        case CPConstants.TIC_MINOR_DRAW_PN:
+<span id="W1L742" class="LineNr"> 742 </span><span class="DiffAdd">            ticMinorDraw = CPConstants.asBoolean( newVal );</span><span class="DiffAdd">                </span>
+<span id="W1L743" class="LineNr"> 743 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L744" class="LineNr"> 744 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L745" class="LineNr"> 745 </span>        case CPConstants.TIC_MAJOR_COLOR_PN:
+<span id="W1L746" class="LineNr"> 746 </span><span class="DiffAdd">            ticMajorColor = CPConstants.asColor( newVal );</span><span class="DiffAdd">                 </span>
+<span id="W1L747" class="LineNr"> 747 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L748" class="LineNr"> 748 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L749" class="LineNr"> 749 </span>        case CPConstants.TIC_MAJOR_WEIGHT_PN:
+<span id="W1L750" class="LineNr"> 750 </span><span class="DiffAdd">            ticMajorWeight = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                </span>
+<span id="W1L751" class="LineNr"> 751 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L752" class="LineNr"> 752 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L753" class="LineNr"> 753 </span>        case CPConstants.TIC_MAJOR_LEN_PN:
+<span id="W1L754" class="LineNr"> 754 </span><span class="DiffAdd">            ticMajorLen = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                   </span>
+<span id="W1L755" class="LineNr"> 755 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L756" class="LineNr"> 756 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L757" class="LineNr"> 757 </span>        case CPConstants.TIC_MAJOR_MPU_PN:
+<span id="W1L758" class="LineNr"> 758 </span><span class="DiffAdd">            ticMajorMPU = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                   </span>
+<span id="W1L759" class="LineNr"> 759 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L760" class="LineNr"> 760 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L761" class="LineNr"> 761 </span>        case CPConstants.TIC_MAJOR_DRAW_PN:
+<span id="W1L762" class="LineNr"> 762 </span><span class="DiffAdd">            ticMajorDraw = CPConstants.asBoolean( newVal );</span><span class="DiffAdd">                </span>
+<span id="W1L763" class="LineNr"> 763 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L764" class="LineNr"> 764 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L765" class="LineNr"> 765 </span>        case CPConstants.GRID_LINE_COLOR_PN:
+<span id="W1L766" class="LineNr"> 766 </span><span class="DiffAdd">            gridLineColor = CPConstants.asColor( newVal );</span><span class="DiffAdd">                 </span>
+<span id="W1L767" class="LineNr"> 767 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L768" class="LineNr"> 768 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L769" class="LineNr"> 769 </span>        case CPConstants.GRID_LINE_WEIGHT_PN:
+<span id="W1L770" class="LineNr"> 770 </span><span class="DiffAdd">            gridLineWeight = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                </span>
+<span id="W1L771" class="LineNr"> 771 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L772" class="LineNr"> 772 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L773" class="LineNr"> 773 </span>        case CPConstants.GRID_LINE_LPU_PN:
+<span id="W1L774" class="LineNr"> 774 </span><span class="DiffAdd">            gridLineLPU = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                   </span>
+<span id="W1L775" class="LineNr"> 775 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L776" class="LineNr"> 776 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L777" class="LineNr"> 777 </span>        case CPConstants.GRID_LINE_DRAW_PN:
+<span id="W1L778" class="LineNr"> 778 </span><span class="DiffAdd">            gridLineDraw = CPConstants.asBoolean( newVal );</span><span class="DiffAdd">                </span>
+<span id="W1L779" class="LineNr"> 779 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L780" class="LineNr"> 780 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L781" class="LineNr"> 781 </span>        case CPConstants.AXIS_COLOR_PN:
+<span id="W1L782" class="LineNr"> 782 </span><span class="DiffAdd">            axisColor = CPConstants.asColor( newVal );</span><span class="DiffAdd">                     </span>
+<span id="W1L783" class="LineNr"> 783 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L784" class="LineNr"> 784 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L785" class="LineNr"> 785 </span>        case CPConstants.AXIS_WEIGHT_PN:
+<span id="W1L786" class="LineNr"> 786 </span><span class="DiffAdd">            axisWeight = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                    </span>
+<span id="W1L787" class="LineNr"> 787 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L788" class="LineNr"> 788 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L789" class="LineNr"> 789 </span>        case CPConstants.LABEL_FONT_COLOR_PN:
+<span id="W1L790" class="LineNr"> 790 </span><span class="DiffAdd">            labelFontColor = CPConstants.asColor( newVal );</span><span class="DiffAdd">                </span>
+<span id="W1L791" class="LineNr"> 791 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L792" class="LineNr"> 792 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L793" class="LineNr"> 793 </span>        case CPConstants.LABEL_FONT_NAME_PN:
+<span id="W1L794" class="LineNr"> 794 </span><span class="DiffAdd">            labelFontName = newVal;</span><span class="DiffAdd">                                        </span>
+<span id="W1L795" class="LineNr"> 795 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L796" class="LineNr"> 796 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L797" class="LineNr"> 797 </span>        case CPConstants.LABEL_FONT_STYLE_PN:
+<span id="W1L798" class="LineNr"> 798 </span><span class="DiffAdd">            labelFontStyle = CPConstants.asFontStyle( newVal );</span><span class="DiffAdd">            </span>
+<span id="W1L799" class="LineNr"> 799 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L800" class="LineNr"> 800 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L801" class="LineNr"> 801 </span>        case CPConstants.LABEL_FONT_SIZE_PN:
+<span id="W1L802" class="LineNr"> 802 </span><span class="DiffAdd">            labelFontSize = CPConstants.asFloat( newVal );</span><span class="DiffAdd">                 </span>
+<span id="W1L803" class="LineNr"> 803 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L804" class="LineNr"> 804 </span><span class="DiffAdd">            break;</span><span class="DiffAdd">                                                         </span>
+<span id="W1L805" class="LineNr"> 805 </span>        case CPConstants.LABEL_DRAW_PN:
+<span id="W1L806" class="LineNr"> 806 </span><span class="DiffChange">            </span><span class="DiffText">labelDraw = CPConstants.asBoolean( newVal )</span><span class="DiffChange">;                   </span>
+<span id="W1L807" class="LineNr"> 807 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                     </span>
+<span id="W1L808" class="LineNr"> 808 </span>            break;
+<span id="W1L809" class="LineNr"> 809 </span>        }
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span class="LineNr">     </span><span class="DiffDelete">---------------------------------------------------------------------------</span>
+<span id="W1L810" class="LineNr"> 810 </span>    }
+<span id="W1L811" class="LineNr"> 811 </span>
+<span id="W1L812" class="LineNr"> 812 </span>    /**
+<span id="W1L813" class="LineNr"> 813 </span>     * Sets the supplier
+<span id="W1L814" class="LineNr"> 814 </span>     * that will fetch a stream
+<span id="W1L815" class="LineNr"> 815 </span>     * to deliver commands
+<span id="W1L816" class="Folded"> 816 </span><span class="Folded">+-- 15 lines: * for plotting a curve.-------------------------------------------</span>
+<span id="W1L831" class="LineNr"> 831 </span>    private void drawUserPlot()
+<span id="W1L832" class="LineNr"> 832 </span>    {
+<span id="W1L833" class="LineNr"> 833 </span>        gtx.setColor( plotColor );
+<span id="W1L834" class="LineNr"> 834 </span>        streamSupplier.get().forEach( c -&gt; c.execute() );
+<span id="W1L835" class="LineNr"> 835 </span>    }
+<span id="W1L836" class="LineNr"> 836 </span>
+<span id="W1L837" class="LineNr"> 837 </span><span class="DiffAdd">    /**</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L838" class="LineNr"> 838 </span><span class="DiffAdd">     * Draws the x- and y-axes on the graph.</span><span class="DiffAdd">                               </span>
+<span id="W1L839" class="LineNr"> 839 </span><span class="DiffAdd">     */</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L840" class="LineNr"> 840 </span><span class="DiffAdd">    private void drawAxes()</span><span class="DiffAdd">                                                </span>
+<span id="W1L841" class="LineNr"> 841 </span><span class="DiffAdd">    {</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L842" class="LineNr"> 842 </span><span class="DiffAdd">        gtx.setColor( axisColor );</span><span class="DiffAdd">                                         </span>
+<span id="W1L843" class="LineNr"> 843 </span><span class="DiffAdd">        gtx.setStroke( new BasicStroke( axisWeight ) );</span><span class="DiffAdd">                    </span>
+<span id="W1L844" class="LineNr"> 844 </span><span class="DiffAdd">        </span><span class="DiffAdd">                                                                   </span>
+<span id="W1L845" class="LineNr"> 845 </span><span class="DiffAdd">        Iterator&lt;Line2D&gt;    axes    = </span><span class="DiffAdd">                                     </span>
+<span id="W1L846" class="LineNr"> 846 </span><span class="DiffAdd">            LineGenerator.axesIterator( gridRect );</span><span class="DiffAdd">                        </span>
+<span id="W1L847" class="LineNr"> 847 </span><span class="DiffAdd">        gtx.draw( axes.next() );</span><span class="DiffAdd">                                           </span>
+<span id="W1L848" class="LineNr"> 848 </span><span class="DiffAdd">        gtx.draw( axes.next() );</span><span class="DiffAdd">                                           </span>
+<span id="W1L849" class="LineNr"> 849 </span><span class="DiffAdd">    }</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L850" class="LineNr"> 850 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                       </span>
+<span id="W1L851" class="LineNr"> 851 </span><span class="DiffAdd">    /**</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L852" class="LineNr"> 852 </span><span class="DiffAdd">     * Draws the grid lines on the graph.</span><span class="DiffAdd">                                  </span>
+<span id="W1L853" class="LineNr"> 853 </span><span class="DiffAdd">     */</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L854" class="LineNr"> 854 </span><span class="DiffAdd">    private void drawGridLines()</span><span class="DiffAdd">                                           </span>
+<span id="W1L855" class="LineNr"> 855 </span><span class="DiffAdd">    {</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L856" class="LineNr"> 856 </span><span class="DiffAdd">        if ( gridLineDraw )</span><span class="DiffAdd">                                                </span>
+<span id="W1L857" class="LineNr"> 857 </span><span class="DiffAdd">        {</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L858" class="LineNr"> 858 </span><span class="DiffAdd">            LineGenerator   lineGen = </span><span class="DiffAdd">                                     </span>
+<span id="W1L859" class="LineNr"> 859 </span><span class="DiffAdd">                new LineGenerator( gridRect, gridUnit, gridLineLPU );</span><span class="DiffAdd">      </span>
+<span id="W1L860" class="LineNr"> 860 </span><span class="DiffAdd">            gtx.setStroke( new BasicStroke( gridLineWeight ) );</span><span class="DiffAdd">            </span>
+<span id="W1L861" class="LineNr"> 861 </span><span class="DiffAdd">            gtx.setColor( gridLineColor );</span><span class="DiffAdd">                                 </span>
+<span id="W1L862" class="LineNr"> 862 </span><span class="DiffAdd">            lineGen.forEach( gtx::draw );</span><span class="DiffAdd">                                  </span>
+<span id="W1L863" class="LineNr"> 863 </span><span class="DiffAdd">        }</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L864" class="LineNr"> 864 </span><span class="DiffAdd">    }</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L865" class="LineNr"> 865 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                       </span>
+<span id="W1L866" class="LineNr"> 866 </span><span class="DiffAdd">    /**</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L867" class="LineNr"> 867 </span><span class="DiffAdd">     * Draws the minor tics on the graph.</span><span class="DiffAdd">                                  </span>
+<span id="W1L868" class="LineNr"> 868 </span><span class="DiffAdd">     */</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L869" class="LineNr"> 869 </span><span class="DiffAdd">    private void drawMinorTics()</span><span class="DiffAdd">                                           </span>
+<span id="W1L870" class="LineNr"> 870 </span><span class="DiffAdd">    {</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L871" class="LineNr"> 871 </span><span class="DiffAdd">        if ( ticMinorDraw )</span><span class="DiffAdd">                                                </span>
+<span id="W1L872" class="LineNr"> 872 </span><span class="DiffAdd">        {</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L873" class="LineNr"> 873 </span><span class="DiffAdd">            LineGenerator   lineGen = </span><span class="DiffAdd">                                     </span>
+<span id="W1L874" class="LineNr"> 874 </span><span class="DiffAdd">                new LineGenerator( </span><span class="DiffAdd">                                        </span>
+<span id="W1L875" class="LineNr"> 875 </span><span class="DiffAdd">                    gridRect, </span><span class="DiffAdd">                                             </span>
+<span id="W1L876" class="LineNr"> 876 </span><span class="DiffAdd">                    gridUnit, </span><span class="DiffAdd">                                             </span>
+<span id="W1L877" class="LineNr"> 877 </span><span class="DiffAdd">                    ticMinorMPU,</span><span class="DiffAdd">                                           </span>
+<span id="W1L878" class="LineNr"> 878 </span><span class="DiffAdd">                    ticMinorLen,</span><span class="DiffAdd">                                           </span>
+<span id="W1L879" class="LineNr"> 879 </span><span class="DiffAdd">                    LineGenerator.BOTH</span><span class="DiffAdd">                                     </span>
+<span id="W1L880" class="LineNr"> 880 </span><span class="DiffAdd">                );</span><span class="DiffAdd">                                                         </span>
+<span id="W1L881" class="LineNr"> 881 </span><span class="DiffAdd">            gtx.setStroke( new BasicStroke( ticMinorWeight ) );</span><span class="DiffAdd">            </span>
+<span id="W1L882" class="LineNr"> 882 </span><span class="DiffAdd">            gtx.setColor( ticMinorColor );</span><span class="DiffAdd">                                 </span>
+<span id="W1L883" class="LineNr"> 883 </span><span class="DiffAdd">          StreamSupport</span><span class="DiffAdd">                                                    </span>
+<span id="W1L884" class="LineNr"> 884 </span><span class="DiffAdd">              .stream( lineGen.spliterator(), false )</span><span class="DiffAdd">                      </span>
+<span id="W1L885" class="LineNr"> 885 </span><span class="DiffAdd">              .forEach( gtx:: draw );</span><span class="DiffAdd">                                      </span>
+<span id="W1L886" class="LineNr"> 886 </span><span class="DiffAdd">        }</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L887" class="LineNr"> 887 </span><span class="DiffAdd">    }</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L888" class="LineNr"> 888 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                       </span>
+<span id="W1L889" class="LineNr"> 889 </span><span class="DiffAdd">    /**</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L890" class="LineNr"> 890 </span><span class="DiffAdd">     * Draws the major tics on the graph.</span><span class="DiffAdd">                                  </span>
+<span id="W1L891" class="LineNr"> 891 </span><span class="DiffAdd">     */</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L892" class="LineNr"> 892 </span><span class="DiffAdd">    private void drawMajorTics()</span><span class="DiffAdd">                                           </span>
+<span id="W1L893" class="LineNr"> 893 </span><span class="DiffAdd">    {</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L894" class="LineNr"> 894 </span><span class="DiffAdd">        if ( ticMajorDraw )</span><span class="DiffAdd">                                                </span>
+<span id="W1L895" class="LineNr"> 895 </span><span class="DiffAdd">        {</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L896" class="LineNr"> 896 </span><span class="DiffAdd">            LineGenerator   lineGen = </span><span class="DiffAdd">                                     </span>
+<span id="W1L897" class="LineNr"> 897 </span><span class="DiffAdd">                new LineGenerator( </span><span class="DiffAdd">                                        </span>
+<span id="W1L898" class="LineNr"> 898 </span><span class="DiffAdd">                    gridRect, </span><span class="DiffAdd">                                             </span>
+<span id="W1L899" class="LineNr"> 899 </span><span class="DiffAdd">                    gridUnit, </span><span class="DiffAdd">                                             </span>
+<span id="W1L900" class="LineNr"> 900 </span><span class="DiffAdd">                    ticMajorMPU,</span><span class="DiffAdd">                                           </span>
+<span id="W1L901" class="LineNr"> 901 </span><span class="DiffAdd">                    ticMajorLen,</span><span class="DiffAdd">                                           </span>
+<span id="W1L902" class="LineNr"> 902 </span><span class="DiffAdd">                    LineGenerator.BOTH</span><span class="DiffAdd">                                     </span>
+<span id="W1L903" class="LineNr"> 903 </span><span class="DiffAdd">                );</span><span class="DiffAdd">                                                         </span>
+<span id="W1L904" class="LineNr"> 904 </span><span class="DiffAdd">            gtx.setStroke( new BasicStroke( ticMajorWeight ) );</span><span class="DiffAdd">            </span>
+<span id="W1L905" class="LineNr"> 905 </span><span class="DiffAdd">            gtx.setColor( ticMajorColor );</span><span class="DiffAdd">                                 </span>
+<span id="W1L906" class="LineNr"> 906 </span><span class="DiffAdd">            StreamSupport</span><span class="DiffAdd">                                                  </span>
+<span id="W1L907" class="LineNr"> 907 </span><span class="DiffAdd">                .stream( lineGen.spliterator(), false )</span><span class="DiffAdd">                    </span>
+<span id="W1L908" class="LineNr"> 908 </span><span class="DiffAdd">                .forEach( gtx::draw );</span><span class="DiffAdd">                                     </span>
+<span id="W1L909" class="LineNr"> 909 </span><span class="DiffAdd">        }</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L910" class="LineNr"> 910 </span><span class="DiffAdd">    }</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L911" class="LineNr"> 911 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                       </span>
+<span id="W1L912" class="LineNr"> 912 </span><span class="DiffAdd">    /**</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L913" class="LineNr"> 913 </span><span class="DiffAdd">     * Draw the labels on the horizontal tic marks</span><span class="DiffAdd">                         </span>
+<span id="W1L914" class="LineNr"> 914 </span><span class="DiffAdd">     * (top to bottom of y-axis).</span><span class="DiffAdd">                                          </span>
+<span id="W1L915" class="LineNr"> 915 </span><span class="DiffAdd">     */</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L916" class="LineNr"> 916 </span><span class="DiffAdd">    private void drawHorizontalLabels()</span><span class="DiffAdd">                                    </span>
+<span id="W1L917" class="LineNr"> 917 </span><span class="DiffAdd">    {</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L918" class="LineNr"> 918 </span><span class="DiffAdd">        // padding between tic mark and label</span><span class="DiffAdd">                              </span>
+<span id="W1L919" class="LineNr"> 919 </span><span class="DiffAdd">        final int   labelPadding    = 3;</span><span class="DiffAdd">                                   </span>
+<span id="W1L920" class="LineNr"> 920 </span><span class="DiffAdd">        </span><span class="DiffAdd">                                                                   </span>
+<span id="W1L921" class="LineNr"> 921 </span><span class="DiffAdd">        LineGenerator   lineGen = </span><span class="DiffAdd">                                         </span>
+<span id="W1L922" class="LineNr"> 922 </span><span class="DiffAdd">            new LineGenerator( </span><span class="DiffAdd">                                            </span>
+<span id="W1L923" class="LineNr"> 923 </span><span class="DiffAdd">                gridRect, </span><span class="DiffAdd">                                                 </span>
+<span id="W1L924" class="LineNr"> 924 </span><span class="DiffAdd">                gridUnit, </span><span class="DiffAdd">                                                 </span>
+<span id="W1L925" class="LineNr"> 925 </span><span class="DiffAdd">                ticMajorMPU,</span><span class="DiffAdd">                                               </span>
+<span id="W1L926" class="LineNr"> 926 </span><span class="DiffAdd">                ticMajorLen,</span><span class="DiffAdd">                                               </span>
+<span id="W1L927" class="LineNr"> 927 </span><span class="DiffAdd">                LineGenerator.HORIZONTAL</span><span class="DiffAdd">                                   </span>
+<span id="W1L928" class="LineNr"> 928 </span><span class="DiffAdd">            );</span><span class="DiffAdd">                                                             </span>
+<span id="W1L929" class="LineNr"> 929 </span><span class="DiffAdd">        float       spacing     = gridUnit / ticMajorMPU;</span><span class="DiffAdd">                  </span>
+<span id="W1L930" class="LineNr"> 930 </span><span class="DiffAdd">        float       labelIncr   = 1 / ticMajorMPU;</span><span class="DiffAdd">                         </span>
+<span id="W1L931" class="LineNr"> 931 </span><span class="DiffAdd">        float       originYco   = (float)gridRect.getCenterY();</span><span class="DiffAdd">            </span>
+<span id="W1L932" class="LineNr"> 932 </span><span class="DiffAdd">        for ( Line2D line : lineGen )</span><span class="DiffAdd">                                      </span>
+<span id="W1L933" class="LineNr"> 933 </span><span class="DiffAdd">        {</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L934" class="LineNr"> 934 </span><span class="DiffAdd">            float       xco2    = (float)line.getX2();</span><span class="DiffAdd">                     </span>
+<span id="W1L935" class="LineNr"> 935 </span><span class="DiffAdd">            float       yco1    = (float)line.getY1();</span><span class="DiffAdd">                     </span>
+<span id="W1L936" class="LineNr"> 936 </span><span class="DiffAdd">            int         dist    = (int)((originYco - yco1) / spacing);</span><span class="DiffAdd">     </span>
+<span id="W1L937" class="LineNr"> 937 </span><span class="DiffAdd">            float       next    = dist * labelIncr;</span><span class="DiffAdd">                        </span>
+<span id="W1L938" class="LineNr"> 938 </span><span class="DiffAdd">            String      label   = String.format( &quot;%3.2f&quot;, next );</span><span class="DiffAdd">          </span>
+<span id="W1L939" class="LineNr"> 939 </span><span class="DiffAdd">            TextLayout  layout  = </span><span class="DiffAdd">                                         </span>
+<span id="W1L940" class="LineNr"> 940 </span><span class="DiffAdd">                new TextLayout( label, labelFont, labelFRC );</span><span class="DiffAdd">              </span>
+<span id="W1L941" class="LineNr"> 941 </span><span class="DiffAdd">            Rectangle2D bounds  = layout.getBounds();</span><span class="DiffAdd">                      </span>
+<span id="W1L942" class="LineNr"> 942 </span><span class="DiffAdd">            float       yOffset = (float)(bounds.getHeight() / 2);</span><span class="DiffAdd">         </span>
+<span id="W1L943" class="LineNr"> 943 </span><span class="DiffAdd">            float       xco     = xco2 + labelPadding;</span><span class="DiffAdd">                     </span>
+<span id="W1L944" class="LineNr"> 944 </span><span class="DiffAdd">            float       yco     = yco1 + yOffset;</span><span class="DiffAdd">                          </span>
+<span id="W1L945" class="LineNr"> 945 </span><span class="DiffAdd">            layout.draw( gtx, xco, yco );</span><span class="DiffAdd">                                  </span>
+<span id="W1L946" class="LineNr"> 946 </span><span class="DiffAdd">        }</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L947" class="LineNr"> 947 </span><span class="DiffAdd">    }</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L948" class="LineNr"> 948 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                       </span>
+<span id="W1L949" class="LineNr"> 949 </span><span class="DiffAdd">    /**</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L950" class="LineNr"> 950 </span><span class="DiffAdd">     * Draw the labels on the vertical tic marks</span><span class="DiffAdd">                           </span>
+<span id="W1L951" class="LineNr"> 951 </span><span class="DiffAdd">     * (left to right on x-axis).</span><span class="DiffAdd">                                          </span>
+<span id="W1L952" class="LineNr"> 952 </span><span class="DiffAdd">     */</span><span class="DiffAdd">                                                                    </span>
+<span id="W1L953" class="LineNr"> 953 </span><span class="DiffAdd">    private void drawVerticalLabels()</span><span class="DiffAdd">                                      </span>
+<span id="W1L954" class="LineNr"> 954 </span><span class="DiffAdd">    {</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L955" class="LineNr"> 955 </span><span class="DiffAdd">        // padding between tic mark and label</span><span class="DiffAdd">                              </span>
+<span id="W1L956" class="LineNr"> 956 </span><span class="DiffAdd">        final int   labelPadding    = 3;</span><span class="DiffAdd">                                   </span>
+<span id="W1L957" class="LineNr"> 957 </span><span class="DiffAdd">        </span><span class="DiffAdd">                                                                   </span>
+<span id="W1L958" class="LineNr"> 958 </span><span class="DiffAdd">        LineGenerator   lineGen = </span><span class="DiffAdd">                                         </span>
+<span id="W1L959" class="LineNr"> 959 </span><span class="DiffAdd">            new LineGenerator( </span><span class="DiffAdd">                                            </span>
+<span id="W1L960" class="LineNr"> 960 </span><span class="DiffAdd">                gridRect, </span><span class="DiffAdd">                                                 </span>
+<span id="W1L961" class="LineNr"> 961 </span><span class="DiffAdd">                gridUnit, </span><span class="DiffAdd">                                                 </span>
+<span id="W1L962" class="LineNr"> 962 </span><span class="DiffAdd">                ticMajorMPU,</span><span class="DiffAdd">                                               </span>
+<span id="W1L963" class="LineNr"> 963 </span><span class="DiffAdd">                ticMajorLen,</span><span class="DiffAdd">                                               </span>
+<span id="W1L964" class="LineNr"> 964 </span><span class="DiffAdd">                LineGenerator.VERTICAL</span><span class="DiffAdd">                                     </span>
+<span id="W1L965" class="LineNr"> 965 </span><span class="DiffAdd">            );</span><span class="DiffAdd">                                                             </span>
+<span id="W1L966" class="LineNr"> 966 </span><span class="DiffAdd">        float       spacing     = gridUnit / ticMajorMPU;</span><span class="DiffAdd">                  </span>
+<span id="W1L967" class="LineNr"> 967 </span><span class="DiffAdd">        float       labelIncr   = 1 / ticMajorMPU;</span><span class="DiffAdd">                         </span>
+<span id="W1L968" class="LineNr"> 968 </span><span class="DiffAdd">        float       originXco   = (float)gridRect.getCenterX();</span><span class="DiffAdd">            </span>
+<span id="W1L969" class="LineNr"> 969 </span><span class="DiffAdd">        for ( Line2D line : lineGen )</span><span class="DiffAdd">                                      </span>
+<span id="W1L970" class="LineNr"> 970 </span><span class="DiffAdd">        {</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L971" class="LineNr"> 971 </span><span class="DiffAdd">            float       xco1    = (float)line.getX2();</span><span class="DiffAdd">                     </span>
+<span id="W1L972" class="LineNr"> 972 </span><span class="DiffAdd">            int         dist    = (int)((xco1 - originXco) / spacing);</span><span class="DiffAdd">     </span>
+<span id="W1L973" class="LineNr"> 973 </span><span class="DiffAdd">            float       next    = dist * labelIncr;</span><span class="DiffAdd">                        </span>
+<span id="W1L974" class="LineNr"> 974 </span><span class="DiffAdd">            String      label   = String.format( &quot;%3.2f&quot;, next );</span><span class="DiffAdd">          </span>
+<span id="W1L975" class="LineNr"> 975 </span><span class="DiffAdd"> </span><span class="DiffAdd">                                                                          </span>
+<span id="W1L976" class="LineNr"> 976 </span><span class="DiffAdd">            TextLayout  layout  = </span><span class="DiffAdd">                                         </span>
+<span id="W1L977" class="LineNr"> 977 </span><span class="DiffAdd">                new TextLayout( label, labelFont, labelFRC );</span><span class="DiffAdd">              </span>
+<span id="W1L978" class="LineNr"> 978 </span><span class="DiffAdd">            Rectangle2D bounds  = layout.getBounds();</span><span class="DiffAdd">                      </span>
+<span id="W1L979" class="LineNr"> 979 </span><span class="DiffAdd">            float       yOffset = </span><span class="DiffAdd">                                         </span>
+<span id="W1L980" class="LineNr"> 980 </span><span class="DiffAdd">                (float)(bounds.getHeight() + labelPadding);</span><span class="DiffAdd">                </span>
+<span id="W1L981" class="LineNr"> 981 </span><span class="DiffAdd">            float       xOffset = (float)(bounds.getWidth() / 2);</span><span class="DiffAdd">          </span>
+<span id="W1L982" class="LineNr"> 982 </span><span class="DiffAdd">            float       xco     = xco1 - xOffset;</span><span class="DiffAdd">                          </span>
+<span id="W1L983" class="LineNr"> 983 </span><span class="DiffAdd">            float       yco     = (float)line.getY2() + yOffset;</span><span class="DiffAdd">           </span>
+<span id="W1L984" class="LineNr"> 984 </span><span class="DiffAdd">            layout.draw( gtx, xco, yco );</span><span class="DiffAdd">                                  </span>
+<span id="W1L985" class="LineNr"> 985 </span><span class="DiffAdd">        }</span><span class="DiffAdd">                                                                  </span>
+<span id="W1L986" class="LineNr"> 986 </span><span class="DiffAdd">    }</span><span class="DiffAdd">                                                                      </span>
+<span id="W1L987" class="LineNr"> 987 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                       </span>
+<span id="W1L988" class="LineNr"> 988 </span>    private void paintMargins()
+<span id="W1L989" class="LineNr"> 989 </span>    {
+<span id="W1L990" class="LineNr"> 990 </span>        Rectangle2D rect    = new Rectangle2D.Float();
+<span id="W1L991" class="LineNr"> 991 </span>
+<span id="W1L992" class="LineNr"> 992 </span>        // top margin
+<span id="W1L993" class="LineNr"> 993 </span>        rect.setRect( 0, 0, currWidth, marginTopWidth );
+<span id="W1L994" class="Folded"> 994 </span><span class="Folded">+-- 21 lines: gtx.setColor( marginTopBGColor );---------------------------------</span>
+</pre>
+</div></td>
+<td><div>
+<pre>
+<span id="W2L1" class="LineNr">  1 </span>package com.acmemail.judah.cartesian_plane;
+<span id="W2L2" class="LineNr">  2 </span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L3" class="LineNr">  3 </span>import java.awt.Color;
+<span id="W2L4" class="LineNr">  4 </span>import java.awt.Dimension;
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L5" class="LineNr">  5 </span>import java.awt.Graphics;
+<span id="W2L6" class="LineNr">  6 </span>import java.awt.Graphics2D;
+<span id="W2L7" class="LineNr">  7 </span>import java.awt.Shape;
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L8" class="LineNr">  8 </span>import java.awt.geom.Rectangle2D;
+<span id="W2L9" class="LineNr">  9 </span>import java.beans.PropertyChangeEvent;
+<span id="W2L10" class="LineNr"> 10 </span>import java.beans.PropertyChangeListener;
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L11" class="LineNr"> 11 </span>import java.util.function.Supplier;
+<span id="W2L12" class="LineNr"> 12 </span>import java.util.stream.Stream;
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L13" class="LineNr"> 13 </span>
+<span id="W2L14" class="LineNr"> 14 </span>import javax.swing.JPanel;
+<span id="W2L15" class="LineNr"> 15 </span>
+<span id="W2L16" class="LineNr"> 16 </span>/**
+<span id="W2L17" class="LineNr"> 17 </span> * This class encapsulates the display of a Cartesian plane.
+<span id="W2L18" class="LineNr"> 18 </span> * The plane consists of the following components,
+<span id="W2L19" class="Folded"> 19 </span><span class="Folded">+--372 lines: * each of which is customizable by the user.----------------------</span>
+<span id="W2L391" class="LineNr">391 </span> *    &lt;/table&gt;
+<span id="W2L392" class="LineNr">392 </span> *
+<span id="W2L393" class="LineNr">393 </span> * @author Jack Straub
+<span id="W2L394" class="LineNr">394 </span> */
+<span id="W2L395" class="LineNr">395 </span>@SuppressWarnings(&quot;serial&quot;)
+<span id="W2L396" class="LineNr">396 </span>public class CartesianPlane
+<span id="W2L397" class="LineNr">397 </span><span class="DiffChange">    extends JPanel </span><span class="DiffChange">                                                         </span>
+<span id="W2L398" class="LineNr">398 </span><span class="DiffAdd">    implements PropertyChangeListener</span><span class="DiffAdd">                                       </span>
+<span id="W2L399" class="LineNr">399 </span>{
+<span id="W2L400" class="LineNr">400 </span>    /**
+<span id="W2L401" class="LineNr">401 </span>     * This declaration is just for convenience; it saves
+<span id="W2L402" class="LineNr">402 </span>     * having to write &quot;PropertyManager.INSTANCE&quot; over and over.
+<span id="W2L403" class="LineNr">403 </span>     */
+<span id="W2L404" class="LineNr">404 </span>    private static final PropertyManager pmgr   = PropertyManager.INSTANCE;
+<span id="W2L405" class="Folded">405 </span><span class="Folded">+-- 38 lines: private static final int    mainWindowWidthDV   =-----------------</span>
+<span id="W2L443" class="LineNr">443 </span>        pmgr.asColor( CPConstants.MARGIN_BOTTOM_BG_COLOR_PN );
+<span id="W2L444" class="LineNr">444 </span>    private float   marginLeftWidth      =
+<span id="W2L445" class="LineNr">445 </span>        pmgr.asFloat( CPConstants.MARGIN_LEFT_WIDTH_PN );
+<span id="W2L446" class="LineNr">446 </span>    private Color   marginLeftBGColor    =
+<span id="W2L447" class="LineNr">447 </span>        pmgr.asColor( CPConstants.MARGIN_LEFT_BG_COLOR_PN );
+<span id="W2L448" class="LineNr">448 </span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L449" class="LineNr">449 </span>    /**
+<span id="W2L450" class="LineNr">450 </span>     * Supplier, set by the user,
+<span id="W2L451" class="LineNr">451 </span>     * to obtain a stream of PlotCommands.
+<span id="W2L452" class="LineNr">452 </span>     */
+<span id="W2L453" class="LineNr">453 </span>    private Supplier&lt;Stream&lt;PlotCommand&gt;&gt;   streamSupplier  =
+<span id="W2L454" class="LineNr">454 </span>        () -&gt; Stream.empty();
+<span id="W2L455" class="Folded">455 </span><span class="Folded">+--  2 lines: ///////////////////////////////////////////////-------------------</span>
+<span id="W2L457" class="LineNr">457 </span>    //   Plot properties (properties to use
+<span id="W2L458" class="LineNr">458 </span>    //   when plotting a point on the grid)
+<span id="W2L459" class="LineNr">459 </span>    /////////////////////////////////////////////////
+<span id="W2L460" class="LineNr">460 </span>    private Color   plotColor           =
+<span id="W2L461" class="LineNr">461 </span>        pmgr.asColor( CPConstants.PLOT_COLOR_PN );
+<span id="W2L462" class="LineNr">462 </span>    private PlotShape  plotShape       = new PointShape();
+<span id="W2L463" class="LineNr">463 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                        </span>
+<span id="W2L464" class="LineNr">464 </span><span class="DiffAdd">    private GraphManager  graphMgr;</span><span class="DiffAdd">                                         </span>
+<span id="W2L465" class="LineNr">465 </span>
+<span id="W2L466" class="LineNr">466 </span>    ///////////////////////////////////////////////////////
+<span id="W2L467" class="LineNr">467 </span>    //
+<span id="W2L468" class="LineNr">468 </span>    // The following values are recalculated every time
+<span id="W2L469" class="LineNr">469 </span>    // paintComponent is invoked.
+<span id="W2L470" class="LineNr">470 </span>    //
+<span id="W2L471" class="LineNr">471 </span>    ///////////////////////////////////////////////////////
+<span id="W2L472" class="LineNr">472 </span>    private int                 currWidth;
+<span id="W2L473" class="LineNr">473 </span>    private int                 currHeight;
+<span id="W2L474" class="LineNr">474 </span>    private Graphics2D          gtx;
+<span id="W2L475" class="LineNr">475 </span>    private Rectangle2D         gridRect;
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L476" class="LineNr">476 </span>    private PlotShape           currPlotShape;
+<span id="W2L477" class="LineNr">477 </span>    private double              xOffset;
+<span id="W2L478" class="LineNr">478 </span>    private double              yOffset;
+<span id="W2L479" class="LineNr">479 </span>
+<span id="W2L480" class="LineNr">480 </span>    /**
+<span id="W2L481" class="LineNr">481 </span>     * Constructor.
+<span id="W2L482" class="Folded">482 </span><span class="Folded">+-- 19 lines: * Builds a CartesianPlane with a default width and height.--------</span>
+<span id="W2L501" class="LineNr">501 </span>
+<span id="W2L502" class="LineNr">502 </span>        // Register listener for redraw notifications
+<span id="W2L503" class="LineNr">503 </span>        NotificationManager.INSTANCE.addNotificationListener(
+<span id="W2L504" class="LineNr">504 </span>            CPConstants.REDRAW_NP,
+<span id="W2L505" class="LineNr">505 </span>            e -&gt; repaint()
+<span id="W2L506" class="LineNr">506 </span>        );
+<span id="W2L507" class="LineNr">507 </span><span class="DiffAdd">        </span><span class="DiffAdd">                                                                    </span>
+<span id="W2L508" class="LineNr">508 </span><span class="DiffAdd">        graphMgr = new GraphManager( gridRect, new Profile() );</span><span class="DiffAdd">             </span>
+<span id="W2L509" class="LineNr">509 </span>    }
+<span id="W2L510" class="LineNr">510 </span>
+<span id="W2L511" class="LineNr">511 </span>    /**
+<span id="W2L512" class="LineNr">512 </span>     * This method is where you do all your drawing.
+<span id="W2L513" class="LineNr">513 </span>     * Note the the window must be COMPLETELY redrawn
+<span id="W2L514" class="LineNr">514 </span>     * every time this method is called;
+<span id="W2L515" class="Folded">515 </span><span class="Folded">+--  9 lines: * Java does not remember anything you previously drew.------------</span>
+<span id="W2L524" class="LineNr">524 </span>        currWidth = getWidth();
+<span id="W2L525" class="LineNr">525 </span>        currHeight = getHeight();
+<span id="W2L526" class="LineNr">526 </span>        gtx = (Graphics2D)graphics.create();
+<span id="W2L527" class="LineNr">527 </span>        gtx.setColor( mwBGColor );
+<span id="W2L528" class="LineNr">528 </span>        gtx.fillRect( 0,  0, currWidth, currHeight );
+<span id="W2L529" class="LineNr">529 </span>        // end boilerplate
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L530" class="LineNr">530 </span>
+<span id="W2L531" class="LineNr">531 </span>        // Describe the rectangle containing the grid
+<span id="W2L532" class="LineNr">532 </span>        float   gridWidth   = currWidth - marginLeftWidth - marginRightWidth;
+<span id="W2L533" class="LineNr">533 </span>        float   minXco      = marginLeftWidth;
+<span id="W2L534" class="LineNr">534 </span>        float   gridHeight  = currHeight - marginTopWidth - marginBottomWidth;
+<span id="W2L535" class="LineNr">535 </span>        float   minYco      = marginTopWidth;
+<span id="W2L536" class="Folded">536 </span><span class="Folded">+-- 12 lines: gridRect = -------------------------------------------------------</span>
+<span id="W2L548" class="LineNr">548 </span>        // change the values but they will only be in effect
+<span id="W2L549" class="LineNr">549 </span>        // for the duration of one paintComponent execute; with
+<span id="W2L550" class="LineNr">550 </span>        // the next paintComponent execution they will return
+<span id="W2L551" class="LineNr">551 </span>        // to their default values.
+<span id="W2L552" class="LineNr">552 </span>        currPlotShape = plotShape;
+<span id="W2L553" class="LineNr">553 </span>
+<span id="W2L554" class="LineNr">554 </span><span class="DiffChange">        // Values to use in mapping Cartesian coordinates </span><span class="DiffChange">                  </span>
+<span id="W2L555" class="LineNr">555 </span><span class="DiffAdd">        // to pixel coordinates</span><span class="DiffAdd">                                             </span>
+<span id="W2L556" class="LineNr">556 </span>        xOffset = gridRect.getX() + (gridRect.getWidth() - 1) / 2;
+<span id="W2L557" class="LineNr">557 </span>        yOffset = gridRect.getY() + (gridRect.getHeight() - 1) / 2;
+<span id="W2L558" class="LineNr">558 </span>
+<span id="W2L559" class="LineNr">559 </span><span class="DiffChange">        </span><span class="DiffText">graphMgr.refresh( gtx, gridRect </span><span class="DiffChange">);                                  </span>
+<span id="W2L560" class="LineNr">560 </span><span class="DiffChange">        </span><span class="DiffText">graphMgr.drawAll</span><span class="DiffChange">();                                                 </span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L561" class="LineNr">561 </span>        drawUserPlot();
+<span id="W2L562" class="LineNr">562 </span>
+<span id="W2L563" class="LineNr">563 </span>        gtx.setClip( origClip );
+<span id="W2L564" class="LineNr">564 </span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L565" class="LineNr">565 </span>        paintMargins();
+<span id="W2L566" class="LineNr">566 </span>
+<span id="W2L567" class="LineNr">567 </span>        // begin boilerplate
+<span id="W2L568" class="LineNr">568 </span>        gtx.dispose();
+<span id="W2L569" class="LineNr">569 </span>        // end boilerplate
+<span id="W2L570" class="LineNr">570 </span>    }
+<span id="W2L571" class="Folded">571 </span><span class="Folded">+-- 29 lines: public void plotPoint( float userXco, float userYco )-------------</span>
+<span id="W2L600" class="LineNr">600 </span>    }
+<span id="W2L601" class="LineNr">601 </span>
+<span id="W2L602" class="LineNr">602 </span>    public void propertyChange( PropertyChangeEvent evt )
+<span id="W2L603" class="LineNr">603 </span>    {
+<span id="W2L604" class="LineNr">604 </span>        String  pName   = evt.getPropertyName();
+<span id="W2L605" class="LineNr">605 </span>        String  newVal  = (String)evt.getNewValue();
+<span id="W2L606" class="LineNr">606 </span><span class="DiffAdd">        boolean update  = false;</span><span class="DiffAdd">                                            </span>
+<span id="W2L607" class="LineNr">607 </span>        switch ( pName )
+<span id="W2L608" class="LineNr">608 </span>        {
+<span id="W2L609" class="LineNr">609 </span>        case CPConstants.GRID_UNIT_PN:
+<span id="W2L610" class="LineNr">610 </span>            gridUnit = CPConstants.asFloat( newVal );
+<span id="W2L611" class="LineNr">611 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L612" class="LineNr">612 </span>            break;
+<span id="W2L613" class="LineNr">613 </span>        case CPConstants.MW_BG_COLOR_PN:
+<span id="W2L614" class="LineNr">614 </span>            mwBGColor = CPConstants.asColor( newVal );
+<span id="W2L615" class="LineNr">615 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L616" class="LineNr">616 </span>            break;
+<span id="W2L617" class="LineNr">617 </span>        case CPConstants.MARGIN_TOP_WIDTH_PN:
+<span id="W2L618" class="LineNr">618 </span>            marginTopWidth = CPConstants.asFloat( newVal );
+<span id="W2L619" class="LineNr">619 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L620" class="LineNr">620 </span>            break;
+<span id="W2L621" class="LineNr">621 </span>        case CPConstants.MARGIN_TOP_BG_COLOR_PN:
+<span id="W2L622" class="LineNr">622 </span>            marginTopBGColor = CPConstants.asColor( newVal );
+<span id="W2L623" class="LineNr">623 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L624" class="LineNr">624 </span>            break;
+<span id="W2L625" class="LineNr">625 </span>        case CPConstants.MARGIN_RIGHT_WIDTH_PN:
+<span id="W2L626" class="LineNr">626 </span>            marginRightWidth = CPConstants.asFloat( newVal );
+<span id="W2L627" class="LineNr">627 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L628" class="LineNr">628 </span>            break;
+<span id="W2L629" class="LineNr">629 </span>        case CPConstants.MARGIN_RIGHT_BG_COLOR_PN:
+<span id="W2L630" class="LineNr">630 </span>            marginRightBGColor = CPConstants.asColor( newVal );
+<span id="W2L631" class="LineNr">631 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L632" class="LineNr">632 </span>            break;
+<span id="W2L633" class="LineNr">633 </span>        case CPConstants.MARGIN_BOTTOM_WIDTH_PN:
+<span id="W2L634" class="LineNr">634 </span>            marginBottomWidth = CPConstants.asFloat( newVal );
+<span id="W2L635" class="LineNr">635 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L636" class="LineNr">636 </span>            break;
+<span id="W2L637" class="LineNr">637 </span>        case CPConstants.MARGIN_BOTTOM_BG_COLOR_PN:
+<span id="W2L638" class="LineNr">638 </span>            marginBottomBGColor = CPConstants.asColor( newVal );
+<span id="W2L639" class="LineNr">639 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L640" class="LineNr">640 </span>            break;
+<span id="W2L641" class="LineNr">641 </span>        case CPConstants.MARGIN_LEFT_WIDTH_PN:
+<span id="W2L642" class="LineNr">642 </span>            marginLeftWidth = CPConstants.asFloat( newVal );
+<span id="W2L643" class="LineNr">643 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L644" class="LineNr">644 </span>            break;
+<span id="W2L645" class="LineNr">645 </span>        case CPConstants.MARGIN_LEFT_BG_COLOR_PN:
+<span id="W2L646" class="LineNr">646 </span>            marginLeftBGColor = CPConstants.asColor( newVal );
+<span id="W2L647" class="LineNr">647 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span id="W2L648" class="LineNr">648 </span>            break;
+<span id="W2L649" class="LineNr">649 </span>        case CPConstants.TIC_MINOR_COLOR_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L650" class="LineNr">650 </span>        case CPConstants.TIC_MINOR_WEIGHT_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L651" class="LineNr">651 </span>        case CPConstants.TIC_MINOR_LEN_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L652" class="LineNr">652 </span>        case CPConstants.TIC_MINOR_MPU_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L653" class="LineNr">653 </span>        case CPConstants.TIC_MINOR_DRAW_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L654" class="LineNr">654 </span>        case CPConstants.TIC_MAJOR_COLOR_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L655" class="LineNr">655 </span>        case CPConstants.TIC_MAJOR_WEIGHT_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L656" class="LineNr">656 </span>        case CPConstants.TIC_MAJOR_LEN_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L657" class="LineNr">657 </span>        case CPConstants.TIC_MAJOR_MPU_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L658" class="LineNr">658 </span>        case CPConstants.TIC_MAJOR_DRAW_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L659" class="LineNr">659 </span>        case CPConstants.GRID_LINE_COLOR_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L660" class="LineNr">660 </span>        case CPConstants.GRID_LINE_WEIGHT_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L661" class="LineNr">661 </span>        case CPConstants.GRID_LINE_LPU_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L662" class="LineNr">662 </span>        case CPConstants.GRID_LINE_DRAW_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L663" class="LineNr">663 </span>        case CPConstants.AXIS_COLOR_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L664" class="LineNr">664 </span>        case CPConstants.AXIS_WEIGHT_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L665" class="LineNr">665 </span>        case CPConstants.LABEL_FONT_COLOR_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L666" class="LineNr">666 </span>        case CPConstants.LABEL_FONT_NAME_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L667" class="LineNr">667 </span>        case CPConstants.LABEL_FONT_STYLE_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L668" class="LineNr">668 </span>        case CPConstants.LABEL_FONT_SIZE_PN:
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L669" class="LineNr">669 </span>        case CPConstants.LABEL_DRAW_PN:
+<span id="W2L670" class="LineNr">670 </span><span class="DiffChange">            </span><span class="DiffText">update = true</span><span class="DiffChange">;                                                  </span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L671" class="LineNr">671 </span>            break;
+<span id="W2L672" class="LineNr">672 </span>        }
+<span id="W2L673" class="LineNr">673 </span><span class="DiffAdd">        </span><span class="DiffAdd">                                                                    </span>
+<span id="W2L674" class="LineNr">674 </span><span class="DiffAdd">        if ( update )</span><span class="DiffAdd">                                                       </span>
+<span id="W2L675" class="LineNr">675 </span><span class="DiffAdd">        {</span><span class="DiffAdd">                                                                   </span>
+<span id="W2L676" class="LineNr">676 </span><span class="DiffAdd">            graphMgr.resetProfile();</span><span class="DiffAdd">                                        </span>
+<span id="W2L677" class="LineNr">677 </span><span class="DiffAdd">            repaint();</span><span class="DiffAdd">                                                      </span>
+<span id="W2L678" class="LineNr">678 </span><span class="DiffAdd">        }</span><span class="DiffAdd">                                                                   </span>
+<span id="W2L679" class="LineNr">679 </span>    }
+<span id="W2L680" class="LineNr">680 </span>
+<span id="W2L681" class="LineNr">681 </span>    /**
+<span id="W2L682" class="LineNr">682 </span>     * Sets the supplier
+<span id="W2L683" class="LineNr">683 </span>     * that will fetch a stream
+<span id="W2L684" class="LineNr">684 </span>     * to deliver commands
+<span id="W2L685" class="Folded">685 </span><span class="Folded">+-- 15 lines: * for plotting a curve.-------------------------------------------</span>
+<span id="W2L700" class="LineNr">700 </span>    private void drawUserPlot()
+<span id="W2L701" class="LineNr">701 </span>    {
+<span id="W2L702" class="LineNr">702 </span>        gtx.setColor( plotColor );
+<span id="W2L703" class="LineNr">703 </span>        streamSupplier.get().forEach( c -&gt; c.execute() );
+<span id="W2L704" class="LineNr">704 </span>    }
+<span id="W2L705" class="LineNr">705 </span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">----------------------------------------------------------------------------</span>
+<span id="W2L706" class="LineNr">706 </span>    private void paintMargins()
+<span id="W2L707" class="LineNr">707 </span>    {
+<span id="W2L708" class="LineNr">708 </span>        Rectangle2D rect    = new Rectangle2D.Float();
+<span id="W2L709" class="LineNr">709 </span>
+<span id="W2L710" class="LineNr">710 </span>        // top margin
+<span id="W2L711" class="LineNr">711 </span>        rect.setRect( 0, 0, currWidth, marginTopWidth );
+<span id="W2L712" class="Folded">712 </span><span class="Folded">+-- 21 lines: gtx.setColor( marginTopBGColor );---------------------------------</span>
+</pre>
+</div></td>
+</tr>
+</table>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->
+
