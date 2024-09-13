@@ -1,12 +1,14 @@
 package com.acmemail.judah.cartesian_plane;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -43,6 +46,11 @@ import net.sourceforge.tess4j.TesseractException;
 
 class GraphManagerTest
 {
+    private static final int    defImgWidth      = 300;
+    private static final int    defImgHeight     = 400;
+    private static final int    defImgType       = BufferedImage.TYPE_INT_RGB;
+
+    
     private static final String             AXES        =
         LinePropertySetAxes.class.getSimpleName();
     private static final String             GRID_LINES  =
@@ -88,7 +96,7 @@ class GraphManagerTest
     private final Tesseract             tesseract       = 
         Tess4JConfig.getTesseract();
     private static final Profile        baseProfile     = new Profile();
-    private final static Profile        workingProfile  = new Profile();
+    private static final Profile        workingProfile  = new Profile();
     private static GraphManagerTestGUI  testGUI;
         
     private float               workingGPU;
@@ -101,6 +109,7 @@ class GraphManagerTest
     private int                 workingRGB;
 
     private BufferedImage       workingImage;
+    private Rectangle           workingRect;
     private String              workingLineSet;
     
     @BeforeAll
@@ -125,6 +134,50 @@ class GraphManagerTest
         @SuppressWarnings("unused")
         GraphManager    mgr = 
             new GraphManager( new JPanel(), new Profile() );
+    }
+    
+    @Test
+    public void testGraphManagerProfile()
+    {
+        initTestParameters( 0 );
+        initTestData( AXES );
+        prepareRectTest();
+        GraphManager    test    = new GraphManager( workingProfile );
+        Graphics2D      gtx     = workingImage.createGraphics();
+        test.refresh( gtx, workingRect );
+        validateFill( workingRect );
+    }
+    
+    @Test
+    public void testGraphManagerRectProfile()
+    {
+        initTestParameters( 0 );
+        initTestData( AXES );
+        prepareRectTest();
+        GraphManager    test            = 
+            new GraphManager( workingRect, workingProfile );
+        Graphics2D      gtx             = workingImage.createGraphics();
+        test.refresh( gtx );
+        validateFill( workingRect );
+    }
+    
+    private void prepareRectTest()
+    {
+        workingImage = 
+            new BufferedImage( defImgWidth, defImgHeight, defImgType );
+        int             rectXco         = 10;
+        int             rectYco         = rectXco + 5;
+        int             right           = rectYco + 5;
+        int             bottom          = right + 5;
+        int             rectWidth       = defImgWidth - rectXco - right;
+        int             rectHeight      = defImgHeight - rectYco - bottom;
+        workingRect = 
+            new Rectangle( rectXco, rectYco, rectWidth, rectHeight );
+        int             intFG           = workingColor.getRGB() & 0xFFFFFF;
+            workingProfile.getMainWindow().getFGColor();
+        for ( int row = 0 ; row < defImgHeight ; ++row )
+            for ( int col = 0 ; col < defImgWidth ; ++col )
+                workingImage.setRGB( col, row, intFG );
     }
 
     // There's no good test for refresh, other than to follow it
@@ -192,6 +245,87 @@ class GraphManagerTest
         List<Float>     expValues   = getExpectedHorizontalLabels();
         List<Float>     actValues   = getLabels();
         assertEquals( expValues, actValues );
+    }
+    
+    @Test
+    public void testDrawAll()
+    {
+        initTessTestData();
+        LinePropertySet axesSet         = 
+            workingProfile.getLinePropertySet( AXES );
+        LinePropertySet gridLinesSet    = 
+            workingProfile.getLinePropertySet( GRID_LINES );
+        LinePropertySet ticMajorSet     = 
+            workingProfile.getLinePropertySet( TIC_MAJOR );
+        LinePropertySet ticMinorSet     = 
+            workingProfile.getLinePropertySet( TIC_MINOR );
+        int             rectWidth       = 500;
+        int             rectHeight      = 500;
+        Rectangle       rect            = 
+            new Rectangle( rectWidth, rectHeight );
+        
+        Stream.of( axesSet, gridLinesSet, ticMajorSet, ticMinorSet )
+            .peek( s -> s.setStroke( 3 ) )
+            .forEach( s -> s.setLength( 20 ) );
+        
+        gridLinesSet.setSpacing( 1 );
+        ticMajorSet.setSpacing( 2 );
+        ticMinorSet.setSpacing( 4 );
+        
+        workingImage = 
+            new BufferedImage( rectWidth, rectHeight, defImgType );
+        testGUI.drawAll( workingImage.createGraphics(), rect );
+//        showImageDialog();
+        Stream.of( axesSet, gridLinesSet, ticMajorSet, ticMinorSet )
+            .forEach( s -> assertTrue( hasLine( s ) ) );
+        assertTrue( hasVerticalLabel() );
+        assertTrue( hasHorizontalLabel() );
+    }
+    
+    /**
+     * 
+     * <p>
+     * Preconditions:
+     * </p>
+     * <ol>
+     * <li>gridUnit &gt;= 100</li>
+     * <li>grid line spacing = 1</li>
+     * <li>tic major spacing = 2</li>
+     * <li>tic minor spacing = 4</li>
+     * <li>stroke for all lines &lt; 5</li>
+     * <li>stroke for all lines &gt; 1</li>
+     * <li>length for all lines &gt; 16</li>
+     * <li>length for tic marks < grid height / 2</li>
+     * <li>length for tic marks < grid width / 2</li>
+     * <li>grid width &gt; 2 * grid unit</li>
+     * <li>grid height &gt; 2 * grid unit</li>
+     * </ol>
+     * 
+     * @param propSet
+     * @return
+     */
+    private boolean hasLine( LinePropertySet propSet )
+    {
+        float   gridUnit    = workingProfile.getGridUnit();
+        int     width       = workingImage.getWidth();
+        int     height      = workingImage.getHeight();
+        float   xAxisYco    = height / 2;
+        float   yAxisXco    = width / 2;
+        float   lineOffset  = propSet.hasSpacing() ?
+           gridUnit / propSet.getSpacing() : 0;
+        float   testOffset  = propSet.hasLength() ? 
+            propSet.getLength() / 2 - 1 : 90;
+        Color   color       = propSet.getColor();
+        int     expColor    = color.getRGB() & 0xffffff;
+        int     vXco        = (int)(yAxisXco + lineOffset);
+        int     vYco        = (int)(xAxisYco - testOffset);
+        int     vPoint      = workingImage.getRGB( vXco, vYco ) & 0xFFFFFF;
+        int     hXco        = (int)(yAxisXco + testOffset);
+        int     hYco        = (int)(xAxisYco - lineOffset);
+        int     hPoint      = workingImage.getRGB( hXco, hYco ) & 0xFFFFFF;
+        
+        boolean result      = expColor == vPoint && expColor == hPoint;
+        return result;
     }
 
     @Test
@@ -433,23 +567,39 @@ class GraphManagerTest
     }
     
     /**
-     * Verify that every value in a given image
-     * is that of a given color.
+     * Verify that the background image
+     * is set to the current background color
+     * only in the given range.
      * 
-     * @param image the given image
-     * @param rgb   the given color
+     * @param rect  the given range
+     */
+    private void validateFill( Rectangle rect )
+    {
+        int             rows            = workingImage.getHeight();
+        int             cols            = workingImage.getWidth();
+        for ( int row = 0 ; row < rows ; ++row )
+            for ( int col = 0 ; col < cols ; ++col )
+            {
+                int rgb = workingImage.getRGB( col, row ) & 0xFFFFFF;
+                String  msg = "col=" + col + ",row=" + row;
+                if ( rect.contains( col, row  ) )
+                    assertEquals( workingGridRGB, rgb, msg );
+                else
+                    assertNotEquals( workingGridRGB, rgb, msg );
+            }
+    }
+    
+    /**
+     * Verify that every value in the working image
+     * is equal to the expected background color.
      */
     private void validateFill()
     {
         int             width   = workingImage.getWidth();
         int             height  = workingImage.getHeight();
-        for ( int xco = 0 ; xco < width ; ++xco )
-            for ( int yco = 0 ; yco < height ; ++yco )
-            {
-                int imageRGB    = 
-                    workingImage.getRGB( xco, yco ) & 0xFFFFFF;
-                assertEquals( workingGridRGB, imageRGB );
-            }
+        Rectangle       rect    = 
+            new Rectangle( 0, 0, width, height );
+        validateFill( rect );
     }
     
     private void testDrawAxesInternal( int paramNum )
