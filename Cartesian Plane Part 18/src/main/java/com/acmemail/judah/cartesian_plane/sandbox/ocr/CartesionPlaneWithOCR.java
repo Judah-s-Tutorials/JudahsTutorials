@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.ocr;
+    package com.acmemail.judah.cartesian_plane.sandbox.ocr;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
