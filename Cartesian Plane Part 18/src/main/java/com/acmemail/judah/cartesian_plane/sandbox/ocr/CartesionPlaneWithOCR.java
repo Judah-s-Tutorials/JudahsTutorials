@@ -47,7 +47,7 @@ public class CartesionPlaneWithOCR extends JFrame
     /** Tesseract segmentation modes. */
     private static final String[]   segModes    =
     {
-        "0. OSD only",
+        "0. Orientation and script detection (OSD) only",
         "1. Page segmentation with OSD",
         "2. (not implemented)",
         "3. Page segmentation, no OSD (default)",
