@@ -249,7 +249,9 @@ public class Tess4JDemo2 extends JPanel
         try
         {
             String  text    = tesseract.doOCR( image );
+            log.append( "<pre>" );
             log.append( text );
+            log.append( "</pre>" );
             log.append( "**********" );
         }
         catch ( TesseractException exc )

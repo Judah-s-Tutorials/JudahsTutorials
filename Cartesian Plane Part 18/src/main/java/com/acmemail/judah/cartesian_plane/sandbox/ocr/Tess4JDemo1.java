@@ -50,9 +50,10 @@ public class Tess4JDemo1
         File        file    = null;
         int         rVal    = chooser.showOpenDialog( null );
         if( rVal == JFileChooser.APPROVE_OPTION )
+        {
             file = chooser.getSelectedFile();
-
-        new Tess4JDemo1( file );
+            new Tess4JDemo1( file );
+        }
     }
     
     /**
