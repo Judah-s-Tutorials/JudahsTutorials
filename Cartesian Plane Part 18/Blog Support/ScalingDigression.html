@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Scaling</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<div style="float: right;margin-left: .25em;">
+<img src="https://judahstutorials.com/wp-content/uploads/2024/09/ScalingDemo1.png" alt="ScalingDemo1">
+<p>
+<img src="https://judahstutorials.com/wp-content/uploads/2024/09/ScalingDemo1A.png" alt="ScalingDemo1A">
+</p>
+</div>
+<p style="font-size: 130%;font-weight: bold; padding-bottom: 0;">
+Digression: Image Scaling
+</p>
+<p>
+We've already seen that <em>Tess4J</em>
+can produce less-than-perfect results
+when extracting text from an image.
+One way to improve the reults
+is by <em>scaling</em> the image.
+</p>
+<p>
+When we scale an image
+we make it larger or smaller;
+we do this by applying a <em>scale factor,</em>
+a percentage by which
+the inmage size is to be changed.
+Scaling can be applied <em>uniformly,</em>
+by applying the same scale factor
+to the width a height of an image,
+or <em>non-uniformly,</em>>
+by changing the width by one scale factor
+and the height by another.
+Scaling can be applied
+to <em>vector</em> images
+or <em>raster</em> images.
+If you're interested in a discussion
+of the two types of images,
+see the references below.
+In our unit test for <em>GraphManager</em>
+we will be dealing excusively
+with <em>BufferedImages</em> which are rasters.
+</p>
+<p>
+We talked about rasters in an earlier lesson.
+A raster is a two-dimensional array of integers
+where each integer determines the color 
+of the corresponding pixel in a picture.
+Since you can't change the size of a pixel,
+scaling-up and image entails adding pixels,
+while scaling-down means subtracting pixels.
+Now the question becomes: 
+how do you know which pixels to add or subtract?
+There are a variety of algorithms
+for making this choice;
+for a general discussion of scaling algorithms,
+see <a href="https://www.fxguide.com/fxfeatured/Keeping_Your_Renders_Clean/">Keeping Your Renders Clean</a> at fxguide
+and the Java documentation for
+<a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/Image.html">java.awt.Image.</a>
+
+</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Image_scaling">Image Scaling</a> in Wikipedia</li>
+<li>
+    <a href="https://guides.lib.umich.edu/c.php?g=282942&p=1885352">Raster vs. Vector Images</a>
+    in the University of Michigan Library Research Guides
+</li>
+<li>
+    <a href="https://www.baeldung.com/java-resize-image">How Can I Resize an Image Using Java?</a>
+    from Baeldung
+</li>
+<li>
+    <a href="https://blog.idrsolutions.com/image-scaling-in-java/">Image Scaling in Java</a>
+    from IDR Solutions
+</li>
+</ul>
+<p>
+The documentation for <em>Map&lt;K,V&gt;</em> 
+says that two maps are equal if
+"...the two maps represent the same mappings. 
+More formally, two maps m1 and m2 
+represent the same mappings if 
+<span style="font-family: 'Courier New';">m1.entrySet().equals(m2.entrySet())</span>."
+Which leads to a discussion of <em>Sets</em>.
+</p>
+<p>
+The documentation for <em>Set&lt;E&gt;</em> 
+</p>
+</div>
+</body>
+</html>

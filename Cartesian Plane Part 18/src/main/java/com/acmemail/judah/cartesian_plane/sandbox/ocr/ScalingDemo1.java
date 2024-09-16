@@ -1,26 +1,22 @@
 package com.acmemail.judah.cartesian_plane.sandbox.ocr;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
+import java.awt.Point;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Rectangle2D;
+import java.awt.geom.Line2D;
+import java.awt.image.AffineTransformOp;
+import java.awt.image.BufferedImage;
 
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
 
 /**
  * This application incorporates a simple demonstration
@@ -39,74 +35,24 @@ import javax.swing.border.Border;
  * 
  * @author Jack Straub
  * 
- * @see ScalingDemo2
+ * @see ScalingDemo3
  */
 public class ScalingDemo1 extends JPanel
 {
     private static final long serialVersionUID = -6779305390811349326L;
     
-    /** Strings to render as text in the application FUI. */
-    private static final String[]   text    =
-    {
-        "Winkin, blinkin, and nod one night",
-        "Set sail in a wooden shoe.",
-        "Sailed on a river of crystal light",
-        "Into a sea of dew."
-    };
+    private final int           widthOrig       = 15;
+    private final int           heightOrig      = widthOrig;
+    private final int           margin          = 3;
+    private final float         scaleFactor     = 1.5f;
+    private final int           defWeight       = 3;
+    private final BufferedImage imageOrig;
+    private final BufferedImage imageScaled;
 
     /** Background color of the principal GUI window. */
-    private final Color         bgColor     = Color.WHITE;
+    private final Color         bgColor         = Color.WHITE;
     /** Color for drawing text in the application window. */
-    private final Color         textColor   = Color.BLACK;
-    /** Font family for drawing text in the application window. */
-    private final String        fontFamily  = "Courier New";
-    /** Color for text in the application window. */
-    private final int           fontSize    = 12;
-    /** 
-     * Scale factor; updated at the operator's discretion.
-     * See {@link #getSpinnerPanel()}.
-     */
-    private float               scaleFactor = 1.0f;
-    
-    /** 
-     * Current width of the application window. 
-     * Set in {@link #paintComponent(Graphics)},
-     * declared here for convenience.
-     */
-    private int                 width;
-    /** 
-     * Current height of the application window. 
-     * Set in {@link #paintComponent(Graphics)},
-     * declared here for convenience.
-     */
-    private int                 height;
-    /** 
-     * Working graphics context derived from the parameter
-     * to the {@link #paintComponent(Graphics)} method.
-     * Created at the start of the 
-     * {@link #paintComponent(Graphics)} method,
-     * and disposed at the end.
-     */
-    private Graphics2D          gtx;
-    /** 
-     * Current font object of the application window. 
-     * Set in {@link #paintComponent(Graphics)},
-     * declared here for convenience.
-     */
-    private Font                font;
-    /** 
-     * Font-render-context derived from the application's
-     * graphics context. 
-     * Assigned in {@link #paintComponent(Graphics)},
-     * declared here for convenience.
-     */
-    private FontRenderContext   frc;
-    /** 
-     * Convenience variable to control line spacing
-     * of the text drawn in the application's principal window.
-     * Initialized in the {@link #paintComponent(Graphics)} method.
-     */
-    private int                 currLine;
+    private final Color         fgColor         = Color.BLACK;
     
     /**
      * Application entry point.
@@ -124,177 +70,141 @@ public class ScalingDemo1 extends JPanel
     
     /**
      * Constructor.
-     * Establishes the initial size and font
-     * of the principal application window.
+     * Establishes the BufferedImages to paint.
      */
     public ScalingDemo1()
     {
-        Dimension   dim     = new Dimension( 500, 300 );
-        setPreferredSize( dim );
-        
-        Font    font    = 
-            new Font( fontFamily, Font.BOLD, fontSize );
-        setFont( font );
+        imageOrig = getImageOrig();
+        imageScaled = getImageScaled();
     }
 
     /**
      * Builds and displays the application GUI.
      */
-    private void build()
+    public void build()
     {
-        JFrame      frame       = new JFrame( "Scale Demo" );
+        JFrame          frame       = new JFrame( "Scaling Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        JPanel      contentPane = new JPanel( new BorderLayout() );
-        
-        contentPane.add( getControlPanel(), BorderLayout.SOUTH );
+        JPanel          contentPane = new JPanel( new BorderLayout() );
         contentPane.add( this, BorderLayout.CENTER );
+        
+        int         prefWidth   = imageScaled.getWidth() + 2 * margin;
+        int         prefHeight  = 
+            imageOrig.getHeight() + imageScaled.getHeight() + 3 * margin;
+        Dimension   prefSize    = new Dimension( prefWidth, prefHeight );
+        setPreferredSize( prefSize );
         
         frame.setContentPane( contentPane );
         frame.pack();
         frame.setLocation( 100, 200 );
         frame.setVisible( true );
-    }
-    
-    /**
-     * Creates the control panel for the application GUI.
-     * This consists of an exit button
-     * and a spinner for setting the scale factor.
-     * 
-     * @return  the control panel for the application GUI
-     */
-    private JPanel getControlPanel()
-    {
-        JPanel      panel   = new JPanel();
-        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
-        Border      border  = 
-            BorderFactory.createLineBorder( Color.BLACK, 3 );
-        panel.setLayout( layout );
-        panel.setBorder( border );
         
-        JButton     exitButton  = new JButton( "Exit" );
-        exitButton.addActionListener( e -> System.exit( 0 ) );
-        
-        panel.add( getSpinnerPanel() );
-        panel.add( exitButton );
-        
-        JPanel  outerPanel  = new JPanel();
-        outerPanel.add( panel );
-        return outerPanel;
-    }
-    
-    /**
-     * Creates a panel consisting of
-     * a spinner to control the application's scale factor
-     * and a descriptive label.
-     * @return
-     */
-    private JPanel getSpinnerPanel()
-    {
-        SpinnerNumberModel    model   =
-            new SpinnerNumberModel( 1.0f, .1f, 10f, .1f );
-        JSpinner        spinner = new JSpinner( model );
-        spinner.addChangeListener( e -> {
-            scaleFactor = model.getNumber().floatValue();
-            repaint();
-        });
-        
-        JPanel      panel   = new JPanel();
-        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
-        panel.setLayout( layout );
-        panel.add( new JLabel( "Scale Factor" ) );
-        panel.add( spinner );
-        return panel;
+        showDialog( frame );
     }
     
     @Override
     public void paintComponent( Graphics graphics )
     {
-        width = getWidth();
-        height = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        int         width   = getWidth();
+        int         height  = getHeight();
+        Graphics2D  gtx     = (Graphics2D)graphics.create();
         
         gtx.setColor( bgColor );
         gtx.fillRect( 0, 0, width, height );
         
-        applyScale();
+        gtx.setColor( fgColor );
+        int         xco     = 
+            margin + width / 2 - imageOrig.getWidth() / 2;
+        int         yco     = margin;
+        gtx.drawImage( imageOrig, xco, yco, this );
         
-        font = gtx.getFont();
-        frc = gtx.getFontRenderContext();
-        
-        gtx.setColor( textColor );
-        currLine = 1;
-        drawAlphaText();
-        ++currLine;
-        drawNumericText();
-        
-        gtx.dispose();
+        xco = margin + width / 2 - imageScaled.getWidth() / 2;
+        yco += margin + imageOrig.getHeight();
+        gtx.drawImage( imageScaled, xco, yco, this );
     }
     
     /**
-     * Applies the scaling transform 
-     * to this window's graphics context.
+     * Creates the non-scaled BufferedImage.
+     * 
+     * @return  the non-scaled BufferedImage
      */
-    private void applyScale()
+    private BufferedImage getImageOrig()
     {
+        int             type    = BufferedImage.TYPE_INT_RGB;
+        int             endCap  = BasicStroke.CAP_SQUARE;
+        BufferedImage   image   = 
+            new BufferedImage( widthOrig, heightOrig, type );
+        Point           upperLeft   = new Point( 0, 0 );
+        Point           upperRight  = new Point( widthOrig, 0 );
+        Point           lowerLeft   = new Point( 0, heightOrig );
+        Point           lowerRight  = new Point( widthOrig, heightOrig );
+        Line2D          line1       = 
+            new Line2D.Double( upperLeft, lowerRight );
+        Line2D          line2       = 
+            new Line2D.Double( upperRight, lowerLeft );
+        Stroke          stroke      = 
+            new BasicStroke( defWeight, endCap, 0 );
+        
+        Graphics2D  gtx     = image.createGraphics();
+        gtx.setColor( bgColor );
+        gtx.fillRect( 0, 0, widthOrig, heightOrig );
+        
+        gtx.setColor( fgColor );
+        gtx.setStroke( stroke );
+        gtx.draw( line1 );
+        gtx.draw( line2 );
+        
+        return image;
+    }
+    
+    /**
+     * Creates the scaled BufferedImage.
+     * <p>
+     * Precondition: non-scaled BufferedImage is fully configured
+     * 
+     * @return  the scaled BufferedImage
+     */
+    private BufferedImage getImageScaled()
+    {
+        int             imageType   = imageOrig.getType();
+        int             width       = 
+            (int)(imageOrig.getWidth() * scaleFactor + .5);
+        int             height      =  
+            (int)(imageOrig.getHeight() * scaleFactor + .5);
+        BufferedImage   image       = 
+            new BufferedImage( width, height, imageType );
+        Graphics2D      gtx         = image.createGraphics();
+        gtx.setColor( bgColor );
+        gtx.fillRect( 0, 0, width, height );
+
+        // Scale the image
         AffineTransform     transform       = new AffineTransform();
         transform.scale( scaleFactor, scaleFactor );
-        gtx.transform( transform );
+        AffineTransformOp   scaleOp         = 
+            new AffineTransformOp( 
+                transform, 
+                AffineTransformOp.TYPE_BICUBIC
+            );
+        scaleOp.filter( imageOrig, image );
+        return image;
     }
     
-    /**
-     * Draws the alphabetic text in the principal application window.
-     * <p>
-     * Precondition: 
-     * currLine set to the number of the line of text
-     * to start drawing in the application window.
-     * <p>
-     * Postcondition:
-     * currLine updated by the number of lines
-     * drawn in the application window.
-     */
-    private void drawAlphaText()
+    private void showDialog( JFrame frame )
     {
-        float   yco = font.getSize() * 2 * currLine;
-        float   xco = 10;
-        for ( String str : text )
-        {
-            TextLayout  layout  = new TextLayout( str, font, frc );
-            Rectangle2D bounds  = layout.getBounds();
-            layout.draw( gtx, xco, yco );
-            yco += bounds.getHeight() * 1.5;
-            ++currLine;
-        }
-    }
-    
-    /**
-     * Draws the alphabetic text in the principal application window.
-     * <p>
-     * Precondition: 
-     * currLine set to the number of the line of text
-     * to start drawing in the application window.
-     * <p>
-     * Postcondition:
-     * currLine updated by the number of lines
-     * drawn in the application window.
-     */
-    private void drawNumericText()
-    {
-        float   yOffset = font.getSize() * 1.5f;
-        float   ycoBase = yOffset * currLine;
-        float   yco     = ycoBase;
-        for ( int inx = 0 ; inx < 5 ; ++inx )
-        {
-            float   xco     = 10;
-            for ( float num = -2.123f + inx; num < 3 + inx ; num += 1 )
-            {
-                String      text    = String.format( "%7.3f", num );
-                TextLayout  layout  = new TextLayout( text, font, frc );
-                Rectangle2D bounds  = layout.getBounds();
-                layout.draw( gtx, xco, yco );
-                xco += (1.3 * bounds.getWidth());
-            }
-            currLine++;
-            yco += yOffset;
-        }
+        JPanel  contentPane = new JPanel( new BorderLayout() );
+        JPanel  content     = new ScalingDemo1A( this );
+        JDialog dialog      = new JDialog( frame, false );
+        contentPane.add( content, BorderLayout.CENTER );
+        dialog.setContentPane( contentPane );
+        
+        Dimension   frameDim    = frame.getPreferredSize();
+        Point       frameLoc    = frame.getLocation();
+        int         frameXco    = frameLoc.x;
+        int         frameYco    = frameLoc.y;
+        int         dialogXco   = frameXco + frameDim.width + 10;
+        dialog.setLocation( dialogXco, frameYco );
+        
+        dialog.pack();
+        dialog.setVisible( true );
     }
 }

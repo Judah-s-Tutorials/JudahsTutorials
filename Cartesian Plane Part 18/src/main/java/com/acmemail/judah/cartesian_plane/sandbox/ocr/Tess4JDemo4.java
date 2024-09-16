@@ -49,7 +49,7 @@ import net.sourceforge.tess4j.TesseractException;
  * 
  * @author Jack Straub
  * 
- * @see ScalingDemo2
+ * @see ScalingDemo3
  */
 public class Tess4JDemo4 extends JPanel
 {
