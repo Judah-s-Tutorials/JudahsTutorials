@@ -14,6 +14,7 @@ public class ScalingDemo1A extends JPanel
 {
     private static final char   white       = '\u25a1';
     private static final char   black       = '\u25a0';
+    private static final char   gray        = '\u25a8';
     private static final int    imageType   = BufferedImage.TYPE_INT_RGB;
     
     private final ScalingDemo1  demo;
@@ -26,7 +27,7 @@ public class ScalingDemo1A extends JPanel
     public ScalingDemo1A( ScalingDemo1 demo )
     {
         this.demo = demo;
-        Dimension   prefSize    = new Dimension( 300, 300 );
+        Dimension   prefSize    = new Dimension( 1000, 1000 );
         setPreferredSize( prefSize );
         
         Font    font    = getFont().deriveFont( 8f );
@@ -56,10 +57,16 @@ public class ScalingDemo1A extends JPanel
     private void paintRow( int num )
     {
         StringBuilder   bldr    = new StringBuilder();
-        for ( int inx = xMin - 1 ; inx < image.getWidth()    ; ++inx )
+        for ( int inx = xMin ; inx < image.getWidth()    ; ++inx )
         {
             int     pixel   = image.getRGB( inx, num ) & 0xFFFFFF;
-            char    square  = pixel == 0 ? black : white;
+            char    square  = 0;
+            if ( pixel == 0xffffff )
+                square = white;
+            else if ( pixel == 0 )
+                square = black;
+            else
+                square = gray;
             bldr.append( square );
         }
         int             yco     = num * ascent;

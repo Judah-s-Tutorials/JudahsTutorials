@@ -15,6 +15,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
 /**
@@ -40,9 +41,9 @@ public class ScalingDemo1 extends JPanel
 {
     private static final long serialVersionUID = -6779305390811349326L;
     
-    private final int           widthOrig       = 15;
+    private final int           widthOrig       = 200;
     private final int           heightOrig      = widthOrig;
-    private final int           margin          = 3;
+    private final int           margin          = 1;
     private final float         scaleFactor     = 1.5f;
     private final int           defWeight       = 3;
     private final BufferedImage imageOrig;
@@ -114,11 +115,11 @@ public class ScalingDemo1 extends JPanel
         gtx.fillRect( 0, 0, width, height );
         
         gtx.setColor( fgColor );
-        int         xco     = width / 2 - imageOrig.getWidth() / 2;
-        int         yco     = margin;
+        int         xco     = 0;
+        int         yco     = 0;
         gtx.drawImage( imageOrig, xco, yco, this );
         
-        xco = width / 2 - imageScaled.getWidth( null ) / 2;
+        xco = 0;
         yco += margin + imageOrig.getHeight();
         gtx.drawImage( imageScaled, xco, yco, this );
         
@@ -133,31 +134,20 @@ public class ScalingDemo1 extends JPanel
     private BufferedImage getImageOrig()
     {
         int             type    = BufferedImage.TYPE_INT_RGB;
-        int             endCap  = BasicStroke.CAP_SQUARE;
         BufferedImage   image   = 
             new BufferedImage( widthOrig, heightOrig, type );
-        Point           upperLeft   = new Point( 0, 0 );
-        Point           upperRight  = new Point( widthOrig, 0 );
-        Point           lowerLeft   = new Point( 0, heightOrig );
-        Point           lowerRight  = new Point( widthOrig, heightOrig );
-        Line2D          line1       = 
-            new Line2D.Double( upperLeft, lowerRight );
-        Line2D          line2       = 
-            new Line2D.Double( upperRight, lowerLeft );
-        Stroke          stroke      = 
-            new BasicStroke( defWeight, endCap, 0 );
         
         Graphics2D  gtx     = image.createGraphics();
         gtx.setColor( bgColor );
         gtx.fillRect( 0, 0, widthOrig, heightOrig );
         
         gtx.setColor( fgColor );
-        gtx.setStroke( stroke );
-//        gtx.draw( line1 );
-//        gtx.draw( line2 );
         gtx.setColor( Color.BLACK );
-        drawText( gtx );
-        
+        int     yco   = gtx.getFontMetrics().getAscent();
+        int     xco     = 0;
+        gtx.drawString( "-10", xco, yco );
+
+        image = trim( image );
         return image;
     }
     
@@ -198,17 +188,18 @@ public class ScalingDemo1 extends JPanel
         gtx.setColor( Color.WHITE );
         gtx.fillRect( 0, 0, totalWidth, totalHeight );
         gtx.drawImage( smoothImage, xco, yco, this );
-        xco += smoothWidth + margin;
+        xco += smoothWidth + 2 * margin;
         gtx.drawImage( fastImage, xco, yco, this );
         return image;
     }
     
     private void showDialog( JFrame frame )
     {
-        JPanel  contentPane = new JPanel( new BorderLayout() );
-        JPanel  content     = new ScalingDemo1A( this );
-        JDialog dialog      = new JDialog( frame, false );
-        contentPane.add( content, BorderLayout.CENTER );
+        JPanel      contentPane = new JPanel( new BorderLayout() );
+        JPanel      content     = new ScalingDemo1A( this );
+        JScrollPane scrollPane  = new JScrollPane( content );
+        JDialog     dialog      = new JDialog( frame, false );
+        contentPane.add( scrollPane, BorderLayout.CENTER );
         dialog.setContentPane( contentPane );
         
         Dimension   frameDim    = frame.getPreferredSize();
@@ -224,20 +215,34 @@ public class ScalingDemo1 extends JPanel
     
     private void drawText( Graphics2D gtx )
     {
-        int     xco     = margin;
-        int     yco     = margin;
         int     height  = gtx.getFontMetrics().getAscent();
-        for ( int row = 0 ; row < 10 ; ++row )
-        {
-            StringBuilder   bldr    = new StringBuilder();
-            for ( int col = -5 ; col < 6 ; ++col )
+        int     xco     = 0;
+        int     yco     = height;
+//        gtx.drawString( "Spot", xco, yco );
+        gtx.drawString( "-10", xco, yco );
+    }
+    
+    private BufferedImage trim( BufferedImage image )
+    {
+        int type    = image.getType();
+        int target  = fgColor.getRGB() & 0xffffff;
+        int maxXco  = 0;
+        int maxYco  = 0;
+        int rows    = image.getHeight();
+        int cols    = image.getWidth();
+        for ( int row = 0 ; row < rows ; ++row )
+            for ( int col = 0 ; col < cols ; ++ col )
             {
-                int     intNum  = 100 * row + col;
-                String  strNum  = String.format( "      %03d", intNum );
-                bldr.append( strNum );
+                int pixel = image.getRGB( col,  row ) & 0xffffff;
+                if ( pixel == target )
+                {
+                    maxXco = Math.max( maxXco, col );
+                    maxYco = Math.max( maxYco, row );
+                }
             }
-            gtx.drawString( bldr.toString(), xco, yco );
-            yco += height;
-        }
+        BufferedImage   trimmed = new BufferedImage( maxXco + 1, maxYco + 1, type );
+        Graphics2D      gtx     = trimmed.createGraphics();
+        gtx.drawImage( image, 0, 0, this );
+        return trimmed;
     }
 }
