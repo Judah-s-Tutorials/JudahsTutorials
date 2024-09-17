@@ -6,11 +6,10 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Stroke;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JDialog;
@@ -47,7 +46,7 @@ public class ScalingDemo1 extends JPanel
     private final float         scaleFactor     = 1.5f;
     private final int           defWeight       = 3;
     private final BufferedImage imageOrig;
-    private final BufferedImage imageScaled;
+    private final Image         imageScaled;
 
     /** Background color of the principal GUI window. */
     private final Color         bgColor         = Color.WHITE;
@@ -88,9 +87,11 @@ public class ScalingDemo1 extends JPanel
         JPanel          contentPane = new JPanel( new BorderLayout() );
         contentPane.add( this, BorderLayout.CENTER );
         
-        int         prefWidth   = imageScaled.getWidth() + 2 * margin;
-        int         prefHeight  = 
-            imageOrig.getHeight() + imageScaled.getHeight() + 3 * margin;
+        int     origHeight      = imageOrig.getHeight();
+        int     scaledWidth     = imageScaled.getWidth( null );
+        int     scaledHeight    = imageScaled.getWidth( null );
+        int     prefWidth       = scaledWidth + 2 * margin;
+        int     prefHeight      = origHeight + scaledHeight + 3 * margin;
         Dimension   prefSize    = new Dimension( prefWidth, prefHeight );
         setPreferredSize( prefSize );
         
@@ -113,14 +114,15 @@ public class ScalingDemo1 extends JPanel
         gtx.fillRect( 0, 0, width, height );
         
         gtx.setColor( fgColor );
-        int         xco     = 
-            margin + width / 2 - imageOrig.getWidth() / 2;
+        int         xco     = width / 2 - imageOrig.getWidth() / 2;
         int         yco     = margin;
         gtx.drawImage( imageOrig, xco, yco, this );
         
-        xco = margin + width / 2 - imageScaled.getWidth() / 2;
+        xco = width / 2 - imageScaled.getWidth( null ) / 2;
         yco += margin + imageOrig.getHeight();
         gtx.drawImage( imageScaled, xco, yco, this );
+        
+        gtx.dispose();
     }
     
     /**
@@ -151,8 +153,10 @@ public class ScalingDemo1 extends JPanel
         
         gtx.setColor( fgColor );
         gtx.setStroke( stroke );
-        gtx.draw( line1 );
-        gtx.draw( line2 );
+//        gtx.draw( line1 );
+//        gtx.draw( line2 );
+        gtx.setColor( Color.BLACK );
+        drawText( gtx );
         
         return image;
     }
@@ -164,28 +168,38 @@ public class ScalingDemo1 extends JPanel
      * 
      * @return  the scaled BufferedImage
      */
-    private BufferedImage getImageScaled()
+    private Image getImageScaled()
     {
         int             imageType   = imageOrig.getType();
+        int             smooth      = Image.SCALE_SMOOTH;
+        int             fast        = Image.SCALE_FAST;
         int             width       = 
             (int)(imageOrig.getWidth() * scaleFactor + .5);
         int             height      =  
             (int)(imageOrig.getHeight() * scaleFactor + .5);
-        BufferedImage   image       = 
-            new BufferedImage( width, height, imageType );
-        Graphics2D      gtx         = image.createGraphics();
-        gtx.setColor( bgColor );
-        gtx.fillRect( 0, 0, width, height );
-
-        // Scale the image
-        AffineTransform     transform       = new AffineTransform();
-        transform.scale( scaleFactor, scaleFactor );
-        AffineTransformOp   scaleOp         = 
-            new AffineTransformOp( 
-                transform, 
-                AffineTransformOp.TYPE_BICUBIC
-            );
-        scaleOp.filter( imageOrig, image );
+        Image           smoothImage = 
+            imageOrig.getScaledInstance( width, height, smooth );
+        Image           fastImage   = 
+            imageOrig.getScaledInstance( width, height, fast );
+        
+        int             smoothWidth     = smoothImage.getWidth( null );
+        int             smoothHeight    = smoothImage.getHeight( null );
+        int             fastWidth       = fastImage.getWidth( null );
+        int             fastHeight      = fastImage.getHeight( null );
+        int             totalWidth      = 
+            smoothWidth + fastWidth + 3 * margin;
+        int totalHeight                 =
+            Math.max( smoothHeight, fastHeight ) + 3 * margin;
+        BufferedImage   image           =
+            new BufferedImage( totalWidth, totalHeight, imageType );
+        Graphics2D      gtx             = image.createGraphics();
+        int             xco             = margin;
+        int             yco             = margin;
+        gtx.setColor( Color.WHITE );
+        gtx.fillRect( 0, 0, totalWidth, totalHeight );
+        gtx.drawImage( smoothImage, xco, yco, this );
+        xco += smoothWidth + margin;
+        gtx.drawImage( fastImage, xco, yco, this );
         return image;
     }
     
@@ -206,5 +220,24 @@ public class ScalingDemo1 extends JPanel
         
         dialog.pack();
         dialog.setVisible( true );
+    }
+    
+    private void drawText( Graphics2D gtx )
+    {
+        int     xco     = margin;
+        int     yco     = margin;
+        int     height  = gtx.getFontMetrics().getAscent();
+        for ( int row = 0 ; row < 10 ; ++row )
+        {
+            StringBuilder   bldr    = new StringBuilder();
+            for ( int col = -5 ; col < 6 ; ++col )
+            {
+                int     intNum  = 100 * row + col;
+                String  strNum  = String.format( "      %03d", intNum );
+                bldr.append( strNum );
+            }
+            gtx.drawString( bldr.toString(), xco, yco );
+            yco += height;
+        }
     }
 }
