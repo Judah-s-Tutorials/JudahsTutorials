@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
@@ -694,14 +695,11 @@ class GraphManagerTest
             new BufferedImage( scaledWidth, scaledHeight, scaledType );
 
         // Scale the image
-        AffineTransform     transform       = new AffineTransform();
-        transform.scale( tessScaleFactor, tessScaleFactor );
-        AffineTransformOp   scaleOp         = 
-            new AffineTransformOp( 
-                transform, 
-                AffineTransformOp.TYPE_BICUBIC
-            );
-        scaleOp.filter( workingImage, scaledImage );
+        int     algo    = Image.SCALE_REPLICATE;
+        Image   image   = 
+            workingImage.getScaledInstance( scaledWidth, scaledHeight, algo );
+        Graphics2D  gtx = scaledImage.createGraphics();
+        gtx.drawImage( image, 0, 0, null );
 
         // Perform OCR
         try

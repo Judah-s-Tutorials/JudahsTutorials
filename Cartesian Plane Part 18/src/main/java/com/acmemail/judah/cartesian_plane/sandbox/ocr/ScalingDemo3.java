@@ -367,9 +367,9 @@ public class ScalingDemo3 extends JPanel
             
             int         imageWidth  = scaledImage.getWidth();
             int         imageHeight = scaledImage.getHeight();
-            Dimension   size        = 
-                new Dimension( imageWidth, imageHeight );
-            setPreferredSize( size );
+//            Dimension   size        = 
+//                new Dimension( imageWidth, imageHeight );
+//            setPreferredSize( size );
                 
             gtx.drawImage( scaledImage, 0, 0, this );
         }

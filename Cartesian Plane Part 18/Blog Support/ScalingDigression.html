@@ -8,10 +8,29 @@
 <body>
 <div  style="padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
 <div style="float: right;margin-left: .25em;">
-<img src="https://judahstutorials.com/wp-content/uploads/2024/09/ScalingDemo1.png" alt="ScalingDemo1">
-<p>
-<img src="https://judahstutorials.com/wp-content/uploads/2024/09/ScalingDemo1A.png" alt="ScalingDemo1A">
-</p>
+    <figure>
+        <img 
+            src="https://judahstutorials.com/wp-content/uploads/2024/09/ScalingDemo1.png" 
+            alt="ScalingDemo1"
+            style="width: 90px;"
+        >
+        <p>
+        <img 
+            src="https://judahstutorials.com/wp-content/uploads/2024/09/ScalingDemo1A-1.png" 
+            alt="ScalingDemo1A"
+            style="width: 121px;"
+        >
+        </p>
+        <figcaption style="font-family: sans-serif; font-size: 75%; max-width: 10em;">
+            Figure 1: (Top)
+            An image of two crossed lines;
+            the same image scaled to 150%.
+            (Bottom)
+            The top figure magnified;
+            each square corresponds
+            to 1 pixel in the top figure.
+        </figcaption>
+    </figure>
 </div>
 <p style="font-size: 130%;font-weight: bold; padding-bottom: 0;">
 Digression: Image Scaling
@@ -61,8 +80,81 @@ for a general discussion of scaling algorithms,
 see <a href="https://www.fxguide.com/fxfeatured/Keeping_Your_Renders_Clean/">Keeping Your Renders Clean</a> at fxguide
 and the Java documentation for
 <a href="https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/java/awt/Image.html">java.awt.Image.</a>
-
 </p>
+<p>
+The easiest way to scale an image
+is by using the <em>getScaledImage</em> method
+in the <em>Image</em> class:
+</p>
+<pre style="margin-top: 0; margin-left: 1em;">getScaledInstance(int width, int height, int hints)</pre>
+<p style="margin-bottom: 0;">
+Where:<br>
+</p>
+<div style="padding-left: 1em;">
+    <p style="margin-top: 0; margin-bottom: 0;">
+    <strong>width</strong>
+    is the width of the image after scaling<br>
+    <strong>height</strong>
+    is the height of the image after scaling<br>
+    <strong>hints</strong>
+    is a bit-wise combination of the following:
+    </p>
+    <ul style="margin-top: 0;">
+        <li>SCALE_DEFAULT: Let the AWT do what it thinks best</li>
+        <li>SCALE_AREA_AVERAGING: Use the averaging-area algorithm</li>
+        <li>SCALE_FAST: Use an algorithm that favors speed over quality</li>
+        <li>SCALE_REPLICATE: Use the averaging-area algorithm</li>
+        <li>SCALE_SMOOTH: Use an algorithm that favors quality over speed</li>
+    </ul>
+</div>
+<p>
+For example:
+</p>
+<pre style="margin-left: 1em;">private Image scale( BufferedImage imageIn, float factor )
+{
+    int     scaledWidth     = (int)(imageIn.getWidth() * factor + .5);
+    int     scaledHeight    = (int)(imageIn.getHeight() * factor + .5);
+    int     hints           = Image.SCALE_SMOOTH;
+    Image   imageOut        = 
+        imageIn.getScaledInstance(scaledWidth, scaledHeight, hints );
+    return imageOut;
+}</pre>
+<img 
+    src="https://judahstutorials.com/wp-content/uploads/2024/09/ScalingDemo2.png"
+    alt="ScalingDemo2"
+    style="float: right; width: 208px;"
+>
+<p>
+Application <em>ScalingDemo2</em> in package <em>...sandbox.ocr</em>
+allows you to play with scale factors.
+At the top of the application window is some text.
+At the bottom of the window
+is a spinner that allows you
+to increase of decrease the scale factor.
+This application performs scaling
+by applying an <em>affine transformation</em>
+directly to the application window.
+Following is an excerpt from the application code
+that performs this operation:
+</p>
+<pre style="margin-left: 1em;">public void paintComponent( Graphics graphics )
+{
+    width = getWidth();
+    height = getHeight();
+    gtx = (Graphics2D)graphics.create();
+    
+    gtx.setColor( bgColor );
+    gtx.fillRect( 0, 0, width, height );
+    
+    applyScale();
+    ...
+}
+private void applyScale()
+{
+    AffineTransform     transform       = new AffineTransform();
+    transform.scale( scaleFactor, scaleFactor );
+    gtx.transform( transform );
+}</pre>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Image_scaling">Image Scaling</a> in Wikipedia</li>
 <li>
