@@ -32,8 +32,8 @@
         </figcaption>
     </figure>
 </div>
-<p style="font-size: 130%;font-weight: bold; padding-bottom: 0;">
-Digression: Image Scaling
+<p id="ImageScaling" style="font-size: 130%;font-weight: bold; padding-bottom: 0;">
+Digression: Image Scaling and Affine Transformations
 </p>
 <p>
 We've already seen that <em>Tess4J</em>
@@ -47,11 +47,11 @@ When we scale an image
 we make it larger or smaller;
 we do this by applying a <em>scale factor,</em>
 a percentage by which
-the inmage size is to be changed.
+the image size is to be changed.
 Scaling can be applied <em>uniformly,</em>
 by applying the same scale factor
-to the width a height of an image,
-or <em>non-uniformly,</em>>
+to the width and height of an image,
+or <em>non-uniformly,</em>
 by changing the width by one scale factor
 and the height by another.
 Scaling can be applied
@@ -70,7 +70,7 @@ A raster is a two-dimensional array of integers
 where each integer determines the color 
 of the corresponding pixel in a picture.
 Since you can't change the size of a pixel,
-scaling-up and image entails adding pixels,
+scaling-up an image entails adding pixels,
 while scaling-down means subtracting pixels.
 Now the question becomes: 
 how do you know which pixels to add or subtract?
@@ -101,9 +101,9 @@ Where:<br>
     </p>
     <ul style="margin-top: 0;">
         <li>SCALE_DEFAULT: Let the AWT do what it thinks best</li>
-        <li>SCALE_AREA_AVERAGING: Use the averaging-area algorithm</li>
+        <li>SCALE_AREA_AVERAGING: Use the area-averaging algorithm</li>
         <li>SCALE_FAST: Use an algorithm that favors speed over quality</li>
-        <li>SCALE_REPLICATE: Use the averaging-area algorithm</li>
+        <li>SCALE_REPLICATE: Use the replicate algorithm</li>
         <li>SCALE_SMOOTH: Use an algorithm that favors quality over speed</li>
     </ul>
 </div>
@@ -130,7 +130,7 @@ allows you to play with scale factors.
 At the top of the application window is some text.
 At the bottom of the window
 is a spinner that allows you
-to increase of decrease the scale factor.
+to increase or decrease the scale factor.
 This application performs scaling
 by applying an <em>affine transformation</em>
 directly to the application window.
@@ -155,6 +155,60 @@ private void applyScale()
     transform.scale( scaleFactor, scaleFactor );
     gtx.transform( transform );
 }</pre>
+<p>
+In the above code,
+<em>new AffineTransform()</em> creates an object that can store a transform.
+The next line adds a scale transform to the object;
+and <em>gtx.transform(transform)</em> adds the transform
+to the graphics context.
+Following this,
+any drawing done with the graphics context
+will have the transform applied.
+</p>
+<img 
+    src="https://judahstutorials.com/wp-content/uploads/2024/09/AffineTransformDemo1.png"
+    alt="ScalingDemo2"
+    style="float: right; width: 245px;"
+>
+<p>
+Affine transforms are an effective and efficient way
+to apply transformations to your geometric data.
+To a transform you can add multiple operations,
+which will be combined into a matrix
+and executed simultaneously
+during the drawing operation.
+The most common operations are
+<em>translation, rotation,</em> and <em>scale.</em>
+To Java documentation for <em>AffineTransform</em>
+also lists <em>flip</em> and <em>shear.</em>
+Application <em>AffineTransformDemo1</em> allows you to observe the effects
+of combining translation, rotation, and scaling operations
+into one transform.
+The code that constructs the transform
+is shown below.
+For more information about the mathematics behind affine transformations
+see 
+<a href="https://www.mathsisfun.com/algebra/matrix-transform.html">
+    Transformations and Matrices
+</a>
+on the MathIsFun website.
+</p>
+<pre style="margin-left: 1em;">private void applyTransforms()
+{
+    // The translation operation first moves the origin of
+    // this component to its center, (width/2,height/2)
+    // then apples the the offsets set by the operator.
+    double              centerXco   = width / 2.0 + xcoTranslate;
+    double              centerYco   = height / 2.0 + ycoTranslate;
+    AffineTransform     transform   = new AffineTransform();
+    transform.translate( centerXco, centerYco );
+    transform.scale( scaleFactor, scaleFactor );
+    transform.rotate( rotateFactor );
+    gtx.transform( transform );
+}</pre>
+<p>
+Additional references:
+</p>
 <ul>
 <li><a href="https://en.wikipedia.org/wiki/Image_scaling">Image Scaling</a> in Wikipedia</li>
 <li>
@@ -174,19 +228,17 @@ private void applyScale()
     <a href="https://blog.idrsolutions.com/image-scaling-in-java/">Image Scaling in Java</a>
     from IDR Solutions
 </li>
+<li>
+    <a href="https://en.wikipedia.org/wiki/Affine_transformation">Affine transformations</a>
+    in Wikipedia
+</li>
+<li>
+    <a href="https://docs.oracle.com/javase/tutorial/2d/advanced/transforming.html">
+		Transforming Shapes, Text, and Images
+	</a>
+    in the Oracle Java tutorial
+</li>
 </ul>
-<p>
-The documentation for <em>Map&lt;K,V&gt;</em> 
-says that two maps are equal if
-"...the two maps represent the same mappings. 
-More formally, two maps m1 and m2 
-represent the same mappings if 
-<span style="font-family: 'Courier New';">m1.entrySet().equals(m2.entrySet())</span>."
-Which leads to a discussion of <em>Sets</em>.
-</p>
-<p>
-The documentation for <em>Set&lt;E&gt;</em> 
-</p>
 </div>
 </body>
 </html>
