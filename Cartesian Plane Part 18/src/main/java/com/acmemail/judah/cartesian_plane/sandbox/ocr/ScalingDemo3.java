@@ -365,11 +365,6 @@ public class ScalingDemo3 extends JPanel
             super.paintComponent( gtx );
             BufferedImage       scaledImage     = scaleImage();
             
-            int         imageWidth  = scaledImage.getWidth();
-            int         imageHeight = scaledImage.getHeight();
-//            Dimension   size        = 
-//                new Dimension( imageWidth, imageHeight );
-//            setPreferredSize( size );
                 
             gtx.drawImage( scaledImage, 0, 0, this );
         }
