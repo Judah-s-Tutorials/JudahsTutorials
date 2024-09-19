@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox.utils;
+package com.acmemail.judah.cartesian_plane.test_utils;
 
 import java.awt.Rectangle;
 import java.awt.geom.Line2D;
@@ -17,9 +17,6 @@ import java.util.Objects;
  * in which every point
  * is the same color.
  * 
- * @author Jack Straub
- */
-/**
  * @author Jack Straub
  */
 /**

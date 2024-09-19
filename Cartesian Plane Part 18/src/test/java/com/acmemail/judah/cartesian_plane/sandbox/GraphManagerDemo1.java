@@ -25,7 +25,7 @@ import com.acmemail.judah.cartesian_plane.components.PButtonGroup;
 import com.acmemail.judah.cartesian_plane.components.PRadioButton;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 import com.acmemail.judah.cartesian_plane.sandbox.utils.ActivityLog;
-import com.acmemail.judah.cartesian_plane.sandbox.utils.LineSegment;
+import com.acmemail.judah.cartesian_plane.test_utils.LineSegment;
 
 public class GraphManagerDemo1
 {

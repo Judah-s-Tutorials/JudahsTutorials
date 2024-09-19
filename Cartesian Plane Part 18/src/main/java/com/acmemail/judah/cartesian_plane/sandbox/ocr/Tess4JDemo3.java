@@ -33,22 +33,15 @@ import net.sourceforge.tess4j.TesseractException;
 
 /**
  * This application incorporates a simple demonstration
- * of scaling in a Swing application.
- * The {@link #paintComponent(Graphics)} method
- * applies a scaling factor under the control of the operator
- * and draws some lines of text,
- * incorporating both alpha and numeric characters.
- * <p>
- * For emphasis,
- * the scaling logic is encapsulated in the {@link #applyScale()} method,
- * which creates a scaling operation
- * and concatenates it with the translation operation
- * that is typically present in the graphics context
- * of a Swing application.
+ * of applying scaling as part of an OCR application
+ * using the Tess4J API.
+ * It's equivalent to Tess4JDemo2, 
+ * but highlights the spaces that Tesseract
+ * uses to format its output.
  * 
  * @author Jack Straub
  * 
- * @see ScalingDemo3
+ * @see Tess4JDemo2
  */
 public class Tess4JDemo3 extends JPanel
 {
@@ -169,7 +162,7 @@ public class Tess4JDemo3 extends JPanel
      */
     private void build()
     {
-        JFrame      frame       = new JFrame( "Scale Demo" );
+        JFrame      frame       = new JFrame( "Tess4J Demo 3" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel      contentPane = new JPanel( new BorderLayout() );
         
@@ -328,7 +321,7 @@ public class Tess4JDemo3 extends JPanel
                 wasControl = isControl;
             }
             if ( isControl )
-                bldr.append( String.format( "0x%d ", (int)next ) );
+                bldr.append( String.format( "0x%X ", (int)next ) );
             else if ( Character.isWhitespace( next ) )
                 bldr.append( " . " );
             else
@@ -349,7 +342,9 @@ public class Tess4JDemo3 extends JPanel
         gtx.setColor( bgColor );
         gtx.fillRect( 0, 0, width, height );
         
-        applyScale();
+        AffineTransform     transform       = new AffineTransform();
+        transform.scale( scaleFactor, scaleFactor );
+        gtx.transform( transform );
         
         font = gtx.getFont();
         frc = gtx.getFontRenderContext();
@@ -361,17 +356,6 @@ public class Tess4JDemo3 extends JPanel
         drawNumericText();
         
         gtx.dispose();
-    }
-    
-    /**
-     * Applies the scaling transform 
-     * to this window's graphics context.
-     */
-    private void applyScale()
-    {
-        AffineTransform     transform       = new AffineTransform();
-        transform.scale( scaleFactor, scaleFactor );
-        gtx.transform( transform );
     }
     
     /**
@@ -418,14 +402,14 @@ public class Tess4JDemo3 extends JPanel
         for ( int inx = 0 ; inx < 5 ; ++inx )
         {
             float   xco     = 10;
+            StringBuilder   bldr    = new StringBuilder();
             for ( float num = -2.123f + inx; num < 3 + inx ; num += 1 )
             {
                 String      text    = String.format( "%7.3f", num );
-                TextLayout  layout  = new TextLayout( text, font, frc );
-                Rectangle2D bounds  = layout.getBounds();
-                layout.draw( gtx, xco, yco );
-                xco += (1.3 * bounds.getWidth());
+                bldr.append( text );
             }
+            TextLayout  layout  = new TextLayout( bldr.toString(), font, frc );
+            layout.draw( gtx, xco, yco );
             currLine++;
             yco += yOffset;
         }

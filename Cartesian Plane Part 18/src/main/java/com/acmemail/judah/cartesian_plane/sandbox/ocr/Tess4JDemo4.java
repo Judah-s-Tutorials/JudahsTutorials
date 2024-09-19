@@ -34,18 +34,18 @@ import net.sourceforge.tess4j.TesseractException;
 
 /**
  * This application incorporates a simple demonstration
- * of scaling in a Swing application.
- * The {@link #paintComponent(Graphics)} method
- * applies a scaling factor under the control of the operator
- * and draws some lines of text,
- * incorporating both alpha and numeric characters.
- * <p>
- * For emphasis,
- * the scaling logic is encapsulated in the {@link #applyScale()} method,
- * which creates a scaling operation
+ * of applying scaling as part of an OCR application
+ * using the Tess4J API.
+ * The paintComponent method
+ * creates a scaling operation
  * and concatenates it with the translation operation
  * that is typically present in the graphics context
  * of a Swing application.
+ * Tess4J attempts to extract the text
+ * from an image of the application window.
+ * The application analyzes the Tess4J output,
+ * logging the numbers that it finds,
+ * and highlighting non-numeric output in red.
  * 
  * @author Jack Straub
  * 

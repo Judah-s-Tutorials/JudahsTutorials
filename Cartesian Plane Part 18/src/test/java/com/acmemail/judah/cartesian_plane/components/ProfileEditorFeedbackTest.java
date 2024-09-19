@@ -25,7 +25,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
-import com.acmemail.judah.cartesian_plane.sandbox.utils.LineSegment;
+import com.acmemail.judah.cartesian_plane.test_utils.LineSegment;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorFeedbackTestGUI;
 
 public class ProfileEditorFeedbackTest
