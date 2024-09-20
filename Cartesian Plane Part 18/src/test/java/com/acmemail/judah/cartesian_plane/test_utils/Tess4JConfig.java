@@ -54,7 +54,7 @@ import net.sourceforge.tess4j.Tesseract;
 public class Tess4JConfig
 {
     /** Tesseract language property name. */
-    public static final String  LANGUAGE_PN     = "tessLanguage";
+    public static final String  LANGUAGE_PN     = "tess4jLanguage";
     /** Tesseract language language default value. */
     public static final String  LANGUAGE_DV     = "eng";
     /** Tesseract segmentation mode property name. */
@@ -83,7 +83,7 @@ public class Tess4JConfig
     public static final String  FONT_NAME_DV    = Font.MONOSPACED;
     
     private static final String dataPath        = 
-        System.getenv( "TESSDATA_PREFIX" );
+        getProperty( "TESSDATA_PREFIX" );
     /** Tesseract recommended language. */
     private static final String  language       = 
         getProperty( LANGUAGE_PN, LANGUAGE_DV );
@@ -207,12 +207,8 @@ public class Tess4JConfig
      */
     private static float getProperty( String propName, float defVal )
     {
-        String  strVal  = null;
         float   val     = defVal;
-        if ( (strVal = System.getProperty( propName )) != null )
-            ;
-        else 
-            strVal = System.getenv( propName );
+        String  strVal  = getProperty( propName );
         if ( strVal != null )
         {
             try
@@ -241,12 +237,8 @@ public class Tess4JConfig
      */
     private static int getProperty( String propName, int defVal )
     {
-        String  strVal  = null;
         int     val     = defVal;
-        if ( (strVal = System.getProperty( propName )) != null )
-            ;
-        else 
-            strVal = System.getenv( propName );
+        String  strVal  = getProperty( propName );
         if ( strVal != null )
         {
             try
@@ -275,14 +267,20 @@ public class Tess4JConfig
      */
     private static String getProperty( String propName, String defVal )
     {
-        String  strVal  = null;
         String  val     = defVal;
-        if ( (strVal = System.getProperty( propName )) != null )
-            ;
-        else 
-            strVal = System.getenv( propName );
+        String  strVal  = getProperty( propName );
         if ( strVal != null )
             val = strVal;
+        return val;
+    }
+    
+    private static String getProperty( String propName )
+    {
+        String  val     = null;
+        if ( (val = System.getProperty( propName )) != null )
+            ;
+        else 
+            val = System.getenv( propName );
         return val;
     }
 }
