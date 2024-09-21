@@ -287,16 +287,16 @@ public class LineSegment
         /** The bounding rectangle. */
         public final Rectangle      rect;
         
-        /** X-coordintate of the point provided by the user. */
-        private final int           originXco;
-        /** Y-coordintate of the point provided by the user. */
-        private final int           originYco;
         /** The BufferedImage provided by the user. */
         private final BufferedImage image;
         /** the width of the given image. */
         private final int           imageWidth;
         /** the height of the given image. */
         private final int           imageHeight;
+        /** X-coordinate of the point provided by the user. */
+        private final int           originXco;
+        /** Y-coordintate of the point provided by the user. */
+        private final int           originYco;
         
         /**
          * Constructor.
@@ -374,7 +374,7 @@ public class LineSegment
             for ( int xco = originXco ; xco <= xEnd ; ++xco )
                 for ( int yco = originYco ; yco <= yEnd ; ++yco )
                 {
-                    int testRGB = image.getRGB( xco, yco ) & 0xffffff;
+                    int testRGB = getRGB( xco, yco );
                     if ( testRGB == rgb )
                     {
                         if ( xco < leftXco )
@@ -410,7 +410,7 @@ public class LineSegment
             while ( xco > 0 && testRGB == rgb )
             {
                 --xco;
-                testRGB = getRGB( xco - 1, yco ) & 0xFFFFFF;
+                testRGB = getRGB( xco - 1, yco );
             }
             return xco;
         }
@@ -515,7 +515,6 @@ public class LineSegment
             int limit   = Math.min( testLimit, imageHeight );
             limit = Math.max( 0, limit );
             return limit;
-            
         }
         
         /**
