@@ -196,26 +196,6 @@ public class LineSegment
     }
     
     /**
-     * Returns true
-     * if the bounding rectangle and color
-     * of this object
-     * are equal to 
-     * the given rectangle and color.
-     * 
-     * @param rect  the given rectangle
-     * @param rgb   the given color
-     * 
-     * @return  
-     *      true if this object is equivalent to
-     *      the given rectangle and color 
-     */
-    public boolean equivalentTo( Rectangle rect, int rgb )
-    {
-        boolean result  = this.rect.equals( rect ) && this.rgb == rgb;
-        return result;
-    }
-    
-    /**
      * Returns a string 
      * describing the color
      * and bounding rectangle
@@ -235,6 +215,26 @@ public class LineSegment
         bldr.append( "height=" ).append( rect.getHeight() ).append( ", " );
         bldr.append( "xcolor=" ).append( strColor );
         return bldr.toString();
+    }
+    
+    /**
+     * Returns true
+     * if the bounding rectangle and color
+     * of this object
+     * are equal to 
+     * the given rectangle and color.
+     * 
+     * @param rect  the given rectangle
+     * @param rgb   the given color
+     * 
+     * @return  
+     *      true if this object is equivalent to
+     *      the given rectangle and color 
+     */
+    public boolean equivalentTo( Rectangle rect, int rgb )
+    {
+        boolean result  = this.rect.equals( rect ) && this.rgb == rgb;
+        return result;
     }
     
     @Override
