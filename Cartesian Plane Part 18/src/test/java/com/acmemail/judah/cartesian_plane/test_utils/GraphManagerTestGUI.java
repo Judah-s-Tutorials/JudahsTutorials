@@ -25,13 +25,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 /**
  * Test GUI for the GraphManager.
  * 
- * width/height = 601
- *     center pixel = 300
- * gridunit = 100
- * gridlines/unit = 1
- *      gridline 100, 200, 400, 500
- * gridlines/unit = 2
- *      gridline 50, 100, 150, 200, 250, 400, 450, 500, 550
+ * 
  * 
  * @author Jack Straub
  */
@@ -45,11 +39,19 @@ public class GraphManagerTestGUI
     /** Profile used in testing. */
     private final Profile       profile;
     
+    /** Width of the image managed via the GraphManager. */
     private final int           imageWidth  = 450;
+    /** Height of the image managed via the GraphManager. */
     private final int           imageHeight = 500;
+    /** Type of the image managed via the GraphManager. */
     private final int           imageType   = BufferedImage.TYPE_INT_RGB;
+    /** Image managed via the GraphManager. */
     private BufferedImage       image       =
         new BufferedImage( imageWidth, imageHeight, imageType );
+    /** 
+     * Bounding rectangle describing the portion area within
+     * the managed image that the GraphManager will draw to.
+     */
     private final Rectangle2D   imageRect   =
         new Rectangle2D.Double( 0, 0, imageWidth, imageHeight );
     /** GraphManager under test. */
@@ -57,6 +59,15 @@ public class GraphManagerTestGUI
     /** Place to draw sample graph. */
     private final JPanel        canvas      = new FBPanel();
     
+    /**
+     * Constructor.
+     * Creates the GraphManager under test.
+     * Displays the feedback window.
+     * 
+     * @param profile   
+     *      the profile to be shared with
+     *      the GraphManager under test
+     */
     public GraphManagerTestGUI( Profile profile )
     {
         this.profile = profile;
@@ -79,7 +90,7 @@ public class GraphManagerTestGUI
      */
     public BufferedImage drawBackground()
     {
-        executeProc( () -> graphMgr.drawBackground() );
+        executeGridProc( () -> graphMgr.drawBackground() );
         return image;
     }
     
@@ -91,7 +102,7 @@ public class GraphManagerTestGUI
      */
     public BufferedImage drawAxes()
     {
-        executeProc( () -> graphMgr.drawAxes() );
+        executeGridProc( () -> graphMgr.drawAxes() );
         return image;
     }
     
@@ -103,7 +114,7 @@ public class GraphManagerTestGUI
      */
     public BufferedImage drawMajorTics()
     {
-        executeProc( () -> graphMgr.drawMajorTics() );
+        executeGridProc( () -> graphMgr.drawMajorTics() );
         return image;
     }
     
@@ -115,7 +126,7 @@ public class GraphManagerTestGUI
      */
     public BufferedImage drawMinorTics()
     {
-        executeProc( () -> graphMgr.drawMinorTics() );
+        executeGridProc( () -> graphMgr.drawMinorTics() );
         return image;
     }
     
@@ -127,7 +138,7 @@ public class GraphManagerTestGUI
      */
     public BufferedImage drawGridLines()
     {
-        executeProc( () -> graphMgr.drawGridLines() );
+        executeGridProc( () -> graphMgr.drawGridLines() );
         return image;
     }
     
@@ -139,7 +150,7 @@ public class GraphManagerTestGUI
      */
     public BufferedImage drawHorizontalLabels()
     {
-        executeProc( () -> graphMgr.drawHorizontalLabels() );
+        executeGridProc( () -> graphMgr.drawHorizontalLabels() );
         return image;
     }
     
@@ -151,7 +162,7 @@ public class GraphManagerTestGUI
      */
     public BufferedImage drawVerticalLabels()
     {
-        executeProc( () -> graphMgr.drawVerticalLabels() );
+        executeGridProc( () -> graphMgr.drawVerticalLabels() );
         return image;
     }
     
@@ -163,7 +174,7 @@ public class GraphManagerTestGUI
      */
     public BufferedImage drawText()
     {
-        executeProc( () -> graphMgr.drawText() );
+        executeGridProc( () -> graphMgr.drawText() );
         return image;
     }
     
@@ -173,14 +184,19 @@ public class GraphManagerTestGUI
      * 
      * @return  the bitmap that the grid manager draws to
      */
-    public void drawAll( Graphics2D gtx, Rectangle2D rect )
+    public BufferedImage drawAll()
     {
-        GUIUtils.schedEDTAndWait( () -> {
-            GraphManager    graph   = new GraphManager( rect, profile );
-            graph.refresh( gtx );
-            graph.drawAll();
-        });
+        executeGridProc( () -> graphMgr.drawAll() );
+        return image;
     }
+//    public void drawAll( Graphics2D gtx, Rectangle2D rect )
+//    {
+//        GUIUtils.schedEDTAndWait( () -> {
+//            GraphManager    graph   = new GraphManager( rect, profile );
+//            graph.refresh( gtx );
+//            graph.drawAll();
+//        });
+//    }
     
     /**
      * Sets the value of the gridUnit property
@@ -252,7 +268,7 @@ public class GraphManagerTestGUI
      * 
      * @param draw   the given value
      */
-    public void setGridFontLabels( boolean draw )
+    public void setGridDrawLabels( boolean draw )
     {
         GraphPropertySet    win = profile.getMainWindow();
         setProperty( a -> win.setFontDraw( (Boolean)a ), draw );
@@ -272,7 +288,10 @@ public class GraphManagerTestGUI
     public boolean getLineHasLength( String propSet )
     {
         LinePropertySet set     = profile.getLinePropertySet( propSet );
-        boolean         draw    = getBoolean( () -> set.hasLength() );
+        assertNotNull( set );
+        Object          val     = getProperty( () -> set.hasLength() );
+        assertTrue( val instanceof Boolean );
+        boolean         draw    = (boolean)val;
         return draw;
     }
     
@@ -360,12 +379,12 @@ public class GraphManagerTestGUI
     }
     
     /**
-     * Executes the given procedure
+     * Executes a given GraphManager task
      * in the context of the EDT.
      * 
-     * @param runner    the given procedure
+     * @param runner    the given task
      */
-    private void executeProc( Runnable runner )
+    private void executeGridProc( Runnable runner )
     {
         GUIUtils.schedEDTAndWait( () -> {
             Graphics2D  gtx     = (Graphics2D)image.getGraphics();
@@ -389,24 +408,9 @@ public class GraphManagerTestGUI
     }
     
     /**
-     * Executes the given Boolean supplier
-     * in the context of the EDT.
-     * 
-     * @param supplier  the given supplier
-     * 
-     * @return  the value returned by the given supplier
-     */
-    private boolean getBoolean( Supplier<Boolean> supplier )
-    {
-        Supplier<Object>    objGetter   = () -> supplier.get();
-        Object              obj         = getProperty( objGetter );
-        assertTrue( obj instanceof Boolean );
-        return (boolean)obj;
-    }
-    
-    /**
      * Executes the given Object supplier
-     * in the context of the EDT.
+     * in the context of the EDT
+     * and returns the result.
      * 
      * @param supplier  the given supplier
      * 

@@ -40,7 +40,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
-class GraphManagerTest
+class GraphManagerTest_orig
 {
     private static final int    defImgWidth      = 300;
     private static final int    defImgHeight     = 400;
@@ -56,6 +56,10 @@ class GraphManagerTest
     private static final String             TIC_MINOR   =
         LinePropertySetTicMinor.class.getSimpleName();
     
+    private static final int    tessPageSegMode =
+        Tess4JConfig.getSegmentationMode();
+    private static final int    tessOCREngMode  =
+        Tess4JConfig.getOCREngineMode();
     private static final float  tessScaleFactor =
         Tess4JConfig.getScaleFactor();
     private static final float  tessFontSize    =
@@ -66,17 +70,43 @@ class GraphManagerTest
     private static final float  tessGPU         = Tess4JConfig.getGPU();
     private static final float  tessLPU         = 2;
     private static final int    tessRGB         = 0x000000;
+    
+    private static final int    testRGB1        = 0x0000FF;
+    private static final int    testRGB2        = testRGB1 << 4;
+    private static final int    testGridRGB1    = testRGB2  << 4;
+    private static final int    testGridRGB2    = testGridRGB1 << 4;
+    private static final Color  testColor1      = new Color( testRGB1 );
+    private static final Color  testColor2      = new Color( testRGB2 );
+    private static final Color  testGridColor1  = new Color( testGridRGB1 );
+    private static final Color  testGridColor2  = new Color( testGridRGB2 );
+    private static final float  testGPU1        = 100;
+    
+    private static final float  testGPU2        = testGPU1 + 20;
+    private static final float  testLPU1        = 2;
+    private static final float  testLPU2        = testLPU1 + 2;
+    private static final float  testLength1     = 20;
+    private static final float  testLength2     = testLength1 + 10;
+    private static final float  testStroke1     = 4;
+    private static final float  testStroke2     = testStroke1 + 2;
 
     private final Tesseract     tesseract       = 
         Tess4JConfig.getTesseract();
     private static final Profile        baseProfile     = new Profile();
     private static final Profile        workingProfile  = new Profile();
     private static GraphManagerTestGUI  testGUI;
+        
+    private float               workingGPU;
+    private Color               workingGridColor;
+    private int                 workingGridRGB;
+    private float               workingLPU;
+    private float               workingStroke;
+    private float               workingLength;
+    private Color               workingColor;
+    private int                 workingRGB;
 
     private BufferedImage       workingImage;
     private Rectangle           workingRect;
-    
-    private TestData            testData        = new TestData();
+    private String              workingLineSet;
     
     @BeforeAll
     public static void beforeAll()
@@ -91,7 +121,7 @@ class GraphManagerTest
     {
         baseProfile.apply();
         workingProfile.reset();
-        testData.initTestData( 0 );
+        initTestParameters( 0 );
     }
 
     @Test
@@ -105,8 +135,8 @@ class GraphManagerTest
     @Test
     public void testGraphManagerProfile()
     {
-        testData.initTestData( 0 );
-        testData.initProfile( AXES );
+        initTestParameters( 0 );
+        initTestData( AXES );
         prepareRectTest();
         GraphManager    test    = new GraphManager( workingProfile );
         Graphics2D      gtx     = workingImage.createGraphics();
@@ -117,8 +147,8 @@ class GraphManagerTest
     @Test
     public void testGraphManagerRectProfile()
     {
-        testData.initTestData( 0 );
-        testData.initProfile( AXES );
+        initTestParameters( 0 );
+        initTestData( AXES );
         prepareRectTest();
         GraphManager    test            = 
             new GraphManager( workingRect, workingProfile );
@@ -139,8 +169,8 @@ class GraphManagerTest
         int             rectHeight      = defImgHeight - rectYco - bottom;
         workingRect = 
             new Rectangle( rectXco, rectYco, rectWidth, rectHeight );
-        int             intFG           = testData.fontRGB;
-//            workingProfile.getMainWindow().getFGColor();
+        int             intFG           = workingColor.getRGB() & 0xFFFFFF;
+            workingProfile.getMainWindow().getFGColor();
         for ( int row = 0 ; row < defImgHeight ; ++row )
             for ( int col = 0 ; col < defImgWidth ; ++col )
                 workingImage.setRGB( col, row, intFG );
@@ -159,8 +189,8 @@ class GraphManagerTest
     @ValueSource( ints= {0,1} )
     public void testDrawBackground( int paramNum )
     {
-        testData.initTestData( paramNum );
-        testData.initProfile( AXES );
+        initTestParameters( paramNum );
+        initTestData( AXES );
         workingImage   = testGUI.drawBackground();
         validateFill();
     }
@@ -169,8 +199,8 @@ class GraphManagerTest
     @ValueSource( ints= {0,1} )
     public void testDrawGridLines( int paramNum  )
     {
-        testData.initTestData( paramNum );
-        testData.initProfile( GRID_LINES );
+        initTestParameters( paramNum );
+        initTestData( GRID_LINES );
         workingImage = testGUI.drawGridLines();
         testVerticalLines();
         testHorizontalLines();
@@ -305,8 +335,8 @@ class GraphManagerTest
     @ValueSource( ints= {0,1} )
     public void testDrawAxes( int paramNum )
     {
-        testData.initTestData( paramNum );
-        testData.initProfile( AXES );
+        initTestParameters( paramNum );
+        initTestData( AXES );
         testDrawAxesInternal( paramNum );
     }
 
@@ -314,8 +344,8 @@ class GraphManagerTest
     @ValueSource( ints= {0,1} )
     public void testDrawMinorTics( int paramNum )
     {
-        testData.initTestData( paramNum );
-        testData.initProfile( TIC_MINOR );
+        initTestParameters( paramNum );
+        initTestData( TIC_MINOR );
         workingImage = testGUI.drawMinorTics();
         testVerticalLines();
         testHorizontalLines();
@@ -325,7 +355,7 @@ class GraphManagerTest
     @ValueSource( ints= {0,1} )
     public void testDrawMajorTics( int paramNum )
     {
-        testData.initProfile( TIC_MAJOR );
+        initTestData( TIC_MAJOR );
         workingImage = testGUI.drawMajorTics();
         testVerticalLines();
         testHorizontalLines();
@@ -385,8 +415,8 @@ class GraphManagerTest
     private void 
     testNoLines( String propSet, Supplier<BufferedImage> getter )
     {
-        testData.initTestData( 0 );
-        testData.initProfile( propSet );
+        initTestParameters( 0 );
+        initTestData( propSet );
         testGUI.setLineDraw( propSet, false );
         workingImage = getter.get();
         
@@ -400,7 +430,7 @@ class GraphManagerTest
             int yco     = (int)line.getY1();
             int actRGB  = 
                 workingImage.getRGB( xco, yco ) & 0xffffff;
-            assertEquals( testData.gridRGB, actRGB );
+            assertEquals( workingGridRGB, actRGB );
         }
     }
     
@@ -411,7 +441,7 @@ class GraphManagerTest
         for ( Line2D line : lineGen )
         {
             LineSegment expSeg  = 
-                LineSegment.ofVertical( line, testData.stroke, testData.lineRGB );
+                LineSegment.ofVertical( line, workingStroke, workingRGB );
             LineSegment actSeg  = 
                 LineSegment.of( line.getP1(), workingImage );
             assertEquals( expSeg, actSeg );
@@ -425,7 +455,7 @@ class GraphManagerTest
         for ( Line2D line : lineGen )
         {
             LineSegment expSeg  = 
-                LineSegment.ofHorizontal( line, testData.stroke, testData.lineRGB );
+                LineSegment.ofHorizontal( line, workingStroke, workingRGB );
             LineSegment actSeg  = 
                 LineSegment.of( line.getP1(), workingImage );
             assertEquals( expSeg, actSeg );
@@ -469,15 +499,62 @@ class GraphManagerTest
         boolean             result  = hasLabel( rect );
         return result;
     }
+
+    private void initTestParameters( int num )
+    {
+        if ( num == 0 )
+        {
+            workingGPU = testGPU1;
+            workingGridColor = testGridColor1;
+            workingGridRGB = testGridRGB1;
+            workingLPU = testLPU1;
+            workingStroke = testStroke1;
+            workingLength = testLength1;
+            workingColor = testColor1;
+            workingRGB = testRGB1;
+        }
+        else
+        {
+            workingGPU = testGPU2;
+            workingGridColor = testGridColor2;
+            workingGridRGB = testGridRGB2;
+            workingGridColor = testGridColor2;
+            workingGridRGB = testGridRGB2;
+            workingLPU = testLPU2;
+            workingStroke = testStroke2;
+            workingLength = testLength2;
+            workingColor = testColor2;
+            workingRGB = testRGB2;
+        }
+    }
+    
+    /**
+     * 
+     * Always sets "draw" property to true.
+     * @param propSet
+     */
+    private void initTestData( String propSet )
+    {
+        workingLineSet = propSet;
+        testGUI.setGridUnit( workingGPU );
+        testGUI.setGridColor( workingGridColor );
+        testGUI.setLineSpacing( propSet, workingLPU );
+        testGUI.setLineStroke( propSet, workingStroke );
+        testGUI.setLineLength( propSet, workingLength );
+        testGUI.setLineColor( propSet, workingColor );
+        testGUI.setLineDraw( propSet, true );
+    }
     
     private void initTessTestData()
     {
-        testData.initProfile( TIC_MAJOR );
+        initTestData( TIC_MAJOR );
         testGUI.setGridFontSize( tessFontSize );
         testGUI.setGridFontName( tessFontName );
         testGUI.setGridUnit( tessGPU );
         testGUI.setGridFontRGB( tessRGB );
         testGUI.setLineSpacing( TIC_MAJOR, tessLPU );
+        tesseract.setPageSegMode( tessPageSegMode );
+        tesseract.setOcrEngineMode( tessOCREngMode );
     }
     
     /**
@@ -497,9 +574,9 @@ class GraphManagerTest
                 int rgb = workingImage.getRGB( col, row ) & 0xFFFFFF;
                 String  msg = "col=" + col + ",row=" + row;
                 if ( rect.contains( col, row  ) )
-                    assertEquals( testData.gridRGB, rgb, msg );
+                    assertEquals( workingGridRGB, rgb, msg );
                 else
-                    assertNotEquals( testData.gridRGB, rgb, msg );
+                    assertNotEquals( workingGridRGB, rgb, msg );
             }
     }
     
@@ -518,8 +595,8 @@ class GraphManagerTest
     
     private void testDrawAxesInternal( int paramNum )
     {
-        testData.initTestData( paramNum );
-        testData.initProfile( AXES );
+        initTestParameters( paramNum );
+        initTestData( AXES );
         workingImage                    = testGUI.drawAxes();
         Rectangle2D rect                = getBoundingRectangle();
         Iterator<Line2D>    iter        = 
@@ -539,9 +616,9 @@ class GraphManagerTest
             expYAxis = line1;
         }
         LineSegment         expSegX = 
-            LineSegment.ofHorizontal( expXAxis, testData.stroke, testData.lineRGB );
+            LineSegment.ofHorizontal( expXAxis, workingStroke, workingRGB );
         LineSegment         expSegY = 
-            LineSegment.ofVertical( expYAxis, testData.stroke, testData.lineRGB );
+            LineSegment.ofVertical( expYAxis, workingStroke, workingRGB );
         LineSegment         actSegX = 
             LineSegment.of( expXAxis.getP1(), workingImage );
         LineSegment         actSegY = 
@@ -555,12 +632,12 @@ class GraphManagerTest
         float           length  = workingImage.getHeight();
         List<Float>     list    = new ArrayList<>();
         float           half    = length / 2;
-        float           spacing = testData.gpu / testData.lpu;
+        float           spacing = workingGPU / workingLPU;
         float           start   = half;
 
         int             xier    = 1;
         for ( float mark = start - spacing ; mark > 0 ; mark -= spacing )
-            list.add( 0, xier++ / testData.lpu );
+            list.add( 0, xier++ / workingLPU );
 
         xier = -1;
         for ( 
@@ -568,7 +645,7 @@ class GraphManagerTest
             mark < length ; 
             mark += spacing 
         )
-            list.add( xier-- / testData.lpu );
+            list.add( xier-- / workingLPU );
         return list;
     }
     
@@ -577,12 +654,12 @@ class GraphManagerTest
         float           length  = workingImage.getWidth();
         List<Float>     list    = new ArrayList<>();
         float           half    = length / 2;
-        float           spacing = testData.gpu / testData.lpu;
+        float           spacing = workingGPU / workingLPU;
         float           start   = half;
 
         int             xier    = -1;
         for ( float mark = start - spacing ; mark > 0 ; mark -= spacing )
-            list.add( 0, xier-- / testData.lpu );
+            list.add( 0, xier-- / workingLPU );
 
         xier = 1;
         for ( 
@@ -590,7 +667,7 @@ class GraphManagerTest
             mark < length ; 
             mark += spacing 
         )
-            list.add( xier++ / testData.lpu );
+            list.add( xier++ / workingLPU );
         return list;
     }
     
@@ -650,13 +727,13 @@ class GraphManagerTest
    
     private LineGenerator getLineGenerator( int orientation )
     {
-        boolean hasLength   = testGUI.getLineHasLength( testData.lineSet );
-        float   length      = hasLength ? testData.length : -1;
+        boolean hasLength   = testGUI.getLineHasLength( workingLineSet );
+        float   length      = hasLength ? workingLength : -1;
         
         LineGenerator   lineGen = new LineGenerator( 
             getBoundingRectangle(), 
-            testData.gpu, 
-            testData.lpu, 
+            workingGPU, 
+            workingLPU, 
             length, 
             orientation
         );
@@ -670,65 +747,5 @@ class GraphManagerTest
         Rectangle2D rect    = 
             new Rectangle2D.Double( 0, 0, width, height );
         return rect;
-    }
-    
-    private class TestData
-    {
-        private static final float  GPU         = 100;
-        private static final int    FONT_RGB    = 0x0000FF;
-        private static final int    GRID_RGB    = 0xEEEEEE;
-        private static final float  LPU         = 2;
-        private static final float  LENGTH      = 20;
-        private static final float  STROKE      = 4;
-        private static final int    LINE_RGB    = 0x00FFFF;
-        
-        public  String    lineSet;
-        public  float     gpu;
-        public  int       fontRGB;
-        public  int       gridRGB;
-        public  Color     gridColor;
-        public  float     lpu;
-        public  float     length;
-        public  float     stroke;
-        public  int       lineRGB;
-        public  Color     lineColor;
-        
-        public void initTestData( int dataSet )
-        {
-            fontRGB = FONT_RGB;
-            gridRGB = GRID_RGB;
-            gridColor = new Color( gridRGB );
-            gpu = GPU;
-            lpu = LPU;
-            length = LENGTH;
-            stroke = STROKE;
-            lineRGB = LINE_RGB;
-            lineColor = new Color( lineRGB );
-            if ( dataSet == 2 )
-            {
-                fontRGB <<= 4;
-                gridRGB <<= 4;
-                gridColor = new Color( gridRGB );
-                gpu += 20;
-                lpu += 2;
-                length += 10;
-                stroke += 2;
-                lineRGB <<= 4;
-                lineColor = new Color( lineRGB );
-            }
-        }
-        
-        public void initProfile( String propSet )
-        {
-            lineSet = propSet;
-            testGUI.setGridUnit( gpu );
-            testGUI.setGridColor( gridColor );
-            testGUI.setGridFontRGB( fontRGB );
-            testGUI.setLineSpacing( propSet, lpu );
-            testGUI.setLineStroke( propSet, stroke );
-            testGUI.setLineLength( propSet, length );
-            testGUI.setLineColor( propSet, lineColor );
-            testGUI.setLineDraw( propSet, true );
-        }
     }
 }
