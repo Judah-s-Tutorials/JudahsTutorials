@@ -40,12 +40,12 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
-class GraphManagerTest
+public class GraphManagerTest
 {
     private static final int    defImgWidth      = 300;
     private static final int    defImgHeight     = 400;
-    private static final int    defImgType       = BufferedImage.TYPE_INT_RGB;
-
+    private static final int    defImgType       = 
+        BufferedImage.TYPE_INT_RGB;
     
     private static final String             AXES        =
         LinePropertySetAxes.class.getSimpleName();
@@ -105,7 +105,6 @@ class GraphManagerTest
     @Test
     public void testGraphManagerProfile()
     {
-        testData.initTestData( 0 );
         testData.initProfile( AXES );
         prepareRectTest();
         GraphManager    test    = new GraphManager( workingProfile );
@@ -117,7 +116,6 @@ class GraphManagerTest
     @Test
     public void testGraphManagerRectProfile()
     {
-        testData.initTestData( 0 );
         testData.initProfile( AXES );
         prepareRectTest();
         GraphManager    test            = 
@@ -126,34 +124,6 @@ class GraphManagerTest
         test.refresh( gtx );
         validateFill( workingRect );
     }
-    
-    private void prepareRectTest()
-    {
-        workingImage = 
-            new BufferedImage( defImgWidth, defImgHeight, defImgType );
-        int             rectXco         = 10;
-        int             rectYco         = rectXco + 5;
-        int             right           = rectYco + 5;
-        int             bottom          = right + 5;
-        int             rectWidth       = defImgWidth - rectXco - right;
-        int             rectHeight      = defImgHeight - rectYco - bottom;
-        workingRect = 
-            new Rectangle( rectXco, rectYco, rectWidth, rectHeight );
-        int             intFG           = testData.fontRGB;
-//            workingProfile.getMainWindow().getFGColor();
-        for ( int row = 0 ; row < defImgHeight ; ++row )
-            for ( int col = 0 ; col < defImgWidth ; ++col )
-                workingImage.setRGB( col, row, intFG );
-    }
-
-    // There's no good test for refresh, other than to follow it
-    // with some other action and make sure that action succeeds.
-    // Which is what happens when we execute every other test.
-//    @Test
-//    public void testRefresh()
-//    {
-//        fail("Not yet implemented");
-//    }
 
     @ParameterizedTest
     @ValueSource( ints= {0,1} )
@@ -184,7 +154,84 @@ class GraphManagerTest
         assertTrue( hasHorizontalLabel() );
         assertTrue( hasVerticalLabel() );
     }
+
+    @Test
+    public void testDrawHorizontalLabels()
+    {
+        initTessTestData();
+        workingImage = testGUI.drawHorizontalLabels();
+        Utils.pause( 250 );
+        
+        List<Float>     expValues   = getExpectedHorizontalLabels();
+        List<Float>     actValues   = getLabels();
+        assertEquals( expValues, actValues );
+    }
     
+    /**
+     * Validate the GraphManager.drawAll method.
+     * See line property requirements at {@link #drawAllHasLine(LinePropertySet)}.
+     * See text property initialization at {@link #initTessTestData()}.
+     */
+    @Test
+    public void testDrawAll()
+    {
+        drawAllConfigProfile();        
+        workingImage = testGUI.drawAll();
+        Stream.of( AXES, GRID_LINES, TIC_MAJOR, TIC_MINOR )
+            .map( s -> workingProfile.getLinePropertySet( s ) )
+            .forEach( s -> assertTrue( drawAllHasLine( s ) ) );
+        
+        initTessTestData();
+        assertTrue( hasVerticalLabel() );
+        assertTrue( hasHorizontalLabel() );
+    }
+    
+    /**
+     * Create a BufferedImage and a rectangle
+     * with bounds that fall inside the image
+     * but leave an empty margin on all sides.
+     * No two margins are the same size.
+     * The image is initialized to the foreground
+     * color in the test data.
+     * <p>
+     * Postcondition:
+     * {@link #workingImage} points to the created image.
+     * <p>
+     * Postcondition:
+     * {@link #workingRect} points to the rectangle.
+     */
+    private void prepareRectTest()
+    {
+        workingImage = 
+            new BufferedImage( defImgWidth, defImgHeight, defImgType );
+        int             rectXco         = 10;
+        int             rectYco         = rectXco + 5;
+        int             right           = rectYco + 5;
+        int             bottom          = right + 5;
+        int             rectWidth       = defImgWidth - rectXco - right;
+        int             rectHeight      = defImgHeight - rectYco - bottom;
+        workingRect = 
+            new Rectangle( rectXco, rectYco, rectWidth, rectHeight );
+        int             intFG           = testData.fontRGB;
+        for ( int row = 0 ; row < defImgHeight ; ++row )
+            for ( int col = 0 ; col < defImgWidth ; ++col )
+                workingImage.setRGB( col, row, intFG );
+    }
+    
+    /**
+     * Verifies that text has been drawn in the working image
+     * at least partly inside the given bounding rectangle.
+     * Verification passes if the rectangle
+     * within the working image
+     * contains at least one pixel
+     * with the value {@link #tessRGB}.
+     * 
+     * @param rect  the given rectangle
+     * 
+     * @return  true 
+     *      if the given image has text 
+     *      within the bounds of the given rectangle
+     */
     private boolean hasLabel( Rectangle rect )
     {
         boolean result  = false;
@@ -199,23 +246,35 @@ class GraphManagerTest
             }
         return result;
     }
-
-    @Test
-    public void testDrawHorizontalLabels()
-    {
-        initTessTestData();
-        workingImage = testGUI.drawHorizontalLabels();
-        Utils.pause( 250 );
-        
-        List<Float>     expValues   = getExpectedHorizontalLabels();
-        List<Float>     actValues   = getLabels();
-        assertEquals( expValues, actValues );
-    }
     
-    @Test
-    public void testDrawAll()
+    /**
+     * Configure the working profile
+     * in anticipation of 
+     * testing the drawAll method.
+     * See profile property requirements
+     * at {@link #drawAllHasLine(LinePropertySet)}.
+     */
+    private void drawAllConfigProfile()
     {
-        initTessTestData();
+        final int   strokeAll   = 3;
+        final int   ticMinorLen = 10;
+        final int   ticMajorLen = 2 * ticMinorLen;
+        final int   ticMinorLPU = 4;
+        final int   ticMajorLPU = 2;
+        final int   gridLineLPU = 1;
+        final int   gpu         = 100;
+        
+        workingImage = testGUI.getImage();
+        int     gridWidth   = workingImage.getWidth();
+        int     gridHeight  = workingImage.getHeight();
+        
+        assertTrue( gridWidth > 2 * gpu );
+        assertTrue( gridHeight > 2 * gpu );
+        assertTrue( ticMajorLen < gridWidth / 4 );
+        assertTrue( ticMajorLen < gridHeight / 4 );
+        assertTrue( ticMajorLen >= 2 * ticMinorLen );
+        assertTrue( (gpu / ticMinorLPU) > strokeAll );
+        
         LinePropertySet axesSet         = 
             workingProfile.getLinePropertySet( AXES );
         LinePropertySet gridLinesSet    = 
@@ -226,25 +285,21 @@ class GraphManagerTest
             workingProfile.getLinePropertySet( TIC_MINOR );
         
         Stream.of( axesSet, gridLinesSet, ticMajorSet, ticMinorSet )
-            .peek( s -> s.setStroke( 3 ) )
-            .forEach( s -> s.setLength( 20 ) );
+            .forEach( s -> s.setStroke( strokeAll ) );
         
-        gridLinesSet.setSpacing( 1 );
-        ticMajorSet.setSpacing( 2 );
-        ticMinorSet.setSpacing( 4 );
-        
-        workingImage = testGUI.drawAll();
-//            new BufferedImage( rectWidth, rectHeight, defImgType );
-//        testGUI.drawAll( workingImage.createGraphics(), rect );
-//        showImageDialog();
-        Stream.of( axesSet, gridLinesSet, ticMajorSet, ticMinorSet )
-            .forEach( s -> assertTrue( hasLine( s ) ) );
-        assertTrue( hasVerticalLabel() );
-        assertTrue( hasHorizontalLabel() );
+        ticMinorSet.setSpacing( ticMinorLPU );
+        ticMajorSet.setSpacing( ticMajorLPU );
+        gridLinesSet.setSpacing( gridLineLPU );
+        ticMajorSet.setLength( ticMajorLen );
+        ticMinorSet.setLength( ticMinorLen );
+        workingProfile.setGridUnit( gpu );
     }
-    
+
     /**
-     * 
+     * Return true if,
+     * given the prevailing test parameters,
+     * the working image contains 
+     * horizontal and vertical lines.
      * <p>
      * Preconditions:
      * </p>
@@ -255,9 +310,9 @@ class GraphManagerTest
      * <li>tic minor spacing = 4</li>
      * <li>stroke for all lines &lt; 5</li>
      * <li>stroke for all lines &gt; 1</li>
-     * <li>length for all lines &gt; 16</li>
-     * <li>length for tic marks < grid height / 2</li>
-     * <li>length for tic marks < grid width / 2</li>
+     * <li>tic major length &lt; grid width / 2</li>
+     * <li>tic major length &lt; grid height / 2</li>
+     * <li>tic major length gt;= minor tic length * 2</li>
      * <li>grid width &gt; 2 * grid unit</li>
      * <li>grid height &gt; 2 * grid unit</li>
      * </ol>
@@ -265,7 +320,7 @@ class GraphManagerTest
      * @param propSet
      * @return
      */
-    private boolean hasLine( LinePropertySet propSet )
+    private boolean drawAllHasLine( LinePropertySet propSet )
     {
         float   gridUnit    = workingProfile.getGridUnit();
         int     width       = workingImage.getWidth();
@@ -275,7 +330,7 @@ class GraphManagerTest
         float   lineOffset  = propSet.hasSpacing() ?
            gridUnit / propSet.getSpacing() : 0;
         float   testOffset  = propSet.hasLength() ? 
-            propSet.getLength() / 2 - 1 : 90;
+            propSet.getLength() / 2 - 1 : gridUnit * .6667f;
         Color   color       = propSet.getColor();
         int     expColor    = color.getRGB() & 0xffffff;
         int     vXco        = (int)(yAxisXco + lineOffset);
@@ -385,7 +440,6 @@ class GraphManagerTest
     private void 
     testNoLines( String propSet, Supplier<BufferedImage> getter )
     {
-        testData.initTestData( 0 );
         testData.initProfile( propSet );
         testGUI.setLineDraw( propSet, false );
         workingImage = getter.get();
@@ -424,8 +478,10 @@ class GraphManagerTest
             getLineGenerator( LineGenerator.HORIZONTAL );
         for ( Line2D line : lineGen )
         {
+            float   stroke  = testData.stroke;
+            int     rgb     = testData.lineRGB;
             LineSegment expSeg  = 
-                LineSegment.ofHorizontal( line, testData.stroke, testData.lineRGB );
+                LineSegment.ofHorizontal( line, stroke, rgb );
             LineSegment actSeg  = 
                 LineSegment.of( line.getP1(), workingImage );
             assertEquals( expSeg, actSeg );
@@ -672,15 +728,15 @@ class GraphManagerTest
         return rect;
     }
     
-    private class TestData
+    private static class TestData
     {
         private static final float  GPU         = 100;
-        private static final int    FONT_RGB    = 0x0000FF;
+        private static final int    FONT_RGB    = 0x000008;
         private static final int    GRID_RGB    = 0xEEEEEE;
         private static final float  LPU         = 2;
         private static final float  LENGTH      = 20;
         private static final float  STROKE      = 4;
-        private static final int    LINE_RGB    = 0x00FFFF;
+        private static final int    LINE_RGB    = 0x00000F;
         
         public  String    lineSet;
         public  float     gpu;
@@ -704,16 +760,16 @@ class GraphManagerTest
             stroke = STROKE;
             lineRGB = LINE_RGB;
             lineColor = new Color( lineRGB );
-            if ( dataSet == 2 )
+            if ( dataSet == 1 )
             {
-                fontRGB <<= 4;
-                gridRGB <<= 4;
+                fontRGB = (fontRGB << 2) & 0xFFFFFF;
+                gridRGB = (gridRGB << 2) & 0xFFFFFF;
                 gridColor = new Color( gridRGB );
                 gpu += 20;
                 lpu += 2;
                 length += 10;
                 stroke += 2;
-                lineRGB <<= 4;
+                lineRGB = (lineRGB << 2) & 0xFFFFFF;
                 lineColor = new Color( lineRGB );
             }
         }

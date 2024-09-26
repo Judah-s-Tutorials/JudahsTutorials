@@ -40,9 +40,9 @@ public class GraphManagerTestGUI
     private final Profile       profile;
     
     /** Width of the image managed via the GraphManager. */
-    private final int           imageWidth  = 450;
+    private final int           imageWidth  = 650;
     /** Height of the image managed via the GraphManager. */
-    private final int           imageHeight = 500;
+    private final int           imageHeight = 600;
     /** Type of the image managed via the GraphManager. */
     private final int           imageType   = BufferedImage.TYPE_INT_RGB;
     /** Image managed via the GraphManager. */
@@ -80,6 +80,17 @@ public class GraphManagerTestGUI
         frame.setContentPane( contentPane );
         frame.pack();
         frame.setVisible( true );
+    }
+    
+    /**
+     * Gets the BufferedImage that
+     * the GraphManager under test draws to.
+     * 
+     * @return the image the GraphManager under test draws to
+     */
+    public BufferedImage getImage()
+    {
+        return image;
     }
     
     /**
