@@ -250,9 +250,14 @@ public class GraphManagerTest
     /**
      * Configure the working profile
      * in anticipation of 
-     * testing the drawAll method.
+     * testing the drawAll method
+     * against the encapsulated LinePropertySets.
      * See profile property requirements
      * at {@link #drawAllHasLine(LinePropertySet)}.
+     * <p>
+     * This method does not configure the GraphPopertySet
+     * for testing against text.
+     * See {@link #initTessTestData()}.
      */
     private void drawAllConfigProfile()
     {
@@ -462,10 +467,12 @@ public class GraphManagerTest
     {
         LineGenerator   lineGen     = 
             getLineGenerator( LineGenerator.VERTICAL );
+        float   testStroke  = testData.stroke;
+        int     testRGB     = testData.lineRGB;
         for ( Line2D line : lineGen )
         {
             LineSegment expSeg  = 
-                LineSegment.ofVertical( line, testData.stroke, testData.lineRGB );
+                LineSegment.ofVertical( line, testStroke, testRGB );
             LineSegment actSeg  = 
                 LineSegment.of( line.getP1(), workingImage );
             assertEquals( expSeg, actSeg );
@@ -502,7 +509,6 @@ public class GraphManagerTest
         int         yco     = (int)(line.getY1() - testHeight / 2);
         Rectangle   rect    = 
            new Rectangle( xco, yco, testWidth, testHeight );
-//        showRectangle( rect );
         boolean             result  = hasLabel( rect );
         return result;
     }
@@ -514,14 +520,13 @@ public class GraphManagerTest
         Iterator<Line2D>    iter    = lineGen.iterator();
         assertTrue( iter.hasNext() );
         
-        int         testWidth   = 20;
-        int         testHeight  = 20;
+        int         testWidth   = (int)(testData.gpu / 2);
+        int         testHeight  = testWidth;
         Line2D      line    = iter.next();
         int         xco     = (int)line.getX1() - testWidth / 2;
         int         yco     = (int)line.getY2();
         Rectangle   rect    = 
            new Rectangle( xco, yco, testWidth, testHeight );
-//        showRectangle( rect );
         boolean             result  = hasLabel( rect );
         return result;
     }

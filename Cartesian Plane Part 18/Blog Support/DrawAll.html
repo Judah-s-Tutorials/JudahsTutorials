@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>drawAll Test Strategy</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  
+    style="font-weight: bold; padding-left: .25em;"
+    id="DrawAllIllustration"
+>
+<figure style="margin-left: 0; font-family: 'Courier New';">
+<div style="border: 1px solid black; padding: .5em; background-color: #f6f6f6;">
+<img 
+    style="float: right; margin-left: .25em; width: 200px; margin-top: 1em; margin-right: 1em;"
+    src="https://judahstutorials.com/wp-content/uploads/2024/09/drawAllConfigProfile.png" 
+    alt="drawAllFigure"
+>
+<p style="margin-top: 0; margin-bottom:0;">Given:<br>
+<p style="margin-top:0; padding-left: 2em;">
+    validating major tic marks<br>
+    x-axis y-coordinate = 300<br>
+    y-axis x-coordinate = 200<br>
+    major tic length = 20<br>
+    major tic lpu = 2<br>
+    grid unit (GPU) = 100
+
+</p>
+<p>
+Expected: there is a vertical tic mark 50 pixels to the right 
+of the y-axis (y-axis + GPU ÷ lpu = 200 + 100 ÷ 2 = 250).
+</p>
+<p>
+Expected: the vertical tic mark extends 10 pixels above the 
+x-axis (y=290) and 10 pixels below the x-axis (y=310).
+</p>
+<p style="margin-bottom: 0;">
+Expected: there should be a pixel with a value equal to the 
+current line color with x-coordinate = 250, and y-coordinate =
+281 (x-axis - length ÷ 2 + 1).
+</p>
+</div>
+<figcaption style="font-family: 'Arial Narrow'; text-align:center; font-size: 90%;">
+Test <em>drawAll</em> Strategy, Illustration
+</figcaption>
+</figure>
+</div>
+</body>
+</html>
