@@ -367,7 +367,7 @@ public class GraphManagerTest
     {
         testData.initTestData( paramNum );
         testData.initProfile( AXES );
-        testDrawAxesInternal( paramNum );
+        testDrawAxesInternal();
     }
 
     @ParameterizedTest
@@ -577,10 +577,8 @@ public class GraphManagerTest
         validateFill( rect );
     }
     
-    private void testDrawAxesInternal( int paramNum )
+    private void testDrawAxesInternal()
     {
-        testData.initTestData( paramNum );
-        testData.initProfile( AXES );
         workingImage                    = testGUI.drawAxes();
         Rectangle2D rect                = getBoundingRectangle();
         Iterator<Line2D>    iter        = 
@@ -599,10 +597,13 @@ public class GraphManagerTest
             expXAxis = line2;
             expYAxis = line1;
         }
+        
+        float   stroke  = testData.stroke;
+        int     rgb     = testData.lineRGB;
         LineSegment         expSegX = 
-            LineSegment.ofHorizontal( expXAxis, testData.stroke, testData.lineRGB );
+            LineSegment.ofHorizontal( expXAxis, stroke, rgb );
         LineSegment         expSegY = 
-            LineSegment.ofVertical( expYAxis, testData.stroke, testData.lineRGB );
+            LineSegment.ofVertical( expYAxis, stroke, rgb );
         LineSegment         actSegX = 
             LineSegment.of( expXAxis.getP1(), workingImage );
         LineSegment         actSegY = 

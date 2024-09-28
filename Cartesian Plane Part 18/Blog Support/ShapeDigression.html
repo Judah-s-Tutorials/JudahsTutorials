@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shape Interface</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  
+    style="padding-left: .25em; background-color: #EEE8AA; padding: .5em;"
+    id="ShapeIllustration"
+>
+<div style="float: right; padding: .5em;">
+<img 
+    style="float: right; margin-left: .25em; width: 100px; margin-top: 1em; margin-right: 1em;"
+    src="https://judahstutorials.com/wp-content/uploads/2024/09/ShapeDemo2.png" 
+    alt="Shape Illustration 2"
+>
+<img 
+    style="float: right; margin-left: .25em; width: 100px; margin-top: 1em; margin-right: 1em;"
+    src="https://judahstutorials.com/wp-content/uploads/2024/09/ShapeDemo1.png" 
+    alt="Shape Illustration 1"
+>
+</div>
+<p style="font-size: 120%; font-family: sans-serif; font-weight: bold; margin-bottom: 0;">
+Digression: The Shape Interface
+<p style="margin-top: 0;">
+The <em>Shape</em> interface
+allows you to determine the boundaries
+of a geometric shape.
+Classes that implement <em>Shape</em> include
+<em>Rectangle2D, Ellipse2D, Arc2D,</em> and <em>Polygon</em>.
+The application <em>ShapeDemo</em> 
+from the project sandbox provides an example
+of its use.
+The application window displays an ellipse
+and an irregular polygon.
+When you press the "Fill Exterior" button
+at the bottom of the window
+everything <em>outside</em> the two figures
+is filled with a new color.
+The relevant code looks like this:
+</p>
+<pre style="margin-left: 2em">private static class DemoPanel extends JPanel
+{
+    private final Shape         shape1;
+    private final Shape         shape2;
+    // ...
+    public DemoPanel()
+    {
+        shape1 = getPolygon();
+        shape2 = getEllipse();
+        // ...
+    }
+    // ...
+    public void fillExterior()
+    {
+        int rgb = extFill.getRGB() & 0xffffff;
+        for ( int row = 0 ; row &lt; imageHeight ; ++row )
+            for ( int col = 0 ; col &lt; imageWidth ; ++col )
+                if ( !shape1.contains( col, row ) && 
+                    !shape2.contains( col, row )
+                )
+                    image.setRGB( col, row, rgb );
+    }
+}</pre>
+
+</div>
+</body>
+</html>
