@@ -14,6 +14,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -185,6 +186,98 @@ public class GraphManagerTest
         assertTrue( hasVerticalLabel() );
         assertTrue( hasHorizontalLabel() );
     }
+
+    @Test
+    public void testDrawVerticalLabels()
+    {
+        initTessTestData();
+        workingImage = testGUI.drawVerticalLabels();
+        
+        List<Float>     expValues   = getExpectedVerticalLabels();
+        List<Float>     actValues   = getLabels();
+        assertEquals( expValues, actValues );
+    }
+
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawAxes( int paramNum )
+    {
+        testData.initTestData( paramNum );
+        testData.initProfile( AXES );
+        testDrawAxesInternal();
+    }
+
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawMinorTics( int paramNum )
+    {
+        testData.initTestData( paramNum );
+        testData.initProfile( TIC_MINOR );
+        workingImage = testGUI.drawMinorTics();
+        testVerticalLines();
+        testHorizontalLines();
+    }
+
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawMajorTics( int paramNum )
+    {
+        testData.initProfile( TIC_MAJOR );
+        workingImage = testGUI.drawMajorTics();
+        testVerticalLines();
+        testHorizontalLines();
+    }
+    
+    @Test
+    public void testNoGridLines()
+    {
+        testNoLines( GRID_LINES, testGUI::drawGridLines );
+    }
+    
+    @Test
+    public void testNoMajorTics()
+    {
+        testNoLines( TIC_MAJOR, testGUI::drawMajorTics );
+    }
+    
+    @Test
+    public void testNoMinorTics()
+    {
+        testNoLines( TIC_MINOR, testGUI::drawMinorTics );
+    }
+    
+    @Test
+    public void testNoLabels()
+    {
+        initTessTestData();
+        testGUI.setGridDrawLabels( false );
+        workingImage = testGUI.drawVerticalLabels();
+        Utils.pause( 250 );
+        List<Float>     actValues   = getLabels();
+        assertTrue( actValues.isEmpty() );
+        
+        workingImage = testGUI.drawHorizontalLabels();
+        Utils.pause( 250 );
+        actValues = getLabels();
+        assertTrue( actValues.isEmpty() );
+    }
+    
+    @Test
+    public void testResetProfile()
+    {
+        String              propSetName = TIC_MAJOR;
+        LinePropertySet     propSet     = 
+            workingProfile.getLinePropertySet( propSetName );
+        float               origStroke  = propSet.getStroke();
+        float               newStroke   = origStroke + 5;
+        testGUI.setLineStroke( propSetName, newStroke );
+        float               actStroke   = propSet.getStroke();
+        assertEquals( newStroke, actStroke );
+            
+        testGUI.invokeResetProfile();
+        actStroke = propSet.getStroke();
+        assertEquals( origStroke, actStroke );
+    }
     
     /**
      * Create a BufferedImage and a rectangle
@@ -348,100 +441,27 @@ public class GraphManagerTest
         boolean result      = expColor == vPoint && expColor == hPoint;
         return result;
     }
-
-    @Test
-    public void testDrawVerticalLabels()
-    {
-        initTessTestData();
-        workingImage = testGUI.drawVerticalLabels();
-        Utils.pause( 250 );
-        
-        List<Float>     expValues   = getExpectedVerticalLabels();
-        List<Float>     actValues   = getLabels();
-        assertEquals( expValues, actValues );
-    }
-
-    @ParameterizedTest
-    @ValueSource( ints= {0,1} )
-    public void testDrawAxes( int paramNum )
-    {
-        testData.initTestData( paramNum );
-        testData.initProfile( AXES );
-        testDrawAxesInternal();
-    }
-
-    @ParameterizedTest
-    @ValueSource( ints= {0,1} )
-    public void testDrawMinorTics( int paramNum )
-    {
-        testData.initTestData( paramNum );
-        testData.initProfile( TIC_MINOR );
-        workingImage = testGUI.drawMinorTics();
-        testVerticalLines();
-        testHorizontalLines();
-    }
-
-    @ParameterizedTest
-    @ValueSource( ints= {0,1} )
-    public void testDrawMajorTics( int paramNum )
-    {
-        testData.initProfile( TIC_MAJOR );
-        workingImage = testGUI.drawMajorTics();
-        testVerticalLines();
-        testHorizontalLines();
-    }
     
-    @Test
-    public void testNoGridLines()
-    {
-        testNoLines( GRID_LINES, testGUI::drawGridLines );
-    }
-    
-    @Test
-    public void testNoMajorTics()
-    {
-        testNoLines( TIC_MAJOR, testGUI::drawMajorTics );
-    }
-    
-    @Test
-    public void testNoMinorTics()
-    {
-        testNoLines( TIC_MINOR, testGUI::drawMinorTics );
-    }
-    
-    @Test
-    public void testNoLabels()
-    {
-        initTessTestData();
-        testGUI.setGridDrawLabels( false );
-        workingImage = testGUI.drawVerticalLabels();
-        Utils.pause( 250 );
-        List<Float>     actValues   = getLabels();
-        assertTrue( actValues.isEmpty() );
-        
-        workingImage = testGUI.drawHorizontalLabels();
-        Utils.pause( 250 );
-        actValues = getLabels();
-        assertTrue( actValues.isEmpty() );
-    }
-    
-    @Test
-    public void testUpdateProfile()
-    {
-        String              propSetName = TIC_MAJOR;
-        LinePropertySet     propSet     = 
-            workingProfile.getLinePropertySet( propSetName );
-        float               origStroke  = propSet.getStroke();
-        float               newStroke   = origStroke + 5;
-        testGUI.setLineStroke( propSetName, newStroke );
-        float               actStroke   = propSet.getStroke();
-        assertEquals( newStroke, actStroke );
-            
-        testGUI.invokeResetProfile();
-        actStroke = propSet.getStroke();
-        assertEquals( origStroke, actStroke );
-    }
-    
+    /**
+     * Verify that the working image
+     * contains no lines
+     * configured according to
+     * the given property set
+     * if the given property set's draw property
+     * is set to false.
+     * The caller provides a supplier
+     * that will prompt the test GUI
+     * to attempt to draw the given category of lines
+     * in the working image.
+     * 
+     * @param propSet   the given property set
+     * 
+     * @param getter
+     *      Supplier to initiate line drawing 
+     *      in the test GUI
+     *      of the line category under test
+     *      and obtain a working image
+     */
     private void 
     testNoLines( String propSet, Supplier<BufferedImage> getter )
     {
@@ -463,6 +483,12 @@ public class GraphManagerTest
         }
     }
     
+    /**
+     * Verify that,
+     * given the currently configured test data,
+     * vertical lines are correctly
+     * drawn in the working image.
+     */
     private void testVerticalLines()
     {
         LineGenerator   lineGen     = 
@@ -479,6 +505,12 @@ public class GraphManagerTest
         }
     }
     
+    /**
+     * Verify that,
+     * given the currently configured test data,
+     * horizontal lines are correctly
+     * drawn in the working image.
+     */
     private void testHorizontalLines()
     {
         LineGenerator   lineGen     = 
@@ -495,6 +527,13 @@ public class GraphManagerTest
         }
     }
     
+    /**
+     * Return true if at least one label
+     * can be detected on the horizontal tic marks
+     * in the working image.
+     * 
+     * @return  true if at least one horizontal label can be detected
+     */
     private boolean hasHorizontalLabel()
     {
         LineGenerator       lineGen = 
@@ -531,6 +570,10 @@ public class GraphManagerTest
         return result;
     }
     
+    /**
+     * Configure the test data
+     * for processing with Tesseract.
+     */
     private void initTessTestData()
     {
         testData.initProfile( TIC_MAJOR );
@@ -612,50 +655,76 @@ public class GraphManagerTest
         assertEquals( expSegY, actSegY );
     }
     
+    /**
+     * Given the currently configured test data,
+     * compile a list of values
+     * we expect to find displayed
+     * on the horizontal tic marks
+     * drawn in the working image.
+     * Vaues are ordered from lowest to highest
+     * (top to bottom on the y-axis).
+     * 
+     * @return
+     *      a list of values we expect to find displayed
+     *      on the horizontal tic marks
+     */
     private List<Float> getExpectedHorizontalLabels()
     {
-        float           length  = workingImage.getHeight();
-        List<Float>     list    = new ArrayList<>();
-        float           half    = length / 2;
+        List<Float>     list    = new LinkedList<>();
         float           spacing = testData.gpu / testData.lpu;
-        float           start   = half;
+        float           xAxis   = workingImage.getHeight() / 2;
 
         int             xier    = 1;
-        for ( float mark = start - spacing ; mark > 0 ; mark -= spacing )
-            list.add( 0, xier++ / testData.lpu );
-
-        xier = -1;
-        for ( 
-            float mark = start + spacing ; 
-            mark < length ; 
-            mark += spacing 
-        )
-            list.add( xier-- / testData.lpu );
+        for ( float mark = xAxis - spacing ; mark > 0 ; mark -= spacing )
+        {
+            float   val = xier++ / testData.lpu; 
+            list.add( 0, val );
+            list.add( -val );
+        }
         return list;
     }
     
+    /**
+     * Given the currently configured test data,
+     * compile a list of values
+     * we expect to find displayed
+     * on the horizontal tic marks
+     * drawn in the working image.
+     * Vaues are ordered from lowest to highest
+     * (top to bottom on the y-axis).
+     * 
+     * @return
+     *      a list of values we expect to find displayed
+     *      on the horizontal tic marks
+     */
     private List<Float> getExpectedVerticalLabels()
     {
-        float           length  = workingImage.getWidth();
         List<Float>     list    = new ArrayList<>();
-        float           half    = length / 2;
         float           spacing = testData.gpu / testData.lpu;
-        float           start   = half;
+        float           yAxis   = workingImage.getWidth() / 2;
 
         int             xier    = -1;
-        for ( float mark = start - spacing ; mark > 0 ; mark -= spacing )
-            list.add( 0, xier-- / testData.lpu );
-
-        xier = 1;
-        for ( 
-            float mark = start + spacing ; 
-            mark < length ; 
-            mark += spacing 
-        )
-            list.add( xier++ / testData.lpu );
+        for ( float mark = yAxis - spacing ; mark > 0 ; mark -= spacing )
+        {
+            float   val = xier-- / testData.lpu; 
+            list.add( 0, val );
+            list.add( -val );
+        }
         return list;
     }
     
+    /**
+     * From the working image,
+     * extract the text on the major tic marks,
+     * and convert it to a list
+     * of decimal values.
+     * If conversion fails
+     * a partial list may be returned.
+     * 
+     * @return  
+     *      a list of the values displayed on the major tic marks
+     *      in the working image
+     */
     private List<Float> getLabels()
     {
         List<Float>     list            = null;
@@ -670,9 +739,12 @@ public class GraphManagerTest
             new BufferedImage( scaledWidth, scaledHeight, scaledType );
 
         // Scale the image
-        int     algo    = Image.SCALE_REPLICATE;
         Image   image   = 
-            workingImage.getScaledInstance( scaledWidth, scaledHeight, algo );
+            workingImage.getScaledInstance( 
+                scaledWidth, 
+                scaledHeight, 
+                Image.SCALE_REPLICATE 
+            );
         Graphics2D  gtx = scaledImage.createGraphics();
         gtx.drawImage( image, 0, 0, null );
 
@@ -690,6 +762,15 @@ public class GraphManagerTest
         return list;
     }
     
+    /**
+     * Convert a string containing
+     * formatted decimal numbers separated by whitespace
+     * into a list of decimal values.
+     * 
+     * @param string    the string to convert
+     * 
+     * @return  the compiles list
+     */
     private List<Float> parseFloats( String string )
     {
         List<Float>     list    = new ArrayList<>();
@@ -710,6 +791,19 @@ public class GraphManagerTest
         return list;
     }
    
+    /**
+     * Instantiates a LineGenerator.
+     * The orientation of the LineGenerator
+     * is provided by the caller.
+     * All other parameters
+     * are taken from the
+     * currently configured test data.
+     * 
+     * @param orientation   
+     *      the orientation of the instantiated LineGenerator
+     * 
+     * @return  the instantiated LineGenerator
+     */
     private LineGenerator getLineGenerator( int orientation )
     {
         boolean hasLength   = testGUI.getLineHasLength( testData.lineSet );
@@ -725,6 +819,17 @@ public class GraphManagerTest
         return lineGen;
     }
 
+    /**
+     * Create a rectangle that describes the bounds
+     * of the working image.
+     *
+     * @return 
+     *      a rectangle that describes the bounds
+     *      of the working image
+     */
+    /**
+     * @return
+     */
     private Rectangle2D getBoundingRectangle()
     {
         int         width   = workingImage.getWidth();
