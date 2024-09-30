@@ -96,7 +96,7 @@ public class GraphManagerTest
     }
 
     @Test
-    public void testGraphManager()
+    public void testGraphManagerJComponentProfile()
     {
         @SuppressWarnings("unused")
         GraphManager    mgr = 
@@ -138,11 +138,41 @@ public class GraphManagerTest
 
     @ParameterizedTest
     @ValueSource( ints= {0,1} )
+    public void testDrawAxes( int paramNum )
+    {
+        testData.initTestData( paramNum );
+        testData.initProfile( AXES );
+        testDrawAxesInternal();
+    }
+
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
     public void testDrawGridLines( int paramNum  )
     {
         testData.initTestData( paramNum );
         testData.initProfile( GRID_LINES );
         workingImage = testGUI.drawGridLines();
+        testVerticalLines();
+        testHorizontalLines();
+    }
+
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawMajorTics( int paramNum )
+    {
+        testData.initProfile( TIC_MAJOR );
+        workingImage = testGUI.drawMajorTics();
+        testVerticalLines();
+        testHorizontalLines();
+    }
+
+    @ParameterizedTest
+    @ValueSource( ints= {0,1} )
+    public void testDrawMinorTics( int paramNum )
+    {
+        testData.initTestData( paramNum );
+        testData.initProfile( TIC_MINOR );
+        workingImage = testGUI.drawMinorTics();
         testVerticalLines();
         testHorizontalLines();
     }
@@ -167,6 +197,17 @@ public class GraphManagerTest
         List<Float>     actValues   = getLabels();
         assertEquals( expValues, actValues );
     }
+
+    @Test
+    public void testDrawVerticalLabels()
+    {
+        initTessTestData();
+        workingImage = testGUI.drawVerticalLabels();
+        
+        List<Float>     expValues   = getExpectedVerticalLabels();
+        List<Float>     actValues   = getLabels();
+        assertEquals( expValues, actValues );
+    }
     
     /**
      * Validate the GraphManager.drawAll method.
@@ -185,47 +226,6 @@ public class GraphManagerTest
         initTessTestData();
         assertTrue( hasVerticalLabel() );
         assertTrue( hasHorizontalLabel() );
-    }
-
-    @Test
-    public void testDrawVerticalLabels()
-    {
-        initTessTestData();
-        workingImage = testGUI.drawVerticalLabels();
-        
-        List<Float>     expValues   = getExpectedVerticalLabels();
-        List<Float>     actValues   = getLabels();
-        assertEquals( expValues, actValues );
-    }
-
-    @ParameterizedTest
-    @ValueSource( ints= {0,1} )
-    public void testDrawAxes( int paramNum )
-    {
-        testData.initTestData( paramNum );
-        testData.initProfile( AXES );
-        testDrawAxesInternal();
-    }
-
-    @ParameterizedTest
-    @ValueSource( ints= {0,1} )
-    public void testDrawMinorTics( int paramNum )
-    {
-        testData.initTestData( paramNum );
-        testData.initProfile( TIC_MINOR );
-        workingImage = testGUI.drawMinorTics();
-        testVerticalLines();
-        testHorizontalLines();
-    }
-
-    @ParameterizedTest
-    @ValueSource( ints= {0,1} )
-    public void testDrawMajorTics( int paramNum )
-    {
-        testData.initProfile( TIC_MAJOR );
-        workingImage = testGUI.drawMajorTics();
-        testVerticalLines();
-        testHorizontalLines();
     }
     
     @Test
@@ -252,12 +252,10 @@ public class GraphManagerTest
         initTessTestData();
         testGUI.setGridDrawLabels( false );
         workingImage = testGUI.drawVerticalLabels();
-        Utils.pause( 250 );
         List<Float>     actValues   = getLabels();
         assertTrue( actValues.isEmpty() );
         
         workingImage = testGUI.drawHorizontalLabels();
-        Utils.pause( 250 );
         actValues = getLabels();
         assertTrue( actValues.isEmpty() );
     }

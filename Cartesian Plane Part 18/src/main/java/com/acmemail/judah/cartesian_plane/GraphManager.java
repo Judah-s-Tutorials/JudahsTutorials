@@ -160,9 +160,15 @@ public class GraphManager
     }
 
     /**
-     * Redraw the sample graph.
+     * Redraw the sample graph,
+     * updating the GraphicsContext 
+     * and the bounding rectangle
+     * for this GraphManager object.
      * 
      * @param graphics  graphics context for redrawing the sample graph
+     * @param rect        
+     *      the bounding rectangle to apply to
+     *      future operations
      */
     public void refresh( Graphics2D graphics, Rectangle2D rect )
     {
