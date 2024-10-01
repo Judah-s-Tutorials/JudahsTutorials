@@ -31,7 +31,7 @@ import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorFeedbackTestGU
 /**
  * @author Jack Straub
  */
-public class ProfileEditorFeedbackTest
+public class ProfileEditorFeedbackTest_orig
 {
     /** The simple name of the LinePropertySetAxes class. */
     private static final String axesSet         =
@@ -916,27 +916,38 @@ public class ProfileEditorFeedbackTest
         /**
          * Verify that,
          * for the currently configured data,
-         * the first vertical line
-         * to the right of the y-axis exists, 
-         * and is drawn with the expected properties.
+         * the two vertical lines
+         * to the right of the y-axis exist, 
+         * and are drawn with the expected properties.
          */
         public void validateVertical()
         {
-            float   oXco            = yAxisXco + expSpacing;
-            float   oYco            = expLength > 0 ?
+            float   oXco        = yAxisXco + expSpacing;
+            float   oYco        = expLength > 0 ?
                 xAxisYco + expLength / 4 : expSpacing / 2;
-            Point2D     origin      = new Point2D.Double( oXco, oYco );
-            LineSegment seg         = LineSegment.of( origin, image );
-            Rectangle2D bounds      = seg.getBounds();
-            double      actLength   = bounds.getHeight();
-            double      actStroke   = bounds.getWidth();
-            int         actColor    = seg.getColor();
+            Point2D     origin  = new Point2D.Double( oXco, oYco );
+            LineSegment seg1    = LineSegment.of( origin, image );
+            Rectangle2D bounds1 = seg1.getBounds();
+            
+            origin.setLocation( oXco + expSpacing, oYco );
+            LineSegment seg2    = LineSegment.of( origin, image );
+            Rectangle2D bounds2 = seg2.getBounds();
+            
+            double      actSpacing  = bounds2.getX() - bounds1.getX();
+            double      actLength   = bounds1.getHeight();
+            double      actStroke   = bounds1.getWidth();
+            int         actColor    = seg1.getColor();
 //            waitOp();
+
+            assertEquals( actStroke, bounds2.getWidth() );
+            assertEquals( actLength, bounds2.getHeight() );
+            assertEquals( actColor, seg2.getColor() );
             
             if ( expLength > 0 )
                 assertEquals( expLength, actLength, propSetName );
             else
-                assertTrue( actLength >= height, propSetName );
+                assertTrue( actLength >= height );
+            assertEquals( expSpacing, actSpacing, propSetName );
             assertEquals( expStroke, actStroke, propSetName );
             assertEquals( expColor, actColor, propSetName );
         }
@@ -944,32 +955,38 @@ public class ProfileEditorFeedbackTest
         /**
          * Verify that,
          * for the currently configured data,
-         * the first horizontal line
-         * below the x-axis exists, 
-         * and is drawn with the expected properties.
+         * the first two horizontal lines
+         * below the x-axis exist, 
+         * and are drawn with the expected properties.
          */
         public void validateHorizontal()
         {
-            float   oYco            = xAxisYco + expSpacing;
-            float   oXco            = expLength > 0 ?
+            float   oYco        = xAxisYco + expSpacing;
+            float   oXco        = expLength > 0 ?
                 yAxisXco + expLength / 4 : expSpacing / 2;
-            Point2D     origin      = new Point2D.Double( oXco, oYco );
-            LineSegment seg         = LineSegment.of( origin, image );
-            Rectangle2D bounds      = seg.getBounds();
+            Point2D     origin  = new Point2D.Double( oXco, oYco );
+            LineSegment seg1    = LineSegment.of( origin, image );
+            Rectangle2D bounds1 = seg1.getBounds();
             
-            double      actLength   = bounds.getWidth();
-            double      actStroke   = bounds.getHeight();
-            int         actColor    = seg.getColor();
+            origin.setLocation( oXco, oYco + expSpacing );
+            LineSegment seg2    = LineSegment.of( origin, image );
+            Rectangle2D bounds2 = seg2.getBounds();
+            
+            double      actSpacing  = bounds2.getY() - bounds1.getY();
+            double      actLength   = bounds1.getWidth();
+            double      actStroke   = bounds1.getHeight();
+            int         actColor    = seg1.getColor();
 //            //waitOp();
 
-            assertEquals( actStroke, bounds.getHeight() );
-            assertEquals( actLength, bounds.getWidth() );
-            assertEquals( actColor, seg.getColor() );
+            assertEquals( actStroke, bounds2.getHeight() );
+            assertEquals( actLength, bounds2.getWidth() );
+            assertEquals( actColor, seg2.getColor() );
             
             if ( expLength > 0 )
                 assertEquals( expLength, actLength, propSetName );
             else
                 assertTrue( actLength >= width );
+            assertEquals( expSpacing, actSpacing, propSetName );
             assertEquals( expStroke, actStroke, propSetName );
             assertEquals( expColor, actColor, propSetName );
         }
