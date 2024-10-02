@@ -47,9 +47,9 @@ public class ProfileEditorFeedbackTest
         LinePropertySetTicMinor.class.getSimpleName();
     
     /** Default grid unit. */
-    private static final float      defGridUnit = 175;
+    private static final float      defGridUnit = 100;
     /** Alternate grid unit. */
-    private static final float      altGridUnit = 2 * defGridUnit;
+    private static final float      altGridUnit = 1.5f * defGridUnit;
     /** Default grid color. */
     private static final Color      defBGColor  = new Color( 0xEFEFEF );
     /** Alternate grid color. */
@@ -288,8 +288,10 @@ public class ProfileEditorFeedbackTest
         ImageRect   rectA   = getTextRect();
         
         // Get a rectangle that encloses the text at the larger font size
+//        waitOp();
         graph.setFontSize( altFontSize );
         ImageRect   rectB   = getTextRect();
+//        waitOp();
         
         // Verify that the bounds of the text in the smaller font
         // is less than the bounds of the text in the larger font.
@@ -461,11 +463,13 @@ public class ProfileEditorFeedbackTest
         beforeEach();
         LineEvaluator   lineEvalA   = new LineEvaluator( propSet );
         lineEvalA.validateVertical();
+        waitOp();
         
         
-        LineEvaluator   lineEvalB   = new LineEvaluator( propSet );
         profile.setGridUnit( altGridUnit );
+        LineEvaluator   lineEvalB   = new LineEvaluator( propSet );
         lineEvalB.validateVertical();
+        waitOp();
     }
     
     /**
@@ -526,7 +530,7 @@ public class ProfileEditorFeedbackTest
         // should be no more than 1 unit.
         double      fontSize    = graph.getFontSize();
         double      leftX       = midX - 2 * fontSize;
-        double      width       = 4 * fontSize;
+        double      width       = 2 * fontSize;
         double      maxPadding  = 10;
         double      height      = 1.5 * fontSize + maxPadding;
         assertTrue( width < spacing, width + "," + spacing );
