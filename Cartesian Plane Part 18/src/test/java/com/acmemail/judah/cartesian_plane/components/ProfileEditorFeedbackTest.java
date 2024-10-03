@@ -6,7 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -14,7 +18,9 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -60,12 +66,12 @@ public class ProfileEditorFeedbackTest
     /** Alternate font name. */
     private static final String     altFontName     = Font.MONOSPACED;
     /** Default font size. */
-    private static final float      defFontSize     = 20;
+    private static final float      defFontSize     = 15;
     /** 
      * Alternate font size. The alternate value 
      * must be greater than the default value.
      */
-    private static final float      altFontSize     = 2 * defFontSize;
+    private static final float      altFontSize     = 1.5f * defFontSize;
     /** Default text color. */
     private static final Color      defFGColor      = Color.BLACK;;
     /** Alternate text color. */
@@ -283,20 +289,34 @@ public class ProfileEditorFeedbackTest
         assertTrue( defFontSize < altFontSize );
         
         GraphPropertySet    graph       = profile.getMainWindow();
+        LinePropertySet     majorTic    = 
+            profile.getLinePropertySet( ticMajorSet );
+        majorTic.setSpacing( 1 );
+        majorTic.setDraw( true );
+        graph.setFontDraw( true );
 
-        // Get a rectangle that encloses the text at the smaller font size
-        ImageRect   rectA   = getTextRect();
+        // Draw the text at the default font size and get the
+        // actual bounds of the text. Verify that it matches the
+        // expected bounds.
+//        testGUI.repaint();
+        BufferedImage   image   = testGUI.getImage();
+        ImageRect   rectAAct    = getActTextRect();
+        Rectangle2D rectAExp    = getExpTextRect( image );
+        assertTrue( rectAAct.hasBounds( rectAExp ) );
         
-        // Get a rectangle that encloses the text at the larger font size
-//        waitOp();
+        // Draw the text at the alternate font size and get the
+        // actual bounds of the text. Verify that it matches the
+        // expected bounds.
         graph.setFontSize( altFontSize );
-        ImageRect   rectB   = getTextRect();
-//        waitOp();
+        image = testGUI.getImage();
+        ImageRect   rectBAct    = getActTextRect();
+        Rectangle2D rectBExp    = getExpTextRect( image );
+        assertTrue( rectBAct.hasBounds( rectBExp ) );
         
         // Verify that the bounds of the text in the smaller font
         // is less than the bounds of the text in the larger font.
-        assertTrue( rectA.getWidth() < rectB.getWidth() );
-        assertTrue( rectA.getHeight() < rectB.getHeight() );
+        assertTrue( rectAAct.getWidth() < rectBAct.getWidth() );
+        assertTrue( rectAAct.getHeight() < rectBAct.getHeight() );
     }
     
     /**
@@ -319,14 +339,20 @@ public class ProfileEditorFeedbackTest
     {
         GraphPropertySet    graph   = profile.getMainWindow();
         int                 rgb     = getRGB( graph.getFGColor() );
+        LinePropertySet     majorTic    = 
+            profile.getLinePropertySet( ticMajorSet );
+        majorTic.setSpacing( 1 );
+        majorTic.setDraw( true );
 
         graph.setBold( false );
-        ImageRect   rectA   = getTextRect();
+        testGUI.repaint();
+        ImageRect   rectA   = getActTextRect();
         double      countA  = rectA.count( rgb );
 //        waitOp();
         
         graph.setBold( true );
-        ImageRect   rectB   = getTextRect();
+        testGUI.repaint();
+        ImageRect   rectB   = getActTextRect();
         double      countB  = rectB.count( rgb );
 //        waitOp();
         
@@ -352,16 +378,20 @@ public class ProfileEditorFeedbackTest
     public void testFontColor()
     {
         GraphPropertySet    graph   = profile.getMainWindow();
+        LinePropertySet     majorTic    = 
+            profile.getLinePropertySet( ticMajorSet );
+        majorTic.setSpacing( 1 );
+        majorTic.setDraw( true );
 
         // If the following operation succeeds it means that labels
         // are displayed in the default color.
-        ImageRect   rectA   = getTextRect();
+        ImageRect   rectA   = getActTextRect();
         assertNotNull( rectA );
 
         graph.setFGColor( altFGColor );
         // If the following operation succeeds it means that labels
         // are displayed in the new color.
-        ImageRect   rectB   = getTextRect();
+        ImageRect   rectB   = getActTextRect();
         assertNotNull( rectB );
 //        waitOp();
     }
@@ -387,15 +417,26 @@ public class ProfileEditorFeedbackTest
     public void testFontItalic()
     {
         GraphPropertySet    graph   = profile.getMainWindow();
+        LinePropertySet     majorTic    = 
+            profile.getLinePropertySet( ticMajorSet );
+        majorTic.setSpacing( 1 );
+        majorTic.setDraw( true );
+        graph.setFontDraw( true );
 
         graph.setItalic( false );
-        ImageRect   rectA   = getTextRect();
-//        //waitOp();
+        BufferedImage   image   = testGUI.getImage();
+
+        ImageRect           rectAAct    = getActTextRect();
+        Rectangle2D         rectAExp    = getExpTextRect( image );
+        assertTrue( rectAAct.hasBounds( rectAExp ) );
         
         graph.setItalic( true );
-        ImageRect   rectB   = getTextRect();
-//        //waitOp();
-        assertNotEquals( rectA, rectB );
+        image   = testGUI.getImage();
+        ImageRect           rectBAct   = getActTextRect();
+        Rectangle2D         rectBExp   = getExpTextRect( image );
+        assertTrue( rectBAct.hasBounds( rectBExp ) );
+
+        assertNotEquals( rectAAct, rectBAct );
     }
     
     /**
@@ -419,14 +460,24 @@ public class ProfileEditorFeedbackTest
     public void testFontName()
     {
         GraphPropertySet    graph   = profile.getMainWindow();
+        LinePropertySet     majorTic    = 
+            profile.getLinePropertySet( ticMajorSet );
+        majorTic.setSpacing( 1 );
+        majorTic.setDraw( true );
+        graph.setFontDraw( true );
 
-        ImageRect   rectA   = getTextRect();
-//        //waitOp();
+        BufferedImage   image   = testGUI.getImage();
+        ImageRect           rectAAct    = getActTextRect();
+        Rectangle2D         rectAExp    = getExpTextRect( image );
+        assertTrue( rectAAct.hasBounds( rectAExp ) );
         
         graph.setFontName( altFontName );
-        ImageRect   rectB   = getTextRect();
-//        //waitOp();
-        assertNotEquals( rectA, rectB );
+        image   = testGUI.getImage();
+        ImageRect           rectBAct    = getActTextRect();
+        Rectangle2D         rectBExp    = getExpTextRect( image );
+        assertTrue( rectBAct.hasBounds( rectBExp ) );
+
+        assertNotEquals( rectAAct, rectBAct );
     }
     
     /**
@@ -463,86 +514,13 @@ public class ProfileEditorFeedbackTest
         beforeEach();
         LineEvaluator   lineEvalA   = new LineEvaluator( propSet );
         lineEvalA.validateVertical();
-        waitOp();
+//        waitOp();
         
         
         profile.setGridUnit( altGridUnit );
         LineEvaluator   lineEvalB   = new LineEvaluator( propSet );
         lineEvalB.validateVertical();
-        waitOp();
-    }
-    
-    /**
-     * Get an image of the test GUI with labels turned on,
-     * and calculate the minimum rectangle that encloses one label.
-     * 
-     * @return the calculated rectangle
-     */
-    private ImageRect getTextRect()
-    {
-        LinePropertySet     axes        = 
-            profile.getLinePropertySet( axesSet );
-        LinePropertySet     ticMajor    = 
-            profile.getLinePropertySet( ticMajorSet );
-        GraphPropertySet    graph       = profile.getMainWindow();
-        Color               textColor   = graph.getFGColor();
-        
-        // Sanity check. The text color should be different from the
-        // axis color and the major tic color in order to eliminate
-        // possible confusion.
-        assertNotEquals( textColor, axes.getColor() );
-        assertNotEquals( textColor, ticMajor.getColor() );
-        
-        // Turn on display of major tics in case the tester requires
-        // visual confirmation from the GUI; displayed correctly, the 
-        // text will be centered below the first major tic on the x-axis.
-        ticMajor.setDraw( true );
-        
-        // Labels are displayed on each major tic. With spacing
-        // set to one a major tic will be drawn at one unit distance
-        // to the right of the y axis.
-        ticMajor.setSpacing( 1 );
-        
-        // Turn on display of labels; get an image of the GUI, but
-        // also redisplay the GUI in case visual inspection is desired.
-        graph.setFontDraw( true );
-        testGUI.repaint();
-        BufferedImage       image       = testGUI.getImage();
-        //waitOp();
-        
-        // To locate the center/top of text, start with x= 1 unit 
-        // to the right of the y-axis (the same as the first major tic)
-        // and y= one-half the length of a major tic below the x-axis.
-        double      yAxisXco    = image.getWidth() / 2;
-        double      xAxisYco    = image.getHeight() / 2;
-        double      spacing     = profile.getGridUnit();
-        double      ticLen      = ticMajor.getLength() / 2;
-        double      midX        = yAxisXco + spacing;
-        double      topY        = xAxisYco + ticLen / 2;
-        
-        // Given that the text to be located is four characters
-        // ("1.00") estimate the left edge of the text to be no more 
-        // midX - 2.5 * font-size and the right edge to be no more than
-        // midX + 2.5 * font-size. Assume there are no more than 10 
-        // pixels of padding between the tic mark and the text, and the
-        // maximum height of the text to be no more than 1.5 * the 
-        // font-size. For accurate results the width of the search area 
-        // should be no more than 1 unit.
-        double      fontSize    = graph.getFontSize();
-        double      leftX       = midX - 2 * fontSize;
-        double      width       = 2 * fontSize;
-        double      maxPadding  = 10;
-        double      height      = 1.5 * fontSize + maxPadding;
-        assertTrue( width < spacing, width + "," + spacing );
-        
-        int         color       = getRGB( graph.getFGColor() );
-        Rectangle2D rect        = 
-            new Rectangle2D.Double( leftX, topY, width, height );
-        LineSegment lineSeg     = LineSegment.ofRect( rect, image, color );
-        Rectangle2D resultRect  = lineSeg.getBounds();
-        assertNotNull( resultRect );
-        ImageRect   result      = new ImageRect( image, resultRect );
-        return result;
+//        waitOp();
     }
     
     @SuppressWarnings("unused")
@@ -695,12 +673,133 @@ public class ProfileEditorFeedbackTest
     }
     
     /**
+     * Draw the labels on the feedback panel under test
+     * and return the expected bounds
+     * of the first label on the x-axis
+     * to the right of the y-axis.
+     * Before drawing the text
+     * the current test data is modified to:
+     * <ol>
+     * <li>Set the major tic spacing to 1</li>
+     * </l>
+     * 
+     * @return the calculated rectangle
+     * 
+     * @see #getExpTextRect()
+     */
+    private ImageRect getActTextRect()
+    {
+        LinePropertySet     axes        = 
+            profile.getLinePropertySet( axesSet );
+        LinePropertySet     ticMajor    = 
+            profile.getLinePropertySet( ticMajorSet );
+        GraphPropertySet    graph       = profile.getMainWindow();
+        Color               textColor   = graph.getFGColor();
+        BufferedImage       image       = testGUI.getImage();
+        
+        // Sanity check. The text color should be different from the
+        // axis color and the major tic color in order to eliminate
+        // possible confusion.
+        assertNotEquals( textColor, axes.getColor() );
+        assertNotEquals( textColor, ticMajor.getColor() );
+        
+        // To locate the center/top of text, start with the location
+        // first major tic, and y= one-half the length of a major tic
+        // below the x-axis.
+        double      yAxisXco    = image.getWidth() / 2;
+        double      xAxisYco    = image.getHeight() / 2;
+        double      gridUnit    = profile.getGridUnit();
+        double      ticXOffset  = gridUnit / ticMajor.getSpacing();
+        double      ticLen      = ticMajor.getLength();
+        double      midX        = yAxisXco + ticXOffset;
+        double      topY        = xAxisYco + ticLen / 2;
+        
+        // Given that the text to be located is four characters
+        // ("1.00") estimate the left edge of the text to be no more 
+        // midX - 2.5 * font-size and the right edge to be no more than
+        // midX + 2.5 * font-size. Assume there are no more than 10 
+        // pixels of padding between the tic mark and the text, and the
+        // maximum height of the text to be no more than 1.5 * the 
+        // font-size. For accurate results the width of the search area 
+        // should be no more than 1 unit.
+        double      fontSize    = graph.getFontSize();
+        double      leftX       = midX - ticXOffset / 2;
+        double      width       = ticXOffset;
+        double      maxPadding  = 10;
+        double      height      = 1.5 * fontSize + maxPadding;
+        assertTrue( width <= gridUnit, width + "," + gridUnit );
+        
+        int         color       = getRGB( graph.getFGColor() );
+        Rectangle2D rect        = 
+            new Rectangle2D.Double( leftX, topY, width, height );
+        LineSegment lineSeg     = LineSegment.ofRect( rect, image, color );
+        Rectangle2D resultRect  = lineSeg.getBounds();
+        assertNotNull( resultRect );
+        ImageRect   result      = new ImageRect( image, resultRect );
+        
+        Graphics2D  gtx = image.createGraphics();
+        gtx.setColor( Color.RED );
+        gtx.draw( resultRect );
+//        showImage( image );
+        
+        return result;
+    }
+    
+    /**
+     * Draw the labels on the feedback panel under test
+     * and return the expected bounds
+     * of the first label on the x-axis
+     * to the right of the y-axis.
+     * 
+     * @return  
+     *      a rectangle describing the bounds of the string "1.0"
+     *      as drawn with the current test data settings
+     *  
+     * @see #getActTextRect()
+     */
+    private Rectangle2D getExpTextRect( BufferedImage image )
+    {
+        GraphPropertySet    window  = profile.getMainWindow();
+        Graphics2D      gtx     = image.createGraphics();
+        Font            font    = gtx.getFont().deriveFont( window.getFontSize() );
+        gtx.setFont( font );
+        FontMetrics     metrics = gtx.getFontMetrics();
+        Rectangle2D     rect    = metrics.getStringBounds( "1.0", gtx );
+        return rect;
+    }
+    
+    private void showImage( BufferedImage image )
+    {
+        class ShowPanel extends JPanel
+        {
+            BufferedImage   image   = testGUI.getImage();
+            public ShowPanel( BufferedImage image )
+            {
+                this.image = image;
+                Dimension   size    = 
+                    new Dimension( image.getWidth(), image.getHeight() );
+                setPreferredSize( size );
+            }
+            
+            @Override
+            public void paintComponent( Graphics gtx )
+            {
+                gtx.drawImage( image, 0, 0, null );
+            }
+        }
+        JDialog dialog  = new JDialog();
+        dialog.setModal( true );
+        JPanel  panel   = new ShowPanel( image );
+        dialog.setContentPane( panel );
+        dialog.pack();
+        dialog.setVisible( true );
+        dialog.dispose();
+    }
+    
+    /**
      * An object of this class
      * encapsulates a rectangular region
      * from the interior of an image.
-     * @author Jack Straub
-     */
-    /**
      * @author Jack Straub
      */
     private static class ImageRect
@@ -790,6 +889,18 @@ public class ProfileEditorFeedbackTest
                 Arrays.stream( data )
                     .flatMapToInt( r -> Arrays.stream( r ) );
             return stream;
+        }
+        
+        public boolean hasBounds( Rectangle2D rect )
+        {
+            int thisWidth   = getWidth();
+            int thatWidth   = (int)rect.getWidth();
+            int diffWidth   = Math.abs( thisWidth - thatWidth );
+            int thisHeight  = getHeight();
+            int thatHeight  = (int)rect.getHeight();
+            int diffHeight  = Math.abs( thisHeight - thatHeight );
+            boolean result  = diffWidth <= 2 && diffHeight <= 2;
+            return result;
         }
         
         /**
