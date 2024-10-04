@@ -387,7 +387,7 @@ public class LineSegment
                             bottomYco = yco;
                     }
                 }
-            if ( leftXco >= 0 )
+            if ( leftXco >= 0 && topYco < Integer.MAX_VALUE )
             {
                 int width   = rightXco - leftXco + 1;
                 int height  = bottomYco - topYco + 1;

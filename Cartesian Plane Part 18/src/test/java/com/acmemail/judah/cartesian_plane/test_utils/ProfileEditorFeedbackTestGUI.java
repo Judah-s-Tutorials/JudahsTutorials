@@ -1,9 +1,12 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -16,8 +19,11 @@ public class ProfileEditorFeedbackTestGUI
 {
     private static ProfileEditorFeedbackTestGUI testGUI     = null;
     
-    private final JFrame      feedbackFrame;
+    private final JFrame                feedbackFrame;
     private final ProfileEditorFeedback feedbackPanel;
+    private final JDialog               adHocDialog;
+    private final AdHocPanel            adHocPanel;
+    
     private BufferedImage   image;
     
     private Integer adHocInt;
@@ -39,6 +45,8 @@ public class ProfileEditorFeedbackTestGUI
     private ProfileEditorFeedbackTestGUI( Profile profile )
     {
         feedbackPanel = new ProfileEditorFeedback( profile );
+        adHocPanel = new AdHocPanel( feedbackPanel );
+        adHocDialog = makeAdHocDialog( adHocPanel );
         feedbackFrame = new JFrame( "ProfileEditor Test GUI" );
         JPanel      contentPane     = new JPanel( new BorderLayout() );
         contentPane.add( feedbackPanel, BorderLayout.CENTER );
@@ -48,14 +56,11 @@ public class ProfileEditorFeedbackTestGUI
         feedbackFrame.setVisible( true );
     }
     
-    public void repaint()
-    {
-        GUIUtils.schedEDTAndWait( () -> feedbackPanel.repaint() );
-    }
-    
     public BufferedImage getImage()
     {
         GUIUtils.schedEDTAndWait( () -> {
+            feedbackPanel.repaint();
+            
             int     width       = feedbackPanel.getWidth();
             int     height      = feedbackPanel.getHeight();
             int     type        = BufferedImage.TYPE_INT_RGB;
@@ -81,5 +86,45 @@ public class ProfileEditorFeedbackTestGUI
             () -> adHocInt = feedbackPanel.getHeight()
         );
         return adHocInt;
+    }
+    
+    public void showAdHocDialog( BufferedImage image )
+    {
+        adHocPanel.setImage( image );
+        adHocDialog.setVisible( true );
+    }
+    
+    private JDialog makeAdHocDialog( JComponent adHocPanel )
+    {
+        JDialog     dialog      = new JDialog();
+        dialog.setTitle( "Ad Hoc Dialog" );
+        dialog.setModal( true );
+        dialog.setContentPane( adHocPanel );
+        dialog.pack();
+        return dialog;
+    }
+    
+    @SuppressWarnings("serial")
+    private static class AdHocPanel extends JPanel
+    {
+        private BufferedImage   image   = null;
+        
+        public AdHocPanel( JComponent feedbackPanel )
+        {
+            Dimension   prefSize    = feedbackPanel.getPreferredSize();
+            setPreferredSize( prefSize );
+        }
+        
+        public void setImage( BufferedImage image )
+        {
+            this.image = image;
+        }
+        
+        @Override
+        public void paintComponent( Graphics gtx )
+        {
+            if ( image != null )
+                gtx.drawImage( image, 0, 0, this );
+        }
     }
 }

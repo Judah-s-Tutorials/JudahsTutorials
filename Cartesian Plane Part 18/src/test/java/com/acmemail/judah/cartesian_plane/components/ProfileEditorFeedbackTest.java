@@ -6,11 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.font.FontRenderContext;
+import java.awt.font.TextLayout;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -18,9 +17,7 @@ import java.util.Arrays;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -82,7 +79,7 @@ public class ProfileEditorFeedbackTest
     // hence no extFontBold variable.
     /** Default font isItalic. */
     private static final boolean    defFontItalic   = false;
-    // The bold properly is handled explicitly in the italic test,
+    // The italic properly is handled explicitly in the italic test,
     // hence no extFontItalic variable.
     /** Default grid width. */
     private static final float      defWidth        = 750;
@@ -150,7 +147,6 @@ public class ProfileEditorFeedbackTest
     {
         initBaseProfile();
         testGUI = ProfileEditorFeedbackTestGUI.getTestGUI( profile );
-        testGUI.repaint();
     }
     
     /**
@@ -177,7 +173,6 @@ public class ProfileEditorFeedbackTest
     {
         baseProfile.apply();
         profile.reset();
-        testGUI.repaint();
     }
 
     /**
@@ -260,7 +255,6 @@ public class ProfileEditorFeedbackTest
         
         expRGB = getRGB( altBGColor );
         props.setBGColor( altBGColor );
-        testGUI.repaint();
         image= testGUI.getImage();
         actRGB = image.getRGB( xco, yco ) & 0xFFFFFF;
         assertEquals( actRGB, expRGB );
@@ -298,11 +292,10 @@ public class ProfileEditorFeedbackTest
         // Draw the text at the default font size and get the
         // actual bounds of the text. Verify that it matches the
         // expected bounds.
-//        testGUI.repaint();
-        BufferedImage   image   = testGUI.getImage();
-        ImageRect   rectAAct    = getActTextRect();
-        Rectangle2D rectAExp    = getExpTextRect( image );
-        assertTrue( rectAAct.hasBounds( rectAExp ) );
+        BufferedImage   image       = testGUI.getImage();
+        ImageRect       imgAAct     = getActTextRect();
+        Rectangle2D     rectAExp    = getExpTextRect( image );
+        assertTrue( imgAAct.withinBounds( rectAExp ) );
         
         // Draw the text at the alternate font size and get the
         // actual bounds of the text. Verify that it matches the
@@ -311,12 +304,12 @@ public class ProfileEditorFeedbackTest
         image = testGUI.getImage();
         ImageRect   rectBAct    = getActTextRect();
         Rectangle2D rectBExp    = getExpTextRect( image );
-        assertTrue( rectBAct.hasBounds( rectBExp ) );
+        assertTrue( rectBAct.withinBounds( rectBExp ) );
         
         // Verify that the bounds of the text in the smaller font
         // is less than the bounds of the text in the larger font.
-        assertTrue( rectAAct.getWidth() < rectBAct.getWidth() );
-        assertTrue( rectAAct.getHeight() < rectBAct.getHeight() );
+        assertTrue( imgAAct.getWidth() < rectBAct.getWidth() );
+        assertTrue( imgAAct.getHeight() < rectBAct.getHeight() );
     }
     
     /**
@@ -345,17 +338,13 @@ public class ProfileEditorFeedbackTest
         majorTic.setDraw( true );
 
         graph.setBold( false );
-        testGUI.repaint();
+        graph.setFontDraw( true );
         ImageRect   rectA   = getActTextRect();
         double      countA  = rectA.count( rgb );
-//        waitOp();
         
         graph.setBold( true );
-        testGUI.repaint();
         ImageRect   rectB   = getActTextRect();
-        double      countB  = rectB.count( rgb );
-//        waitOp();
-        
+        double      countB  = rectB.count( rgb );        
         
         // Verify that the plain text bounding box contains fewer
         // pixels of the text color than the bold text bounding box.
@@ -382,6 +371,7 @@ public class ProfileEditorFeedbackTest
             profile.getLinePropertySet( ticMajorSet );
         majorTic.setSpacing( 1 );
         majorTic.setDraw( true );
+        graph.setFontDraw( true );
 
         // If the following operation succeeds it means that labels
         // are displayed in the default color.
@@ -393,7 +383,6 @@ public class ProfileEditorFeedbackTest
         // are displayed in the new color.
         ImageRect   rectB   = getActTextRect();
         assertNotNull( rectB );
-//        waitOp();
     }
     
     /**
@@ -428,13 +417,13 @@ public class ProfileEditorFeedbackTest
 
         ImageRect           rectAAct    = getActTextRect();
         Rectangle2D         rectAExp    = getExpTextRect( image );
-        assertTrue( rectAAct.hasBounds( rectAExp ) );
+        assertTrue( rectAAct.withinBounds( rectAExp ) );
         
         graph.setItalic( true );
         image   = testGUI.getImage();
         ImageRect           rectBAct   = getActTextRect();
         Rectangle2D         rectBExp   = getExpTextRect( image );
-        assertTrue( rectBAct.hasBounds( rectBExp ) );
+        assertTrue( rectBAct.withinBounds( rectBExp ) );
 
         assertNotEquals( rectAAct, rectBAct );
     }
@@ -469,13 +458,13 @@ public class ProfileEditorFeedbackTest
         BufferedImage   image   = testGUI.getImage();
         ImageRect           rectAAct    = getActTextRect();
         Rectangle2D         rectAExp    = getExpTextRect( image );
-        assertTrue( rectAAct.hasBounds( rectAExp ) );
+        assertTrue( rectAAct.withinBounds( rectAExp ) );
         
         graph.setFontName( altFontName );
         image   = testGUI.getImage();
         ImageRect           rectBAct    = getActTextRect();
         Rectangle2D         rectBExp    = getExpTextRect( image );
-        assertTrue( rectBAct.hasBounds( rectBExp ) );
+        assertTrue( rectBAct.withinBounds( rectBExp ) );
 
         assertNotEquals( rectAAct, rectBAct );
     }
@@ -513,14 +502,11 @@ public class ProfileEditorFeedbackTest
     {
         beforeEach();
         LineEvaluator   lineEvalA   = new LineEvaluator( propSet );
-        lineEvalA.validateVertical();
-//        waitOp();
-        
+        lineEvalA.validateVertical();        
         
         profile.setGridUnit( altGridUnit );
         LineEvaluator   lineEvalB   = new LineEvaluator( propSet );
         lineEvalB.validateVertical();
-//        waitOp();
     }
     
     @SuppressWarnings("unused")
@@ -536,29 +522,27 @@ public class ProfileEditorFeedbackTest
      */
     private void validateAxes()
     {
-        testGUI.repaint();
-        
         LinePropertySet props       = 
             profile.getLinePropertySet( axesSet );
         int             width       = testGUI.getWidth();
         int             height      = testGUI.getHeight();
-        float           yTestCo     = height / 4f;
-        float           yCenter     = height / 2f;
-        float           xTestCo     = width / 4f;
-        float           xCenter     = width / 2f;
+        float           xAxisYco    = height / 2f;
+        float           testYco     = height / 4f;
+        float           yAxisXco    = width / 2f;
+        float           testXco     = width / 4f;
         Point2D         origin      = null;
         float           stroke      = props.getStroke();
         int             expColor    = getRGB( props.getColor() );
         BufferedImage   image       = testGUI.getImage();
         
         // On y-axis, above x-axis
-        origin = new Point2D.Float( xCenter, yTestCo );
+        origin = new Point2D.Float( yAxisXco, testYco );
         LineSegment yAxis       = LineSegment.of( origin, image );
         Rectangle2D yBounds     = yAxis.getBounds();
         int         yColor      = getRGB( origin, image );
         
         // On x-axis, left of y-axis
-        origin = new Point2D.Float( xTestCo, yCenter );
+        origin = new Point2D.Float( testXco, xAxisYco );
         LineSegment xAxis   = LineSegment.of( origin, image );
         Rectangle2D xBounds = xAxis.getBounds();
         int         xColor  = getRGB( origin, image );
@@ -737,11 +721,6 @@ public class ProfileEditorFeedbackTest
         assertNotNull( resultRect );
         ImageRect   result      = new ImageRect( image, resultRect );
         
-        Graphics2D  gtx = image.createGraphics();
-        gtx.setColor( Color.RED );
-        gtx.draw( resultRect );
-//        showImage( image );
-        
         return result;
     }
     
@@ -760,40 +739,19 @@ public class ProfileEditorFeedbackTest
     private Rectangle2D getExpTextRect( BufferedImage image )
     {
         GraphPropertySet    window  = profile.getMainWindow();
-        Graphics2D      gtx     = image.createGraphics();
-        Font            font    = gtx.getFont().deriveFont( window.getFontSize() );
+        Graphics2D          gtx     = image.createGraphics();
+        String              name    = window.getFontName();
+        int                 size    = (int)window.getFontSize();
+        int                 style   = window.isBold() ? Font.BOLD : 0;
+        style |= window.isItalic() ? Font.ITALIC : 0;
+        Font                font    = new Font( name, style, size );
         gtx.setFont( font );
-        FontMetrics     metrics = gtx.getFontMetrics();
-        Rectangle2D     rect    = metrics.getStringBounds( "1.0", gtx );
+        FontRenderContext   frc     = gtx.getFontRenderContext();
+        TextLayout          layout  = new TextLayout( "1.00", font, frc );
+        Rectangle2D         rect    = layout.getBounds();
+        
+        gtx.dispose();
         return rect;
-    }
-    
-    private void showImage( BufferedImage image )
-    {
-        class ShowPanel extends JPanel
-        {
-            BufferedImage   image   = testGUI.getImage();
-            public ShowPanel( BufferedImage image )
-            {
-                this.image = image;
-                Dimension   size    = 
-                    new Dimension( image.getWidth(), image.getHeight() );
-                setPreferredSize( size );
-            }
-            
-            @Override
-            public void paintComponent( Graphics gtx )
-            {
-                gtx.drawImage( image, 0, 0, null );
-            }
-        }
-        JDialog dialog  = new JDialog();
-        dialog.setModal( true );
-        JPanel  panel   = new ShowPanel( image );
-        dialog.setContentPane( panel );
-        dialog.pack();
-        dialog.setVisible( true );
-        dialog.dispose();
     }
     
     /**
@@ -808,7 +766,9 @@ public class ProfileEditorFeedbackTest
          * Data copied from the rectangular region
          * with an image.
          */
-        private final int[][]   data;
+        private final int[][]       data;
+        /** The bounds of the encapsulated region. */
+        private final Rectangle2D   bounds;
         
         /**
          * Encapsulate the given rectangular area
@@ -823,6 +783,7 @@ public class ProfileEditorFeedbackTest
             int height      = (int)rect.getHeight();
             int firstRow    = (int)rect.getY();
             int firstCol    = (int)rect.getX();
+            this.bounds     = rect;
             data = new int[height][width];
             
             int row         = firstRow;
@@ -860,9 +821,7 @@ public class ProfileEditorFeedbackTest
          */
         public int getWidth()
         {
-            int width   = 0;
-            if ( data.length > 0 )
-                width = data[0].length;
+            int width   = (int)bounds.getWidth();
             return width;
         }
         
@@ -874,7 +833,7 @@ public class ProfileEditorFeedbackTest
          */
         public int getHeight()
         {
-            int height  = data.length;
+            int height  = (int)bounds.getHeight();
             return height;
         }
         
@@ -891,7 +850,7 @@ public class ProfileEditorFeedbackTest
             return stream;
         }
         
-        public boolean hasBounds( Rectangle2D rect )
+        public boolean withinBounds( Rectangle2D rect )
         {
             int thisWidth   = getWidth();
             int thatWidth   = (int)rect.getWidth();
@@ -1015,7 +974,6 @@ public class ProfileEditorFeedbackTest
             axesProps.setColor( lineColor );
             axesProps.setStroke( 1 );
             
-            testGUI.repaint();
             this.propSetName = propSetName;
             width  = testGUI.getWidth();
             height = testGUI.getHeight();
@@ -1046,7 +1004,6 @@ public class ProfileEditorFeedbackTest
             double      actLength   = bounds.getHeight();
             double      actStroke   = bounds.getWidth();
             int         actColor    = seg.getColor();
-//            waitOp();
             
             if ( expLength > 0 )
                 assertEquals( expLength, actLength, propSetName );
@@ -1075,7 +1032,6 @@ public class ProfileEditorFeedbackTest
             double      actLength   = bounds.getWidth();
             double      actStroke   = bounds.getHeight();
             int         actColor    = seg.getColor();
-//            //waitOp();
 
             assertEquals( actStroke, bounds.getHeight() );
             assertEquals( actLength, bounds.getWidth() );
