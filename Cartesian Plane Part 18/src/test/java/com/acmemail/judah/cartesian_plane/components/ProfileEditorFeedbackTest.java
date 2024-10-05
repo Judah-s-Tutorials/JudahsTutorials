@@ -514,47 +514,6 @@ public class ProfileEditorFeedbackTest
     {
         JOptionPane.showMessageDialog( null, "Waiting..." );
     }
-    
-    /**
-     * Given the currently configured test data,
-     * verify that the x- and y-axes
-     * are correctly drawn.
-     */
-    private void validateAxes()
-    {
-        LinePropertySet props       = 
-            profile.getLinePropertySet( axesSet );
-        int             width       = testGUI.getWidth();
-        int             height      = testGUI.getHeight();
-        float           xAxisYco    = height / 2f;
-        float           testYco     = height / 4f;
-        float           yAxisXco    = width / 2f;
-        float           testXco     = width / 4f;
-        Point2D         origin      = null;
-        float           stroke      = props.getStroke();
-        int             expColor    = getRGB( props.getColor() );
-        BufferedImage   image       = testGUI.getImage();
-        
-        // On y-axis, above x-axis
-        origin = new Point2D.Float( yAxisXco, testYco );
-        LineSegment yAxis       = LineSegment.of( origin, image );
-        Rectangle2D yBounds     = yAxis.getBounds();
-        int         yColor      = getRGB( origin, image );
-        
-        // On x-axis, left of y-axis
-        origin = new Point2D.Float( testXco, xAxisYco );
-        LineSegment xAxis   = LineSegment.of( origin, image );
-        Rectangle2D xBounds = xAxis.getBounds();
-        int         xColor  = getRGB( origin, image );
-
-        assertTrue( yBounds.getHeight() >= height );
-        assertEquals( yBounds.getWidth(), stroke );
-        assertEquals( expColor, yColor );
-
-        assertEquals( xBounds.getHeight(), stroke );
-        assertTrue( xBounds.getWidth() >= width );
-        assertEquals( expColor, xColor );
-    }
 
     /**
      * Set the default properties
@@ -575,7 +534,6 @@ public class ProfileEditorFeedbackTest
             ticMajorSet,
             ticMinorSet
         ).forEach( s -> initBaseLineProperties( s ) );
-        
         
         baseProfile.apply();
     }
@@ -657,6 +615,46 @@ public class ProfileEditorFeedbackTest
     }
     
     /**
+     * Given the currently configured test data,
+     * verify that the x- and y-axes
+     * are correctly drawn.
+     */
+    private void validateAxes()
+    {
+        LinePropertySet props       = 
+            profile.getLinePropertySet( axesSet );
+        int             width       = testGUI.getWidth();
+        int             height      = testGUI.getHeight();
+        float           xAxisYco    = height / 2f;
+        float           testYco     = height / 4f;
+        float           yAxisXco    = width / 2f;
+        float           testXco     = width / 4f;
+        float           expStroke   = props.getStroke();
+        int             expColor    = getRGB( props.getColor() );
+        BufferedImage   image       = testGUI.getImage();
+        
+        // On y-axis, above x-axis
+        Point2D     origin      = new Point2D.Float( yAxisXco, testYco );
+        LineSegment yAxis       = LineSegment.of( origin, image );
+        Rectangle2D yBounds     = yAxis.getBounds();
+        int         yColor      = getRGB( origin, image );
+
+        assertTrue( yBounds.getHeight() >= height );
+        assertEquals( expStroke, yBounds.getWidth() );
+        assertEquals( expColor, yColor );
+        
+        // On x-axis, left of y-axis
+        origin = new Point2D.Float( testXco, xAxisYco );
+        LineSegment xAxis   = LineSegment.of( origin, image );
+        Rectangle2D xBounds = xAxis.getBounds();
+        int         xColor  = getRGB( origin, image );
+
+        assertEquals( expStroke, xBounds.getHeight() );
+        assertTrue( xBounds.getWidth() >= width );
+        assertEquals( expColor, xColor );
+    }
+    
+    /**
      * Draw the labels on the feedback panel under test
      * and return the expected bounds
      * of the first label on the x-axis
@@ -665,7 +663,7 @@ public class ProfileEditorFeedbackTest
      * the current test data is modified to:
      * <ol>
      * <li>Set the major tic spacing to 1</li>
-     * </l>
+     * </ol>
      * 
      * @return the calculated rectangle
      * 
@@ -679,6 +677,7 @@ public class ProfileEditorFeedbackTest
             profile.getLinePropertySet( ticMajorSet );
         GraphPropertySet    graph       = profile.getMainWindow();
         Color               textColor   = graph.getFGColor();
+        ticMajor.setSpacing( 1 );
         BufferedImage       image       = testGUI.getImage();
         
         // Sanity check. The text color should be different from the
@@ -687,33 +686,23 @@ public class ProfileEditorFeedbackTest
         assertNotEquals( textColor, axes.getColor() );
         assertNotEquals( textColor, ticMajor.getColor() );
         
-        // To locate the center/top of text, start with the location
-        // first major tic, and y= one-half the length of a major tic
-        // below the x-axis.
+        // To locate the center/top of text, start with the x-coordinate
+        // of the first major tic, and the y-coordinate of the x-axis.
         double      yAxisXco    = image.getWidth() / 2;
         double      xAxisYco    = image.getHeight() / 2;
         double      gridUnit    = profile.getGridUnit();
-        double      ticXOffset  = gridUnit / ticMajor.getSpacing();
-        double      ticLen      = ticMajor.getLength();
-        double      midX        = yAxisXco + ticXOffset;
-        double      topY        = xAxisYco + ticLen / 2;
+        double      halfUnit    = gridUnit / 2;
         
-        // Given that the text to be located is four characters
-        // ("1.00") estimate the left edge of the text to be no more 
-        // midX - 2.5 * font-size and the right edge to be no more than
-        // midX + 2.5 * font-size. Assume there are no more than 10 
-        // pixels of padding between the tic mark and the text, and the
-        // maximum height of the text to be no more than 1.5 * the 
-        // font-size. For accurate results the width of the search area 
-        // should be no more than 1 unit.
-        double      fontSize    = graph.getFontSize();
-        double      leftX       = midX - ticXOffset / 2;
-        double      width       = ticXOffset;
-        double      maxPadding  = 10;
-        double      height      = 1.5 * fontSize + maxPadding;
-        assertTrue( width <= gridUnit, width + "," + gridUnit );
+        // Assumption: The target label will not overlap another label
+        // or the x-axis. Construct a rectangle one-half unit to either
+        // side of the source tic mark and from the x-axis to one-half
+        // unit below the x-axis.
+        double      topY        = xAxisYco;
+        double      leftX       = yAxisXco + halfUnit;
+        double      width       = gridUnit;
+        double      height      = halfUnit;
         
-        int         color       = getRGB( graph.getFGColor() );
+        int         color       = getRGB( textColor );
         Rectangle2D rect        = 
             new Rectangle2D.Double( leftX, topY, width, height );
         LineSegment lineSeg     = LineSegment.ofRect( rect, image, color );
@@ -739,12 +728,12 @@ public class ProfileEditorFeedbackTest
     private Rectangle2D getExpTextRect( BufferedImage image )
     {
         GraphPropertySet    window  = profile.getMainWindow();
-        Graphics2D          gtx     = image.createGraphics();
         String              name    = window.getFontName();
         int                 size    = (int)window.getFontSize();
         int                 style   = window.isBold() ? Font.BOLD : 0;
         style |= window.isItalic() ? Font.ITALIC : 0;
         Font                font    = new Font( name, style, size );
+        Graphics2D          gtx     = image.createGraphics();
         gtx.setFont( font );
         FontRenderContext   frc     = gtx.getFontRenderContext();
         TextLayout          layout  = new TextLayout( "1.00", font, frc );
