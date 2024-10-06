@@ -257,7 +257,7 @@ public class ProfileEditorFeedbackTest
         props.setBGColor( altBGColor );
         image= testGUI.getImage();
         actRGB = image.getRGB( xco, yco ) & 0xFFFFFF;
-        assertEquals( actRGB, expRGB );
+        assertEquals( expRGB, actRGB );
     }
     
     /**
@@ -352,40 +352,6 @@ public class ProfileEditorFeedbackTest
     }
     
     /**
-     * Verify that label text is redisplayed correctly  
-     * after the fontColor property is changed.
-     * <p>
-     * Verify that a rectangle enclosing a label
-     * in the default color 
-     * can be obtained.
-     * Change the font color.
-     * Verify that a rectangle enclosing a label
-     * in the new color 
-     * can be obtained.
-     */
-    @Test
-    public void testFontColor()
-    {
-        GraphPropertySet    graph   = profile.getMainWindow();
-        LinePropertySet     majorTic    = 
-            profile.getLinePropertySet( ticMajorSet );
-        majorTic.setSpacing( 1 );
-        majorTic.setDraw( true );
-        graph.setFontDraw( true );
-
-        // If the following operation succeeds it means that labels
-        // are displayed in the default color.
-        ImageRect   rectA   = getActTextRect();
-        assertNotNull( rectA );
-
-        graph.setFGColor( altFGColor );
-        // If the following operation succeeds it means that labels
-        // are displayed in the new color.
-        ImageRect   rectB   = getActTextRect();
-        assertNotNull( rectB );
-    }
-    
-    /**
      * Verify that label text is displayed in italics
      * after the fontItalic property is changed to true.
      * <p>
@@ -467,6 +433,40 @@ public class ProfileEditorFeedbackTest
         assertTrue( rectBAct.withinBounds( rectBExp ) );
 
         assertNotEquals( rectAAct, rectBAct );
+    }
+    
+    /**
+     * Verify that label text is redisplayed correctly  
+     * after the fontColor property is changed.
+     * <p>
+     * Verify that a rectangle enclosing a label
+     * in the default color 
+     * can be obtained.
+     * Change the font color.
+     * Verify that a rectangle enclosing a label
+     * in the new color 
+     * can be obtained.
+     */
+    @Test
+    public void testFontColor()
+    {
+        GraphPropertySet    graph   = profile.getMainWindow();
+        LinePropertySet     majorTic    = 
+            profile.getLinePropertySet( ticMajorSet );
+        majorTic.setSpacing( 1 );
+        majorTic.setDraw( true );
+        graph.setFontDraw( true );
+
+        // If the following operation succeeds it means that labels
+        // are displayed in the default color.
+        ImageRect   rectA   = getActTextRect();
+        assertNotNull( rectA );
+
+        graph.setFGColor( altFGColor );
+        // If the following operation succeeds it means that labels
+        // are displayed in the new color.
+        ImageRect   rectB   = getActTextRect();
+        assertNotNull( rectB );
     }
     
     /**
@@ -894,9 +894,8 @@ public class ProfileEditorFeedbackTest
      * collect the data needed to validate
      * the properties of the encapsulated lines,
      * and perform the validation.
-     * Two consecutive vertical lines
-     * and two consecutive horizontal lines
-     * are selected.
+     * One vertical and one horizontal line
+     * are selected for validation.
      * The spacing between the lines,
      * and their length, stroke, and color
      * are verified.
@@ -985,8 +984,7 @@ public class ProfileEditorFeedbackTest
         public void validateVertical()
         {
             float   oXco            = yAxisXco + expSpacing;
-            float   oYco            = expLength > 0 ?
-                xAxisYco + expLength / 4 : expSpacing / 2;
+            float   oYco            = xAxisYco + 1;
             Point2D     origin      = new Point2D.Double( oXco, oYco );
             LineSegment seg         = LineSegment.of( origin, image );
             Rectangle2D bounds      = seg.getBounds();
