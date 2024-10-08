@@ -339,13 +339,20 @@ public class ProfileEditorFeedbackTest
 
         graph.setBold( false );
         graph.setFontDraw( true );
-        ImageRect   rectA   = getActTextRect();
-        double      countA  = rectA.count( rgb );
+        BufferedImage   image       = testGUI.getImage();
+        ImageRect       imageAAct   = getActTextRect();
+        Rectangle2D     rectAExp    = getExpTextRect( image );
+        assertTrue( imageAAct.withinBounds( rectAExp ) );
+        double      countA      = imageAAct.count( rgb );
         
         graph.setBold( true );
-        ImageRect   rectB   = getActTextRect();
-        double      countB  = rectB.count( rgb );        
-        
+        ImageRect   rectB       = getActTextRect();
+        image = testGUI.getImage();
+        ImageRect   imageBAct   = getActTextRect();
+        Rectangle2D rectBExp    = getExpTextRect( image );
+        assertTrue( imageBAct.withinBounds( rectBExp ) );
+        double      countB      = rectB.count( rgb );        
+
         // Verify that the plain text bounding box contains fewer
         // pixels of the text color than the bold text bounding box.
         assertTrue( countA < countB );
