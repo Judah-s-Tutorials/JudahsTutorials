@@ -66,16 +66,17 @@ public abstract class ProfileEditorTestBase
         LinePropertySetTicMinor.class.getSimpleName();
     
     /** The ProfileEditor under test. */
-    private final ProfileEditor         profileEditor;
+    private final ProfileEditor             profileEditor;
+    /** The set of components in the panel titled "Grid." */
+    private final GraphPropertyComponents   graphPropComps;
     /**
      * Maps the name of a property set to a JPanel used to
      * interrogate and modify the property set. For example,
      * "LinePropertySetAxes" maps to the JPanel with the
      * "Axes" title.
      */
-    private final Map<String,JPanel>    propSetPanelMap = new HashMap<>();
-    /** The set of components in the panel titled "Grid." */
-    private final GraphPropertyComponents   graphPropComps;
+    private static final Map<String,JPanel> propSetPanelMap = 
+        new HashMap<>();
     /**
      * Maps the name of a LinePropertySet to the set of components
      * associated with the encapsulated properties.
@@ -513,7 +514,7 @@ public abstract class ProfileEditorTestBase
     {
         LinePropertyComponents  propComps   = 
             propSetToCompMap.get( setName );
-        int value   = getIntValue( () -> propComps.getColor() );
+        int value   = getIntValue( () -> propComps.getLineColor() );
         return value;
     }
     
@@ -529,7 +530,7 @@ public abstract class ProfileEditorTestBase
     {
         LinePropertyComponents  propComps   = 
             propSetToCompMap.get( setName );
-        GUIUtils.schedEDTAndWait( () -> propComps.setColor( value ) );
+        GUIUtils.schedEDTAndWait( () -> propComps.setLineColor( value ) );
     }
     
     /**
@@ -882,10 +883,10 @@ public abstract class ProfileEditorTestBase
      * 
      * @return  the target component
      */
-    private JSpinner getSpinnerByName( String name, JComponent source )
+    private static 
+    JSpinner getSpinnerByName( String name, JComponent source )
     {
         JComponent  comp    = getComponentByName( name, source );
-        assertNotNull( comp );
         assertTrue( comp instanceof JSpinner );
         return (JSpinner)comp;
     }
@@ -902,10 +903,10 @@ public abstract class ProfileEditorTestBase
      * 
      * @return  the target component
      */
-    private JCheckBox getCheckBoxByName( String name, JComponent source )
+    private static 
+    JCheckBox getCheckBoxByName( String name, JComponent source )
     {
         JComponent  comp    = getComponentByName( name, source );
-        assertNotNull( comp );
         assertTrue( comp instanceof JCheckBox );
         return (JCheckBox)comp;
     }
@@ -922,11 +923,10 @@ public abstract class ProfileEditorTestBase
      * 
      * @return  the target component
      */
-    private JTextField 
+    private static JTextField 
     getTextFieldByName( String name, JComponent source )
     {
         JComponent  comp    = getComponentByName( name, source );
-        assertNotNull( comp );
         assertTrue( comp instanceof JTextField );
         return (JTextField)comp;
     }
@@ -943,7 +943,8 @@ public abstract class ProfileEditorTestBase
      * 
      * @return  the target component
      */
-    private JButton getJButtonByName( String name, JComponent source )
+    private static JButton 
+    getJButtonByName( String name, JComponent source )
     {
         JComponent  comp    = getComponentByName( name, source );
         assertTrue( comp instanceof JButton );
@@ -962,12 +963,13 @@ public abstract class ProfileEditorTestBase
      * 
      * @return  the target component
      */
-    private JComponent 
+    private static JComponent 
     getComponentByName( String name, JComponent source )
     {
         Predicate<JComponent>   pred    = 
             jc -> name.equals( jc.getName() );
-        JComponent  comp    = ComponentFinder.find( source, pred );
+        JComponent  comp                = 
+            ComponentFinder.find( source, pred );
         assertNotNull( comp );
         return comp;
     }
@@ -982,7 +984,7 @@ public abstract class ProfileEditorTestBase
      * 
      * @return  the target JCheckBox
      */
-    private JCheckBox getCheckBox( JComponent source )
+    private static JCheckBox getCheckBox( JComponent source )
     {
         JComponent  comp    =
             ComponentFinder.find( source, c -> (c instanceof JCheckBox) );
@@ -1003,7 +1005,7 @@ public abstract class ProfileEditorTestBase
      * @return  the target JCheckBox
      */
     @SuppressWarnings("unchecked")
-    private JComboBox<String> getComboBox( JComponent source )
+    private static JComboBox<String> getComboBox( JComponent source )
     {
         JComponent  comp    =
             ComponentFinder.find( source, c -> (c instanceof JComboBox) );
@@ -1019,7 +1021,7 @@ public abstract class ProfileEditorTestBase
      * 
      * @author Jack Straub
      */
-    private class FontDialogComponents
+    private static class FontDialogComponents
     {
         /** The FontEditorDialog. */
         private final JDialog           fontDialog;
@@ -1082,7 +1084,7 @@ public abstract class ProfileEditorTestBase
      * 
      * @see FontDialogComponents
      */
-    private class GraphPropertyComponents
+    private static class GraphPropertyComponents
     {
         /** Collection of components for editor font properties. */
         private final FontDialogComponents  fontComponents;
@@ -1100,10 +1102,11 @@ public abstract class ProfileEditorTestBase
         /**
          * Constructor.
          * Discovers all the components 
-         * needed to edit the GraphPropertySetMW properties
+         * nee  ded to edit the GraphPropertySetMW properties
          * of a Profile.
          */
-        public GraphPropertyComponents()
+        public 
+        GraphPropertyComponents()
         {
             JPanel  panel   = propSetPanelMap.get( graphSet );
             gridUnitComponent = 
@@ -1120,15 +1123,16 @@ public abstract class ProfileEditorTestBase
             boolean     canBeDialog     = true;
             boolean     canBeFrame      = false;
             boolean     mustBeVisible   = false;
-            String      dialogTitle     = FontEditorDialog.DIALOG_TITLE;
-            Predicate<Window>   pred    = 
-                w -> dialogTitle.equals( ((JDialog)w).getTitle() );
-            ComponentFinder finder  = new ComponentFinder(
+            ComponentFinder finder      = new ComponentFinder(
                 canBeDialog, 
                 canBeFrame, 
                 mustBeVisible
             );
+            String      dialogTitle     = FontEditorDialog.DIALOG_TITLE;
+            Predicate<Window>   pred    = 
+                w -> dialogTitle.equals( ((JDialog)w).getTitle() );
             Window  window  = finder.findWindow( pred );
+            
             assertNotNull( window );
             assertTrue( window instanceof JDialog );
             fontComponents = new FontDialogComponents( (JDialog)window );
@@ -1189,7 +1193,7 @@ public abstract class ProfileEditorTestBase
          */
         public int getBGColor()
         {
-            int iColor  = ProfileEditorTestBase.getColor( colorComponent );
+            int iColor  = getColor( colorComponent );
             return iColor;
         }
         
@@ -1306,8 +1310,7 @@ public abstract class ProfileEditorTestBase
          */
         public int getFGColor()
         {
-            int iColor  = ProfileEditorTestBase
-                .getColor( fontComponents.colorComponent );
+            int iColor  = getColor( fontComponents.colorComponent );
             return iColor;
         }
         
@@ -1401,6 +1404,7 @@ public abstract class ProfileEditorTestBase
         {
             GraphPropertySet    props   = 
                 profile.getMainWindow();
+            profile.setGridUnit( getGridUnit() );
             props.setWidth( getWidth() );
             props.setBGColor( new Color( getBGColor() ) );
             props.setBold( getBold() );
@@ -1419,7 +1423,7 @@ public abstract class ProfileEditorTestBase
      * 
      * @author Jack Straub
      */
-    private class LinePropertyComponents
+    private static class LinePropertyComponents
     {
         /** 
          * The simple name of the LinePropertySet subclass
@@ -1446,7 +1450,7 @@ public abstract class ProfileEditorTestBase
          * 
          * @param propSet   the given LinePropertySet
          */
-        public LinePropertyComponents( LinePropertySet propSet )
+        public LinePropertyComponents( LinePropertySet propSet)
         {
             propSetName = propSet.getClass().getSimpleName();
             JPanel  panel   = propSetPanelMap.get( propSetName );
@@ -1576,9 +1580,9 @@ public abstract class ProfileEditorTestBase
          *      the value of the component for editing 
          *      the color property 
          */
-        public int getColor()
+        public int getLineColor()
         {
-            int iColor  = ProfileEditorTestBase.getColor( colorComponent );
+            int iColor  = getColor( colorComponent );
             return iColor;
         }
         
@@ -1588,7 +1592,7 @@ public abstract class ProfileEditorTestBase
          * 
          * @param iColor   the new value
          */
-        public void setColor( int iColor )
+        public void setLineColor( int iColor )
         {
             colorComponent.setText( toHexString( iColor ) );
         }
@@ -1614,7 +1618,7 @@ public abstract class ProfileEditorTestBase
             if ( props.hasDraw() )
                 props.setDraw( getDraw() );
             if ( props.hasColor() )
-                props.setColor( new Color( getColor() ) );
+                props.setColor( new Color( getLineColor() ) );
         }
     }
 }
