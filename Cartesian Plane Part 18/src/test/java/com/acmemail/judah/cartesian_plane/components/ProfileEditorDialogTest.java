@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -79,6 +80,15 @@ public class ProfileEditorDialogTest
         // have been returned to their original states.
         Profile testProfile = testGUI.getComponentValues();
         assertEquals( profile, testProfile );
+    }
+    
+    @AfterEach
+    public void afterEach()
+    {
+        // In the event that a test failed while the FontEditorDialog
+        // is posted, this will dismiss it. If the dialog is not posted 
+        // it has no effect.
+        testGUI.cancelFontDialog();
     }
     
     @AfterAll

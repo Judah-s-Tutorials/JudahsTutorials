@@ -61,9 +61,10 @@ public class ProfileEditorTestGUI extends ProfileEditorTestBase
     {
         super( new ProfileEditor( profile ) );
 
-        JFrame          editorFrame = new JFrame( "ProfileEditor Test GUI" );
+        String          title           = "ProfileEditor Test GUI";
+        JFrame          editorFrame     = new JFrame( title );
         JPanel          contentPane     = new JPanel( new BorderLayout() );
-        ProfileEditor   profileEditor = getProfileEditor();
+        ProfileEditor   profileEditor   = getProfileEditor();
         contentPane.add( profileEditor, BorderLayout.CENTER );
         
         editorFrame.setContentPane( contentPane );

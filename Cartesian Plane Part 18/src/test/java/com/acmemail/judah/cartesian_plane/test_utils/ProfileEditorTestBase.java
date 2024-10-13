@@ -113,6 +113,10 @@ public abstract class ProfileEditorTestBase
             getTextFieldByName( ProfileEditor.NAME_LABEL, profileEditor );
     }
     
+    /**
+     * Returns the ProfileEditor under test.
+     * @return  the ProfileEditor under test
+     */
     public ProfileEditor getProfileEditor()
     {
         return profileEditor;
@@ -722,6 +726,7 @@ public abstract class ProfileEditorTestBase
         GUIUtils.schedEDTAndWait( () -> 
             adHocObject = supplier.get()
         );
+        assertNotNull( adHocObject );
         return adHocObject;
     }
     

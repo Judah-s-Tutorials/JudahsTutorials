@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 import javax.swing.JComponent;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,12 +39,12 @@ public class ProfileEditorTest
      * to its original state (see for example, {@link #beforeEach()}.
      * Never modified after initialization.
      */
-    private static Profile          baseProfile     = new Profile();
+    private static final Profile    baseProfile     = new Profile();
     /** 
      * Contains property values guaranteed to be different from those
      * stored in the BaseProfile. Never modified after initialization.
      */
-    private static Profile          distinctProfile = 
+    private static final Profile    distinctProfile = 
         ProfileUtils.getDistinctProfile( baseProfile );
     /** 
      * Profile used to initialize the test GUI/ProfileEditor.
@@ -52,19 +53,14 @@ public class ProfileEditorTest
      * The contents are restored to their original values before
      * each test (see {@link #beforeEach()}).
      */
-    private static Profile              profile = new Profile();
+    private static final Profile    profile = new Profile();
     /** 
      * The object that displays and manager the ProfileEditor.
      * Guarantees that all interaction with the ProfileEditor
      * components is conducted via the EDT.
      */
-    private static ProfileEditorTestGUI testGUI;
-    
-    @BeforeAll
-    static void beforeAll() throws Exception
-    {
-        testGUI = ProfileEditorTestGUI.getTestGUI( profile );
-    }
+    private static final ProfileEditorTestGUI   testGUI =
+        ProfileEditorTestGUI.getTestGUI( profile );
     
     @AfterAll
     public static void afterAll()
@@ -95,6 +91,15 @@ public class ProfileEditorTest
         // Verify that the components of the ProfileEditor GUI
         // have been returned to their original states.
         validateCurrState( baseProfile );
+    }
+    
+    @AfterEach
+    public void afterEach()
+    {
+        // In the event that a test failed while the FontEditorDialog
+        // is posted, this will dismiss it. If the dialog is not posted 
+        // it has no effect.
+        testGUI.cancelFontDialog();
     }
     
     /**
