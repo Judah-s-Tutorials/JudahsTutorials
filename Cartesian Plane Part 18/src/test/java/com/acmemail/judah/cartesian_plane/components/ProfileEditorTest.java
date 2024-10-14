@@ -10,7 +10,6 @@ import javax.swing.JComponent;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,20 +46,12 @@ public class ProfileEditorTest
     private static final Profile    distinctProfile = 
         ProfileUtils.getDistinctProfile( baseProfile );
     /** 
-     * Profile used to initialize the test GUI/ProfileEditor.
-     * After initialization the reference must not be changed,
-     * but the contents of the object may be changed as needed.
-     * The contents are restored to their original values before
-     * each test (see {@link #beforeEach()}).
-     */
-    private static final Profile    profile = new Profile();
-    /** 
      * The object that displays and manager the ProfileEditor.
      * Guarantees that all interaction with the ProfileEditor
      * components is conducted via the EDT.
      */
     private static final ProfileEditorTestGUI   testGUI =
-        ProfileEditorTestGUI.getTestGUI( profile );
+        ProfileEditorTestGUI.getTestGUI( new Profile() );
     
     @AfterAll
     public static void afterAll()
@@ -79,14 +70,8 @@ public class ProfileEditorTest
         // to their original values.
         baseProfile.apply();
         
-        // Return the working profile to its original state;
-        // reset the components of the ProfileEditor to their
-        // original values.
+        // Return the GUI to its original state.
         testGUI.reset();
-        
-        // Verify that the working profile has been returned
-        // to its original state.
-        assertEquals( baseProfile, profile );
         
         // Verify that the components of the ProfileEditor GUI
         // have been returned to their original states.
@@ -171,6 +156,8 @@ public class ProfileEditorTest
      */
     private void applyDistinctProperties()
     {
+        testGUI.setName( distinctProfile.getName() );
+        testGUI.setGridUnit( distinctProfile.getGridUnit() );
         applyDistinctGraphProperties();
         Stream.of( allSetNames )
             .forEach( this::applyDistinctLineProperties );
@@ -190,7 +177,6 @@ public class ProfileEditorTest
         testGUI.setFontDraw( graphSet.isFontDraw() );
         testGUI.setBGColor( iBGColor );
         testGUI.setName( distinctProfile.getName() );
-        testGUI.setGridUnit( distinctProfile.getGridUnit() );
         testGUI.setGridWidth( graphSet.getWidth() );
         
         Thread  thread  = testGUI.editFont();
@@ -235,23 +221,24 @@ public class ProfileEditorTest
      * in the ProfileEditor
      * match the given profile.
      * 
-     * @param currState the given profile
+     * @param expState the given profile
      */
-    private void validateCurrState( Profile currState )
+    private void validateCurrState( Profile expState )
     {
-        Profile profile = new Profile();
+        Profile actState    = new Profile();
         
-        collectGraphProperties( profile );
-        assertEquals( currState.getMainWindow(), profile.getMainWindow() );
+        actState.setName( testGUI.getName() );
+        actState.setGridUnit( testGUI.getGridUnit() );
+        collectGraphProperties( actState );
+        assertEquals( expState.getMainWindow(), actState.getMainWindow() );
         Stream.of( allSetNames )
-            .peek( s -> collectLineProperties( s, profile ) )
             .forEach( s -> {
-                LinePropertySet currSet = 
-                    currState.getLinePropertySet( s );
-                LinePropertySet testSet = profile.getLinePropertySet( s );
-                assertEquals( currSet, testSet );
+                collectLineProperties( s, actState );
+                LinePropertySet expSet  = expState.getLinePropertySet( s );
+                LinePropertySet actSet  = actState.getLinePropertySet( s );
+                assertEquals( expSet, actSet, s );
             });
-        assertEquals( currState, profile );
+        assertEquals( expState, actState );
     }
     
     /**
@@ -273,8 +260,6 @@ public class ProfileEditorTest
         Color               fgColor     =
             new Color( testGUI.getFGColor() );
         
-        profile.setName( testGUI.getName() );
-        profile.setGridUnit( testGUI.getGridUnit() );
         graphSet.setWidth( testGUI.getGridWidth() );
         graphSet.setBGColor( bgColor );
         graphSet.setBold( testGUI.getFontBold() );
@@ -284,6 +269,7 @@ public class ProfileEditorTest
         graphSet.setFontSize( testGUI.getFontSize() );
         graphSet.setItalic( testGUI.getFontItalic() );
     }
+    
     /**
      * Use the values of the components of the ProfileEditor.
      * to initialize the given LinePropertySet of a given profile.
