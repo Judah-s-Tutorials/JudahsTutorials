@@ -68,20 +68,6 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
     }
     
     /**
-     * Instantiates a ProfileEditorDialogTestGUI.
-     * Must be invoked from within the EDT.
-     * 
-     * @param profile
-     *      the profile to be encapsulated in the dialog
-     */
-    private static void initGUI( Profile profile )
-    {
-        ProfileEditorDialog dialog = 
-            new ProfileEditorDialog( null, profile );
-        testGUI = new ProfileEditorDialogTestGUI( dialog );
-    }
-    
-    /**
      * Constructor.
      * Fully initializes this ProfileEditorTestGUI_old.
      * Must be invoked from the EDT.
@@ -192,6 +178,20 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         pushButton( cancelButton );
     }
     
+    /**
+     * Instantiates a ProfileEditorDialogTestGUI.
+     * Must be invoked from within the EDT.
+     * 
+     * @param profile
+     *      the profile to be encapsulated in the dialog
+     */
+    private static void initGUI( Profile profile )
+    {
+        ProfileEditorDialog dialog = 
+            new ProfileEditorDialog( null, profile );
+        testGUI = new ProfileEditorDialogTestGUI( dialog );
+    }
+
     /** 
      * Activates the given button
      * in the context of the EDT.

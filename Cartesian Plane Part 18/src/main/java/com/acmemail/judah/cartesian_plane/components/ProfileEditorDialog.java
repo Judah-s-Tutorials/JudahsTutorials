@@ -56,7 +56,6 @@ public class ProfileEditorDialog extends JDialog
         contentPane.add( BorderLayout.SOUTH, getButtonPanel() );
         
         setContentPane( contentPane );
-        contentPane.setFocusable( true );
         pack();
         
         GUIUtils.center( this );
