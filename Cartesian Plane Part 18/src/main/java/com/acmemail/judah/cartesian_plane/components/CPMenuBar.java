@@ -198,8 +198,8 @@ public class CPMenuBar extends JMenuBar
             new JCheckBoxMenuItem( "Edit Graph Properties", false );
         JCheckBoxMenuItem   lineItem    =
             new JCheckBoxMenuItem( "Edit Line Properties", false );
-        JCheckBoxMenuItem   profileItem =
-            new JCheckBoxMenuItem( "Edit Profile", false );
+        JMenuItem   profileItem =
+            new JMenuItem( "Edit Profile" );
         graphItem.addItemListener( e -> 
             graphDialog.setVisible( graphItem.isSelected() )
         );
@@ -216,6 +216,17 @@ public class CPMenuBar extends JMenuBar
         return menu;
     }
     
+    /**
+     * Posts the ProfileEditorDialog in a modal dialog
+     * using a Profile constructed from 
+     * the property values currently stored 
+     * in the PropertyManager.
+     * If, upon closing,
+     * the dialog returns a status of OK
+     * changes to the Profile are applied.
+     * 
+     * @param evt   object accompanying ActionEvent; not used
+     */
     private void showProfileEditorDialog( ActionEvent evt )
     {
         Profile             profile = new Profile();

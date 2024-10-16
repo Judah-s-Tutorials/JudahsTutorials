@@ -11,7 +11,6 @@ import javax.swing.JOptionPane;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -29,12 +28,12 @@ public class ProfileEditorDialogTest
      * to its original state (see for example, {@link #beforeEach()}.
      * Never modified after initialization.
      */
-    private static Profile          baseProfile     = new Profile();
+    private static final Profile    baseProfile     = new Profile();
     /** 
      * Contains property values guaranteed to be different from those
      * stored in the BaseProfile. Never modified after initialization.
      */
-    private static Profile          distinctProfile = 
+    private static final Profile    distinctProfile = 
         ProfileUtils.getDistinctProfile( baseProfile );
     /** 
      * Profile used to initialize the test GUI/ProfileEditor.
@@ -43,26 +42,18 @@ public class ProfileEditorDialogTest
      * The contents are restored to their original values before
      * each test (see {@link #beforeEach()}).
      */
-    private static Profile              profile = new Profile();
+    private static final Profile    profile         = new Profile();
     /** 
      * The object that displays and manager the ProfileEditor.
      * Guarantees that all interaction with the ProfileEditor
      * components is conducted via the EDT.
      */
-    private static ProfileEditorDialogTestGUI testGUI;
-    
-    @BeforeAll
-    static void setUpBeforeClass() throws Exception
-    {
-        testGUI = ProfileEditorDialogTestGUI.getTestGUI( profile );
-    }
+    private static final ProfileEditorDialogTestGUI testGUI = 
+        ProfileEditorDialogTestGUI.getTestGUI( profile );
 
     @BeforeEach
     public void beforeEach() throws Exception
     {
-        // Make sure the test dialog isn't still showing.
-        testGUI.cancelDialog();
-        
         // Restore the properties in the PropertyManager
         // to their original values.
         baseProfile.apply();
@@ -88,7 +79,8 @@ public class ProfileEditorDialogTest
         // In the event that a test failed while the FontEditorDialog
         // is posted, this will dismiss it. If the dialog is not posted 
         // it has no effect.
-        testGUI.cancelFontDialog();
+        testGUI.cancelDialog();
+        
     }
     
     @AfterAll
@@ -99,12 +91,6 @@ public class ProfileEditorDialogTest
         // Also make sure all GUI windows are disposed.
         baseProfile.apply();
         ComponentFinder.disposeAll();
-    }
-    
-    @SuppressWarnings("unused")
-    private void waitOp()
-    {
-        JOptionPane.showMessageDialog( null, "Waiting" );
     }
 
     @Test
@@ -140,18 +126,20 @@ public class ProfileEditorDialogTest
     public void testReset()
     {
         Thread  thread  = testGUI.postDialog();
+        Profile startProps          = testGUI.getComponentValues();
+        assertEquals( baseProfile, startProps );
         applyDistinctProperties();
         Profile testDistinctProps   = testGUI.getComponentValues();
+        assertEquals( testDistinctProps, distinctProfile );
         testGUI.pushResetButton();
         Profile testResetProps      = testGUI.getComponentValues();
+        assertEquals( baseProfile, testResetProps );
         
         // Dialog should still be deployed after apply
         assertTrue( testGUI.isVisible() );
         
         testGUI.pushCancelButton();
         Utils.join( thread );
-        assertEquals( testDistinctProps, distinctProfile );
-        assertEquals( baseProfile, testResetProps );
     }
 
     /**
@@ -174,6 +162,8 @@ public class ProfileEditorDialogTest
     public void testApply()
     {
         Thread  thread  = testGUI.postDialog();
+        Profile startProps          = testGUI.getComponentValues();
+        assertEquals( baseProfile, startProps );
         applyDistinctProperties();
         Profile testDistinctProps   = testGUI.getComponentValues();
         testGUI.pushApplyButton();
@@ -208,6 +198,8 @@ public class ProfileEditorDialogTest
     public void testOK()
     {
         Thread  thread  = testGUI.postDialog();
+        Profile startProps          = testGUI.getComponentValues();
+        assertEquals( baseProfile, startProps );
         applyDistinctProperties();
         Profile testDistinctProps   = testGUI.getComponentValues();
         testGUI.pushOKButton();
@@ -247,6 +239,8 @@ public class ProfileEditorDialogTest
     public void testCancel()
     {
         Thread  thread  = testGUI.postDialog();
+        Profile startProps          = testGUI.getComponentValues();
+        assertEquals( baseProfile, startProps );
         applyDistinctProperties();
         Profile testDistinctProps   = testGUI.getComponentValues();
         testGUI.pushCancelButton();
@@ -266,6 +260,11 @@ public class ProfileEditorDialogTest
         assertEquals( baseProfile, testProps );
     }
     
+    /**
+     * Change the values of all GUI components
+     * related to Profile properties
+     * to distinct values.
+     */
     private void applyDistinctProperties()
     {
         testGUI.setGridUnit( distinctProfile.getGridUnit() );
@@ -280,6 +279,11 @@ public class ProfileEditorDialogTest
             .forEach( this::applyDistinctLineProperties );
     }
     
+    /**
+     * Change the values of all GUI components
+     * related to GraphPropertySetMW properties
+     * to distinct values.
+     */
     private void applyDistinctGraphProperties()
     {
         GraphPropertySet    props   = distinctProfile.getMainWindow();
@@ -292,6 +296,11 @@ public class ProfileEditorDialogTest
 //        waitOp();
     }
     
+    /**
+     * Change the values of all GUI components
+     * related to font properties
+     * to distinct values.
+     */
     private void applyDistinctFontProperties()
     {
         Thread              thread  = testGUI.editFont();
@@ -309,6 +318,13 @@ public class ProfileEditorDialogTest
         Utils.join( thread );
     }
     
+    /**
+     * Change the values of the properties
+     * in the given LinePropertySet of the working profile
+     * to distinct values.
+     * 
+     * @param name  the given LinePropertySet
+     */
     private void applyDistinctLineProperties( String name )
     {
         LinePropertySet props   = 
@@ -326,5 +342,18 @@ public class ProfileEditorDialogTest
             testGUI.setSpacing( name, props.getSpacing() );
         if ( props.hasStroke() )
             testGUI.setStroke( name, props.getStroke() );
+    }
+    
+    /**
+     * This method is for debugging purposes only.
+     * It posts a modal dialog
+     * which will suspend the test
+     * and freeze the GUI
+     * until it is dismissed.
+     */
+    @SuppressWarnings("unused")
+    private void waitOp()
+    {
+        JOptionPane.showMessageDialog( null, "Waiting" );
     }
 }
