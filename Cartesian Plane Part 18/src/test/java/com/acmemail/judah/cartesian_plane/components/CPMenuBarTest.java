@@ -24,6 +24,7 @@ public class CPMenuBarTest
     private JDialog             lineDialog;
     private JDialog             graphDialog;
     private JDialog             aboutDialog;
+    private JDialog             profileEditorDialog;
     
     @BeforeEach
     public void beforeEach()
@@ -32,6 +33,7 @@ public class CPMenuBarTest
         lineDialog = tester.getLineDialog();
         graphDialog = tester.getGraphDialog();
         aboutDialog = tester.getAboutDialog();
+        profileEditorDialog = tester.getProfileEditorDialog();
     }
 
     @AfterEach
@@ -42,6 +44,7 @@ public class CPMenuBarTest
         lineDialog = null;
         graphDialog = null;
         aboutDialog = null;
+        profileEditorDialog = null;
     }
 
     @Test
@@ -63,14 +66,13 @@ public class CPMenuBarTest
     @Test
     public void testWindowMenu()
     {
-        JMenu       windowMenu  = tester.getMenu( "Window" );
-        assertNotNull( windowMenu );
-        
         testWindowItem( "Edit Line Properties" );
         testWindowItem( "Edit Graph Properties" );
+        testWindowItem( "Edit Profile" );
         
         testWindowDialog( "Edit Line Properties", lineDialog );
         testWindowDialog( "Edit Graph Properties", graphDialog );
+        testProfileEditorDialog();
     }
 
     @Test
@@ -163,6 +165,19 @@ public class CPMenuBarTest
         Utils.pause( 500 );
         assertFalse( item.isSelected() );
         assertFalse( tester.isVisible( dialog ) );
+    }
+    
+    private void testProfileEditorDialog()
+    {
+        JMenuItem   item    = 
+            tester.getMenuItem( "Window", "Edit Profile" );
+        assertNotNull( item );
+        tester.doClick( item );
+        Utils.pause( 200 );
+        assertTrue( profileEditorDialog.isVisible() );
+        profileEditorDialog.setVisible( false );
+        Utils.pause( 200 );
+        assertFalse( profileEditorDialog.isVisible() );
     }
     
     private void testHelpItem( String... labels )

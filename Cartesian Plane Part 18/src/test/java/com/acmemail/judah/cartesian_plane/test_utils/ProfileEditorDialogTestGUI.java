@@ -98,6 +98,7 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         GUIUtils.schedEDTAndWait( () -> thread.start() );
         while ( !testDialog.isVisible() )
             Utils.pause( 1 );
+        Utils.pause( 10 );
         return thread;
     }
     

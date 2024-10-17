@@ -169,7 +169,8 @@ public class CPMenuBar extends JMenuBar
      * from a given PropertyChangeEvent
      * converts it to a boolean value
      * and returns the result.
-a + 2pi - 5apap     * @param evt   the given PropertyChangeEvent
+     * 
+     * @param evt   the given PropertyChangeEvent
      * 
      * @return
      *      the newValue property of the given PropertyChangeEvent

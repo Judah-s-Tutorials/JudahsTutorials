@@ -141,7 +141,7 @@ public class ProfileEditor extends JPanel
 
     /**
      * Constructor.
-     * Initializes the editor dialog.
+     * Initializes this ProfileEditor.
      * 
      * @param profile   profile to edit
      */

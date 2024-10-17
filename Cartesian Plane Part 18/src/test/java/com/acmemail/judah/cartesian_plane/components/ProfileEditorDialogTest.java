@@ -161,7 +161,7 @@ public class ProfileEditorDialogTest
     @Test
     public void testApply()
     {
-        Thread  thread  = testGUI.postDialog();
+        Thread  thread              = testGUI.postDialog();
         Profile startProps          = testGUI.getComponentValues();
         assertEquals( baseProfile, startProps );
         applyDistinctProperties();

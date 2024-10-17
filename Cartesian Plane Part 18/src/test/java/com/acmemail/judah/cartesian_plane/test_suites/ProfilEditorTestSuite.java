@@ -9,7 +9,7 @@ import com.acmemail.judah.cartesian_plane.components.ProfileEditorFeedbackTest;
 import com.acmemail.judah.cartesian_plane.components.ProfileEditorTest;
 
 @Suite
-@SuiteDisplayName( "LinePropertySet Test Suite" )
+@SuiteDisplayName( "ProfileEditor Test Suite" )
 @SelectClasses({ 
     ProfileEditorTest.class,
     ProfileEditorFeedbackTest.class,

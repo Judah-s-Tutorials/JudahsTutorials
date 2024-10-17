@@ -32,7 +32,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  * of the CPMenuBar,
  * and to the dialogs that the CPMenuBar posts.
  * Operations on components
- * are always executed on the EventDispatchThread,
+ * are always executed on the Event Dispatch Thread,
  * relieving the test class of this responsibility.
  * 
  * @author Jack Straub
@@ -51,6 +51,8 @@ public class CPMenuBarTestDialog
     private final JDialog       lineDialog;
     /** The encapsulated graph property dialog. */
     private final JDialog       graphDialog;
+    /** The encapsulated Profile editor dialog. */
+    private final JDialog       profileEditorDialog;
     /** The encapsulated About dialog. */
     private final JDialog       aboutDialog;
     
@@ -94,6 +96,7 @@ public class CPMenuBarTestDialog
         graphDialog = getDialog( "Graph" );
         lineDialog = getDialog( "Line" );
         aboutDialog = getDialog( "About" );
+        profileEditorDialog = getDialog( "Profile Editor" );
     }
 
     /**
@@ -191,6 +194,17 @@ public class CPMenuBarTestDialog
     public JDialog getGraphDialog()
     {
         return graphDialog;
+    }
+    
+    /**
+     * Gets the dialog that contains the GraphPropertiesPanel
+     * which is spawned by the Window menu.
+     * 
+     * @return  the dialog that contains the GraphPropertiesPanel
+     */
+    public JDialog getProfileEditorDialog()
+    {
+        return profileEditorDialog;
     }
     
     /**
@@ -337,8 +351,8 @@ public class CPMenuBarTestDialog
      * 
      * @return  the menu item with the given menu hierarchy
      * 
-     * @see #tem(String...)
-     * @see #tem(JMenu, String)
+     * @see #getMenuItem(String...)
+     * @see #getMenuItem(JMenu, String)
      */
     private JMenuItem getMenuItemEDT( String... labels )
     {

@@ -2,6 +2,9 @@ package com.acmemail.judah.cartesian_plane.components;
 
 import java.awt.BorderLayout;
 import java.awt.Window;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -54,6 +57,17 @@ public class ProfileEditorDialog extends JDialog
         contentPane.add( BorderLayout.CENTER, canvas );
         contentPane.add( BorderLayout.WEST, editor );
         contentPane.add( BorderLayout.SOUTH, getButtonPanel() );
+        
+        // Make sure editor's profile is updated every time
+        // this dialog becomes visible.
+        WindowListener  listener    = new WindowAdapter() {
+            @Override
+            public void windowOpened( WindowEvent evt )
+            {
+                editor.reset();
+            }
+        };
+        addWindowListener( listener );
         
         setContentPane( contentPane );
         pack();

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>New CPMenuBar</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+
+<table style="font-size: 80%; font-family: 'Lucida Console', 'Courier New', monospace; border-collapse: collapse;">
+<thead>
+<tr> 
+<th style="border: .2em solid black;">Original Code</th>
+<th style="border: .2em solid black;">New Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border: .2em solid black; vertical-align: top; 0;"><pre>private final JDialog       lineDialog;
+private final JDialog       graphDialog;
+private final AboutDialog   aboutDialog;</pre>
+</td>
+<td style="border: .2em solid black; vertical-align: top;"><pre>private final JDialog       lineDialog;
+private final JDialog       graphDialog;
+<span style="background-color: yellow;">private final JDialog       profileEditorDialog;</span>
+private final AboutDialog   aboutDialog;</pre>
+</td>
+</tr>
+</tbody>
+</table>
+
+<table style="font-size: 80%; font-family: 'Lucida Console', 'Courier New', monospace; border-collapse: collapse;">
+<thead>
+<tr> 
+<th style="border: .2em solid black;">Original Code</th>
+<th style="border: .2em solid black;">New Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border: .2em solid black; vertical-align: top; 0;"><pre>public CPMenuBar( Window topWindow )
+{
+    this.topWindow = topWindow;
+    lineDialog =
+        LinePropertiesPanel.getDialog( topWindow );
+    graphDialog =
+        GraphPropertiesPanel.getDialog( topWindow );
+    aboutDialog = new AboutDialog( topWindow );
+    // ...
+}</pre>
+</td>
+<td style="border: .2em solid black; vertical-align: top;"><pre>public CPMenuBar( Window topWindow )
+{
+    this.topWindow = topWindow;
+    lineDialog =
+        LinePropertiesPanel.getDialog( topWindow );
+    graphDialog =
+        GraphPropertiesPanel.getDialog( topWindow );
+    aboutDialog = new AboutDialog( topWindow );
+<span style="background-color: yellow;">    profileEditorDialog = 
+        new ProfileEditorDialog( topWindow, new Profile() );</span>
+    // ...
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+
+<table style="font-size: 80%; font-family: 'Lucida Console', 'Courier New', monospace; border-collapse: collapse;">
+<thead>
+<tr> 
+<th style="border: .2em solid black;">Original Code</th>
+<th style="border: .2em solid black;">New Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border: .2em solid black; vertical-align: top; 0;"><pre>private JMenu getWindowMenu()
+{
+    JMenu   menu    = new JMenu( "Window" );
+    menu.setMnemonic( KeyEvent.VK_W );
+    
+    JCheckBoxMenuItem   graphItem   =
+        new JCheckBoxMenuItem( "Edit Graph Properties", false );
+    JCheckBoxMenuItem   lineItem    =
+        new JCheckBoxMenuItem( "Edit Line Properties", false );
+    graphItem.addItemListener( e -> 
+        graphDialog.setVisible( graphItem.isSelected() )
+    );
+    lineItem.addItemListener( e -> 
+        lineDialog.setVisible( lineItem.isSelected() )
+    );
+    lineDialog.addComponentListener( new SynchVisible( lineItem ) );
+    graphDialog.addComponentListener( new SynchVisible( graphItem ) );
+    menu.add( graphItem );
+    menu.add( lineItem );
+    
+    return menu;
+}
+</pre>
+</td>
+<td style="border: .2em solid black; vertical-align: top;"><pre>private JMenu getWindowMenu()
+{
+    JMenu   menu    = new JMenu( "Window" );
+    menu.setMnemonic( KeyEvent.VK_W );
+    
+    JCheckBoxMenuItem   graphItem   =
+        new JCheckBoxMenuItem( "Edit Graph Properties", false );
+    JCheckBoxMenuItem   lineItem    =
+        new JCheckBoxMenuItem( "Edit Line Properties", false );
+<span style="background-color: yellow;">    JMenuItem   profileItem =
+        new JMenuItem( "Edit Profile" );</span>
+    graphItem.addItemListener( e -> 
+        graphDialog.setVisible( graphItem.isSelected() )
+    );
+    lineItem.addItemListener( e -> 
+        lineDialog.setVisible( lineItem.isSelected() )
+    );
+    lineDialog.addComponentListener( new SynchVisible( lineItem ) );
+    graphDialog.addComponentListener( new SynchVisible( graphItem ) );
+<span style="background-color: yellow;">    profileItem.addActionListener( 
+        e -> profileEditorDialog.setVisible( true )
+    );</span>
+    menu.add( graphItem );
+    menu.add( lineItem );
+<span style="background-color: yellow;">    menu.add( profileItem );</span>
+    
+    return menu;
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+
+</body>
+</html>

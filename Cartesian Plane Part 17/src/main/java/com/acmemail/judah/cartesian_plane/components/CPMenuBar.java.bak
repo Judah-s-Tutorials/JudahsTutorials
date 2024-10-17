@@ -24,7 +24,6 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
-import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
@@ -52,8 +51,6 @@ public class CPMenuBar extends JMenuBar
     private final JDialog       lineDialog;
     /** Dialog to configure graph properties in the Cartesian plane. */
     private final JDialog       graphDialog;
-    /** Dialog to configure profile properties. */
-    private final JDialog       profileEditorDialog;
     /** Dialog to show "about application" page. */
     private final AboutDialog   aboutDialog;
     
@@ -84,8 +81,6 @@ public class CPMenuBar extends JMenuBar
         graphDialog =
             GraphPropertiesPanel.getDialog( topWindow );
         aboutDialog = new AboutDialog( topWindow );
-        profileEditorDialog = 
-            new ProfileEditorDialog( topWindow, new Profile() );
         
         add( getFileMenu() );
         add( getWindowMenu() );
@@ -174,7 +169,7 @@ public class CPMenuBar extends JMenuBar
      * from a given PropertyChangeEvent
      * converts it to a boolean value
      * and returns the result.
-     * 
+     *
      * @param evt   the given PropertyChangeEvent
      * 
      * @return
@@ -202,8 +197,6 @@ public class CPMenuBar extends JMenuBar
             new JCheckBoxMenuItem( "Edit Graph Properties", false );
         JCheckBoxMenuItem   lineItem    =
             new JCheckBoxMenuItem( "Edit Line Properties", false );
-        JMenuItem   profileItem =
-            new JMenuItem( "Edit Profile" );
         graphItem.addItemListener( e -> 
             graphDialog.setVisible( graphItem.isSelected() )
         );
@@ -212,12 +205,8 @@ public class CPMenuBar extends JMenuBar
         );
         lineDialog.addComponentListener( new SynchVisible( lineItem ) );
         graphDialog.addComponentListener( new SynchVisible( graphItem ) );
-        profileItem.addActionListener( 
-            e -> profileEditorDialog.setVisible( true )
-        );
         menu.add( graphItem );
         menu.add( lineItem );
-        menu.add( profileItem );
         
         return menu;
     }
