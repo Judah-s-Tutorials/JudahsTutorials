@@ -5,18 +5,14 @@ import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
 
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import com.acmemail.judah.cartesian_plane.Profile;
-import com.acmemail.judah.cartesian_plane.ProfileFileManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**
@@ -28,7 +24,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  * @author Jack Straub
  */
 @SuppressWarnings("serial")
-public class ProfileEditorDialog extends JDialog
+public class ProfileEditorDialog_orig extends JDialog
 {
     /** The title for this dialog. */
     private static final String dialogTitle     = "Profile Editor";
@@ -36,7 +32,7 @@ public class ProfileEditorDialog extends JDialog
     private final JComponent        canvas;
     /** The encapsulated ProfileEditor. */
     private final ProfileEditor     editor;
-        
+    
     /** 
      * Records the final status of the dialog (OK/Cancel).
      * Updated in the {@link #close(int)} method.
@@ -50,7 +46,7 @@ public class ProfileEditorDialog extends JDialog
      * 
      * @param profile   profile to edit
      */
-    public ProfileEditorDialog( Window parent, Profile profile )
+    public ProfileEditorDialog_orig( Window parent, Profile profile )
     {
         super( parent, dialogTitle, ModalityType.APPLICATION_MODAL );
 
@@ -60,7 +56,7 @@ public class ProfileEditorDialog extends JDialog
         JPanel      contentPane     = new JPanel( new BorderLayout() );
         contentPane.add( BorderLayout.CENTER, canvas );
         contentPane.add( BorderLayout.WEST, editor );
-        contentPane.add( BorderLayout.SOUTH, getControlPanel() );
+        contentPane.add( BorderLayout.SOUTH, getButtonPanel() );
         
         // Make sure editor's profile is updated every time
         // this dialog becomes visible.
@@ -103,16 +99,6 @@ public class ProfileEditorDialog extends JDialog
         return result;
     }
     
-    private JPanel getControlPanel()
-    {
-        JPanel      panel   = new JPanel();
-        BoxLayout   layout  = new BoxLayout( panel, BoxLayout.Y_AXIS );
-        panel.setLayout( layout );
-        panel.add( getOKCancelPanel() );
-        panel.add( getOpenSavePanel() );
-        return panel;
-    }
-    
     /**
      * Creates a panel with a FlowLayout
      * that contains the dialog control buttons
@@ -120,7 +106,7 @@ public class ProfileEditorDialog extends JDialog
      * 
      * @return  a panel containing the dialog control buttons
      */
-    private JPanel getOKCancelPanel()
+    private JPanel getButtonPanel()
     {
         JPanel      panel   = new JPanel();
         JButton     okay    = new JButton( "OK" );
@@ -138,32 +124,6 @@ public class ProfileEditorDialog extends JDialog
         panel.add( apply );
         panel.add( reset );
         panel.add( cancel );
-
-        return panel;
-    }
-    
-    private JPanel getOpenSavePanel()
-    {
-        JPanel      panel   = new JPanel();
-        JButton     open    = new JButton( "Open File" );
-        JButton     save    = new JButton( "Save" );
-        JButton     saveAs  = new JButton( "Save As" );
-        JButton     close   = new JButton( "Close File" );
-
-        open.addActionListener( e -> {
-            if ( ProfileFileManager.open() )
-                editor.reset();
-        });
-        close.addActionListener( e -> ProfileFileManager.close() );
-        save.addActionListener( e -> editor.apply() );
-        save.addActionListener( e -> ProfileFileManager.save() );
-        saveAs.addActionListener( e -> editor.apply() );
-        saveAs.addActionListener( e -> ProfileFileManager.save() );
-
-        panel.add( open );
-        panel.add( save );
-        panel.add( saveAs );
-        panel.add( close );
 
         return panel;
     }

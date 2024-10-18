@@ -1,6 +1,1 @@
-    equation conic sections
-    start 0
-    end 2pi
-    step .001
-    set e=.5,d=1,t0=pi/2
-    r= e*d/(1-e*cos(t - t0)
+PROFILE: defaultgridUnit: 65.0class: GraphPropertySetMWwidth: 500.0bgColor: 0xe6e6e6fgColor: 0x000000font_draw: truefont_name: Dialogfont_size: 10.0font_bold: falsefont_italic: falseclass: LinePropertySetAxescolor: 0x000000stroke: 2.0class: LinePropertySetGridLinescolor: 0xcbcbcbdraw: truespacing: 2.0stroke: 1.0class: LinePropertySetTicMajorcolor: 0x000000draw: truelength: 16.0spacing: 2.0stroke: 5.0class: LinePropertySetTicMinorcolor: 0x000000draw: truelength: 6.0spacing: 10.0stroke: 2.0

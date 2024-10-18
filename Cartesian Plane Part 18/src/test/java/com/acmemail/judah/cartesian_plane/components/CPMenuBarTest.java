@@ -173,11 +173,9 @@ public class CPMenuBarTest
             tester.getMenuItem( "Window", "Edit Profile" );
         assertNotNull( item );
         tester.doClick( item );
-        Utils.pause( 200 );
-        assertTrue( profileEditorDialog.isVisible() );
-        profileEditorDialog.setVisible( false );
-        Utils.pause( 200 );
-        assertFalse( profileEditorDialog.isVisible() );
+        assertTrue( tester.isVisible( profileEditorDialog ) );
+        tester.setVisible( profileEditorDialog, false );
+        assertFalse( tester.isVisible( profileEditorDialog ) );
     }
     
     private void testHelpItem( String... labels )
