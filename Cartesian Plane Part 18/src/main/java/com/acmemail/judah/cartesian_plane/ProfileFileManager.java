@@ -12,7 +12,7 @@ import javax.swing.JOptionPane;
 
 public class ProfileFileManager
 {
-    private static final JFileChooser chooser;
+    static final JFileChooser chooser;
     private static File     currFile            = null;
     private static boolean  lastResult          = false;
 
@@ -28,6 +28,11 @@ public class ProfileFileManager
     public static File getCurrFile()
     {
         return currFile;
+    }
+    
+    public static boolean getLastResult()
+    {
+        return lastResult;
     }
     
     public static void close()
@@ -77,16 +82,16 @@ public class ProfileFileManager
         return lastResult;
     }
     
-    public static boolean save()
-    {
-        saveAs( new Profile() );
-        return lastResult;
-    }
-    
     public static boolean save( Profile profile )
     {
         lastResult = currFile == null ? 
             saveAs( profile ) : save( profile, currFile );
+        return lastResult;
+    }
+    
+    public static boolean saveAs()
+    {
+        saveAs( new Profile() );
         return lastResult;
     }
     
