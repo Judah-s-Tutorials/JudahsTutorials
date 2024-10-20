@@ -25,6 +25,11 @@ public class ProfileFileManager
         chooser = new JFileChooser( baseDir );
     }
     
+    public static JFileChooser getFileChooser()
+    {
+        return chooser;
+    }
+    
     public static File getCurrFile()
     {
         return currFile;
@@ -98,7 +103,7 @@ public class ProfileFileManager
     public static boolean saveAs( Profile profile )
     {
         lastResult = false;
-        int result  = chooser.showOpenDialog( null );
+        int result  = chooser.showSaveDialog( null );
         if ( result == JFileChooser.APPROVE_OPTION )
             lastResult = save( profile, chooser.getSelectedFile() );
         return lastResult;

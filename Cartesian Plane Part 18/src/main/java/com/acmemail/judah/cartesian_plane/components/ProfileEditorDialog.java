@@ -154,11 +154,15 @@ public class ProfileEditorDialog extends JDialog
             if ( ProfileFileManager.open() )
                 editor.reset();
         });
+        save.addActionListener( e -> {
+            editor.apply();
+            ProfileFileManager.save( new Profile() );
+        });
+        save.addActionListener( e -> {
+            editor.apply();
+            ProfileFileManager.saveAs( new Profile() );
+        });
         close.addActionListener( e -> ProfileFileManager.close() );
-        save.addActionListener( e -> editor.apply() );
-        save.addActionListener( e -> ProfileFileManager.save() );
-        saveAs.addActionListener( e -> editor.apply() );
-        saveAs.addActionListener( e -> ProfileFileManager.save() );
 
         panel.add( open );
         panel.add( save );

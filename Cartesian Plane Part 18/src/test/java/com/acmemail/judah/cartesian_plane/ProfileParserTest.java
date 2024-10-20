@@ -8,11 +8,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractButton;
@@ -235,7 +233,7 @@ public class ProfileParserTest
         props.add( 4, ProfileParser.FONT_SIZE + ": " + 10 + ", a"  );
         
         ProfileParser   testParser  = new ProfileParser();
-        int testCount   = expectDialog( () ->
+        int             testCount   = expectDialog( () ->
             testParser.loadProperties( props.stream() )
         );
         

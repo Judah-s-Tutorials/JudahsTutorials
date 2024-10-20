@@ -19,13 +19,30 @@ import com.acmemail.judah.cartesian_plane.ProfileFileManager;
 import com.acmemail.judah.cartesian_plane.components.ProfileEditor;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
+/**
+ * This application demonstrates the use of the ProfileManager.
+ * It provides the operator with a choice 
+ * of open, save, save-as, and close operations,
+ * which interact dynamically
+ * with an instance of a ProfileEditor.
+ * 
+ * @author Jack Straub
+ * 
+ * @see #getButtonPanel()
+ */
 public class ProfileFileManagerDemo1
 {
+    /** Title of the main application frame. */
     private static final String title       = "ProfileFileManager Demo1";
+    /** Main application frame. */
     private final JFrame        frame       = new JFrame( title );
+    /** Text field that displays the name of the currently open file. */
     private final JTextField    currFile    = new JTextField( 10 );
+    /** Text field that displays the result of the last operation. */
     private final JTextField    lastResult  = new JTextField( 5 );
+    /** Working profile. */
     private final Profile       profile     = new Profile();
+    /** Encapsulated ProfileEditor. */
     private final ProfileEditor editor      = new ProfileEditor( profile );
     
     /**
@@ -39,6 +56,12 @@ public class ProfileFileManagerDemo1
         SwingUtilities.invokeLater( ProfileFileManagerDemo1::new );
     }
     
+    /**
+     * Constructor.
+     * Fully initializes the application;
+     * creates and displays the application GUI.
+     * Must be invoked on the EDT.
+     */
     public ProfileFileManagerDemo1()
     {
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
@@ -56,6 +79,12 @@ public class ProfileFileManagerDemo1
         frame.setVisible( true );
     }
     
+    /**
+     * Creates the panel that displays the currently open file
+     * and the result of the last operation.
+     * 
+     * @return  the created panel
+     */
     private JPanel getFeedbackPanel()
     {
         JPanel      panel       = new JPanel();
@@ -71,6 +100,13 @@ public class ProfileFileManagerDemo1
         return panel;
     }
     
+    /**
+     * Creates the panel that contains
+     * the buttons the operator can use
+     * to initiate an operation.
+     * 
+     * @return the created panel
+     */
     private JPanel getButtonPanel()
     {
         JPanel      buttons     = 
@@ -110,11 +146,22 @@ public class ProfileFileManagerDemo1
         buttons.add( new JLabel( "" ) );
         buttons.add( exit );
 
+        // The extra panel is to prevent the layout manager on the
+        // button panel from resizing the child components to fill
+        // the allocated real estate.
         JPanel  panel   = new JPanel();
         panel.add( buttons );
         return panel;
     }
     
+    /**
+     * Execute the given ProfileFileManager operation.
+     * After the operation completes
+     * update the current file name and last-result fields
+     * in the feedback panel.
+     * 
+     * @param runner    the given operation
+     */
     private void execCommand( Runnable runner )
     {
         runner.run();
