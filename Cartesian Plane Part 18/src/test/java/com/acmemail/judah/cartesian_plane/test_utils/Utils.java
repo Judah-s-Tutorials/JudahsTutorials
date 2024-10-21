@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.test_utils;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.stream.Stream;
 
 public class Utils
 {
@@ -99,6 +100,21 @@ public class Utils
             if ( !testDir.mkdirs() )
                 testDir = null;
         return testDir;
+    }
+    
+    /**
+     * Recursively deletes the given file.
+     * If the given file is a directory
+     * all contained files a recursively deleted.
+     * 
+     * @param file  the given file
+     */
+    public static void recursiveDelete( File file )
+    {
+        if ( file.isDirectory() )
+            Stream.of( file.listFiles() )
+            .forEach( Utils::recursiveDelete );
+        file.delete();
     }
     
     /**

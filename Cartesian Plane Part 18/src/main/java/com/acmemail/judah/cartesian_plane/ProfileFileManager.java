@@ -56,7 +56,7 @@ public class ProfileFileManager
     
     public static boolean open( File file )
     {
-        Profile         profile = null;
+        Profile         profile = new Profile();
         Stream<String>  lines   = null;
         try ( 
             FileReader fReader = new FileReader( file );
@@ -64,9 +64,8 @@ public class ProfileFileManager
         )
         {
             lines = bReader.lines();
-            ProfileParser   parser  = new ProfileParser();
+            ProfileParser   parser  = new ProfileParser( profile );
             parser.loadProperties( lines );
-            profile = parser.getProfile();
             profile.apply();
             currFile = file;
         }

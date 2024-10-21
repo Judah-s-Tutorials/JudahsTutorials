@@ -1,11 +1,19 @@
 package com.acmemail.judah.cartesian_plane;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Component;
 import java.awt.Window;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.function.Predicate;
 
 import javax.swing.AbstractButton;
@@ -15,16 +23,36 @@ import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
+import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
-class ProfileFileManagerTest
+public class ProfileFileManagerTest
 {
+    private static String   testDataDirName     = "ProfileFileManagerTest";
+    private static File     testDataDir         = 
+        Utils.getTestDataDir( testDataDirName );
+    private static String   baseProfileName     = "BaseProfile.txt";
+    private static String   distinctProfileName = "DistinctProfile.txt";
+    private static String   adHocName           = "AdHoc.txt";
+    private static String   noAccessProfileName = "NoAccessFile.txt";
+    private static String   noSuchFile          = "NoSuchFile.txt";
+    
+    /** 
+     * Profile containing original property values; 
+     * modified in {@link #setUpBeforeClass()} and never changed.
+     */
+    private static Profile  baseProfile         = new Profile();
+    /** Profile containing unique property values; never modified. */
+    private Profile         distinctProfile     = 
+        ProfileUtils.getDistinctProfile( baseProfile );
+    
     /** The FileChooser from the ProfileFileManager. */
     private JFileChooser    fileChooser     = 
         ProfileFileManager.getFileChooser();
@@ -48,68 +76,163 @@ class ProfileFileManagerTest
     private JButton         cancelButton    = null;
 
     @BeforeAll
-    static void setUpBeforeClass() throws Exception
+    static public void setUpBeforeClass() throws Exception
     {
+        System.out.println( Utils.getTempDir().getAbsolutePath() );
+        
+        File    baseFile    = new File( testDataDir, baseProfileName );
+        if ( baseFile.exists() )
+            baseFile.delete();
+        
+        baseProfile.setName( "Unique-Test-Name" );
+        ProfileParser   parser      = new ProfileParser( baseProfile );
+        try ( 
+            FileOutputStream fileStr = new FileOutputStream( baseFile );
+            PrintWriter writer = new PrintWriter( fileStr );
+        )
+        {
+            parser.getProperties()
+                .forEach( writer::println );
+        }
+        
+        File    distinctFile    = 
+            new File( testDataDir, distinctProfileName );
+        if ( distinctFile.exists() )
+            distinctFile.delete();
+        
+        
+        File    noAccessFile   = 
+            new File( testDataDir, noAccessProfileName );
+        noAccessFile.createNewFile();
+        if ( noAccessFile.canRead() )
+            noAccessFile.setReadable( false );
+        if ( noAccessFile.canWrite() )
+            noAccessFile.setWritable( false );
     }
-
+    
+    @AfterAll
+    public static void afterAll() throws Exception
+    {
+        if ( testDataDir.exists() )
+            Utils.recursiveDelete( testDataDir );
+        String  finalStatus = testDataDir.getName() + ": Delete data dir ";
+        finalStatus += testDataDir.exists() ? "failed" : "succeeded";
+        System.err.println( finalStatus );
+    }
+    
     @BeforeEach
-    void setUp() throws Exception
+    public void setUp() throws Exception
     {
+    }
+    
+    @Test
+    public void testMisc()
+    {
+        File    inError = new File( testDataDir, noSuchFile );
+        try ( FileInputStream inStr = new FileInputStream( inError ) )
+        {
+            System.out.println( "no input test failed" );
+        }
+        catch ( IOException exc )
+        {
+            System.out.println( exc.getMessage() );
+        }
+
+        File    outError = new File( testDataDir, noAccessProfileName );
+        try ( PrintStream inStr = new PrintStream( outError ) )
+        {
+            System.out.println( "no output test failed" );
+        }
+        catch ( IOException exc )
+        {
+            System.out.println( exc.getMessage() );
+        }
+        System.out.println( "done" );
     }
 
     @Test
-    void testGetCurrFile()
+    public void testGetCurrFile()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testGetLastResult()
+    public void testGetLastResult()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testClose()
+    public void testClose()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testOpen()
+    public void testOpenGoRight()
+    {
+        Thread  thread  = executeOp( ProfileFileManager::open );
+        enterPath( baseProfileName );
+        clickOn( openButton );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        Profile currProfile = new Profile();
+        assertEquals( baseProfile, currProfile );
+    }
+
+    @Test
+    public void testOpenGoWrong()
+    {
+        Thread  thread  = executeOp( ProfileFileManager::open );
+        enterPath( noSuchFile );
+        clickOn( openButton );
+        assertTrue( dismissErrorDialog() );
+        Utils.join( thread );
+    }
+
+    @Test
+    public void testOpenFile()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testOpenFile()
+    public void testSaveProfile()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testSaveProfile()
+    public void testSaveAs()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testSaveAs()
+    public void testSaveAsProfile()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testSaveAsProfile()
+    public void testSaveProfileFile()
     {
         fail("Not yet implemented");
     }
-
-    @Test
-    void testSaveProfileFile()
+    
+    private void enterPath( String fileName )
     {
-        fail("Not yet implemented");
+        assertNotNull( chooserName );
+        File    file    = new File( testDataDir, fileName );
+        String  path    = file.getAbsolutePath();
+        GUIUtils.schedEDTAndWait( () -> chooserName.setText( path ) );
     }
+    
+    private void clickOn( AbstractButton button )
+    {
+        GUIUtils.schedEDTAndWait( button::doClick );
+    }
+    
     /**
      * Execute a given operation,
      * wait for an error errorDialog to post,
@@ -130,22 +253,30 @@ class ProfileFileManagerTest
      *      the number of dialogs posted 
      *      while executing the given operation
      */
-    private int expectDialog( Runnable runner )
+    private Thread executeOp( Runnable runner )
     {
         Thread  thread          = new Thread( runner );
-        int     dialogCounter   = 0;
         thread.start();
-        while ( thread.isAlive() )
+        Utils.pause( 250 );
+        assertTrue( fileChooser.isVisible() );
+        getFileChooserComponents();
+        return thread;
+    }
+    
+    private boolean dismissErrorDialog()
+    {
+        boolean dismissed   = false;
+        Utils.pause( 250 );
+        getDialogAndOKButton();
+        if ( errorDialogOKButton != null )
         {
+            dismissed = true;
+            GUIUtils.schedEDTAndWait( errorDialogOKButton::doClick );
+            String  status  = "Error dialog visible: " + errorDialog.isVisible();
+            System.out.println( status );
             Utils.pause( 250 );
-            getDialogAndOKButton();
-            if ( errorDialogOKButton != null )
-            {
-                ++dialogCounter;
-                okAndWait();
-            }
         }
-        return dialogCounter;
+        return dismissed;
     }
     
     /**
