@@ -5,13 +5,11 @@ import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.io.File;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
@@ -151,16 +149,15 @@ public class ProfileEditorDialog extends JDialog
         JButton     close   = new JButton( "Close File" );
 
         open.addActionListener( e -> {
-            if ( ProfileFileManager.open() )
+            Profile profile = editor.getProfile();
+            if ( ProfileFileManager.open( profile ) != null )
                 editor.reset();
         });
         save.addActionListener( e -> {
-            editor.apply();
-            ProfileFileManager.save( new Profile() );
+            ProfileFileManager.save( editor.getProfile() );
         });
         save.addActionListener( e -> {
-            editor.apply();
-            ProfileFileManager.saveAs( new Profile() );
+            ProfileFileManager.saveAs( editor.getProfile() );
         });
         close.addActionListener( e -> ProfileFileManager.close() );
 

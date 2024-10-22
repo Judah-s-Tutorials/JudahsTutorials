@@ -1,5 +1,6 @@
 package com.acmemail.judah.cartesian_plane;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -35,22 +36,51 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 public class ProfileFileManagerTest
 {
-    private static String   testDataDirName     = "ProfileFileManagerTest";
-    private static File     testDataDir         = 
+    private static final String   testDataDirName   = 
+        "ProfileFileManagerTest";
+    private static final  File     testDataDir      = 
         Utils.getTestDataDir( testDataDirName );
-    private static String   baseProfileName     = "BaseProfile.txt";
-    private static String   distinctProfileName = "DistinctProfile.txt";
-    private static String   adHocName           = "AdHoc.txt";
-    private static String   noAccessProfileName = "NoAccessFile.txt";
-    private static String   noSuchFile          = "NoSuchFile.txt";
+    private static final  String   baseName         = 
+        "BaseProfile.txt";
+    private static final  String   distinctName     = 
+        "DistinctProfile.txt";
+    private static final  String   adHocName        = 
+        "AdHoc.txt";
+    private static final  String   noAccessName     = 
+        "NoAccessFile.txt";
+    private static final  String   noSuchFileName   = 
+        "NoSuchFile.txt";
+    private static final File       baseFile        = 
+        new File( testDataDir, baseName );
+    private static final File       distinctFile    = 
+        new File( testDataDir, distinctName );
+    private static final File       adHocFile       = 
+        new File( testDataDir, adHocName );
+    private static final File       noAccessFile    = 
+        new File( testDataDir, noAccessName );
+    private static final File       noSuchFile      = 
+        new File( testDataDir, noSuchFileName );
     
     /** 
      * Profile containing original property values; 
      * modified in {@link #setUpBeforeClass()} and never changed.
+     * Used in {@link #beforeEach()} to restore the PropertyManager
+     * to the base properties before each test.
      */
-    private static Profile  baseProfile         = new Profile();
+    private static final Profile    baseProfile         = new Profile();
     /** Profile containing unique property values; never modified. */
-    private Profile         distinctProfile     = 
+    private static final Profile    distinctProfile     = 
+        ProfileUtils.getDistinctProfile( baseProfile );
+    /** 
+     * Profile for ad hoc use during testing. Contents should be
+     * considered volatile outside of very narrow usage, such:
+     * <span style="font-family: monospace;">
+     * <br>
+     * &nbsp;&nbsp;&nbsp;&nbsp;profile = getProfile();<br>
+     * &nbsp;&nbsp;&nbsp;&nbsp;validate( profile );
+     * </span>
+     */
+    private Profile         adHocProfile                = 
         ProfileUtils.getDistinctProfile( baseProfile );
     
     /** The FileChooser from the ProfileFileManager. */
@@ -80,34 +110,34 @@ public class ProfileFileManagerTest
     {
         System.out.println( Utils.getTempDir().getAbsolutePath() );
         
-        File    baseFile    = new File( testDataDir, baseProfileName );
-        if ( baseFile.exists() )
-            baseFile.delete();
-        
+        baseFile.delete();
         baseProfile.setName( "Unique-Test-Name" );
-        ProfileParser   parser      = new ProfileParser( baseProfile );
+        saveProfile( baseProfile, baseFile );
+        
+        distinctFile.delete();
+        saveProfile( distinctProfile, distinctFile );
+        
+        noSuchFile.delete();
+        
+        noAccessFile.createNewFile();
+        if ( noAccessFile.canRead() )
+            noAccessFile.setReadable( false );
+        if ( noAccessFile.canWrite() )
+            noAccessFile.setWritable( false );
+    }
+    
+    private static void saveProfile( Profile profile, File file ) 
+        throws Exception
+    {
+        ProfileParser   parser      = new ProfileParser( profile );
         try ( 
-            FileOutputStream fileStr = new FileOutputStream( baseFile );
+            FileOutputStream fileStr = new FileOutputStream( file );
             PrintWriter writer = new PrintWriter( fileStr );
         )
         {
             parser.getProperties()
                 .forEach( writer::println );
         }
-        
-        File    distinctFile    = 
-            new File( testDataDir, distinctProfileName );
-        if ( distinctFile.exists() )
-            distinctFile.delete();
-        
-        
-        File    noAccessFile   = 
-            new File( testDataDir, noAccessProfileName );
-        noAccessFile.createNewFile();
-        if ( noAccessFile.canRead() )
-            noAccessFile.setReadable( false );
-        if ( noAccessFile.canWrite() )
-            noAccessFile.setWritable( false );
     }
     
     @AfterAll
@@ -121,14 +151,19 @@ public class ProfileFileManagerTest
     }
     
     @BeforeEach
-    public void setUp() throws Exception
+    public void beforeEach() throws Exception
     {
+        baseProfile.apply();
+        chooserName = null;
+        openButton = null;
+        saveButton = null;
+        cancelButton = null;
     }
     
     @Test
     public void testMisc()
     {
-        File    inError = new File( testDataDir, noSuchFile );
+        File    inError = new File( testDataDir, noSuchFileName );
         try ( FileInputStream inStr = new FileInputStream( inError ) )
         {
             System.out.println( "no input test failed" );
@@ -138,7 +173,7 @@ public class ProfileFileManagerTest
             System.out.println( exc.getMessage() );
         }
 
-        File    outError = new File( testDataDir, noAccessProfileName );
+        File    outError = new File( testDataDir, noAccessName );
         try ( PrintStream inStr = new PrintStream( outError ) )
         {
             System.out.println( "no output test failed" );
@@ -153,71 +188,310 @@ public class ProfileFileManagerTest
     @Test
     public void testGetCurrFile()
     {
-        fail("Not yet implemented");
+        Thread  thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( baseFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( baseFile, ProfileFileManager.getCurrFile() );
+
+        thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( adHocFile, ProfileFileManager.getCurrFile() );
     }
 
     @Test
-    public void testGetLastResult()
+    public void testGetLastResultTrue()
     {
-        fail("Not yet implemented");
+        Thread  thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( baseFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertTrue( ProfileFileManager.getLastResult() );
     }
+
+    @Test
+    public void testGetLastResultFalse()
+    {
+        Thread  thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( noSuchFile )
+        );
+        assertTrue( dismissErrorDialog() );
+        Utils.join( thread );
+        assertFalse( ProfileFileManager.getLastResult() );
+}
 
     @Test
     public void testClose()
     {
-        fail("Not yet implemented");
+        Thread  thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( baseFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertNotNull( ProfileFileManager.getCurrFile() );
+        
+        ProfileFileManager.close();
+        thread  = executeOp( ProfileFileManager::close );
+        Utils.join( thread );
+        assertNull( ProfileFileManager.getCurrFile() );
     }
 
     @Test
     public void testOpenGoRight()
     {
-        Thread  thread  = executeOp( ProfileFileManager::open );
-        enterPath( baseProfileName );
+        Thread  thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open()
+        );
+        enterPath( baseName );
         clickOn( openButton );
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
-        Profile currProfile = new Profile();
-        assertEquals( baseProfile, currProfile );
+        assertEquals( baseProfile, adHocProfile );
     }
 
     @Test
     public void testOpenGoWrong()
     {
-        Thread  thread  = executeOp( ProfileFileManager::open );
-        enterPath( noSuchFile );
+        Thread  thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open()
+        );
+        enterPath( noSuchFileName );
         clickOn( openButton );
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
+        assertNull( adHocProfile );
     }
 
     @Test
     public void testOpenFile()
     {
-        fail("Not yet implemented");
+        Thread  thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( baseFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( baseProfile, adHocProfile );
+    }
+    
+    @Test
+    public void testSaveProfileFileGoRight()
+    {
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        
+        Profile profile = new Profile();
+        // sanity check
+        assertEquals( baseProfile, profile );
+        
+        profile.setName( "testSaveProfileFileGoRight" );
+        Thread  thread  = executeOp( 
+            () -> ProfileFileManager.save( profile, adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertTrue( adHocFile.exists() );
+        
+        thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( profile, adHocProfile );
+        assertEquals( adHocFile, ProfileFileManager.getCurrFile() );
+    }
+    
+    @Test
+    public void testSaveProfileFileGoWrong()
+    {
+        File    origFile    = ProfileFileManager.getCurrFile();
+        Thread  thread  = executeOp( 
+            () -> ProfileFileManager.save( new Profile(), noAccessFile )
+        );
+        assertTrue( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( origFile, ProfileFileManager.getCurrFile() );
     }
 
     @Test
-    public void testSaveProfile()
+    public void testSaveProfileGoRight()
     {
-        fail("Not yet implemented");
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        ProfileFileManager.clearCurrFile();
+        
+        Profile profile = new Profile();
+        // sanity check
+        assertEquals( baseProfile, profile );
+        
+        profile.setName( "testSaveProfileGoRight" );
+        Thread  thread  = executeOp( 
+            () -> ProfileFileManager.save( profile )
+        );
+        enterPath( adHocName );
+        clickOn( saveButton );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertTrue( adHocFile.exists() );
+        
+        thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( profile, adHocProfile );
+        assertEquals( adHocFile, ProfileFileManager.getCurrFile() );
+    }
+
+    @Test
+    public void testSaveProfileGoWrong()
+    {
+        assertTrue( noAccessFile.exists() );
+        assertFalse( noAccessFile.canWrite() );
+        ProfileFileManager.clearCurrFile();
+        
+        Profile profile = new Profile();
+        // sanity check
+        assertEquals( baseProfile, profile );
+        
+        profile.setName( "testSaveProfileGoRight" );
+        Thread  thread  = executeOp( 
+            () -> ProfileFileManager.save( profile )
+        );
+        enterPath( noAccessName );
+        clickOn( saveButton );
+        assertTrue( dismissErrorDialog() );
+        Utils.join( thread );
     }
 
     @Test
     public void testSaveAs()
     {
-        fail("Not yet implemented");
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        
+        // Write distinct properties to ad hoc file
+        Thread  thread  = executeOp( 
+            () -> ProfileFileManager.saveAs()
+        );
+        enterPath( adHocName );
+        clickOn( saveButton );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        
+        // Verify ad hoc file exists and contains base properties
+        assertTrue( adHocFile.exists() );
+        thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( baseProfile, adHocProfile );
+    }
+
+    @Test
+    public void testSaveAsCancel()
+    {
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        
+        // Write distinct properties to ad hoc file
+        Thread  thread  = executeOp( 
+            () -> ProfileFileManager.saveAs()
+        );
+        enterPath( adHocName );
+        clickOn( cancelButton );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        
+        // Verify ad hoc file not written
+        assertFalse( adHocFile.exists() );
     }
 
     @Test
     public void testSaveAsProfile()
     {
-        fail("Not yet implemented");
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        
+        // Write distinct properties to ad hoc file
+        Profile profile = new Profile();
+        profile.setName( "testSaveAsProfile" );
+        Thread  thread  = executeOp( 
+            () -> ProfileFileManager.saveAs( profile )
+        );
+        enterPath( adHocName );
+        clickOn( saveButton );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        
+        // Verify ad hoc file exists and contains modified properties
+        assertTrue( adHocFile.exists() );
+        thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( profile, adHocProfile );
+    }
+
+    @Test
+    public void testSaveAsProfileCancel()
+    {
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        
+        // Write distinct properties to ad hoc file
+        Profile profile = new Profile();
+        profile.setName( "testSaveAsProfile" );
+        Thread  thread  = executeOp( 
+            () -> ProfileFileManager.saveAs( profile )
+        );
+        enterPath( adHocName );
+        clickOn( cancelButton );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        
+        // Verify ad hoc file exists and contains modified properties
+        assertFalse( adHocFile.exists() );
     }
 
     @Test
     public void testSaveProfileFile()
     {
-        fail("Not yet implemented");
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        
+        // Write distinct properties to ad hoc file
+        Profile profile = new Profile();
+        profile.setName( "testSaveAsProfile" );
+        Thread  thread  = executeOp( 
+            () -> ProfileFileManager.save( profile, adHocFile )
+        );
+        enterPath( adHocName );
+        clickOn( saveButton );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        
+        // Verify ad hoc file exists and contains modified properties
+        assertTrue( adHocFile.exists() );
+        thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( profile, adHocProfile );
     }
     
     private void enterPath( String fileName )
@@ -335,6 +609,15 @@ public class ProfileFileManagerTest
                 errorDialogOKButton = (AbstractButton)comp;
             }
         });
+    }
+    
+    private void nullCurrFileName()
+    {
+        Thread  thread  = executeOp( 
+            () -> adHocProfile = ProfileFileManager.open( noSuchFile )
+        );
+        assertTrue( dismissErrorDialog() );
+        assertNull( ProfileFileManager.getCurrFile() );
     }
     
     /**

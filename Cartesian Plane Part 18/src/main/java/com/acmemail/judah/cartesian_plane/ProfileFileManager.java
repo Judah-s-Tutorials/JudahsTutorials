@@ -35,6 +35,11 @@ public class ProfileFileManager
         return currFile;
     }
     
+    public static void clearCurrFile()
+    {
+        currFile = null;
+    }
+    
     public static boolean getLastResult()
     {
         return lastResult;
@@ -45,19 +50,35 @@ public class ProfileFileManager
         currFile = null;
     }
     
-    public static boolean open()
+    public static Profile open()
+    {
+        lastResult = false;
+        Profile profile = null;
+        int result  = chooser.showOpenDialog( null );
+        if ( result == JFileChooser.APPROVE_OPTION )
+            profile = open( chooser.getSelectedFile() );
+        return profile;
+    }
+    
+    public static Profile open( Profile profile )
     {
         lastResult = false;
         int result  = chooser.showOpenDialog( null );
         if ( result == JFileChooser.APPROVE_OPTION )
-            open( chooser.getSelectedFile() );
-        return lastResult;
+            profile = open( chooser.getSelectedFile() );
+        return profile;
     }
     
-    public static boolean open( File file )
+    public static Profile open( File file )
     {
-        Profile         profile = new Profile();
+        Profile profile = open( file, new Profile() );
+        return profile;
+    }
+    
+    public static Profile open( File file, Profile profile )
+    {
         Stream<String>  lines   = null;
+        currFile = null;
         try ( 
             FileReader fReader = new FileReader( file );
             BufferedReader  bReader = new BufferedReader( fReader );
@@ -66,11 +87,12 @@ public class ProfileFileManager
             lines = bReader.lines();
             ProfileParser   parser  = new ProfileParser( profile );
             parser.loadProperties( lines );
-            profile.apply();
+            profile = parser.getProfile();
             currFile = file;
         }
         catch ( IOException exc )
         {
+            profile = null;
             String  msg = 
                 "Error reading \"" 
                     + file.getAbsolutePath() + "\": " 
@@ -83,6 +105,18 @@ public class ProfileFileManager
             );
         }
         lastResult = profile != null;
+        return profile;
+    }
+    
+    public static boolean save( File file )
+    {
+        save( new Profile(), file );
+        return lastResult;
+    }
+    
+    public static boolean save()
+    {
+        save( new Profile() );
         return lastResult;
     }
     
@@ -111,6 +145,7 @@ public class ProfileFileManager
     public static boolean save( Profile profile, File file )
     {
         lastResult = false;
+//        currFile = null;
         try ( PrintWriter pWriter = new PrintWriter( file ) )
         {
             ProfileParser   parser  = new ProfileParser( profile );

@@ -172,6 +172,16 @@ public class ProfileEditor extends JPanel
     }
     
     /**
+     * Gets this object's Profile.
+     * 
+     * @return   this object's Profile
+     */
+    public Profile getProfile()
+    {
+        return profile;
+    }
+    
+    /**
      * Returns the feedback component.
      * 
      * @return  the feedback component.
