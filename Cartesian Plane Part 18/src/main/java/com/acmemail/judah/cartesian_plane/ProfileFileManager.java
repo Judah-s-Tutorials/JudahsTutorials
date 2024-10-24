@@ -12,45 +12,42 @@ import javax.swing.JOptionPane;
 
 public class ProfileFileManager
 {
-    static final JFileChooser chooser;
-    private static File     currFile            = null;
-    private static boolean  lastResult          = false;
-
-    static
+    private final  JFileChooser chooser;
+    private File     currFile            = null;
+    private boolean  lastResult          = false;
+    
+    /**
+     * Constructor.
+     * Fully configures an object of this type.
+     */
+    public ProfileFileManager()
     {
-        // This property typically contains the path to the directory
-        // from which this application was executed.
         String  userDir = System.getProperty( "user.dir" );
         File    baseDir = new File( userDir );
         chooser = new JFileChooser( baseDir );
     }
     
-    public static JFileChooser getFileChooser()
+    public JFileChooser getFileChooser()
     {
         return chooser;
     }
     
-    public static File getCurrFile()
+    public File getCurrFile()
     {
         return currFile;
     }
     
-    public static void clearCurrFile()
-    {
-        currFile = null;
-    }
-    
-    public static boolean getLastResult()
+    public boolean getLastResult()
     {
         return lastResult;
     }
     
-    public static void close()
+    public void close()
     {
         currFile = null;
     }
     
-    public static Profile open()
+    public Profile open()
     {
         lastResult = false;
         Profile profile = null;
@@ -60,22 +57,22 @@ public class ProfileFileManager
         return profile;
     }
     
-    public static Profile open( Profile profile )
+    public Profile open( Profile profile )
     {
         lastResult = false;
         int result  = chooser.showOpenDialog( null );
         if ( result == JFileChooser.APPROVE_OPTION )
-            profile = open( chooser.getSelectedFile() );
+            profile = open( chooser.getSelectedFile(), profile );
         return profile;
     }
     
-    public static Profile open( File file )
+    public Profile open( File file )
     {
         Profile profile = open( file, new Profile() );
         return profile;
     }
     
-    public static Profile open( File file, Profile profile )
+    public Profile open( File file, Profile profile )
     {
         Stream<String>  lines   = null;
         currFile = null;
@@ -108,32 +105,33 @@ public class ProfileFileManager
         return profile;
     }
     
-    public static boolean save( File file )
+    public boolean newFile()
+    {
+        Profile profile = new Profile();
+        saveAs( profile );
+        return lastResult;
+    }
+
+    public boolean save( File file )
     {
         save( new Profile(), file );
         return lastResult;
     }
     
-    public static boolean save()
-    {
-        save( new Profile() );
-        return lastResult;
-    }
-    
-    public static boolean save( Profile profile )
+    public boolean save( Profile profile )
     {
         lastResult = currFile == null ? 
             saveAs( profile ) : save( profile, currFile );
         return lastResult;
     }
     
-    public static boolean saveAs()
+    public boolean saveAs()
     {
         saveAs( new Profile() );
         return lastResult;
     }
     
-    public static boolean saveAs( Profile profile )
+    public boolean saveAs( Profile profile )
     {
         lastResult = false;
         int result  = chooser.showSaveDialog( null );
@@ -142,10 +140,10 @@ public class ProfileFileManager
         return lastResult;
     }
     
-    public static boolean save( Profile profile, File file )
+    public boolean save( Profile profile, File file )
     {
         lastResult = false;
-//        currFile = null;
+        currFile = null;
         try ( PrintWriter pWriter = new PrintWriter( file ) )
         {
             ProfileParser   parser  = new ProfileParser( profile );

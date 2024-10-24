@@ -29,11 +29,14 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 public class ProfileEditorDialog extends JDialog
 {
     /** The title for this dialog. */
-    private static final String dialogTitle     = "Profile Editor";
+    private static final String         dialogTitle     = "Profile Editor";
     /** The component that the sample graph is drawn on. */
-    private final JComponent        canvas;
+    private final JComponent            canvas;
     /** The encapsulated ProfileEditor. */
-    private final ProfileEditor     editor;
+    private final ProfileEditor         editor;
+    /** The file manager for opening and saving Profile property files. */
+    private final ProfileFileManager    fileMgr     = 
+        new ProfileFileManager();
         
     /** 
      * Records the final status of the dialog (OK/Cancel).
@@ -150,16 +153,16 @@ public class ProfileEditorDialog extends JDialog
 
         open.addActionListener( e -> {
             Profile profile = editor.getProfile();
-            if ( ProfileFileManager.open( profile ) != null )
+            if ( fileMgr.open( profile ) != null )
                 editor.reset();
         });
         save.addActionListener( e -> {
-            ProfileFileManager.save( editor.getProfile() );
+            fileMgr.save( editor.getProfile() );
         });
         save.addActionListener( e -> {
-            ProfileFileManager.saveAs( editor.getProfile() );
+            fileMgr.saveAs( editor.getProfile() );
         });
-        close.addActionListener( e -> ProfileFileManager.close() );
+        close.addActionListener( e -> fileMgr.close() );
 
         panel.add( open );
         panel.add( save );

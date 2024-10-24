@@ -44,7 +44,10 @@ public class ProfileFileManagerDemo1
     private final Profile       profile     = new Profile();
     /** Encapsulated ProfileEditor. */
     private final ProfileEditor editor      = new ProfileEditor( profile );
-    
+    /** The file manager object. */
+    private final ProfileFileManager    fileMgr     = 
+        new ProfileFileManager();
+
     /**
      * Application entry point.
      *
@@ -120,22 +123,22 @@ public class ProfileFileManagerDemo1
         JButton     exit        = new JButton( "Exit" );
         
         open.addActionListener( e -> {
-            execCommand( ProfileFileManager::open );
+            execCommand( fileMgr::open );
             editor.reset();
         });
 
         save.addActionListener( e -> {
             editor.apply();
-            execCommand( () -> ProfileFileManager.save( profile ) );
+            execCommand( () -> fileMgr.save( profile ) );
         });
         
         saveAs.addActionListener( e -> {
             editor.apply();
-            execCommand( ProfileFileManager::saveAs );
+            execCommand( fileMgr::saveAs );
         });
         
         close.addActionListener(
-            e -> execCommand( ProfileFileManager::close )
+            e -> execCommand( fileMgr::close )
         );
         exit.addActionListener( e -> System.exit( 0 ) );
         
@@ -166,8 +169,8 @@ public class ProfileFileManagerDemo1
     {
         runner.run();
         String  fileName    = "";
-        boolean result      = ProfileFileManager.getLastResult();
-        File    file        = ProfileFileManager.getCurrFile();
+        boolean result      = fileMgr.getLastResult();
+        File    file        = fileMgr.getCurrFile();
         if ( file != null )
             fileName = file.getName();
         currFile.setText( fileName );
