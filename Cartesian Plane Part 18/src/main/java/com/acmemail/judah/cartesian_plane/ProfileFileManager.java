@@ -111,13 +111,26 @@ public class ProfileFileManager
         saveAs( profile );
         return lastResult;
     }
-
     public boolean save( File file )
     {
         save( new Profile(), file );
         return lastResult;
     }
     
+
+    /**
+     * This method saves the given Profile
+     * to the current file, if any.
+     * If there is no current file,
+     * this operation is equivalent to {@link #saveAs(Profile)}.
+     * Returns true on successful completion
+     * false for failure.
+     * If the operator cancels the operation
+     * the state of the object remains unchanged.
+     * 
+     * @param file
+     * @return
+     */
     public boolean save( Profile profile )
     {
         lastResult = currFile == null ? 
@@ -125,21 +138,51 @@ public class ProfileFileManager
         return lastResult;
     }
     
+    /**
+     * Instantiates a new Profile
+     * and writes it to
+     * a file of the operator's choice.
+     * Returns true on successful completion of the operation,
+     * false for failure.
+     * If the operator cancels the operation
+     * the object's state remains unchanged.
+     * 
+     * @return
+     */
     public boolean saveAs()
     {
         saveAs( new Profile() );
         return lastResult;
     }
     
+    /**
+     * Saves the given Profile to a file
+     * of the operator's choice.
+     * Returns true on success,
+     * false otherwise.
+     * 
+     * @param profile
+     * 
+     * @return  true on success, false otherwise
+     */
     public boolean saveAs( Profile profile )
     {
-        lastResult = false;
         int result  = chooser.showSaveDialog( null );
         if ( result == JFileChooser.APPROVE_OPTION )
             lastResult = save( profile, chooser.getSelectedFile() );
         return lastResult;
     }
     
+    /**
+     * Saves the given Profile to the given File.
+     * I/O errors are reported via dialogs.
+     * Returns true on successful completion,
+     * false otherwise.
+     * 
+     * @param profile   the given Profile
+     * @param file      the given File
+     * @return  true on successful completion, false otherwise
+     */
     public boolean save( Profile profile, File file )
     {
         lastResult = false;
