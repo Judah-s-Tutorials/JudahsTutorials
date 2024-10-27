@@ -66,17 +66,10 @@ public class ProfileFileManagerTest
      * Used in {@link #beforeEach()} to restore the PropertyManager
      * to the base properties before each test.
      */
-    private static final Profile    baseProfile         = new Profile();
+    private static final Profile    baseProfile     = new Profile();
     /** Profile containing unique property values; never modified. */
-    private static final Profile    distinctProfile     = 
+    private static final Profile    distinctProfile = 
         ProfileUtils.getDistinctProfile( baseProfile );
-    /** The file manager under test. */
-    private final ProfileFileManager    fileMgr     = 
-        new ProfileFileManager();
-    
-    /** The FileChooser from the fileMgr. */
-    private final JFileChooser          fileChooser = 
-        fileMgr.getFileChooser();
     /** 
      * Profile for ad hoc use during testing. Contents should be
      * considered volatile outside of very narrow usage, such:
@@ -86,10 +79,16 @@ public class ProfileFileManagerTest
      * &nbsp;&nbsp;&nbsp;&nbsp;validate( profile );
      * </span>
      */
-    private Profile         adHocProfile                = 
-        ProfileUtils.getDistinctProfile( baseProfile );
+    private Profile                 adHocProfile    = new Profile();
+    /** The file manager under test. */
+    private final ProfileFileManager    fileMgr     = 
+        new ProfileFileManager();
+    
+    /** The FileChooser from the fileMgr. */
+    private final JFileChooser      fileChooser     = 
+        fileMgr.getFileChooser();
     /** The JOptionPane dialog used to display error messages. */
-    private JDialog         errorDialog     = null;
+    private JDialog                 errorDialog     = null;
     /** The OK button from {@link #errorDialog}. */
     private AbstractButton errorDialogOKButton;
     
@@ -525,7 +524,7 @@ public class ProfileFileManagerTest
     }
 
     @Test
-    public void testSaveAs()
+    public void testSaveAsGoRight()
     {
         adHocFile.delete();
         // sanity check
@@ -576,7 +575,7 @@ public class ProfileFileManagerTest
     }
 
     @Test
-    public void testSaveAsProfile()
+    public void testSaveAsProfileGoRight()
     {
         adHocFile.delete();
         // sanity check
