@@ -24,6 +24,9 @@ public class ProfileFileManager
      * @see #getLastAction()
      */
     public static final int     CANCEL      = JFileChooser.CANCEL_OPTION;
+    
+    /** The title of the file chooser dialog. */
+    private static final String title       = "Profile File Manager";
 
     /** The JFileChooser used in this object. */
     private final JFileChooser  chooser;
@@ -57,6 +60,7 @@ public class ProfileFileManager
         String  userDir = System.getProperty( "user.dir" );
         File    baseDir = new File( userDir );
         chooser = new JFileChooser( baseDir );
+        chooser.setDialogTitle( title );
     }
     
     /**

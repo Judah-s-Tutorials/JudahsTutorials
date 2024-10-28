@@ -35,19 +35,19 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 public class ProfileFileManagerTest
 {
-    private static final String   testDataDirName   = 
+    private static final String     testDataDirName = 
         "ProfileFileManagerTest";
-    private static final  File     testDataDir      = 
+    private static final  File      testDataDir     = 
         Utils.getTestDataDir( testDataDirName );
-    private static final  String   baseName         = 
+    private static final  String    baseName        = 
         "BaseProfile.txt";
-    private static final  String   distinctName     = 
+    private static final  String    distinctName    = 
         "DistinctProfile.txt";
-    private static final  String   adHocName        = 
+    private static final  String    adHocName       = 
         "AdHoc.txt";
-    private static final  String   noAccessName     = 
+    private static final  String    noAccessName    = 
         "NoAccessFile.txt";
-    private static final  String   noSuchFileName   = 
+    private static final  String    noSuchFileName  = 
         "NoSuchFile.txt";
     private static final File       baseFile        = 
         new File( testDataDir, baseName );
@@ -87,9 +87,7 @@ public class ProfileFileManagerTest
     /** The FileChooser from the fileMgr. */
     private final JFileChooser      fileChooser     = 
         fileMgr.getFileChooser();
-    /** The JOptionPane dialog used to display error messages. */
-    private JDialog                 errorDialog     = null;
-    /** The OK button from {@link #errorDialog}. */
+    /** The OK button from the dialog for displaying I/O errors. */
     private AbstractButton errorDialogOKButton;
     
     // The components we get from the FileChooser aren't predictable.
@@ -97,6 +95,8 @@ public class ProfileFileManagerTest
     // there's not. References to FileChooser components should be
     // calculated every time they're needed, after making sure the
     // FileChooser is visible.
+    /** The dialog encapsulating the JFileChooser. */
+    private JDialog         chooserDialog   = null;
     /** The field to enter a file name in the FileChooserDialog. */
     private JTextField      chooserName     = null;
     /** The Open button in the FileChooser dialog, if present. */
@@ -107,7 +107,7 @@ public class ProfileFileManagerTest
     private JButton         cancelButton    = null;
 
     @BeforeAll
-    static public void setUpBeforeClass() throws Exception
+    static public void beforeAll() throws Exception
     {
         System.out.println( Utils.getTempDir().getAbsolutePath() );
         
@@ -132,9 +132,6 @@ public class ProfileFileManagerTest
     {
         if ( testDataDir.exists() )
             Utils.recursiveDelete( testDataDir );
-        String  finalStatus = testDataDir.getName() + ": Delete data dir ";
-        finalStatus += testDataDir.exists() ? "failed" : "succeeded";
-        System.err.println( finalStatus );
     }
     
     @BeforeEach
@@ -145,6 +142,7 @@ public class ProfileFileManagerTest
         openButton = null;
         saveButton = null;
         cancelButton = null;
+        initFileManagerState();
     }
     
     @Test
@@ -183,14 +181,14 @@ public class ProfileFileManagerTest
     @Test
     public void testGetCurrFile()
     {
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( baseFile )
         );
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertEquals( baseFile, fileMgr.getCurrFile() );
 
-        thread  = executeOp( 
+        thread  = executeNonChooserOp( 
             () -> fileMgr.save( adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -201,7 +199,7 @@ public class ProfileFileManagerTest
     @Test
     public void testGetLastResultTrue()
     {
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( baseFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -212,7 +210,7 @@ public class ProfileFileManagerTest
     @Test
     public void testGetLastResultFalse()
     {
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( noSuchFile )
         );
         assertTrue( dismissErrorDialog() );
@@ -223,7 +221,7 @@ public class ProfileFileManagerTest
     @Test
     public void testClose()
     {
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( baseFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -231,7 +229,7 @@ public class ProfileFileManagerTest
         assertNotNull( fileMgr.getCurrFile() );
         
         fileMgr.close();
-        thread  = executeOp( fileMgr::close );
+        thread  = executeNonChooserOp( fileMgr::close );
         Utils.join( thread );
         assertNull( fileMgr.getCurrFile() );
     }
@@ -240,7 +238,9 @@ public class ProfileFileManagerTest
     public void testNewFileGoRight()
     {
         adHocFile.delete();
-        Thread  thread  = executeOp( 
+        // Sanity check
+        assertFalse( adHocFile.exists() );
+        Thread  thread  = executeChooserOp( 
             () -> fileMgr.newFile()
         );
         enterPath( adHocName );
@@ -254,7 +254,7 @@ public class ProfileFileManagerTest
     @Test
     public void testOpenGoRight()
     {
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open()
         );
         enterPath( baseName );
@@ -268,7 +268,7 @@ public class ProfileFileManagerTest
     @Test
     public void testOpenGoWrong()
     {
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open()
         );
         enterPath( noSuchFileName );
@@ -283,7 +283,7 @@ public class ProfileFileManagerTest
     public void testOpenCancel()
     {
         String  expName = getCurrFileName();
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open()
         );
         enterPath( baseName );
@@ -303,7 +303,7 @@ public class ProfileFileManagerTest
         assertEquals( baseProfile, testProfile );
         
         // Overwrite profile with properties from distinctFile
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open( testProfile )
         );
         enterPath( distinctName );
@@ -322,7 +322,7 @@ public class ProfileFileManagerTest
         assertEquals( baseProfile, testProfile );
         
         // Try/fail to overwrite profile with properties from noSuchFile
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open( testProfile )
         );
         enterPath( noSuchFileName );
@@ -337,7 +337,7 @@ public class ProfileFileManagerTest
     public void testOpenProfileCancel()
     {
         // Establish currFile name
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> fileMgr.save( adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -350,7 +350,7 @@ public class ProfileFileManagerTest
         
         // Start to overwrite profile with properties from 
         // distinctFile, but cancel before completion
-        thread  = executeOp( 
+        thread  = executeChooserOp( 
             () -> fileMgr.open( testProfile )
         );
         enterPath( distinctName );
@@ -364,7 +364,7 @@ public class ProfileFileManagerTest
     @Test
     public void testOpenFile()
     {
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( baseFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -385,14 +385,14 @@ public class ProfileFileManagerTest
         assertEquals( baseProfile, profile );
         
         profile.setName( "testSaveProfileFileGoRight" );
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> fileMgr.save( profile, adHocFile )
         );
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertTrue( adHocFile.exists() );
         
-        thread  = executeOp( 
+        thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -406,7 +406,7 @@ public class ProfileFileManagerTest
     @Test
     public void testSaveProfileFileGoWrong()
     {
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> fileMgr.save( new Profile(), noAccessFile )
         );
         assertTrue( dismissErrorDialog() );
@@ -427,7 +427,7 @@ public class ProfileFileManagerTest
         assertEquals( baseProfile, profile );
         
         profile.setName( "testSaveProfileGoRight" );
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> fileMgr.save( profile )
         );
         enterPath( adHocName );
@@ -436,7 +436,7 @@ public class ProfileFileManagerTest
         Utils.join( thread );
         assertTrue( adHocFile.exists() );
         
-        thread  = executeOp( 
+        thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open( adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -451,7 +451,7 @@ public class ProfileFileManagerTest
     public void testSaveProfileToCurrFile()
     {
         // Establish currFile = adHocFile
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> fileMgr.save( adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -460,14 +460,14 @@ public class ProfileFileManagerTest
         assertEquals( adHocName, getCurrFileName() );
         
         // Write distinct properties to currFile (adHocFile)
-        thread  = executeOp( 
+        thread  = executeNonChooserOp( 
             () -> fileMgr.save( distinctProfile )
         );
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         
         // Verify contents of adHocFile
-        thread  = executeOp( 
+        thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -489,8 +489,8 @@ public class ProfileFileManagerTest
         // sanity check
         assertEquals( baseProfile, profile );
         
-        profile.setName( "testSaveProfileGoRight" );
-        Thread  thread  = executeOp( 
+        profile.setName( "testSaveProfileGoWrong" );
+        Thread  thread  = executeChooserOp( 
             () -> fileMgr.save( profile )
         );
         enterPath( noAccessName );
@@ -510,7 +510,7 @@ public class ProfileFileManagerTest
         fileMgr.close();
         
         Profile profile = new Profile();
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> fileMgr.save( profile )
         );
         enterPath( adHocName );
@@ -531,7 +531,7 @@ public class ProfileFileManagerTest
         assertFalse( adHocFile.exists() );
         
         // Write distinct properties to ad hoc file
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> fileMgr.saveAs()
         );
         enterPath( adHocName );
@@ -541,7 +541,7 @@ public class ProfileFileManagerTest
         
         // Verify ad hoc file exists and contains base properties
         assertTrue( adHocFile.exists() );
-        thread  = executeOp( 
+        thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -560,7 +560,7 @@ public class ProfileFileManagerTest
         assertFalse( adHocFile.exists() );
         
         // Write distinct properties to ad hoc file
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> fileMgr.saveAs()
         );
         enterPath( adHocName );
@@ -584,7 +584,7 @@ public class ProfileFileManagerTest
         // Write distinct properties to ad hoc file
         Profile profile = new Profile();
         profile.setName( "testSaveAsProfile" );
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> fileMgr.saveAs( profile )
         );
         enterPath( adHocName );
@@ -594,7 +594,7 @@ public class ProfileFileManagerTest
         
         // Verify ad hoc file exists and contains modified properties
         assertTrue( adHocFile.exists() );
-        thread  = executeOp( 
+        thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open( adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -612,7 +612,7 @@ public class ProfileFileManagerTest
         // Write distinct properties to ad hoc file
         Profile profile = new Profile();
         profile.setName( "testSaveAsProfile" );
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeChooserOp( 
             () -> fileMgr.saveAs( profile )
         );
         enterPath( adHocName );
@@ -634,7 +634,7 @@ public class ProfileFileManagerTest
         // Write distinct properties to ad hoc file
         Profile profile = new Profile();
         profile.setName( "testSaveAsProfile" );
-        Thread  thread  = executeOp( 
+        Thread  thread  = executeNonChooserOp( 
             () -> fileMgr.save( profile, adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -642,7 +642,7 @@ public class ProfileFileManagerTest
         
         // Verify ad hoc file exists and contains modified properties
         assertTrue( adHocFile.exists() );
-        thread  = executeOp( 
+        thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( adHocFile )
         );
         assertFalse( dismissErrorDialog() );
@@ -672,7 +672,7 @@ public class ProfileFileManagerTest
         GUIUtils.schedEDTAndWait( () -> chooserName.setText( path ) );
     }
     
-    private void clickOn( AbstractButton button )
+    private static void clickOn( AbstractButton button )
     {
         GUIUtils.schedEDTAndWait( button::doClick );
     }
@@ -697,13 +697,21 @@ public class ProfileFileManagerTest
      *      the number of dialogs posted 
      *      while executing the given operation
      */
-    private Thread executeOp( Runnable runner )
+    private Thread executeChooserOp( Runnable runner )
     {
-        Thread  thread          = new Thread( runner );
+        Thread  thread  = new Thread( runner );
         thread.start();
         Utils.pause( 250 );
-        assertTrue( fileChooser.isVisible() );
         getFileChooserComponents();
+        assertTrue( fileChooser.isVisible() );
+        return thread;
+    }
+    
+    private Thread executeNonChooserOp( Runnable runner )
+    {
+        Thread  thread  = new Thread( runner );
+        thread.start();
+        Utils.pause( 250 );
         return thread;
     }
     
@@ -716,33 +724,9 @@ public class ProfileFileManagerTest
         {
             dismissed = true;
             GUIUtils.schedEDTAndWait( errorDialogOKButton::doClick );
-            String  status  = "Error dialog visible: " + errorDialog.isVisible();
-            System.out.println( status );
             Utils.pause( 250 );
         }
         return dismissed;
-    }
-    
-    /**
-     * Pushes the OK button
-     * indicated by {@link #errorDialogOKButton}
-     * and wait for its constituent dialog to terminate.
-     * The {@link #errorDialogOKButton} is set to null
-     * after being pushed.
-     * <p>
-     * Precondition:<br>
-     * The {@link #errorDialogOKButton} is non-null.
-     * Postcondition:<br>
-     * The {@link #errorDialogOKButton} is null.
-     * Postcondition:<br>
-     * The error dialog is no longer visible.
-     */
-    private void okAndWait()
-    {
-        errorDialogOKButton.doClick();
-        errorDialogOKButton = null;
-        while ( errorDialog.isVisible() )
-            Utils.pause( 125 );
     }
     
     /**
@@ -762,14 +746,12 @@ public class ProfileFileManagerTest
         final boolean mustBeVis     = true;
         GUIUtils.schedEDTAndWait( () ->  {
             errorDialogOKButton = null;
-            errorDialog = null;
             ComponentFinder finder  = 
                 new ComponentFinder( canBeDialog, canBeFrame, mustBeVis );
             Window          window  = finder.findWindow( c -> true );
             if ( window != null )
             {
                 assertTrue( window instanceof JDialog );
-                errorDialog = (JDialog)window;
                 Predicate<JComponent>   pred    = 
                     ComponentFinder.getButtonPredicate( "OK" );
                 JComponent              comp    = 
@@ -790,19 +772,44 @@ public class ProfileFileManagerTest
    
     }
     
-    private void nullCurrFileName()
+    private void initFileManagerState()
     {
-        Thread  thread  = executeOp( 
-            () -> adHocProfile = fileMgr.open( noSuchFile )
-        );
-        assertTrue( dismissErrorDialog() );
-        assertNull( fileMgr.getCurrFile() );
+        Thread  thread  = executeChooserOp( () -> fileMgr.open() );
+        enterPath( baseName );
+        clickOn( openButton );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        validateState( baseName, true, ProfileFileManager.APPROVE );
+        assertEquals( baseProfile, adHocProfile );
+        assertEquals( baseName, getCurrFileName() );
+    }
+    
+    private void 
+    validateState( String expFile, boolean expResult, int expAction )
+    {
+        assertEquals( expFile, getCurrFileName() );
+        assertEquals( expResult, fileMgr.getLastResult() );
+        assertEquals( expAction, fileMgr.getLastAction() );
     }
     
     /**
-     * 
+     * This method gets the dialog
+     * that encapsulates the JFileChooser (if necessary)
+     * and the required constituent components.
+     * It must only be called 
+     * after we expect the dialog 
+     * to be visible (see {@link #getChooserDialog()}). 
+     * Additionally, the state of the dialog 
+     * is generally unpredictable; 
+     * for example, sometimes the Save button exists, 
+     * and sometimes it doesn't. 
+     * Therefore, this method must be called 
+     * every time a reference 
+     * to a component is needed. 
      * <p>
      * Precondition: The FileChooser dialog is visible.
+     * 
+     * @see #getChooserDialog()
      */
     private void getFileChooserComponents()
     {
@@ -814,6 +821,10 @@ public class ProfileFileManagerTest
             ComponentFinder.getButtonPredicate( "Save" );
         final Predicate<JComponent> cancelPred  =
             ComponentFinder.getButtonPredicate( "Cancel" );
+        
+        // Get chooser dialog if necessary
+        if ( chooserDialog == null )
+            chooserDialog = getChooserDialog();
         
         // The text field component should always be present.
         Component   comp        = 
@@ -845,5 +856,41 @@ public class ProfileFileManagerTest
             saveButton = (JButton)comp;
         }
         assertTrue( openButton != null || saveButton != null );
+    }
+    
+    /**
+     * Obtains a reference
+     * to the dialog that
+     * encapsulates the JFileChooser.
+     * Since we can't be sure
+     * when the dialog is created
+     * we must not call this method
+     * until we've executed an operation
+     * that requires it.
+     * <p>
+     * Precondition:
+     * The JFileChooser dialog must be visible.
+     * 
+     * @return  the dialog that encapsulates the JFileChooser
+     * 
+     * @see #getFileChooserComponents()
+     */
+    private JDialog getChooserDialog()
+    {
+        final boolean           canBeFrame  = false;
+        final boolean           canBeDialog = true;
+        final boolean           mustBeVis   = true;
+        final String            title       = fileChooser.getDialogTitle();
+        final Predicate<Window> isDialog    = w -> (w instanceof JDialog);
+        final Predicate<Window> hasTitle    = 
+            w -> title.equals( ((JDialog)w).getTitle() );
+        final Predicate<Window> pred        = isDialog.and( hasTitle );
+        
+        ComponentFinder     finder      = 
+            new ComponentFinder( canBeDialog, canBeFrame, mustBeVis );
+        Window          window  = finder.findWindow( pred );
+        assertNotNull( window );
+        assertTrue( window instanceof JDialog );
+        return (JDialog)window;
     }
 }
