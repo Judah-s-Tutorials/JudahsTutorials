@@ -247,13 +247,13 @@ public class ProfileFileManagerTest
         clickOn( saveButton );
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
-        assertTrue( fileMgr.getLastResult() );
-        assertEquals( adHocName, getCurrFileName() );
+        validateState( adHocFile, true, ProfileFileManager.APPROVE );
     }
 
     @Test
     public void testOpenGoRight()
     {
+        int expAction   = fileMgr.getLastAction();
         Thread  thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open()
         );
@@ -262,7 +262,7 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertEquals( baseProfile, adHocProfile );
-        assertEquals( baseName, getCurrFileName() );
+        validateState( baseFile, true, expAction );
     }
 
     @Test
@@ -276,13 +276,14 @@ public class ProfileFileManagerTest
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
         assertNull( adHocProfile );
-        assertNull( getCurrFileName() );
+        assertNull( fileMgr.getCurrFile() );
+        validateState( null, false, ProfileFileManager.APPROVE );
     }
 
     @Test
     public void testOpenCancel()
     {
-        String  expName = getCurrFileName();
+        File    expFile = fileMgr.getCurrFile();
         Thread  thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open()
         );
@@ -291,8 +292,7 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertNull( adHocProfile );
-        String  actName = getCurrFileName();
-        assertEquals( expName, actName );
+        validateState( expFile, true, ProfileFileManager.CANCEL );
     }
 
     @Test
@@ -311,7 +311,7 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertEquals( distinctProfile, testProfile );
-        assertEquals( distinctName, getCurrFileName() );
+        validateState( distinctFile, true, ProfileFileManager.APPROVE );
     }
 
     @Test
@@ -330,27 +330,19 @@ public class ProfileFileManagerTest
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
         assertEquals( baseProfile, testProfile );
-        assertNull( getCurrFileName() );
+        validateState( null, false, ProfileFileManager.APPROVE );
     }
 
     @Test
     public void testOpenProfileCancel()
     {
-        // Establish currFile name
-        Thread  thread  = executeNonChooserOp( 
-            () -> fileMgr.save( adHocFile )
-        );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        assertEquals( adHocName, getCurrFileName() );
-
         Profile testProfile = new Profile();
         // sanity check
         assertEquals( baseProfile, testProfile );
         
         // Start to overwrite profile with properties from 
         // distinctFile, but cancel before completion
-        thread  = executeChooserOp( 
+        Thread  thread  = executeChooserOp( 
             () -> fileMgr.open( testProfile )
         );
         enterPath( distinctName );
@@ -358,7 +350,7 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertEquals( baseProfile, testProfile );
-        assertEquals( adHocName, getCurrFileName() );
+        validateState( baseFile, true, ProfileFileManager.CANCEL );
     }
 
     @Test
@@ -370,7 +362,7 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertEquals( baseProfile, adHocProfile );
-        assertEquals( baseName, getCurrFileName() );
+        validateState( baseFile, true, ProfileFileManager.APPROVE );
     }
     
     @Test
@@ -384,6 +376,7 @@ public class ProfileFileManagerTest
         // sanity check
         assertEquals( baseProfile, profile );
         
+        int expAction   = fileMgr.getLastAction();
         profile.setName( "testSaveProfileFileGoRight" );
         Thread  thread  = executeNonChooserOp( 
             () -> fileMgr.save( profile, adHocFile )
@@ -391,7 +384,8 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertTrue( adHocFile.exists() );
-        
+        validateState( adHocFile, true, expAction );
+
         thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( adHocFile )
         );
@@ -399,19 +393,19 @@ public class ProfileFileManagerTest
         Utils.join( thread );
         assertEquals( profile, adHocProfile );
         assertEquals( adHocFile, fileMgr.getCurrFile() );
-        String  actFileName = getCurrFileName();
-        assertEquals( adHocName, actFileName );
+        validateState( adHocFile, true, expAction );
     }
     
     @Test
     public void testSaveProfileFileGoWrong()
     {
+        int expAction   = fileMgr.getLastAction();
         Thread  thread  = executeNonChooserOp( 
             () -> fileMgr.save( new Profile(), noAccessFile )
         );
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
-        assertNull( getCurrFileName() );
+        validateState( null, false, expAction );
     }
 
     @Test
@@ -435,6 +429,7 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertTrue( adHocFile.exists() );
+        validateState( adHocFile, true, ProfileFileManager.APPROVE );
         
         thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open( adHocFile )
@@ -442,14 +437,13 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertEquals( profile, adHocProfile );
-        assertEquals( adHocFile, fileMgr.getCurrFile() );
-        String  actName = getCurrFileName();
-        assertEquals( adHocName, actName );
+        validateState( adHocFile, true, ProfileFileManager.APPROVE );
     }
 
     @Test
     public void testSaveProfileToCurrFile()
     {
+        int expAction   = fileMgr.getLastAction();
         // Establish currFile = adHocFile
         Thread  thread  = executeNonChooserOp( 
             () -> fileMgr.save( adHocFile )
@@ -457,7 +451,7 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertTrue( adHocFile.exists() );
-        assertEquals( adHocName, getCurrFileName() );
+        validateState( adHocFile, true, expAction );
         
         // Write distinct properties to currFile (adHocFile)
         thread  = executeNonChooserOp( 
@@ -474,8 +468,7 @@ public class ProfileFileManagerTest
         Utils.join( thread );
         assertEquals( distinctProfile, adHocProfile );
         assertEquals( adHocFile, fileMgr.getCurrFile() );
-        String  actName = getCurrFileName();
-        assertEquals( adHocName, actName );
+        validateState( adHocFile, true, expAction );
     }
 
     @Test
@@ -497,20 +490,25 @@ public class ProfileFileManagerTest
         clickOn( saveButton );
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
-        assertNull( getCurrFileName() );
+        validateState( null, false, ProfileFileManager.APPROVE );
     }
 
     @Test
     public void testSaveProfileCancel()
     {
-        String  expName = getCurrFileName();
+        // Make sure currFile is null
+        fileMgr.close();
+        // sanity check
+        assertNull( fileMgr.getCurrFile() );
+        
+        // Make sure adHoc file doesn't exist
         adHocFile.delete();
         // sanity check
         assertFalse( adHocFile.exists() );
-        fileMgr.close();
         
-        Profile profile = new Profile();
-        Thread  thread  = executeChooserOp( 
+        boolean expResult   = fileMgr.getLastResult();
+        Profile profile     = new Profile();
+        Thread  thread      = executeChooserOp( 
             () -> fileMgr.save( profile )
         );
         enterPath( adHocName );
@@ -518,18 +516,12 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertFalse( adHocFile.exists() );
-        assertNull( fileMgr.getCurrFile() );
-        String  actName = getCurrFileName();
-        assertEquals( expName, actName );
+        validateState( null, expResult, ProfileFileManager.CANCEL );
     }
 
     @Test
     public void testSaveAsGoRight()
     {
-        adHocFile.delete();
-        // sanity check
-        assertFalse( adHocFile.exists() );
-        
         // Write distinct properties to ad hoc file
         Thread  thread  = executeChooserOp( 
             () -> fileMgr.saveAs()
@@ -538,6 +530,7 @@ public class ProfileFileManagerTest
         clickOn( saveButton );
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
+        validateState( adHocFile, true, ProfileFileManager.APPROVE );
         
         // Verify ad hoc file exists and contains base properties
         assertTrue( adHocFile.exists() );
@@ -547,19 +540,13 @@ public class ProfileFileManagerTest
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertEquals( baseProfile, adHocProfile );
-        String  currFileName    = getCurrFileName();
-        assertEquals( adHocName, currFileName );
+        validateState( adHocFile, true, ProfileFileManager.APPROVE );
     }
 
     @Test
     public void testSaveAsCancel()
     {
-        String  expName = getCurrFileName();
-        adHocFile.delete();
-        // sanity check
-        assertFalse( adHocFile.exists() );
-        
-        // Write distinct properties to ad hoc file
+        // Start to write adHocfile then cancel
         Thread  thread  = executeChooserOp( 
             () -> fileMgr.saveAs()
         );
@@ -570,17 +557,12 @@ public class ProfileFileManagerTest
         
         // Verify ad hoc file not written
         assertFalse( adHocFile.exists() );
-        String  actName = getCurrFileName();
-        assertEquals( expName, actName );
+        validateState( baseFile, true, ProfileFileManager.CANCEL );
     }
 
     @Test
     public void testSaveAsProfileGoRight()
     {
-        adHocFile.delete();
-        // sanity check
-        assertFalse( adHocFile.exists() );
-        
         // Write distinct properties to ad hoc file
         Profile profile = new Profile();
         profile.setName( "testSaveAsProfile" );
@@ -593,23 +575,13 @@ public class ProfileFileManagerTest
         Utils.join( thread );
         
         // Verify ad hoc file exists and contains modified properties
-        assertTrue( adHocFile.exists() );
-        thread  = executeChooserOp( 
-            () -> adHocProfile = fileMgr.open( adHocFile )
-        );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        assertEquals( profile, adHocProfile );
+        validateFile( profile, adHocFile );
     }
 
     @Test
     public void testSaveAsProfileCancel()
     {
-        adHocFile.delete();
-        // sanity check
-        assertFalse( adHocFile.exists() );
-        
-        // Write distinct properties to ad hoc file
+        // Start to write adHoc file then cancel
         Profile profile = new Profile();
         profile.setName( "testSaveAsProfile" );
         Thread  thread  = executeChooserOp( 
@@ -622,15 +594,12 @@ public class ProfileFileManagerTest
         
         // Verify ad hoc file exists and contains modified properties
         assertFalse( adHocFile.exists() );
+        validateState( baseFile, true, ProfileFileManager.CANCEL );
     }
 
     @Test
     public void testSaveProfileFile()
     {
-        adHocFile.delete();
-        // sanity check
-        assertFalse( adHocFile.exists() );
-        
         // Write distinct properties to ad hoc file
         Profile profile = new Profile();
         profile.setName( "testSaveAsProfile" );
@@ -639,15 +608,23 @@ public class ProfileFileManagerTest
         );
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
+        validateState( adHocFile, true, ProfileFileManager.APPROVE );
         
         // Verify ad hoc file exists and contains modified properties
         assertTrue( adHocFile.exists() );
-        thread  = executeNonChooserOp( 
-            () -> adHocProfile = fileMgr.open( adHocFile )
+        validateFile( profile, adHocFile );
+    }
+    
+    private void validateFile( Profile profile, File file )
+    {
+        assertTrue( file.exists() );
+        Thread  thread  = executeNonChooserOp( 
+            () -> adHocProfile = fileMgr.open( file )
         );
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertEquals( profile, adHocProfile );
+        validateState( file, true, ProfileFileManager.APPROVE );
     }
     
     private static void saveProfile( Profile profile, File file ) 
@@ -719,7 +696,7 @@ public class ProfileFileManagerTest
     {
         boolean dismissed   = false;
         Utils.pause( 250 );
-        getDialogAndOKButton();
+        getErrorDialogAndOKButton();
         if ( errorDialogOKButton != null )
         {
             dismissed = true;
@@ -739,7 +716,7 @@ public class ProfileFileManagerTest
      * <p>
      * Precondition: the FileChooser dialog is not posted.
      */
-    private void getDialogAndOKButton()
+    private void getErrorDialogAndOKButton()
     {
         final boolean canBeFrame    = false;
         final boolean canBeDialog   = true;
@@ -763,6 +740,14 @@ public class ProfileFileManagerTest
         });
     }
     
+    /**
+     * Obtains the current file from the file manager
+     * and extracts its name.
+     * If there is no current file
+     * null is returned.
+     * 
+     * @return  the name of the current file or null if none
+     */
     private String getCurrFileName()
     {
         File    currFile        = fileMgr.getCurrFile();
@@ -772,22 +757,60 @@ public class ProfileFileManagerTest
    
     }
     
+    /**
+     * Compare the names of two given File objects.
+     * The names are converted to uppercase before comparing.
+     * 
+     * @param file1 the first given File object
+     * @param file2 the second given File object
+     * 
+     * @return  true if the names of the given Files are equal
+     */
+    private static boolean compareFileName( File file1, File file2 )
+    {
+        String  name1   = file1.getName().toUpperCase();
+        String  name2   = file2.getName().toUpperCase();
+        boolean result  = name1.equals( name2 );
+        return result;
+    }
+    
+    /**
+     * Delete the adHocFile;
+     * save the baseProfile to the baseFile
+     * via the file chooser.
+     * <p>
+     * Postconditions:
+     * <ul>
+     * <li>baseFile exists</li>
+     * <li>adHocFile doesn't exist</li>
+     * <li>currFile = baseFile</li>
+     * <li>lastResult = true</li>
+     * <li>lastAction = APPROVE</li>
+     * <ul>
+     */
     private void initFileManagerState()
     {
+        adHocFile.delete();
+        
         Thread  thread  = executeChooserOp( () -> fileMgr.open() );
         enterPath( baseName );
         clickOn( openButton );
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
-        validateState( baseName, true, ProfileFileManager.APPROVE );
+        adHocProfile.reset();
+        validateState( baseFile, true, ProfileFileManager.APPROVE );
         assertEquals( baseProfile, adHocProfile );
-        assertEquals( baseName, getCurrFileName() );
-    }
+        assertFalse( adHocFile.exists() );
+    };
     
     private void 
-    validateState( String expFile, boolean expResult, int expAction )
+    validateState( File expFile, boolean expResult, int expAction )
     {
-        assertEquals( expFile, getCurrFileName() );
+        File    currFile    = fileMgr.getCurrFile();
+        if ( expFile == null )
+            assertNull( currFile );
+        else
+            assertTrue( compareFileName( expFile, currFile ) );
         assertEquals( expResult, fileMgr.getLastResult() );
         assertEquals( expAction, fileMgr.getLastAction() );
     }
