@@ -80,6 +80,12 @@ public class ProfileFileManagerTest
      * </span>
      */
     private Profile                 adHocProfile    = new Profile();
+    /** 
+     * Temporary integer for temporary use in lambdas, for example:<br>
+     * <pre>    adHocResult = executeChooserOp( 
+     *         () -> adHocResult = fileMgr.saveAs( profile )
+     */
+    private boolean                 adHocResult     = false;
     /** The file manager under test. */
     private final ProfileFileManager    fileMgr     = 
         new ProfileFileManager();
@@ -395,6 +401,80 @@ public class ProfileFileManagerTest
         assertEquals( adHocFile, fileMgr.getCurrFile() );
         validateState( adHocFile, true, expAction );
     }
+
+    @Test
+    public void testSaveProfileGoRightTemp()
+    {
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        
+        Profile profile = new Profile();
+        // sanity check
+        assertEquals( baseProfile, profile );
+        
+        int expAction   = fileMgr.getLastAction();
+        profile.setName( "testSaveProfileFileGoRight" );
+        Thread  thread  = executeNonChooserOp( 
+            () -> adHocResult = fileMgr.save( profile, adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertTrue( adHocResult );
+        assertTrue( adHocFile.exists() );
+        File    currFile    = fileMgr.getCurrFile();
+        int     lastAction  = fileMgr.getLastAction();
+        assertTrue( compareFiles( adHocFile, currFile ) );
+        assertTrue( fileMgr.getLastResult() );
+        assertEquals( expAction, lastAction );
+    
+        thread  = executeNonChooserOp( 
+            () -> adHocProfile = fileMgr.open( adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( profile, adHocProfile );
+        assertTrue( compareFiles( adHocFile, currFile ) );
+        assertTrue( fileMgr.getLastResult() );
+        assertEquals( expAction, lastAction );
+    }
+    
+    @Test
+    public void testSaveProfileFileGoRightTemp()
+    {
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        
+        Profile profile = new Profile();
+        // sanity check
+        assertEquals( baseProfile, profile );
+        
+        int expAction   = fileMgr.getLastAction();
+        profile.setName( "testSaveProfileFileGoRight" );
+        Thread  thread  = executeNonChooserOp( 
+            () -> adHocResult = fileMgr.save( profile, adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertTrue( adHocResult );
+        assertTrue( adHocFile.exists() );
+        File    currFile    = fileMgr.getCurrFile();
+        int     lastAction  = fileMgr.getLastAction();
+        assertTrue( compareFiles( adHocFile, currFile ) );
+        assertTrue( fileMgr.getLastResult() );
+        assertEquals( expAction, lastAction );
+
+        thread  = executeNonChooserOp( 
+            () -> adHocProfile = fileMgr.open( adHocFile )
+        );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertEquals( profile, adHocProfile );
+        assertTrue( compareFiles( adHocFile, currFile ) );
+        assertTrue( fileMgr.getLastResult() );
+        assertEquals( expAction, lastAction );
+    }
     
     @Test
     public void testSaveProfileFileGoWrong()
@@ -524,7 +604,7 @@ public class ProfileFileManagerTest
     {
         // Write distinct properties to ad hoc file
         Thread  thread  = executeChooserOp( 
-            () -> fileMgr.saveAs()
+            () -> adHocResult = fileMgr.saveAs()
         );
         enterPath( adHocName );
         clickOn( saveButton );
@@ -600,6 +680,10 @@ public class ProfileFileManagerTest
     @Test
     public void testSaveProfileFile()
     {
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+
         // Write distinct properties to ad hoc file
         Profile profile = new Profile();
         profile.setName( "testSaveAsProfile" );
@@ -641,6 +725,13 @@ public class ProfileFileManagerTest
         }
     }
 
+    /**
+     * In the context of the EDT,
+     * enters the given file name
+     * into the JFileChooser's text field.
+     * 
+     * @param fileName  the given file name
+     */
     private void enterPath( String fileName )
     {
         assertNotNull( chooserName );
@@ -649,6 +740,12 @@ public class ProfileFileManagerTest
         GUIUtils.schedEDTAndWait( () -> chooserName.setText( path ) );
     }
     
+    /**
+     * In the context of the EDT,
+     * clicks on the given button.
+     * 
+     * @param button    the given button
+     */
     private static void clickOn( AbstractButton button )
     {
         GUIUtils.schedEDTAndWait( button::doClick );
@@ -700,8 +797,7 @@ public class ProfileFileManagerTest
         if ( errorDialogOKButton != null )
         {
             dismissed = true;
-            GUIUtils.schedEDTAndWait( errorDialogOKButton::doClick );
-            Utils.pause( 250 );
+            clickOn( errorDialogOKButton );
         }
         return dismissed;
     }
@@ -741,40 +837,6 @@ public class ProfileFileManagerTest
     }
     
     /**
-     * Obtains the current file from the file manager
-     * and extracts its name.
-     * If there is no current file
-     * null is returned.
-     * 
-     * @return  the name of the current file or null if none
-     */
-    private String getCurrFileName()
-    {
-        File    currFile        = fileMgr.getCurrFile();
-        String  currFileName    = currFile == null ?
-            null : currFile.getName();
-        return currFileName;
-   
-    }
-    
-    /**
-     * Compare the names of two given File objects.
-     * The names are converted to uppercase before comparing.
-     * 
-     * @param file1 the first given File object
-     * @param file2 the second given File object
-     * 
-     * @return  true if the names of the given Files are equal
-     */
-    private static boolean compareFileName( File file1, File file2 )
-    {
-        String  name1   = file1.getName().toUpperCase();
-        String  name2   = file2.getName().toUpperCase();
-        boolean result  = name1.equals( name2 );
-        return result;
-    }
-    
-    /**
      * Delete the adHocFile;
      * save the baseProfile to the baseFile
      * via the file chooser.
@@ -803,14 +865,48 @@ public class ProfileFileManagerTest
         assertFalse( adHocFile.exists() );
     };
     
+    /**
+     * Compare the names of two given File objects;
+     * if both objects are null
+     * the result is true.
+     * Otherwise, the names are converted to uppercase
+     * and compared for equality.
+     * 
+     * @param file1 the first given File object
+     * @param file2 the second given File object
+     * 
+     * @return  true if the names of the given Files are equal
+     */
+    private static boolean compareFiles( File file1, File file2 )
+    {
+        boolean result  = false;
+        if ( file1 == file2 )
+            result = true;
+        else if ( file1 == null )
+            result = false;
+        else
+        {
+            String  name1   = file1.getName().toUpperCase();
+            String  name2   = file2.getName().toUpperCase();
+            result  = name1.equals( name2 );
+        }
+        return result;
+    }
+
+    /**
+     * Asserts that the given file, result, and action
+     * match the return values of ProfileFileManager methods
+     * getCurrFile, getLastResult, and getLastAction.
+     * 
+     * @param expFile   the given file
+     * @param expResult the given result
+     * @param expAction the given action
+     */
     private void 
     validateState( File expFile, boolean expResult, int expAction )
     {
         File    currFile    = fileMgr.getCurrFile();
-        if ( expFile == null )
-            assertNull( currFile );
-        else
-            assertTrue( compareFileName( expFile, currFile ) );
+        assertTrue( compareFiles( expFile, currFile ) );
         assertEquals( expResult, fileMgr.getLastResult() );
         assertEquals( expAction, fileMgr.getLastAction() );
     }
