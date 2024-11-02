@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ProfileFileManager Test Case Comparison</title>
+    <link rel="stylesheet" href="main.css">
+    <style>
+    p,ul {
+      font-family: 'Times New Roman', serif;
+      font-size: 110%;
+      max-width: 45em;
+      margin-left: 4em;
+    }
+    span.callout {
+      font-family: 'Lucida Console', 'Courier New', monospace;
+      font-size: 80%;
+      max-width: 45em;
+      margin-left: 4em;
+    }
+    th {
+      font-family: 'Times New Roman', serif;
+      font-size: 200%;
+    }
+    tr.code {
+        margin-bottom: 2em;
+        font-size: 80%; 
+        font-family: 'Lucida Console', 'Courier New', monospace;
+    }
+    td.code {
+        margin-left: 2em;
+    }
+    </style>
+</head>
+<body>
+
+<table style="border-collapse: collapse;">
+<thead>
+<tr> 
+<th colspan="2">Digression: ProfileFileManager JUnit Test Development</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td colspan="2">
+<p>
+This page isn't about JUnit test development specifically.
+It's more about developing facilities
+to support JUnit test methods
+for the <em>ProfileFileManager</em> JUnit test cases.
+The discussion below assumes
+that you have read the first part of the
+<a href="https://judahstutorials.com/cartesian-plane-lesson-18-page-x4c-profilefilemanager-junittest/">
+    Cartesian Plane Lesson 18 Page X4C: ProfileFileManager JUnitTest
+</a>
+page.
+Any code you find here should be considered pseudocode.
+Do not expect to find anything on this page
+checked in to the GitHub respository.
+</p>
+<p>
+To best understand the pseudocode
+you should be familiar with the methods
+discussed on the above referenced page.
+In addition to those,
+we will be referencing the following two methods.
+See the discussion below for additional details.
+</p>
+</td>
+</tr>
+
+<tr> 
+<td style="border: .2em solid black;">private Thread executeChooserOp( Runnable runner )</td>
+<td style="border: .2em solid black;">private Thread executeNonChooserOp( Runnable runner )</td>
+</tr>
+<tr> 
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%">1
+2
+3
+4
+5
+6
+7
+8
+9</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">private</span> Thread <span style="color: #0066BB; font-weight: bold">executeChooserOp</span><span style="color: #333333">(</span> Runnable runner <span style="color: #333333">)</span>
+<span style="color: #333333">{</span>
+    Thread  thread  <span style="color: #333333">=</span> <span style="color: #008800; font-weight: bold">new</span> Thread<span style="color: #333333">(</span> runner <span style="color: #333333">);</span>
+    thread<span style="color: #333333">.</span><span style="color: #0000CC">start</span><span style="color: #333333">();</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">pause</span><span style="color: #333333">(</span> <span style="color: #0000DD; font-weight: bold">250</span> <span style="color: #333333">);</span>
+    getFileChooserComponents<span style="color: #333333">();</span>
+    assertTrue<span style="color: #333333">(</span> fileChooser<span style="color: #333333">.</span><span style="color: #0000CC">isVisible</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    <span style="color: #008800; font-weight: bold">return</span> thread<span style="color: #333333">;</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%">1
+2
+3
+4
+5
+6
+7
+8
+9</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #008800; font-weight: bold">private</span> Thread <span style="color: #0066BB; font-weight: bold">executeNonChooserOp</span><span style="color: #333333">(</span> Runnable runner <span style="color: #333333">)</span>
+<span style="color: #333333">{</span>
+    Thread  thread  <span style="color: #333333">=</span> <span style="color: #008800; font-weight: bold">new</span> Thread<span style="color: #333333">(</span> runner <span style="color: #333333">);</span>
+    thread<span style="color: #333333">.</span><span style="color: #0000CC">start</span><span style="color: #333333">();</span>
+
+    
+    
+    <span style="color: #008800; font-weight: bold">return</span> thread<span style="color: #333333">;</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+</tr>
+
+<tr>
+<td colspan="2">
+<ul>
+<li>
+Line 1:
+These two methods are called
+when we want to execute a file manager operation.
+Use <em>executeChooserOp</em> if the operation
+requires the file chooser to be posted,
+otherwise use<em>executeNonChooserOp</em>.
+The parameter is the <em>Runnable</em>
+the executes the operation, for example:<br>
+<span class = "callout">
+() -> adHocResult = fileMgr.save( profile, adHocFile )
+</span>
+</li>
+<li>
+Lines 3,4:
+Start the given operation
+in a dedicated thread.
+We've seen this strategy before;
+the thread will be returned to the client
+which can then join it,
+pausing main thread execution
+until the dedicated thread completes.
+</li>
+<li>
+Lines 5-7:
+If necessary,
+give the file chooser time to post,
+then collect the file chooser components
+(the text field and the save button)
+and verify that the chooser is visible.
+</li>
+<li>
+Line 8:
+Return a reference to the dedicated thread
+to the client.
+</li>
+</ul>
+
+<p>
+Here are two methods that save a <em>Profile</em> to a file.
+The one on the right
+saves a given <em>Profile</em>
+to a file of the operators choice;
+The one on the left
+requires no operator interaction.
+Let's first discuss
+the logic behind the tests.
+</p>
+<ul>
+<li>
+Lines 4-6:
+At the conclusion of the test
+we expect to find a file
+containing <em>Profile</em> properties.
+At the beginning of the test
+make sure the file doesn't exist;
+at the end one of our validations
+will be to assert that the file exists.
+</li>
+<li>
+Line 8:
+Since the method that saves
+to an explicit file
+requires no interaction with the file chooser
+after the operation completes
+we will expect the <em>lastAction</em> property
+to be unchanged.
+So save the current value of <em>lastAction</em>
+so that at the end of the test
+we can verify that it hasn't changed.
+</li>
+<li>
+Lines 9,10:
+Instantiate the Profile we want to save;
+give it at least one unique property
+so that,
+after the conclusion of the operation,
+the given Profile 
+is correctly saved to the given file.
+<br>&nbsp;<br>
+Caveat: 
+at the conclusion of the <em>saveAs</em> operation
+we expect the <em>lastAction</em> property
+to be <em>SAVE</em>.
+But, if it is,
+we have no way of knowing
+whether the operation set it to <em>SAVE</em>,
+or it was <em>SAVE</em>
+at the start of the operation.
+</li>
+<li>
+Lines 12-14:
+Initiate the operation under test
+in a new thread.
+</li>
+<li>
+Lines 15,16:
+The operation that requires operator interaction via the file chooser
+has to enter a file name into the chooser's text field
+and push its <em>Save</em> button.
+</li>
+<li>
+Line 17:
+Both operations potentially raise I/O errors.
+We're not expecting one,
+so check for an error dialog and assert that there isn't one.
+</li>
+<li>
+Line 18:
+Wait for the operation to complete.
+</li>
+<li>
+Lines 19-22:
+Validate the <em>ProfileFileManager's</em>
+<em>currFile</em> and <em>lastAction</em> properties.
+</li>
+<li>
+Line 25:
+Validate the <em>ProfileFileManager's</em>
+<em>lastAction</em> property.
+For the operation that uses the file chooser
+the expected value is <em>APPROVE;</em>
+for the operation requiring operator interaction
+the expected value is whatever it was
+at the start of the operation
+</li>
+</ul>
+</td>
+</tr>
+
+<tr> 
+<td style="border: .2em solid black;">save( Profile profile, File file )</td>
+<td style="border: .2em solid black;">saveAs( Profile profile )</td>
+</tr>
+
+<tr>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveProfileFileGoRightTemp</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    adHocFile<span style="color: #333333">.</span><span style="color: #0000CC">delete</span><span style="color: #333333">();</span>
+    <span style="color: #888888">// sanity check</span>
+    assertFalse<span style="color: #333333">(</span> adHocFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+
+    <span style="color: #333399; font-weight: bold">int</span>     expAction   <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastAction</span><span style="color: #333333">();</span>
+    Profile profile     <span style="color: #333333">=</span> <span style="color: #008800; font-weight: bold">new</span> Profile<span style="color: #333333">();</span>
+    profile<span style="color: #333333">.</span><span style="color: #0000CC">setName</span><span style="color: #333333">(</span> <span style="background-color: #fff0f0">&quot;testSaveProfileFileGoRight&quot;</span> <span style="color: #333333">);</span>
+    
+    Thread  thread  <span style="color: #333333">=</span> executeNonChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocResult <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">save</span><span style="color: #333333">(</span> profile<span style="color: #333333">,</span> adHocFile <span style="color: #333333">)</span>
+    <span style="color: #333333">);</span>
+
+
+    assertFalse<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> adHocResult <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> adHocFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    File    currFile    <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getCurrFile</span><span style="color: #333333">();</span>
+    <span style="color: #333399; font-weight: bold">int</span>     lastAction  <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastAction</span><span style="color: #333333">();</span>
+    assertTrue<span style="color: #333333">(</span> compareFiles<span style="color: #333333">(</span> adHocFile<span style="color: #333333">,</span> currFile <span style="color: #333333">)</span> <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastResult</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> expAction<span style="color: #333333">,</span> lastAction <span style="color: #333333">);</span>
+
+    thread  <span style="color: #333333">=</span> executeNonChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocProfile <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">(</span> adHocFile <span style="color: #333333">)</span>
+    <span style="color: #333333">);</span>
+    assertFalse<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> profile<span style="color: #333333">,</span> adHocProfile <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> compareFiles<span style="color: #333333">(</span> adHocFile<span style="color: #333333">,</span> currFile <span style="color: #333333">)</span> <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastResult</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> expAction<span style="color: #333333">,</span> lastAction <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+<td style="border: .2em solid black; vertical-align: top;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveAsProfileGoRightTemp</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    adHocFile<span style="color: #333333">.</span><span style="color: #0000CC">delete</span><span style="color: #333333">();</span>
+    <span style="color: #888888">// sanity check</span>
+    assertFalse<span style="color: #333333">(</span> adHocFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+
+
+    Profile profile     <span style="color: #333333">=</span> <span style="color: #008800; font-weight: bold">new</span> Profile<span style="color: #333333">();</span>
+    profile<span style="color: #333333">.</span><span style="color: #0000CC">setName</span><span style="color: #333333">(</span> <span style="background-color: #fff0f0">&quot;testSaveAsProfileGoRight&quot;</span> <span style="color: #333333">);</span>
+    
+    Thread  thread  <span style="color: #333333">=</span> executeChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocResult <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">saveAs</span><span style="color: #333333">(</span> profile <span style="color: #333333">)</span>
+    <span style="color: #333333">);</span>
+    enterPath<span style="color: #333333">(</span> adHocName <span style="color: #333333">);</span>
+    clickOn<span style="color: #333333">(</span> saveButton <span style="color: #333333">);</span>
+    assertFalse<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> adHocResult <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> adHocFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    File    currFile    <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getCurrFile</span><span style="color: #333333">();</span>
+    <span style="color: #333399; font-weight: bold">int</span>     lastAction  <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastAction</span><span style="color: #333333">();</span>
+    assertTrue<span style="color: #333333">(</span> compareFiles<span style="color: #333333">(</span> adHocFile<span style="color: #333333">,</span> currFile <span style="color: #333333">)</span> <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastResult</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> ProfileFileManager<span style="color: #333333">.</span><span style="color: #0000CC">APPROVE</span><span style="color: #333333">,</span> lastAction <span style="color: #333333">);</span>
+
+    thread  <span style="color: #333333">=</span> executeNonChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocProfile <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">(</span> adHocFile <span style="color: #333333">)</span>
+    <span style="color: #333333">);</span>
+    assertFalse<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> profile<span style="color: #333333">,</span> adHocProfile <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> compareFiles<span style="color: #333333">(</span> adHocFile<span style="color: #333333">,</span> currFile <span style="color: #333333">)</span> <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastResult</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> ProfileFileManager<span style="color: #333333">.</span><span style="color: #0000CC">APPROVE</span><span style="color: #333333">,</span> lastAction <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
+<ul>
+<li>
+Discussion
+</li>
+</ul>
+</td>
+</tr>
+
+<tr> 
+<td style="border: .2em solid black;">save( Profile profile, File file )</td>
+<td style="border: .2em solid black;">saveAs( Profile profile )</td>
+</tr>
+
+<tr>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testOpenGoRight</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    <span style="color: #333399; font-weight: bold">int</span> expAction   <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastAction</span><span style="color: #333333">();</span>
+    Thread  thread  <span style="color: #333333">=</span> executeChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocProfile <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">()</span>
+    <span style="color: #333333">);</span>
+    enterPath<span style="color: #333333">(</span> distinctName <span style="color: #333333">);</span>
+    clickOn<span style="color: #333333">(</span> openButton <span style="color: #333333">);</span>
+    assertFalse<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> distinctProfile<span style="color: #333333">,</span> adHocProfile <span style="color: #333333">);</span>
+    validateState<span style="color: #333333">(</span> distinctFile<span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">true</span><span style="color: #333333">,</span> expAction <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+<td style="border: .2em solid black; vertical-align: top;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testOpenFileGoRight</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    
+    Thread  thread  <span style="color: #333333">=</span> executeNonChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocProfile <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">(</span> distinctFile <span style="color: #333333">)</span>
+    <span style="color: #333333">);</span>
+
+    
+    assertFalse<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> distinctProfile<span style="color: #333333">,</span> adHocProfile <span style="color: #333333">);</span>
+    validateState<span style="color: #333333">(</span> distinctFile<span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">true</span><span style="color: #333333">,</span> ProfileFileManager<span style="color: #333333">.</span><span style="color: #0000CC">APPROVE</span> <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+</tr>
+
+<tr>
+<td colspan="2">
+<p>
+At the start of each test,
+the file/file manager state
+will be as follows:
+</p>
+<ul>
+<li>
+<em>adHocFile</em> doesn't exist.
+</li>
+<li>
+There is no current file
+(<em>fileMgr.getCurrFile</em> returns null).
+</li>
+<li>
+Last result is <em>false</em>.
+</li>
+<li>
+Last action is <em>CANCEL</em>.
+</li>
+</ul>
+</td>
+</tr>
+
+</tbody>
+</table>
+
+
+</body>
+</html>
