@@ -29,6 +29,9 @@
     td.code {
         margin-left: 2em;
     }
+    pre.code {
+        margin-left: 8em;
+    }
     </style>
 </head>
 <body>
@@ -170,85 +173,6 @@ requires no operator interaction.
 Let's first discuss
 the logic behind the tests.
 </p>
-<ul>
-<li>
-Lines 4-6:
-At the conclusion of the test
-we expect to find a file
-containing <em>Profile</em> properties.
-At the beginning of the test
-make sure the file doesn't exist;
-at the end one of our validations
-will be to assert that the file exists.
-</li>
-<li>
-Line 8:
-Since the method that saves
-to an explicit file
-requires no interaction with the file chooser
-after the operation completes
-we will expect the <em>lastAction</em> property
-to be unchanged.
-So save the current value of <em>lastAction</em>
-so that at the end of the test
-we can verify that it hasn't changed.
-</li>
-<li>
-Lines 9,10:
-Instantiate the Profile we want to save;
-give it at least one unique property
-so that,
-after the conclusion of the operation,
-the given Profile 
-is correctly saved to the given file.
-<br>&nbsp;<br>
-Caveat: 
-at the conclusion of the <em>saveAs</em> operation
-we expect the <em>lastAction</em> property
-to be <em>SAVE</em>.
-But, if it is,
-we have no way of knowing
-whether the operation set it to <em>SAVE</em>,
-or it was <em>SAVE</em>
-at the start of the operation.
-</li>
-<li>
-Lines 12-14:
-Initiate the operation under test
-in a new thread.
-</li>
-<li>
-Lines 15,16:
-The operation that requires operator interaction via the file chooser
-has to enter a file name into the chooser's text field
-and push its <em>Save</em> button.
-</li>
-<li>
-Line 17:
-Both operations potentially raise I/O errors.
-We're not expecting one,
-so check for an error dialog and assert that there isn't one.
-</li>
-<li>
-Line 18:
-Wait for the operation to complete.
-</li>
-<li>
-Lines 19-22:
-Validate the <em>ProfileFileManager's</em>
-<em>currFile</em> and <em>lastAction</em> properties.
-</li>
-<li>
-Line 25:
-Validate the <em>ProfileFileManager's</em>
-<em>lastAction</em> property.
-For the operation that uses the file chooser
-the expected value is <em>APPROVE;</em>
-for the operation requiring operator interaction
-the expected value is whatever it was
-at the start of the operation
-</li>
-</ul>
 </td>
 </tr>
 
@@ -415,15 +339,384 @@ at the start of the operation
 <td colspan="2">
 <ul>
 <li>
-Discussion
+Lines 4-6:
+At the conclusion of the test
+we expect to find a file
+containing <em>Profile</em> properties.
+At the beginning of the test
+make sure the file doesn't exist;
+at the end one of our validations
+will be to assert that the file exists.
+</li>
+<li>
+Line 8:
+Since the method that saves
+to an explicit file
+requires no interaction with the file chooser
+after the operation completes
+we will expect the <em>lastAction</em> property
+to be unchanged.
+So save the current value of <em>lastAction</em>
+so that at the end of the test
+we can verify that it hasn't changed.
+</li>
+<li>
+Lines 9,10:
+Instantiate the Profile we want to save;
+give it at least one unique property
+so that,
+after the conclusion of the operation,
+the given Profile 
+is correctly saved to the given file.
+<p id="Caveat1">
+Caveat: 
+at the conclusion of the <em>saveAs</em> operation
+we expect the <em>lastAction</em> property
+to be <em>SAVE</em>.
+But, if it is,
+we have no way of knowing
+whether the operation set it to <em>SAVE</em>,
+or it was <em>SAVE</em>
+at the start of the operation.
+</p>
+</li>
+<li>
+Lines 12-14:
+Initiate the operation under test
+in a new thread.
+</li>
+<li>
+Lines 15,16:
+The operation that requires operator interaction via the file chooser
+has to enter a file name into the chooser's text field
+and push its <em>Save</em> button.
+</li>
+<li>
+Line 17:
+Both operations potentially raise I/O errors.
+We're not expecting one,
+so check for an error dialog and assert that there isn't one.
+</li>
+<li>
+Line 18:
+Wait for the operation to complete.
+</li>
+<li>
+Lines 19-22:
+Validate the <em>ProfileFileManager's</em>
+<em>currFile</em> and <em>lastAction</em> properties.
+</li>
+<li>
+Line 25:
+Validate the <em>ProfileFileManager's</em>
+<em>lastAction</em> property.
+For the operation that uses the file chooser
+the expected value is <em>APPROVE;</em>
+for the operation requiring operator interaction
+the expected value is whatever it was
+at the start of the operation
 </li>
 </ul>
+<p>
+A quick look at the above comaprison
+convinces me that there's a lot of duplicate code
+that can be encapsulated in helper methods.
+The first thing that captures my attention
+is the last three lines
+of both methods,
+as well as lines 23-25 of <em>testSaveProfileFileGoRight</em>.
+This logic should be executed
+not just at the end of every test,
+but the end of every operation.
+Let's write the following method
+to perform those validations:<br>
+</p>
+<pre class="code">
+private void 
+validateState( File expFile, boolean expResult, int expAction )
+{
+    File    currFile    = fileMgr.getCurrFile();
+    assertTrue( compareFiles( expFile, currFile ) );
+    assertEquals( expResult, fileMgr.getLastResult() );
+    assertEquals( expAction, fileMgr.getLastAction() );
+}</pre>
+<p>
+My second observation is that
+almost every output test
+is going to conclude with
+verifying the output,
+as with lines 27 - 35 above.
+This can all be encapsulated
+in a method that reads a given file
+and compares it to a given <em>Profile</em>,
+such as the following:
+</p>
+<pre class="code">
+private void 
+validateFile( Profile expProfile, File file )
+{
+    verify the given file exists
+    int expAction = fileMgr.getLastAction();
+    Profile profile = new Profile();
+    read the given file without going through the file chooser:
+        () -> fileMgr.open( file, profile );
+    assertEquals( expProfile, profile );
+    validateState( file, true, expAction );
+}</pre>
+<p>
+Next consider that our test cases
+are nearly identical
+except for interaction with the file chooser.
+We can write a method
+that performs a save operation
+with a simple conditional
+that takes into account
+the requirement to use the file chooser.
+Consider this strategy:
+</p>
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #888888">/*</span>
+<span style="color: #888888">    private void saveGoRight( </span>
+<span style="color: #888888">        BooleanSupplier supplier, </span>
+<span style="color: #888888">        File file, </span>
+<span style="color: #888888">        boolean expectChooser</span>
+<span style="color: #888888">    )</span>
+<span style="color: #888888">{</span>
+<span style="color: #888888">    delete the target file</span>
+<span style="color: #888888">    expAction = fileMgr.getLastAction()</span>
+<span style="color: #888888">    formulate the Runnable that will drive a dedicated thread:</span>
+<span style="color: #888888">        Runnable    runner      = </span>
+<span style="color: #888888">            () -&gt; adHocResult = supplier.getAsBoolean();</span>
+<span style="color: #888888">    create and start the thread</span>
+<span style="color: #888888">    pause to allow file chooser to post (if necessary)</span>
+<span style="color: #888888">    if ( expectChooser )</span>
+<span style="color: #888888">    {</span>
+<span style="color: #888888">        find the file chooser&#39;s text field</span>
+<span style="color: #888888">        enter the file name into the text field</span>
+<span style="color: #888888">        click on the save button</span>
+<span style="color: #888888">        expAction = APPROVE</span>
+<span style="color: #888888">    }</span>
+<span style="color: #888888">    verify an error dialog was not posted</span>
+<span style="color: #888888">    join the thread</span>
+<span style="color: #888888">    verify the value of adHocResult</span>
+<span style="color: #888888">    verify the target file exists</span>
+<span style="color: #888888">    validateState( file, true, expAction );</span>
+<span style="color: #888888">}</span>
+<span style="color: #888888">*/</span>
+</pre></td></tr></tbody></table></div>
+
+<ul>
+<li>
+Line 3: The <em>Supplier</em> parameter
+encapsulates the output operation
+to be executed, for example
+<em>() -> fileMgr.save(profile, adHocFile)</em> or 
+<em>() -> fileMgr.saveAs(profile)</em>.
+</li>
+</ul>
+
+<p>
+My last thought is 
+that we have a lot of complications
+surrounding the file manager state
+(see Caveat, above), such as:
+</p>
+<p style="margin-bottom: 0;">
+    Example 1:
+</p>
+<ul style="margin-top: 0;">
+<li>
+    Start with the last-action property = APPROVE;
+</li>
+<li>
+    Begin execution of an operation
+    that requires operator interaction
+    with the file chooser;
+</li>
+<li>
+    Cancel the operation via the file chooser;
+</li>
+<li>
+    Verify that last-action is now CANCEL.
+</li>
+</ul>
+<p style="margin-bottom: 0;">
+    Example 2:
+</p>
+<ul style="margin-top: 0;">
+<li>
+    Start with the last-result property = false;
+</li>
+<li>
+    Begin execution of an operation
+    that requires operator interaction
+    with the file chooser;
+</li>
+<li>
+    Cancel the operation via the file chooser;
+</li>
+<li>
+    Verify that last-result is still false.
+</li>
+</ul>
+<p>
+To help with state issues
+let's make sure that,
+at the conclusion of our <em>BeforeEach</em> method,
+our test environment will be in a very specific state.
+Let's also have methods that we can use
+to set the state of the last-action and last-result properties.
+The last two methods are necessary
+because setting the last-action and last-result states
+are non-trivial;
+they require executing operations
+which will achieve the desired result:
+</p>
+<p>
+&#x1F7E6;<em>public void beforeEach()</em><br>
+This method has the following postconditions:
+</p>
+<ul>
+<li>
+The <em>PropertyManager</em> state
+will be in its original state;
+</li>
+<li>
+Set all the fields associated with file chooser components
+(<em>chooserName, openButton,</em> etc.)
+will be null;
+</li>
+<li>
+The physical <em>adHocFile</em> will not exist;
+all other files will be unchanged
+from there initial states.
+</li>
+<li>
+The last-result property will be false;
+</li>
+<li>
+The last-action property will be CANCEL;
+</li>
+</ul>
+<p>
+&#x1F7E6;<em>private void setLastAction( int action )</em><br>
+This method will initiate an input operation
+that requires operator interaction with the file chooser.
+It will dismiss the file chooser dialog
+with the given action (<em>APPROVE</em> or <em>CANCEL</em>).
+</p>
+<p>
+&#x1F7E6;<em>private void setLastResult( boolean expResult )</em><br>
+This method will initiate an input operation
+that does not requires interaction with the file chooser.
+Depending on the value of <em>expResult</em>
+the input operation will be one
+that completes with an I/O error
+or one that completes with no error.
+</p>
+<p>
+With the implementation of the above facilities,
+our tests for <em>save(Profile, File)</em>
+and <em>saveAs(Profile)</em>
+look like this:
+</p>
 </td>
 </tr>
 
 <tr> 
 <td style="border: .2em solid black;">save( Profile profile, File file )</td>
 <td style="border: .2em solid black;">saveAs( Profile profile )</td>
+</tr>
+
+<tr>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveProfileFileGoRight</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    Profile          profile     <span style="color: #333333">=</span> <span style="color: #008800; font-weight: bold">new</span> Profile<span style="color: #333333">();</span>
+    profile<span style="color: #333333">.</span><span style="color: #0000CC">setName</span><span style="color: #333333">(</span> <span style="background-color: #fff0f0">&quot;testSaveProfileFileGoRight&quot;</span> <span style="color: #333333">);</span>
+    BooleanSupplier  supplier    <span style="color: #333333">=</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">save</span><span style="color: #333333">(</span> profile<span style="color: #333333">,</span> adHocFile <span style="color: #333333">);</span>
+    saveGoRight<span style="color: #333333">(</span> supplier<span style="color: #333333">,</span> adHocFile<span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">false</span> <span style="color: #333333">);</span>
+    validateFile<span style="color: #333333">(</span> profile<span style="color: #333333">,</span> adHocFile <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+<td style="border: .2em solid black; vertical-align: top;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveAsProfileGoRight</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    Profile         profile     <span style="color: #333333">=</span> <span style="color: #008800; font-weight: bold">new</span> Profile<span style="color: #333333">();</span>
+    profile<span style="color: #333333">.</span><span style="color: #0000CC">setName</span><span style="color: #333333">(</span> <span style="background-color: #fff0f0">&quot;testSaveAsProfile&quot;</span> <span style="color: #333333">);</span>
+    BooleanSupplier supplier    <span style="color: #333333">=</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">saveAs</span><span style="color: #333333">(</span> profile <span style="color: #333333">);</span>
+    saveGoRight<span style="color: #333333">(</span> supplier<span style="color: #333333">,</span> adHocFile<span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">true</span> <span style="color: #333333">);</span>
+    validateFile<span style="color: #333333">(</span> profile<span style="color: #333333">,</span> adHocFile <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+</tr>
+
+<tr>
+<td colspan="2">
+<p>
+Next let's look at
+</p>
+</td>
+</tr>
+
+<tr> 
+<td style="border: .2em solid black;">open()</td>
+<td style="border: .2em solid black;">open( File file )</td>
 </tr>
 
 <tr>

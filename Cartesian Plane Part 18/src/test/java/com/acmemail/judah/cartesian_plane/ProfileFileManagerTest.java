@@ -333,11 +333,11 @@ public class ProfileFileManagerTest
     @Test
     public void testSaveProfileFileGoRight()
     {
-        Profile profile = new Profile();
+        Profile         profile     = new Profile();
         profile.setName( "testSaveProfileFileGoRight" );
-        BooleanSupplier  oper    = 
+        BooleanSupplier  supplier    = 
             () -> fileMgr.save( profile, adHocFile );
-        saveGoRight( oper, adHocFile, false );
+        saveGoRight( supplier, adHocFile, false );
         validateFile( profile, adHocFile );
     }
     
@@ -506,12 +506,11 @@ public class ProfileFileManagerTest
     @Test
     public void testSaveAsProfileGoRight()
     {
-        // Write distinct properties to ad hoc file
         Profile profile             = new Profile();
         profile.setName( "testSaveAsProfile" );
-        BooleanSupplier supplier    = () -> fileMgr.saveAs( profile );
+        BooleanSupplier supplier    = 
+            () -> fileMgr.saveAs( profile );
         saveGoRight( supplier, adHocFile, true );
-        // Verify ad hoc file exists and contains modified properties
         validateFile( profile, adHocFile );
     }
 
