@@ -248,7 +248,9 @@ public class ProfileFileManagerTest
     @Test
     public void testOpenGoRight()
     {
-        openGoRight( () -> fileMgr.open(), distinctFile, true );
+        Supplier<Profile>   supplier    = 
+            () -> fileMgr.open();
+        openGoRight( supplier, distinctFile, true );
         assertEquals( distinctProfile, adHocProfile );
     }
 
@@ -339,14 +341,6 @@ public class ProfileFileManagerTest
             () -> fileMgr.save( profile, adHocFile );
         saveGoRight( supplier, adHocFile, false );
         validateFile( profile, adHocFile );
-    }
-    
-    @Test
-    public void testSaveProfileFileGoWrong()
-    {
-        BooleanSupplier  oper    = 
-            () -> fileMgr.save( new Profile(), noAccessFile );
-        
     }
 
     @Test
@@ -487,18 +481,6 @@ public class ProfileFileManagerTest
     @Test
     public void testSaveAsCancel()
     {
-        // Start to write adHocfile then cancel
-//        Thread  thread  = executeChooserOp( 
-//            () -> fileMgr.saveAs()
-//        );
-//        enterPath( adHocName );
-//        clickOn( cancelButton );
-//        assertFalse( dismissErrorDialog() );
-//        Utils.join( thread );
-//        
-//        // Verify ad hoc file not written
-//        assertFalse( adHocFile.exists() );
-//        validateState( baseFile, true, ProfileFileManager.CANCEL );
         Supplier<?> supplier    = () -> fileMgr.saveAs();
         cancelOperation( supplier, adHocFile);
     }
@@ -531,6 +513,18 @@ public class ProfileFileManagerTest
         // Verify ad hoc file exists and contains modified properties
         assertFalse( adHocFile.exists() );
         validateState( null, false, ProfileFileManager.CANCEL );
+    }
+    
+    @Test
+    public void testSaveProfileFileGoWrong()
+    {
+        int expAction   = fileMgr.getLastAction();
+        Thread  thread  = executeNonChooserOp( 
+            () -> fileMgr.save( new Profile(), noAccessFile )
+        );
+        assertTrue( dismissErrorDialog() );
+        Utils.join( thread );
+        validateState( null, false, expAction );
     }
     
     private static void saveProfile( Profile profile, File file ) 
@@ -660,6 +654,7 @@ public class ProfileFileManagerTest
 
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
+        assertNull( adHocProfile );
         validateState( null, false, expAction );
     }
     
@@ -724,6 +719,7 @@ public class ProfileFileManagerTest
         }
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
+        assertNull( adHocProfile );
         validateState( null, false, expAction );
     }
     

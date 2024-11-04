@@ -274,6 +274,7 @@ public class ProfileFileManagerTest_orig
     @Test
     public void testOpenGoWrong()
     {
+
         Thread  thread  = executeChooserOp( 
             () -> adHocProfile = fileMgr.open()
         );
@@ -282,7 +283,6 @@ public class ProfileFileManagerTest_orig
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
         assertNull( adHocProfile );
-        assertNull( fileMgr.getCurrFile() );
         validateState( null, false, ProfileFileManager.APPROVE );
     }
 
@@ -360,7 +360,7 @@ public class ProfileFileManagerTest_orig
     }
 
     @Test
-    public void testOpenFile()
+    public void testOpenFileGoRight()
     {
         Thread  thread  = executeNonChooserOp( 
             () -> adHocProfile = fileMgr.open( baseFile )
@@ -370,7 +370,22 @@ public class ProfileFileManagerTest_orig
         assertEquals( baseProfile, adHocProfile );
         validateState( baseFile, true, ProfileFileManager.APPROVE );
     }
-    
+
+    @Test
+    public void testOpenFileGoWrong()
+    {
+        int     expAction   = fileMgr.getLastAction();
+        Thread  thread      = executeChooserOp( 
+            () -> adHocProfile = fileMgr.open( noSuchFile )
+        );
+
+
+        assertTrue( dismissErrorDialog() );
+        Utils.join( thread );
+        assertNull( adHocProfile );
+        validateState( null, false, expAction );
+    }
+
     @Test
     public void testSaveProfileFileGoRight()
     {
@@ -474,7 +489,39 @@ public class ProfileFileManagerTest_orig
     }
     
     @Test
+    public void testSaveAsProfileGoWrong()
+    {
+        assertTrue( noAccessFile.exists() );
+        assertFalse( noAccessFile.canWrite() );
+
+        Thread  thread  = executeChooserOp( 
+            () -> adHocResult = fileMgr.saveAs( adHocProfile )
+        );
+        enterPath( noAccessName );
+        clickOn( saveButton );
+        assertTrue( dismissErrorDialog() );
+        Utils.join( thread );
+        validateState( null, false, ProfileFileManager.APPROVE );
+    }
+
+    @Test
     public void testSaveProfileFileGoWrong()
+    {
+        assertTrue( noAccessFile.exists() );
+        assertFalse( noAccessFile.canWrite() );
+        int expAction   = fileMgr.getLastAction();
+        Thread  thread  = executeNonChooserOp( 
+            () -> fileMgr.save( new Profile(), noAccessFile )
+        );
+        
+        
+        assertTrue( dismissErrorDialog() );
+        Utils.join( thread );
+        validateState( null, false, expAction );
+    }
+    
+    @Test
+    public void testSaveAsProfileFileGoWrong()
     {
         int expAction   = fileMgr.getLastAction();
         Thread  thread  = executeNonChooserOp( 

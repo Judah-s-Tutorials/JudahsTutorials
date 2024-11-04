@@ -184,7 +184,7 @@ the logic behind the tests.
 <tr>
 <td style="border: .2em solid black; vertical-align: top; 0;">
 
-<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;" id="testSaveProfile"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
  2
  3
  4
@@ -220,7 +220,7 @@ the logic behind the tests.
 34
 35
 36</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
-<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveProfileFileGoRightTemp</span><span style="color: #333333">()</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveProfileFileGoRight</span><span style="color: #333333">()</span>
 <span style="color: #333333">{</span>
     adHocFile<span style="color: #333333">.</span><span style="color: #0000CC">delete</span><span style="color: #333333">();</span>
     <span style="color: #888888">// sanity check</span>
@@ -296,7 +296,7 @@ the logic behind the tests.
 34
 35
 36</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
-<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveAsProfileGoRightTemp</span><span style="color: #333333">()</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveAsProfileGoRight</span><span style="color: #333333">()</span>
 <span style="color: #333333">{</span>
     adHocFile<span style="color: #333333">.</span><span style="color: #0000CC">delete</span><span style="color: #333333">();</span>
     <span style="color: #888888">// sanity check</span>
@@ -534,20 +534,57 @@ Consider this strategy:
 
 <ul>
 <li>
-Line 3: The <em>Supplier</em> parameter
-encapsulates the output operation
-to be executed, for example
+    Line 3: The <em>supplier</em> parameter
+    encapsulates the output operation
+    to be executed, for example
 <em>() -> fileMgr.save(profile, adHocFile)</em> or 
 <em>() -> fileMgr.saveAs(profile)</em>.
+</li>
+<li>
+    Line 4: The <em>file</em> parameter
+    refers to the file to be operated on,
+    <em>ahdHocFile</em> in the 
+    <a href="#testSaveProfile">original code</a>.
+</li>
+<li>
+    Parameter <em>expectChooser</em> will be true
+    if the operation under test
+    requires operator interaction
+    with the file chooser.
+</li>
+<li>
+    Line 8: Corresponds to lines 4-6 in the 
+    <a href="#testSaveProfile">original code</a>.
+</li>
+<li>
+    Line 9: Sets the "expected action"
+    to the current value of 
+    the file manager's <em>lastAction</em> property.
+    If this operation requires
+    operator interaction with the file chooser,
+    it will be updated at line 20.
+</li>
+<li>
+    Lines 10-14: Correspond to lines 12-14 in the 
+    <a href="#testSaveProfile">original code</a>.
+</li>
+<li>
+    Lines 15-21: This code replaces lines 15 and 16 in the
+    <a href="#testSaveProfile">original code</a>.
+</li>
+<li>
+    Lines 22-26: Correspond to lines 30-35 in the 
+    <a href="#testSaveProfile">original code</a>.
 </li>
 </ul>
 
 <p>
-My last thought is 
-that we have a lot of complications
+My last thought regarding code encapsulation 
+is that we have a lot of complications
 surrounding the file manager state
 (see Caveat, above), such as:
 </p>
+<div style="margin-left: 2em;">
 <p style="margin-bottom: 0;">
     Example 1:
 </p>
@@ -586,6 +623,7 @@ surrounding the file manager state
     Verify that last-result is still false.
 </li>
 </ul>
+</div>
 <p>
 To help with state issues
 let's make sure that,
@@ -709,7 +747,17 @@ look like this:
 <tr>
 <td colspan="2">
 <p>
-Next let's look at
+Next,
+let's look at possible implementations for input operations.
+In the following figure,
+the code on the left
+is a possible test method for
+<em>ProfileFileManager.open()</em>,
+and the one on the left for
+<em>ProfileFileManager.open(File)</em>.
+The first requires operator interaction
+with the file chooser,
+the second does not.
 </p>
 </td>
 </tr>
@@ -789,23 +837,586 @@ Next let's look at
 <tr>
 <td colspan="2">
 <p>
-At the start of each test,
-the file/file manager state
-will be as follows:
+As with the 
+<a href="#testSaveProfile">
+    <em>save( Profile profile, File file )</em>
+    and <em>saveAs( Profile profile )</em>
+</a>
+test methods,
+the only difference between these two methods
+is how we handle file chooser interaction,
+at line 4,
+where we anticipate (if necessary)
+the expected value 
+of the last-action property
+at the end of the test,
+and lines 8 and 9
+where we configure the file chooser
+and press its <em>Save</em> button.
+Taking that into account,
+we can implement a helper method
+that encapsulates all the duplicate code:
 </p>
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #888888">/*</span>
+<span style="color: #888888">private void openGoRight(</span>
+<span style="color: #888888">    Supplier&lt;Profile&gt; supplier, </span>
+<span style="color: #888888">    File file, </span>
+<span style="color: #888888">    boolean expectChooser</span>
+<span style="color: #888888">)</span>
+<span style="color: #888888">{</span>
+<span style="color: #888888">    verify the target file exists</span>
+<span style="color: #888888">    expAction = fileMgr.getLastAction()</span>
+<span style="color: #888888">    formulate the Runnable that will drive a dedicated thread:</span>
+<span style="color: #888888">        Runnable runner = () -&gt; adHocProfile = supplier.get();</span>
+<span style="color: #888888">    create and start the thread</span>
+<span style="color: #888888">    pause to allow file chooser to post (if necessary)</span>
+<span style="color: #888888">    if ( expectChooser )</span>
+<span style="color: #888888">    {</span>
+<span style="color: #888888">        find the file chooser&#39;s text field</span>
+<span style="color: #888888">        enter the file name into the text field</span>
+<span style="color: #888888">        click on the open button</span>
+<span style="color: #888888">        expAction = APPROVE</span>
+<span style="color: #888888">    }</span>
+<span style="color: #888888">    verify an error dialog was not posted</span>
+<span style="color: #888888">    join the thread</span>
+<span style="color: #888888">    verify the value of adHocResult</span>
+<span style="color: #888888">    validateState( file, true, expAction );</span>
+<span style="color: #888888">}</span>
+<span style="color: #888888">*/</span>
+</pre></td></tr></tbody></table></div>
+
+
+<p>
+Re-writing our test methods
+to take advantage of the above,
+we get:
+</p>
+</td>
+</tr>
+
+<tr> 
+<td style="border: .2em solid black;">open()</td>
+<td style="border: .2em solid black;">open( File file )</td>
+</tr>
+
+<tr>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%">1
+2
+3
+4
+5
+6
+7
+8</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testOpenGoRight</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    Supplier<span style="color: #333333">&lt;</span>Profile<span style="color: #333333">&gt;</span>   supplier    <span style="color: #333333">=</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">();</span>
+    openGoRight<span style="color: #333333">(</span> supplier<span style="color: #333333">,</span> distinctFile<span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">true</span> <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> distinctProfile<span style="color: #333333">,</span> adHocProfile <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+
+</td>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%">1
+2
+3
+4
+5
+6
+7
+8</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testOpenFileGoRight</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    Supplier<span style="color: #333333">&lt;</span>Profile<span style="color: #333333">&gt;</span>   supplier    <span style="color: #333333">=</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">(</span> distinctFile <span style="color: #333333">);</span>
+    openGoRight<span style="color: #333333">(</span> supplier<span style="color: #333333">,</span> distinctFile<span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">false</span> <span style="color: #333333">);</span>
+    assertEquals<span style="color: #333333">(</span> distinctProfile<span style="color: #333333">,</span> adHocProfile <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
+<p>
+Let's look at a couple of go-wrong tests,
+executing a save or open operation
+that results in an I/O error.
+On the left side of the figure
+is a go-wrong test
+that requires operation interaction with the file chooser,
+on the right is a test
+that does not require operator intervention.
+</p>
+</td>
+</tr>
+
+
+<tr> 
+<td style="border: .2em solid black;">saveAs( Profile profile )</td>
+<td style="border: .2em solid black;">save( Profile profile, File file )</td>
+</tr>
+<tr> 
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveAsProfileGoWrong</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    assertTrue<span style="color: #333333">(</span> noAccessFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertFalse<span style="color: #333333">(</span> noAccessFile<span style="color: #333333">.</span><span style="color: #0000CC">canWrite</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+
+    Thread  thread  <span style="color: #333333">=</span> executeChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocResult <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">saveAs</span><span style="color: #333333">(</span> adHocProfile <span style="color: #333333">)</span>
+    <span style="color: #333333">);</span>
+    enterPath<span style="color: #333333">(</span> noAccessName <span style="color: #333333">);</span>
+    clickOn<span style="color: #333333">(</span> saveButton <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    validateState<span style="color: #333333">(</span> <span style="color: #008800; font-weight: bold">null</span><span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">false</span><span style="color: #333333">,</span> ProfileFileManager<span style="color: #333333">.</span><span style="color: #0000CC">APPROVE</span> <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+
+
+</td>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveProfileFileGoWrong</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    assertTrue<span style="color: #333333">(</span> noAccessFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertFalse<span style="color: #333333">(</span> noAccessFile<span style="color: #333333">.</span><span style="color: #0000CC">canWrite</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    <span style="color: #333399; font-weight: bold">int</span> expAction   <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastAction</span><span style="color: #333333">();</span>
+    Thread  thread  <span style="color: #333333">=</span> executeNonChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">save</span><span style="color: #333333">(</span> <span style="color: #008800; font-weight: bold">new</span> Profile<span style="color: #333333">(),</span> noAccessFile <span style="color: #333333">)</span>
+    <span style="color: #333333">);</span>
+    
+    
+    assertTrue<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    validateState<span style="color: #333333">(</span> <span style="color: #008800; font-weight: bold">null</span><span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">false</span><span style="color: #333333">,</span> expAction <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+</tr>
+
+<tr> 
+<td style="border: .2em solid black;">open()</td>
+<td style="border: .2em solid black;">open( File file )</td>
+</tr>
+
+<tr> 
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testOpenGoWrong</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+
+    Thread  thread  <span style="color: #333333">=</span> executeChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocProfile <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">()</span>
+    <span style="color: #333333">);</span>
+    enterPath<span style="color: #333333">(</span> noSuchFileName <span style="color: #333333">);</span>
+    clickOn<span style="color: #333333">(</span> openButton <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    assertNull<span style="color: #333333">(</span> adHocProfile <span style="color: #333333">);</span>
+    validateState<span style="color: #333333">(</span> <span style="color: #008800; font-weight: bold">null</span><span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">false</span><span style="color: #333333">,</span> ProfileFileManager<span style="color: #333333">.</span><span style="color: #0000CC">APPROVE</span> <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testOpenFileGoWrong</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    <span style="color: #333399; font-weight: bold">int</span>     expAction   <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastAction</span><span style="color: #333333">();</span>
+    Thread  thread      <span style="color: #333333">=</span> executeChooserOp<span style="color: #333333">(</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocProfile <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">(</span> noSuchFile <span style="color: #333333">)</span>
+    <span style="color: #333333">);</span>
+
+
+    assertTrue<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
+    assertNull<span style="color: #333333">(</span> adHocProfile <span style="color: #333333">);</span>
+    validateState<span style="color: #333333">(</span> <span style="color: #008800; font-weight: bold">null</span><span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">false</span><span style="color: #333333">,</span> expAction <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></table></div>
+
+</td>
+</tr>
+
+<tr>
+<td colspan="2">
+<p>
+As we did with the go-right helper methods,
+we can encapsulate common code
+in save-go-wrong and open-go-wrong methods,
+as seen here:
+</p>
+</td>
+</tr>
+
+<tr> 
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #888888">/*</span>
+<span style="color: #888888">private void saveGoWrong( </span>
+<span style="color: #888888">    BooleanSupplier supplier, </span>
+<span style="color: #888888">    File file, </span>
+<span style="color: #888888">    boolean expectChooser</span>
+<span style="color: #888888">)</span>
+<span style="color: #888888">{</span>
+<span style="color: #888888">    expAction = fileMgr.getLastAction()</span>
+<span style="color: #888888">    formulate the Runnable that will drive a dedicated thread:</span>
+<span style="color: #888888">        Runnable runner = </span>
+<span style="color: #888888">            () -&gt; adHocResult = supplier.getAsBoolean();</span>
+<span style="color: #888888">    pause to allow file chooser to post (if necessary)</span>
+<span style="color: #888888">    if ( expectChooser )</span>
+<span style="color: #888888">    {</span>
+<span style="color: #888888">        find the file chooser&#39;s text field</span>
+<span style="color: #888888">        enter the file name into the text field</span>
+<span style="color: #888888">        click on the save button</span>
+<span style="color: #888888">        expAction = APPROVE</span>
+<span style="color: #888888">    }</span>
+<span style="color: #888888">    verify an error dialog was posted</span>
+<span style="color: #888888">    join the thread</span>
+<span style="color: #888888">    verify the value of adHocResult</span>
+<span style="color: #888888">    validateState( file, true, expAction );</span>
+<span style="color: #888888">}</span>
+<span style="color: #888888">*/</span>
+</pre></td></tr></tbody></table></div>
+
+
+
+</td>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #888888">/*</span>
+<span style="color: #888888">private void openGoWrong(</span>
+<span style="color: #888888">    Supplier&lt;Profile&gt; supplier, </span>
+<span style="color: #888888">    File file, </span>
+<span style="color: #888888">    boolean expectChooser</span>
+<span style="color: #888888">)</span>
+<span style="color: #888888">{</span>
+<span style="color: #888888">    expAction = fileMgr.getLastAction()</span>
+<span style="color: #888888">    formulate the Runnable that will drive a dedicated thread:</span>
+<span style="color: #888888">        Runnable runner = </span>
+<span style="color: #888888">            () -&gt; adHocProfile = supplier.get()</span>
+<span style="color: #888888">    pause to allow file chooser to post (if necessary)</span>
+<span style="color: #888888">    if ( expectChooser )</span>
+<span style="color: #888888">    {</span>
+<span style="color: #888888">        find the file chooser&#39;s text field</span>
+<span style="color: #888888">        enter the file name into the text field</span>
+<span style="color: #888888">        click on the open button</span>
+<span style="color: #888888">        expAction = APPROVE</span>
+<span style="color: #888888">    }</span>
+<span style="color: #888888">    verify an error dialog was posted</span>
+<span style="color: #888888">    join the thread</span>
+<span style="color: #888888">    verify the value of adHocProfile</span>
+<span style="color: #888888">    validateState( file, true, expAction );</span>
+<span style="color: #888888">}</span>
+<span style="color: #888888">*/</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
+<p>
+And then we can rewrite our go-wrong test methods
+as shown below.
+</p>
+</td>
+</tr>
+<tr> 
+<td style="border: .2em solid black;">open()</td>
+<td style="border: .2em solid black;">open( File file )</td>
+</tr>
+
+<tr> 
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%">1
+2
+3
+4
+5
+6
+7</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testOpenGoWrong</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    Supplier<span style="color: #333333">&lt;</span>Profile<span style="color: #333333">&gt;</span>   supplier    <span style="color: #333333">=</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">();</span>
+    openGoWrong<span style="color: #333333">(</span> supplier<span style="color: #333333">,</span> noSuchFile<span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">true</span> <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+
+
+</td>
+<td style="border: .2em solid black; vertical-align: top; 0;">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%">1
+2
+3
+4
+5
+6
+7</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
+<span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testOpenFileGoWrong</span><span style="color: #333333">()</span>
+<span style="color: #333333">{</span>
+    Supplier<span style="color: #333333">&lt;</span>Profile<span style="color: #333333">&gt;</span>   supplier    <span style="color: #333333">=</span> 
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">open</span><span style="color: #333333">(</span> noSuchFile <span style="color: #333333">);</span>
+    openGoWrong<span style="color: #333333">(</span> supplier<span style="color: #333333">,</span> distinctFile<span style="color: #333333">,</span> <span style="color: #008800; font-weight: bold">false</span> <span style="color: #333333">);</span>
+<span style="color: #333333">}</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
+<p>
+We have one more type of test
+that can be encapsulated:
+file manager operations that are canceled
+via the file chooser dialog.
+This is pretty easy to do
+because we don't need different methods
+for input and output operations.
+Below are two figures;
+the first shows the pseudocode
+for the method
+that encapsulates the cancel logic,
+and the second presents
+one input cancel test,
+and one output cancel test.
+</p>
+</td>
+</tr>
+
+<tr>
+<td colspan="2">
+
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tbody><tr><td><pre style="margin: 0; line-height: 125%"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #888888">/*</span>
+<span style="color: #888888">private void cancelOperation(</span>
+<span style="color: #888888">    Supplier&lt;?&gt; supplier, </span>
+<span style="color: #888888">    File file</span>
+<span style="color: #888888">)</span>
+<span style="color: #888888">{</span>
+<span style="color: #888888">    expFile = fileMgr.getCurrFile();</span>
+<span style="color: #888888">    expLastResult = fileMgr.getLastResult()</span>
+<span style="color: #888888">    formulate the Runnable that will drive a dedicated thread:</span>
+<span style="color: #888888">        Runnable    runner      = () -&gt; supplier.get() </span>
+<span style="color: #888888">    start dedicate thread to encapsulate the operation</span>
+<span style="color: #888888">    </span>
+<span style="color: #888888">    pause to allow file chooser to post</span>
+<span style="color: #888888">    find the file chooser&#39;s text field</span>
+<span style="color: #888888">    enter the file name into the text field</span>
+<span style="color: #888888">    click on the cancel button</span>
+
+<span style="color: #888888">    join the thread</span>
+<span style="color: #888888">    validateState( expFile, expResult, CANCEL )</span>
+<span style="color: #888888">}</span>
+<span style="color: #888888">*/</span>
+</pre></td></tr></tbody></table></div>
+
+</td>
+</tr>
+<tr>
+<td colspan="2">
 <ul>
 <li>
-<em>adHocFile</em> doesn't exist.
+    Line 3: 
+    This time we declare out supplier
+    with a wildcard (?) because
+    we're using it 
+    for both input (<em>Supplier&lt;Profile&gt;</em> required)
+    and output (<em>Supplier&lt;Boolean&gt;</em> required) operations.
 </li>
 <li>
-There is no current file
-(<em>fileMgr.getCurrFile</em> returns null).
+    Lines 7,8:
+    Record the values of the current-file
+    and last-result properties
+    for validation at the end
+    of the operation
+    (canceled operation do not change these properties).
 </li>
 <li>
-Last result is <em>false</em>.
+    Lines 9-11:
+    Start the operation
+    in a dedicated thread.
 </li>
 <li>
-Last action is <em>CANCEL</em>.
+    Lines 13-16:
+    There is not "expect file chooser" logic this time;
+    cancel operation always go through the file chooser.
+    Wait for the file chooser to post,
+    enter the file name
+    and push the <em>Cancel</em> button.
+</li>
+<li> Line 18: Wait for the dedicated thread to complete.</li>
+<li>
+    Line 19:
+    Verify that the curr-file and last-result properties
+    are unchanged,
+    and the last-action property
+    is set to <em>CANCEL</em>.
 </li>
 </ul>
 </td>
@@ -817,3 +1428,4 @@ Last action is <em>CANCEL</em>.
 
 </body>
 </html>
+    
