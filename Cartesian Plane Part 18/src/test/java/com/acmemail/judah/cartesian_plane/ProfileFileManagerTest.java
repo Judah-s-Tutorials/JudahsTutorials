@@ -129,10 +129,8 @@ public class ProfileFileManagerTest
         noSuchFile.delete();
         
         noAccessFile.createNewFile();
-        if ( noAccessFile.canRead() )
-            noAccessFile.setReadable( false );
-        if ( noAccessFile.canWrite() )
-            noAccessFile.setWritable( false );
+        saveProfile( baseProfile, noAccessFile );
+        noAccessFile.setWritable( false );
     }
     
     @AfterAll
@@ -151,31 +149,6 @@ public class ProfileFileManagerTest
         saveButton = null;
         cancelButton = null;
         initFileManagerState();
-    }
-    
-    @Test
-    public void testMisc()
-    {
-        File    inError = new File( testDataDir, noSuchFileName );
-        try ( FileInputStream inStr = new FileInputStream( inError ) )
-        {
-            System.out.println( "no input test failed" );
-        }
-        catch ( IOException exc )
-        {
-            System.out.println( exc.getMessage() );
-        }
-
-        File    outError = new File( testDataDir, noAccessName );
-        try ( PrintStream inStr = new PrintStream( outError ) )
-        {
-            System.out.println( "no output test failed" );
-        }
-        catch ( IOException exc )
-        {
-            System.out.println( exc.getMessage() );
-        }
-        System.out.println( "done" );
     }
     
     @Test
@@ -211,9 +184,6 @@ public class ProfileFileManagerTest
     @Test
     public void testClose()
     {
-        fileMgr.close();
-        assertNull( fileMgr.getCurrFile() );
-        
         Supplier<Profile>   supplier    = () -> fileMgr.open( baseFile );
         openGoRight( supplier, baseFile, false );
         assertNotNull( fileMgr.getCurrFile() );
@@ -223,33 +193,9 @@ public class ProfileFileManagerTest
     }
 
     @Test
-    public void testNewFileGoRight()
-    {
-        BooleanSupplier supplier    = () -> fileMgr.newFile();
-        saveGoRight( supplier, adHocFile, true );
-        validateFile( baseProfile, adHocFile );
-    }
-
-    @Test
-    public void testNewFileGoWrong()
-    {
-        BooleanSupplier supplier    = () -> fileMgr.newFile();
-        saveGoWrong( supplier, noAccessFile, true );
-    }
-    
-    @Test
-    public void testNewFileCancel()
-    {
-        Supplier<?> supplier    = () -> fileMgr.newFile();
-        cancelOperation( supplier, adHocFile );
-        assertFalse( adHocFile.exists() );
-    }
-
-    @Test
     public void testOpenGoRight()
     {
-        Supplier<Profile>   supplier    = 
-            () -> fileMgr.open();
+        Supplier<Profile>   supplier    = () -> fileMgr.open();
         openGoRight( supplier, distinctFile, true );
         assertEquals( distinctProfile, adHocProfile );
     }
@@ -265,7 +211,8 @@ public class ProfileFileManagerTest
     public void testOpenCancel()
     {
         Supplier<?> supplier    = () -> fileMgr.open();
-        cancelOperation( supplier, baseFile );
+        cancelOperation( supplier, adHocFile );
+        assertFalse( adHocFile.exists() );
     }
 
     @Test
@@ -317,7 +264,7 @@ public class ProfileFileManagerTest
     {
         Profile profile = new Profile();
         Supplier<Profile>   supplier    = 
-            () -> fileMgr.open( distinctFile,profile );
+            () -> fileMgr.open( distinctFile, profile );
         openGoRight( supplier, distinctFile, false );
         assertEquals( distinctProfile, profile );
     }
@@ -331,7 +278,92 @@ public class ProfileFileManagerTest
         openGoWrong( supplier, distinctFile, false );
         assertEquals( baseProfile, profile );
     }
+
+    @Test
+    public void testNewFileGoRight()
+    {
+        BooleanSupplier supplier    = () -> fileMgr.newFile();
+        saveGoRight( supplier, adHocFile, true );
+        validateFile( baseProfile, adHocFile );
+    }
+
+    @Test
+    public void testNewFileGoWrong()
+    {
+        BooleanSupplier supplier    = () -> fileMgr.newFile();
+        saveGoWrong( supplier, noAccessFile, true );
+    }
     
+    @Test
+    public void testNewFileCancel()
+    {
+        Supplier<?> supplier    = () -> fileMgr.newFile();
+        cancelOperation( supplier, adHocFile );
+        assertFalse( adHocFile.exists() );
+    }
+    @Test
+    public void testSaveFileGoRight()
+    {
+        BooleanSupplier supplier    = () -> fileMgr.save( adHocFile );
+        saveGoRight( supplier, adHocFile, false );
+        validateFile( baseProfile, adHocFile );
+    }
+
+    @Test
+    public void testSaveFileGoWrong()
+    {
+        BooleanSupplier supplier    = () -> fileMgr.save( noAccessFile );
+        saveGoWrong( supplier, noAccessFile, false );
+    }
+
+    @Test
+    public void testSaveProfileGoWrong()
+    {
+        assertTrue( noAccessFile.exists() );
+        assertFalse( noAccessFile.canWrite() );
+        fileMgr.close();
+        
+        Profile profile = new Profile();
+        // sanity check
+        assertEquals( baseProfile, profile );
+        
+        profile.setName( "testSaveProfileGoWrong" );
+        Thread  thread  = executeChooserOp( 
+            () -> fileMgr.save( profile )
+        );
+        enterPath( noAccessName );
+        clickOn( saveButton );
+        assertTrue( dismissErrorDialog() );
+        Utils.join( thread );
+        validateState( null, false, ProfileFileManager.APPROVE );
+    }
+
+    @Test
+    public void testSaveProfileCancel()
+    {
+        // Make sure currFile is null
+        fileMgr.close();
+        // sanity check
+        assertNull( fileMgr.getCurrFile() );
+        
+        // Make sure adHoc file doesn't exist
+        adHocFile.delete();
+        // sanity check
+        assertFalse( adHocFile.exists() );
+        
+        boolean expResult   = fileMgr.getLastResult();
+        Profile profile     = new Profile();
+        Thread  thread      = executeChooserOp( 
+            () -> fileMgr.save( profile )
+        );
+        enterPath( adHocName );
+        clickOn( cancelButton );
+        assertFalse( dismissErrorDialog() );
+        Utils.join( thread );
+        assertFalse( adHocFile.exists() );
+        validateState( null, expResult, ProfileFileManager.CANCEL );
+    }
+
     @Test
     public void testSaveProfileFileGoRight()
     {
@@ -343,6 +375,36 @@ public class ProfileFileManagerTest
         validateFile( profile, adHocFile );
     }
 
+    @Test
+    public void testSaveProfile_CurrFileGoRight()
+    {
+        // make sure there's a file open; write distinct data to it
+        BooleanSupplier  supplier    = 
+            () -> fileMgr.save( distinctProfile, adHocFile );
+        saveGoRight( supplier, adHocFile, false );
+        // sanity check
+        validateFile( distinctProfile, adHocFile );
+
+        // save base data to currently open file (adHocFile)
+        supplier = () -> fileMgr.save( baseProfile );
+        saveGoRight( supplier, adHocFile, false );
+        // sanity check
+        validateFile( baseProfile, adHocFile );
+    }
+
+    @Test
+    public void testSaveProfile_CurrFileGoWrong()
+    {
+        // read the no-write file
+        Supplier<Profile>   readSupplier    = 
+            () -> fileMgr.open( noAccessFile );
+        openGoRight( readSupplier, noAccessFile, false );
+
+        // try to save to currently open file (no-write file)
+        BooleanSupplier supplier = () -> fileMgr.save( baseProfile );
+        saveGoWrong( supplier, adHocFile, false );
+    }
+    
     @Test
     public void testSaveProfileNoCurrFile()
     {
@@ -407,54 +469,6 @@ public class ProfileFileManagerTest
     }
 
     @Test
-    public void testSaveProfileGoWrong()
-    {
-        assertTrue( noAccessFile.exists() );
-        assertFalse( noAccessFile.canWrite() );
-        fileMgr.close();
-        
-        Profile profile = new Profile();
-        // sanity check
-        assertEquals( baseProfile, profile );
-        
-        profile.setName( "testSaveProfileGoWrong" );
-        Thread  thread  = executeChooserOp( 
-            () -> fileMgr.save( profile )
-        );
-        enterPath( noAccessName );
-        clickOn( saveButton );
-        assertTrue( dismissErrorDialog() );
-        Utils.join( thread );
-        validateState( null, false, ProfileFileManager.APPROVE );
-    }
-
-    @Test
-    public void testSaveProfileCancel()
-    {
-        // Make sure currFile is null
-        fileMgr.close();
-        // sanity check
-        assertNull( fileMgr.getCurrFile() );
-        
-        // Make sure adHoc file doesn't exist
-        adHocFile.delete();
-        // sanity check
-        assertFalse( adHocFile.exists() );
-        
-        boolean expResult   = fileMgr.getLastResult();
-        Profile profile     = new Profile();
-        Thread  thread      = executeChooserOp( 
-            () -> fileMgr.save( profile )
-        );
-        enterPath( adHocName );
-        clickOn( cancelButton );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        assertFalse( adHocFile.exists() );
-        validateState( null, expResult, ProfileFileManager.CANCEL );
-    }
-
-    @Test
     public void testSaveAsGoRight()
     {
         // Write distinct properties to ad hoc file
@@ -499,20 +513,9 @@ public class ProfileFileManagerTest
     @Test
     public void testSaveAsProfileCancel()
     {
-        // Start to write adHoc file then cancel
-        Profile profile = new Profile();
-        profile.setName( "testSaveAsProfile" );
-        Thread  thread  = executeChooserOp( 
-            () -> fileMgr.saveAs( profile )
-        );
-        enterPath( adHocName );
-        clickOn( cancelButton );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        
-        // Verify ad hoc file exists and contains modified properties
+        Supplier<?> supplier    = () -> fileMgr.saveAs( distinctProfile );
+        cancelOperation( supplier, adHocFile);
         assertFalse( adHocFile.exists() );
-        validateState( null, false, ProfileFileManager.CANCEL );
     }
     
     @Test

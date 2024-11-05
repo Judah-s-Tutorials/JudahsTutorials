@@ -202,10 +202,12 @@ public class ProfileFileManager
         }
         catch ( IOException exc )
         {
+            final String    lineSep = System.lineSeparator();
             profile = null;
             String  msg = 
                 "Error reading \"" 
-                    + file.getAbsolutePath() + "\": " 
+                    + file.getName() + "\": " 
+                    + lineSep 
                     + exc.getMessage();
             JOptionPane.showMessageDialog( 
                 null, 

@@ -14,7 +14,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
@@ -1057,3 +1059,4 @@ public class ProfileFileManagerTest_orig
         return (JDialog)window;
     }
 }
+
