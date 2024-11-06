@@ -1041,13 +1041,13 @@ that does not require operator intervention.
 15</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
 <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveAsProfileGoWrong</span><span style="color: #333333">()</span>
 <span style="color: #333333">{</span>
-    assertTrue<span style="color: #333333">(</span> noAccessFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
-    assertFalse<span style="color: #333333">(</span> noAccessFile<span style="color: #333333">.</span><span style="color: #0000CC">canWrite</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> readOnlyFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertFalse<span style="color: #333333">(</span> readOnlyFile<span style="color: #333333">.</span><span style="color: #0000CC">canWrite</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
 
     Thread  thread  <span style="color: #333333">=</span> executeChooserOp<span style="color: #333333">(</span> 
         <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> adHocResult <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">saveAs</span><span style="color: #333333">(</span> adHocProfile <span style="color: #333333">)</span>
     <span style="color: #333333">);</span>
-    enterPath<span style="color: #333333">(</span> noAccessName <span style="color: #333333">);</span>
+    enterPath<span style="color: #333333">(</span> readOnlyName <span style="color: #333333">);</span>
     clickOn<span style="color: #333333">(</span> saveButton <span style="color: #333333">);</span>
     assertTrue<span style="color: #333333">(</span> dismissErrorDialog<span style="color: #333333">()</span> <span style="color: #333333">);</span>
     Utils<span style="color: #333333">.</span><span style="color: #0000CC">join</span><span style="color: #333333">(</span> thread <span style="color: #333333">);</span>
@@ -1077,11 +1077,11 @@ that does not require operator intervention.
 15</pre></td><td><pre style="margin: 0; line-height: 125%"><span style="color: #555555; font-weight: bold">@Test</span>
 <span style="color: #008800; font-weight: bold">public</span> <span style="color: #333399; font-weight: bold">void</span> <span style="color: #0066BB; font-weight: bold">testSaveProfileFileGoWrong</span><span style="color: #333333">()</span>
 <span style="color: #333333">{</span>
-    assertTrue<span style="color: #333333">(</span> noAccessFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
-    assertFalse<span style="color: #333333">(</span> noAccessFile<span style="color: #333333">.</span><span style="color: #0000CC">canWrite</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertTrue<span style="color: #333333">(</span> readOnlyFile<span style="color: #333333">.</span><span style="color: #0000CC">exists</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
+    assertFalse<span style="color: #333333">(</span> readOnlyFile<span style="color: #333333">.</span><span style="color: #0000CC">canWrite</span><span style="color: #333333">()</span> <span style="color: #333333">);</span>
     <span style="color: #333399; font-weight: bold">int</span> expAction   <span style="color: #333333">=</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">getLastAction</span><span style="color: #333333">();</span>
     Thread  thread  <span style="color: #333333">=</span> executeNonChooserOp<span style="color: #333333">(</span> 
-        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">save</span><span style="color: #333333">(</span> <span style="color: #008800; font-weight: bold">new</span> Profile<span style="color: #333333">(),</span> noAccessFile <span style="color: #333333">)</span>
+        <span style="color: #333333">()</span> <span style="color: #333333">-&gt;</span> fileMgr<span style="color: #333333">.</span><span style="color: #0000CC">save</span><span style="color: #333333">(</span> <span style="color: #008800; font-weight: bold">new</span> Profile<span style="color: #333333">(),</span> readOnlyFile <span style="color: #333333">)</span>
     <span style="color: #333333">);</span>
     
     

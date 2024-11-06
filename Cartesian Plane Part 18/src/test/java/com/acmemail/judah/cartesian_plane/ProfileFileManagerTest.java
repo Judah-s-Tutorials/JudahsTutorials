@@ -9,10 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.Component;
 import java.awt.Window;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
@@ -32,12 +30,12 @@ import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
-import com.acmemail.judah.cartesian_plane.input.FileManager;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 public class ProfileFileManagerTest
 {
+    private static final long       pauseInterval   = 125;
     private static final String     testDataDirName = 
         "ProfileFileManagerTest";
     private static final  File      testDataDir     = 
@@ -48,8 +46,8 @@ public class ProfileFileManagerTest
         "DistinctProfile.txt";
     private static final  String    adHocName       = 
         "AdHoc.txt";
-    private static final  String    noAccessName    = 
-        "NoAccessFile.txt";
+    private static final  String    readOnlyName    = 
+        "ReadonlyFile.txt";
     private static final  String    noSuchFileName  = 
         "NoSuchFile.txt";
     private static final File       baseFile        = 
@@ -58,8 +56,8 @@ public class ProfileFileManagerTest
         new File( testDataDir, distinctName );
     private static final File       adHocFile       = 
         new File( testDataDir, adHocName );
-    private static final File       noAccessFile    = 
-        new File( testDataDir, noAccessName );
+    private static final File       readOnlyFile    = 
+        new File( testDataDir, readOnlyName );
     private static final File       noSuchFile      = 
         new File( testDataDir, noSuchFileName );
     
@@ -128,9 +126,9 @@ public class ProfileFileManagerTest
         
         noSuchFile.delete();
         
-        noAccessFile.createNewFile();
-        saveProfile( baseProfile, noAccessFile );
-        noAccessFile.setWritable( false );
+        readOnlyFile.createNewFile();
+        saveProfile( baseProfile, readOnlyFile );
+        readOnlyFile.setWritable( false );
     }
     
     @AfterAll
@@ -291,7 +289,7 @@ public class ProfileFileManagerTest
     public void testNewFileGoWrong()
     {
         BooleanSupplier supplier    = () -> fileMgr.newFile();
-        saveGoWrong( supplier, noAccessFile, true );
+        saveGoWrong( supplier, readOnlyFile, true );
     }
     
     @Test
@@ -301,6 +299,7 @@ public class ProfileFileManagerTest
         cancelOperation( supplier, adHocFile );
         assertFalse( adHocFile.exists() );
     }
+    
     @Test
     public void testSaveFileGoRight()
     {
@@ -312,67 +311,8 @@ public class ProfileFileManagerTest
     @Test
     public void testSaveFileGoWrong()
     {
-        BooleanSupplier supplier    = () -> fileMgr.save( noAccessFile );
-        saveGoWrong( supplier, noAccessFile, false );
-    }
-
-    @Test
-    public void testSaveProfileGoWrong()
-    {
-        assertTrue( noAccessFile.exists() );
-        assertFalse( noAccessFile.canWrite() );
-        fileMgr.close();
-        
-        Profile profile = new Profile();
-        // sanity check
-        assertEquals( baseProfile, profile );
-        
-        profile.setName( "testSaveProfileGoWrong" );
-        Thread  thread  = executeChooserOp( 
-            () -> fileMgr.save( profile )
-        );
-        enterPath( noAccessName );
-        clickOn( saveButton );
-        assertTrue( dismissErrorDialog() );
-        Utils.join( thread );
-        validateState( null, false, ProfileFileManager.APPROVE );
-    }
-
-    @Test
-    public void testSaveProfileCancel()
-    {
-        // Make sure currFile is null
-        fileMgr.close();
-        // sanity check
-        assertNull( fileMgr.getCurrFile() );
-        
-        // Make sure adHoc file doesn't exist
-        adHocFile.delete();
-        // sanity check
-        assertFalse( adHocFile.exists() );
-        
-        boolean expResult   = fileMgr.getLastResult();
-        Profile profile     = new Profile();
-        Thread  thread      = executeChooserOp( 
-            () -> fileMgr.save( profile )
-        );
-        enterPath( adHocName );
-        clickOn( cancelButton );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        assertFalse( adHocFile.exists() );
-        validateState( null, expResult, ProfileFileManager.CANCEL );
-    }
-
-    @Test
-    public void testSaveProfileFileGoRight()
-    {
-        Profile         profile     = new Profile();
-        profile.setName( "testSaveProfileFileGoRight" );
-        BooleanSupplier  supplier    = 
-            () -> fileMgr.save( profile, adHocFile );
-        saveGoRight( supplier, adHocFile, false );
-        validateFile( profile, adHocFile );
+        BooleanSupplier supplier    = () -> fileMgr.save( readOnlyFile );
+        saveGoWrong( supplier, readOnlyFile, false );
     }
 
     @Test
@@ -397,99 +337,84 @@ public class ProfileFileManagerTest
     {
         // read the no-write file
         Supplier<Profile>   readSupplier    = 
-            () -> fileMgr.open( noAccessFile );
-        openGoRight( readSupplier, noAccessFile, false );
+            () -> fileMgr.open( readOnlyFile );
+        openGoRight( readSupplier, readOnlyFile, false );
 
         // try to save to currently open file (no-write file)
         BooleanSupplier supplier = () -> fileMgr.save( baseProfile );
-        saveGoWrong( supplier, adHocFile, false );
+        saveGoWrong( supplier, readOnlyFile, false );
     }
     
     @Test
-    public void testSaveProfileNoCurrFile()
+    public void testSaveProfile_NoCurrFileGoRight()
     {
-        adHocFile.delete();
-        // sanity check
+        // Preconditions: adHocFile doesn't exist, getCurrFile()a
+        // returns null.
         assertFalse( adHocFile.exists() );
-        fileMgr.close();
+        assertNull( fileMgr.getCurrFile() );
         
-        Profile profile = new Profile();
+        BooleanSupplier supplier = () -> fileMgr.save( distinctProfile );
+        saveGoRight( supplier, adHocFile, true );
         // sanity check
-        assertEquals( baseProfile, profile );
-        
-        profile.setName( "testSaveProfileGoRight" );
-        Thread  thread  = executeChooserOp( 
-            () -> fileMgr.save( profile )
-        );
-        enterPath( adHocName );
-        clickOn( saveButton );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        assertTrue( adHocFile.exists() );
-        validateState( adHocFile, true, ProfileFileManager.APPROVE );
-        
-        thread  = executeChooserOp( 
-            () -> adHocProfile = fileMgr.open( adHocFile )
-        );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        assertEquals( profile, adHocProfile );
-        validateState( adHocFile, true, ProfileFileManager.APPROVE );
+        validateFile( distinctProfile, adHocFile );
     }
 
     @Test
-    public void testSaveProfileToCurrFile()
+    public void testSaveProfile_NoCurrFileGoWrong()
     {
-        int expAction   = fileMgr.getLastAction();
-        // Establish currFile = adHocFile
-        Thread  thread  = executeNonChooserOp( 
-            () -> fileMgr.save( adHocFile )
-        );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        assertTrue( adHocFile.exists() );
-        validateState( adHocFile, true, expAction );
+        // Preconditions: adHocFile doesn't exist, getCurrFile()a
+        // returns null.
+        assertFalse( adHocFile.exists() );
+        assertNull( fileMgr.getCurrFile() );
         
-        // Write distinct properties to currFile (adHocFile)
-        thread  = executeNonChooserOp( 
-            () -> fileMgr.save( distinctProfile )
-        );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
+        // try to save to currently open file (no-write file)
+        BooleanSupplier supplier = () -> fileMgr.save( baseProfile );
+        saveGoWrong( supplier, readOnlyFile, true );
+    }
+
+    @Test
+    public void testSaveProfileCancel()
+    {
+        // Preconditions: adHocFile doesn't exist, getCurrFile()a
+        // returns null.
+        assertFalse( adHocFile.exists() );
+        assertNull( fileMgr.getCurrFile() );
         
-        // Verify contents of adHocFile
-        thread  = executeNonChooserOp( 
-            () -> adHocProfile = fileMgr.open( adHocFile )
-        );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        assertEquals( distinctProfile, adHocProfile );
-        assertEquals( adHocFile, fileMgr.getCurrFile() );
-        validateState( adHocFile, true, expAction );
+        Supplier<?> supplier = () -> fileMgr.save( baseProfile );
+        cancelOperation( supplier, adHocFile );
+        assertFalse( adHocFile.exists() );
+    }
+
+    @Test
+    public void testSaveProfileFileGoRight()
+    {
+        BooleanSupplier  supplier    = 
+            () -> fileMgr.save( distinctProfile, adHocFile );
+        saveGoRight( supplier, adHocFile, false );
+        validateFile( distinctProfile, adHocFile );
+    }
+    
+    @Test
+    public void testSaveProfileFileGoWrong()
+    {
+        BooleanSupplier  supplier    = 
+            () -> fileMgr.save( distinctProfile, readOnlyFile );
+        saveGoWrong( supplier, readOnlyFile, false );
     }
 
     @Test
     public void testSaveAsGoRight()
     {
-        // Write distinct properties to ad hoc file
-        Thread  thread  = executeChooserOp( 
-            () -> adHocResult = fileMgr.saveAs()
-        );
-        enterPath( adHocName );
-        clickOn( saveButton );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        validateState( adHocFile, true, ProfileFileManager.APPROVE );
-        
-        // Verify ad hoc file exists and contains base properties
-        assertTrue( adHocFile.exists() );
-        thread  = executeNonChooserOp( 
-            () -> adHocProfile = fileMgr.open( adHocFile )
-        );
-        assertFalse( dismissErrorDialog() );
-        Utils.join( thread );
-        assertEquals( baseProfile, adHocProfile );
-        validateState( adHocFile, true, ProfileFileManager.APPROVE );
+        BooleanSupplier  supplier    = () -> fileMgr.saveAs();
+        saveGoRight( supplier, adHocFile, true );
+        validateFile( baseProfile, adHocFile );
+    }
+
+    @Test
+    public void testSaveAsGoWrong()
+    {
+        BooleanSupplier  supplier    = () -> fileMgr.saveAs();
+        saveGoWrong( supplier, readOnlyFile, true );
     }
 
     @Test
@@ -497,17 +422,23 @@ public class ProfileFileManagerTest
     {
         Supplier<?> supplier    = () -> fileMgr.saveAs();
         cancelOperation( supplier, adHocFile);
+        assertFalse( adHocFile.exists() );
     }
 
     @Test
     public void testSaveAsProfileGoRight()
     {
-        Profile profile             = new Profile();
-        profile.setName( "testSaveAsProfile" );
         BooleanSupplier supplier    = 
-            () -> fileMgr.saveAs( profile );
+            () -> fileMgr.saveAs( distinctProfile );
         saveGoRight( supplier, adHocFile, true );
-        validateFile( profile, adHocFile );
+        validateFile( distinctProfile, adHocFile );
+    }
+
+    @Test
+    public void testSaveAsProfileGoWrong()
+    {
+        BooleanSupplier  supplier    = () -> fileMgr.saveAs();
+        saveGoWrong( supplier, readOnlyFile, true );
     }
 
     @Test
@@ -518,20 +449,18 @@ public class ProfileFileManagerTest
         assertFalse( adHocFile.exists() );
     }
     
-    @Test
-    public void testSaveProfileFileGoWrong()
-    {
-        int expAction   = fileMgr.getLastAction();
-        Thread  thread  = executeNonChooserOp( 
-            () -> fileMgr.save( new Profile(), noAccessFile )
-        );
-        assertTrue( dismissErrorDialog() );
-        Utils.join( thread );
-        validateState( null, false, expAction );
-    }
-    
+    /**
+     * Saves the given profile
+     * to the given file
+     * without going through the file manager.
+     * 
+     * @param profile       the given profile
+     * @param file          the given file
+     * 
+     * @throws IOException  if the operation fails
+     */
     private static void saveProfile( Profile profile, File file ) 
-        throws Exception
+        throws IOException
     {
         ProfileParser   parser      = new ProfileParser( profile );
         try ( 
@@ -571,35 +500,30 @@ public class ProfileFileManagerTest
     }
     
     /**
-     * Execute a given operation,
-     * wait for an error errorDialog to post,
-     * then dismiss the error errorDialog
-     * by selecting its OK button.
-     * The given operation
-     * is executed via a dedicated thread
-     * and this method does not return
-     * until the thread
-     * has reached the terminated state.
-     * The given operation may post many error dialogs;
-     * the number of dialogs posted is returned.
+     * Execute the given operation
+     * against the given file
+     * in a dedicated thread;
+     * does not return
+     * until the dedicated thread dies.
+     * The given operation is assumed to be a save operation.
+     * The given file is deleted at the start of the operation,
+     * and its existence is confirmed at the end of the operation.
+     * If a file chooser dialog is expected,
+     * the file name is entered into its file name field,
+     * and its Save button is pushed.
+     * If the file chooser is expected
+     * but is not posted,
+     * an assertion is triggered.
+     * The operation is expected to complete normally;
+     * if an error dialog is posted
+     * an assertion is triggered.
      * 
-     * 
-     * @param runner    the given operation
-     * 
-     * @return  
-     *      the number of dialogs posted 
-     *      while executing the given operation
+     * @param supplier      the given operation
+     * @param file          the given file
+     * @param expectChooser 
+     *      true if the operation requires interaction
+     *      with the file chooser
      */
-    private Thread executeChooserOp( Runnable runner )
-    {
-        Thread  thread  = new Thread( runner );
-        thread.start();
-        Utils.pause( 250 );
-        getFileChooserComponents();
-        assertTrue( fileChooser.isVisible() );
-        return thread;
-    }
-    
     private void saveGoRight( 
         BooleanSupplier supplier, 
         File file, 
@@ -614,16 +538,18 @@ public class ProfileFileManagerTest
         String      name        = file.getName();
         int         expAction   = fileMgr.getLastAction();
         Thread      thread  = new Thread( runner );
-        thread.start();
-        Utils.pause( 250 );
+        GUIUtils.schedEDTAndWait( thread::start );
+        
         if ( expectChooser )
         {
+            Utils.pause( pauseInterval );
             getFileChooserComponents();
             assertTrue( fileChooser.isVisible() );
             enterPath( name );
             clickOn( saveButton );
             expAction = ProfileFileManager.APPROVE;
         }
+        
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         assertTrue( adHocResult );
@@ -631,6 +557,33 @@ public class ProfileFileManagerTest
         validateState( file, true, expAction );
     }
     
+    
+    /**
+     * Execute the given operation
+     * against the given file
+     * in a dedicated thread
+     * with the expectation
+     * that the operation will fail
+     * and post an error dialog.
+     * This method does not return
+     * until the dedicated thread dies.
+     * If a file chooser dialog is expected,
+     * the file name is entered into its file name field,
+     * and its Save button is pushed.
+     * If the file chooser is expected
+     * but is not posted,
+     * an assertion is triggered.
+     * The operation is expected to fail with an I/O error
+     * and post an error dialog;
+     * If an error dialog is not posted
+     * an assertion is triggered.
+     * 
+     * @param supplier      the given operation
+     * @param file          the given file
+     * @param expectChooser 
+     *      true if the operation requires interaction
+     *      with the file chooser
+     */
     private void saveGoWrong( 
         BooleanSupplier supplier, 
         File file, 
@@ -643,11 +596,11 @@ public class ProfileFileManagerTest
         int         expAction   = fileMgr.getLastAction();
         
         Thread      thread  = new Thread( runner );
-        thread.start();
-        Utils.pause( 250 );
+        GUIUtils.schedEDTAndWait( thread::start );
         
         if ( expectChooser )
         {
+            Utils.pause( pauseInterval );
             getFileChooserComponents();
             assertTrue( fileChooser.isVisible() );
             enterPath( name );
@@ -657,22 +610,35 @@ public class ProfileFileManagerTest
 
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
-        assertNull( adHocProfile );
+        assertFalse( adHocResult );
         validateState( null, false, expAction );
     }
     
-    private void validateFile( Profile expProfile, File file )
-    {
-        assertTrue( file.exists() );
-        int                 expAction   = fileMgr.getLastAction();
-        Profile             profile     = new Profile();
-        Supplier<Profile>   supplier    = 
-            () -> fileMgr.open( file, profile );
-        openGoRight( supplier, file, false );
-        assertEquals( expProfile, profile );
-        validateState( file, true, expAction );
-    }
-    
+    /**
+     * Executes the given operation
+     * against the given file
+     * in a dedicated thread;
+     * does not return
+     * until the dedicated thread dies.
+     * The given operation is assumed to be an open operation.
+     * The existence of the given file 
+     * is confirmed at the start of the operation.
+     * If a file chooser dialog is expected,
+     * the file name is entered into its file name field,
+     * and its Open button is pushed.
+     * If the file chooser is expected
+     * but is not posted,
+     * an assertion is triggered.
+     * The operation is expected to complete normally;
+     * if an error dialog is posted
+     * an assertion is triggered.
+     * 
+     * @param supplier      the given operation
+     * @param file          the given file
+     * @param expectChooser 
+     *      true if the operation requires interaction
+     *      with the file chooser
+     */
     private void openGoRight(
         Supplier<Profile> supplier, 
         File file, 
@@ -685,21 +651,49 @@ public class ProfileFileManagerTest
         String      name        = file.getName();
         int         expAction   = fileMgr.getLastAction();
         Thread      thread      = new Thread( runner );
-        thread.start();
-        Utils.pause( 250 );
+        GUIUtils.schedEDTAndWait( thread::start );
+
         if ( expectChooser )
         {
+            Utils.pause( pauseInterval );
             getFileChooserComponents();
             assertTrue( fileChooser.isVisible() );
             enterPath( name );
             clickOn( openButton );
             expAction = ProfileFileManager.APPROVE;
         }
+        
         assertFalse( dismissErrorDialog() );
         Utils.join( thread );
         validateState( file, true, expAction );
     }
     
+    /**
+     * Execute the given operation
+     * against the given file
+     * in a dedicated thread
+     * with the expectation
+     * that the operation will fail
+     * and post an error dialog.
+     * This method does not return
+     * until the dedicated thread dies.
+     * If a file chooser dialog is expected,
+     * the file name is entered into its file name field,
+     * and its Open button is pushed.
+     * If the file chooser is expected
+     * but is not posted,
+     * an assertion is triggered.
+     * The operation is expected to fail with an I/O error
+     * and post an error dialog;
+     * If an error dialog is not posted
+     * an assertion is triggered.
+     * 
+     * @param supplier      the given operation
+     * @param file          the given file
+     * @param expectChooser 
+     *      true if the operation requires interaction
+     *      with the file chooser
+     */
     private void openGoWrong(
         Supplier<Profile> supplier, 
         File file, 
@@ -710,22 +704,41 @@ public class ProfileFileManagerTest
         String      name        = file.getName();
         int         expAction   = fileMgr.getLastAction();
         Thread      thread      = new Thread( runner );
-        thread.start();
-        Utils.pause( 250 );
+        GUIUtils.schedEDTAndWait( thread::start );
+
         if ( expectChooser )
         {
+            Utils.pause( pauseInterval );
             getFileChooserComponents();
             assertTrue( fileChooser.isVisible() );
             enterPath( name );
             clickOn( openButton );
             expAction = ProfileFileManager.APPROVE;
         }
+        
         assertTrue( dismissErrorDialog() );
         Utils.join( thread );
         assertNull( adHocProfile );
         validateState( null, false, expAction );
     }
     
+    /**
+     * Begin a given operation
+     * against a given file
+     * in a dedicated thread
+     * then cancel it via the file chooser.
+     * This method does not return
+     * until the dedicated thread dies.
+     * When the file chooser is posted
+     * the name of the given file
+     * is entered into its name field
+     * and its Cancel button is pushed.
+     * If the file chooser is not posted
+     * an assertion is triggered.
+     * 
+     * @param supplier  the given operation
+     * @param file      the given file
+     */
     private void cancelOperation(
         Supplier<?> supplier, 
         File file
@@ -736,8 +749,8 @@ public class ProfileFileManagerTest
         File        expFile     = fileMgr.getCurrFile();
         boolean     expResult   = fileMgr.getLastResult();
         Thread      thread      = new Thread( runner );
-        thread.start();
-        Utils.pause( 250 );
+        GUIUtils.schedEDTAndWait( thread::start );
+        Utils.pause( pauseInterval );
 
         getFileChooserComponents();
         assertTrue( fileChooser.isVisible() );
@@ -748,21 +761,38 @@ public class ProfileFileManagerTest
         validateState( expFile, expResult, ProfileFileManager.CANCEL );
     }
     
-    private Thread executeNonChooserOp( Runnable runner )
+    /**
+     * Read the given file
+     * and validate its contents
+     * against the given profile.
+     * 
+     * @param expProfile    the given profile
+     * @param file          the given file
+     */
+    private void validateFile( Profile expProfile, File file )
     {
-        Thread  thread  = new Thread( runner );
-        thread.start();
-
-        
-        
-        return thread;
+        assertTrue( file.exists() );
+        int                 expAction   = fileMgr.getLastAction();
+        Profile             profile     = new Profile();
+        Supplier<Profile>   supplier    = 
+            () -> fileMgr.open( file, profile );
+        openGoRight( supplier, file, false );
+        assertEquals( expProfile, profile );
+        validateState( file, true, expAction );
     }
     
+    /**
+     * Search for an error dialog;
+     * if found,
+     * dismiss it by pushing its OK button.
+     * 
+     * @return  true if the error dialog is found
+     */
     private boolean dismissErrorDialog()
     {
         boolean dismissed   = false;
-        Utils.pause( 250 );
-        getDialogAndOKButton();
+        Utils.pause( pauseInterval );
+        getErrorDialogAndOKButton();
         if ( errorDialogOKButton != null )
         {
             dismissed = true;
@@ -781,7 +811,7 @@ public class ProfileFileManagerTest
      * <p>
      * Precondition: the FileChooser dialog is not posted.
      */
-    private void getDialogAndOKButton()
+    private void getErrorDialogAndOKButton()
     {
         final boolean canBeFrame    = false;
         final boolean canBeDialog   = true;
@@ -827,16 +857,42 @@ public class ProfileFileManagerTest
         validateState( null, false, ProfileFileManager.CANCEL );
     };
     
+    /**
+     * Set the lastAction property of the file manager 
+     * to the given action.
+     * The property is set by initiating an operation
+     * that requires interaction with the file chooser,
+     * then pushing the file chooser button
+     * that will set the lastAction property
+     * to the given value, APPROVE or CANCEL.
+     * If the given action is APPROVE
+     * the client can expect the file manager's
+     * lastResult and currFile properties to change.
+     * 
+     * @param action    the given action
+     */
     private void setLastAction( int action )
     {
         Supplier<Profile>   supplier    = () -> fileMgr.open();
         if ( action == ProfileFileManager.APPROVE )
-            openGoRight( supplier, adHocFile, true );
+            openGoRight( supplier, baseFile, true );
         else
-            cancelOperation( supplier, adHocFile );
+            cancelOperation( (Supplier<?>)supplier, adHocFile );
         assertEquals( action, fileMgr.getLastAction() );
     }
     
+    /**
+     * Set the lastResult property of the file manager 
+     * to the given value.
+     * The property is set by initiating an operation
+     * that will either complete successfully
+     * (if expResult is true)
+     * or fail (if expResult is false).
+     * The client can expect the file manager's
+     * currFile property to change.
+     * 
+     * @param expResult    the given value
+     */
     private void setLastResult( boolean expResult )
     {
         int expAction   = fileMgr.getLastAction();
@@ -858,14 +914,14 @@ public class ProfileFileManagerTest
     /**
      * Compare the names of two given File objects;
      * if both objects are null
-     * the result is true.
-     * Otherwise, the names are converted to uppercase
+     * the result is true,
+     * otherwise, the file names are converted to uppercase
      * and compared for equality.
      * 
      * @param file1 the first given File object
      * @param file2 the second given File object
      * 
-     * @return  true if the names of the given Files are equal
+     * @return  true if the names of the given files are equal
      */
     private static boolean compareFiles( File file1, File file2 )
     {
@@ -903,14 +959,15 @@ public class ProfileFileManagerTest
     }
     
     /**
-     * This method gets the dialog
-     * that encapsulates the JFileChooser (if necessary)
-     * and the required constituent components.
-     * It must only be called 
+     * This method gets the components of the dialog
+     * that are required for testing;
+     * If necessary,
+     * the dialog itself is located.
+     * This method must only be called 
      * after we expect the dialog 
      * to be visible (see {@link #getChooserDialog()}). 
      * Additionally, the state of the dialog 
-     * is generally unpredictable; 
+     * should be considered unpredictable; 
      * for example, sometimes the Save button exists, 
      * and sometimes it doesn't. 
      * Therefore, this method must be called 
