@@ -113,10 +113,8 @@ public class ProfileFileManagerTest
     private JButton         cancelButton    = null;
 
     @BeforeAll
-    static public void beforeAll() throws Exception
+    public static void beforeAll() throws Exception
     {
-        System.out.println( Utils.getTempDir().getAbsolutePath() );
-        
         baseFile.delete();
         baseProfile.setName( "Unique-Test-Name" );
         saveProfile( baseProfile, baseFile );
@@ -124,11 +122,12 @@ public class ProfileFileManagerTest
         distinctFile.delete();
         saveProfile( distinctProfile, distinctFile );
         
-        noSuchFile.delete();
-        
         readOnlyFile.createNewFile();
         saveProfile( baseProfile, readOnlyFile );
         readOnlyFile.setWritable( false );
+        
+        noSuchFile.delete();
+        adHocFile.delete();
     }
     
     @AfterAll
@@ -188,6 +187,12 @@ public class ProfileFileManagerTest
         
         fileMgr.close();
         assertNull( fileMgr.getCurrFile() );
+    }
+    
+    @Test
+    public void testGetFileChooser()
+    {
+        assertNotNull( fileMgr.getFileChooser() );
     }
 
     @Test
@@ -533,12 +538,14 @@ public class ProfileFileManagerTest
         file.delete();
         assertFalse( file.exists() );
         
-        Runnable    runner      = 
+        Runnable    edtRunner   = 
             () -> adHocResult = supplier.getAsBoolean();
+        Runnable    runner      = 
+            () -> GUIUtils.schedEDTAndWait( edtRunner );
         String      name        = file.getName();
         int         expAction   = fileMgr.getLastAction();
         Thread      thread  = new Thread( runner );
-        GUIUtils.schedEDTAndWait( thread::start );
+        thread.start();
         
         if ( expectChooser )
         {
@@ -590,13 +597,15 @@ public class ProfileFileManagerTest
         boolean expectChooser
     )
     {
-        Runnable    runner      = 
+        Runnable    edtRunner   = 
             () -> adHocResult = supplier.getAsBoolean();
+        Runnable    runner      = 
+            () -> GUIUtils.schedEDTAndWait( edtRunner );
         String      name        = file.getName();
         int         expAction   = fileMgr.getLastAction();
         
         Thread      thread  = new Thread( runner );
-        GUIUtils.schedEDTAndWait( thread::start );
+        thread.start();
         
         if ( expectChooser )
         {
@@ -647,11 +656,14 @@ public class ProfileFileManagerTest
     {
         assertTrue( file.exists() );
         
-        Runnable    runner      = () -> adHocProfile = supplier.get();
+        Runnable    edtRunner   = 
+            () -> adHocProfile = supplier.get();
+        Runnable    runner      = 
+            () -> GUIUtils.schedEDTAndWait( edtRunner );
         String      name        = file.getName();
         int         expAction   = fileMgr.getLastAction();
         Thread      thread      = new Thread( runner );
-        GUIUtils.schedEDTAndWait( thread::start );
+        thread.start();
 
         if ( expectChooser )
         {
@@ -700,11 +712,13 @@ public class ProfileFileManagerTest
         boolean expectChooser
     )
     {
-        Runnable    runner      = () -> adHocProfile = supplier.get();
+        Runnable    edtRunner   = () -> adHocProfile = supplier.get();
+        Runnable    runner      = 
+            () -> GUIUtils.schedEDTAndWait( edtRunner );
         String      name        = file.getName();
         int         expAction   = fileMgr.getLastAction();
         Thread      thread      = new Thread( runner );
-        GUIUtils.schedEDTAndWait( thread::start );
+        thread.start();
 
         if ( expectChooser )
         {
@@ -744,14 +758,16 @@ public class ProfileFileManagerTest
         File file
     )
     {
-        Runnable    runner      = () -> supplier.get();
+        Runnable    edtRunner   = () -> supplier.get();
+        Runnable    runner      = 
+            () -> GUIUtils.schedEDTAndWait( edtRunner );
         String      name        = file.getName();
         File        expFile     = fileMgr.getCurrFile();
         boolean     expResult   = fileMgr.getLastResult();
         Thread      thread      = new Thread( runner );
-        GUIUtils.schedEDTAndWait( thread::start );
+        thread.start();
+        
         Utils.pause( pauseInterval );
-
         getFileChooserComponents();
         assertTrue( fileChooser.isVisible() );
         enterPath( name );
@@ -854,6 +870,7 @@ public class ProfileFileManagerTest
         assertFalse( adHocFile.exists() );
         setLastAction( ProfileFileManager.CANCEL );
         setLastResult( false );
+        fileMgr.close();
         validateState( null, false, ProfileFileManager.CANCEL );
     };
     
