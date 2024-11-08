@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ProfileFileManager Test Cases</title>
+    <style>
+    /* body {
+      font-family: 'Times New Roman', serif;
+      background-color: #EEEEEE;
+      margin-left: 2em;
+    }
+    p {
+      max-width: 15em;
+      margin: .25em;
+    }
+    td {
+      font-family: 'Times New Roman', serif;
+      border: 1px solid black;
+      padding-left: .25em;
+      padding-right: .25em;
+    }
+    th {
+      font-family: 'Times New Roman', serif;
+      border: 1px solid black;
+      padding-left: .25em;
+      padding-right: .25em;
+    }
+    td.code {
+        font-size: 80%; 
+        font-family: 'Lucida Console', 'Courier New', monospace;
+    }
+    pre.code {
+        margin-left: 8em;
+    } */
+    </style>
+</head>
+<body>
+
+<table style="border-collapse: collapse; border: 1px solid black;">
+<thead>
+<tr> 
+    <th style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;" colspan="3">
+        ProfileFileManager I/O Operation Test Cases
+    </th>
+</tr>
+
+<tr>
+    <th style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        Method Under Test
+    </th>
+    <th style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        Test Method
+    </th>
+    <th style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        Remarks
+    </th>
+</tr>
+</thead>
+
+<tbody>
+
+<!-- start -->
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;" rowspan="3">
+        open()
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <a href="#testOpen">
+            testOpenGoRight()
+        </a>
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Open a file of the operator's choice;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <a href="#testOpen">
+            testOpenGoWrong()
+        </a>
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Open a file of the operator's choice;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <a href="#testOpen">
+            testOpenCancel()
+        </a>
+    </td>
+    <td style="font-family: 'imes New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Open a file of the operator's choice;
+            cancel the operation in the file chooser.
+        </p>
+    </td>
+</tr>
+
+<!-- start -->
+<tr>
+    <td rowspan="3" style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        open( Profile profile )
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <a href="#testOpenProfile">
+            testOpenProfileGoRight()
+        </a>
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Read a file of the operator's choice
+            into a given profile;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">testOpenProfileGoWrong()</td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Read a file of the operator's choice
+            into a given profile;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">testOpenProfileCancel()</td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Read a file of the operator's choice
+            into a given profile;
+            cancel the operation in the file chooser.
+        </p>
+    </td>
+</tr>
+
+<!-- start -->
+<tr>
+    <td rowspan="2" style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        open( File file )
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <a href="#testOpenProfile">
+            testOpenFileGoRight()
+        </a>
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Open the given file;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">testOpenFileGoWrong()</td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Open the given file;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+<!-- start -->
+<tr>
+    <td rowspan="2" style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        open( File file, Profile profile )
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testOpenFileProfileGoRight()
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Read the given file
+            into the given profile;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">testOpenFileProfileGoWrong()</td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Read the given file
+            into the given profile;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+<!-- start -->
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;" rowspan="3">
+        newFile()
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testNewFileGoRight()
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Create a file of the operator's choice;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testNewFileGoWrong()
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Create a file of the operator's choice;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testNewFileCancel()
+    </td>
+    <td style="font-family: 'imes New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Begin to create a file of the operator's choice;
+            cancel the operation in the file chooser.
+        </p>
+    </td>
+</tr>
+
+<!-- start -->
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;" rowspan="5">
+        save( Profile profile )
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <a href="#testSaveProfile">
+            testSaveProfile_CurrFileGoRight()
+        </a>
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save the given profile
+            to the currently open file;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <a href="#testSaveProfile">
+            testSaveProfile_CurrFileGoWrong()
+        </a>
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save the given profile
+            to the currently open file;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <a href="#testSaveProfile">
+            testSaveProfile_NoCurrFileGoRight()
+        </a>
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save the given profile
+            when there is no open file;
+            the operator will select a file
+            from the file chooser.
+            Expect successful completion.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testSaveProfile_NoCurrFileGoWrong()
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save the given profile
+            when there is no open file;
+            the operator will select a file
+            from the file chooser.
+            Expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testSaveProfile_NoCurrFileCancel()
+    </td>
+    <td style="font-family: 'imes New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Begin a save operation
+            when there is no open file;
+            cancel the operation in the file chooser.
+        </p>
+    </td>
+</tr>
+
+<!-- start -->
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;" rowspan="2">
+        save( File file )
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testSaveFileGoRight()
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save to a given file;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testSaveFileGoWrong()
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save to a given file;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+<!-- start -->
+<tr>
+    <td rowspan="3" style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        saveAs()
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testSaveAsGoRight()
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save a new profile
+            to a file of the operator's choice;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">testSaveAsGoWrong()</td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save a new profile
+            to a file of the operator's choice;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">testSaveAsCancel()</td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Begin an operation to save a new profile
+            to a file of the operator's choice;
+            cancel the operation in the file chooser.
+        </p>
+    </td>
+</tr>
+
+<!-- start -->
+<tr>
+    <td rowspan="3" style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        saveAs( Profile profile )
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        testSaveAsProfileGoRight()
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save a given profile
+            to a file of the operator's choice;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">testSaveAsProfileGoWrong()</td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save a given profile
+            to a file of the operator's choice;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">testSaveAsCancel()</td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Begin an operation to save a profile
+            to a file of the operator's choice;
+            cancel the operation in the file chooser.
+        </p>
+    </td>
+</tr>
+
+<!-- start -->
+<tr>
+    <td rowspan="2" style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        save( Profile profile, File file )
+    </td>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <a href="#testSaveProfileFile">
+            testSaveProfileFileGoRight()
+        </a>
+    </td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save the given profile
+            to the given file;
+            expect successful completion.
+        </p>
+    </td>
+</tr>
+<tr>
+    <td style="font-family: 'Lucida Console', 'Courier New', monospace; font-size: 80%; border: 1px solid black; padding-left: .25em; padding-right: .25em;">testSaveProfileFileGoWrong()</td>
+    <td style="font-family: 'Times New Roman', serif; border: 1px solid black; padding-left: .25em; padding-right: .25em;">
+        <p style="margin-top: .2em; margin-bottom: .2em; max-width: 20em;">
+            Save the given profile
+            to the given file;
+            expect I/O failure.
+        </p>
+    </td>
+</tr>
+
+</tbody>
+</table>
+
+
+</body>
+</html>
+    

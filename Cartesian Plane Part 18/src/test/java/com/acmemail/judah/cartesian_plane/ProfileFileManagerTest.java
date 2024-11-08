@@ -378,7 +378,7 @@ public class ProfileFileManagerTest
     }
 
     @Test
-    public void testSaveProfileCancel()
+    public void testSaveProfile_NoCurrFileCancel()
     {
         // Preconditions: adHocFile doesn't exist, getCurrFile()a
         // returns null.
@@ -388,23 +388,6 @@ public class ProfileFileManagerTest
         Supplier<?> supplier = () -> fileMgr.save( baseProfile );
         cancelOperation( supplier, adHocFile );
         assertFalse( adHocFile.exists() );
-    }
-
-    @Test
-    public void testSaveProfileFileGoRight()
-    {
-        BooleanSupplier  supplier    = 
-            () -> fileMgr.save( distinctProfile, adHocFile );
-        saveGoRight( supplier, adHocFile, false );
-        validateFile( distinctProfile, adHocFile );
-    }
-    
-    @Test
-    public void testSaveProfileFileGoWrong()
-    {
-        BooleanSupplier  supplier    = 
-            () -> fileMgr.save( distinctProfile, readOnlyFile );
-        saveGoWrong( supplier, readOnlyFile, false );
     }
 
     @Test
@@ -476,6 +459,23 @@ public class ProfileFileManagerTest
             parser.getProperties()
                 .forEach( writer::println );
         }
+    }
+
+    @Test
+    public void testSaveProfileFileGoRight()
+    {
+        BooleanSupplier  supplier    = 
+            () -> fileMgr.save( distinctProfile, adHocFile );
+        saveGoRight( supplier, adHocFile, false );
+        validateFile( distinctProfile, adHocFile );
+    }
+    
+    @Test
+    public void testSaveProfileFileGoWrong()
+    {
+        BooleanSupplier  supplier    = 
+            () -> fileMgr.save( distinctProfile, readOnlyFile );
+        saveGoWrong( supplier, readOnlyFile, false );
     }
 
     /**
