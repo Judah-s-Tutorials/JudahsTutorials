@@ -5,6 +5,7 @@ import java.awt.Window;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
@@ -132,7 +133,7 @@ public class ProfileEditorDialog extends JDialog
         okay.addActionListener( e -> close( JOptionPane.OK_OPTION ) );
         cancel.addActionListener( e -> close( JOptionPane.CANCEL_OPTION ) );
         apply.addActionListener( e -> editor.apply() );
-        reset.addActionListener( e -> editor.reset() );
+        reset.addActionListener( e -> resetProfile() );
         reset.addActionListener( e -> canvas.repaint() );
 
         panel.add( okay );
@@ -141,6 +142,17 @@ public class ProfileEditorDialog extends JDialog
         panel.add( cancel );
 
         return panel;
+    }
+    
+    private void resetProfile()
+    {
+        Profile profile = editor.getProfile();
+        File    file    = fileMgr.getCurrFile();
+        if ( file != null )
+            fileMgr.open( file, profile );
+        else
+            profile.reset();
+        editor.reset();
     }
     
     private JPanel getOpenSavePanel()
