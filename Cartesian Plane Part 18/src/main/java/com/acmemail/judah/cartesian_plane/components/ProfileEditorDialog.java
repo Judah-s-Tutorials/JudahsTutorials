@@ -134,7 +134,6 @@ public class ProfileEditorDialog extends JDialog
         cancel.addActionListener( e -> close( JOptionPane.CANCEL_OPTION ) );
         apply.addActionListener( e -> editor.apply() );
         reset.addActionListener( e -> resetProfile() );
-        reset.addActionListener( e -> canvas.repaint() );
 
         panel.add( okay );
         panel.add( apply );
@@ -142,17 +141,6 @@ public class ProfileEditorDialog extends JDialog
         panel.add( cancel );
 
         return panel;
-    }
-    
-    private void resetProfile()
-    {
-        Profile profile = editor.getProfile();
-        File    file    = fileMgr.getCurrFile();
-        if ( file != null )
-            fileMgr.open( file, profile );
-        else
-            profile.reset();
-        editor.reset();
     }
     
     private JPanel getOpenSavePanel()
@@ -168,10 +156,10 @@ public class ProfileEditorDialog extends JDialog
             if ( fileMgr.open( profile ) != null )
                 editor.reset();
         });
-        save.addActionListener( e -> {
-            fileMgr.save( editor.getProfile() );
-        });
-        save.addActionListener( e -> {
+        save.addActionListener( e -> 
+            fileMgr.save( editor.getProfile() )
+        );
+        saveAs.addActionListener( e -> {
             fileMgr.saveAs( editor.getProfile() );
         });
         close.addActionListener( e -> fileMgr.close() );
@@ -182,6 +170,17 @@ public class ProfileEditorDialog extends JDialog
         panel.add( close );
 
         return panel;
+    }
+    
+    private void resetProfile()
+    {
+        Profile profile = editor.getProfile();
+        File    file    = fileMgr.getCurrFile();
+        if ( file != null )
+            fileMgr.open( file, profile );
+        else
+            profile.reset();
+        editor.reset();
     }
     
     /**
