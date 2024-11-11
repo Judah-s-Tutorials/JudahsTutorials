@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
 import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
@@ -17,11 +18,38 @@ import org.junit.jupiter.api.Test;
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorDialogTestGUI;
+import com.acmemail.judah.cartesian_plane.test_utils.ProfileFileManagerTestData;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 public class ProfileEditorDialogTest
 {
+    /** Directory containing test data. */
+    private static final  File      testDataDir     = 
+        ProfileFileManagerTestData.getTestDataDir();
+    /** File containing base test data; should never be modified. */
+    private static final File       baseFile        = 
+        ProfileFileManagerTestData.getBaseFile();
+    /** 
+     * File containing test data distinct from baseFile;
+     *  should never be modified. 
+     */
+    private static final File       distinctFile    = 
+        ProfileFileManagerTestData.getDistinctFile();
+    /** File for use by test methods as needed. */
+    private static final File       adHocFile       = 
+        ProfileFileManagerTestData.getAdhocFile();
+    /** 
+     * File that can be read but not written; 
+     * for error testing output operations.
+     */
+    private static final File       readOnlyFile    = 
+        ProfileFileManagerTestData.getReadonlyFile();
+    /** File that never exists; for error testing input operations. */
+    private static final File       noSuchFile      = 
+        ProfileFileManagerTestData.getNosuchFile();
+    
+
     /**
      * Represents the properties of a Profile as determined by the
      * PropertyManager. Used as needed to return the PropertyManager
@@ -57,6 +85,7 @@ public class ProfileEditorDialogTest
         // Restore the properties in the PropertyManager
         // to their original values.
         baseProfile.apply();
+        profile.reset();
         
         // Return the working profile to its original state;
         // reset the components of the ProfileEditor to their
@@ -257,7 +286,14 @@ public class ProfileEditorDialogTest
         
         thread = testGUI.postDialog();
         Profile testProps   = testGUI.getComponentValues();
+        testGUI.pushCancelButton();
+        Utils.join( thread );
         assertEquals( baseProfile, testProps );
+    }
+    
+    @Test
+    public void testOpen()
+    {
     }
     
     /**

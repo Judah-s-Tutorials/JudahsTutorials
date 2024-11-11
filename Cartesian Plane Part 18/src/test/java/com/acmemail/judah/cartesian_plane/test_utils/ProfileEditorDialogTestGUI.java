@@ -1,12 +1,21 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.awt.Component;
+import java.awt.Window;
+import java.io.File;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
+import javax.swing.AbstractButton;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.Profile;
@@ -27,9 +36,14 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
  */
 public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
 {
+    /** How long to wait for dialog to post. */
+    private static final long                   pauseInterval   = 125;
     /** The singleton for this GUI test object. */
-    private static ProfileEditorDialogTestGUI testGUI;
-    
+    private static ProfileEditorDialogTestGUI   testGUI;
+    /** Directory containing test data. */
+    private static final  File      testDataDir     = 
+        ProfileFileManagerTestData.getTestDataDir();
+
     /** The dialog under test. */
     private final ProfileEditorDialog  testDialog;
     
@@ -41,9 +55,42 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
     private final JButton               resetButton;
     /** The dialog's Cancel button. */
     private final JButton               cancelButton;
+    /** The dialog's Open button. */
+    private final JButton               openButton;
+    /** The dialog's Save As button. */
+    private final JButton               saveAsButton;
+    /** The dialog's Save button. */
+    private final JButton               saveButton;
+    /** The dialog's Close button. */
+    private final JButton               closeButton;
+
+    /** The OK button from the dialog for displaying I/O errors. */
+    private AbstractButton errorDialogOKButton;
     
+    /** The FileChooser from the fileMgr. */
+    private JFileChooser      fileChooser;
+    
+    // The components we get from the FileChooser aren't predictable.
+    // For example, sometimes there's an open button, and sometimes
+    // there's not. References to FileChooser components should be
+    // calculated every time they're needed, after making sure the
+    // FileChooser is visible.
+    /** The dialog encapsulating the JFileChooser. */
+    private JDialog         chooserDialog   = null;
+    /** The field to enter a file name in the FileChooserDialog. */
+    private JTextField      chooserName     = null;
+    /** The Open button in the FileChooser dialog, if present. */
+    private JButton         openFileButton  = null;
+    /** The Save button in the FileChooser dialog, if present. */
+    private JButton         saveFileButton  = null;
+    /** The Cancel button in the FileChooser dialog, if present. */
+    private JButton         cancelFileButton    = null;
+
     /** The last result returned by the dialog. */
     private int     lastDialogResult;
+    
+    /** The last result returned in an I/O operation. */
+    private Object  lastIOResult;
     
     /**
      * Instantiates and returns a ProfileEditorDialogTestGUI.
@@ -82,6 +129,10 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         applyButton = getButton( "Apply" );
         resetButton = getButton( "Reset" );
         cancelButton = getButton( "Cancel" );
+        openButton = getButton( "Open File" );
+        saveButton = getButton( "Save" );
+        saveAsButton = getButton( "Save As" );
+        closeButton = getButton( "Close File" );
     }
     
     /**
@@ -180,6 +231,92 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
     }
     
     /**
+     * Pushes the dialog's Open File button.
+     */
+    public void pushOpenButton()
+    {
+        pushButton( openButton );
+    }
+    
+    /**
+     * Pushes the dialog's Save button.
+     */
+    public void pushSaveButton()
+    {
+        pushButton( saveButton );
+    }
+    
+    /**
+     * Pushes the dialog's Save As button.
+     */
+    public void pushSaveAsButton()
+    {
+        pushButton( saveAsButton );
+    }
+    
+    /**
+     * Pushes the dialog's Close File button.
+     */
+    public void pushCloseButton()
+    {
+        pushButton( closeButton );
+    }
+    
+    /**
+     * Executes the given operation
+     * against the given file
+     * in a dedicated thread;
+     * does not return
+     * until the dedicated thread dies.
+     * The given operation is assumed to be an open operation.
+     * The existence of the given file 
+     * is confirmed at the start of the operation.
+     * If a file chooser dialog is expected,
+     * the file name is entered into its file name field,
+     * and its Open button is pushed.
+     * If the file chooser is expected
+     * but is not posted,
+     * an assertion is triggered.
+     * The operation is expected to complete normally;
+     * if an error dialog is posted
+     * an assertion is triggered.
+     * 
+     * @param supplier      the given operation
+     * @param file          the given file
+     * @param expectChooser 
+     *      true if the operation requires interaction
+     *      with the file chooser
+     */
+    public void execFileOp(
+        Runnable edtRunner, 
+        File file, 
+        boolean expectChooser,
+        boolean expectError
+    )
+    {
+        assertTrue( file.exists() );
+        
+        Runnable    runner      = 
+            () -> GUIUtils.schedEDTAndWait( edtRunner );
+        Thread      thread      = new Thread( runner );
+        thread.start();
+
+        if ( expectChooser )
+        {
+            Utils.pause( pauseInterval );
+            String      name        = file.getName();
+            getFileChooserComponents();
+            assertTrue( fileChooser.isVisible() );
+            enterPath( name );
+            pushButton( openButton );
+        }
+        
+        boolean dismissStatus   = dismissErrorDialog();
+        assertEquals( expectError, dismissStatus );
+        Utils.join( thread );
+    }
+
+    /**
      * Instantiates a ProfileEditorDialogTestGUI.
      * Must be invoked from within the EDT.
      * 
@@ -192,6 +329,60 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             new ProfileEditorDialog( null, profile );
         testGUI = new ProfileEditorDialogTestGUI( dialog );
     }
+    
+    /**
+     * Search for an error dialog;
+     * if found,
+     * dismiss it by pushing its OK button.
+     * 
+     * @return  true if the error dialog is found
+     */
+    private boolean dismissErrorDialog()
+    {
+        boolean dismissed   = false;
+        Utils.pause( pauseInterval );
+        getErrorDialogAndOKButton();
+        if ( errorDialogOKButton != null )
+        {
+            dismissed = true;
+            pushButton( errorDialogOKButton );
+        }
+        return dismissed;
+    }
+    
+    /**
+     * Searches for the first visible JDialog,
+     * locates its constituent OK button,
+     * and sets {@link #errorDialogOKButton}
+     * to the ID of the button.
+     * If no dialog is visible
+     * {@link #errorDialogOKButton} is set to null.
+     * <p>
+     * Precondition: the FileChooser dialog is not posted.
+     */
+    private void getErrorDialogAndOKButton()
+    {
+        final boolean canBeFrame    = false;
+        final boolean canBeDialog   = true;
+        final boolean mustBeVis     = true;
+        GUIUtils.schedEDTAndWait( () ->  {
+            errorDialogOKButton = null;
+            ComponentFinder finder  = 
+                new ComponentFinder( canBeDialog, canBeFrame, mustBeVis );
+            Window          window  = finder.findWindow( c -> true );
+            if ( window != null )
+            {
+                assertTrue( window instanceof JDialog );
+                Predicate<JComponent>   pred    = 
+                    ComponentFinder.getButtonPredicate( "OK" );
+                JComponent              comp    = 
+                    ComponentFinder.find( window, pred );
+                assertNotNull( comp );
+                assertTrue( comp instanceof AbstractButton );
+                errorDialogOKButton = (AbstractButton)comp;
+            }
+        });
+    }
 
     /** 
      * Activates the given button
@@ -199,7 +390,7 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
      * 
      * @param button    the given button
      */
-    private static void pushButton( JButton button )
+    private static void pushButton( AbstractButton button )
     {
         GUIUtils.schedEDTAndWait( () -> button.doClick() );
     }
@@ -221,5 +412,123 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         assertNotNull( comp );
         assertTrue( comp instanceof JButton );
         return (JButton)comp;
+    }
+    
+    /**
+     * This method gets the components of the dialog
+     * that are required for testing;
+     * If necessary,
+     * the dialog itself is located.
+     * This method must only be called 
+     * after we expect the dialog 
+     * to be visible (see {@link #getChooserDialog()}). 
+     * Additionally, the state of the dialog 
+     * should be considered unpredictable; 
+     * for example, sometimes the Save button exists, 
+     * and sometimes it doesn't. 
+     * Therefore, this method must be called 
+     * every time a reference 
+     * to a component is needed. 
+     * <p>
+     * Precondition: The FileChooser dialog is visible.
+     * 
+     * @see #getChooserDialog()
+     */
+    private void getFileChooserComponents()
+    {
+        final Predicate<JComponent> namePred    =
+            c -> (c instanceof JTextField );
+        final Predicate<JComponent> openPred    =
+            ComponentFinder.getButtonPredicate( "Open" );
+        final Predicate<JComponent> savePred    =
+            ComponentFinder.getButtonPredicate( "Save" );
+        final Predicate<JComponent> cancelPred  =
+            ComponentFinder.getButtonPredicate( "Cancel" );
+        
+        // Get chooser dialog if necessary
+        if ( chooserDialog == null )
+            chooserDialog = getChooserDialog();
+        
+        // The text field component should always be present.
+        Component   comp        = 
+            ComponentFinder.find( fileChooser, namePred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JTextField );
+        chooserName = (JTextField)comp;
+        
+        // The Cancel should always be present.
+        comp = ComponentFinder.find( fileChooser, cancelPred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JButton );
+        cancelFileButton = (JButton)comp;
+        
+        // The Open and Save buttons may not both be present, but
+        // at least one of them must be.
+        openFileButton = null;
+        comp = ComponentFinder.find( fileChooser, openPred );
+        if ( comp != null )
+        {
+            assertTrue( comp instanceof JButton );
+            openFileButton = (JButton)comp;
+        }
+        saveFileButton = null;
+        comp = ComponentFinder.find( fileChooser, savePred );
+        if ( comp != null )
+        {
+            assertTrue( comp instanceof JButton );
+            saveFileButton = (JButton)comp;
+        }
+        assertTrue( openButton != null || saveButton != null );
+    }
+    
+    /**
+     * Obtains a reference
+     * to the dialog that
+     * encapsulates the JFileChooser.
+     * Since we can't be sure
+     * when the dialog is created
+     * we must not call this method
+     * until we've executed an operation
+     * that requires it.
+     * <p>
+     * Precondition:
+     * The JFileChooser dialog must be visible.
+     * 
+     * @return  the dialog that encapsulates the JFileChooser
+     * 
+     * @see #getFileChooserComponents()
+     */
+    private JDialog getChooserDialog()
+    {
+        final boolean           canBeFrame  = false;
+        final boolean           canBeDialog = true;
+        final boolean           mustBeVis   = true;
+        final String            title       = fileChooser.getDialogTitle();
+        final Predicate<Window> isDialog    = w -> (w instanceof JDialog);
+        final Predicate<Window> hasTitle    = 
+            w -> title.equals( ((JDialog)w).getTitle() );
+        final Predicate<Window> pred        = isDialog.and( hasTitle );
+        
+        ComponentFinder     finder      = 
+            new ComponentFinder( canBeDialog, canBeFrame, mustBeVis );
+        Window          window  = finder.findWindow( pred );
+        assertNotNull( window );
+        assertTrue( window instanceof JDialog );
+        return (JDialog)window;
+    }
+
+    /**
+     * In the context of the EDT,
+     * enters the given file name
+     * into the JFileChooser's text field.
+     * 
+     * @param fileName  the given file name
+     */
+    private void enterPath( String fileName )
+    {
+        assertNotNull( chooserName );
+        File    file    = new File( testDataDir, fileName );
+        String  path    = file.getAbsolutePath();
+        GUIUtils.schedEDTAndWait( () -> chooserName.setText( path ) );
     }
 }

@@ -230,7 +230,10 @@ public class ProfileEditorTest
         actState.setName( testGUI.getName() );
         actState.setGridUnit( testGUI.getGridUnit() );
         collectGraphProperties( actState );
-        assertEquals( expState.getMainWindow(), actState.getMainWindow() );
+        
+        GraphPropertySet    expGraphState   = expState.getMainWindow();
+        GraphPropertySet    actGraphState   = actState.getMainWindow();
+        assertEquals( expGraphState, actGraphState );
         Stream.of( allSetNames )
             .forEach( s -> {
                 collectLineProperties( s, actState );

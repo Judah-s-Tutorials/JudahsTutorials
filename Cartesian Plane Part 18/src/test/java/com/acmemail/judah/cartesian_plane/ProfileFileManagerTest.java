@@ -9,9 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.awt.Component;
 import java.awt.Window;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -30,36 +27,38 @@ import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
+import com.acmemail.judah.cartesian_plane.test_utils.ProfileFileManagerTestData;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 public class ProfileFileManagerTest
 {
+    /** How long to wait for dialog to post. */
     private static final long       pauseInterval   = 125;
-    private static final String     testDataDirName = 
-        "ProfileFileManagerTest";
+    /** Directory containing test data. */
     private static final  File      testDataDir     = 
-        Utils.getTestDataDir( testDataDirName );
-    private static final  String    baseName        = 
-        "BaseProfile.txt";
-    private static final  String    distinctName    = 
-        "DistinctProfile.txt";
-    private static final  String    adHocName       = 
-        "AdHoc.txt";
-    private static final  String    readOnlyName    = 
-        "ReadonlyFile.txt";
-    private static final  String    noSuchFileName  = 
-        "NoSuchFile.txt";
+        ProfileFileManagerTestData.getTestDataDir();
+    /** File containing base test data; should never be modified. */
     private static final File       baseFile        = 
-        new File( testDataDir, baseName );
+        ProfileFileManagerTestData.getBaseFile();
+    /** 
+     * File containing test data distinct from baseFile;
+     *  should never be modified. 
+     */
     private static final File       distinctFile    = 
-        new File( testDataDir, distinctName );
+        ProfileFileManagerTestData.getDistinctFile();
+    /** File for use by test methods as needed. */
     private static final File       adHocFile       = 
-        new File( testDataDir, adHocName );
+        ProfileFileManagerTestData.getAdhocFile();
+    /** 
+     * File that can be read but not written; 
+     * for error testing output operations.
+     */
     private static final File       readOnlyFile    = 
-        new File( testDataDir, readOnlyName );
+        ProfileFileManagerTestData.getReadonlyFile();
+    /** File that never exists; for error testing input operations. */
     private static final File       noSuchFile      = 
-        new File( testDataDir, noSuchFileName );
+        ProfileFileManagerTestData.getNosuchFile();
     
     /** 
      * Profile containing original property values; 
@@ -115,19 +114,6 @@ public class ProfileFileManagerTest
     @BeforeAll
     public static void beforeAll() throws Exception
     {
-        baseFile.delete();
-        baseProfile.setName( "Unique-Test-Name" );
-        saveProfile( baseProfile, baseFile );
-        
-        distinctFile.delete();
-        saveProfile( distinctProfile, distinctFile );
-        
-        readOnlyFile.createNewFile();
-        saveProfile( baseProfile, readOnlyFile );
-        readOnlyFile.setWritable( false );
-        
-        noSuchFile.delete();
-        adHocFile.delete();
     }
     
     @AfterAll
@@ -435,30 +421,6 @@ public class ProfileFileManagerTest
         Supplier<?> supplier    = () -> fileMgr.saveAs( distinctProfile );
         cancelOperation( supplier, adHocFile);
         assertFalse( adHocFile.exists() );
-    }
-    
-    /**
-     * Saves the given profile
-     * to the given file
-     * without going through the file manager.
-     * 
-     * @param profile       the given profile
-     * @param file          the given file
-     * 
-     * @throws IOException  if the operation fails
-     */
-    private static void saveProfile( Profile profile, File file ) 
-        throws IOException
-    {
-        ProfileParser   parser      = new ProfileParser( profile );
-        try ( 
-            FileOutputStream fileStr = new FileOutputStream( file );
-            PrintWriter writer = new PrintWriter( fileStr );
-        )
-        {
-            parser.getProperties()
-                .forEach( writer::println );
-        }
     }
 
     @Test
