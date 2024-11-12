@@ -1,5 +1,6 @@
 package com.acmemail.judah.cartesian_plane.components;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -294,6 +295,45 @@ public class ProfileEditorDialogTest
     @Test
     public void testOpen()
     {
+        Thread  thread      = testGUI.postDialog();
+        Profile startProps  = testGUI.getComponentValues();
+        assertEquals( baseProfile, startProps );
+        testGUI.openFile( distinctFile );
+        Profile currProps   = testGUI.getComponentValues();
+        testGUI.pushCancelButton();
+        Utils.join( thread );
+        assertEquals( distinctProfile, currProps );
+    }
+    
+    @Test
+    public void testSaveAs()
+    {
+        Thread  thread      = testGUI.postDialog();
+        Profile startProps  = testGUI.getComponentValues();
+        assertEquals( baseProfile, startProps );
+        
+        assertFalse( adHocFile.exists() );
+        testGUI.saveAs( adHocFile );
+        testGUI.pushCancelButton();
+        Utils.join( thread );
+        assertTrue( adHocFile.exists() );
+        Profile testProfile = testGUI.getProfile( adHocFile );
+        assertEquals( baseProfile, testProfile );
+    }
+    
+    @Test
+    public void testCloseFile()
+    {
+        Thread  thread      = testGUI.postDialog();
+        Profile startProps  = testGUI.getComponentValues();
+        assertEquals( baseProfile, startProps );
+        
+        testGUI.openFile( distinctFile );
+        assertEquals( distinctFile, testGUI.getCurrFile() );
+        testGUI.pushCloseButton();
+        assertNull( testGUI.getCurrFile() );
+        testGUI.pushCancelButton();
+        Utils.join( thread );
     }
     
     /**

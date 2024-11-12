@@ -208,7 +208,7 @@ public class ProfileEditor extends JPanel
      */
     public void reset()
     {
-        profile.reset();
+//        profile.reset();
         resetList.forEach( i -> i.run() );
         repaint();
     }

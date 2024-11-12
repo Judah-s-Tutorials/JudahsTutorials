@@ -8,7 +8,6 @@ import java.awt.Component;
 import java.awt.Window;
 import java.io.File;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
@@ -19,6 +18,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.Profile;
+import com.acmemail.judah.cartesian_plane.ProfileFileManager;
 import com.acmemail.judah.cartesian_plane.components.ProfileEditorDialog;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
@@ -46,6 +46,8 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
 
     /** The dialog under test. */
     private final ProfileEditorDialog  testDialog;
+    /** The file manager used by testDialog. */
+    private final ProfileFileManager    fileMgr;
     
     /** The dialog's OK button. */
     private final JButton               okButton;
@@ -125,6 +127,8 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
     {
         super( dialog.getProfileEditor() );
         testDialog = dialog;
+        fileMgr = testDialog.getFileManager();
+        fileChooser = fileMgr.getFileChooser();
         okButton = getButton( "OK" );
         applyButton = getButton( "Apply" );
         resetButton = getButton( "Reset" );
@@ -262,6 +266,34 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         pushButton( closeButton );
     }
     
+    public void openFile( File file )
+    {
+        execFileOp( 
+            this::pushOpenButton, 
+            file, 
+            true, // expectChooser
+            true, // approve
+            false // expectError
+        );
+    }
+    
+    public void saveAs( File file )
+    {
+        execFileOp( 
+            this::pushSaveAsButton, 
+            file, 
+            true, // expectChooser
+            true, // approve
+            false // expectError
+        );
+    }
+    
+    public Profile getProfile( File file )
+    {
+        Profile profile = fileMgr.open( file );
+        return profile;
+    }
+    
     /**
      * Executes the given operation
      * against the given file
@@ -288,16 +320,13 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
      *      with the file chooser
      */
     public void execFileOp(
-        Runnable edtRunner, 
+        Runnable runner, 
         File file, 
         boolean expectChooser,
+        boolean approve,
         boolean expectError
     )
     {
-        assertTrue( file.exists() );
-        
-        Runnable    runner      = 
-            () -> GUIUtils.schedEDTAndWait( edtRunner );
         Thread      thread      = new Thread( runner );
         thread.start();
 
@@ -308,12 +337,20 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             getFileChooserComponents();
             assertTrue( fileChooser.isVisible() );
             enterPath( name );
-            pushButton( openButton );
+            AbstractButton  targetButton    = openFileButton != null ?
+                openFileButton : saveFileButton;
+            assertNotNull( targetButton );
+            pushButton( targetButton );
         }
         
         boolean dismissStatus   = dismissErrorDialog();
         assertEquals( expectError, dismissStatus );
         Utils.join( thread );
+    }
+    
+    public File getCurrFile()
+    {
+        return fileMgr.getCurrFile();
     }
 
     /**
@@ -369,7 +406,10 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             errorDialogOKButton = null;
             ComponentFinder finder  = 
                 new ComponentFinder( canBeDialog, canBeFrame, mustBeVis );
-            Window          window  = finder.findWindow( c -> true );
+            Predicate<Window>   wPred   = 
+                w -> !(w instanceof ProfileEditorDialog);
+            Window              window  = 
+                finder.findWindow( wPred );
             if ( window != null )
             {
                 assertTrue( window instanceof JDialog );
@@ -478,7 +518,7 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             assertTrue( comp instanceof JButton );
             saveFileButton = (JButton)comp;
         }
-        assertTrue( openButton != null || saveButton != null );
+        assertTrue( openFileButton != null || saveFileButton != null );
     }
     
     /**

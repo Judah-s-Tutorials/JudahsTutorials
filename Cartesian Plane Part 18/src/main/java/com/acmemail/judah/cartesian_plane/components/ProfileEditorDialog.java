@@ -91,6 +91,11 @@ public class ProfileEditorDialog extends JDialog
         return editor;
     }
     
+    public ProfileFileManager getFileManager()
+    {
+        return fileMgr;
+    }
+    
     /**
      * Posts this dialog,
      * waits for it to complete,
@@ -154,7 +159,10 @@ public class ProfileEditorDialog extends JDialog
         open.addActionListener( e -> {
             Profile profile = editor.getProfile();
             if ( fileMgr.open( profile ) != null )
+            {
                 editor.reset();
+                editor.repaint();
+            }
         });
         save.addActionListener( e -> 
             fileMgr.save( editor.getProfile() )

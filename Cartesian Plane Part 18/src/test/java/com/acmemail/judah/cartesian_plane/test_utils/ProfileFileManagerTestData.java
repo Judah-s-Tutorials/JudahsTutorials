@@ -42,19 +42,13 @@ public class ProfileFileManagerTestData
             Profile baseProfile     = new Profile();
             Profile distinctProfile = 
                 ProfileUtils.getDistinctProfile( baseProfile );
+            Utils.recursiveDelete( testDataDir );
+            testDataDir.mkdirs();
             
-            baseFile.delete();
             saveProfile( baseProfile, baseFile );
-            
-            distinctFile.delete();
             saveProfile( distinctProfile, distinctFile );
-            
-            readOnlyFile.createNewFile();
             saveProfile( baseProfile, readOnlyFile );
             readOnlyFile.setWritable( false );
-            
-            noSuchFile.delete();
-            adHocFile.delete();
         }
         catch ( IOException exc )
         {
