@@ -45,13 +45,14 @@ public class ProfileEditorTest
      */
     private static final Profile    distinctProfile = 
         ProfileUtils.getDistinctProfile( baseProfile );
+    private static final Profile    workingProfile  = new Profile();
     /** 
      * The object that displays and manager the ProfileEditor.
      * Guarantees that all interaction with the ProfileEditor
      * components is conducted via the EDT.
      */
     private static final ProfileEditorTestGUI   testGUI =
-        ProfileEditorTestGUI.getTestGUI( new Profile() );
+        ProfileEditorTestGUI.getTestGUI( workingProfile );
     
     @AfterAll
     public static void afterAll()
@@ -69,6 +70,7 @@ public class ProfileEditorTest
         // Restore the properties in the PropertyManager
         // to their original values.
         baseProfile.apply();
+        workingProfile.reset();
         
         // Return the GUI to its original state.
         testGUI.reset();

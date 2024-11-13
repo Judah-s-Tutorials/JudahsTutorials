@@ -6,6 +6,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.LayoutManager;
 import java.awt.Toolkit;
+import java.awt.event.FocusAdapter;
+import java.awt.event.FocusEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -193,7 +195,7 @@ public class ProfileEditor extends JPanel
 
     /**
      * Applies all edits
-     * and the PropertyManager
+     * to the PropertyManager
      */
     public void apply()
     {
@@ -208,7 +210,12 @@ public class ProfileEditor extends JPanel
      */
     public void reset()
     {
-//        profile.reset();
+        profile.reset();
+        refresh();
+    }
+    
+    public void refresh()
+    {
         resetList.forEach( i -> i.run() );
         repaint();
     }
@@ -364,7 +371,17 @@ public class ProfileEditor extends JPanel
         Runnable        toProfile   = 
             () -> profile.setName( nameField.getText() );
         Runnable        toComponent = 
-            () -> nameField.setText( profile.getName() );
+            () -> nameField.setText( profile.getName() ); 
+            
+        nameField.addActionListener( e -> toProfile.run() );
+        nameField.addFocusListener( new FocusAdapter() {
+            @Override
+            public void focusLost( FocusEvent evt )
+            {
+                toProfile.run();
+            }
+        });
+            
         resetList.add( toComponent );
         applyList.add( toProfile );
 

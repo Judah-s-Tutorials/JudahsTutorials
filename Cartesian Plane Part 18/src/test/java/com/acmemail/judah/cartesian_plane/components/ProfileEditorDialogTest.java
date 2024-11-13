@@ -66,7 +66,8 @@ public class ProfileEditorDialogTest
         ProfileUtils.getDistinctProfile( baseProfile );
     /** 
      * Profile used to initialize the test GUI/ProfileEditor.
-     * After initialization the reference must not be changed,
+     * After initialization the reference to the object
+     * must not be changed,
      * but the contents of the object may be changed as needed.
      * The contents are restored to their original values before
      * each test (see {@link #beforeEach()}).
@@ -137,7 +138,12 @@ public class ProfileEditorDialogTest
     }
     
     /**
-     * Verify the reset operation.
+     * Verify the reset operation
+     * when there is no open file.
+     * The reset operation
+     * should restore the GUI component values
+     * to Profile properties
+     * stored in the PropertyManager.
      * <ol>
      * <li>Apply distinct properties to all components.</li>
      * <li>Verify distinct properties applied.</li>
@@ -153,7 +159,7 @@ public class ProfileEditorDialogTest
      * has been pushed.
      */
     @Test
-    public void testReset()
+    public void testResetFromBase()
     {
         Thread  thread  = testGUI.postDialog();
         Profile startProps          = testGUI.getComponentValues();
@@ -161,15 +167,87 @@ public class ProfileEditorDialogTest
         applyDistinctProperties();
         Profile testDistinctProps   = testGUI.getComponentValues();
         assertEquals( testDistinctProps, distinctProfile );
+        
         testGUI.pushResetButton();
         Profile testResetProps      = testGUI.getComponentValues();
         assertEquals( baseProfile, testResetProps );
         
-        // Dialog should still be deployed after apply
+        // Dialog should still be deployed after reset
         assertTrue( testGUI.isVisible() );
         
+        // Cancel the editor dialog and wait for it to quiesce.
         testGUI.pushCancelButton();
         Utils.join( thread );
+        
+        // Dialog should no longer be deployed
+        assertFalse( testGUI.isVisible() );
+    }
+    
+    /**
+     * Verify the reset operation
+     * when resetting from an open file.
+     * The reset operation
+     * should restore the GUI component values
+     * to Profile properties
+     * stored in the open file.
+     * <ol>
+     * <li>Apply distinct properties to all components.</li>
+     * <li>Verify distinct properties applied.</li>
+     * <li>Save toAdHocFile</li>
+     * <li>Apply base properties to all components.</li>
+     * <li>Verify base properties applied.</li>
+     * <li>Push reset button.</li>
+     * <li>Verify all properties returned to distinct values.</li>
+     * </ol>
+     * <p>
+     * Note:
+     * To avoid interrupting the process
+     * before the dialog under test is dismissed,
+     * all verification takes place
+     * after the dialog's cancel button
+     * has been pushed.
+     */
+    @Test
+    public void testResetFromFile()
+    {
+        Thread  thread              = testGUI.postDialog();
+        // Give all editor components distinct values.
+        applyDistinctProperties();
+        // Sanity check; verify the new values of the editor components
+        Profile testDistinctProps   = testGUI.getComponentValues();
+        assertEquals( testDistinctProps, distinctProfile );
+        
+        // Save distinct properties to adHocFile
+        testGUI.saveAs( adHocFile );
+        // Sanity check; currFile should now be adHocFile.
+        File    currFile            = testGUI.getCurrFile();
+        assertTrue( 
+            ProfileFileManagerTestData.compareFiles( adHocFile, currFile )
+        );
+        
+        // Sanity check; verify contents of adHocFile
+        assertTrue( 
+            ProfileFileManagerTestData.validateFile(
+                distinctProfile, 
+                adHocFile
+            )
+        );
+        
+        // Push the reset button and get the rest values of the editor 
+        // components; verify that they match the distinct profile.
+        testGUI.pushResetButton();
+        Profile testResetProps      = testGUI.getComponentValues();
+        assertEquals( baseProfile, testResetProps );
+        
+        // Dialog should still be deployed after reset
+        assertTrue( testGUI.isVisible() );
+        
+        // Cancel the editor dialog and wait for it to quiesce.
+        testGUI.pushCancelButton();
+        Utils.join( thread );
+        
+        // Dialog should no longer be deployed
+        assertFalse( testGUI.isVisible() );
     }
 
     /**

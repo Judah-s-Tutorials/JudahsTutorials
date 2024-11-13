@@ -119,8 +119,7 @@ public class ProfileFileManagerTest
     @AfterAll
     public static void afterAll() throws Exception
     {
-        if ( testDataDir.exists() )
-            Utils.recursiveDelete( testDataDir );
+        ProfileFileManagerTestData.shutDown();
     }
     
     @BeforeEach
@@ -149,7 +148,9 @@ public class ProfileFileManagerTest
         Supplier<Profile>   supplier    = () -> fileMgr.open( baseFile );
         openGoRight( supplier, baseFile, false );
         File    currFile    = fileMgr.getCurrFile();
-        assertTrue( compareFiles( baseFile, currFile ) );
+        assertTrue( 
+            ProfileFileManagerTestData.compareFiles( baseFile, currFile )
+        );
     }
 
     @Test
@@ -273,7 +274,7 @@ public class ProfileFileManagerTest
     {
         BooleanSupplier supplier    = () -> fileMgr.newFile();
         saveGoRight( supplier, adHocFile, true );
-        validateFile( baseProfile, adHocFile );
+        ProfileFileManagerTestData.validateFile( baseProfile, adHocFile );
     }
 
     @Test
@@ -296,7 +297,7 @@ public class ProfileFileManagerTest
     {
         BooleanSupplier supplier    = () -> fileMgr.save( adHocFile );
         saveGoRight( supplier, adHocFile, false );
-        validateFile( baseProfile, adHocFile );
+        ProfileFileManagerTestData.validateFile( baseProfile, adHocFile );
     }
 
     @Test
@@ -314,13 +315,16 @@ public class ProfileFileManagerTest
             () -> fileMgr.save( distinctProfile, adHocFile );
         saveGoRight( supplier, adHocFile, false );
         // sanity check
-        validateFile( distinctProfile, adHocFile );
+        ProfileFileManagerTestData.validateFile( 
+            distinctProfile, 
+            adHocFile 
+        );
 
         // save base data to currently open file (adHocFile)
         supplier = () -> fileMgr.save( baseProfile );
         saveGoRight( supplier, adHocFile, false );
         // sanity check
-        validateFile( baseProfile, adHocFile );
+        ProfileFileManagerTestData.validateFile( baseProfile, adHocFile );
     }
 
     @Test
@@ -347,7 +351,10 @@ public class ProfileFileManagerTest
         BooleanSupplier supplier = () -> fileMgr.save( distinctProfile );
         saveGoRight( supplier, adHocFile, true );
         // sanity check
-        validateFile( distinctProfile, adHocFile );
+        ProfileFileManagerTestData.validateFile( 
+            distinctProfile, 
+            adHocFile
+        );
     }
 
     @Test
@@ -381,7 +388,7 @@ public class ProfileFileManagerTest
     {
         BooleanSupplier  supplier    = () -> fileMgr.saveAs();
         saveGoRight( supplier, adHocFile, true );
-        validateFile( baseProfile, adHocFile );
+        ProfileFileManagerTestData.validateFile( baseProfile, adHocFile );
     }
 
     @Test
@@ -405,7 +412,10 @@ public class ProfileFileManagerTest
         BooleanSupplier supplier    = 
             () -> fileMgr.saveAs( distinctProfile );
         saveGoRight( supplier, adHocFile, true );
-        validateFile( distinctProfile, adHocFile );
+        ProfileFileManagerTestData.validateFile( 
+            distinctProfile, 
+            adHocFile 
+        );
     }
 
     @Test
@@ -429,7 +439,10 @@ public class ProfileFileManagerTest
         BooleanSupplier  supplier    = 
             () -> fileMgr.save( distinctProfile, adHocFile );
         saveGoRight( supplier, adHocFile, false );
-        validateFile( distinctProfile, adHocFile );
+        ProfileFileManagerTestData.validateFile( 
+            distinctProfile, 
+            adHocFile
+        );
     }
     
     @Test
@@ -740,26 +753,6 @@ public class ProfileFileManagerTest
     }
     
     /**
-     * Read the given file
-     * and validate its contents
-     * against the given profile.
-     * 
-     * @param expProfile    the given profile
-     * @param file          the given file
-     */
-    private void validateFile( Profile expProfile, File file )
-    {
-        assertTrue( file.exists() );
-        int                 expAction   = fileMgr.getLastAction();
-        Profile             profile     = new Profile();
-        Supplier<Profile>   supplier    = 
-            () -> fileMgr.open( file, profile );
-        openGoRight( supplier, file, false );
-        assertEquals( expProfile, profile );
-        validateState( file, true, expAction );
-    }
-    
-    /**
      * Search for an error dialog;
      * if found,
      * dismiss it by pushing its OK button.
@@ -889,35 +882,6 @@ public class ProfileFileManagerTest
             validateState( null, false, expAction );
         }
     }
-    
-    /**
-     * Compare the names of two given File objects;
-     * if both objects are null
-     * the result is true,
-     * otherwise, the file names are converted to uppercase
-     * and compared for equality.
-     * 
-     * @param file1 the first given File object
-     * @param file2 the second given File object
-     * 
-     * @return  true if the names of the given files are equal
-     */
-    private static boolean compareFiles( File file1, File file2 )
-    {
-        boolean result  = false;
-        if ( file1 == file2 )
-            result = true;
-        else if ( file1 == null )
-            result = false;
-        else
-        {
-            String  name1   = file1.getName().toUpperCase();
-            String  name2   = file2 == null ? 
-                null : file2.getName().toUpperCase();
-            result  = name1.equals( name2 );
-        }
-        return result;
-    }
 
     /**
      * Asserts that the given file, result, and action
@@ -932,7 +896,9 @@ public class ProfileFileManagerTest
     validateState( File expFile, boolean expResult, int expAction )
     {
         File    currFile    = fileMgr.getCurrFile();
-        assertTrue( compareFiles( expFile, currFile ) );
+        assertTrue( 
+            ProfileFileManagerTestData.compareFiles( expFile, currFile )
+        );
         assertEquals( expResult, fileMgr.getLastResult() );
         assertEquals( expAction, fileMgr.getLastAction() );
     }

@@ -168,6 +168,7 @@ public class ProfileEditorDialog extends JDialog
             fileMgr.save( editor.getProfile() )
         );
         saveAs.addActionListener( e -> {
+            editor.apply();
             fileMgr.saveAs( editor.getProfile() );
         });
         close.addActionListener( e -> fileMgr.close() );
@@ -188,7 +189,7 @@ public class ProfileEditorDialog extends JDialog
             fileMgr.open( file, profile );
         else
             profile.reset();
-        editor.reset();
+        editor.refresh();
     }
     
     /**

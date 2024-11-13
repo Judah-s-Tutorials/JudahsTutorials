@@ -1,4 +1,4 @@
-PROFILE: default
+PROFILE: BaseProfile
 gridUnit: 65.0
 class: GraphPropertySetMW
 width: 500.0

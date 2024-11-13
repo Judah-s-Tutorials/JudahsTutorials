@@ -1,12 +1,18 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.stream.Stream;
 
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.ProfileParser;
+import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
 
 public class ProfileFileManagerTestData
 {
@@ -116,6 +122,93 @@ public class ProfileFileManagerTestData
     {
         return noSuchFile;
     }
+    
+    /**
+     * Compare the names of two given File objects;
+     * if both objects are null
+     * the result is true,
+     * otherwise, the file names are converted to uppercase
+     * and compared for equality.
+     * 
+     * @param file1 the first given File object
+     * @param file2 the second given File object
+     * 
+     * @return  true if the names of the given files are equal
+     */
+    public static boolean compareFiles( File file1, File file2 )
+    {
+        boolean result  = false;
+        if ( file1 == file2 )
+            result = true;
+        else if ( file1 == null )
+            result = false;
+        else
+        {
+            String  name1   = file1.getName().toUpperCase();
+            String  name2   = file2 == null ? 
+                null : file2.getName().toUpperCase();
+            result  = name1.equals( name2 );
+        }
+        return result;
+    }
+    
+    /**
+     * Read the given file
+     * and validate its contents
+     * against the given profile.
+     * It is assume that the given file exists,
+     * is readable, and contains a valid Profile.
+     * An I/O will result
+     * in a thrown ComponentException
+     * 
+     * @param expProfile    the given profile
+     * @param file          the given file
+     * 
+     * @throws ComponentException
+     * if the given file cannot be successfully read
+     */
+    public static boolean validateFile( Profile expProfile, File file )
+    {
+        Profile actProfile  = null;
+        try
+        {
+            actProfile  = getProfile( file );
+        }
+        catch ( IOException exc )
+        {
+            String  msg =
+                "\"" + file.getName() + "\" read failure";
+            throw new ComponentException( msg, exc );
+        }
+        boolean result      = expProfile.equals( actProfile );
+        return result;
+    }
+    
+    /**
+     * Reads a given file into a Profile
+     * and returns the Profile.
+     * 
+     * @param file  the given file
+     * 
+     * @return  the generated Profile
+     * 
+     * @throws IOException  if the given file cannot be read
+     */
+    private static Profile getProfile( File file )
+        throws IOException
+    {
+        Profile profile = new Profile();
+        try ( 
+            FileReader fReader = new FileReader( file );
+            BufferedReader  bReader = new BufferedReader( fReader );
+        )
+        {
+            Stream<String>  lines = bReader.lines();
+            ProfileParser   parser  = new ProfileParser( profile );
+            parser.loadProperties( lines );
+        }
+        return profile;
+    }
 
     /**
      * Saves the given profile
@@ -139,5 +232,16 @@ public class ProfileFileManagerTestData
             parser.getProperties()
                 .forEach( writer::println );
         }
+    }
+    
+    /**
+     * Perform all necessary cleanup;
+     * release all resources
+     * and delete all test data
+     * including the test data subdirectory.
+     */
+    public static void shutDown()
+    {
+        Utils.recursiveDelete( testDataDir );
     }
 }
