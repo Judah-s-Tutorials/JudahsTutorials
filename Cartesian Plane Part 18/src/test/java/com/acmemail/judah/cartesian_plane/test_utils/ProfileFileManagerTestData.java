@@ -40,14 +40,15 @@ public class ProfileFileManagerTestData
         new File( testDataDir, readOnlyName );
     private static final File       noSuchFile      = 
         new File( testDataDir, noSuchFileName );
+    
+    private static final Profile    baseProfile     = new Profile();
+    private static final Profile    distinctProfile = 
+        ProfileUtils.getDistinctProfile( baseProfile );
 
     static
     {
         try
         {
-            Profile baseProfile     = new Profile();
-            Profile distinctProfile = 
-                ProfileUtils.getDistinctProfile( baseProfile );
             Utils.recursiveDelete( testDataDir );
             testDataDir.mkdirs();
             
@@ -61,6 +62,30 @@ public class ProfileFileManagerTestData
             exc.printStackTrace();
             System.exit( 1 );
         }
+    }
+    
+    private ProfileFileManagerTestData()
+    {
+    }
+    
+    /**
+     * Returns the Profile 
+     * used to create the baseFile.
+     * @return
+     */
+    public static Profile getBaseProfile()
+    {
+        return baseProfile;
+    }
+    
+    /**
+     * Returns the Profile 
+     * used to create the distinctFile.
+     * @return
+     */
+    public static Profile getDistinctProfile()
+    {
+        return distinctProfile;
     }
 
     /**
@@ -135,7 +160,7 @@ public class ProfileFileManagerTestData
      * 
      * @return  true if the names of the given files are equal
      */
-    public static boolean compareFiles( File file1, File file2 )
+    public static boolean compareFileNames( File file1, File file2 )
     {
         boolean result  = false;
         if ( file1 == file2 )
@@ -185,6 +210,17 @@ public class ProfileFileManagerTestData
     }
     
     /**
+     * Perform all necessary cleanup;
+     * release all resources
+     * and delete all test data
+     * including the test data subdirectory.
+     */
+    public static void shutDown()
+    {
+        Utils.recursiveDelete( testDataDir );
+    }
+
+    /**
      * Reads a given file into a Profile
      * and returns the Profile.
      * 
@@ -232,16 +268,5 @@ public class ProfileFileManagerTestData
             parser.getProperties()
                 .forEach( writer::println );
         }
-    }
-    
-    /**
-     * Perform all necessary cleanup;
-     * release all resources
-     * and delete all test data
-     * including the test data subdirectory.
-     */
-    public static void shutDown()
-    {
-        Utils.recursiveDelete( testDataDir );
     }
 }

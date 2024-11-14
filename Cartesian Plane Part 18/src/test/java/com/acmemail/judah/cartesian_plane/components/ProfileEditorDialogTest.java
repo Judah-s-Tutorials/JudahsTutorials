@@ -147,6 +147,7 @@ public class ProfileEditorDialogTest
      * <ol>
      * <li>Apply distinct properties to all components.</li>
      * <li>Verify distinct properties applied.</li>
+     * <li>Push the close button.</li>
      * <li>Push reset button.</li>
      * <li>Verify all properties returned to original values.</li>
      * </ol>
@@ -168,9 +169,9 @@ public class ProfileEditorDialogTest
         Profile testDistinctProps   = testGUI.getComponentValues();
         assertEquals( testDistinctProps, distinctProfile );
         
+        testGUI.pushCloseButton();
         testGUI.pushResetButton();
         Profile testResetProps      = testGUI.getComponentValues();
-        assertEquals( baseProfile, testResetProps );
         
         // Dialog should still be deployed after reset
         assertTrue( testGUI.isVisible() );
@@ -181,6 +182,7 @@ public class ProfileEditorDialogTest
         
         // Dialog should no longer be deployed
         assertFalse( testGUI.isVisible() );
+        assertEquals( baseProfile, testResetProps );
     }
     
     /**
@@ -222,7 +224,7 @@ public class ProfileEditorDialogTest
         // Sanity check; currFile should now be adHocFile.
         File    currFile            = testGUI.getCurrFile();
         assertTrue( 
-            ProfileFileManagerTestData.compareFiles( adHocFile, currFile )
+            ProfileFileManagerTestData.compareFileNames( adHocFile, currFile )
         );
         
         // Sanity check; verify contents of adHocFile
@@ -233,11 +235,11 @@ public class ProfileEditorDialogTest
             )
         );
         
-        // Push the reset button and get the rest values of the editor 
+        // Push the reset button and get the reset values of the editor 
         // components; verify that they match the distinct profile.
         testGUI.pushResetButton();
         Profile testResetProps      = testGUI.getComponentValues();
-        assertEquals( baseProfile, testResetProps );
+        assertEquals( distinctProfile, testResetProps );
         
         // Dialog should still be deployed after reset
         assertTrue( testGUI.isVisible() );
@@ -253,8 +255,8 @@ public class ProfileEditorDialogTest
     /**
      * Verify the apply operation.
      * <ol>
-     * <li>Apply distinct properties to all components.</li>
-     * <li>Verify distinct properties applied.</li>
+     * <li>Set all components to distinct values.</li>
+     * <li>Verify distinct properties set.</li>
      * <li>Push apply button.</li>
      * <li>Verify all properties written to PropertyManager.</li>
      * </ol>
@@ -289,10 +291,11 @@ public class ProfileEditorDialogTest
     /**
      * Verify the OK operation.
      * <ol>
-     * <li>Apply distinct properties to all components.</li>
-     * <li>Verify distinct properties applied.</li>
-     * <li>Push OK button.</li>
+     * <li>Set all components to distinct values.</li>
+     * <li>Verify distinct properties set.</li>
+     * <li>Push apply button.</li>
      * <li>Verify all properties written to PropertyManager.</li>
+     * <li>Verify dialog closed.</li>
      * </ol>
      * <p>
      * Note:
@@ -305,7 +308,7 @@ public class ProfileEditorDialogTest
     @Test
     public void testOK()
     {
-        Thread  thread  = testGUI.postDialog();
+        Thread  thread              = testGUI.postDialog();
         Profile startProps          = testGUI.getComponentValues();
         assertEquals( baseProfile, startProps );
         applyDistinctProperties();
@@ -326,8 +329,8 @@ public class ProfileEditorDialogTest
     /**
      * Verify the Cancel operation.
      * <ol>
-     * <li>Apply distinct properties to all components.</li>
-     * <li>Verify distinct properties applied.</li>
+     * <li>Set all components to distinct values.</li>
+     * <li>Verify distinct properties set.</li>
      * <li>Push Cancel button.</li>
      * <li>Verify NO properties written to PropertyManager.</li>
      * <li>Restart the dialog.</li>
@@ -370,6 +373,22 @@ public class ProfileEditorDialogTest
         assertEquals( baseProfile, testProps );
     }
     
+    /**
+     * Verify the Open File operation.
+     * <ol>
+     * <li>Verify test GUI contains base property values.</li>
+     * <li>Open distinctFile</li>
+     * <li>Verify distinct properties set.</li>
+     * <li>Push Cancel button.</li>
+     * </ol>
+     * <p>
+     * Note:
+     * To avoid interrupting the process
+     * before the dialog under test is dismissed,
+     * all verification takes place
+     * after the dialog's cancel button
+     * has been pushed.
+     */
     @Test
     public void testOpen()
     {
@@ -380,9 +399,132 @@ public class ProfileEditorDialogTest
         Profile currProps   = testGUI.getComponentValues();
         testGUI.pushCancelButton();
         Utils.join( thread );
+        assertFalse( testGUI.isVisible() );
         assertEquals( distinctProfile, currProps );
     }
     
+    /**
+     * Verify behavior when the Open File operation fails.
+     * <ol>
+     * <li>Set distinct properties in GUI.</li>
+     * <li>Try to open noSuchFile.</li>
+     * <li>Verify distinct properties still set.</li>
+     * <li>Push Cancel button.</li>
+     * </ol>
+     * <p>
+     * Note:
+     * To avoid interrupting the process
+     * before the dialog under test is dismissed,
+     * all verification takes place
+     * after the dialog's cancel button
+     * has been pushed.
+     */
+    @Test
+    public void testOpenGoWrong()
+    {
+        Thread  thread      = testGUI.postDialog();
+        applyDistinctProperties();
+        Profile startProps  = testGUI.getComponentValues();
+        assertEquals( distinctProfile, startProps );
+        testGUI.openFileGoWrong( noSuchFile );
+        Profile currProps   = testGUI.getComponentValues();
+        testGUI.pushCancelButton();
+        Utils.join( thread );
+        assertFalse( testGUI.isVisible() );
+        assertEquals( distinctProfile, currProps );
+    }
+    
+    /**
+     * Verify the Save operation when no file
+     * is currently open.
+     * <ol>
+     * <li>Verify base properties set in test GUI.</li>
+     * <li>Close open file, if necessary.</li>
+     * <li>Execute Save specifying adHocFile.</li>
+     * <li>Verify adHocFile contains base property values.</li>
+     * </ol>
+     * <p>
+     * Note:
+     * To avoid interrupting the process
+     * before the dialog under test is dismissed,
+     * all verification takes place
+     * after the dialog's cancel button
+     * has been pushed.
+     */
+    @Test
+    public void testSaveNoOpenFile()
+    {
+        Thread  thread      = testGUI.postDialog();
+        Profile startProps  = testGUI.getComponentValues();
+        assertEquals( baseProfile, startProps );
+        
+        adHocFile.delete();
+        assertFalse( adHocFile.exists() );
+        testGUI.pushCloseButton();
+        testGUI.save( adHocFile );
+        testGUI.pushCancelButton();
+        Utils.join( thread );
+        assertTrue( adHocFile.exists() );
+        assertTrue(
+            ProfileFileManagerTestData
+                .validateFile( baseProfile, adHocFile )
+        );
+    }
+    
+    /**
+     * Verify the Save operation when a file
+     * is currently open.
+     * <ol>
+     * <li>Verify base properties set in test GUI.</li>
+     * <li>SaveAs to adHocFile.</li>
+     * <li>Load distinct properties into GUI.<li>
+     * <li>Execute Save specifying adHocFile.</li>
+     * <li>Verify adHocFile contains distinct property values.</li>
+     * </ol>
+     * <p>
+     * Note:
+     * To avoid interrupting the process
+     * before the dialog under test is dismissed,
+     * all verification takes place
+     * after the dialog's cancel button
+     * has been pushed.
+     */
+    @Test
+    public void testSaveOpenFile()
+    {
+        Thread  thread      = testGUI.postDialog();
+        Profile startProps  = testGUI.getComponentValues();
+        assertEquals( baseProfile, startProps );
+        
+        adHocFile.delete();
+        assertFalse( adHocFile.exists() );
+        testGUI.saveAs( adHocFile );
+
+        applyDistinctProperties();
+        testGUI.save( adHocFile );
+        testGUI.pushCancelButton();
+        Utils.join( thread );
+        assertTrue(
+            ProfileFileManagerTestData
+                .validateFile( distinctProfile, adHocFile )
+        );
+    }
+
+    /**
+     * Verify the Save As operation.
+     * <ol>
+     * <li>Verify base properties set in test GUI.</li>
+     * <li>Execute SaveAs specifying adHocFile.</li>
+     * <li>Verify adHocFile contains base property values.</li>
+     * </ol>
+     * <p>
+     * Note:
+     * To avoid interrupting the process
+     * before the dialog under test is dismissed,
+     * all verification takes place
+     * after the dialog's cancel button
+     * has been pushed.
+     */
     @Test
     public void testSaveAs()
     {
@@ -390,24 +532,35 @@ public class ProfileEditorDialogTest
         Profile startProps  = testGUI.getComponentValues();
         assertEquals( baseProfile, startProps );
         
+        adHocFile.delete();
         assertFalse( adHocFile.exists() );
         testGUI.saveAs( adHocFile );
         testGUI.pushCancelButton();
         Utils.join( thread );
         assertTrue( adHocFile.exists() );
-        Profile testProfile = testGUI.getProfile( adHocFile );
-        assertEquals( baseProfile, testProfile );
+        assertTrue(
+            ProfileFileManagerTestData
+                .validateFile( baseProfile, adHocFile )
+        );
     }
     
+    /**
+     * Verify the Save As operation.
+     * <ol>
+     * <li>Verify base properties set in test GUI.</li>
+     * <li>Execute SaveAs specifying adHocFile.</li>
+     * <li>Verify adHocFile contains base property values.</li>
+     * </ol>
+     */
     @Test
     public void testCloseFile()
     {
         Thread  thread      = testGUI.postDialog();
-        Profile startProps  = testGUI.getComponentValues();
-        assertEquals( baseProfile, startProps );
-        
         testGUI.openFile( distinctFile );
-        assertEquals( distinctFile, testGUI.getCurrFile() );
+        File    currFile    = testGUI.getCurrFile();
+        assertTrue(
+            ProfileFileManagerTestData.compareFileNames( distinctFile, currFile )
+        );
         testGUI.pushCloseButton();
         assertNull( testGUI.getCurrFile() );
         testGUI.pushCancelButton();

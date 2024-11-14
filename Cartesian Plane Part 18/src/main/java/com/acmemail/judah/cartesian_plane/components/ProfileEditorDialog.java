@@ -160,7 +160,7 @@ public class ProfileEditorDialog extends JDialog
             Profile profile = editor.getProfile();
             if ( fileMgr.open( profile ) != null )
             {
-                editor.reset();
+                editor.refresh();
                 editor.repaint();
             }
         });

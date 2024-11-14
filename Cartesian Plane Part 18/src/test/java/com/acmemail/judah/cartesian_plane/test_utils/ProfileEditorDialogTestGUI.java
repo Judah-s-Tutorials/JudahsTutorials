@@ -85,14 +85,9 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
     private JButton         openFileButton  = null;
     /** The Save button in the FileChooser dialog, if present. */
     private JButton         saveFileButton  = null;
-    /** The Cancel button in the FileChooser dialog, if present. */
-    private JButton         cancelFileButton    = null;
 
     /** The last result returned by the dialog. */
     private int     lastDialogResult;
-    
-    /** The last result returned in an I/O operation. */
-    private Object  lastIOResult;
     
     /**
      * Instantiates and returns a ProfileEditorDialogTestGUI.
@@ -272,6 +267,29 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             this::pushOpenButton, 
             file, 
             true, // expectChooser
+            true, // approve
+            false // expectError
+        );
+    }
+    
+    public void openFileGoWrong( File file )
+    {
+        execFileOp( 
+            this::pushOpenButton, 
+            file, 
+            true, // expectChooser
+            true, // approve
+            true  // expectError
+        );
+    }
+    
+    public void save( File file )
+    {
+        boolean expectChooser   = fileMgr.getCurrFile() == null;
+        execFileOp( 
+            this::pushSaveButton, 
+            file, 
+            expectChooser,
             true, // approve
             false // expectError
         );
@@ -482,8 +500,6 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             ComponentFinder.getButtonPredicate( "Open" );
         final Predicate<JComponent> savePred    =
             ComponentFinder.getButtonPredicate( "Save" );
-        final Predicate<JComponent> cancelPred  =
-            ComponentFinder.getButtonPredicate( "Cancel" );
         
         // Get chooser dialog if necessary
         if ( chooserDialog == null )
@@ -495,12 +511,6 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         assertNotNull( comp );
         assertTrue( comp instanceof JTextField );
         chooserName = (JTextField)comp;
-        
-        // The Cancel should always be present.
-        comp = ComponentFinder.find( fileChooser, cancelPred );
-        assertNotNull( comp );
-        assertTrue( comp instanceof JButton );
-        cancelFileButton = (JButton)comp;
         
         // The Open and Save buttons may not both be present, but
         // at least one of them must be.

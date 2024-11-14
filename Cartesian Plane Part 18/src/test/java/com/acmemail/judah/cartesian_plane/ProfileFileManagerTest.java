@@ -66,10 +66,11 @@ public class ProfileFileManagerTest
      * Used in {@link #beforeEach()} to restore the PropertyManager
      * to the base properties before each test.
      */
-    private static final Profile    baseProfile     = new Profile();
+    private static final Profile    baseProfile     = 
+        ProfileFileManagerTestData.getBaseProfile();
     /** Profile containing unique property values; never modified. */
     private static final Profile    distinctProfile = 
-        ProfileUtils.getDistinctProfile( baseProfile );
+        ProfileFileManagerTestData.getDistinctProfile();
     /** 
      * Profile for ad hoc use during testing. Contents should be
      * considered volatile outside of very narrow usage, such:
@@ -149,7 +150,7 @@ public class ProfileFileManagerTest
         openGoRight( supplier, baseFile, false );
         File    currFile    = fileMgr.getCurrFile();
         assertTrue( 
-            ProfileFileManagerTestData.compareFiles( baseFile, currFile )
+            ProfileFileManagerTestData.compareFileNames( baseFile, currFile )
         );
     }
 
@@ -897,7 +898,7 @@ public class ProfileFileManagerTest
     {
         File    currFile    = fileMgr.getCurrFile();
         assertTrue( 
-            ProfileFileManagerTestData.compareFiles( expFile, currFile )
+            ProfileFileManagerTestData.compareFileNames( expFile, currFile )
         );
         assertEquals( expResult, fileMgr.getLastResult() );
         assertEquals( expAction, fileMgr.getLastAction() );

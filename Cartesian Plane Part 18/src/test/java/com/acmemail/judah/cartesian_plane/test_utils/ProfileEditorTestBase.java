@@ -1600,6 +1600,7 @@ public abstract class ProfileEditorTestBase
         public void setLineColor( int iColor )
         {
             colorComponent.setText( toHexString( iColor ) );
+            colorComponent.postActionEvent();
         }
         
         /**
