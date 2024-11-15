@@ -1,7 +1,5 @@
 package com.acmemail.judah.cartesian_plane.test_utils;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -215,7 +213,7 @@ public class ProfileFileManagerTestData
      * and delete all test data
      * including the test data subdirectory.
      */
-    public static void shutDown()
+    public static void shutdown()
     {
         Utils.recursiveDelete( testDataDir );
     }
@@ -236,7 +234,7 @@ public class ProfileFileManagerTestData
         Profile profile = new Profile();
         try ( 
             FileReader fReader = new FileReader( file );
-            BufferedReader  bReader = new BufferedReader( fReader );
+            BufferedReader bReader = new BufferedReader( fReader );
         )
         {
             Stream<String>  lines = bReader.lines();

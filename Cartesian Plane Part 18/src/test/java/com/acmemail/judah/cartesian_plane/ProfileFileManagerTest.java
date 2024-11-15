@@ -28,7 +28,6 @@ import org.junit.jupiter.api.Test;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileFileManagerTestData;
-import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 public class ProfileFileManagerTest
@@ -93,8 +92,6 @@ public class ProfileFileManagerTest
     /** The FileChooser from the fileMgr. */
     private final JFileChooser      fileChooser     = 
         fileMgr.getFileChooser();
-    /** The OK button from the dialog for displaying I/O errors. */
-    private AbstractButton errorDialogOKButton;
     
     // The components we get from the FileChooser aren't predictable.
     // For example, sometimes there's an open button, and sometimes
@@ -112,15 +109,13 @@ public class ProfileFileManagerTest
     /** The Cancel button in the FileChooser dialog, if present. */
     private JButton         cancelButton    = null;
 
-    @BeforeAll
-    public static void beforeAll() throws Exception
-    {
-    }
+    /** The OK button from the dialog for displaying I/O errors. */
+    private AbstractButton errorDialogOKButton;
     
     @AfterAll
     public static void afterAll() throws Exception
     {
-        ProfileFileManagerTestData.shutDown();
+        ProfileFileManagerTestData.shutdown();
     }
     
     @BeforeEach
