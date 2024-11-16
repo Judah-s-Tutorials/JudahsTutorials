@@ -24,7 +24,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**
- * An instance of this class
+ * An instance of this clas
  * is used to display and manage a ProfileEditor.
  * Interaction with the ProfileEditor
  * is conducted via operations
@@ -37,15 +37,15 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
 {
     /** How long to wait for dialog to post. */
-    private static final long                   pauseInterval   = 125;
+    private static final long           pauseInterval   = 125;
     /** The singleton for this GUI test object. */
     private static ProfileEditorDialogTestGUI   testGUI;
     /** Directory containing test data. */
-    private static final  File      testDataDir     = 
+    private static final  File          testDataDir     = 
         ProfileFileManagerTestData.getTestDataDir();
 
     /** The dialog under test. */
-    private final ProfileEditorDialog  testDialog;
+    private final ProfileEditorDialog   testDialog;
     /** The file manager used by testDialog. */
     private final ProfileFileManager    fileMgr;
     
@@ -77,7 +77,12 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
     // there's not. References to FileChooser components should be
     // calculated every time they're needed, after making sure the
     // FileChooser is visible.
-    /** The dialog encapsulating the JFileChooser. */
+    /** 
+     * The dialog encapsulating the JFileChooser. The time of
+     * instantiation of the dialog is uncertain, so we don't 
+     * try to obtain a reference to it until after we expect it
+     * to be posted. See {@link #getChooserDialog()}
+     */
     private JDialog         chooserDialog   = null;
     /** The field to enter a file name in the FileChooserDialog. */
     private JTextField      chooserName     = null;
@@ -384,6 +389,17 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             new ProfileEditorDialog( null, profile );
         testGUI = new ProfileEditorDialogTestGUI( dialog );
     }
+
+    /** 
+     * Activates the given button
+     * in the context of the EDT.
+     * 
+     * @param button    the given button
+     */
+    private static void pushButton( AbstractButton button )
+    {
+        GUIUtils.schedEDTAndWait( () -> button.doClick() );
+    }
     
     /**
      * Search for an error dialog;
@@ -422,12 +438,11 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         final boolean mustBeVis     = true;
         GUIUtils.schedEDTAndWait( () ->  {
             errorDialogOKButton = null;
-            ComponentFinder finder  = 
+            ComponentFinder finder      = 
                 new ComponentFinder( canBeDialog, canBeFrame, mustBeVis );
             Predicate<Window>   wPred   = 
                 w -> !(w instanceof ProfileEditorDialog);
-            Window              window  = 
-                finder.findWindow( wPred );
+            Window          window      = finder.findWindow( wPred );
             if ( window != null )
             {
                 assertTrue( window instanceof JDialog );
@@ -440,17 +455,6 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
                 errorDialogOKButton = (AbstractButton)comp;
             }
         });
-    }
-
-    /** 
-     * Activates the given button
-     * in the context of the EDT.
-     * 
-     * @param button    the given button
-     */
-    private static void pushButton( AbstractButton button )
-    {
-        GUIUtils.schedEDTAndWait( () -> button.doClick() );
     }
     
     /**
@@ -491,10 +495,11 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
      * Precondition: The FileChooser dialog is visible.
      * 
      * @see #getChooserDialog()
+     * @see #execFileOp(Runnable, File, boolean, boolean, boolean)
      */
     private void getFileChooserComponents()
     {
-        final Predicate<JComponent> namePred    =
+        final Predicate<JComponent> typePred    =
             c -> (c instanceof JTextField );
         final Predicate<JComponent> openPred    =
             ComponentFinder.getButtonPredicate( "Open" );
@@ -507,7 +512,7 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         
         // The text field component should always be present.
         Component   comp        = 
-            ComponentFinder.find( fileChooser, namePred );
+            ComponentFinder.find( fileChooser, typePred );
         assertNotNull( comp );
         assertTrue( comp instanceof JTextField );
         chooserName = (JTextField)comp;
