@@ -37,7 +37,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
 {
     /** How long to wait for dialog to post. */
-    private static final long           pauseInterval   = 125;
+    private static final long           pauseInterval   = 240;
     /** The singleton for this GUI test object. */
     private static ProfileEditorDialogTestGUI   testGUI;
     /** Directory containing test data. */
@@ -83,13 +83,15 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
      * try to obtain a reference to it until after we expect it
      * to be posted. See {@link #getChooserDialog()}
      */
-    private JDialog         chooserDialog   = null;
+    private JDialog     chooserDialog       = null;
     /** The field to enter a file name in the FileChooserDialog. */
-    private JTextField      chooserName     = null;
+    private JTextField  chooserName         = null;
     /** The Open button in the FileChooser dialog, if present. */
-    private JButton         openFileButton  = null;
+    private JButton     openFileButton      = null;
     /** The Save button in the FileChooser dialog, if present. */
-    private JButton         saveFileButton  = null;
+    private JButton     saveFileButton      = null;
+    /** The Cancel button in the FileChooser dialog, if present. */
+    private JButton     cancelFileButton    = null;
 
     /** The last result returned by the dialog. */
     private int     lastDialogResult;
@@ -272,8 +274,8 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             this::pushOpenButton, 
             file, 
             true, // expectChooser
-            true, // approve
-            false // expectError
+            true,  // approve
+            false  // expectError
         );
     }
     
@@ -300,6 +302,18 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         );
     }
     
+    public void saveGoWrong( File file )
+    {
+        boolean expectChooser   = fileMgr.getCurrFile() == null;
+        execFileOp( 
+            this::pushSaveButton, 
+            file, 
+            expectChooser,
+            true, // approve
+            true // expectError
+        );
+    }
+    
     public void saveAs( File file )
     {
         execFileOp( 
@@ -307,6 +321,28 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             file, 
             true, // expectChooser
             true, // approve
+            false // expectError
+        );
+    }
+    
+    public void saveAsGoWrong( File file )
+    {
+        execFileOp( 
+            this::pushSaveAsButton, 
+            file, 
+            true, // expectChooser
+            true, // approve
+            true // expectError
+        );
+    }
+    
+    public void cancel( File file, Runnable runner )
+    {
+        execFileOp( 
+            runner, 
+            file, 
+            true, // expectChooser
+            false, // approve
             false // expectError
         );
     }
@@ -358,10 +394,12 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             Utils.pause( pauseInterval );
             String      name        = file.getName();
             getFileChooserComponents();
-            assertTrue( fileChooser.isVisible() );
+            assertTrue( chooserDialog.isVisible() );
             enterPath( name );
-            AbstractButton  targetButton    = openFileButton != null ?
+            AbstractButton  approveButton   = openFileButton != null ?
                 openFileButton : saveFileButton;
+            AbstractButton  targetButton    = approve ?
+                approveButton : cancelFileButton;
             assertNotNull( targetButton );
             pushButton( targetButton );
         }
@@ -505,9 +543,11 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             ComponentFinder.getButtonPredicate( "Open" );
         final Predicate<JComponent> savePred    =
             ComponentFinder.getButtonPredicate( "Save" );
+        final Predicate<JComponent> cancelPred  =
+            ComponentFinder.getButtonPredicate( "Cancel" );
         
         // Get chooser dialog if necessary
-        if ( chooserDialog == null )
+//        if ( chooserDialog == null )
             chooserDialog = getChooserDialog();
         
         // The text field component should always be present.
@@ -517,6 +557,12 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         assertTrue( comp instanceof JTextField );
         chooserName = (JTextField)comp;
         
+        // The cancel button must always be present.
+        comp = ComponentFinder.find( fileChooser, cancelPred );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JButton );
+        cancelFileButton = (JButton)comp;
+
         // The Open and Save buttons may not both be present, but
         // at least one of them must be.
         openFileButton = null;
@@ -526,6 +572,7 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
             assertTrue( comp instanceof JButton );
             openFileButton = (JButton)comp;
         }
+        
         saveFileButton = null;
         comp = ComponentFinder.find( fileChooser, savePred );
         if ( comp != null )
