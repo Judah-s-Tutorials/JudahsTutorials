@@ -24,11 +24,10 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**
- * An instance of this clas
- * is used to display and manage a ProfileEditor.
- * Interaction with the ProfileEditor
- * is conducted via operations
- * performed on the EDT.
+ * An instance of this class
+ * is used to display and manage a ProfileEditorDialog.
+ * Interaction with the dialog is conducted 
+ * via operations performed on the EDT.
  * 
  * @author Jack Straub
  * 
@@ -123,7 +122,7 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
      * Fully initializes this ProfileEditorTestGUI_old.
      * Must be invoked from the EDT.
      * 
-     * @param profile   Profile to install in the ProfileEditor
+     * @param dialog    the dialog under test
      */
     private ProfileEditorDialogTestGUI( ProfileEditorDialog dialog )
     {
@@ -268,17 +267,27 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         pushButton( closeButton );
     }
     
+    /**
+     * Begins a go-right open-file operation.
+     * 
+     * @param file  the file to open
+     */
     public void openFile( File file )
     {
         execFileOp( 
             this::pushOpenButton, 
             file, 
-            true, // expectChooser
+            true,  // expectChooser
             true,  // approve
             false  // expectError
         );
     }
     
+    /**
+     * Begins a go-wrong open-file operation.
+     * 
+     * @param file  the file to open
+     */
     public void openFileGoWrong( File file )
     {
         execFileOp( 
@@ -290,6 +299,14 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         );
     }
     
+    /**
+     * Begins a go-right save-file operation.
+     * This method can handle save operations
+     * for contexts in which there is or is not
+     * an open file.
+     * 
+     * @param file  the file to save
+     */
     public void save( File file )
     {
         boolean expectChooser   = fileMgr.getCurrFile() == null;
@@ -302,6 +319,14 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         );
     }
     
+    /**
+     * Begins a go-wrong save-file operation.
+     * This method can handle save operations
+     * for contexts in which there is or is not
+     * an open file.
+     * 
+     * @param file  the file to save
+     */
     public void saveGoWrong( File file )
     {
         boolean expectChooser   = fileMgr.getCurrFile() == null;
@@ -314,6 +339,11 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         );
     }
     
+    /**
+     * Begins a go-right save-as-file operation.
+     * 
+     * @param file  the file to save
+     */
     public void saveAs( File file )
     {
         execFileOp( 
@@ -325,6 +355,11 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         );
     }
     
+    /**
+     * Begins a go-wrong save-as-file operation.
+     * 
+     * @param file  the file to save
+     */
     public void saveAsGoWrong( File file )
     {
         execFileOp( 
@@ -336,21 +371,28 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         );
     }
     
+    /**
+     * Begins any file operation
+     * that requires operator interaction
+     * with the file chooser,
+     * then cancels the operation
+     * via the file chooser.
+     * Examples:
+     * <pre>    testGUI.cancel( adHocFile, testGUI::pushSaveAsButton );
+     *    testGUI.cancel( adHocFile, testGUI::pushOpenButton );</pre>
+     * 
+     * @param file      the target file
+     * @param runner    encapsulates operation to begin
+     */
     public void cancel( File file, Runnable runner )
     {
         execFileOp( 
             runner, 
             file, 
-            true, // expectChooser
+            true,  // expectChooser
             false, // approve
-            false // expectError
+            false  // expectError
         );
-    }
-    
-    public Profile getProfile( File file )
-    {
-        Profile profile = fileMgr.open( file );
-        return profile;
     }
     
     /**
@@ -372,7 +414,7 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
      * if an error dialog is posted
      * an assertion is triggered.
      * 
-     * @param supplier      the given operation
+     * @param runner        the given operation
      * @param file          the given file
      * @param expectChooser 
      *      true if the operation requires interaction
@@ -409,6 +451,10 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         Utils.join( thread );
     }
     
+    /**
+     * Returns the current-file property from the file manager.
+     * @return
+     */
     public File getCurrFile()
     {
         return fileMgr.getCurrFile();
@@ -546,9 +592,7 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
         final Predicate<JComponent> cancelPred  =
             ComponentFinder.getButtonPredicate( "Cancel" );
         
-        // Get chooser dialog if necessary
-//        if ( chooserDialog == null )
-            chooserDialog = getChooserDialog();
+        chooserDialog = getChooserDialog();
         
         // The text field component should always be present.
         Component   comp        = 

@@ -19,21 +19,24 @@ import org.junit.jupiter.api.Test;
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorDialogTestGUI;
+import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorTestBase;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileFileManagerTestData;
-import com.acmemail.judah.cartesian_plane.test_utils.ProfileUtils;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
+/**
+ * JUnit test class 
+ * for the {@linkplain ProfileEditorDialog}.
+ * 
+ * @author Jack Straub
+ * 
+ * @see ProfileEditorDialogTestGUI
+ * @see ProfileEditorTestBase
+ */
 public class ProfileEditorDialogTest
 {
-    /** Directory containing test data. */
-    private static final  File      testDataDir     = 
-        ProfileFileManagerTestData.getTestDataDir();
-    /** File containing base test data; should never be modified. */
-    private static final File       baseFile        = 
-        ProfileFileManagerTestData.getBaseFile();
     /** 
      * File containing test data distinct from baseFile;
-     *  should never be modified. 
+     * should not be modified after creation. 
      */
     private static final File       distinctFile    = 
         ProfileFileManagerTestData.getDistinctFile();
@@ -57,13 +60,14 @@ public class ProfileEditorDialogTest
      * to its original state (see for example, {@link #beforeEach()}.
      * Never modified after initialization.
      */
-    private static final Profile    baseProfile     = new Profile();
+    private static final Profile    baseProfile     =
+        ProfileFileManagerTestData.getBaseProfile();
     /** 
      * Contains property values guaranteed to be different from those
      * stored in the BaseProfile. Never modified after initialization.
      */
     private static final Profile    distinctProfile = 
-        ProfileUtils.getDistinctProfile( baseProfile );
+        ProfileFileManagerTestData.getDistinctProfile();
     /** 
      * Profile used to initialize the test GUI/ProfileEditor.
      * After initialization the reference to the object
@@ -104,6 +108,10 @@ public class ProfileEditorDialogTest
         assertEquals( profile, testProfile );
     }
     
+    /**
+     * To be executed after the completion
+     * of every test method.
+     */
     @AfterEach
     public void afterEach()
     {
@@ -114,6 +122,9 @@ public class ProfileEditorDialogTest
         
     }
     
+    /**
+     * To be executed after all tests have completed.
+     */
     @AfterAll
     public static void afterAll()
     {
@@ -122,6 +133,7 @@ public class ProfileEditorDialogTest
         // Also make sure all GUI windows are disposed.
         baseProfile.apply();
         ComponentFinder.disposeAll();
+        ProfileFileManagerTestData.shutdown();
     }
 
     @Test
@@ -708,6 +720,18 @@ public class ProfileEditorDialogTest
         assertNull( testGUI.getCurrFile() );
 
         applyDistinctProperties();
+        // sanity check
+        Profile currProps   = testGUI.getComponentValues();
+        assertEquals( distinctProfile, currProps );
+        
+        testGUI.cancel( adHocFile, testGUI::pushOpenButton );
+        assertNull( testGUI.getCurrFile() );
+        currProps = testGUI.getComponentValues();
+        assertEquals( distinctProfile, currProps );
+        assertTrue(
+            ProfileFileManagerTestData
+                .validateFile( baseProfile, adHocFile )
+        );
         
         testGUI.cancel( adHocFile, testGUI::pushSaveAsButton );
         assertNull( testGUI.getCurrFile() );
