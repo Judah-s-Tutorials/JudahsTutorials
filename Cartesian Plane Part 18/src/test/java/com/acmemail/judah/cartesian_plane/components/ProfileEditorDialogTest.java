@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane.components;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -93,8 +94,7 @@ public class ProfileEditorDialogTest
         baseProfile.apply();
         profile.reset();
         
-        // Return the working profile to its original state;
-        // reset the components of the ProfileEditor to their
+        // Reset the components of the ProfileEditor to their
         // original values.
         testGUI.reset();
         
@@ -146,7 +146,9 @@ public class ProfileEditorDialogTest
     @Test
     public void testGetProfileEditor()
     {
-        assertNotNull( testGUI.getProfileEditor() );
+        ProfileEditorDialog dialog  = 
+            new ProfileEditorDialog( null,new Profile() );
+        assertNotNull( dialog.getProfileEditor() );
     }
     
     /**
@@ -224,6 +226,8 @@ public class ProfileEditorDialogTest
     @Test
     public void testResetFromFile()
     {
+        final String testName   = "testResetFromFile";
+        
         Thread  thread              = testGUI.postDialog();
         // Give all editor components distinct values.
         applyDistinctProperties();
@@ -236,7 +240,10 @@ public class ProfileEditorDialogTest
         // Sanity check; currFile should now be adHocFile.
         File    currFile            = testGUI.getCurrFile();
         assertTrue( 
-            ProfileFileManagerTestData.compareFileNames( adHocFile, currFile )
+            ProfileFileManagerTestData.compareFileNames( 
+                adHocFile, 
+                currFile
+            )
         );
         
         // Sanity check; verify contents of adHocFile
@@ -246,6 +253,12 @@ public class ProfileEditorDialogTest
                 adHocFile
             )
         );
+        
+        // Change one of the ProfileEditor components
+        testGUI.setName( testName );
+        // Sanity check; verify component value changed
+        Profile testProps           = testGUI.getComponentValues();
+        assertNotEquals( distinctProfile, testProps );
         
         // Push the reset button and get the reset values of the editor 
         // components; verify that they match the distinct profile.
@@ -286,18 +299,20 @@ public class ProfileEditorDialogTest
         Thread  thread              = testGUI.postDialog();
         Profile startProps          = testGUI.getComponentValues();
         assertEquals( baseProfile, startProps );
+        
         applyDistinctProperties();
         Profile testDistinctProps   = testGUI.getComponentValues();
+        assertEquals( distinctProfile, testDistinctProps );
+        
         testGUI.pushApplyButton();
         Profile testCommittedProps  = new Profile();
+        assertEquals( testDistinctProps, testCommittedProps );
         
         // Dialog should still be deployed after apply
         assertTrue( testGUI.isVisible() );
         
         testGUI.pushCancelButton();
         Utils.join( thread );
-        assertEquals( testDistinctProps, distinctProfile );
-        assertEquals( testDistinctProps, testCommittedProps );
     }
 
     /**
@@ -364,25 +379,26 @@ public class ProfileEditorDialogTest
         Thread  thread  = testGUI.postDialog();
         Profile startProps          = testGUI.getComponentValues();
         assertEquals( baseProfile, startProps );
+        
         applyDistinctProperties();
         Profile testDistinctProps   = testGUI.getComponentValues();
+        assertEquals( distinctProfile, testDistinctProps );
+        
         testGUI.pushCancelButton();
         Utils.join( thread );
-        
-        // Dialog not be shown after the OK button is pushed.
         assertFalse( testGUI.isVisible() );
         int     lastResult  = testGUI.getLastDialogResult();
         assertEquals( JOptionPane.CANCEL_OPTION, lastResult );
         
         Profile testCommittedProps  = new Profile();
-        assertEquals( distinctProfile, testDistinctProps );
         assertEquals( baseProfile, testCommittedProps );
         
         thread = testGUI.postDialog();
         Profile testProps   = testGUI.getComponentValues();
+        assertEquals( baseProfile, testProps );
+
         testGUI.pushCancelButton();
         Utils.join( thread );
-        assertEquals( baseProfile, testProps );
     }
     
     /**
@@ -409,10 +425,10 @@ public class ProfileEditorDialogTest
         assertEquals( baseProfile, startProps );
         testGUI.openFile( distinctFile );
         Profile currProps   = testGUI.getComponentValues();
+        assertEquals( distinctProfile, currProps );
         testGUI.pushCancelButton();
         Utils.join( thread );
         assertFalse( testGUI.isVisible() );
-        assertEquals( distinctProfile, currProps );
     }
     
     /**
@@ -438,12 +454,14 @@ public class ProfileEditorDialogTest
         applyDistinctProperties();
         Profile startProps  = testGUI.getComponentValues();
         assertEquals( distinctProfile, startProps );
+        
         testGUI.openFileGoWrong( noSuchFile );
         Profile currProps   = testGUI.getComponentValues();
+        assertEquals( distinctProfile, currProps );
+
         testGUI.pushCancelButton();
         Utils.join( thread );
         assertFalse( testGUI.isVisible() );
-        assertEquals( distinctProfile, currProps );
     }
     
     /**
@@ -473,14 +491,14 @@ public class ProfileEditorDialogTest
         adHocFile.delete();
         assertFalse( adHocFile.exists() );
         testGUI.pushCloseButton();
+        
         testGUI.save( adHocFile );
-        testGUI.pushCancelButton();
-        Utils.join( thread );
-        assertTrue( adHocFile.exists() );
         assertTrue(
             ProfileFileManagerTestData
                 .validateFile( baseProfile, adHocFile )
         );
+        testGUI.pushCancelButton();
+        Utils.join( thread );
     }
     
     /**
