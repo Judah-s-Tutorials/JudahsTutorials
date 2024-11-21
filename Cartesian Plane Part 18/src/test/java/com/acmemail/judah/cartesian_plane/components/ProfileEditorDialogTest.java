@@ -770,12 +770,9 @@ public class ProfileEditorDialogTest
     }
     
     /**
-     * Verify the Save As operation.
-     * <ol>
-     * <li>Verify base properties set in test GUI.</li>
-     * <li>Execute SaveAs specifying adHocFile.</li>
-     * <li>Verify adHocFile contains base property values.</li>
-     * </ol>
+     * Verify the Close File operation.
+     * Open a file, close it,
+     * and verify that the file is closed.
      */
     @Test
     public void testCloseFile()

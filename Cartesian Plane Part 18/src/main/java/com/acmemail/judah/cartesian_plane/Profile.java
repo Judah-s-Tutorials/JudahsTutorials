@@ -306,7 +306,7 @@ public class Profile
     public int hashCode()
     {
         int hashCode    =
-            Objects.hash( gridUnit, mainWindow, linePropertySetMap );
+            Objects.hash( name, gridUnit, mainWindow, linePropertySetMap );
         return hashCode;
     }
 
