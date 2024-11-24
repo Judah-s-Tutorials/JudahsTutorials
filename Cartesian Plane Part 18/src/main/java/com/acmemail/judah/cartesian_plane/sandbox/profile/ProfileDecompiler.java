@@ -160,7 +160,7 @@ public class ProfileDecompiler
      */
     private String[] splitArgString( String str )
     {
-        String[]    args    = str.split( " *: *" );
+        String[]    args    = str.split( " +" );
         if ( args.length != 2 )
         {
             String  error   = "Invalid input string: " + str;
@@ -204,7 +204,9 @@ end of alternative splitArgString method. */
      */
     private void decompile( String[] arr )
     {
-        if ( ProfileParser.CLASS.equals( arr[0] ) )
+        if ( ProfileParser.PROFILE.equals( arr[0] ) )
+            decompileProfile( arr );
+        else if ( ProfileParser.CLASS.equals( arr[0] ) )
             decompileClass( arr );
         else
             decompileProperty( arr );
@@ -238,6 +240,11 @@ end of alternative splitArgString method. */
             String  error   = "Invalid class tag value: " + arr[1];
             postParseError( error );
         }
+    }
+    
+    private void decompileProfile( String[] arr )
+    {
+        profile.setName( arr[0] );
     }
     
     /**
@@ -306,6 +313,9 @@ end of alternative splitArgString method. */
     {
         switch ( arr[0] )
         {
+        case ProfileParser.WIDTH:
+            set.setWidth( parseFloat( arr[1] ) );
+            break;
         case ProfileParser.BG_COLOR:
             set.setBGColor( parseColor( arr[1] ) );
             break;
@@ -327,9 +337,12 @@ end of alternative splitArgString method. */
         case ProfileParser.FONT_ITALIC:
             set.setItalic( parseBoolean( arr[1] ) );
             break;
+        case ProfileParser.FONT_DRAW:
+            set.setFontDraw( parseBoolean( arr[1] ));
+            break;
         default:
             String  error   =
-            "\"" + arr[1] + "\" is not a valid graph property";
+            "\"" + arr[0] + "\" is not a valid graph property";
             postParseError( error );
         }
     }

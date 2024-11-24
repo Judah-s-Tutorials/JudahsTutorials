@@ -124,6 +124,7 @@ public class ProfileDecompilerDemo1
         
         ProfileParser   parser  = new ProfileParser( expRevisedProfile );
         Stream<String>  stream  = parser.getProperties();
+
         actRevisedProfile = ProfileDecompiler.of( stream );
         
         Dimension   logDim  = log.getPreferredSize();

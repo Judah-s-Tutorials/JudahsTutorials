@@ -234,7 +234,12 @@ class ProfileTest
      * {@link #protoProfile} has not been changed since initialization.
      * <p>
      * Precondition: 
-     * {@link #distinctProfile} has not been changed since initialization.
+     * {@link #distinctProfile}
+     * and {@link #protoProfile} have not been changed since initialization.
+     * <p>
+     * Precondition: 
+     * The property values in the PropertyManager
+     * match those in {@link #protoProfile}.
      * <p>
      * Postcondition: 
      * {@link #workingProfile} has been modified.

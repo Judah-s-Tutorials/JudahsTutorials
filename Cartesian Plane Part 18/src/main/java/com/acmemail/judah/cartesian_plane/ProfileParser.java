@@ -89,7 +89,7 @@ public class ProfileParser
     /** The tag preceding a profile name. */
     public static final String PROFILE      = "PROFILE";
     /** The tag preceding a class name. */
-    public static final String CLASS        = "class";
+    public static final String CLASS        = "CLASS";
     /** The tag for the grid unit property. */
     public static final String GRID_UNIT    = CPConstants.GRID_UNIT_PN;
     /** The tag for the draw property in the LinePropertySet. */
@@ -612,7 +612,7 @@ public class ProfileParser
      */
     private String format( String label, String value )
     {
-        String  result  = label + ": " + value;
+        String  result  = label + " " + value;
         return result;
     }
     

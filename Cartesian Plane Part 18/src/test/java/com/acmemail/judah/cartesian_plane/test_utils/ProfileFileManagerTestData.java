@@ -163,13 +163,12 @@ public class ProfileFileManagerTestData
         boolean result  = false;
         if ( file1 == file2 )
             result = true;
-        else if ( file1 == null )
+        else if ( file1 == null || file2 == null )
             result = false;
         else
         {
             String  name1   = file1.getName().toUpperCase();
-            String  name2   = file2 == null ? 
-                null : file2.getName().toUpperCase();
+            String  name2   = file2.getName().toUpperCase();
             result  = name1.equals( name2 );
         }
         return result;

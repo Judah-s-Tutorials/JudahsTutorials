@@ -228,9 +228,9 @@ public class ProfileParserTest
     {
         List<String>    props   = getTestPropertyList();
         // Add line with too few tokens
-        props.add( 3, ProfileParser.FONT_SIZE + ": " );
+        props.add( 3, ProfileParser.FONT_SIZE + " " );
         // Add line with too many tokens
-        props.add( 4, ProfileParser.FONT_SIZE + ": " + 10 + ", a"  );
+        props.add( 4, ProfileParser.FONT_SIZE + " " + 10 + ", a"  );
         
         ProfileParser   testParser  = new ProfileParser();
         int             testCount   = expectDialog( () ->
@@ -248,8 +248,8 @@ public class ProfileParserTest
         // Try to parse a line property and a graph property
         // before any class has been declared
         List<String>    props   = getTestPropertyList();
-        props.add( 2, ProfileParser.FONT_SIZE + ": " + 10 );
-        props.add( 3, ProfileParser.STROKE + ": " + 2  );
+        props.add( 2, ProfileParser.FONT_SIZE + " " + 10 );
+        props.add( 3, ProfileParser.STROKE + " " + 2  );
         
         ProfileParser   testParser  = new ProfileParser();
         int testCount   = expectDialog( () ->
@@ -269,9 +269,9 @@ public class ProfileParserTest
         // declaration followed by a graph property and a line property.
         // Should yield 3 error dialogs.
         List<String>    props   = getTestPropertyList();
-        props.add( 4, ProfileParser.CLASS + ": " + "notAValidClassName" );
-        props.add( 5, ProfileParser.STROKE + ": " + 2  );
-        props.add( 6, ProfileParser.FONT_SIZE + ": " + 10  );
+        props.add( 4, ProfileParser.CLASS + " " + "notAValidClassName" );
+        props.add( 5, ProfileParser.STROKE + " " + 2  );
+        props.add( 6, ProfileParser.FONT_SIZE + " " + 10  );
         
         ProfileParser   testParser  = new ProfileParser();
         int testCount   = expectDialog( () ->
@@ -296,22 +296,23 @@ public class ProfileParserTest
             LinePropertySetAxes.class.getSimpleName();
         String  graphName           = 
             GraphPropertySetMW.class.getSimpleName();
-        props.add( ProfileParser.CLASS + ": " + graphName );
-        props.add( ProfileParser.STROKE + ": " + 2  );
-        props.add( ProfileParser.LENGTH + ": " + 2  );
-        props.add( ProfileParser.SPACING + ": " + 2  );
-        props.add( ProfileParser.DRAW + ": " + 2  );
-        props.add( ProfileParser.COLOR + ": " + 2  );
+        props.add( ProfileParser.CLASS + " " + graphName );
+        props.add( ProfileParser.STROKE + " " + 2  );
+        props.add( ProfileParser.LENGTH + " " + 2  );
+        props.add( ProfileParser.SPACING + " " + 2  );
+        props.add( ProfileParser.DRAW + " " + 2  );
+        props.add( ProfileParser.COLOR + " " + 2  );
 
-        props.add( ProfileParser.CLASS + ": " + lineName );
-        props.add( ProfileParser.FONT_BOLD + ": " + false );
-        props.add( ProfileParser.FONT_ITALIC + ": " + 2  );
-        props.add( ProfileParser.FONT_NAME + ": " + 2  );
-        props.add( ProfileParser.FONT_DRAW + ": " + 2  );
-        props.add( ProfileParser.BG_COLOR + ": " + 2  );
-        props.add( ProfileParser.FG_COLOR + ": " + 2  );
-        props.add( ProfileParser.WIDTH + ": " + 2  );
+        props.add( ProfileParser.CLASS + " " + lineName );
+        props.add( ProfileParser.FONT_BOLD + " " + false );
+        props.add( ProfileParser.FONT_ITALIC + " " + 2  );
+        props.add( ProfileParser.FONT_NAME + " " + 2  );
+        props.add( ProfileParser.FONT_DRAW + " " + 2  );
+        props.add( ProfileParser.BG_COLOR + " " + 2  );
+        props.add( ProfileParser.FG_COLOR + " " + 2  );
+        props.add( ProfileParser.WIDTH + " " + 2  );
         
+        props.forEach( System.out::println );
         ProfileParser   testParser  = new ProfileParser();
         int testCount   = expectDialog( () ->
             testParser.loadProperties( props.stream() )
@@ -419,12 +420,12 @@ public class ProfileParserTest
      * <p>
      * List returned:
      * <ul>
-     * <li>[0]  PROFILE: distinctName</li>
-     * <li>[1]  gridUnit: distinctGridUnit</li>
-     * <li>[2]  class: GraphPropertySetMW</li>
-     * <li>[3]  fontSize: distinctFontSize</li>
-     * <li>[4]  class: LinePropertySetAxes</li>
-     * <li>[6]  stroke: distinctStroke</li>
+     * <li>[0]  PROFILE distinctName</li>
+     * <li>[1]  gridUnit distinctGridUnit</li>
+     * <li>[2]  class GraphPropertySetMW</li>
+     * <li>[3]  fontSize distinctFontSize</li>
+     * <li>[4]  class LinePropertySetAxes</li>
+     * <li>[6]  stroke distinctStroke</li>
      * </ul>
      * 
      * @return 
@@ -448,12 +449,12 @@ public class ProfileParserTest
         workingProfile.getLinePropertySet( lineName ).setStroke( stroke );
         
         List<String>    props   = new ArrayList<>();
-        props.add( ProfileParser.PROFILE + ": " + name );
-        props.add( ProfileParser.GRID_UNIT + ": " + gridUnit );
-        props.add( ProfileParser.CLASS + ": " + graphName );
-        props.add( ProfileParser.FONT_SIZE + ": " + fontSize  );
-        props.add( ProfileParser.CLASS + ": " + lineName ) ;
-        props.add( ProfileParser.STROKE + ": " + stroke );
+        props.add( ProfileParser.PROFILE + " " + name );
+        props.add( ProfileParser.GRID_UNIT + " " + gridUnit );
+        props.add( ProfileParser.CLASS + " " + graphName );
+        props.add( ProfileParser.FONT_SIZE + " " + fontSize  );
+        props.add( ProfileParser.CLASS + " " + lineName ) ;
+        props.add( ProfileParser.STROKE + " " + stroke );
 
         return props;
     }
@@ -508,9 +509,9 @@ public class ProfileParserTest
         float               distinctVal     = srcPropSet.getFontSize();
         dstPropSet.setFontSize( distinctVal );
         String              classDecl       =
-            ProfileParser.CLASS + ": " + propSetName;
+            ProfileParser.CLASS + " " + propSetName;
         String              propDecl        =
-            ProfileParser.FONT_SIZE + ": " + distinctVal;
+            ProfileParser.FONT_SIZE + " " + distinctVal;
         list.add( classDecl );
         list.add( propDecl );
     }
@@ -692,8 +693,8 @@ public class ProfileParserTest
                 getter.apply( srcPropSet );
             setter.accept( dstPropSet, distinctVal );
             
-            String  classDecl   = ProfileParser.CLASS + ": " + propSetName;
-            String  valueDecl   = propName + ": " + distinctVal;
+            String  classDecl   = ProfileParser.CLASS + " " + propSetName;
+            String  valueDecl   = propName + " " + distinctVal;
             list.add( classDecl );
             list.add( valueDecl );
         }

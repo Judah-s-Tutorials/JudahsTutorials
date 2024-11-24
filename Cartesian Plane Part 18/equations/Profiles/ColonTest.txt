@@ -1,0 +1,6 @@
+PROFILE Cardioid
+gridUnit 75.1
+CLASS GraphPropertySetMW 
+font_size 11.5
+CLASS LinePropertySetGridLines
+stroke 4
