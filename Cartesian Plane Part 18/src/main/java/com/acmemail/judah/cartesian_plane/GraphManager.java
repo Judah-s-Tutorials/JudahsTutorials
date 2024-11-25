@@ -38,12 +38,6 @@ import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinor;
  */
 public class GraphManager
 {
-    /** Type of line-cap when instantiating Stroke. */
-    private static final int    lineCap                 =
-        BasicStroke.CAP_BUTT;
-    /** Type of line-join when instantiating Stroke. */
-    private static final int    lineJoin                =
-        BasicStroke.JOIN_BEVEL;
     /** Name of the LinePropertiesSetAxes class. */
     private static final String axisPropertiesName      =
         LinePropertySetAxes.class.getSimpleName();
@@ -64,32 +58,32 @@ public class GraphManager
      * so that when the editor makes changes to its profile the
      * changes will be reflected here.
      */
-    private final Profile                   profile;
+    private final Profile           profile;
     /** 
      * Main window properties. Obtained from the profile, and 
      * referenced by an instance variable for convenience.
      */
-    private final GraphPropertySet          mainWindow;
+    private final GraphPropertySet  mainWindow;
     /** 
      * Axis properties. Obtained from the profile, and 
      * referenced by an instance variable for convenience.
      */
-    private final LinePropertySetAxes       axis;
+    private final LinePropertySet   axis;
     /** 
      * Major tic properties. Obtained from the profile, and 
      * referenced by an instance variable for convenience.
      */
-    private final LinePropertySetTicMajor   ticMajor;
+    private final LinePropertySet   ticMajor;
     /** 
      * Minor tic properties. Obtained from the profile, and 
      * referenced by an instance variable for convenience.
      */
-    private final LinePropertySetTicMinor   ticMinor;
+    private final LinePropertySet   ticMinor;
     /**
      * Grid line properties. Obtained from the profile, and 
      * referenced by an instance variable for convenience.
      */
-    private final LinePropertySetGridLines  gridLine;
+    private final LinePropertySet   gridLine;
     
     
     /** 
@@ -145,18 +139,10 @@ public class GraphManager
         this.rect = rect;
         this.profile = profile;
         mainWindow = profile.getMainWindow();
-        axis = 
-            (LinePropertySetAxes)profile
-            .getLinePropertySet( axisPropertiesName );
-        ticMajor = 
-            (LinePropertySetTicMajor)profile
-            .getLinePropertySet( ticMajorPropertiesName );
-        ticMinor = 
-            (LinePropertySetTicMinor)profile
-            .getLinePropertySet( ticMinorPropertiesName );
-        gridLine = 
-            (LinePropertySetGridLines)profile
-            .getLinePropertySet( gridLinesPropertiesName );
+        axis = profile.getLinePropertySet( axisPropertiesName );
+        ticMajor = profile.getLinePropertySet( ticMajorPropertiesName );
+        ticMinor = profile.getLinePropertySet( ticMinorPropertiesName );
+        gridLine = profile.getLinePropertySet( gridLinesPropertiesName );
     }
 
     /**
@@ -403,7 +389,9 @@ public class GraphManager
      */
     private Stroke getStroke( float width )
     {
-        Stroke  stroke  = new BasicStroke( width, lineCap, lineJoin );
+        int     lineCap     = BasicStroke.CAP_BUTT;
+        int     lineJoin    = BasicStroke.JOIN_BEVEL;
+        Stroke  stroke      = new BasicStroke( width, lineCap, lineJoin );
         return stroke;
     }
 }
