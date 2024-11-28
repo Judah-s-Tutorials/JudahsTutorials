@@ -26,12 +26,6 @@ public class Tess4JDemo1
      */
     private static final String dataPathStr     = 
         System.getenv( "TESSDATA_PREFIX" );
-    /** String identifying the path to the project root directory. */
-    private static final String strUserDir      = 
-        System.getProperty( "user.dir" );
-    /** The project root directory. */
-    private static final File   userDir         =
-        new File( strUserDir );
 
     /**
      * Application entry point.
@@ -41,12 +35,18 @@ public class Tess4JDemo1
     */
     public static void main(String[] args)
     {
+        // Locate user directory.
+        final String    strUserDir  = System.getProperty( "user.dir" );
+        final File      userDir     = new File( strUserDir );
+        
+        // Create and configure file chooser
         JFileChooser    chooser     = new JFileChooser();
         FileNameExtensionFilter filter = 
             new FileNameExtensionFilter( "Images", "jpg", "gif", "png" );
         chooser.setCurrentDirectory( userDir );
         chooser.setFileFilter(filter);
         
+        // Allow operator to select a file; exit on cancel.
         File        file    = null;
         int         rVal    = chooser.showOpenDialog( null );
         if( rVal == JFileChooser.APPROVE_OPTION )

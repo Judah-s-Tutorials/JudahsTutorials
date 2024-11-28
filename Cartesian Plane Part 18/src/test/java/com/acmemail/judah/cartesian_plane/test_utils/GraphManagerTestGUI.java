@@ -461,9 +461,12 @@ public class GraphManagerTestGUI
         public void paintComponent( Graphics graphics )
         {
             super.paintComponent( graphics );
+            Graphics2D  gtx = (Graphics2D) graphics.create();
             graphics.setColor( Color.WHITE );
             graphics.fillRect( 0, 0, getWidth(), getHeight() );
             graphics.drawImage( image, 0, 0, this );
+            
+            gtx.dispose();
         }
     }
 }
