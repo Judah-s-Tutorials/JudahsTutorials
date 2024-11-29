@@ -41,44 +41,102 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
+/**
+ * JUnit test for {@link GraphManager}.
+ * 
+ */
 public class GraphManagerTest
 {
+    /**
+     * Default image width. This is the width used by most of the
+     * tests. For exceptions see {@link #testGraphManagerProfile()},
+     * {@link #testGraphManagerRectProfile()}, and 
+     * {@link #prepareRectTest()}.
+     */
     private static final int    defImgWidth      = 300;
+    /**
+     * Default image width. This is the width used by most of the
+     * tests. For exceptions see {@link #testGraphManagerProfile()},
+     * {@link #testGraphManagerRectProfile()}, and 
+     * {@link #prepareRectTest()}.
+     */
     private static final int    defImgHeight     = 400;
     private static final int    defImgType       = 
         BufferedImage.TYPE_INT_RGB;
     
+    /** Simple class name of LinePropertySetAxes. */
     private static final String             AXES        =
         LinePropertySetAxes.class.getSimpleName();
+    /** Simple class name of LinePropertySetGridLines. */
     private static final String             GRID_LINES  =
         LinePropertySetGridLines.class.getSimpleName();
+    /** Simple class name of LinePropertySetTicMajor. */
     private static final String             TIC_MAJOR   =
         LinePropertySetTicMajor.class.getSimpleName();
+    /** Simple class name of LinePropertySetTicMinor. */
     private static final String             TIC_MINOR   =
         LinePropertySetTicMinor.class.getSimpleName();
     
+    /** 
+     * The factor by which to scale text 
+     * when performing OCR via tess4J.
+     */
     private static final float  tessScaleFactor =
         Tess4JConfig.getScaleFactor();
+    /**  The font size to use when performing OCR via tess4J. */
     private static final float  tessFontSize    =
         Tess4JConfig.getFontSize();
+    /** The name of the font to use when performing OCR via tess4J. */
     private static final String tessFontName    =
         Tess4JConfig.getFontName();
     
+    /** Grid unit to use when testing with tess4j. */
     private static final float  tessGPU         = Tess4JConfig.getGPU();
+    /** Line spacing to use when testing with tess4j. */
     private static final float  tessLPU         = 2;
+    /** Text color to use when testing with tess4j. */
     private static final int    tessRGB         = 0x000000;
 
-    private final Tesseract     tesseract       = 
+    /** The controlling object when performing tess4j operations. */
+     final Tesseract     tesseract       = 
         Tess4JConfig.getTesseract();
+    /** 
+     * Profile containing the original values of the properties
+     * stored in the PropertyManager. Never modified after initialization.
+     * Used to restore PropertyManager to original state in the
+     * {@link #beforeEach()} method.
+     */
     private static final Profile        baseProfile     = new Profile();
+    /** 
+     * Profile to be used as needed by individual tests. Restored
+     * to initial values in the {@link #beforeEach()} method.
+     */
     private static final Profile        workingProfile  = new Profile();
+    /** 
+     * The manager of all GUI operations needed by this JUnit test.
+     */
     private static GraphManagerTestGUI  testGUI;
 
-    private BufferedImage       workingImage;
-    private Rectangle           workingRect;
+    /** The BufferedImage managed by the test GUI. */
+     BufferedImage       workingImage;
+    /** 
+     * The area within the workingImage that contains the graphic
+     * components managed by the test GUI. 
+     */
+     Rectangle           workingRect;
     
-    private TestData            testData        = new TestData();
+    /** 
+     * Data for use during testing. Initialized to state 0 in
+     * the {@link #beforeEach()} method. Reconfigured as needed
+     * by individual tests.
+     * @see #initTestData
+     */
+     TestData            testData        = new TestData();
     
+    /**
+     * Executed once, before any tests are executed. Initializes
+     * the test GUI used by individual tests.
+     */
     @BeforeAll
     public static void beforeAll()
     {
@@ -87,8 +145,15 @@ public class GraphManagerTest
         );
     }
     
+    /**
+     * Executed immediately before every test method. Restore the
+     * PropertyManager, {@link #baseProfile} and {@link #workingProfile} 
+     * to their initial states.
+     * 
+     * @throws Exception
+     */
     @BeforeEach
-    public void beforeEach() throws Exception
+    public void beforeEach()
     {
         baseProfile.apply();
         workingProfile.reset();
@@ -416,8 +481,8 @@ public class GraphManagerTest
      * @param propSet
      * @return
      */
-    private boolean drawAllHasLine( LinePropertySet propSet )
-    {
+     private boolean drawAllHasLine( LinePropertySet propSet )
+     {
         float   gridUnit    = workingProfile.getGridUnit();
         int     width       = workingImage.getWidth();
         int     height      = workingImage.getHeight();
@@ -539,9 +604,9 @@ public class GraphManagerTest
         Iterator<Line2D>    iter    = lineGen.iterator();
         assertTrue( iter.hasNext() );
         
+        Line2D      line    = iter.next();
         int         testWidth   = 20;
         int         testHeight  = 20;
-        Line2D      line    = iter.next();
         int         xco     = (int)line.getX2();
         int         yco     = (int)(line.getY1() - testHeight / 2);
         Rectangle   rect    = 
