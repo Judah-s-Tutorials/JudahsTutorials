@@ -428,7 +428,7 @@ public class ProfileEditorFeedbackTest
         majorTic.setDraw( true );
         graph.setFontDraw( true );
 
-        BufferedImage   image   = testGUI.getImage();
+        BufferedImage       image       = testGUI.getImage();
         ImageRect           rectAAct    = getActTextRect();
         Rectangle2D         rectAExp    = getExpTextRect( image );
         assertTrue( rectAAct.withinBounds( rectAExp ) );

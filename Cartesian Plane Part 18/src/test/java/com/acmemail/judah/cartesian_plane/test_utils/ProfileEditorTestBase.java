@@ -40,7 +40,8 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**
  * An instance of this class
- * is used to display and manage a ProfileEditor.
+ * is used to display and manage a ProfileEditor
+ * for the purposes of testing.
  * Interaction with the ProfileEditor
  * is conducted via operations
  * performed on the EDT.
