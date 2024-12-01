@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>diff</title>
+<meta name="Generator" content="Vim/9.0">
+<meta name="plugin-version" content="vim8.1_v2">
+<meta name="settings" content="number_lines,whole_filler,use_css,no_foldcolumn,expand_tabs,line_ids,prevent_copy=,use_input_for_pc=fallback">
+<meta name="colorscheme" content="none">
+<style>
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.Folded { color: #00008b; background-color: #d3d3d3; padding-bottom: 1px; }
+.LineNr { color: #a52a2a; }
+.DiffText { background-color: #ff0000; padding-bottom: 1px; font-weight: bold; }
+.DiffAdd { background-color: #add8e6; padding-bottom: 1px; }
+.DiffChange { background-color: #ff8bff; padding-bottom: 1px; }
+.DiffDelete { color: #0000ff; background-color: #e0ffff; padding-bottom: 1px; font-weight: bold; }
+-->
+<!--
+table { table-layout: fixed; }
+html, body, table, tbody { width: 100%; margin: 0; padding: 0; }
+table, td, th { border: 1px solid; }
+td { vertical-align: top; }
+th, td { width: 50.0%; }
+td div { overflow: auto; }
+-->
+</style>
+<script>
+<!--
+
+/* function to open any folds containing a jumped-to line before jumping to it */
+function JumpToLine()
+{
+  var lineNum;
+  lineNum = window.location.hash;
+  lineNum = lineNum.substr(1); /* strip off '#' */
+
+  if (lineNum.indexOf('L') == -1) {
+    lineNum = 'L'+lineNum;
+  }
+  if (lineNum.indexOf('W') == -1) {
+    lineNum = 'W1'+lineNum;
+  }
+  var lineElem = document.getElementById(lineNum);
+  /* Always jump to new location even if the line was hidden inside a fold, or
+   * we corrected the raw number to a line ID.
+   */
+  if (lineElem) {
+    lineElem.scrollIntoView(true);
+  }
+  return true;
+}
+if ('onhashchange' in window) {
+  window.onhashchange = JumpToLine;
+}
+
+-->
+</script>
+</head>
+<body onload='JumpToLine();'>
+<table id='vimCodeElement'>
+<tr>
+<th>Workspaces\Judah\JudahsTutorials\Cartesian Plane Part 17\src\main\java\com\acmemail\judah\cartesian_plane\components\ColorEditor.java</th>
+<th>Workspaces\Judah\JudahsTutorials\Cartesian Plane Part 18\src\main\java\com\acmemail\judah\cartesian_plane\components\ColorEditor.java</th>
+</tr><tr>
+<td><div>
+<pre>
+<span id="W1L1" class="Folded">  1 </span><span class="Folded">+--102 lines: package com.acmemail.judah.cartesian_plane.components;---------------------------------------------------------------------------------------</span>
+<span id="W1L103" class="LineNr">103 </span> * &lt;/li&gt;
+<span id="W1L104" class="LineNr">104 </span> * &lt;/ul&gt;
+<span id="W1L105" class="LineNr">105 </span> * @author Jack Straub
+<span id="W1L106" class="LineNr">106 </span> */
+<span id="W1L107" class="LineNr">107 </span>public class ColorEditor
+<span id="W1L108" class="LineNr">108 </span>{
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W1L109" class="LineNr">109 </span>    /** The default color, encoded as an integer string. */
+<span id="W1L110" class="LineNr">110 </span>    private static final String defColorString  = &quot;0x0000FF&quot;;
+<span id="W1L111" class="LineNr">111 </span>    /** The default color. */
+<span id="W1L112" class="LineNr">112 </span>    private static final Color  defColor        =
+<span id="W1L113" class="LineNr">113 </span>        Color.decode( defColorString );
+<span id="W1L114" class="LineNr">114 </span>
+<span id="W1L115" class="LineNr">115 </span>    /** The colorButton component. */
+<span id="W1L116" class="LineNr">116 </span><span class="DiffChange">    private final JButton       colorButton = </span><span class="DiffText">new JButton( &quot;Color&quot; );</span><span class="DiffChange">                                                                                  </span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W1L117" class="LineNr">117 </span>    /** The textEditor component. */
+<span id="W1L118" class="LineNr">118 </span>    private final JTextField    textEditor  =
+<span id="W1L119" class="LineNr">119 </span>        new JTextField( defColorString, 10 );
+<span id="W1L120" class="LineNr">120 </span>    /** The feedback component. */
+<span id="W1L121" class="LineNr">121 </span>    private final JPanel        feedback    = new JPanel();
+<span id="W1L122" class="LineNr">122 </span>    /** ColorSelector dialog. */
+<span id="W1L123" class="Folded">123 </span><span class="Folded">+-- 25 lines: private final ColorSelector colorDialog = ---------------------------------------------------------------------------------------------------</span>
+<span id="W1L148" class="LineNr">148 </span>        Font    newFont = new Font( name, style, size );
+<span id="W1L149" class="LineNr">149 </span>        textEditor.setFont( newFont );
+<span id="W1L150" class="LineNr">150 </span>
+<span id="W1L151" class="LineNr">151 </span>        feedback.setBackground( defColor );
+<span id="W1L152" class="LineNr">152 </span>        textEditor.addActionListener( e -&gt; editColor() );
+<span id="W1L153" class="LineNr">153 </span>        colorButton.addActionListener( e -&gt; selectColor() );
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W1L154" class="LineNr">154 </span>    }
+<span id="W1L155" class="LineNr">155 </span>
+<span id="W1L156" class="LineNr">156 </span>    /**
+<span id="W1L157" class="LineNr">157 </span>     * Adds a given listener
+<span id="W1L158" class="LineNr">158 </span>     * to the list of ActionListeners
+<span id="W1L159" class="LineNr">159 </span>     * that are notified
+<span id="W1L160" class="Folded">160 </span><span class="Folded">+--182 lines: * when the selected color changes.-----------------------------------------------------------------------------------------------------------</span>
+</pre>
+</div></td>
+<td><div>
+<pre>
+<span id="W2L1" class="Folded">  1 </span><span class="Folded">+--102 lines: package com.acmemail.judah.cartesian_plane.components;---------------------------------------------------------------------------------------</span>
+<span id="W2L103" class="LineNr">103 </span> * &lt;/li&gt;
+<span id="W2L104" class="LineNr">104 </span> * &lt;/ul&gt;
+<span id="W2L105" class="LineNr">105 </span> * @author Jack Straub
+<span id="W2L106" class="LineNr">106 </span> */
+<span id="W2L107" class="LineNr">107 </span>public class ColorEditor
+<span id="W2L108" class="LineNr">108 </span>{
+<span id="W2L109" class="LineNr">109 </span><span class="DiffAdd">    public static final String  COLOR_BUTTON_LABEL  = &quot;Color&quot;;</span><span class="DiffAdd">                                                                                         </span>
+<span id="W2L110" class="LineNr">110 </span><span class="DiffAdd">    public static final String  TEXT_EDITOR_NAME    = &quot;Text Editor&quot;;</span><span class="DiffAdd">                                                                                   </span>
+<span id="W2L111" class="LineNr">111 </span><span class="DiffAdd">    public static final String  FEEDBACK_NAME       = &quot;Feedback&quot;;</span><span class="DiffAdd">                                                                                      </span>
+<span id="W2L112" class="LineNr">112 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                                                                                                   </span>
+<span id="W2L113" class="LineNr">113 </span>    /** The default color, encoded as an integer string. */
+<span id="W2L114" class="LineNr">114 </span>    private static final String defColorString  = &quot;0x0000FF&quot;;
+<span id="W2L115" class="LineNr">115 </span>    /** The default color. */
+<span id="W2L116" class="LineNr">116 </span>    private static final Color  defColor        =
+<span id="W2L117" class="LineNr">117 </span>        Color.decode( defColorString );
+<span id="W2L118" class="LineNr">118 </span>
+<span id="W2L119" class="LineNr">119 </span>    /** The colorButton component. */
+<span id="W2L120" class="LineNr">120 </span><span class="DiffChange">    private final JButton       colorButton = </span><span class="DiffChange">                                                                                                         </span>
+<span id="W2L121" class="LineNr">121 </span><span class="DiffAdd">        new JButton( COLOR_BUTTON_LABEL );</span><span class="DiffAdd">                                                                                                             </span>
+<span id="W2L122" class="LineNr">122 </span>    /** The textEditor component. */
+<span id="W2L123" class="LineNr">123 </span>    private final JTextField    textEditor  =
+<span id="W2L124" class="LineNr">124 </span>        new JTextField( defColorString, 10 );
+<span id="W2L125" class="LineNr">125 </span>    /** The feedback component. */
+<span id="W2L126" class="LineNr">126 </span>    private final JPanel        feedback    = new JPanel();
+<span id="W2L127" class="LineNr">127 </span>    /** ColorSelector dialog. */
+<span id="W2L128" class="Folded">128 </span><span class="Folded">+-- 25 lines: private final ColorSelector colorDialog = ---------------------------------------------------------------------------------------------------</span>
+<span id="W2L153" class="LineNr">153 </span>        Font    newFont = new Font( name, style, size );
+<span id="W2L154" class="LineNr">154 </span>        textEditor.setFont( newFont );
+<span id="W2L155" class="LineNr">155 </span>
+<span id="W2L156" class="LineNr">156 </span>        feedback.setBackground( defColor );
+<span id="W2L157" class="LineNr">157 </span>        textEditor.addActionListener( e -&gt; editColor() );
+<span id="W2L158" class="LineNr">158 </span>        colorButton.addActionListener( e -&gt; selectColor() );
+<span id="W2L159" class="LineNr">159 </span><span class="DiffAdd">        </span><span class="DiffAdd">                                                                                                                                               </span>
+<span id="W2L160" class="LineNr">160 </span><span class="DiffAdd">        feedback.setName( FEEDBACK_NAME );</span><span class="DiffAdd">                                                                                                             </span>
+<span id="W2L161" class="LineNr">161 </span><span class="DiffAdd">        textEditor.setName( TEXT_EDITOR_NAME );</span><span class="DiffAdd">                                                                                                        </span>
+<span id="W2L162" class="LineNr">162 </span><span class="DiffAdd">        colorButton.setName( COLOR_BUTTON_LABEL );</span><span class="DiffAdd">                                                                                                     </span>
+<span id="W2L163" class="LineNr">163 </span>    }
+<span id="W2L164" class="LineNr">164 </span>
+<span id="W2L165" class="LineNr">165 </span>    /**
+<span id="W2L166" class="LineNr">166 </span>     * Adds a given listener
+<span id="W2L167" class="LineNr">167 </span>     * to the list of ActionListeners
+<span id="W2L168" class="LineNr">168 </span>     * that are notified
+<span id="W2L169" class="Folded">169 </span><span class="Folded">+--182 lines: * when the selected color changes.-----------------------------------------------------------------------------------------------------------</span>
+</pre>
+</div></td>
+</tr>
+</table>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->
+

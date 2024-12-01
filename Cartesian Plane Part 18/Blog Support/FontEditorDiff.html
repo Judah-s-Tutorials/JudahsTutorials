@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>diff</title>
+<meta name="Generator" content="Vim/9.0">
+<meta name="plugin-version" content="vim8.1_v2">
+<meta name="settings" content="number_lines,whole_filler,use_css,no_foldcolumn,expand_tabs,line_ids,prevent_copy=,use_input_for_pc=fallback">
+<meta name="colorscheme" content="none">
+<style>
+<!--
+pre { font-family: monospace; color: #000000; background-color: #ffffff; }
+body { font-family: monospace; color: #000000; background-color: #ffffff; }
+* { font-size: 1em; }
+.Folded { color: #00008b; background-color: #d3d3d3; padding-bottom: 1px; }
+.LineNr { color: #a52a2a; }
+.DiffText { background-color: #ff0000; padding-bottom: 1px; font-weight: bold; }
+.DiffAdd { background-color: #add8e6; padding-bottom: 1px; }
+.DiffChange { background-color: #ff8bff; padding-bottom: 1px; }
+.DiffDelete { color: #0000ff; background-color: #e0ffff; padding-bottom: 1px; font-weight: bold; }
+-->
+<!--
+table { table-layout: fixed; }
+html, body, table, tbody { width: 100%; margin: 0; padding: 0; }
+table, td, th { border: 1px solid; }
+td { vertical-align: top; }
+th, td { width: 50.0%; }
+td div { overflow: auto; }
+-->
+</style>
+<script>
+<!--
+
+/* function to open any folds containing a jumped-to line before jumping to it */
+function JumpToLine()
+{
+  var lineNum;
+  lineNum = window.location.hash;
+  lineNum = lineNum.substr(1); /* strip off '#' */
+
+  if (lineNum.indexOf('L') == -1) {
+    lineNum = 'L'+lineNum;
+  }
+  if (lineNum.indexOf('W') == -1) {
+    lineNum = 'W1'+lineNum;
+  }
+  var lineElem = document.getElementById(lineNum);
+  /* Always jump to new location even if the line was hidden inside a fold, or
+   * we corrected the raw number to a line ID.
+   */
+  if (lineElem) {
+    lineElem.scrollIntoView(true);
+  }
+  return true;
+}
+if ('onhashchange' in window) {
+  window.onhashchange = JumpToLine;
+}
+
+-->
+</script>
+</head>
+<body onload='JumpToLine();'>
+<table id='vimCodeElement'>
+<tr>
+<th>Cartesian Plane Part 17\src\main\java\com\acmemail\judah\cartesian_plane\components\FontEditor.java</th>
+<th>Cartesian Plane Part 18\src\main\java\com\acmemail\judah\cartesian_plane\components\FontEditor.java</th>
+</tr><tr>
+<td><div>
+<pre>
+<span id="W1L1" class="Folded">  1 </span><span class="Folded">+-- 58 lines: package com.acmemail.judah.cartesian_plane.components;---------------------------------------------------------------------------------------</span>
+<span id="W1L59" class="LineNr"> 59 </span> *      in the configured font
+<span id="W1L60" class="LineNr"> 60 </span> *      (the &quot;feedback window&quot;).
+<span id="W1L61" class="LineNr"> 61 </span> * &lt;/li&gt;
+<span id="W1L62" class="LineNr"> 62 </span> * &lt;/ul&gt;
+<span id="W1L63" class="LineNr"> 63 </span> * &lt;p&gt;
+<span id="W1L64" class="LineNr"> 64 </span> * The user can obtain a JPanel
+<span id="W1L65" class="LineNr"> 65 </span><span class="DiffChange"> * displaying the component</span><span class="DiffText">sd</span><span class="DiffChange">                                                                                                                          </span>
+<span id="W1L66" class="LineNr"> 66 </span> * in a default configuration
+<span id="W1L67" class="LineNr"> 67 </span> * (see {@linkplain #getPanel()},
+<span id="W1L68" class="LineNr"> 68 </span> * or individual components can be retrieved
+<span id="W1L69" class="LineNr"> 69 </span> * and configured however the user wishes
+<span id="W1L70" class="LineNr"> 70 </span> * (see {@linkplain #getBoldToggle()},
+<span id="W1L71" class="LineNr"> 71 </span> * {@linkplain #getNameCombo()},
+<span id="W1L72" class="Folded"> 72 </span><span class="Folded">+--  7 lines: * etc.)--------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W1L79" class="LineNr"> 79 </span> * of the elements.
+<span id="W1L80" class="LineNr"> 80 </span> * &lt;/p&gt;
+<span id="W1L81" class="LineNr"> 81 </span> * @author Jack Straub
+<span id="W1L82" class="LineNr"> 82 </span> */
+<span id="W1L83" class="LineNr"> 83 </span>public class FontEditor
+<span id="W1L84" class="LineNr"> 84 </span>{
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W1L85" class="LineNr"> 85 </span>    /** Text to display in feedback area. */
+<span id="W1L86" class="LineNr"> 86 </span>    private static final String     sampleString    =
+<span id="W1L87" class="LineNr"> 87 </span>        &quot;&lt;html&gt;1313 Mockingbird Lane, Wisdom NB 68101&lt;/html&gt;&quot;;
+<span id="W1L88" class="LineNr"> 88 </span>
+<span id="W1L89" class="LineNr"> 89 </span>    /** Text to display when a configuration property is invalid. */
+<span id="W1L90" class="LineNr"> 90 </span>    private static final String     errorString     = &quot;--ERROR--&quot;;
+<span id="W1L91" class="Folded"> 91 </span><span class="Folded">+-- 14 lines: * Color of feedback text when a configuration property is invalid. --------------------------------------------------------------------------</span>
+<span id="W1L105" class="LineNr">105 </span>    };
+<span id="W1L106" class="LineNr">106 </span>    /** Drop-down list of supported font names. */
+<span id="W1L107" class="LineNr">107 </span>    private final JComboBox&lt;String&gt;     fontList        =
+<span id="W1L108" class="LineNr">108 </span>        new JComboBox&lt;&gt;( fontNames );
+<span id="W1L109" class="LineNr">109 </span>    /** Bold face toggle. */
+<span id="W1L110" class="LineNr">110 </span>    private final JCheckBox             boldToggle      =
+<span id="W1L111" class="LineNr">111 </span><span class="DiffChange">        new JCheckBox( </span><span class="DiffText">&quot;Bold&quot;</span><span class="DiffChange"> );                                                                                                                       </span>
+<span id="W1L112" class="LineNr">112 </span>    /** Slope face toggle. */
+<span id="W1L113" class="LineNr">113 </span>    private final JCheckBox             italicToggle    =
+<span id="W1L114" class="LineNr">114 </span><span class="DiffChange">        new JCheckBox( </span><span class="DiffText">&quot;Italic&quot;</span><span class="DiffChange"> );                                                                                                                     </span>
+<span id="W1L115" class="LineNr">115 </span>    /** Spinner model for size selector */
+<span id="W1L116" class="LineNr">116 </span>    private final SpinnerNumberModel    sizeModel       =
+<span id="W1L117" class="LineNr">117 </span>        new SpinnerNumberModel( 10, 1, 40, 1 );
+<span id="W1L118" class="LineNr">118 </span>    /** Size selector. */
+<span id="W1L119" class="LineNr">119 </span>    private final JSpinner              sizeEditor      =
+<span id="W1L120" class="LineNr">120 </span>        new JSpinner( sizeModel );
+<span id="W1L121" class="Folded">121 </span><span class="Folded">+-- 21 lines: *--------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W1L142" class="LineNr">142 </span>        boldToggle.addActionListener( e -&gt; feedback.update() );
+<span id="W1L143" class="LineNr">143 </span>        italicToggle.addActionListener( e -&gt; feedback.update() );
+<span id="W1L144" class="LineNr">144 </span>        fontList.addActionListener( e -&gt; feedback.update() );
+<span id="W1L145" class="LineNr">145 </span>        colorEditor.addActionListener( e -&gt; feedback.update() );
+<span id="W1L146" class="LineNr">146 </span>        sizeEditor.addChangeListener( e -&gt; feedback.update() );
+<span id="W1L147" class="LineNr">147 </span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W1L148" class="LineNr">148 </span>        feedback.update();
+<span id="W1L149" class="LineNr">149 </span>    }
+<span id="W1L150" class="LineNr">150 </span>
+<span id="W1L151" class="LineNr">151 </span>    /**
+<span id="W1L152" class="LineNr">152 </span>     * Returns a JPanel that incorporates
+<span id="W1L153" class="LineNr">153 </span>     * all the FontEditor components.
+<span id="W1L154" class="Folded">154 </span><span class="Folded">+--269 lines: * -------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W1L423" class="LineNr">423 </span>        JPanel              panel   = new JPanel();
+<span id="W1L424" class="LineNr">424 </span>        panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+<span id="W1L425" class="LineNr">425 </span>        panel.add( fontList );
+<span id="W1L426" class="LineNr">426 </span>        panel.add( boldToggle );
+<span id="W1L427" class="LineNr">427 </span>        panel.add( italicToggle );
+<span id="W1L428" class="LineNr">428 </span>
+<span id="W1L429" class="LineNr">429 </span><span class="DiffChange">        JLabel sizeLabel = new JLabel( </span><span class="DiffText">&quot;Size&quot;</span><span class="DiffChange"> );                                                                                                       </span>
+<span id="W1L430" class="LineNr">430 </span>        sizeLabel.setAlignmentX( JComponent.CENTER_ALIGNMENT );
+<span id="W1L431" class="LineNr">431 </span>        sizeEditor.setAlignmentX( JComponent.CENTER_ALIGNMENT );
+<span class="LineNr">    </span><span class="DiffDelete">-------------------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W1L432" class="LineNr">432 </span>
+<span id="W1L433" class="LineNr">433 </span>        JPanel  sizePanel   = new JPanel();
+<span id="W1L434" class="LineNr">434 </span>        sizePanel.setLayout( new GridLayout( 1, 2, 3, 0 ) );
+<span id="W1L435" class="LineNr">435 </span>        sizePanel.add( sizeEditor );
+<span id="W1L436" class="LineNr">436 </span>        sizePanel.add( sizeLabel );
+<span id="W1L437" class="LineNr">437 </span>        panel.add( sizePanel );
+<span id="W1L438" class="Folded">438 </span><span class="Folded">+-- 78 lines: JPanel  colorPanel   = new JPanel();---------------------------------------------------------------------------------------------------------</span>
+</pre>
+</div></td>
+<td><div>
+<pre>
+<span id="W2L1" class="Folded">  1 </span><span class="Folded">+-- 58 lines: package com.acmemail.judah.cartesian_plane.components;---------------------------------------------------------------------------------------</span>
+<span id="W2L59" class="LineNr"> 59 </span> *      in the configured font
+<span id="W2L60" class="LineNr"> 60 </span> *      (the &quot;feedback window&quot;).
+<span id="W2L61" class="LineNr"> 61 </span> * &lt;/li&gt;
+<span id="W2L62" class="LineNr"> 62 </span> * &lt;/ul&gt;
+<span id="W2L63" class="LineNr"> 63 </span> * &lt;p&gt;
+<span id="W2L64" class="LineNr"> 64 </span> * The user can obtain a JPanel
+<span id="W2L65" class="LineNr"> 65 </span><span class="DiffChange"> * displaying the component</span><span class="DiffChange">                                                                                                                            </span>
+<span id="W2L66" class="LineNr"> 66 </span> * in a default configuration
+<span id="W2L67" class="LineNr"> 67 </span> * (see {@linkplain #getPanel()},
+<span id="W2L68" class="LineNr"> 68 </span> * or individual components can be retrieved
+<span id="W2L69" class="LineNr"> 69 </span> * and configured however the user wishes
+<span id="W2L70" class="LineNr"> 70 </span> * (see {@linkplain #getBoldToggle()},
+<span id="W2L71" class="LineNr"> 71 </span> * {@linkplain #getNameCombo()},
+<span id="W2L72" class="Folded"> 72 </span><span class="Folded">+--  7 lines: * etc.)--------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W2L79" class="LineNr"> 79 </span> * of the elements.
+<span id="W2L80" class="LineNr"> 80 </span> * &lt;/p&gt;
+<span id="W2L81" class="LineNr"> 81 </span> * @author Jack Straub
+<span id="W2L82" class="LineNr"> 82 </span> */
+<span id="W2L83" class="LineNr"> 83 </span>public class FontEditor
+<span id="W2L84" class="LineNr"> 84 </span>{
+<span id="W2L85" class="LineNr"> 85 </span><span class="DiffAdd">    /** Label on the bold check box. */</span><span class="DiffAdd">                                                                                                                </span>
+<span id="W2L86" class="LineNr"> 86 </span><span class="DiffAdd">    public static final String      BOLD_LABEL      = &quot;Bold&quot;;</span><span class="DiffAdd">                                                                                          </span>
+<span id="W2L87" class="LineNr"> 87 </span><span class="DiffAdd">    /** Label on the bold italic box. */</span><span class="DiffAdd">                                                                                                               </span>
+<span id="W2L88" class="LineNr"> 88 </span><span class="DiffAdd">    public static final String      ITALIC_LABEL    = &quot;Italic&quot;;</span><span class="DiffAdd">                                                                                        </span>
+<span id="W2L89" class="LineNr"> 89 </span><span class="DiffAdd">    /** Name of the font-name component. */</span><span class="DiffAdd">                                                                                                            </span>
+<span id="W2L90" class="LineNr"> 90 </span><span class="DiffAdd">    public static final String      NAME_LABEL      = &quot;Name&quot;;</span><span class="DiffAdd">                                                                                          </span>
+<span id="W2L91" class="LineNr"> 91 </span><span class="DiffAdd">    /** Label on the font-size component. */</span><span class="DiffAdd">                                                                                                           </span>
+<span id="W2L92" class="LineNr"> 92 </span><span class="DiffAdd">    public static final String      SIZE_LABEL      = &quot;Size&quot;;</span><span class="DiffAdd">                                                                                          </span>
+<span id="W2L93" class="LineNr"> 93 </span><span class="DiffAdd">    /** Name of the feedback component. */</span><span class="DiffAdd">                                                                                                             </span>
+<span id="W2L94" class="LineNr"> 94 </span><span class="DiffAdd">    public static final String      FEEDBACK_LABEL  = &quot;Feedback&quot;;</span><span class="DiffAdd">                                                                                      </span>
+<span id="W2L95" class="LineNr"> 95 </span><span class="DiffAdd">    </span><span class="DiffAdd">                                                                                                                                                   </span>
+<span id="W2L96" class="LineNr"> 96 </span>    /** Text to display in feedback area. */
+<span id="W2L97" class="LineNr"> 97 </span>    private static final String     sampleString    =
+<span id="W2L98" class="LineNr"> 98 </span>        &quot;&lt;html&gt;1313 Mockingbird Lane, Wisdom NB 68101&lt;/html&gt;&quot;;
+<span id="W2L99" class="LineNr"> 99 </span>
+<span id="W2L100" class="LineNr">100 </span>    /** Text to display when a configuration property is invalid. */
+<span id="W2L101" class="LineNr">101 </span>    private static final String     errorString     = &quot;--ERROR--&quot;;
+<span id="W2L102" class="Folded">102 </span><span class="Folded">+-- 14 lines: * Color of feedback text when a configuration property is invalid. --------------------------------------------------------------------------</span>
+<span id="W2L116" class="LineNr">116 </span>    };
+<span id="W2L117" class="LineNr">117 </span>    /** Drop-down list of supported font names. */
+<span id="W2L118" class="LineNr">118 </span>    private final JComboBox&lt;String&gt;     fontList        =
+<span id="W2L119" class="LineNr">119 </span>        new JComboBox&lt;&gt;( fontNames );
+<span id="W2L120" class="LineNr">120 </span>    /** Bold face toggle. */
+<span id="W2L121" class="LineNr">121 </span>    private final JCheckBox             boldToggle      =
+<span id="W2L122" class="LineNr">122 </span><span class="DiffChange">        new JCheckBox( </span><span class="DiffText">BOLD_LABEL</span><span class="DiffChange"> );                                                                                                                   </span>
+<span id="W2L123" class="LineNr">123 </span>    /** Slope face toggle. */
+<span id="W2L124" class="LineNr">124 </span>    private final JCheckBox             italicToggle    =
+<span id="W2L125" class="LineNr">125 </span><span class="DiffChange">        new JCheckBox( </span><span class="DiffText">ITALIC_LABEL</span><span class="DiffChange"> );                                                                                                                 </span>
+<span id="W2L126" class="LineNr">126 </span>    /** Spinner model for size selector */
+<span id="W2L127" class="LineNr">127 </span>    private final SpinnerNumberModel    sizeModel       =
+<span id="W2L128" class="LineNr">128 </span>        new SpinnerNumberModel( 10, 1, 40, 1 );
+<span id="W2L129" class="LineNr">129 </span>    /** Size selector. */
+<span id="W2L130" class="LineNr">130 </span>    private final JSpinner              sizeEditor      =
+<span id="W2L131" class="LineNr">131 </span>        new JSpinner( sizeModel );
+<span id="W2L132" class="Folded">132 </span><span class="Folded">+-- 21 lines: *--------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W2L153" class="LineNr">153 </span>        boldToggle.addActionListener( e -&gt; feedback.update() );
+<span id="W2L154" class="LineNr">154 </span>        italicToggle.addActionListener( e -&gt; feedback.update() );
+<span id="W2L155" class="LineNr">155 </span>        fontList.addActionListener( e -&gt; feedback.update() );
+<span id="W2L156" class="LineNr">156 </span>        colorEditor.addActionListener( e -&gt; feedback.update() );
+<span id="W2L157" class="LineNr">157 </span>        sizeEditor.addChangeListener( e -&gt; feedback.update() );
+<span id="W2L158" class="LineNr">158 </span>
+<span id="W2L159" class="LineNr">159 </span><span class="DiffAdd">        boldToggle.setName( BOLD_LABEL );</span><span class="DiffAdd">                                                                                                              </span>
+<span id="W2L160" class="LineNr">160 </span><span class="DiffAdd">        italicToggle.setName( ITALIC_LABEL );</span><span class="DiffAdd">                                                                                                          </span>
+<span id="W2L161" class="LineNr">161 </span><span class="DiffAdd">        </span><span class="DiffAdd">                                                                                                                                               </span>
+<span id="W2L162" class="LineNr">162 </span>        feedback.update();
+<span id="W2L163" class="LineNr">163 </span>    }
+<span id="W2L164" class="LineNr">164 </span>
+<span id="W2L165" class="LineNr">165 </span>    /**
+<span id="W2L166" class="LineNr">166 </span>     * Returns a JPanel that incorporates
+<span id="W2L167" class="LineNr">167 </span>     * all the FontEditor components.
+<span id="W2L168" class="Folded">168 </span><span class="Folded">+--269 lines: * -------------------------------------------------------------------------------------------------------------------------------------------</span>
+<span id="W2L437" class="LineNr">437 </span>        JPanel              panel   = new JPanel();
+<span id="W2L438" class="LineNr">438 </span>        panel.setLayout( new BoxLayout( panel, BoxLayout.Y_AXIS ) );
+<span id="W2L439" class="LineNr">439 </span>        panel.add( fontList );
+<span id="W2L440" class="LineNr">440 </span>        panel.add( boldToggle );
+<span id="W2L441" class="LineNr">441 </span>        panel.add( italicToggle );
+<span id="W2L442" class="LineNr">442 </span>
+<span id="W2L443" class="LineNr">443 </span><span class="DiffChange">        JLabel sizeLabel = new JLabel( </span><span class="DiffText">SIZE_LABEL</span><span class="DiffChange"> );                                                                                                   </span>
+<span id="W2L444" class="LineNr">444 </span>        sizeLabel.setAlignmentX( JComponent.CENTER_ALIGNMENT );
+<span id="W2L445" class="LineNr">445 </span>        sizeEditor.setAlignmentX( JComponent.CENTER_ALIGNMENT );
+<span id="W2L446" class="LineNr">446 </span><span class="DiffAdd">        sizeEditor.setName( SIZE_LABEL );</span><span class="DiffAdd">                                                                                                              </span>
+<span id="W2L447" class="LineNr">447 </span>
+<span id="W2L448" class="LineNr">448 </span>        JPanel  sizePanel   = new JPanel();
+<span id="W2L449" class="LineNr">449 </span>        sizePanel.setLayout( new GridLayout( 1, 2, 3, 0 ) );
+<span id="W2L450" class="LineNr">450 </span>        sizePanel.add( sizeEditor );
+<span id="W2L451" class="LineNr">451 </span>        sizePanel.add( sizeLabel );
+<span id="W2L452" class="LineNr">452 </span>        panel.add( sizePanel );
+<span id="W2L453" class="Folded">453 </span><span class="Folded">+-- 78 lines: JPanel  colorPanel   = new JPanel();---------------------------------------------------------------------------------------------------------</span>
+</pre>
+</div></td>
+</tr>
+</table>
+</body>
+</html>
+<!-- vim: set foldmethod=manual : -->
+

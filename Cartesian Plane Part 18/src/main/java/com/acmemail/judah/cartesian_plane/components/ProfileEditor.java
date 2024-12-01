@@ -361,7 +361,6 @@ public class ProfileEditor extends JPanel
         LayoutManager   layout  = new BoxLayout( panel, BoxLayout.X_AXIS );
         panel.setLayout( layout );
         panel.setBorder( border );
-        panel.add( new JLabel( NAME_LABEL ) );
         panel.add( Box.createRigidArea( spacer ) );
         JTextField      nameField   = new JTextField( 10 );
         panel.add( nameField );
