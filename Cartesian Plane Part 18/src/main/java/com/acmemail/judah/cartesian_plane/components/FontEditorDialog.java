@@ -149,7 +149,7 @@ public class FontEditorDialog extends JDialog
      * Saves the values of the font property editors
      * to the encapsulated property set.
      * Invoked when the dialog's 
-     * OK or Apply buttons are selected.
+     * OK button is selected.
      */
     private void apply()
     {
