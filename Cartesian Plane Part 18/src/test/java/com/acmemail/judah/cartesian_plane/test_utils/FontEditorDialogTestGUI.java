@@ -19,14 +19,22 @@ import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.components.ColorEditor;
 import com.acmemail.judah.cartesian_plane.components.FontEditor;
 import com.acmemail.judah.cartesian_plane.components.FontEditorDialog;
+import com.acmemail.judah.cartesian_plane.components.FontEditorDialogTest;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
 
 /**
+ * This is a utility for managing a FontEditorDialog during testing. 
+ * As appropriate, it forces operations
+ * to be executed in the context of the EDT.
+ * 
  * @author Jack Straub
+ * 
+ * @see FontEditorDialog
+ * @see FontEditorDialogTest
  */
-public class FontEditorDialogTestUtil
+public class FontEditorDialogTestGUI
 {
     /** 
      * The font properties when the application is started;
@@ -91,7 +99,8 @@ public class FontEditorDialogTestUtil
      */
     public boolean isVisible()
     {
-        return dialog.isVisible();
+        boolean visible = getBooleanProperty( () -> dialog.isVisible() );
+        return visible;
     }
     
     /**
@@ -142,6 +151,48 @@ public class FontEditorDialogTestUtil
         return size;
     }
     
+    /**
+     * Gets the value of the Bold profile property.
+     * 
+     * @return  the value of the Bold profile property
+     */
+    public boolean isProfileBold()
+    {
+        boolean bold    = getBooleanProperty( () -> mainWindow.isBold() );
+        return bold;
+    }
+    
+    /**
+     * Gets the value of the Italic profile property.
+     * 
+     * @return  the value of the Italic profile property
+     */
+    public boolean isProfileItalic()
+    {
+        boolean italic  = 
+            getBooleanProperty( () -> mainWindow.isItalic() );
+        return italic;
+    }
+    
+    /**
+     * Returns the RGB value
+     * corresponding to the foreground color
+     * of the Color editor's text field
+     * in the current profile.
+     * 
+     * @return  
+     *      the RGB value of the Profiles foreground color property
+     */
+    public int getProfileColor()
+    {
+        int     rgb     = getIntProperty( () -> {
+            Color   color   = mainWindow.getFGColor();
+            int     rgb2    = color.getRGB() & 0xFFFFFF;
+            return rgb2;
+        });
+        return rgb;
+    }
+
     /**
      * Obtains the Profile being used
      * by this test utility.
@@ -251,25 +302,6 @@ public class FontEditorDialogTestUtil
     }
     
     /**
-     * Returns the RGB value
-     * corresponding to the foreground color
-     * of the Color editor's text field
-     * in the current profile.
-     * 
-     * @return  
-     *      the RGB value of the Profiles foreground color property
-     */
-    public int getProfileColor()
-    {
-        int     rgb     = getIntProperty( () -> {
-            Color   color   = mainWindow.getFGColor();
-            int     rgb2    = color.getRGB() & 0xFFFFFF;
-            return rgb2;
-        });
-        return rgb;
-    }
-    
-    /**
      * Gets the value of the Bold check box.
      * 
      * @return  true if the Bold check box is selected
@@ -289,29 +321,6 @@ public class FontEditorDialogTestUtil
     public void setBold( boolean selected )
     {
         setProperty( o -> boldBox.setSelected( (boolean)o ), selected );
-    }
-    
-    /**
-     * Gets the value of the Bold profile property.
-     * 
-     * @return  the value of the Bold profile property
-     */
-    public boolean isProfileBold()
-    {
-        boolean bold    = getBooleanProperty( () -> mainWindow.isBold() );
-        return bold;
-    }
-    
-    /**
-     * Gets the value of the Italic profile property.
-     * 
-     * @return  the value of the Italic profile property
-     */
-    public boolean isProfileItalic()
-    {
-        boolean italic  = 
-            getBooleanProperty( () -> mainWindow.isItalic() );
-        return italic;
     }
     
     /**
@@ -437,7 +446,7 @@ public class FontEditorDialogTestUtil
      * 
      * @return the object obtained from the given getter
      */
-    private Object getProperty( Supplier<Object> getter )
+    private Object getProperty(  Supplier<Object> getter )
     {
         GUIUtils.schedEDTAndWait( () -> adHocObj = getter.get() );
         return adHocObj;
@@ -450,8 +459,6 @@ public class FontEditorDialogTestUtil
      * 
      * @param setter    the given setter
      * @param val       the given property value
-     * 
-     * @return the object obtained from the given getter
      */
     private void setProperty( Consumer<Object> setter, Object val )
     {

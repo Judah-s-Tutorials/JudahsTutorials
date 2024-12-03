@@ -14,18 +14,18 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.cartesian_plane.Profile;
-import com.acmemail.judah.cartesian_plane.test_utils.FontEditorDialogTestUtil;
+import com.acmemail.judah.cartesian_plane.test_utils.FontEditorDialogTestGUI;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
-class FontEditorDialogTest
+public class FontEditorDialogTest
 {
-    private final FontEditorDialogTestUtil  testUtil    =
-        new FontEditorDialogTestUtil();
+    private final FontEditorDialogTestGUI  testGUI     =
+        new FontEditorDialogTestGUI();
     
     @BeforeEach
-    void setUp() throws Exception
+    void beforeEach() throws Exception
     {
-        testUtil.resetProfile();
+        testGUI.resetProfile();
     }
 
     @ParameterizedTest    
@@ -34,9 +34,9 @@ class FontEditorDialogTest
     {
         testBoolean( 
             okay, 
-            testUtil::setBold, 
-            testUtil::isBold, 
-            testUtil::isProfileBold
+            testGUI::setBold, 
+            testGUI::isBold, 
+            testGUI::isProfileBold
         );
     }
 
@@ -46,9 +46,9 @@ class FontEditorDialogTest
     {
         testBoolean( 
             okay, 
-            testUtil::setItalic, 
-            testUtil::isItalic, 
-            testUtil::isProfileItalic
+            testGUI::setItalic, 
+            testGUI::isItalic, 
+            testGUI::isProfileItalic
         );
     }
 
@@ -56,120 +56,120 @@ class FontEditorDialogTest
     @ValueSource( booleans= { true, false} )
     public void testName( boolean okay )
     {
-        assertFalse( testUtil.isVisible() );
-        Thread  guiThread   = testUtil.showDialog();
+        assertFalse( testGUI.isVisible() );
+        Thread  guiThread   = testGUI.showDialog();
         
-        String  origProfileName = testUtil.getProfileName();
-        String  origGUIName     = testUtil.getName();
+        String  origProfileName = testGUI.getProfileName();
+        String  origGUIName     = testGUI.getName();
         String  newName         = origProfileName.equals( Font.DIALOG ) ? 
             Font.MONOSPACED : Font.DIALOG;
         assertEquals( origProfileName, origGUIName );
         assertNotEquals( origProfileName, newName );
         
-        testUtil.setName( newName );
-        assertEquals( newName, testUtil.getName() );
-        assertEquals( origProfileName, testUtil.getProfileName() );
+        testGUI.setName( newName );
+        assertEquals( newName, testGUI.getName() );
+        assertEquals( origProfileName, testGUI.getProfileName() );
         
-        testUtil.clickReset();
-        assertEquals( origProfileName, testUtil.getName() );
-        assertEquals( origProfileName, testUtil.getProfileName() );
+        testGUI.clickReset();
+        assertEquals( origProfileName, testGUI.getName() );
+        assertEquals( origProfileName, testGUI.getProfileName() );
         
-        testUtil.setName( newName );
-        assertEquals( newName, testUtil.getName() );
-        assertEquals( origProfileName, testUtil.getProfileName() );
+        testGUI.setName( newName );
+        assertEquals( newName, testGUI.getName() );
+        assertEquals( origProfileName, testGUI.getProfileName() );
         
         if ( okay )
-            testUtil.clickOK();
+            testGUI.clickOK();
         else
-            testUtil.clickCancel();
+            testGUI.clickCancel();
         Utils.join( guiThread );
-        assertFalse( testUtil.isVisible() );
+        assertFalse( testGUI.isVisible() );
         if ( okay )
-            assertEquals( newName, testUtil.getProfileName() );
+            assertEquals( newName, testGUI.getProfileName() );
         else
-            assertEquals( origProfileName, testUtil.getProfileName() );
+            assertEquals( origProfileName, testGUI.getProfileName() );
     }
 
     @ParameterizedTest    
     @ValueSource( booleans= { true, false} )
     public void testSize( boolean okay )
     {
-        assertFalse( testUtil.isVisible() );
-        Thread  guiThread   = testUtil.showDialog();
+        assertFalse( testGUI.isVisible() );
+        Thread  guiThread   = testGUI.showDialog();
         
-        float   origProfileSize = testUtil.getProfileSize();
-        int     origGUISize     = testUtil.getSize();
+        float   origProfileSize = testGUI.getProfileSize();
+        int     origGUISize     = testGUI.getSize();
         int     newSize         = (int)origProfileSize + 1;
         assertEquals( origProfileSize, origGUISize );
         assertNotEquals( origProfileSize, newSize );
         
-        testUtil.setSize( newSize );
-        assertEquals( newSize, testUtil.getSize() );
-        assertEquals( origProfileSize, testUtil.getProfileSize() );
+        testGUI.setSize( newSize );
+        assertEquals( newSize, testGUI.getSize() );
+        assertEquals( origProfileSize, testGUI.getProfileSize() );
         
-        testUtil.clickReset();
-        assertEquals( origProfileSize, testUtil.getSize() );
-        assertEquals( origProfileSize, testUtil.getProfileSize() );
+        testGUI.clickReset();
+        assertEquals( origProfileSize, testGUI.getSize() );
+        assertEquals( origProfileSize, testGUI.getProfileSize() );
         
-        testUtil.setSize( newSize );
-        assertEquals( newSize, testUtil.getSize() );
-        assertEquals( origProfileSize, testUtil.getProfileSize() );
+        testGUI.setSize( newSize );
+        assertEquals( newSize, testGUI.getSize() );
+        assertEquals( origProfileSize, testGUI.getProfileSize() );
         
         if ( okay )
-            testUtil.clickOK();
+            testGUI.clickOK();
         else
-            testUtil.clickCancel();
+            testGUI.clickCancel();
         Utils.join( guiThread );
-        assertFalse( testUtil.isVisible() );
+        assertFalse( testGUI.isVisible() );
         if ( okay )
-            assertEquals( newSize, testUtil.getProfileSize() );
+            assertEquals( newSize, testGUI.getProfileSize() );
         else
-            assertEquals( origProfileSize, testUtil.getProfileSize() );
+            assertEquals( origProfileSize, testGUI.getProfileSize() );
     }
 
     @ParameterizedTest    
     @ValueSource( booleans= { true, false} )
     public void testColor( boolean okay )
     {
-        assertFalse( testUtil.isVisible() );
-        Thread  guiThread   = testUtil.showDialog();
+        assertFalse( testGUI.isVisible() );
+        Thread  guiThread   = testGUI.showDialog();
         
-        int     origProfileColor    = testUtil.getProfileColor();
-        int     origGUIColor        = testUtil.getColor();
+        int     origProfileColor    = testGUI.getProfileColor();
+        int     origGUIColor        = testGUI.getColor();
         int     newColor            = origProfileColor + 1;
         assertEquals( origProfileColor, origGUIColor );
         assertNotEquals( origProfileColor, newColor );
         
-        testUtil.setColor( newColor );
-        assertEquals( newColor, testUtil.getColor() );
-        assertEquals( origProfileColor, testUtil.getProfileColor() );
+        testGUI.setColor( newColor );
+        assertEquals( newColor, testGUI.getColor() );
+        assertEquals( origProfileColor, testGUI.getProfileColor() );
         
-        testUtil.clickReset();
-        assertEquals( origProfileColor, testUtil.getColor() );
-        assertEquals( origProfileColor, testUtil.getProfileColor() );
+        testGUI.clickReset();
+        assertEquals( origProfileColor, testGUI.getColor() );
+        assertEquals( origProfileColor, testGUI.getProfileColor() );
         
-        testUtil.setColor( newColor );
-        assertEquals( newColor, testUtil.getColor() );
-        assertEquals( origProfileColor, testUtil.getProfileColor() );
+        testGUI.setColor( newColor );
+        assertEquals( newColor, testGUI.getColor() );
+        assertEquals( origProfileColor, testGUI.getProfileColor() );
         
         if ( okay )
-            testUtil.clickOK();
+            testGUI.clickOK();
         else
-            testUtil.clickCancel();
+            testGUI.clickCancel();
         Utils.join( guiThread );
-        assertFalse( testUtil.isVisible() );
+        assertFalse( testGUI.isVisible() );
         if ( okay )
-            assertEquals( newColor, testUtil.getProfileColor() );
+            assertEquals( newColor, testGUI.getProfileColor() );
         else
-            assertEquals( origProfileColor, testUtil.getProfileColor() );
+            assertEquals( origProfileColor, testGUI.getProfileColor() );
     }
     
     @Test
     public void testGetPropertySet()
     {
-        Profile             testProfile     = testUtil.getProfile();
+        Profile             testProfile     = testGUI.getProfile();
         GraphPropertySet    expPropertySet  = testProfile.getMainWindow();
-        GraphPropertySet    actPropertySet  = testUtil.getPropertySet();
+        GraphPropertySet    actPropertySet  = testGUI.getPropertySet();
         assertEquals( expPropertySet, actPropertySet );
     }
     
@@ -180,8 +180,8 @@ class FontEditorDialogTest
         Supplier<Boolean> profileGetter
      )
     {
-        assertFalse( testUtil.isVisible() );
-        Thread  guiThread   = testUtil.showDialog();
+        assertFalse( testGUI.isVisible() );
+        Thread  guiThread   = testGUI.showDialog();
         
         boolean origProfileVal  = profileGetter.get();
         boolean origGUIVal      = guiGetter.get();
@@ -193,7 +193,7 @@ class FontEditorDialogTest
         assertEquals( newVal, guiGetter.get() );
         assertEquals( origProfileVal, profileGetter.get() );
         
-        testUtil.clickReset();
+        testGUI.clickReset();
         assertEquals( origProfileVal, profileGetter.get() );
         assertEquals( origProfileVal, guiGetter.get() );
         
@@ -202,11 +202,11 @@ class FontEditorDialogTest
         assertEquals( origProfileVal, profileGetter.get() );
         
         if ( okay )
-            testUtil.clickOK();
+            testGUI.clickOK();
         else
-            testUtil.clickCancel();
+            testGUI.clickCancel();
         Utils.join( guiThread );
-        assertFalse( testUtil.isVisible() );
+        assertFalse( testGUI.isVisible() );
         if ( okay )
             assertEquals( newVal, profileGetter.get() );
         else
