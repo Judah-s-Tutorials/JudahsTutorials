@@ -1,5 +1,6 @@
 package com.acmemail.judah.cartesian_plane.components;
 
+import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -170,7 +171,7 @@ public class FontEditorDialogTest
         Profile             testProfile     = testGUI.getProfile();
         GraphPropertySet    expPropertySet  = testProfile.getMainWindow();
         GraphPropertySet    actPropertySet  = testGUI.getPropertySet();
-        assertEquals( expPropertySet, actPropertySet );
+        assertSame( expPropertySet, actPropertySet );
     }
     
     private void testBoolean( 
