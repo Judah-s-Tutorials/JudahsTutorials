@@ -66,8 +66,6 @@ public abstract class ProfileEditorTestBase
     private static final String ticMinorSet     =
         LinePropertySetTicMinor.class.getSimpleName();
     
-    /** The ProfileEditor under test. */
-    private final ProfileEditor             profileEditor;
     /** The set of components in the panel titled "Grid." */
     private final GraphPropertyComponents   graphPropComps;
     /**
@@ -84,6 +82,8 @@ public abstract class ProfileEditorTestBase
      */
     private final Map<String, LinePropertyComponents>   
         propSetToCompMap    = new HashMap<>();
+    /** The ProfileEditor under test. */
+    private final ProfileEditor             profileEditor;
     /** 
      * The component in the ProfileEditor 
      * that contains the profile name.
@@ -554,7 +554,7 @@ public abstract class ProfileEditorTestBase
      */
     public void selectFDOK()
     {
-        graphPropComps.selectOK();
+        GUIUtils.schedEDTAndWait( () -> graphPropComps.selectOK() );
     }
     
     /**
@@ -562,7 +562,7 @@ public abstract class ProfileEditorTestBase
      */
     public void selectFDReset()
     {
-        graphPropComps.selectReset();
+        GUIUtils.schedEDTAndWait( () -> graphPropComps.selectReset() );
     }
     
     /**
@@ -570,7 +570,7 @@ public abstract class ProfileEditorTestBase
      */
     public void selectFDCancel()
     {
-        graphPropComps.selectCancel();
+        GUIUtils.schedEDTAndWait( () -> graphPropComps.selectCancel() );
     }
     
     /**
@@ -974,7 +974,7 @@ public abstract class ProfileEditorTestBase
     {
         Predicate<JComponent>   pred    = 
             jc -> name.equals( jc.getName() );
-        JComponent  comp                = 
+        JComponent              comp    = 
             ComponentFinder.find( source, pred );
         assertNotNull( comp );
         return comp;
@@ -1024,6 +1024,7 @@ public abstract class ProfileEditorTestBase
      * Collects those components of a FontEditorDialog
      * that are necessary for editing
      * the font properties in a ProfileEditor.
+     * ALL OPERATIONS MUST BE EXECUTED ON THE EDT.
      * 
      * @author Jack Straub
      */
@@ -1085,6 +1086,7 @@ public abstract class ProfileEditorTestBase
      * all the components necessary
      * to edit the GraphPropertySetMW properties
      * of a Profile. 
+     * ALL OPERATIONS MUST BE EXECUTED ON THE EDT.
      *
      * @author Jack Straub
      * 
@@ -1426,6 +1428,7 @@ public abstract class ProfileEditorTestBase
      * Collects all those components
      * necessary to edit
      * a LinePropertySet contained in a Profile.
+     * ALL OPERATIONS MUST BE EXECUTED ON THE EDT.
      * 
      * @author Jack Straub
      */
