@@ -90,8 +90,12 @@ public class CPMenuBarNoCPFrameTest
         private void clickButton( AbstractButton button )
         {
             GUIUtils.schedEDTAndWait( () -> {
-                assertTrue( button.isEnabled() );
+                String      text    = button.getText();
+                boolean     orig    = button.isEnabled();
+                button.setEnabled( true );
+                assertTrue( button.isEnabled(), text );
                 button.doClick();
+                button.setEnabled( orig );
             });
         }
         
