@@ -4,20 +4,18 @@ import org.junit.platform.suite.api.SelectClasses;
 import org.junit.platform.suite.api.Suite;
 import org.junit.platform.suite.api.SuiteDisplayName;
 
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxesTest;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetGridLinesTest;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetMiscTest;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMajorTest;
-import com.acmemail.judah.cartesian_plane.components.LinePropertySetTicMinorTest;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySetBMTest;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySetLMTest;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMWTest;
+import com.acmemail.judah.cartesian_plane.components.GraphPropertySetRMTest;
 
 @Suite
 @SuiteDisplayName( "LinePropertySet Test Suite" )
 @SelectClasses({ 
-    LinePropertySetAxesTest.class,
-    LinePropertySetGridLinesTest.class,
-    LinePropertySetTicMajorTest.class,
-    LinePropertySetTicMinorTest.class,
-    LinePropertySetMiscTest.class
+    GraphPropertySetBMTest.class,
+    GraphPropertySetLMTest.class,
+    GraphPropertySetMWTest.class,
+    GraphPropertySetRMTest.class
 })
 class GraphPropertySetTestSuite
 {

@@ -1,6 +1,6 @@
 package com.acmemail.judah.cartesian_plane.components;
 
-class GraphPropertySetMWTest extends GraphPropertySetTest
+public class GraphPropertySetMWTest extends GraphPropertySetTest
 {
     public GraphPropertySetMWTest()
     {
