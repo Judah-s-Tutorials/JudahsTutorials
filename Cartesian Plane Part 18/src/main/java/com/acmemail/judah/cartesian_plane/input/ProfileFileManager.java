@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane;
+package com.acmemail.judah.cartesian_plane.input;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,6 +9,8 @@ import java.util.stream.Stream;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+
+import com.acmemail.judah.cartesian_plane.Profile;
 
 public class ProfileFileManager
 {

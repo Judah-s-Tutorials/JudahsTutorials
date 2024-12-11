@@ -9,8 +9,8 @@ import java.io.PrintWriter;
 import java.util.stream.Stream;
 
 import com.acmemail.judah.cartesian_plane.Profile;
-import com.acmemail.judah.cartesian_plane.ProfileParser;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentException;
+import com.acmemail.judah.cartesian_plane.input.ProfileParser;
 
 public class ProfileFileManagerTestData
 {

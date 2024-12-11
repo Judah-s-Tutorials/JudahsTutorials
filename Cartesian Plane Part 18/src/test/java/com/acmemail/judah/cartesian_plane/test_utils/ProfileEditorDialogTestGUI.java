@@ -18,10 +18,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.cartesian_plane.Profile;
-import com.acmemail.judah.cartesian_plane.ProfileFileManager;
 import com.acmemail.judah.cartesian_plane.components.ProfileEditorDialog;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
+import com.acmemail.judah.cartesian_plane.input.ProfileFileManager;
 
 /**
  * An instance of this class

@@ -10,10 +10,10 @@ import java.util.stream.Stream;
 import javax.swing.JOptionPane;
 
 import com.acmemail.judah.cartesian_plane.Profile;
-import com.acmemail.judah.cartesian_plane.ProfileParser;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
+import com.acmemail.judah.cartesian_plane.input.ProfileParser;
 
 /**
  * This class parses a stream of strings,

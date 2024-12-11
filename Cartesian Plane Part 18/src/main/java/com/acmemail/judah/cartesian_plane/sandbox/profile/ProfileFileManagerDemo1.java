@@ -15,9 +15,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.cartesian_plane.Profile;
-import com.acmemail.judah.cartesian_plane.ProfileFileManager;
 import com.acmemail.judah.cartesian_plane.components.ProfileEditor;
 import com.acmemail.judah.cartesian_plane.graphics_utils.GUIUtils;
+import com.acmemail.judah.cartesian_plane.input.ProfileFileManager;
 
 /**
  * This application demonstrates the use of the ProfileManager.

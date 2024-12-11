@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane;
+package com.acmemail.judah.cartesian_plane.input;
 
 import java.awt.Color;
 import java.util.function.Consumer;
@@ -6,6 +6,8 @@ import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
 
+import com.acmemail.judah.cartesian_plane.CPConstants;
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySetAxes;

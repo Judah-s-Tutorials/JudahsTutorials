@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane;
+package com.acmemail.judah.cartesian_plane.input;
 
 import static org.junit.Assert.assertSame;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -22,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 
+import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySet;
 import com.acmemail.judah.cartesian_plane.components.GraphPropertySetMW;
 import com.acmemail.judah.cartesian_plane.components.LinePropertySet;
@@ -180,7 +181,7 @@ public class ProfileParserTest
         // Change the profile name
         List<String>    list            = new ArrayList<>();
         String          distinctName    = distinctProfile.getName();
-        list.add( ProfileParser.PROFILE + ": " + distinctName );
+        list.add( ProfileParser.PROFILE + " " + distinctName );
         workingProfile.setName( distinctName );
         
         // Change the main window font size
@@ -220,7 +221,7 @@ public class ProfileParserTest
         ProfileParser   testParser  = new ProfileParser();
         testParser.loadProperties( props.stream() );
         Profile         testProfile = testParser.getProfile();
-        assertEquals( testProfile, workingProfile );
+        assertEquals( workingProfile, testProfile );
     }
     
     @Test
@@ -312,7 +313,6 @@ public class ProfileParserTest
         props.add( ProfileParser.FG_COLOR + " " + 2  );
         props.add( ProfileParser.WIDTH + " " + 2  );
         
-        props.forEach( System.out::println );
         ProfileParser   testParser  = new ProfileParser();
         int testCount   = expectDialog( () ->
             testParser.loadProperties( props.stream() )
@@ -330,9 +330,9 @@ public class ProfileParserTest
         // a line property. After adding the line property class
         // try to add a graph property. Should yield 2 error dialogs.
         List<String>    props   = getTestPropertyList();
-        props.add( 3, ProfileParser.STROKE + ": " + 2  );
+        props.add( 3, ProfileParser.STROKE + " " + 2  );
         // line property class declaration is now at line 5.
-        props.add( 6, ProfileParser.FONT_SIZE + ": " + 10  );
+        props.add( 6, ProfileParser.FONT_SIZE + " " + 10  );
         
         ProfileParser   testParser  = new ProfileParser();
         int testCount   = expectDialog( () ->
@@ -351,10 +351,10 @@ public class ProfileParserTest
         // declaration, and another one after. Should yield two error
         // dialogs.
         List<String>    props   = getTestPropertyList();
-        props.add( 3, "notAValidPropertyName" + ": " + 10 );
+        props.add( 3, "notAValidPropertyName" + " " + 10 );
         // After adding previous line, first class declaration is at
         // line 4. Add the next invalid line at line 5.
-        props.add( 5, "alsoNotValid" + ": " + 2  );
+        props.add( 5, "alsoNotValid" + " " + 2  );
         
         ProfileParser   testParser  = new ProfileParser();
         int testCount   = expectDialog( () ->
@@ -376,8 +376,8 @@ public class ProfileParserTest
         // false, so we can't test for an invalid Boolean value.
         // Should yield two error dialogs.
         List<String>    props   = getTestPropertyList();
-        props.add( 6, ProfileParser.LENGTH + ": " + "xx" );
-        props.add( 7, ProfileParser.COLOR + ": " + "yy" );
+        props.add( 6, ProfileParser.LENGTH + " " + "xx" );
+        props.add( 7, ProfileParser.COLOR + " " + "yy" );
         
         ProfileParser   testParser  = new ProfileParser();
         int testCount   = expectDialog( () ->
@@ -395,8 +395,8 @@ public class ProfileParserTest
         // Try to parse a line property and a graph property
         // before any class has been declared
         List<String>    props   = getTestPropertyList();
-        props.add( 2, ProfileParser.FONT_SIZE + ": " + 10 );
-        props.add( 3, ProfileParser.STROKE + ": " + 2  );
+        props.add( 2, ProfileParser.FONT_SIZE + " " + 10 );
+        props.add( 3, ProfileParser.STROKE + " " + 2  );
         
         ProfileParser   testParser  = new ProfileParser();
         int testCount   = expectDialog( () ->

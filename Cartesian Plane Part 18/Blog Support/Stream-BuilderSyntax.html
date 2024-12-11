@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>About the syntax...</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="margin-left: 2.5em; margin-right: 1.5em; padding-left: 2.5em; padding-right: 1.5em; font-family: 'Times New Roman', Times, serif; background-color: #f6f6f6; max-width: 50em;">
+<p style="font-size: 125%;">
+<strong><sup>*</sup>About the syntax:</strong>
+</p>
+<p style="margin-left: 2.5em; font-family: 'Lucida Console', 'Courier New', Monospace; font-size: 75%;">
+Stream.Builder&lt;String&gt;  bldr    = Stream.&lt;String&gt;builder();
+</p>
+<p>
+<em>Builder&lt;T&gt;</em> is a generic interface in the generic class <em>Stream&lt;T&gt;</em>.
+The method <em>builder()</em> is a generic method in <em>Stream&lt;T&gt;</em>
+that returns a <em>Stream.Builder&lt;T&gt;</em>.
+It's declared like this:
+</p>
+<p style="margin-left: 2.5em; font-family: 'Lucida Console', 'Courier New', Monospace; font-size: 75%;">
+static &lt;T&gt; Stream.Builder&lt;T&gt; builder()
+</p>
+<p>
+The full syntax when calling a generic method
+is to declare the type in angle brackets
+before the generic method.
+If <em>getList</em> in class <em>GenericMethodDemo1</em>
+is declared this way:
+</p>
+<p style="margin-left: 2.5em; font-family: 'Lucida Console', 'Courier New', Monospace; font-size: 75%;">
+public static &lt;T&gt; List&lt;T&gt; getList()
+</p>
+<p>
+We could invoke it like this:
+</p>
+<p style="margin-left: 2.5em; font-family: 'Lucida Console', 'Courier New', Monospace; font-size: 75%;">
+List&lt;String&gt;  strList = GenericMethodDemo1.&lt;String&gt;getList();<br>
+List&lt;Integer&gt; intList = GenericMethodDemo1.&lt;Integer&gt;getList();
+</p>
+<p>
+The extra <em>&lt;type&gt;</em>, however,
+can usually be omitted because the compiler
+is able to infer it,
+giving us:
+</p>
+<p style="margin-left: 2.5em; font-family: 'Lucida Console', 'Courier New', Monospace; font-size: 75%;">
+List&lt;String&gt;  strList = GenericMethodDemo1.getList();<br>
+List&lt;Integer&gt; intList = GenericMethodDemo1.getList();
+</p>
+<p>
+Or, in the case of our <em>Stream</em> example:
+</p>
+<p style="margin-left: 2.5em; font-family: 'Lucida Console', 'Courier New', Monospace; font-size: 75%;">
+Stream.Builder&lt;String&gt;  bldr    = Stream.builder();
+</p>
+<p>
+Compare this the way that the compiler
+can infer the type of <em>ArrayList&lt;&gt;</em>
+in the following declaration:
+</p>
+<p style="margin-left: 2.5em; font-family: 'Lucida Console', 'Courier New', Monospace; font-size: 75%;">
+List&lt;String&gt;  strList = new ArrayList&lt;&gt;();
+</p>
+<p>
+I chose to include the extra <em>&lt;type&gt;</em> at least once,
+because that's how I saw it in a lot of the examples on the web,
+and I wanted to be able to call attention to it.
+<p>
+See also:
+<a href="https://docs.oracle.com/javase/tutorial/java/generics/methods.html">
+    Generic Methods
+</a>
+in the Oracle Java tutorial.
+</p>
+</div>
+</body>
+</html>
