@@ -58,7 +58,7 @@ public class Main2
         private static final double   twoPI = 2 * Math.PI;
 
         private final double    side        = 50;
-        private final double    angle       = Math.PI / 12;
+        private final double    angle       = Math.PI / 3;
         private final IsoTri    triangle    = new IsoTri( side, angle );
         private final Color     bgColor     = new Color( 0xeeeeee );
         private final Color     fgColor     = Color.BLACK;

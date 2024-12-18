@@ -990,8 +990,8 @@ public class ProfileEditorFeedbackTest
          */
         public void validateVertical()
         {
-            float   oXco            = yAxisXco + expSpacing;
-            float   oYco            = xAxisYco + 1;
+            float       oXco        = yAxisXco + expSpacing;
+            float       oYco        = xAxisYco + 1;
             Point2D     origin      = new Point2D.Double( oXco, oYco );
             LineSegment seg         = LineSegment.of( origin, image );
             Rectangle2D bounds      = seg.getBounds();

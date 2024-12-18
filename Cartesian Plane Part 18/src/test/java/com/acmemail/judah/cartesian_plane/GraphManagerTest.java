@@ -118,12 +118,12 @@ public class GraphManagerTest
     private static GraphManagerTestGUI  testGUI;
 
     /** The BufferedImage managed by the test GUI. */
-     BufferedImage       workingImage;
+    private BufferedImage       workingImage;
     /** 
      * The area within the workingImage that contains the graphic
      * components managed by the test GUI. 
      */
-     Rectangle           workingRect;
+    private Rectangle           workingRect;
     
     /** 
      * Data for use during testing. Initialized to state 0 in
@@ -131,7 +131,7 @@ public class GraphManagerTest
      * by individual tests.
      * @see #initTestData
      */
-     TestData            testData        = new TestData();
+    private TestData            testData        = new TestData();
     
     /**
      * Executed once, before any tests are executed. Initializes
@@ -902,27 +902,80 @@ public class GraphManagerTest
         return rect;
     }
     
+    /**
+     * Class to encapsulate data for testing a GraphManager feature.
+     * The data include the grid unit (GPU) from the Profile class,
+     * the grid color and font color from a Profile object's
+     * encapsulated GridPropertySetMW, 
+     * and the LPU, length, stroke, and color properties
+     * from one of the Profile's encapsulated LinePropertySets.
+     * The user can choose from two distinct sets of data,
+     * the primary set and the secondary set; 
+     * see {@link #initTestData(int)}.
+     * 
+     * @author Jack Straub
+     */
     private static class TestData
     {
+        /** Primary GPU value. */
         private static final float  GPU         = 100;
+        /** Primary font RGB value. */
         private static final int    FONT_RGB    = 0x000008;
+        /** Primary grid RGB value. */
         private static final int    GRID_RGB    = 0xEEEEEE;
+        /** Primary LPU value. */
         private static final float  LPU         = 2;
+        /** Primary length value. */
         private static final float  LENGTH      = 20;
+        /** Primary stroke value. */
         private static final float  STROKE      = 4;
+        /** Primary line RGB value. */
         private static final int    LINE_RGB    = 0x00000F;
         
+        /** 
+         * The name of the encapsulated LinePropertySet,
+         * determined by {@link #initProfile(String)}.
+         */
         public  String    lineSet;
+        /** The GPU, determined by {@link #initTestData(int)}. */
         public  float     gpu;
+        /** The font RGB value, determined by {@link #initTestData(int)}. */
         public  int       fontRGB;
+        /** The grid RGB value, determined by {@link #initTestData(int)}. */
         public  int       gridRGB;
+        /** 
+         * The grid color, 
+         * determined by {@link #initTestData(int)}, 
+         * derived from {@link #gridRGB}. 
+         */
         public  Color     gridColor;
+        /** The LPU, determined by {@link #initTestData(int)}. */
         public  float     lpu;
+        /** The line length, determined by {@link #initTestData(int)}. */
         public  float     length;
+        /** The line weight, determined by {@link #initTestData(int)}. */
         public  float     stroke;
+        /** The the line RGB, determined by {@link #initTestData(int)}. */
         public  int       lineRGB;
+        /** 
+         * The line color, 
+         * determined by {@link #initTestData(int)}, 
+         * derived from {@link #lineRGB}. 
+         */
         public  Color     lineColor;
         
+        /**
+         * Initializes the fields of this object
+         * to values from the primary or secondary data set.
+         * To select the secondary data set
+         * pass an argument of 1.
+         * Any other choice of argument
+         * will select the primary data set.
+         * 
+         * @param dataSet
+         *      value to choose between the primary and
+         *      secondary data sets
+         */
         public void initTestData( int dataSet )
         {
             fontRGB = FONT_RGB;
@@ -948,6 +1001,13 @@ public class GraphManagerTest
             }
         }
         
+        /**
+         * Transfers data from this object to the test Profile,
+         * the Profile's encapsulated GraphPropertySetMW,
+         * and the Profile's given LinePopertySet.
+         * 
+         * @param propSet   the given LinePropertySet
+         */ 
         public void initProfile( String propSet )
         {
             lineSet = propSet;

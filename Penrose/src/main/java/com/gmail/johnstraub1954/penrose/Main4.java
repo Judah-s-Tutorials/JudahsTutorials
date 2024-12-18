@@ -15,14 +15,14 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class Main3
+public class Main4
 {
     private final JFrame    frame;
     private static Canvas    canvas;
     
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( Main3::new );
+        SwingUtilities.invokeLater( Main4::new );
         
         try
         {
@@ -38,7 +38,7 @@ public class Main3
         }
     }
     
-    public Main3()
+    public Main4()
     {
         frame = new JFrame( "Penrose" );
         canvas = new Canvas();
@@ -73,10 +73,12 @@ public class Main3
         private static final double   twoPI = 2 * Math.PI;
 
         private final double    side        = 50;
-        private final double    angle       = Math.PI / 3;
+        private final double    angle       = Math.PI / 12;
         private final IsoTri    triangle    = new IsoTri( side, angle );
+        private final TriColor  triColor    = new TriColor();
         private final Color     bgColor     = new Color( 0xeeeeee );
         private final Color     fgColor     = Color.BLACK;
+        private final int       maxRows     = 6;
         
         private int             row         = 0;
         private int             col         = 0;
@@ -104,17 +106,18 @@ public class Main3
             
             double  centerXco   = width / 2.0;
             double  centerYco   = height / 2.0;
-            gtx.translate( centerXco, centerYco );
-            work    = angle / (row + 1) * col++;
+            work    = (angle / (row + 1)) * col++;
             if ( work >= twoPI )
             {
                 work = 0;
                 col = 0;
-                if ( ++row > 5 )
+                if ( ++row > maxRows )
                     row = 0;
             }
-            gtx.rotate( work );
-            triangle.draw( gtx, row );
+            gtx.setColor( triColor.getColor() );
+            gtx.rotate( work, centerXco, centerYco );
+            gtx.translate( centerXco + row * triangle.hypot, centerYco );
+            gtx.fill( triangle.path );
             gtx.dispose();
         }
     }
@@ -122,31 +125,13 @@ public class Main3
     private static class IsoTri
     {
         private final Path2D    path        = new Path2D.Double();
-        private final float     hueIncr     = .001f;
-        private final float     satMin      = .1f;
-        private final float     satMax      = .9f;
-        private final float     satIncr     = .1f;
-        private final float     brightMin   = .1f;
-        private final float     brightMax   = .9f;
-        private final float     brightIncr  = .1f;
-        
         private final double    hypot;
-        private final double    radians;
-        private final double    side; 
-        private final double    xco1;
-        private final double    yco;
-        
-        private float hue           = 0;
-        private float saturation    = satMin;
-        private float brightness    = brightMin;
         
         public IsoTri( double side, double radians )
         {
-            this.radians = radians;
-            this.side = side;
             double  half    = radians / 2;
-            xco1 = side * Math.cos( half );
-            yco     = side * Math.sin( half );
+            double  xco1 = side * Math.cos( half );
+            double  yco  = side * Math.sin( half );
             
             path.moveTo( 0, 0 );
             path.lineTo( xco1, yco );
@@ -154,29 +139,28 @@ public class Main3
             path.lineTo( 0, 0 );
             hypot = xco1;
         }
+    }
+    
+    private static class TriColor
+    {
+        private final float     hueIncr     = .01f;
+        private final float     lightMin    = .75f;
+        private final float     lightMax    = .75f;
+        private final float     lightIncr   = .3f;
         
-        public void draw( Graphics2D gtx, int inx )
+        private float hue      = 0;
+        private float light    = lightMin;
+        
+        public Color getColor()
         {
-            Path2D  path2   = new Path2D.Double();
-            double  vertex  = inx * hypot;
-            double  xco     = vertex + side * Math.cos( radians / 2 );
-            path2.moveTo( vertex, 0 );
-            path2.lineTo( xco, yco );
-            path2.lineTo( xco, -yco );
-            path2.lineTo( vertex, 0 );
-            gtx.setColor( Color.BLACK );
-            gtx.draw( path2 );
-            if ( (hue += hueIncr) > 1 )
-                hue = 0;
-            if ( (saturation += satIncr) > satMax )
-                saturation = satMin;
-            if ( (brightness += brightIncr) > brightMax )
-                brightness = brightMin;
-            Color   color   = Color.getHSBColor( hue, saturation, brightness );
-            gtx.setColor( color );
-            gtx.fill( path2 );
-            hue += hueIncr;
-            hue %= 1;
+            if ( (light += lightIncr) > lightMax )
+            {
+                light = lightMin;
+                if ( (hue += hueIncr) > 1 )
+                    hue = 0;
+            }
+            Color   color   = Color.getHSBColor( hue, light, light );
+            return color;
         }
     }
 }
