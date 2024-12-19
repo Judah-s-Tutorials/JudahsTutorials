@@ -652,8 +652,8 @@ public class ProfileEditor extends JPanel
         private static final float      maxVal  = Integer.MAX_VALUE;
         public final    JSpinner        spinner;
         public final    JLabel          label;
-        private final   DoubleConsumer  profileSetter;
-        private final   DoubleSupplier  profileGetter;
+        public final    DoubleConsumer  profileSetter;
+        public final    DoubleSupplier  profileGetter;
         
         public SpinnerDesc(
             LinePropertySet propSet,
