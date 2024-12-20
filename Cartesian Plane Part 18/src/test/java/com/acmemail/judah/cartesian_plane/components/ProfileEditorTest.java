@@ -178,7 +178,6 @@ public class ProfileEditorTest
         
         testGUI.setFontDraw( graphSet.isFontDraw() );
         testGUI.setBGColor( iBGColor );
-        testGUI.setName( distinctProfile.getName() );
         testGUI.setGridWidth( graphSet.getWidth() );
         
         Thread  thread  = testGUI.editFont();
