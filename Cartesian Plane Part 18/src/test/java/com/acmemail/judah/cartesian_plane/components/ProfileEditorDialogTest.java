@@ -3,11 +3,14 @@ package com.acmemail.judah.cartesian_plane.components;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
@@ -19,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.cartesian_plane.Profile;
 import com.acmemail.judah.cartesian_plane.graphics_utils.ComponentFinder;
+import com.acmemail.judah.cartesian_plane.input.ProfileParser;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorDialogTestGUI;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileEditorTestBase;
 import com.acmemail.judah.cartesian_plane.test_utils.ProfileFileManagerTestData;
@@ -215,56 +219,31 @@ public class ProfileEditorDialogTest
      * <li>Push reset button.</li>
      * <li>Verify all properties returned to distinct values.</li>
      * </ol>
-     * <p>
-     * Note:
-     * To avoid interrupting the process
-     * before the dialog under test is dismissed,
-     * all verification takes place
-     * after the dialog's cancel button
-     * has been pushed.
      */
     @Test
     public void testResetFromFile()
     {
-        final String testName   = "testResetFromFile";
         
-        Thread  thread              = testGUI.postDialog();
-        // Give all editor components distinct values.
-        applyDistinctProperties();
-        // Sanity check; verify the new values of the editor components
-        Profile testDistinctProps   = testGUI.getComponentValues();
-        assertEquals( testDistinctProps, distinctProfile );
+        Thread  thread      = testGUI.postDialog();
+
+        // Set adHocFile to baseProfile without going through file 
+        // manager, then open it (via the ProfileEditordialog).
+        saveProfile( baseProfile, adHocFile );
+        testGUI.openFile( adHocFile );
         
-        // Save distinct properties to adHocFile
-        testGUI.saveAs( adHocFile );
-        // Sanity check; currFile should now be adHocFile.
-        File    currFile            = testGUI.getCurrFile();
-        assertTrue( 
-            ProfileFileManagerTestData.compareFileNames( 
-                adHocFile, 
-                currFile
-            )
-        );
+        // sanity check: verify that GUI agrees with baseProfile,
+        // and adHocFile is open.
+        Profile testProfile = testGUI.getComponentValues();
+        File    testFile    = testGUI.getCurrFile();
+        assertEquals( baseProfile, testProfile );
+        ProfileFileManagerTestData.compareFileNames( adHocFile, testFile );
         
-        // Sanity check; verify contents of adHocFile
-        assertTrue( 
-            ProfileFileManagerTestData.validateFile(
-                distinctProfile, 
-                adHocFile
-            )
-        );
-        
-        // Change one of the ProfileEditor components
-        testGUI.setName( testName );
-        // Sanity check; verify component value changed
-        Profile testProps           = testGUI.getComponentValues();
-        assertNotEquals( distinctProfile, testProps );
-        
-        // Push the reset button and get the reset values of the editor 
-        // components; verify that they match the distinct profile.
+        // change adHocFile to distinctProfile w/o going through file mgr
+        saveProfile( distinctProfile, adHocFile );
+        // Push reset button, and verify GUI was reset from adHocFile
         testGUI.pushResetButton();
-        Profile testResetProps      = testGUI.getComponentValues();
-        assertEquals( distinctProfile, testResetProps );
+        testProfile = testGUI.getComponentValues();
+        assertEquals( distinctProfile, testProfile );
         
         // Dialog should still be deployed after reset
         assertTrue( testGUI.isVisible() );
@@ -276,7 +255,7 @@ public class ProfileEditorDialogTest
         // Dialog should no longer be deployed
         assertFalse( testGUI.isVisible() );
     }
-
+    
     /**
      * Verify the apply operation.
      * <ol>
@@ -874,6 +853,29 @@ public class ProfileEditorDialogTest
             testGUI.setStroke( name, props.getStroke() );
     }
     
+    /**
+     * Save a given profile to a given file
+     * without affecting the state of the ProfileFileManager.
+     * 
+     * @param profile   the given profile
+     * @param file      the given file
+     */
+    private static void saveProfile( Profile profile, File file ) 
+    {
+        ProfileParser   parser      = new ProfileParser( profile );
+        try ( 
+            FileOutputStream fileStr = new FileOutputStream( file );
+            PrintWriter writer = new PrintWriter( fileStr );
+        )
+        {
+            parser.getProperties().forEach( writer::println );
+        }
+        catch ( IOException exc )
+        {
+            fail( "Unexpected I/O exception", exc );
+        }
+    }
+
     /**
      * This method is for debugging purposes only.
      * It posts a modal dialog
