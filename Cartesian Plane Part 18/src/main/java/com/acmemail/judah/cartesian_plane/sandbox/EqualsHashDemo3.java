@@ -3,8 +3,6 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentSkipListSet;
 
 public class EqualsHashDemo3
 {

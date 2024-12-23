@@ -132,5 +132,63 @@ private final AboutDialog   aboutDialog;</pre>
 </tbody>
 </table>
 
+<table style="font-size: 80%; font-family: 'Lucida Console', 'Courier New', monospace; border-collapse: collapse;">
+<thead>
+<tr> 
+<th style="border: .2em solid black;">Original Code</th>
+<th style="border: .2em solid black;">New Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border: .2em solid black; vertical-align: top; 0;"><pre>private final JDialog       lineDialog;
+private final JDialog       graphDialog;
+private final JDialog       aboutDialog;
+</pre>
+</td>
+<td style="border: .2em solid black; vertical-align: top;"><pre>private final JDialog       lineDialog;
+private final JDialog       graphDialog;
+<span style="background-color: yellow;">private final JDialog       profileEditorDialog;</span>
+private final AboutDialog   aboutDialog;</pre>
+</td>
+</tr>
+</tbody>
+</table>
+
+<table style="font-size: 80%; font-family: 'Lucida Console', 'Courier New', monospace; border-collapse: collapse;">
+<thead>
+<tr> 
+<th style="border: .2em solid black;">Original Code</th>
+<th style="border: .2em solid black;">New Code</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border: .2em solid black; vertical-align: top; 0;"><pre>private CPMenuBarTestDialog()
+{
+    menuBar = new CPMenuBar( null );
+    dialog = makeDialog();
+    
+    graphDialog = getDialog( "Graph" );
+    lineDialog = getDialog( "Line" );
+    aboutDialog = getDialog( "About" );
+}
+</pre>
+</td>
+<td style="border: .2em solid black; vertical-align: top;"><pre>private CPMenuBarTestDialog()
+{
+    menuBar = new CPMenuBar( null );
+    dialog = makeDialog();
+        
+    graphDialog = getDialog( "Graph" );
+    lineDialog = getDialog( "Line" );
+    aboutDialog = getDialog( "About" );
+<span style="background-color: yellow;">    profileEditorDialog = 
+        profileEditorDialog = getDialog( "Profile Editor" );</span>
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
 </body>
 </html>

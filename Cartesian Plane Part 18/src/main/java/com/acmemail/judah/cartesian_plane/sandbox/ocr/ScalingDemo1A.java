@@ -10,6 +10,7 @@ import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
+@SuppressWarnings("serial")
 public class ScalingDemo1A extends JPanel
 {
     private static final char   white       = '\u25a1';

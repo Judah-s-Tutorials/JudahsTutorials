@@ -1,6 +1,5 @@
 package com.acmemail.judah.cartesian_plane.sandbox.ocr;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -8,8 +7,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.Stroke;
-import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JDialog;
@@ -45,7 +42,6 @@ public class ScalingDemo1 extends JPanel
     private final int           heightOrig      = widthOrig;
     private final int           margin          = 1;
     private final float         scaleFactor     = 1.5f;
-    private final int           defWeight       = 3;
     private final BufferedImage imageOrig;
     private final Image         imageScaled;
 
@@ -211,15 +207,6 @@ public class ScalingDemo1 extends JPanel
         
         dialog.pack();
         dialog.setVisible( true );
-    }
-    
-    private void drawText( Graphics2D gtx )
-    {
-        int     height  = gtx.getFontMetrics().getAscent();
-        int     xco     = 0;
-        int     yco     = height;
-//        gtx.drawString( "Spot", xco, yco );
-        gtx.drawString( "-10", xco, yco );
     }
     
     private BufferedImage trim( BufferedImage image )

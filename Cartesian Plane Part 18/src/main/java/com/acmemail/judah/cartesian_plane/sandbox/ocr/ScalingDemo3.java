@@ -328,7 +328,6 @@ public class ScalingDemo3 extends JPanel
      * 
      * @author Jack Straub
      */
-    @SuppressWarnings({ "serial" })
     private class ScaledDialog extends JDialog
     {
         /**
@@ -356,7 +355,6 @@ public class ScalingDemo3 extends JPanel
      * 
      * @author Jack Straub
      */
-    @SuppressWarnings("serial")
     private class ScaledPanel extends JPanel
     {
         @Override
