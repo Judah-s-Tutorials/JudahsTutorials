@@ -17,7 +17,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class DartDemo1
+public class KiteDemo1
 {
     /** Unicode for an up-arrow. */
     private static final String         upArrow     = "\u21e7";
@@ -37,20 +37,20 @@ public class DartDemo1
     
     public static void main(String[] args)
     {
-        DartDemo1   demo2 = new DartDemo1();
-        SwingUtilities.invokeLater( () -> demo2.build() );
+        KiteDemo1   demo    = new KiteDemo1();
+        SwingUtilities.invokeLater( () -> demo.build() );
     }
     
     public void build()
     {
-        JFrame  frame   = new JFrame( "Dart Demo" );
+        JFrame  frame   = new JFrame( "Kite Demo" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new JPanel( new BorderLayout() );
         canvas = new Canvas( longSide );
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );
         frame.setContentPane( pane );
-        frame.setLocation( 350, 100 );
+        frame.setLocation( 400, 100 );
         frame.pack();
         
         canvas.addMouseListener(
@@ -60,7 +60,7 @@ public class DartDemo1
                 {
                     int xco = evt.getX();
                     int yco = evt.getY();
-                    System.out.println( canvas.dart.contains( xco, yco ) );
+                    System.out.println( canvas.kite.contains( xco, yco ) );
                 }
             }
         );
@@ -92,16 +92,16 @@ public class DartDemo1
         JButton rightButton = new JButton( rightArrow );
         
         upButton.addActionListener( e -> 
-            action( () -> canvas.getDart().move( 0, -8 ) )
+            action( () -> canvas.getKite().move( 0, -8 ) )
         );
         downButton.addActionListener( e -> 
-            action( () -> canvas.getDart().move( 0, 8 ) )
+            action( () -> canvas.getKite().move( 0, 8 ) )
         );
         leftButton.addActionListener( e -> 
-            action( () -> canvas.getDart().move( -8, 0 ) )
+            action( () -> canvas.getKite().move( -8, 0 ) )
         );
         rightButton.addActionListener( e -> 
-            action( () -> canvas.getDart().move( 8, 0 ) )
+            action( () -> canvas.getKite().move( 8, 0 ) )
         );
         
         panel.add( new JLabel( "" ) );
@@ -121,10 +121,10 @@ public class DartDemo1
         
         float   rotateIncr  = (float)(Math.PI / 32);
         leftButton.addActionListener( e -> 
-            action( () -> canvas.getDart().rotate( -rotateIncr ) )
+            action( () -> canvas.getKite().rotate( -rotateIncr ) )
         );
         rightButton.addActionListener( e -> 
-            action( () -> canvas.getDart().rotate( rotateIncr ) )
+            action( () -> canvas.getKite().rotate( rotateIncr ) )
         );
         
         panel.add( leftButton );
@@ -142,7 +142,7 @@ public class DartDemo1
     {
         private static final long serialVersionUID = 1L;
 
-        private final PDart dart;
+        private final PKite kite;
         
         private Graphics2D  gtx;
         private int         width;
@@ -151,7 +151,7 @@ public class DartDemo1
         public Canvas( double longSide )
         {
             setPreferredSize( new Dimension( 500, 500 ) );
-            dart = new PDart( longSide );
+            kite = new PKite( longSide );
         }
         
         @Override
@@ -165,17 +165,17 @@ public class DartDemo1
             gtx.setColor( new Color( 200, 200, 200 ) );
             gtx.fillRect( 0, 0, width, height );
             
-            dart.render( gtx );
-            Rectangle2D rect    = dart.getRightBounds();
+            kite.render( gtx );
+            Rectangle2D rect    = kite.getRightBounds();
             gtx.setColor( Color.YELLOW );
             gtx.draw( rect );
 
             gtx.dispose();
         }
         
-        public PDart getDart()
+        public PKite getKite()
         {
-            return dart;
+            return kite;
         }
     }
 }

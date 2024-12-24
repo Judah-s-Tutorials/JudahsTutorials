@@ -8,7 +8,9 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -17,7 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class KiteDemo2
+public class SelectDemo1
 {
     /** Unicode for an up-arrow. */
     private static final String         upArrow     = "\u21e7";
@@ -32,25 +34,31 @@ public class KiteDemo2
     /** Unicode for a rotate-right arrow. */
     private static final String         rotateRight = "\u21B7";
     
-    private static double       longSide    = 150;
+    private static double       longSide    = 75;
     private Canvas  canvas;
     
     public static void main(String[] args)
     {
-        KiteDemo2   demo2 = new KiteDemo2();
-        SwingUtilities.invokeLater( () -> demo2.build() );
+        SelectDemo1   demo2 = new SelectDemo1();
+        SwingUtilities.invokeLater( () -> {
+            demo2.build();
+            demo2.canvas.addShape( new PKite( longSide, 0, 0 ) );
+            demo2.canvas.addShape( new PDart( longSide, 100, 0 ) );
+            demo2.canvas.addShape( new PKite( longSide, 0, 100 ) );
+            demo2.canvas.addShape( new PDart( longSide, 100, 100 ) );
+        });
     }
     
     public void build()
     {
-        JFrame  frame   = new JFrame( "Kite Demo" );
+        JFrame  frame   = new JFrame( "Dart Demo" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new JPanel( new BorderLayout() );
         canvas = new Canvas( longSide );
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );
         frame.setContentPane( pane );
-        frame.setLocation( 400, 100 );
+        frame.setLocation( 350, 100 );
         frame.pack();
         
         canvas.addMouseListener(
@@ -60,7 +68,7 @@ public class KiteDemo2
                 {
                     int xco = evt.getX();
                     int yco = evt.getY();
-                    System.out.println( canvas.kite.contains( xco, yco ) );
+                    canvas.select( xco, yco );
                 }
             }
         );
@@ -92,16 +100,16 @@ public class KiteDemo2
         JButton rightButton = new JButton( rightArrow );
         
         upButton.addActionListener( e -> 
-            action( () -> canvas.getKite().move( 0, -8 ) )
+            action( p -> p.move( 0, -4 ) )
         );
         downButton.addActionListener( e -> 
-            action( () -> canvas.getKite().move( 0, 8 ) )
+            action( p -> p.move( 0, 4 ) )
         );
         leftButton.addActionListener( e -> 
-            action( () -> canvas.getKite().move( -8, 0 ) )
+            action( p -> p.move( -4, 0 ) )
         );
         rightButton.addActionListener( e -> 
-            action( () -> canvas.getKite().move( 8, 0 ) )
+            action( p -> p.move( 4,0 ) )
         );
         
         panel.add( new JLabel( "" ) );
@@ -119,12 +127,12 @@ public class KiteDemo2
         JButton leftButton  = new JButton( rotateLeft );
         JButton rightButton = new JButton( rotateRight );
         
-        float   rotateIncr  = (float)(Math.PI / 32);
+        float   rotateIncr  = (float)(Math.PI / 64);
         leftButton.addActionListener( e -> 
-            action( () -> canvas.getKite().rotate( -rotateIncr ) )
+            action( p -> p.rotate( rotateIncr ) )
         );
         rightButton.addActionListener( e -> 
-            action( () -> canvas.getKite().rotate( rotateIncr ) )
+            action( p -> p.rotate( -rotateIncr ) )
         );
         
         panel.add( leftButton );
@@ -132,9 +140,10 @@ public class KiteDemo2
         return panel;
     }
     
-    private void action( Runnable runner )
+    private void action( Consumer<PShape> consumer )
     {
-        runner.run();
+        List<PShape>    list    = canvas.getSelected();
+        list.forEach( consumer );
         canvas.repaint();
     }
 
@@ -142,7 +151,8 @@ public class KiteDemo2
     {
         private static final long serialVersionUID = 1L;
 
-        private final PKite kite;
+        private final   List<PShape>    shapes      = new ArrayList<>();
+        private final   List<PShape>    selected    = new ArrayList<>();
         
         private Graphics2D  gtx;
         private int         width;
@@ -151,7 +161,33 @@ public class KiteDemo2
         public Canvas( double longSide )
         {
             setPreferredSize( new Dimension( 500, 500 ) );
-            kite = new PKite( longSide );
+        }
+        
+        public void addShape( PShape shape )
+        {
+            shapes.add( shape );
+            repaint();
+        }
+        
+        public void removeShape( PShape shape )
+        {
+            shapes.remove( shape );
+            selected.remove( shape );
+            repaint();
+        }
+        
+        public void select( double xco, double yco )
+        {
+            shapes.forEach( s -> {
+                if ( s.contains( xco, yco ))
+                {
+                    if ( selected.contains( s ) )
+                        selected.remove( s );
+                    else
+                        selected.add( s );
+                }
+            });
+            repaint();
         }
         
         @Override
@@ -164,18 +200,15 @@ public class KiteDemo2
             
             gtx.setColor( new Color( 200, 200, 200 ) );
             gtx.fillRect( 0, 0, width, height );
+            shapes.forEach( s -> s.render( gtx ) );
+            selected.forEach( s -> s.highlight( gtx ) );
             
-            kite.render( gtx );
-            Rectangle2D rect    = kite.getBounds();
-            gtx.setColor( Color.YELLOW );
-            gtx.draw( rect );
-
             gtx.dispose();
         }
         
-        public PKite getKite()
+        public List<PShape> getSelected()
         {
-            return kite;
+            return selected;
         }
     }
 }

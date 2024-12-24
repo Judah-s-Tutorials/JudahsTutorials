@@ -8,7 +8,9 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Consumer;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -17,7 +19,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class DartDemo1
+public class DragDemo1
 {
     /** Unicode for an up-arrow. */
     private static final String         upArrow     = "\u21e7";
@@ -32,13 +34,19 @@ public class DartDemo1
     /** Unicode for a rotate-right arrow. */
     private static final String         rotateRight = "\u21B7";
     
-    private static double       longSide    = 150;
-    private Canvas  canvas;
+    private static double       longSide    = 75;
+    private PCanvas canvas;
     
     public static void main(String[] args)
     {
-        DartDemo1   demo2 = new DartDemo1();
-        SwingUtilities.invokeLater( () -> demo2.build() );
+        DragDemo1   demo2 = new DragDemo1();
+        SwingUtilities.invokeLater( () -> {
+            demo2.build();
+            demo2.canvas.addShape( new PKite( longSide, 0, 0 ) );
+            demo2.canvas.addShape( new PDart( longSide, 100, 0 ) );
+            demo2.canvas.addShape( new PKite( longSide, 0, 100 ) );
+            demo2.canvas.addShape( new PDart( longSide, 100, 100 ) );
+        });
     }
     
     public void build()
@@ -46,24 +54,12 @@ public class DartDemo1
         JFrame  frame   = new JFrame( "Dart Demo" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new JPanel( new BorderLayout() );
-        canvas = new Canvas( longSide );
+        canvas = new PCanvas();
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );
         frame.setContentPane( pane );
         frame.setLocation( 350, 100 );
         frame.pack();
-        
-        canvas.addMouseListener(
-            new MouseAdapter() {
-                @Override
-                public void mousePressed( MouseEvent evt )
-                {
-                    int xco = evt.getX();
-                    int yco = evt.getY();
-                    System.out.println( canvas.dart.contains( xco, yco ) );
-                }
-            }
-        );
         
         frame.setVisible( true );
     }
@@ -92,16 +88,16 @@ public class DartDemo1
         JButton rightButton = new JButton( rightArrow );
         
         upButton.addActionListener( e -> 
-            action( () -> canvas.getDart().move( 0, -8 ) )
+            action( p -> p.move( 0, -4 ) )
         );
         downButton.addActionListener( e -> 
-            action( () -> canvas.getDart().move( 0, 8 ) )
+            action( p -> p.move( 0, 4 ) )
         );
         leftButton.addActionListener( e -> 
-            action( () -> canvas.getDart().move( -8, 0 ) )
+            action( p -> p.move( -4, 0 ) )
         );
         rightButton.addActionListener( e -> 
-            action( () -> canvas.getDart().move( 8, 0 ) )
+            action( p -> p.move( 4,0 ) )
         );
         
         panel.add( new JLabel( "" ) );
@@ -119,12 +115,11 @@ public class DartDemo1
         JButton leftButton  = new JButton( rotateLeft );
         JButton rightButton = new JButton( rotateRight );
         
-        float   rotateIncr  = (float)(Math.PI / 32);
         leftButton.addActionListener( e -> 
-            action( () -> canvas.getDart().rotate( -rotateIncr ) )
+            action( p -> p.rotate( PShape.D36 ) )
         );
         rightButton.addActionListener( e -> 
-            action( () -> canvas.getDart().rotate( rotateIncr ) )
+            action( p -> p.rotate( -PShape.D36 ) )
         );
         
         panel.add( leftButton );
@@ -132,50 +127,10 @@ public class DartDemo1
         return panel;
     }
     
-    private void action( Runnable runner )
+    private void action( Consumer<PShape> consumer )
     {
-        runner.run();
+        List<PShape>    list    = canvas.getSelected();
+        list.forEach( consumer );
         canvas.repaint();
-    }
-
-    private static class Canvas extends JPanel
-    {
-        private static final long serialVersionUID = 1L;
-
-        private final PDart dart;
-        
-        private Graphics2D  gtx;
-        private int         width;
-        private int         height;
-        
-        public Canvas( double longSide )
-        {
-            setPreferredSize( new Dimension( 500, 500 ) );
-            dart = new PDart( longSide );
-        }
-        
-        @Override
-        public void paintComponent( Graphics graphics )
-        {
-            super.paintComponent( graphics );
-            gtx = (Graphics2D)graphics.create();
-            width = getWidth();
-            height = getHeight();
-            
-            gtx.setColor( new Color( 200, 200, 200 ) );
-            gtx.fillRect( 0, 0, width, height );
-            
-            dart.render( gtx );
-            Rectangle2D rect    = dart.getRightBounds();
-            gtx.setColor( Color.YELLOW );
-            gtx.draw( rect );
-
-            gtx.dispose();
-        }
-        
-        public PDart getDart()
-        {
-            return dart;
-        }
     }
 }
