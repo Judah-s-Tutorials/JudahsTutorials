@@ -1,5 +1,6 @@
 package com.gmail.johnstraub1954.penrose;
 
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 
 public class PKite extends PShape
@@ -30,6 +31,19 @@ public class PKite extends PShape
         path.lineTo( rightXOff, midYOff );
         path.lineTo( midXOff, bottomYOff );
         path.lineTo( 0, midYOff );
+        
+        double      diam    = getDotDiam();
+        double      half    = diam / 2;
+        Ellipse2D   dot = 
+            new Ellipse2D.Double( diam, midYOff - half, diam, diam );
+        path.append( dot, false );
+        dot = new Ellipse2D.Double( 
+            rightXOff - (diam + half), 
+            midYOff - half, 
+            diam, 
+            diam
+        );
+        path.append( dot, false );
         return path;
     }
 }

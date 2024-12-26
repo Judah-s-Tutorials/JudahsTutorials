@@ -1,14 +1,9 @@
 package com.gmail.johnstraub1954.penrose;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
+import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -19,7 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class DragDemo1
+public class PShapeDemo1
 {
     /** Unicode for an up-arrow. */
     private static final String         upArrow     = "\u21e7";
@@ -34,12 +29,12 @@ public class DragDemo1
     /** Unicode for a rotate-right arrow. */
     private static final String         rotateRight = "\u21B7";
     
-    private static double       longSide    = 75;
+    private static double       longSide    = 50;
     private PCanvas canvas;
     
     public static void main(String[] args)
     {
-        DragDemo1   demo2 = new DragDemo1();
+        PShapeDemo1   demo2 = new PShapeDemo1();
         SwingUtilities.invokeLater( () -> {
             demo2.build();
             demo2.canvas.addShape( new PKite( longSide, 0, 0 ) );
@@ -58,6 +53,7 @@ public class DragDemo1
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );
         frame.setContentPane( pane );
+        
         frame.setLocation( 350, 100 );
         frame.pack();
         
@@ -70,7 +66,7 @@ public class DragDemo1
         JPanel  panel   = new JPanel();
         panel.add( getTranslatePanel() );
         panel.add( Box.createRigidArea( rigidDim ) );
-        panel.add( getRotatePanel() );
+        panel.add( getAddRotatePanel() );
         panel.add( Box.createRigidArea( rigidDim ) );
         
         JButton exit    = new JButton( "Exit" );
@@ -109,21 +105,31 @@ public class DragDemo1
         return panel;
     }
     
-    private JPanel getRotatePanel()
+    private JPanel getAddRotatePanel()
     {
-        JPanel  panel       = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
+        JPanel  panel       = new JPanel( new GridLayout( 2, 2 ) );
         JButton leftButton  = new JButton( rotateLeft );
         JButton rightButton = new JButton( rotateRight );
+        JButton kiteButton  = new JButton( "Kite" );
+        JButton dartButton  = new JButton( "Dart" );
         
         leftButton.addActionListener( e -> 
-            action( p -> p.rotate( PShape.D36 ) )
+            action( p -> p.rotate( -PShape.D18 ) )
         );
         rightButton.addActionListener( e -> 
-            action( p -> p.rotate( -PShape.D36 ) )
+            action( p -> p.rotate(  PShape.D18 ) )
+        );
+        kiteButton.addActionListener( e -> 
+            addShape( new PKite( longSide, 0, 0 ) ) 
+        );
+        dartButton.addActionListener( e -> 
+            addShape( new PDart( longSide, 0, 0 ) ) 
         );
         
         panel.add( leftButton );
         panel.add( rightButton );
+        panel.add( kiteButton );
+        panel.add( dartButton );
         return panel;
     }
     
@@ -131,6 +137,20 @@ public class DragDemo1
     {
         List<PShape>    list    = canvas.getSelected();
         list.forEach( consumer );
+        canvas.repaint();
+    }
+    
+    private void addShape( PShape shape )
+    {
+        int         width   = canvas.getWidth();
+        int         height  = canvas.getHeight();
+        Rectangle2D rect    = shape.getBounds();
+        double      xco     = width / 2 - rect.getWidth() / 2;
+        double      yco     = height / 2 - rect.getHeight() / 2;
+        canvas.addShape( shape );
+        shape.moveTo( xco, yco );
+        canvas.deselect();
+        canvas.select( shape );
         canvas.repaint();
     }
 }

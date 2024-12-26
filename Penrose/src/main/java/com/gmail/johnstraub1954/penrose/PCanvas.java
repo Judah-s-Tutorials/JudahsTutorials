@@ -4,6 +4,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
@@ -33,22 +36,39 @@ public class PCanvas extends JPanel
     public PCanvas( int width, int height )
     {
         setPreferredSize( new Dimension( width, height ) );
-        MListener   listener    = new MListener();
-        addMouseListener( listener );
-        addMouseMotionListener( listener );
+        setFocusable( true );
+        MListener   mListener   = new MListener();
+        KListener   kListener   = new KListener();
+        addMouseListener( mListener );
+        addMouseMotionListener( mListener );
+        addKeyListener( kListener );
     }
     
     public void addShape( PShape shape )
     {
         shapes.add( shape );
-        repaint();
     }
     
     public void removeShape( PShape shape )
     {
         shapes.remove( shape );
         selected.remove( shape );
-        repaint();
+    }
+    
+    public void deselect()
+    {
+        selected.clear();
+    }
+    
+    public void deselect( PShape shape )
+    {
+        selected.remove( shape );
+    }
+    
+    public void select( PShape shape )
+    {
+        if ( !selected.contains( shape ) )
+            selected.add( shape );
     }
     
     public void select( double xco, double yco )
@@ -73,6 +93,10 @@ public class PCanvas extends JPanel
         width = getWidth();
         height = getHeight();
         
+        gtx.setRenderingHint( 
+            RenderingHints.KEY_ANTIALIASING, 
+            RenderingHints.VALUE_ANTIALIAS_ON
+        );
         gtx.setColor( new Color( 200, 200, 200 ) );
         gtx.fillRect( 0, 0, width, height );
         shapes.forEach( s -> s.render( gtx ) );
@@ -85,12 +109,72 @@ public class PCanvas extends JPanel
     {
         return selected;
     }
+    
+    public void rotate( double radians )
+    {
+        selected.forEach( s -> s.rotate( radians) );
+    }
+    
+    public void move( double deltaX, double deltaY )
+    {
+        selected.forEach( s -> s.move( deltaX, deltaY ) );
+    }
+    
+    private class KListener extends KeyAdapter
+    {
+        @Override
+        public void keyPressed( KeyEvent evt )
+        {
+            int keyCode = evt.getKeyCode();
+            if ( evt.isControlDown() )
+            {
+                double  angle   = 
+                    evt.isShiftDown() ? PShape.D01 : PShape.D18;
+                if ( evt.isShiftDown() )
+                    angle = PShape.D01;
+                switch ( keyCode )
+                {
+                case KeyEvent.VK_LEFT:
+                    rotate( -angle );
+                    repaint();
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    rotate( angle );
+                    repaint();
+                    break;
+                }
+            }
+            else
+            {
+                switch ( keyCode )
+                {
+                case KeyEvent.VK_LEFT:
+                    move( -1d, 0d );
+                    repaint();
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    move( 1d, 0d );
+                    repaint();
+                    break;
+                case KeyEvent.VK_UP:
+                    move( 0d, -1d );
+                    repaint();
+                    break;
+                case KeyEvent.VK_DOWN:
+                    move( 0d, 1d );
+                    repaint();
+                    break;
+                }
+            }
+        }
+    }
 
     private class MListener extends MouseAdapter
     {
         @Override
         public void mousePressed( MouseEvent evt )
         {
+            requestFocusInWindow();
             if ( evt.getButton() == 1 )
             {
                 int xco = evt.getX();
@@ -113,6 +197,8 @@ public class PCanvas extends JPanel
         {
             if ( evt.getButton() == 1 )
             {
+                if ( !evt.isShiftDown() )
+                    selected.clear();
                 int xco = evt.getX();
                 int yco = evt.getY();
                 select( xco, yco );

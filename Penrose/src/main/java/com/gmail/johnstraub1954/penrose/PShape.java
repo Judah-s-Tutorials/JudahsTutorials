@@ -11,10 +11,14 @@ import java.awt.geom.Rectangle2D;
 
 public abstract class PShape
 {
+    public static final double  D18     = 18 * Math.PI / 180;
     public static final double  D36     = 36 * Math.PI / 180;
     public static final double  D72     = 72 * Math.PI / 180;
     public static final double  D108    = 108 * Math.PI / 180;
+    public static final double  D01     = Math.PI / 180;
     public static final double  TWO_PI  = 2 * Math.PI;
+    
+    private static double       dotDiam = 4;
     
     private final Path2D        path;
     private final Rectangle2D   rightBounds;
@@ -25,7 +29,7 @@ public abstract class PShape
     private Color   drawColor       = Color.BLACK;
     private Color   fillColor       = Color.WHITE;
     private Color   highlightColor  = Color.CYAN;
-    private int     highlightWidth  = 3;
+    private int     highlightWidth  = 1;
     private Shape   workShape;
     
     public abstract Path2D initPath( double longSide );
@@ -122,6 +126,56 @@ public abstract class PShape
         gtx.setColor( Color.RED );
         gtx.drawOval( (int)xcoPin, (int)ycoPin, 3, 3 );
         gtx.setColor( save );
+    }
+    
+    public Color getDrawColor()
+    {
+        return drawColor;
+    }
+
+    public void setDrawColor(Color drawColor)
+    {
+        this.drawColor = drawColor;
+    }
+
+    public Color getFillColor()
+    {
+        return fillColor;
+    }
+
+    public void setFillColor(Color fillColor)
+    {
+        this.fillColor = fillColor;
+    }
+
+    public Color getHighlightColor()
+    {
+        return highlightColor;
+    }
+
+    public void setHighlightColor(Color highlightColor)
+    {
+        this.highlightColor = highlightColor;
+    }
+
+    public int getHighlightWidth()
+    {
+        return highlightWidth;
+    }
+
+    public void setHighlightWidth(int highlightWidth)
+    {
+        this.highlightWidth = highlightWidth;
+    }
+
+    public static double getDotDiam()
+    {
+        return dotDiam;
+    }
+    
+    public static void setDotDiam( double diam )
+    {
+        dotDiam = diam;
     }
     
     private void computePath()
