@@ -1,13 +1,17 @@
 package com.gmail.johnstraub1954.penrose;
 
+import java.awt.Color;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.Point2D;
 
 public class PKite extends PShape
 {
+    private static final long serialVersionUID = 6004387132704487172L;
+    
     public PKite( double longSide )
     {
-        super( longSide );
+        this( longSide, 0, 0 );
     }
     
     public PKite( double longSide, double xco, double yco )
@@ -45,5 +49,23 @@ public class PKite extends PShape
         );
         path.append( dot, false );
         return path;
+    }
+    
+    public Point2D[] getVertices( double longSide )
+    {
+        double  midXOff     = longSide * Math.cos( D36 );
+        double  midYOff     = longSide * Math.sin( D36 );
+        double  rightXOff   = longSide;
+        double  bottomYOff  = 2 * midYOff;
+        
+        Point2D[]   vertices    = 
+        {
+            new Point2D.Double( 0, midYOff ),
+            new Point2D.Double( midXOff, 0 ),
+            new Point2D.Double( midXOff, 0 ),
+            new Point2D.Double( rightXOff, midYOff ),
+            new Point2D.Double( midXOff, bottomYOff )
+        };
+        return vertices;
     }
 }

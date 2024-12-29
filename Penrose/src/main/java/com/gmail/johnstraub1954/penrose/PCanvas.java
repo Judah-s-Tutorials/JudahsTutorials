@@ -85,6 +85,12 @@ public class PCanvas extends JPanel
         repaint();
     }
     
+    public void delete( PShape shape )
+    {
+        selected.remove( shape );
+        shapes.remove( shape );
+    }
+    
     @Override
     public void paintComponent( Graphics graphics )
     {
@@ -108,6 +114,11 @@ public class PCanvas extends JPanel
     public List<PShape> getSelected()
     {
         return selected;
+    }
+    
+    public List<PShape> getShapes()
+    {
+        return shapes;
     }
     
     public void rotate( double radians )
@@ -197,7 +208,9 @@ public class PCanvas extends JPanel
         {
             if ( evt.getButton() == 1 )
             {
-                if ( !evt.isShiftDown() )
+                if ( evt.isControlDown() )
+                    snap( evt );
+                else if ( !evt.isShiftDown() )
                     selected.clear();
                 int xco = evt.getX();
                 int yco = evt.getY();
@@ -216,6 +229,20 @@ public class PCanvas extends JPanel
                 double  deltaY  = newYco - dragFrom.getY();
                 selected.forEach( s -> s.move( deltaX, deltaY ) );
                 dragFrom.setLocation( newXco, newYco );
+                repaint();
+            }
+        }
+        
+        private void snap( MouseEvent evt )
+        {
+            int xco = evt.getX();
+            int yco = evt.getY();
+            select( xco, yco );
+            if ( selected.size() == 2 )
+            {
+                PShape  toShape     = selected.get( 1 );
+                PShape  fromShape   = selected.get( 0 );
+                fromShape.snapTo( toShape );
                 repaint();
             }
         }

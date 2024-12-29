@@ -1,16 +1,22 @@
 package com.gmail.johnstraub1954.penrose;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 import java.util.function.Consumer;
 
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JColorChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -34,7 +40,12 @@ public class PShapeDemo1
     
     public static void main(String[] args)
     {
-        PShapeDemo1   demo2 = new PShapeDemo1();
+        PShapeDemo1 demo2   = new PShapeDemo1();
+        String      clazz   = PKite.class.getSimpleName();
+        PShape.setDefaultFillColor( clazz, new Color( 0x900C3F ) );
+        clazz = PDart.class.getSimpleName();
+        PShape.setDefaultFillColor( clazz, new Color( 0x663399 ) );
+
         SwingUtilities.invokeLater( () -> {
             demo2.build();
             demo2.canvas.addShape( new PKite( longSide, 0, 0 ) );
@@ -52,6 +63,7 @@ public class PShapeDemo1
         canvas = new PCanvas();
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );
+        pane.add( new PMenuBar(), BorderLayout.NORTH );
         frame.setContentPane( pane );
         
         frame.setLocation( 350, 100 );
@@ -69,8 +81,14 @@ public class PShapeDemo1
         panel.add( getAddRotatePanel() );
         panel.add( Box.createRigidArea( rigidDim ) );
         
+        JButton select  = new JButton( "<html>Select<br>All</html>" );
         JButton exit    = new JButton( "Exit" );
         exit.addActionListener( e -> System.exit( 0 ) );
+        select.addActionListener( e -> {
+            canvas.getShapes().forEach( canvas::select );
+            canvas.repaint();
+        });
+        panel.add( select );
         panel.add( exit );
         return panel;
     }
@@ -152,5 +170,88 @@ public class PShapeDemo1
         canvas.deselect();
         canvas.select( shape );
         canvas.repaint();
+    }
+
+    private class PMenuBar extends JMenuBar
+    {
+        private static final long serialVersionUID = -6941152071574388193L;
+
+        public PMenuBar()
+        {
+            add( getFileMenu() );
+            add( getEditMenu() );
+        }
+        
+        private JMenu getFileMenu()
+        {
+            JMenu   menu    = new JMenu( "File" );
+            menu.setMnemonic( KeyEvent.VK_F );
+            
+            JMenuItem   save    = new JMenuItem( "Save", KeyEvent.VK_S );
+            JMenuItem   open    = new JMenuItem( "Open", KeyEvent.VK_O );
+            menu.add( save );
+            menu.add( open );
+            
+            return menu;
+        }
+        
+        private JMenu getEditMenu()
+        {
+            JMenu   menu    = new JMenu( "Edit" );
+            menu.setMnemonic( KeyEvent.VK_E );
+            
+            JMenuItem   select      = 
+                new JMenuItem( "Select All", KeyEvent.VK_A );
+            JMenuItem   deselect    = 
+                new JMenuItem( "Deselect All" );
+            JMenuItem   delete      = new JMenuItem( "Delete Selected" );
+            JMenuItem   color       = new JMenuItem( "Color" );
+            JMenuItem   edgeColor   = new JMenuItem( "Edge Color" );
+            JMenuItem   kiteColor   = new JMenuItem( "Kite Color" );
+            JMenuItem   kiteEColor  = new JMenuItem( "Kite Edge Color" );
+            JMenuItem   dartColor   = new JMenuItem( "Dart Color" );
+            JMenuItem   dartEColor  = new JMenuItem( "Dart Edge Color" );
+            
+            select.addActionListener( e -> {
+                canvas.getShapes().forEach( canvas::select );
+                canvas.repaint();
+            });
+            
+            deselect.addActionListener( e -> {
+                canvas.getSelected().forEach( canvas::deselect );
+                canvas.repaint();
+            });
+            
+            delete.addActionListener( e -> {
+                List<PShape>    selected    = canvas.getSelected();
+                while ( !selected.isEmpty() )
+                    canvas.delete( selected.get( 0 ) );
+                canvas.repaint();
+            });
+            
+            color.addActionListener( e -> {
+                String  title       = "Choose a Fill Color";
+                Color   shapeColor  = 
+                    JColorChooser.showDialog( null, title, null );
+                if ( shapeColor != null )
+                {
+                    canvas.getSelected()
+                        .forEach( s -> s.setColor( shapeColor ) );
+                    canvas.repaint();
+                }
+            });
+            
+            menu.add( select );
+            menu.add( deselect );
+            menu.add( delete );
+            menu.add( color );
+            menu.add( edgeColor );
+            menu.add( kiteColor );
+            menu.add( kiteEColor );
+            menu.add( dartColor );
+            menu.add( dartEColor );
+            
+            return menu;
+        }
     }
 }
