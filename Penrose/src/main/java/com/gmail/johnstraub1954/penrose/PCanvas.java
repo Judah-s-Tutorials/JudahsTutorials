@@ -10,23 +10,32 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JPanel;
 
-public class PCanvas extends JPanel
+public class PCanvas extends JPanel implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
     private final   List<PShape>    shapes      = new ArrayList<>();
     private final   List<PShape>    selected    = new ArrayList<>();
     
-    private Point2D dragFrom    = null;
+    /** Start point of a drag operation. */
+    private Point2D     dragFrom    = null;
+    /** Start point of a drag operation. */
+    private Point2D     dragTo      = null;
+    /** Rectangle describing a rubber band operation. */
+    private Rectangle2D rubberBand  = new Rectangle2D.Double();
     
-    private Graphics2D  gtx;
-    private int         width;
-    private int         height;
+    private transient Graphics2D  gtx;
+    private transient int         width;
+    private transient int         height;
     
     public PCanvas()
     {
@@ -108,6 +117,13 @@ public class PCanvas extends JPanel
         shapes.forEach( s -> s.render( gtx ) );
         selected.forEach( s -> s.highlight( gtx ) );
         
+        if ( dragFrom != null && dragTo != null )
+        {
+            gtx.setColor( Color.BLACK );
+            gtx.draw( rubberBand );
+        }
+
+        this.grabFocus();
         gtx.dispose();
     }
     
@@ -179,9 +195,22 @@ public class PCanvas extends JPanel
             }
         }
     }
-
-    private class MListener extends MouseAdapter
+    
+    private void readObject(ObjectInputStream in) 
+        throws IOException, ClassNotFoundException
     {
+        in.defaultReadObject();
+        MListener   mListener   = new MListener();
+        KListener   kListener   = new KListener();
+        addMouseListener( mListener );
+        addMouseMotionListener( mListener );
+        addKeyListener( kListener );
+    }
+
+    private class MListener extends MouseAdapter implements Serializable
+    {
+        private static final long serialVersionUID = -8780588853585090448L;
+
         @Override
         public void mousePressed( MouseEvent evt )
         {
@@ -197,9 +226,38 @@ public class PCanvas extends JPanel
         @Override
         public void mouseReleased( MouseEvent evt )
         {
-            if ( evt.getButton() == 1 )
+            System.out.println( "released" );
+            if ( evt.getButton() == 1 && dragFrom != null )
             {
+                // Determine if this is the completion of a drag operation.
+                // If drag is in progress and the selected list is
+                // is non-empty, the drag was performing a move operation,
+                // which is handled entirely by the mouseDragged method.
+                // If the selected list is empty, the drag was a 
+                // rubber-banding operation which must no be completed by
+                // selecting all shapes within the rubber band.
+                if ( selected.isEmpty() )
+                {
+                    double      startX  = dragFrom.getX();
+                    double      startY  = dragFrom.getY();
+                    int         endX    = evt.getX();
+                    int         endY    = evt.getY();
+                    double      width   = endX - dragFrom.getX();
+                    double      height  = endY - dragFrom.getY();
+                    Rectangle2D rect    = 
+                        new Rectangle2D.Double( 
+                            startX,
+                            startY,
+                            width,
+                            height
+                        );
+                    shapes.stream()
+                        .filter( s -> s.intersects( rect ) )
+                        .forEach( selected::add );
+                }
                 dragFrom = null;
+                dragTo = null;
+                repaint();
             }
         }
         
@@ -227,8 +285,22 @@ public class PCanvas extends JPanel
                 double  newYco  = evt.getY();
                 double  deltaX  = newXco - dragFrom.getX();
                 double  deltaY  = newYco - dragFrom.getY();
-                selected.forEach( s -> s.move( deltaX, deltaY ) );
-                dragFrom.setLocation( newXco, newYco );
+                if ( !selected.isEmpty() )
+                {
+                    selected.forEach( s -> s.move( deltaX, deltaY ) );
+                    dragFrom.setLocation( newXco, newYco );
+                }
+                else
+                {
+                    double      startX  = dragFrom.getX();
+                    double      startY  = dragFrom.getY();
+                    int         endX    = evt.getX();
+                    int         endY    = evt.getY();
+                    double      width   = endX - dragFrom.getX();
+                    double      height  = endY - dragFrom.getY();
+                    dragTo = new Point2D.Double( endX, endY );
+                    rubberBand.setRect( startX, startY, width, height ); 
+                }
                 repaint();
             }
         }

@@ -6,17 +6,25 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.List;
 import java.util.function.Consumer;
 
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
@@ -36,6 +44,9 @@ public class PShapeDemo1
     private static final String         rotateRight = "\u21B7";
     
     private static double       longSide    = 50;
+    private final JFileChooser  chooser;
+    private static final String chooserTitle    = "Choose File";
+    private JFrame        frame;
     private PCanvas canvas;
     
     public static void main(String[] args)
@@ -55,9 +66,17 @@ public class PShapeDemo1
         });
     }
     
+    public PShapeDemo1()
+    {
+        String  userDir = System.getProperty( "user.dir" );
+        File    baseDir = new File( userDir );
+        chooser = new JFileChooser( baseDir );
+        chooser.setDialogTitle( chooserTitle );
+    }
+    
     public void build()
     {
-        JFrame  frame   = new JFrame( "Dart Demo" );
+        frame   = new JFrame( "Dart Demo" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new JPanel( new BorderLayout() );
         canvas = new PCanvas();
@@ -171,6 +190,68 @@ public class PShapeDemo1
         canvas.select( shape );
         canvas.repaint();
     }
+    
+    private void save()
+    {
+        int choice  = chooser.showSaveDialog( canvas );
+        if ( choice == JFileChooser.APPROVE_OPTION )
+        {
+            File    file    = chooser.getSelectedFile();
+            try ( 
+                FileOutputStream fileStream = new FileOutputStream( file );
+                ObjectOutputStream outStream = 
+                    new ObjectOutputStream( fileStream );
+            )
+            {
+                outStream.writeObject( canvas );
+            }
+            catch ( IOException exc )
+            {
+                exc.printStackTrace();
+                JOptionPane.showMessageDialog(
+                    canvas, 
+                    "Save Failed", 
+                    "IO Error", 
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    }
+    
+    private void open()
+    {
+        int choice  = chooser.showSaveDialog( canvas );
+        if ( choice == JFileChooser.APPROVE_OPTION )
+        {
+            File    file    = chooser.getSelectedFile();
+            try ( 
+                FileInputStream fileStream = new FileInputStream( file );
+                ObjectInputStream inStream = 
+                    new ObjectInputStream( fileStream );
+            )
+            {
+                Object input    = inStream.readObject();
+                if ( !(input instanceof PCanvas ) )
+                    throw new ClassNotFoundException( "Class not found" );
+                JPanel  pane    = (JPanel)frame.getContentPane();
+                pane.remove( canvas );
+                canvas = (PCanvas)input;
+                pane.add( canvas, BorderLayout.CENTER );
+                frame.pack();
+                canvas.repaint();
+            }
+            catch ( ClassNotFoundException | IOException exc )
+            {
+                exc.printStackTrace();
+                JOptionPane.showMessageDialog(
+                    canvas, 
+                    "Save Failed", 
+                    "IO Error", 
+                    JOptionPane.ERROR_MESSAGE
+                );
+            }
+        }
+    }
 
     private class PMenuBar extends JMenuBar
     {
@@ -191,6 +272,9 @@ public class PShapeDemo1
             JMenuItem   open    = new JMenuItem( "Open", KeyEvent.VK_O );
             menu.add( save );
             menu.add( open );
+            
+            save.addActionListener( e -> save() );
+            open.addActionListener( e -> open() );
             
             return menu;
         }

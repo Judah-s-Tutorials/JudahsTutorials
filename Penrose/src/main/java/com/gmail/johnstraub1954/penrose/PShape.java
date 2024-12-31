@@ -63,6 +63,12 @@ public abstract class PShape implements Serializable
         return workShape.contains( xco, yco );
     }
     
+    public boolean intersects( Rectangle2D rect )
+    {
+        boolean result  = workShape.intersects( rect );
+        return result;
+    }
+    
     public void draw( Graphics2D gtx )
     {
         Color   save    = gtx.getColor();
