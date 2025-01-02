@@ -226,7 +226,6 @@ public class PCanvas extends JPanel implements Serializable
         @Override
         public void mouseReleased( MouseEvent evt )
         {
-            System.out.println( "released" );
             if ( evt.getButton() == 1 && dragFrom != null )
             {
                 // Determine if this is the completion of a drag operation.

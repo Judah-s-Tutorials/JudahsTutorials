@@ -188,7 +188,11 @@ public class ProfileEditorDialogTestGUI extends ProfileEditorTestBase
      */
     public boolean isVisible()
     {
-        return testDialog.isVisible();
+        boolean[]   isVisible   = new boolean[1];
+        GUIUtils.schedEDTAndWait( () -> 
+            isVisible[0] = testDialog.isVisible()
+        );
+        return isVisible[0];
     }
     
     /**
