@@ -93,7 +93,11 @@ public class PropertiesFileParser
                 .filter( Predicate.not( s -> s.startsWith( "#" ) ) )
                 .map( s -> s.split( "=" ) )
                 .filter( a -> a.length == 2 )
-                .map( a -> {a[0]=a[0].trim(); a[1]=a[1].trim(); return a;} )
+                .map( a -> {
+                    a[0]=a[0].trim(); 
+                    a[1]=a[1].trim(); 
+                    return a;
+                })
                 .collect( Collectors.toMap( a -> a[0], a -> a[1] ) )
         );
         return props;

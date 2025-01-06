@@ -87,10 +87,10 @@ public class ShowDogGenerator
         List<ShowDog>   list    =
             Stream.generate( ShowDog::new )
                 .limit( maxCount )
-                .map( s -> s.putName( names[randy.nextInt( numNames )] ) )
-                .map( s -> s.putBreed( breeds[randy.nextInt( numBreeds )] ) )
-                .map( s -> s.putAge( randy.nextInt( ageRange ) + minAge ) )
-                .map( s -> s.putOwnerID( randy.nextInt( maxOwnerID + 1 ) ) )
+                .peek( s -> s.putName( names[randy.nextInt( numNames )] ) )
+                .peek( s -> s.putBreed( breeds[randy.nextInt( numBreeds )] ) )
+                .peek( s -> s.putAge( randy.nextInt( ageRange ) + minAge ) )
+                .peek( s -> s.putOwnerID( randy.nextInt( maxOwnerID + 1 ) ) )
                 .collect( Collectors.toList() );
         return list;
     }
