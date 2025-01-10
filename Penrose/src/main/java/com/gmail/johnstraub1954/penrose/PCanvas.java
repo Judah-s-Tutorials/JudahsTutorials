@@ -239,10 +239,24 @@ public class PCanvas extends JPanel implements Serializable
                 {
                     double      startX  = dragFrom.getX();
                     double      startY  = dragFrom.getY();
-                    int         endX    = evt.getX();
-                    int         endY    = evt.getY();
+                    double      endX    = evt.getX();
+                    double      endY    = evt.getY();
                     double      width   = endX - dragFrom.getX();
                     double      height  = endY - dragFrom.getY();
+                    if ( width < 0 )
+                    {
+                        double  temp    = startX;
+                        startX = endX;
+                        endX = temp;
+                        width = -width;
+                    }
+                    if ( height < 0 )
+                    {
+                        double  temp    = startY;
+                        startY = endY;
+                        endY = temp;
+                        height = - height;
+                    }
                     Rectangle2D rect    = 
                         new Rectangle2D.Double( 
                             startX,
@@ -293,10 +307,24 @@ public class PCanvas extends JPanel implements Serializable
                 {
                     double      startX  = dragFrom.getX();
                     double      startY  = dragFrom.getY();
-                    int         endX    = evt.getX();
-                    int         endY    = evt.getY();
+                    double      endX    = evt.getX();
+                    double      endY    = evt.getY();
                     double      width   = endX - dragFrom.getX();
                     double      height  = endY - dragFrom.getY();
+                    if ( width < 0 )
+                    {
+                        double  temp    = startX;
+                        startX = endX;
+                        endX = temp;
+                        width = -width;
+                    }
+                    if ( height < 0 )
+                    {
+                        double  temp    = startY;
+                        startY = endY;
+                        endY = temp;
+                        height = - height;
+                    }
                     dragTo = new Point2D.Double( endX, endY );
                     rubberBand.setRect( startX, startY, width, height ); 
                 }
