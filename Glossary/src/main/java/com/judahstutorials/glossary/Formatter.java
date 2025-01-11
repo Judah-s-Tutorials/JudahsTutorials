@@ -1,9 +1,10 @@
 package com.judahstutorials.glossary;
 
-import static com.judahstutorials.glossary.GConstants.*;
+import static com.judahstutorials.glossary.GConstants.DEFINITION;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,7 +32,7 @@ public class Formatter
     
     public Formatter( String input ) throws FormatException
     {
-        File                    xmlFile     = new File( input );
+        File    xmlFile     = new File( input );
         if ( !xmlFile.exists() )
         {
             String  msg     = "\"" + input + "\": doesn't exist";
@@ -66,12 +67,34 @@ public class Formatter
         NodeList    defs        = 
             rootElement.getElementsByTagName( DEFINITION );
         int         numNodes    = defs.getLength();
-        System.out.println( numNodes + " definitions found" );
+        StringBuilder   bldr    = new StringBuilder();
+        String          title   = Utils.getTitle( rootElement );
+        bldr.append( Encode.getHead( title ) );
         for ( int inx = 0 ; inx < numNodes ; ++inx )
         {
             Element     ele     = (Element)defs.item( inx );
             Definition  def     = new Definition( ele );
-            System.out.println( def );
+            String      html    = Encode.getDefinition( def );
+            bldr.append( html );
+        }
+        bldr.append( Encode.getTail() );
+        writeTemp( bldr );
+        System.out.println( bldr );
+    }
+    
+    private void writeTemp( StringBuilder bldr )
+    {
+        File    file    = new File( "output/temp.html" );
+        try ( 
+            PrintWriter writer = new PrintWriter( file );
+        )
+        {
+            writer.print( bldr.toString() );
+        }
+        catch ( IOException exc )
+        {
+            String  msg = "Failed to write " + file.getName();
+            throw new FormatException( msg, exc );
         }
     }
 }

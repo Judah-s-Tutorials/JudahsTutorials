@@ -1,0 +1,42 @@
+<p class="nospacing">
+General usage: 
+<ol type='a'>
+    <li>
+		a collection of properties and/or methods 
+		related to a common theme or utility.
+    </li>
+    <li>
+        Often, a collection of related properties 
+        and the means to retrieve, modify, or utilize them, 
+        typically provided via methods.
+        For example:
+        <div class="example" style="max-width:10em;">
+            <p class="nospacing">
+                class: Rectangle
+            </p>
+            <p class="nospacing">
+                properties
+            </p>
+            <ul>
+                <li>position</li>
+                <li>width</li>
+                <li>height</li>
+                <li>perimeter</li>
+                <li>area</li>
+            </ul>
+            <p class="nospacing">
+                methods
+            </p>
+            <ul>
+                <li>get-position</li>
+                <li>set-position</li>
+                <li>get-width</li>
+                <li>set-width</li>
+                <li>get-height</li>
+                <li>set-height</li>
+                <li>get-perimeter</li>
+                <li>get-area</li>
+            </ul>
+        </div>
+    </li>
+</ol>

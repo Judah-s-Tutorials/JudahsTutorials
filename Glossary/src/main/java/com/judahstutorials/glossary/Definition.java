@@ -1,9 +1,15 @@
 package com.judahstutorials.glossary;
 
-import static com.judahstutorials.glossary.GConstants.*;
+import static com.judahstutorials.glossary.GConstants.DESCRIPTION;
+import static com.judahstutorials.glossary.GConstants.SEE_ALSO;
+import static com.judahstutorials.glossary.GConstants.SEQ_NUM;
 import static com.judahstutorials.glossary.GConstants.SLUG;
 import static com.judahstutorials.glossary.GConstants.TERM;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,10 +19,12 @@ import org.w3c.dom.NodeList;
 
 public class Definition
 {
-    private final String            term;
-    private final Integer           seqNum;
-    private final String            slug;
-    private final String            description;
+    private static final String endl    = System.lineSeparator();
+    
+    private final String        term;
+    private final Integer       seqNum;
+    private final String        slug;
+    private final String        description;
     private final List<String>  seeAlso     = new ArrayList<>();
 
     public Definition( Element def )
@@ -28,6 +36,34 @@ public class Definition
         getSeeAlso( def );
     }
     
+    public String getTerm()
+    {
+        String  term    = this.term;
+        if ( seqNum != null )
+            term += "(" + seqNum + ")";
+        return term;
+    }
+
+    public Integer getSeqNum()
+    {
+        return seqNum;
+    }
+
+    public String getSlug()
+    {
+        return slug;
+    }
+
+    public String getDescription()
+    {
+        return description;
+    }
+
+    public List<String> getSeeAlso()
+    {
+        return seeAlso;
+    }
+
     public String toString()
     {
         StringBuilder   bldr        = new StringBuilder();
@@ -61,8 +97,6 @@ public class Definition
         if ( numNodes > 1 )
             throw new FormatException( "multiple term elements founc" );
         Node        node        = nodeList.item( 0 );
-//        if ( node.getNodeType() != Node.TEXT_NODE )
-//            throw new FormatException( "text node not found" );
         String      term        = node.getTextContent();
         if ( term == null || term.isEmpty() )
             throw new FormatException( "invalid term \"" + term + "\"" );
@@ -79,8 +113,6 @@ public class Definition
         if ( numNodes == 1 )
         {
             Node        node        = nodeList.item( 0 );
-//            if ( node.getNodeType() != Node.TEXT_NODE )
-//                throw new FormatException( "text node not found" );
             String      text        = node.getTextContent();
             if ( text == null || text.isEmpty() )
             {
@@ -110,8 +142,6 @@ public class Definition
         if ( numNodes == 1 )
         {
             Node        node        = nodeList.item( 0 );
-//            if ( node.getNodeType() != Node.TEXT_NODE )
-//                throw new FormatException( "text node not found" );
             slug = node.getTextContent();
             if ( slug == null || slug.isEmpty() )
             {
@@ -131,11 +161,50 @@ public class Definition
         if ( numNodes > 1 )
             throw new FormatException( "multiple description elements found" );
         Node        node        = nodeList.item( 0 );
-//        if ( node.getNodeType() != Node.TEXT_NODE )
-//            throw new FormatException( "text node not found" );
         String      desc        = node.getTextContent();
         if ( desc == null || desc.isEmpty() )
             throw new FormatException( "invalid description \"" + desc + "\"" );
+        String  fullDesc    = getDescription( desc );
+        
+        return fullDesc;
+    }
+    
+    private String getDescription( String input )
+    {
+        String  output  = input;
+        String  test    = input.trim();
+        if ( test.startsWith( "@" ) )
+        {
+            File    file    = new File( input.substring( 1 ) );
+            output = getDescription( file );
+        }
+        return output;
+    }
+    
+    private String getDescription( File file )
+    {
+        String  desc    = null;
+        try ( 
+            FileReader  fReader = new FileReader( file );
+            BufferedReader bReader = new BufferedReader( fReader );
+        )
+        {
+            StringBuilder   bldr    =
+                bReader.lines()
+                .map( l -> l + endl )
+                .collect(
+                    StringBuilder::new,
+                    StringBuilder::append,
+                    StringBuilder::append
+                );
+            desc = bldr.toString();
+        }
+        catch ( IOException exc )
+        {
+            String  msg = "Failed to read " + file.getName();
+            throw new FormatException( msg, exc );
+        }
+        
         return desc;
     }
     
@@ -146,8 +215,6 @@ public class Definition
         for ( int inx = 0 ; inx < numNodes ; ++inx )
         {
             Node        node        = nodeList.item( inx );
-//            if ( node.getNodeType() != Node.TEXT_NODE )
-//                throw new FormatException( "text node not found" );
             String      seeAlso     = node.getTextContent();
             if ( seeAlso == null || seeAlso.isEmpty() )
                 throw new FormatException( "invalid seeAlso \"" + seeAlso + "\"" );

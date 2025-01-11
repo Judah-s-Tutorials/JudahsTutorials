@@ -1,52 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <glossary>
+	<title>Glossary of Java Terms</title>
     <definition>
         <term>class</term>
         <seqnum>1</seqnum>
         <slug>class1</slug>
-        <description>
-            <p>
-            General usage: 
-            a collection of properties and/or methods 
-            related to a common theme or utility.
-            <ol type='a'>
-                <li>
-                    Often, a collection of related properties 
-                    and the means to retrieve, modify, or utilize them, 
-                    typically provided via methods.
-                    For example:
-                    <div class="example">
-                        <p>
-                            class: Rectangle
-                        </p>
-                        <p>
-                            properties
-                        </p>
-                        <ul>
-                            <li>position</li>
-                            <li>width</li>
-                            <li>height</li>
-                            <li>perimeter</li>
-                            <li>area</li>
-                        </ul>
-                        <p>
-                            methods
-                        </p>
-                        <ul>
-                            <li>get-position</li>
-                            <li>set-position</li>
-                            <li>get-width</li>
-                            <li>set-width</li>
-                            <li>get-height</li>
-                            <li>set-height</li>
-                            <li>get-perimeter</li>
-                            <li>get-area</li>
-                        </ul>
-                    </div>
-                </li>
-            </ol>
-            </p>
-        </description>
+        <description>@input/html/class1.def</description>
         <see>utility class</see>
     </definition>
     
@@ -55,12 +14,12 @@
         <seqnum>2</seqnum>
         <slug>class2</slug>
         <description>
-            <p>
-                Java keyword,
-                always spelled in lower-case letters.
-                delimits the start
-                of a class declaration.
-            </p>
+&lt;p class = "nospacing"&gt;
+    Java keyword,
+    always spelled in lower-case letters;
+    delimits the start
+    of a class declaration.
+&lt;/p&gt;
         </description>
         <see>class declaration</see>
         <see>top-level class</see>
