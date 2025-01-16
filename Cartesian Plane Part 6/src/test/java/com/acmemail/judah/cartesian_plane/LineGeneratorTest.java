@@ -21,19 +21,79 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 class LineGeneratorTest
 {
+    /** 
+     * Base x-coordinate for the rectangle in which line drawing
+     * will take place.
+     */
     private static final int    baseRectXco     = 100;
+    /** 
+     * Base y-coordinate for the rectangle in which line drawing
+     * will take place. Deliberately chosen to be different from
+     * the base x-coordinate.
+     */
     private static final int    baseRectYco     = 2 * baseRectXco;
+    /** 
+     * Base width for the rectangle in which line drawing
+     * will take place.
+     */
     private static final float  baseWidth       = 200;
-    private static final float  baseHeight      = 300;
+    /** 
+     * Base height for the rectangle in which line drawing
+     * will take place. Deliberately chosen to be different from
+     * the base width.
+     */
+    private static final float  baseHeight      = baseWidth + 100;
+    /** 
+     * Base GPU (pixels-per-unit) for drawing test lines.
+     */
     private static final float  baseGPU         = 50;
+    /** 
+     * Base LPU (lines-per-unit) for drawing test lines.
+     */
     private static final float  baseLPU         = 1;
+    /** 
+     * Base length for drawing test lines.
+     */
     private static final float  baseLen         = 15;
     
+    /** 
+     * Rectangle to be used for testing. Always initialized to 
+     * base parameters in the before-each method. May be changed
+     * during during testing.
+     * @see #makeRect().
+     */
     private Rectangle2D testRect;
+    /** 
+     * Width of the rectangle to be used for testing. Always initialized 
+     * baseWidth in the before-each method. May be changed
+     * during during testing.
+     * @see #makeRect().
+     */
     private float       testWidth;
+    /** 
+     * Height of the rectangle to be used for testing. Always initialized 
+     * baseHeight in the before-each method. May be changed
+     * during during testing.
+     * @see #makeRect().
+     */
     private float       testHeight;
+    /** 
+     * Default GPU for testing. Always initialized baseGPU in the 
+     * before-each method. May be changed during during testing.
+     * @see #setUp().
+     */
     private float       testGPU;
+    /** 
+     * Default LPU for testing. Always initialized baseLPU in the 
+     * before-each method. May be changed during during testing.
+     * @see #setUp().
+     */
     private float       testLPU;
+    /** 
+     * Default line length for testing. Always initialized baseLen in the 
+     * before-each method. May be changed during during testing.
+     * @see #setUp().
+     */
     private float       testLen;
     
     @BeforeEach
@@ -317,6 +377,14 @@ class LineGeneratorTest
         assertEquals( expHasVert, actHasVert );
     }
     
+    /**
+     * Verify that the given iterator
+     * correctly generates 
+     * the position and length
+     * of the axes.
+     * 
+     * @param iter  the given iterator
+     */
     private void validateAxes( Iterator<Line2D> iter )
     {
         double  centerY = testRect.getCenterY();
@@ -350,6 +418,13 @@ class LineGeneratorTest
         assertLineEquals( expSet.get( 1 ), actSet.get( 1 ) );
     }
     
+    /**
+     * Verify that a given generated line
+     * has the expected coordinates.
+     * 
+     * @param actLine   the given generated line
+     * @param expLine   the expected coordinates.
+     */
     private void assertLineEquals( Line2D expLine, Line2D actLine )
     {
         assertEquals( expLine.getX1(), actLine.getX1() );
@@ -358,6 +433,33 @@ class LineGeneratorTest
         assertEquals( expLine.getY2(), actLine.getY2() );
     }
     
+    /**
+     * This method
+     * generates a dimension
+     * (height or width)
+     * for the test rectangle
+     * based on the expected number 
+     * of horizontal or vertical lines
+     * in that dimension.
+     * The calculated value
+     * is expected to be 
+     * more than big enough
+     * to accommodate the expected count,
+     * but less then enough
+     * to accommodate 
+     * the expected count + 1.
+     * The intent is to avoid
+     * testing against a dimension
+     * that is exactly the right size
+     * for the expected count.
+     * 
+     * @param expCount
+     *      the expected number of vertical or horizontal lines
+     *      
+     * @return  
+     *      a value slightly greater than that to accommodate
+     *      the expected number of lines
+     */
     private float calcFromExpCount( int expCount )
     {
         testGPU = baseGPU;
@@ -366,6 +468,10 @@ class LineGeneratorTest
         return dim;
     }
     
+    /**
+     * Create the default test rectangle
+     * from the default test parameters.
+     */
     private void makeRect()
     {
         testRect = new Rectangle2D.Double( 
@@ -376,6 +482,17 @@ class LineGeneratorTest
         );
     }
     
+    /**
+     * Given the offset from the y-axis
+     * to an x-coordinate,
+     * generate a vertical line for that coordinate
+     * given the current test rectangle
+     * and test length.
+     * 
+     * @param xOffset   the given offset
+     * 
+     * @return  the generated vertical line
+     */
     private Line2D getVertLine( double xOffset )
     {
         double  centerX = testRect.getCenterX();
@@ -390,6 +507,17 @@ class LineGeneratorTest
         return line;
     }
     
+    /**
+     * Given the offset from the x-axis
+     * to a y-coordinate,
+     * generate a horizontal line for that coordinate
+     * given the current test rectangle
+     * and test length.
+     * 
+     * @param yOffset   the given offset
+     * 
+     * @return  the generated vertical line
+     */
     private Line2D getHorLine( double yOffset )
     {
         double  centerX = testRect.getCenterX();

@@ -6,6 +6,7 @@ dt
 dd
 {
 	margin-top: 0;
+    display: none;
 }
 p.nospacing
 {
@@ -17,4 +18,10 @@ div.example
 	padding: 1em 1em 1em 1em;
 	border: 1px solid black;
 	font-style: italic;
+}
+p.see-also
+{
+	margin-top: 0;
+	margin-bottom: 0;
+    font-weight: bold;
 }

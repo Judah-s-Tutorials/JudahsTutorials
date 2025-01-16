@@ -305,8 +305,8 @@ public class GridLayoutDemo extends JPanel
      * next to the grid. 
      * The first column is #0.
      * 
-     * @param line  the given line
-     * @param row   the given row
+     * @param line      the given line
+     * @param column    the given column
      */
     private void labelHorizontalLine( Line2D line, int column )
     {

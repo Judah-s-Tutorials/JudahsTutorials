@@ -571,7 +571,7 @@ public class CartesianPlane extends JPanel
         // drawing any lines. Don't forget to restore the original clip
         // region after drawing the lines.
         Shape   origClip    = gtx.getClip();
-        gtx.setClip( gridRect );
+//        gtx.setClip( gridRect );
 
         drawGridLines();
         drawMinorTics();

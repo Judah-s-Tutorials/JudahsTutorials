@@ -315,7 +315,7 @@ public class LineGenerator implements Iterable<Line2D>
      */
     public static Iterator<Line2D> axesIterator( Rectangle2D rect )
     {
-        LineGenerator          lineGen = new LineGenerator( rect, 1, 1, -1 );
+        LineGenerator       lineGen = new LineGenerator( rect, 1, 1, -1 );
         Iterator<Line2D>    iter    = lineGen.axesIterator();
         return iter;
     }
