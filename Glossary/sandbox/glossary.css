@@ -1,11 +1,25 @@
+dt:hover
+{
+    color: red;
+}
+
+dl
+{
+	margin-top: 0;
+	margin-bottom: 0;
+}
 dt
 {
+	margin-top: 0;
 	margin-bottom: 0;
 	font-weight: bold;
+    cursor: pointer;
+    text-decoration: underline;
 }
 dd
 {
 	margin-top: 0;
+	margin-bottom: 0;
     display: none;
 }
 p.nospacing
@@ -19,9 +33,23 @@ div.example
 	border: 1px solid black;
 	font-style: italic;
 }
+div.letter
+{
+	padding-left: 2em;
+    display: none;
+	margin-top: 0;
+	margin-bottom: 0;
+}
 p.see-also
 {
 	margin-top: 0;
 	margin-bottom: 0;
     font-weight: bold;
+}
+p.letter-heading
+{
+	margin-top: 0;
+	margin-bottom: 0;
+    font-weight: bold;
+    font-size: 110%;
 }
