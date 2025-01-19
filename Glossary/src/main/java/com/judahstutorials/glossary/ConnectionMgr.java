@@ -41,12 +41,13 @@ public class ConnectionMgr
     
     public static PreparedStatement getPreparedStatement( String sql )
     {
+        final int returnKey = Statement.RETURN_GENERATED_KEYS;
         PreparedStatement   statement   = null;
         try
         {
             Connection  conn    = getConnection();
             if ( conn != null )
-                statement = conn.prepareStatement( sql );
+                statement = conn.prepareStatement( sql, returnKey );
         }
         catch ( SQLException exc )
         {
