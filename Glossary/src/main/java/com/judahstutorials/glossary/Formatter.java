@@ -73,9 +73,9 @@ public class Formatter
         for ( int inx = 0 ; inx < numNodes ; ++inx )
         {
             Element     ele     = (Element)defs.item( inx );
-            Definition  def     = new Definition( ele );
-            String      html    = Encode.getDefinition( def );
-            bldr.append( html );
+//            Definition  def     = new Definition( ele );
+//            String      html    = Encode.getDefinition( def );
+//            bldr.append( html );
         }
         bldr.append( Encode.getTail() );
         writeTemp( bldr );

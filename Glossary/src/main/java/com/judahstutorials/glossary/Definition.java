@@ -1,42 +1,35 @@
 package com.judahstutorials.glossary;
 
-import static com.judahstutorials.glossary.GConstants.DESCRIPTION;
-import static com.judahstutorials.glossary.GConstants.SEE_ALSO;
-import static com.judahstutorials.glossary.GConstants.SEQ_NUM;
-import static com.judahstutorials.glossary.GConstants.SLUG;
-import static com.judahstutorials.glossary.GConstants.TERM;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Definition
 {
-    private static final String endl    = System.lineSeparator();
+    private static final String             insertString    =
+        "INSERT INTO see_also (term, seq_num, slug, description ) "
+            + "VALUES (?, ?, ?, ?);";
+    private static final PreparedStatement  insertSQL       =
+        ConnectionMgr.getPreparedStatement( insertString );
     
-    private final String        term;
-    private final Integer       seqNum;
-    private final String        slug;
-    private final String        description;
-    private final List<String>  seeAlso     = new ArrayList<>();
+    private String      term        = "";
+    private Integer     seqNum      = null;
+    private String      slug        = null;
+    private String      description = null;
 
-    public Definition( Element def )
+    private Integer     ident       = null;
+    
+    public Definition()
     {
-        term = getTerm( def );
-        seqNum = getSeqNum( def );
-        slug = getSlug( def );
-        description = getDescription( def );
-        getSeeAlso( def );
+        
     }
     
     public String getTerm()
+    {
+        return term;
+    }
+    
+    public String getTermDisplay()
     {
         String  term    = this.term;
         if ( seqNum != null )
@@ -46,11 +39,19 @@ public class Definition
 
     public Integer getSeqNum()
     {
+        if ( seqNum == null )
+            seqNum = 0;
         return seqNum;
     }
 
     public String getSlug()
     {
+        if ( slug == null )
+        {
+            slug = term;
+            if ( seqNum != null && seqNum > 0 )
+                slug += "-" + seqNum;
+        }
         return slug;
     }
 
@@ -58,10 +59,30 @@ public class Definition
     {
         return description;
     }
-
-    public List<String> getSeeAlso()
+    
+    public Integer insert()
     {
-        return seeAlso;
+        Integer ident   = null;
+        if ( this.ident == null )
+        {
+            try
+            {
+                insertSQL.setString( 1, getTerm() );
+                insertSQL.setInt( 2, getSeqNum() );
+                insertSQL.setString( 3, getSlug() );
+                insertSQL.setString( 4, description );
+                if ( insertSQL.executeUpdate() == 1 )
+                {
+                    ResultSet   result  = insertSQL.getResultSet();
+                    ident = result.getInt( "id" );
+                }
+            }
+            catch ( SQLException exc )
+            {
+                exc.printStackTrace();
+            }
+        }
+        return ident;
     }
 
     public String toString()
@@ -84,141 +105,11 @@ public class Definition
         bldr.append( ",seqNum=" ).append( seqNum );
         bldr.append( ",slug=" ).append( slug );
         bldr.append( "," ).append( desc );
-        bldr.append( ", {" ).append( seeAlso.toString() ).append( "}" );
         return bldr.toString();
     }
-
-    private String getTerm( Element def )
-    {
-        NodeList    nodeList    = def.getElementsByTagName( TERM );
-        int         numNodes    = nodeList.getLength();
-        if ( numNodes == 0 )
-            throw new FormatException( "term element not found" );
-        if ( numNodes > 1 )
-            throw new FormatException( "multiple term elements founc" );
-        Node        node        = nodeList.item( 0 );
-        String      term        = node.getTextContent();
-        if ( term == null || term.isEmpty() )
-            throw new FormatException( "invalid term \"" + term + "\"" );
-        return term;
-    }
     
-    private Integer getSeqNum( Element def )
+    public Integer getID()
     {
-        NodeList    nodeList    = def.getElementsByTagName( SEQ_NUM );
-        int         numNodes    = nodeList.getLength();
-        Integer     seqNum      = null;
-        if ( numNodes > 1 )
-            throw new FormatException( "multiple term elements found" );
-        if ( numNodes == 1 )
-        {
-            Node        node        = nodeList.item( 0 );
-            String      text        = node.getTextContent();
-            if ( text == null || text.isEmpty() )
-            {
-                String  msg = "invalid sequence number \"" + text + "\"";
-                throw new FormatException( msg );
-            }
-            try
-            {
-                seqNum = Integer.parseInt( text );
-            }
-            catch ( NumberFormatException exc )
-            {
-                String  msg = "invalid sequence number \"" + text + "\"";
-                throw new FormatException( msg );
-            }
-        }
-        return seqNum;
-    }
-    
-    private String getSlug( Element def )
-    {
-        NodeList    nodeList    = def.getElementsByTagName( SLUG );
-        int         numNodes    = nodeList.getLength();
-        String      slug        = null;
-        if ( numNodes > 1 )
-            throw new FormatException( "multiple slug elements found" );
-        if ( numNodes == 1 )
-        {
-            Node        node        = nodeList.item( 0 );
-            slug = node.getTextContent();
-            if ( slug == null || slug.isEmpty() )
-            {
-                String  msg = "invalid slug \"" + slug + "\"";
-                throw new FormatException( msg );
-            }
-        }
-        return slug;
-    }
-
-    private String getDescription( Element def )
-    {
-        NodeList    nodeList    = def.getElementsByTagName( DESCRIPTION );
-        int         numNodes    = nodeList.getLength();
-        if ( numNodes == 0 )
-            throw new FormatException( "description element not found" );
-        if ( numNodes > 1 )
-            throw new FormatException( "multiple description elements found" );
-        Node        node        = nodeList.item( 0 );
-        String      desc        = node.getTextContent();
-        if ( desc == null || desc.isEmpty() )
-            throw new FormatException( "invalid description \"" + desc + "\"" );
-        String  fullDesc    = getDescription( desc );
-        
-        return fullDesc;
-    }
-    
-    private String getDescription( String input )
-    {
-        String  output  = input;
-        String  test    = input.trim();
-        if ( test.startsWith( "@" ) )
-        {
-            File    file    = new File( input.substring( 1 ) );
-            output = getDescription( file );
-        }
-        return output;
-    }
-    
-    private String getDescription( File file )
-    {
-        String  desc    = null;
-        try ( 
-            FileReader  fReader = new FileReader( file );
-            BufferedReader bReader = new BufferedReader( fReader );
-        )
-        {
-            StringBuilder   bldr    =
-                bReader.lines()
-                .map( l -> l + endl )
-                .collect(
-                    StringBuilder::new,
-                    StringBuilder::append,
-                    StringBuilder::append
-                );
-            desc = bldr.toString();
-        }
-        catch ( IOException exc )
-        {
-            String  msg = "Failed to read " + file.getName();
-            throw new FormatException( msg, exc );
-        }
-        
-        return desc;
-    }
-    
-    private void getSeeAlso( Element def )
-    {
-        NodeList    nodeList    = def.getElementsByTagName( SEE_ALSO );
-        int         numNodes    = nodeList.getLength();
-        for ( int inx = 0 ; inx < numNodes ; ++inx )
-        {
-            Node        node        = nodeList.item( inx );
-            String      seeAlso     = node.getTextContent();
-            if ( seeAlso == null || seeAlso.isEmpty() )
-                throw new FormatException( "invalid seeAlso \"" + seeAlso + "\"" );
-            this.seeAlso.add( seeAlso );
-        }
+        return ident;
     }
 }
