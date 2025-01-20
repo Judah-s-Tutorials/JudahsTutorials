@@ -25,10 +25,10 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import com.judahstutorials.glossary.ConnectionMgr;
-import com.judahstutorials.glossary.Definition;
-import com.judahstutorials.glossary.SeeAlso;
+import com.judahstutorials.glossary.Definition_draft;
+import com.judahstutorials.glossary.SeeAlso_draft;
 
-public class MainFrame
+public class MainFrame_draft
 {
     private final JFrame            frame       =
         new JFrame( "Glossary Editor" );
@@ -40,16 +40,16 @@ public class MainFrame
     private final JTextArea         description = new JTextArea( 24, 40 );
     private final JTextField        addField    = new JTextField( 20 );
     private final JButton           addButton   = new JButton( "Add" );
-    private final QueryDialog       queryDialog = new QueryDialog( frame );
+    private final QueryDialog_draft       queryDialog = new QueryDialog_draft( frame );
 
-    private final DefaultListModel<SeeAlso> seeAlsoModel   =
+    private final DefaultListModel<SeeAlso_draft> seeAlsoModel   =
         new DefaultListModel<>();
-    private final JList<SeeAlso>    seeAlso     = 
+    private final JList<SeeAlso_draft>    seeAlso     = 
         new JList<>( seeAlsoModel );
     
-    private Definition  currDef;
+    private Definition_draft  currDef;
     
-    public MainFrame()
+    public MainFrame_draft()
     {
         frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
         JPanel      contentPane = new JPanel( new BorderLayout() );
@@ -92,7 +92,7 @@ public class MainFrame
         BoxLayout   layout      = new BoxLayout( panel, BoxLayout.Y_AXIS );
         Border      border      =
             BorderFactory.createLineBorder( Color.BLACK, 2 );
-        JLabel      defLabel    = new JLabel( "Definition" );
+        JLabel      defLabel    = new JLabel( "Definition_draft" );
 //        defLabel.setAlignmentX( 0f );
 //        panel.setAlignmentX( 0f );
         panel.setLayout( layout );
@@ -211,7 +211,7 @@ public class MainFrame
     
     private void insertTerm( ActionEvent evt )
     {
-        currDef = new Definition(
+        currDef = new Definition_draft(
             term.getText(),
             seqNum.getText(),
             slug.getText(),
@@ -228,7 +228,7 @@ public class MainFrame
     
     private void newDef( ActionEvent evt )
     {
-        currDef = new Definition();
+        currDef = new Definition_draft();
         term.setText( "" );
         ident.setText( "" );
         description.setText( "" );
@@ -252,7 +252,7 @@ public class MainFrame
             ;
         else
         {
-            SeeAlso next    = new SeeAlso( termID, text );
+            SeeAlso_draft next    = new SeeAlso_draft( termID, text );
             Integer rval    = next.insert();
             if ( rval == null )
                 postError( "See also insert failed" );
@@ -269,7 +269,7 @@ public class MainFrame
     
     private void query( ActionEvent evt )
     {
-        Definition  def     = null;
+        Definition_draft  def     = null;
         int choice  = queryDialog.showDialog();
         if ( choice == JOptionPane.OK_OPTION )
             def = queryDialog.getSelection();
@@ -284,7 +284,7 @@ public class MainFrame
             description.setText( def.getDescription() );
             
             seeAlsoModel.removeAllElements();
-            List<SeeAlso>   list    = SeeAlso.getAllFor( termID );
+            List<SeeAlso_draft>   list    = SeeAlso_draft.getAllFor( termID );
             System.out.println( termID );
             System.out.println( list.size() );
             seeAlsoModel.addAll( list );

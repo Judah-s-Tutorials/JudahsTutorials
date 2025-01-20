@@ -6,7 +6,7 @@ import java.sql.SQLException;
 
 import javax.swing.JOptionPane;
 
-public class Definition
+public class Definition_draft
 {
     private static final String             insertString    =
         "INSERT INTO definition (term, seq_num, slug, description ) "
@@ -22,12 +22,12 @@ public class Definition
 
     private boolean     isError     = false;
     
-    public Definition()
+    public Definition_draft()
     {
         
     }
     
-    public Definition( ResultSet resultSet )
+    public Definition_draft( ResultSet resultSet )
     {
         try
         {
@@ -45,7 +45,7 @@ public class Definition
     }
     
     public 
-    Definition( String term, String seqNum, String slug, String desc )
+    Definition_draft( String term, String seqNum, String slug, String desc )
     {
         setTerm( term );
         setSeqNum( seqNum );

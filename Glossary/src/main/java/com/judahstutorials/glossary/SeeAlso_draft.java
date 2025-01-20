@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SeeAlso
+public class SeeAlso_draft
 {
     private static final String             insertString    =
         "INSERT INTO see_also (term_id, url) VALUES (?, ?);";
@@ -21,20 +21,20 @@ public class SeeAlso
     private int     termID;
     private String  url;
     
-    public SeeAlso( int ident, int termID, String see )
+    public SeeAlso_draft( int ident, int termID, String see )
     {
         this.ident = ident;
         this.termID = termID;
         this.url = see;
     }
     
-    public SeeAlso( int termID, String see )
+    public SeeAlso_draft( int termID, String see )
     {
         this.termID = termID;
         this.url = see;
     }
     
-    public SeeAlso()
+    public SeeAlso_draft()
     {
         this( 0, "" );
     }
@@ -91,9 +91,9 @@ public class SeeAlso
         return url;
     }
     
-    public static List<SeeAlso> getAllFor( int termID )
+    public static List<SeeAlso_draft> getAllFor( int termID )
     {
-        List<SeeAlso>   list    = new ArrayList<>();
+        List<SeeAlso_draft>   list    = new ArrayList<>();
         try
         {
             listForSQL.setInt( 1, termID);
@@ -103,7 +103,7 @@ public class SeeAlso
                 int     ident       = resultSet.getInt( "id" );
                 int     termIdent   = resultSet.getInt( "term_id" );
                 String  url         = resultSet.getString( "url" );
-                SeeAlso rec         = new SeeAlso( ident, termIdent, url );
+                SeeAlso_draft rec         = new SeeAlso_draft( ident, termIdent, url );
                 list.add( rec );
             }
             resultSet.close();

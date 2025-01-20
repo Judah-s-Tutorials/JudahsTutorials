@@ -34,7 +34,7 @@ public class Utils
         return title;
     }
     
-    public static String getSlug( Definition def )
+    public static String getSlug( Definition_draft def )
     {
         String  rawSlug = def.getSlug();
         if ( rawSlug == null )
@@ -48,7 +48,7 @@ public class Utils
         return slug;
     }
     
-    public static String getTerm( Definition def )
+    public static String getTerm( Definition_draft def )
     {
         String  term    = def.getSlug();
             Integer seqNum  = def.getSeqNum();

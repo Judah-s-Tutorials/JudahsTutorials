@@ -9,26 +9,37 @@ import java.util.List;
 
 public class ConnectionMgr
 {
+    public static final String  PRODUCTION  = "judah614_JGlossary1";
+    public static final String  SANDBOX     = "judah614_JGlossary2";
+    public static final String  TESTING     = "judah614_JGlossaryTest";
     private static final String host        = 
-        "jdbc:mysql://judahstutorials.com/judah614_JGlossary2";
+        "jdbc:mysql://judahstutorials.com/";
     private static final String user        = "judah614_JackStraub";
     private static final String password    = "Glossary1@01";
     
     private static Connection       conn        = null;
     private static List<Statement>  statements  = new ArrayList<>();
     
-    public ConnectionMgr()
+    private static String selectedDatabase     = SANDBOX;
+    
+    private ConnectionMgr()
     {
         // TODO Auto-generated constructor stub
     }
+    
+    public static void selectDatabase( String database )
+    {
+        selectedDatabase = database;
+    }
 
-    public static Connection getConnection()
+    synchronized public static Connection getConnection()
     {
         if ( conn == null )
         {
             try
             {
-                conn = DriverManager.getConnection( host, user, password );
+                String  target  = host + selectedDatabase;
+                conn = DriverManager.getConnection( target, user, password );
                 conn.setAutoCommit( true );
             }
             catch ( SQLException exc )
@@ -39,7 +50,8 @@ public class ConnectionMgr
         return conn;
     }
     
-    public static PreparedStatement getPreparedStatement( String sql )
+    synchronized public static PreparedStatement 
+    getPreparedStatement( String sql )
     {
         final int returnKey = Statement.RETURN_GENERATED_KEYS;
         PreparedStatement   statement   = null;
@@ -57,7 +69,7 @@ public class ConnectionMgr
         return statement;
     }
     
-    public static void closeStatement( Statement statement )
+    synchronized public static void closeStatement( Statement statement )
     {
         try
         {
@@ -70,7 +82,7 @@ public class ConnectionMgr
         }
     }
     
-    public static void closeAllResources()
+    synchronized public static void closeAllResources()
     {
         try
         {
@@ -83,7 +95,7 @@ public class ConnectionMgr
         }
     }
     
-    public static void closeConnection()
+    synchronized public static void closeConnection()
     {
         if ( conn != null )
         {
@@ -96,6 +108,7 @@ public class ConnectionMgr
             {
                 exc.printStackTrace();
             }
+            conn = null;
         }
     }
 }

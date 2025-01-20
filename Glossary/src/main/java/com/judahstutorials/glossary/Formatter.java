@@ -73,7 +73,7 @@ public class Formatter
         for ( int inx = 0 ; inx < numNodes ; ++inx )
         {
             Element     ele     = (Element)defs.item( inx );
-//            Definition  def     = new Definition( ele );
+//            Definition_draft  def     = new Definition_draft( ele );
 //            String      html    = Encode.getDefinition( def );
 //            bldr.append( html );
         }

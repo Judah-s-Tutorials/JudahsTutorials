@@ -26,10 +26,9 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import com.judahstutorials.glossary.ConnectionMgr;
-import com.judahstutorials.glossary.Definition_draft;
-import com.judahstutorials.glossary.SeeAlso_draft;
+import com.judahstutorials.glossary.Definition;
 
-public class QueryDialog_draft extends JDialog
+public class QueryDialog extends JDialog
 {
     private static final String             likeStr =
         "SELECT * FROM definition "
@@ -48,12 +47,12 @@ public class QueryDialog_draft extends JDialog
         new DefaultListModel<>();
     private final JList<String>     resultList  = 
         new JList<>( resultModel );
-    private final List<Definition_draft>  results     = new ArrayList<>();
+    private final List<Definition>  results     = new ArrayList<>();
     
     private int choice      = JOptionPane.OK_OPTION;
     private int selection   = -1;
     
-    public QueryDialog_draft( JFrame parent)
+    public QueryDialog( JFrame parent)
     {
         super( parent, true );
         setTitle( "Query Definition_draft Table" );
@@ -72,9 +71,9 @@ public class QueryDialog_draft extends JDialog
         return choice;
     }
     
-    public Definition_draft getSelection()
+    public Definition getSelection()
     {
-        Definition_draft  def     = null;
+        Definition  def     = null;
         if ( selection > 0 && selection < results.size() )
             def = results.get( selection );
         return def;
@@ -148,12 +147,13 @@ public class QueryDialog_draft extends JDialog
             results.clear();
             while ( resultSet.next() )
             {
-                Definition_draft  def     = new Definition_draft( resultSet );
+                Definition  def     = new Definition( resultSet );
                 String      term    = def.getTermDisplay();
                 resultModel.addElement( term );
                 results.add( def );
             }
             resultSet.close();
+            ConnectionMgr.closeConnection();
         }
         catch ( SQLException exc )
         {

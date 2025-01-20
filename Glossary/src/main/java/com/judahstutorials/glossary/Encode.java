@@ -47,7 +47,7 @@ public class Encode
         return  tail;
     }
 
-    public static String getDefinition( Definition def )
+    public static String getDefinition( Definition_draft def )
     {
         String          slug        = Utils.getSlug( def );
         String          desc        = def.getDescription();
