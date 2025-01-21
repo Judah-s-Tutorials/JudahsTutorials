@@ -31,6 +31,23 @@ public class ConnectionMgr
     {
         selectedDatabase = database;
     }
+    
+    public static boolean getStatus()
+    {
+        boolean status = false;
+        if ( conn != null )
+        {
+            try
+            {
+                status = !conn.isClosed();
+            }
+            catch ( SQLException exc )
+            {
+                exc.printStackTrace();
+            }
+        }
+        return status;
+    }
 
     synchronized public static Connection getConnection()
     {

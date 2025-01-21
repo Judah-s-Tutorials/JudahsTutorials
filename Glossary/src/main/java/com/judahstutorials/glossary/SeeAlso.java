@@ -94,17 +94,6 @@ public class SeeAlso
             SQLUtils.postSQLException( "Update SeeAlso", exc );
         }
     }
-
-    
-    public void delete()
-    {
-        if ( ident != null )
-        {
-            PreparedStatement  deleteSQL    =
-                ConnectionMgr.getPreparedStatement( deleteString );
-            delete( deleteSQL );
-        }
-    }
     
     public static void deleteAll( int termID )
     {
@@ -127,7 +116,7 @@ public class SeeAlso
     {
         try
         {
-            deleteSQL.setInt( 1, ident );
+            deleteSQL.setInt( 1, termID );
             if ( deleteSQL.executeUpdate() == 1 )
                 ident = null;
             else
@@ -220,7 +209,19 @@ public class SeeAlso
     
     public String toString()
     {
-        return url;
+        String  rval    = url;
+        if ( isMarkedForDelete() )
+        {
+            StringBuilder   bldr    = new StringBuilder();
+            bldr.append( "<HTML>" )
+                .append( '\u2421' )
+                .append( "<font color='red'>" )
+                .append( url )
+                .append( "</font>")
+                .append( "</HTML>" );
+            rval = bldr.toString();
+        }
+        return rval;
     }
     
     public static List<SeeAlso> getAllFor( int termID )

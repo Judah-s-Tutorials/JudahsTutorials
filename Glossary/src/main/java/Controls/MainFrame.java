@@ -8,11 +8,15 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -28,23 +32,28 @@ import com.judahstutorials.glossary.SeeAlso;
 
 public class MainFrame
 {
+    private static final int    textWidth       = 20;
+    
     private final JFrame            frame       =
         new JFrame( "Glossary Editor" );
     
     private final JTextField            ident           =
-        new JTextField( 20 );
+        getFormattedTextField( Integer.valueOf( 0 ) );
     private final JFormattedTextField   term            =
-        new JFormattedTextField();
+        getFormattedTextField( "" );
     private final JFormattedTextField   seqNum          = 
-        new JFormattedTextField();
+        getFormattedTextField( "" );
     private final JFormattedTextField   slug            = 
-        new JFormattedTextField();
+        getFormattedTextField( "" );
     private final JTextArea             description     =
         new JTextArea( 24, 40 );
     private final QueryDialog           queryDialog     = 
         new QueryDialog( frame );
     private final SeeAlsoPanel          seeAlsoPanel    =
         new SeeAlsoPanel();
+    
+    private final List<JComponent>      abledComponents =
+        getAbledComponents();
     
     private Definition  currDef;
     
@@ -84,10 +93,12 @@ public class MainFrame
             @Override
             public void keyTyped( KeyEvent evt )
             {
-                currDef.setDescription( description.getText() );
+                if ( currDef != null )
+                    currDef.setDescription( description.getText() );
             }
         });
         ident.setEditable( false );
+        reset( false );
         return panel;
     }
 
@@ -108,10 +119,10 @@ public class MainFrame
         
         ident.setEditable( false );
         term.addPropertyChangeListener( "value", e ->
-            currDef.setSlug( (String)slug.getValue() ) 
+            currDef.setTerm( (String)term.getValue() ) 
         );
-        term.addPropertyChangeListener( "value", e ->
-            currDef.setTerm( (String)seqNum.getValue() ) 
+        slug.addPropertyChangeListener( "value", e ->
+            currDef.setSlug( (String)slug.getValue() ) 
         );
         seqNum.addPropertyChangeListener( "value", e ->
             currDef.setSeqNum( (Integer)seqNum.getValue() ) 
@@ -137,11 +148,14 @@ public class MainFrame
         JButton     newButton       = new JButton( "New" );
         JButton     queryButton     = new JButton( "Query" );
         JButton     commitButton    = new JButton( "Commit" );
-        JButton     updateButton    = new JButton( "Update" );
+        JButton     deleteButton    = new JButton( "Delete" );
+        JButton     cancelButton    = new JButton( "Cancel" );
         JButton     exitButton      = new JButton( "Exit" );
         newButton.addActionListener( this::newDef );
-//        insertButton.addActionListener( this::insertTerm );
         queryButton.addActionListener( this::query );
+        commitButton.addActionListener( this::commit );
+        cancelButton.addActionListener( e -> reset( false ) );
+        deleteButton.addActionListener( this::deleteDef );
         exitButton.addActionListener( e -> {
             ConnectionMgr.closeConnection();
             System.exit( 0 );
@@ -150,24 +164,49 @@ public class MainFrame
         panel.add( newButton );
         panel.add( queryButton );
         panel.add( commitButton );
-        panel.add( updateButton );
+        panel.add( cancelButton );
         panel.add( exitButton );
         
         return panel;
     }
     
+    private JFormattedTextField getFormattedTextField( Object initialVal )
+    {
+        JFormattedTextField textField   = new JFormattedTextField();
+        textField.setValue( initialVal );
+        textField.setColumns( textWidth );
+        return textField;
+    }
+    
+    private List<JComponent> getAbledComponents()
+    {
+        List<JComponent>    list    = 
+            Arrays.asList( ident, term, seqNum, slug, description );
+        List<JComponent>    ulist   =
+            Collections.unmodifiableList( list );
+        return ulist;
+    }
+    
     private void commit( ActionEvent evt )
     {
         currDef.commit();
+        seeAlsoPanel.setDefinition( currDef );
+        frame.repaint();
+    }
+    
+    private void deleteDef( ActionEvent evt )
+    {
+        if ( currDef != null && currDef.getID() != null )
+        {
+            boolean currState   = currDef.isMarkedForDelete();
+            currDef.markForDelete( !currState );
+        }
     }
     
     private void newDef( ActionEvent evt )
     {
         currDef = new Definition();
-        term.setText( "" );
-        ident.setText( "" );
-        description.setText( "" );
-        slug.setText( "" );
+        reset( true );
         seeAlsoPanel.setDefinition( currDef );
     }
     
@@ -181,6 +220,7 @@ public class MainFrame
         {
             currDef = def;
             int termID  = def.getID();
+            reset( true );
             ident.setText( String.valueOf( termID ) );
             term.setText( def.getTerm() );
             slug.setText( def.getSlug() );
@@ -188,9 +228,16 @@ public class MainFrame
             description.setText( def.getDescription() );
             
             seeAlsoPanel.setDefinition( currDef );
-            List<SeeAlso>   list    = SeeAlso.getAllFor( termID );
-            System.out.println( termID );
-            System.out.println( list.size() );
         }
+    }
+    
+    private void reset( boolean live )
+    {
+        ident.setText( "" );
+        term.setValue( "" );
+        slug.setValue( "" );
+        description.setText( "" );
+        abledComponents.forEach( c -> c.setEnabled( live ) );
+        seeAlsoPanel.setDefinition( null );
     }
 }

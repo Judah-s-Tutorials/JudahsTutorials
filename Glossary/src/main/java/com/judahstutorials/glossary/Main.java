@@ -2,7 +2,7 @@ package com.judahstutorials.glossary;
 
 import javax.swing.SwingUtilities;
 
-import Controls.MainFrame_draft;
+import Controls.MainFrame;
 
 public class Main
 {
@@ -14,7 +14,7 @@ public class Main
     */
     public static void main(String[] args)
     {
-        SwingUtilities.invokeLater( () -> new MainFrame_draft() );
+        SwingUtilities.invokeLater( () -> new MainFrame() );
     }
     
     public Main()

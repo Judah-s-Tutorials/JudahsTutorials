@@ -18,11 +18,12 @@ public class Definition
     private static final String     deleteString    =
         "DELETE from definition where id = ?";
     private static final String     updateString    =
-        "UPDATE see_also SET "
+        "UPDATE definition SET "
             + "term = ?"
             + " ,seq_num = ?"
             + " ,slug = ?"
-            + " ,description = ?";
+            + " ,description = ?"
+            + " WHERE id = ?";
     
     private Integer     ident       = null;
     private String      term        = "";
@@ -30,9 +31,9 @@ public class Definition
     private String      slug        = null;
     private String      description = null;
 
-    private transient final 
-        List<SeeAlso>   seeAlso     = new ArrayList<>();
-    private transient boolean     isError     = false;
+    private transient final List<SeeAlso>   seeAlso = new ArrayList<>();
+    private transient boolean   isError         = false;
+    private transient boolean   markedForDelete = false;
     
     public Definition()
     {
@@ -57,9 +58,25 @@ public class Definition
         }
     }
     
+    public void markForDelete( boolean delete )
+    {
+        markedForDelete = delete;
+    }
+    
+    public boolean isMarkedForDelete()
+    {
+        return markedForDelete;
+    }
+    
     public void commit()
     {
-        if ( ident == null )
+        if ( isMarkedForDelete() && ident != null )
+        {
+            PreparedStatement   sql     = 
+                ConnectionMgr.getPreparedStatement( deleteString );
+            delete( sql );
+        }
+        else if ( ident == null )
         {
             PreparedStatement   sql     = 
                 ConnectionMgr.getPreparedStatement( insertString );
@@ -71,7 +88,7 @@ public class Definition
                 ConnectionMgr.getPreparedStatement( updateString );
             update( sql );
         }
-
+        ConnectionMgr.closeConnection();
     }
     
     public 
@@ -114,10 +131,10 @@ public class Definition
     public static Definition select( String term )
     {
         Definition  def = null;
+        PreparedStatement   selectSQL   =
+            ConnectionMgr.getPreparedStatement( selectString );
         try
         {
-            PreparedStatement   selectSQL   =
-                ConnectionMgr.getPreparedStatement( selectString );
             selectSQL.setString( 1, term );
             ResultSet           resultSet   = selectSQL.executeQuery();
             if ( resultSet.next() )
@@ -128,6 +145,7 @@ public class Definition
         {
             SQLUtils.postSQLException( "Select term", exc );
         }
+        ConnectionMgr.closeConnection();
         return def;
     }
     
@@ -138,28 +156,25 @@ public class Definition
             PreparedStatement   insertSQL   =
                 ConnectionMgr.getPreparedStatement( insertString );
             insert( insertSQL );
+            ConnectionMgr.closeConnection();
         }
     }
 
-    public void delete()
+    private void delete( PreparedStatement deleteSQL )
     {
-        if ( ident != null )
+        try
         {
-            PreparedStatement   deleteSQL   =
-                ConnectionMgr.getPreparedStatement( deleteString );
-            try
-            {
-                deleteSQL.setInt( 1, ident );
-                if ( deleteSQL.executeUpdate() == 1 )
-                    ident = null;
-                else
-                    SQLUtils.postSQLError( "Delete SeeAlso failure" );
-            }
-            catch ( SQLException exc )
-            {
-                SQLUtils.postSQLException( "Delete SeeAlso", exc );
-            }
+            deleteSQL.setInt( 1, ident );
+            if ( !deleteSQL.execute() )
+                SQLUtils.postSQLError( "Delete SeeAlso failure" );
+            else
+                SeeAlso.deleteAll( ident );
         }
+        catch ( SQLException exc )
+        {
+            SQLUtils.postSQLException( "Delete SeeAlso", exc );
+        }
+        ConnectionMgr.closeConnection();
     }
 
     public String getTerm()
@@ -226,7 +241,8 @@ public class Definition
             insertSQL.setString( 1, getTerm() );
             insertSQL.setInt( 2, getSeqNum() );
             insertSQL.setString( 3, getSlug() );
-            insertSQL.setString( 4, description );
+            insertSQL.setString( 4, getDescription() );
+            System.out.println( insertSQL );
             if ( insertSQL.executeUpdate() == 1 )
             {
                 ResultSet   result  = insertSQL.getGeneratedKeys();
@@ -249,21 +265,14 @@ public class Definition
     {
         try
         {
-            updateSQL.setInt( 1, getID() );
-            updateSQL.setString( 2, getTerm() );
-            updateSQL.setInt( 3, getSeqNum() );
-            updateSQL.setString( 4, getSlug() );
-            updateSQL.setString( 5, description );
-            if ( updateSQL.executeUpdate() == 1 )
-            {
-                ResultSet   result  = updateSQL.getGeneratedKeys();
-                if ( !result.next() )
-                {
-                    throw new Error( "Failed to get generated key" );
-                }
-                ident = result.getInt( 1 );
-                result.close();
-            }
+            updateSQL.setString( 1, getTerm() );
+            updateSQL.setInt( 2, getSeqNum() );
+            updateSQL.setString( 3, getSlug() );
+            updateSQL.setString( 4, description );
+            updateSQL.setInt( 5, getID() );
+            System.out.println( updateSQL );
+            if ( updateSQL.executeUpdate() != 1 )
+                throw new Error( "Update failure" );
         }
         catch ( SQLException exc )
         {

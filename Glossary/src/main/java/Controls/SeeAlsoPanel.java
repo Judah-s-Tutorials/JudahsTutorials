@@ -46,12 +46,13 @@ public class SeeAlsoPanel extends JPanel
         add( new JLabel( seeAlsoText ), BorderLayout.NORTH );
         add( getAddDeletePanel(), BorderLayout.SOUTH );
         add( getScrolledList(), BorderLayout.CENTER );
+        setDefinition( null );
     }
     
     public void setDefinition( Definition def )
     {
         currDef = def;
-        if ( def == null )
+        if ( def == null || def.getID() == null )
         {
             seeAlsoModel.removeAllElements();
             addField.setValue( "" );
@@ -104,6 +105,7 @@ public class SeeAlsoPanel extends JPanel
         BoxLayout   layout      = new BoxLayout( panel, BoxLayout.X_AXIS );
         panel.setLayout( layout );
 
+        addField.setValue( "" );
         addField.addPropertyChangeListener( "value", this::newSeeAlso );
         addField.setEnabled( false );
         
@@ -119,6 +121,7 @@ public class SeeAlsoPanel extends JPanel
         {
             boolean deleted = see.isMarkedForDelete();
             see.markForDelete( !deleted );
+            seeAlsoList.repaint();
         }
     }
     
@@ -157,6 +160,7 @@ public class SeeAlsoPanel extends JPanel
             int rowCount    = seeAlsoModel.getSize();
             if ( rowCount > 0 )
                 seeAlsoList.setSelectedIndex( rowCount - 1 );
+            addField.setValue( "" );
         }
     }
 }

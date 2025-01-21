@@ -28,19 +28,16 @@ import javax.swing.border.Border;
 import com.judahstutorials.glossary.ConnectionMgr;
 import com.judahstutorials.glossary.Definition;
 
+@SuppressWarnings("serial")
 public class QueryDialog extends JDialog
 {
     private static final String             likeStr =
         "SELECT * FROM definition "
         + "WHERE term LIKE ? " 
         + "ORDER BY term, SEQ_NUM";
-    private static final PreparedStatement  likeSQL =
-        ConnectionMgr.getPreparedStatement( likeStr );
     private static final String             allStr  =
         "SELECT * FROM definition "
         + "ORDER BY term, SEQ_NUM";
-    private static final PreparedStatement  allSQL  =
-        ConnectionMgr.getPreparedStatement( allStr );
     
     private final JTextField        likeField   = new JTextField( 10 );
     private final DefaultListModel<String> resultModel   =
@@ -136,11 +133,11 @@ public class QueryDialog extends JDialog
             String              like        = likeField.getText();
             PreparedStatement   statement   = null;
             if ( like.isEmpty() )
-                statement = allSQL;
+                statement = ConnectionMgr.getPreparedStatement( allStr );
             else
             {
-                likeSQL.setString( 1, like );
-                statement = likeSQL;
+                statement = ConnectionMgr.getPreparedStatement( likeStr );
+                statement.setString( 1, like );
             }
             ResultSet       resultSet   = statement.executeQuery();
             resultModel.removeAllElements();
