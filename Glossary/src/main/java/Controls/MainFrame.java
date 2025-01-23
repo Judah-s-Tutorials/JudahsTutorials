@@ -181,7 +181,14 @@ public class MainFrame
     private List<JComponent> getAbledComponents()
     {
         List<JComponent>    list    = 
-            Arrays.asList( ident, term, seqNum, slug, description );
+            Arrays.asList( 
+                ident, 
+                term, 
+                seqNum, 
+                slug, 
+                description, 
+                seeAlsoPanel
+        );
         List<JComponent>    ulist   =
             Collections.unmodifiableList( list );
         return ulist;
@@ -190,6 +197,8 @@ public class MainFrame
     private void commit( ActionEvent evt )
     {
         currDef.commit();
+        if ( currDef.isMarkedForDelete() )
+            reset( false );
         seeAlsoPanel.setDefinition( currDef );
         frame.repaint();
     }

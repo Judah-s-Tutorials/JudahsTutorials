@@ -13,7 +13,9 @@ public class SeeAlso
     private static final String             deleteString    =
         "DELETE from see_also where term_id = ?";
     private static final String             updateString    =
-        "UPDATE see_SET url = ?";
+        "UPDATE see_also SET "
+            + "url = ?"
+            + "where id = ?";
     private static final String             listForStr      =
         "SELECT * FROM see_also WHERE term_id = ? ";
     private static final String             deleteForStr    =
@@ -83,11 +85,9 @@ public class SeeAlso
     {
         try
         {
-            updateSQL.setInt( 1, ident );
-            if ( updateSQL.executeUpdate() == 1 )
-                ident = null;
-            else
-                SQLUtils.postSQLError( "Update SeeAlso failure" );
+            updateSQL.setString( 1, url );
+            updateSQL.setInt( 2, ident );
+            updateSQL.executeUpdate();
         }
         catch ( SQLException exc )
         {

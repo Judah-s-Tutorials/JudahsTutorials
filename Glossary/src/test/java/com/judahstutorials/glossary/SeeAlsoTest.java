@@ -6,12 +6,16 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import test_utils.SeeAlsoTestGUI;
+
 class SeeAlsoTest
 {
+    private static SeeAlsoTestGUI   testGUI = new SeeAlsoTestGUI();
 
     @BeforeAll
     static void setUpBeforeClass() throws Exception
     {
+        ConnectionMgr.selectDatabase( ConnectionMgr.TESTING );
     }
 
     @BeforeEach
