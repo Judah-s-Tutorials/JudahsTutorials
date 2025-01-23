@@ -242,7 +242,6 @@ public class Definition
             insertSQL.setInt( 2, getSeqNum() );
             insertSQL.setString( 3, getSlug() );
             insertSQL.setString( 4, getDescription() );
-            System.out.println( insertSQL );
             if ( insertSQL.executeUpdate() == 1 )
             {
                 ResultSet   result  = insertSQL.getGeneratedKeys();
@@ -309,7 +308,7 @@ public class Definition
         return ident;
     }
     
-    private void setID( int ident )
+    public void setID( int ident )
     {
         this.ident = ident;
     }

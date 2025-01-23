@@ -119,7 +119,7 @@ public class SeeAlsoTestGUI
     private JButton getButton()
     {
         Predicate<JComponent>   pred    = 
-            ComponentFinder.getButtonPredicate( "Delete" );
+            ComponentFinder.getButtonPredicate( "Delete Selected" );
         JComponent  comp    = ComponentFinder.find( seeAlsoPanel, pred );
         assertNotNull( comp );
         assertTrue( comp instanceof JButton );

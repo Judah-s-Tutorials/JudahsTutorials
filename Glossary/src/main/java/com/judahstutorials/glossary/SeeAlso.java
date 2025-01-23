@@ -11,7 +11,7 @@ public class SeeAlso
     private static final String             insertString    =
         "INSERT INTO see_also (term_id, url) VALUES (?, ?)";
     private static final String             deleteString    =
-        "DELETE from see_also where term_id = ?";
+        "DELETE from see_also where id = ?";
     private static final String             updateString    =
         "UPDATE see_also SET "
             + "url = ?"
@@ -22,28 +22,28 @@ public class SeeAlso
         "DELETE from see_also where term_id = ?";
     
     private Integer ident;
-    private int     termID;
+    private Integer termID;
     private String  url;
     
     private transient boolean   delete  = false;
     private transient boolean   update  = false;
     private transient boolean   error   = false;
     
-    private SeeAlso( Integer ident, int termID, String url )
+    public SeeAlso( Integer ident, Integer termID, String url )
     {
-        this.ident = ident;
-        this.termID = termID;
-        this.url = url;
+        setID( ident );
+        setTermID( termID );
+        setURL( url );
     }
     
-    public SeeAlso( int termID, String url )
+    public SeeAlso( Integer termID, String url )
     {
         this( null, termID, url );
     }
     
     public SeeAlso()
     {
-        this( null, 0, "" );
+        this( null, null, "" );
     }
     
     public void markForDelete( boolean delete )
@@ -81,6 +81,23 @@ public class SeeAlso
         }
     }
     
+    public void delete()
+    {
+        try
+        {
+            PreparedStatement   deleteSQL   =
+                ConnectionMgr.getPreparedStatement( deleteString );
+            deleteSQL.setInt( 1, ident );
+            if ( deleteSQL.executeUpdate() != 1 )
+                SQLUtils.postSQLError( "Delete failure" );
+
+        }
+        catch ( SQLException exc )
+        {
+            SQLUtils.postSQLException( "Delete for term", exc );
+        }
+    }
+    
     private void update( PreparedStatement updateSQL )
     {
         try
@@ -102,9 +119,7 @@ public class SeeAlso
             PreparedStatement   deleteSQL   =
                 ConnectionMgr.getPreparedStatement( deleteForStr );
             deleteSQL.setInt( 1, termID );
-            if ( deleteSQL.executeUpdate() != 1 )
-                SQLUtils.postSQLError( "Delete for term failure" );
-
+            deleteSQL.executeUpdate();
         }
         catch ( SQLException exc )
         {
@@ -130,7 +145,7 @@ public class SeeAlso
     
     public void insert()
     {
-        if ( ident != null )
+        if ( ident == null )
         {
             PreparedStatement  insertSQL       =
                 ConnectionMgr.getPreparedStatement( insertString );
@@ -145,7 +160,6 @@ public class SeeAlso
         {
             insertSQL.setInt( 1, termID );
             insertSQL.setString( 2, url );
-            insertSQL.executeUpdate();
             if ( insertSQL.executeUpdate() == 1 )
             {
                 ResultSet   key = insertSQL.getGeneratedKeys();
@@ -184,16 +198,31 @@ public class SeeAlso
         {
             if ( next.isMarkedForDelete() )
                 next.delete( deleteSQL );
-            else if ( next.getIdent() != null )
+            else if ( next.getID() != null )
                 next.insert( insertSQL );
             else if ( next.isMarkedForUpdate() )
                 next.update( updateSQL );
         }
     }
 
-    public Integer getIdent()
+    public Integer getID()
     {
         return ident;
+    }
+    
+    public void setID( Integer ident )
+    {
+        this.ident = ident;
+    }
+    
+    public Integer getTermID()
+    {
+        return termID;
+    }
+    
+    public void setTermID( Integer termID )
+    {
+        this.termID = termID;
     }
 
     public String getURL()
@@ -204,7 +233,6 @@ public class SeeAlso
     public void setURL( String url )
     {
         this.url = url;
-        markForUpdate( true );
     }
     
     public String toString()
