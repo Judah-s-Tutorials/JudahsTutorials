@@ -2,7 +2,7 @@ package com.judahstutorials.glossary;
 
 import javax.swing.SwingUtilities;
 
-import Controls.MainFrame;
+import com.judahstutorials.glossary.Controls.MainFrame;
 
 public class Main
 {

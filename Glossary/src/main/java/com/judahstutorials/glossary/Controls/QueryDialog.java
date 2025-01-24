@@ -1,4 +1,4 @@
-package Controls;
+package com.judahstutorials.glossary.Controls;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -26,34 +26,30 @@ import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import com.judahstutorials.glossary.ConnectionMgr;
-import com.judahstutorials.glossary.Definition_draft;
-import com.judahstutorials.glossary.SeeAlso_draft;
+import com.judahstutorials.glossary.Definition;
 
-public class QueryDialog_draft extends JDialog
+@SuppressWarnings("serial")
+public class QueryDialog extends JDialog
 {
     private static final String             likeStr =
         "SELECT * FROM definition "
         + "WHERE term LIKE ? " 
         + "ORDER BY term, SEQ_NUM";
-    private static final PreparedStatement  likeSQL =
-        ConnectionMgr.getPreparedStatement( likeStr );
     private static final String             allStr  =
         "SELECT * FROM definition "
         + "ORDER BY term, SEQ_NUM";
-    private static final PreparedStatement  allSQL  =
-        ConnectionMgr.getPreparedStatement( allStr );
     
     private final JTextField        likeField   = new JTextField( 10 );
     private final DefaultListModel<String> resultModel   =
         new DefaultListModel<>();
     private final JList<String>     resultList  = 
         new JList<>( resultModel );
-    private final List<Definition_draft>  results     = new ArrayList<>();
+    private final List<Definition>  results     = new ArrayList<>();
     
     private int choice      = JOptionPane.OK_OPTION;
     private int selection   = -1;
     
-    public QueryDialog_draft( JFrame parent)
+    public QueryDialog( JFrame parent)
     {
         super( parent, true );
         setTitle( "Query Definition_draft Table" );
@@ -72,9 +68,9 @@ public class QueryDialog_draft extends JDialog
         return choice;
     }
     
-    public Definition_draft getSelection()
+    public Definition getSelection()
     {
-        Definition_draft  def     = null;
+        Definition  def     = null;
         if ( selection > 0 && selection < results.size() )
             def = results.get( selection );
         return def;
@@ -137,23 +133,24 @@ public class QueryDialog_draft extends JDialog
             String              like        = likeField.getText();
             PreparedStatement   statement   = null;
             if ( like.isEmpty() )
-                statement = allSQL;
+                statement = ConnectionMgr.getPreparedStatement( allStr );
             else
             {
-                likeSQL.setString( 1, like );
-                statement = likeSQL;
+                statement = ConnectionMgr.getPreparedStatement( likeStr );
+                statement.setString( 1, like );
             }
             ResultSet       resultSet   = statement.executeQuery();
             resultModel.removeAllElements();
             results.clear();
             while ( resultSet.next() )
             {
-                Definition_draft  def     = new Definition_draft( resultSet );
+                Definition  def     = new Definition( resultSet );
                 String      term    = def.getTermDisplay();
                 resultModel.addElement( term );
                 results.add( def );
             }
             resultSet.close();
+            ConnectionMgr.closeConnection();
         }
         catch ( SQLException exc )
         {

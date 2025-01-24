@@ -1,4 +1,4 @@
-package Controls;
+package com.judahstutorials.glossary.Controls;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -52,19 +52,19 @@ public class SeeAlsoPanel extends JPanel
     public void setDefinition( Definition def )
     {
         currDef = def;
-        if ( def == null || def.getID() == null )
+        reset();
+        if ( def != null )
         {
-            seeAlsoModel.removeAllElements();
-            addField.setValue( "" );
-            addField.setEnabled( false );
+            seeAlsoModel.addAll( def.getSeeAlso() );
+            setEnabled( true );
         }
-        else
-        {
-            seeAlsoModel.removeAllElements();
-            List<SeeAlso>   defList     = currDef.getSeeAlso();
-            seeAlsoModel.addAll( defList );
-            addField.setEnabled( true );
-        }
+    }
+    
+    public void reset()
+    {
+        seeAlsoModel.clear();
+        addField.setValue( "" );
+        setEnabled( false );
     }
 
     private JScrollPane getScrolledList()
@@ -107,7 +107,7 @@ public class SeeAlsoPanel extends JPanel
 
         addField.setValue( "" );
         addField.addPropertyChangeListener( "value", this::newSeeAlso );
-        addField.setEnabled( false );
+        addField.addActionListener( this::newSeeAlso );
         
         panel.add( new JLabel( "New link: " ) );
         panel.add( addField );
@@ -141,18 +141,27 @@ public class SeeAlsoPanel extends JPanel
                     );
                 if ( text != null && !text.isEmpty() )
                 {
-                    see.setURL( text );
+                    see.updateURL( text );
                     seeAlsoList.repaint();
                 }
             }
         }
     }
     
+    private void newSeeAlso( ActionEvent evt )
+    {
+        String  url = addField.getText();
+        newSeeAlso( url );
+    }
+    
     private void newSeeAlso( PropertyChangeEvent evt )
     {
         String  url = (String)addField.getValue();
-        System.out.println( url );
-        System.out.println( addField.getText() );
+        newSeeAlso( url );
+    }
+    
+    private void newSeeAlso( String url )
+    {
         if ( url != null && !url.isEmpty() )
         {
             SeeAlso next    = new SeeAlso( currDef.getID(), url );

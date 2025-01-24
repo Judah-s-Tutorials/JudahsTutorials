@@ -1,4 +1,4 @@
-package sandbox;
+package com.judahstutorials.glossary.sandbox;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
@@ -10,9 +10,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.judahstutorials.glossary.Definition;
-
-import Controls.QueryDialog;
-import Controls.SeeAlsoPanel;
+import com.judahstutorials.glossary.Controls.QueryDialog;
+import com.judahstutorials.glossary.Controls.SeeAlsoPanel;
 
 /**
  * 

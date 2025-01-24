@@ -5,12 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,13 +28,19 @@ class SeeAlsoTest
     }
 
     @BeforeEach
-    void setUp() throws Exception
+    public void setUp() throws Exception
     {
         testDB = new TestDB();
     }
+    
+    @AfterEach
+    public void afterEach()
+    {
+        ConnectionMgr.closeConnection();
+    }
 
     @Test
-    void testSeeAlsoIntIntString()
+    public void testSeeAlsoIntIntString()
     {
         int     ident   = 25;
         int     termID  = 35;
@@ -46,7 +52,7 @@ class SeeAlsoTest
     }
 
     @Test
-    void testSeeAlsoIntString()
+    public void testSeeAlsoIntString()
     {
         Integer ident   = null;
         int     termID  = 35;
@@ -58,7 +64,7 @@ class SeeAlsoTest
     }
 
     @Test
-    void testSeeAlso()
+    public void testSeeAlso()
     {
         Integer ident   = null;
         Integer termID  = null;
@@ -70,7 +76,7 @@ class SeeAlsoTest
     }
 
     @Test
-    void testMarkForDelete()
+    public void testMarkForDelete()
     {
         SeeAlso seeAlso = new SeeAlso();
         assertFalse( seeAlso.isMarkedForDelete() );
@@ -81,14 +87,14 @@ class SeeAlsoTest
     }
 
     @Test
-    void testIsError()
+    public void testIsError()
     {
         SeeAlso seeAlso = new SeeAlso();
         assertFalse( seeAlso.isError() );
     }
 
     @Test
-    void testMarkForUpdate()
+    public void testMarkForUpdate()
     {
         SeeAlso seeAlso = new SeeAlso();
         assertFalse( seeAlso.isMarkedForUpdate() );
@@ -99,26 +105,43 @@ class SeeAlsoTest
     }
 
     @Test
-    void testGetID()
+    public void testGetID()
     {
         Integer testID  = 400;
         SeeAlso seeAlso = new SeeAlso();
         assertNull( seeAlso.getID() );
+        assertFalse( seeAlso.isMarkedForUpdate() );
         seeAlso.setID( testID );
         assertEquals( testID, seeAlso.getID() );
+        // setID doesn't set 'marked for update'
+        assertFalse( seeAlso.isMarkedForUpdate() );
     }
 
     @Test
-    void testGetURL()
+    public void testGetTermID()
+    {
+        Integer testTermID  = 400;
+        SeeAlso seeAlso = new SeeAlso();
+        assertNull( seeAlso.getTermID() );
+        assertFalse( seeAlso.isMarkedForUpdate() );
+        seeAlso.updateTermID( testTermID );
+        assertEquals( testTermID, seeAlso.getTermID() );
+        assertTrue( seeAlso.isMarkedForUpdate() );
+    }
+
+    @Test
+    public void testGetURL()
     {
         String  testURL = "Test URL";
         SeeAlso seeAlso = new SeeAlso();
-        seeAlso.setURL( testURL );
+        assertFalse( seeAlso.isMarkedForUpdate() );
+        seeAlso.updateURL( testURL );
         assertEquals( testURL, seeAlso.getURL() );
+        assertTrue( seeAlso.isMarkedForUpdate() );
     }
 
     @Test
-    void testInsert()
+    public void testInsert()
     {
         int             termID      = 1000;
         List<SeeAlso>   expected    = new ArrayList<>();
@@ -140,7 +163,7 @@ class SeeAlsoTest
     }
 
     @Test
-    void testInsertIntString()
+    public void testInsertIntString()
     {
         int             termID      = 1000;
         List<SeeAlso>   expected    = new ArrayList<>();
@@ -165,7 +188,7 @@ class SeeAlsoTest
     }
 
     @Test
-    void testUpdate()
+    public void testUpdate()
     {
         String          updateStr   = "_modified";
         Definition      def         = testDB.getDefinition( 0 );
@@ -175,9 +198,10 @@ class SeeAlsoTest
         assertTrue( allSAsOrig.size() > 0 );
         allSAsOrig.forEach( seeAlso -> {
             String  url = seeAlso.getURL() + updateStr;
-            seeAlso.setURL( url );
-            seeAlso.markForUpdate( true );
+            seeAlso.updateURL( url );
+            assertTrue( seeAlso.isMarkedForUpdate() );
             seeAlso.update();
+            assertFalse( seeAlso.isMarkedForUpdate() );
        });
         
         List<SeeAlso>   allSAsUpd   = SeeAlso.getAllFor( termID );
@@ -185,11 +209,12 @@ class SeeAlsoTest
         allSAsOrig.forEach( seeAlso -> {
             String  url = seeAlso.getURL();
             assertTrue( url.endsWith( updateStr ) );
+            assertFalse( seeAlso.isMarkedForUpdate() );
         });
     }
 
     @Test
-    void testDelete()
+    public void testDelete()
     {
         int             testInx     = 2;
         Definition      def         = testDB.getDefinition( 0 );
@@ -209,7 +234,7 @@ class SeeAlsoTest
     }
 
     @Test
-    void testDeleteAll()
+    public void testDeleteAll()
     {
         Definition      def         = testDB.getDefinition( 0 );
         int             termID      = def.getID();
@@ -224,21 +249,121 @@ class SeeAlsoTest
     }
 
     @Test
-    void testCommit()
+    public void testCommit()
     {
-        fail("Not yet implemented");
+        final String    updateSuffix    = "updated";
+        
+        int     termID      = 1000;
+        // Create a list with two objects to later be deleted,
+        // two objects to later be update, and two objects to
+        // later remain unchanged.
+        SeeAlso toKeep1     = new SeeAlso( termID, "to keep 1" );
+        SeeAlso toDelete1   = new SeeAlso( termID, "to delete 1" );
+        SeeAlso toUpdate1   = new SeeAlso( termID, "to update 1" );
+
+        SeeAlso toKeep2     = new SeeAlso( termID, "to keep 2" );
+        SeeAlso toDelete2   = new SeeAlso( termID, "to delete 2" );
+        SeeAlso toUpdate2   = new SeeAlso( termID, "to update 2" );
+        
+        List<SeeAlso>   inList  = new ArrayList<>();
+        inList.add( toKeep1 );
+        inList.add( toDelete1 );
+        inList.add( toUpdate1 );
+        
+        inList.add( toKeep2 );
+        inList.add( toDelete2 );
+        inList.add( toUpdate2 );
+        
+        SeeAlso.commit( inList );
+        List<SeeAlso>   outList1    = SeeAlso.getAllFor( termID );
+        assertNotNull( outList1 );
+        assertEquals( inList.size(), outList1.size() );
+        inList.forEach( s -> assertNotNull( getByID( s, outList1 ) ) );
+        outList1.forEach( s -> assertNotNull( s.getID() ) );
+        
+        for ( SeeAlso seeAlso : inList )
+        {
+            String  url     = seeAlso.getURL();
+            assertFalse( seeAlso.isMarkedForUpdate() );
+            if ( url.contains( "delete" ) )
+                seeAlso.markForDelete( true );
+            else if ( url.contains( "update" ) )
+            {
+                seeAlso.updateURL( url + updateSuffix );
+                assertTrue( seeAlso.isMarkedForUpdate() );
+            }
+            else
+                ;
+        }
+        
+        SeeAlso toInsert1   = new SeeAlso( termID, "to insert 1" );
+        SeeAlso toInsert2   = new SeeAlso( termID, "to insert 2" );
+        SeeAlso toInsert3   = new SeeAlso( termID, "to insert 3" );
+        inList.add( toInsert1 );
+        inList.add( toInsert2 );
+        inList.add( toInsert3 );
+        SeeAlso.commit( inList );
+        List<SeeAlso>   outList2    = SeeAlso.getAllFor( termID );
+        int     expCount    = 0;
+        for ( SeeAlso seeAlso : inList )
+        {
+            // Verify that all objects marked for delete are gone
+            String  inURL     = seeAlso.getURL();
+            if ( inURL.contains( "delete" ) )
+            {
+                assertNull( getByID( seeAlso, outList2 ) );
+            }
+            else
+            {
+                // Verify that all objects not marked for delete 
+                // are present
+                ++expCount;
+                SeeAlso outSeeAlso = getByID( seeAlso, outList2 );
+                assertNotNull( outSeeAlso );
+                assertNotNull( outSeeAlso.getID() );
+                String  outURL  = seeAlso.getURL();
+                
+                // Verify that all objects marked for update
+                // have been updated.
+                if ( inURL.contains( "update" ) )
+                {
+                    assert( outURL.startsWith( inURL ) );
+                    assert( outURL.endsWith( updateSuffix ) );
+                }
+                // Validate all object meant to be "kept," and
+                // all inserted objects.
+                else
+                    assertEquals( inURL, outURL );
+            }
+        }
+        assertEquals( expCount, outList2.size() );
     }
 
     @Test
-    void testToString()
+    public void testToString()
     {
-        fail("Not yet implemented");
+        int     termID  = 1000;
+        String  url     ="address";
+        SeeAlso seeAlso = new SeeAlso( termID, url );
+        String  testStr = seeAlso.toString();
+        assertFalse( testStr.contains( "HTML" ) );
+        assertTrue( testStr.contains( url ) );
+        
+        seeAlso.markForDelete( true );
+        testStr = seeAlso.toString();
+        assertTrue( testStr.contains( "HTML" ) );
+        assertTrue( testStr.contains( url ) );
     }
 
     @Test
-    void testGetAllFor()
+    public void testGetAllFor()
     {
-        fail("Not yet implemented");
+        Definition      def         = testDB.getDefinition( 0 );
+        int             termID      = def.getID();
+        List<SeeAlso>   allSAsOrig  = SeeAlso.getAllFor( termID );
+        assertNotNull( allSAsOrig );
+        assertTrue( allSAsOrig.size() > 2 );
+        allSAsOrig.forEach( s -> assertEquals( termID, s.getTermID() ) );
     }
     
     private static boolean equals( SeeAlso see1, SeeAlso see2 )

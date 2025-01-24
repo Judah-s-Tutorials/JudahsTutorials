@@ -131,7 +131,7 @@ public class SeeAlso
     {
         try
         {
-            deleteSQL.setInt( 1, termID );
+            deleteSQL.setInt( 1, ident );
             if ( deleteSQL.executeUpdate() == 1 )
                 ident = null;
             else
@@ -139,6 +139,7 @@ public class SeeAlso
         }
         catch ( SQLException exc )
         {
+            exc.printStackTrace();
             SQLUtils.postSQLException( "Delete SeeAlso", exc );
         }
     }
@@ -198,10 +199,13 @@ public class SeeAlso
         {
             if ( next.isMarkedForDelete() )
                 next.delete( deleteSQL );
-            else if ( next.getID() != null )
+            else if ( next.getID() == null )
                 next.insert( insertSQL );
             else if ( next.isMarkedForUpdate() )
+            {
                 next.update( updateSQL );
+                next.markForUpdate( false );
+            }
         }
     }
 
@@ -220,9 +224,10 @@ public class SeeAlso
         return termID;
     }
     
-    public void setTermID( Integer termID )
+    public void updateTermID( Integer termID )
     {
-        this.termID = termID;
+        setTermID( termID );
+        markForUpdate( true );
     }
 
     public String getURL()
@@ -230,9 +235,10 @@ public class SeeAlso
         return url;
     }
 
-    public void setURL( String url )
+    public void updateURL( String url )
     {
-        this.url = url;
+        setURL( url );
+        markForUpdate( true );
     }
     
     public String toString()
@@ -277,5 +283,15 @@ public class SeeAlso
             System.exit( 1 );
         }
         return list;
+    }
+    
+    private void setTermID( Integer termID )
+    {
+        this.termID = termID;
+    }
+
+    private void setURL( String url )
+    {
+        this.url = url;
     }
 }
