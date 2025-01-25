@@ -16,7 +16,7 @@ import com.judahstutorials.glossary.SeeAlso;
 
 public class TestDB
 {
-    private static final String insertDefStr        =
+    private static final String     insertDefStr    =
         "INSERT INTO definition (term, seq_num, slug, description ) "
             + "VALUES (?, ?, ?, ?);";
     private static final String     selectDefStr    =
@@ -30,6 +30,8 @@ public class TestDB
             + " WHERE id = ?";
     private static final String     deleteDefStr    =
         "DELETE from definition where id = ?";
+    private static final String     queryDefByIDStr =
+        "SELECT * from definition where id = ?";
 
     private static final String     insertSAStr     =
         "INSERT INTO see_also (term_id, url) VALUES (?, ?)";
@@ -134,7 +136,7 @@ public class TestDB
     
     public List<SeeAlso> selectSeeAlsoGivenTermID( int term )
     {
-        List<SeeAlso>       list    = new ArrayList();
+        List<SeeAlso>       list    = new ArrayList<>();
         PreparedStatement   select  =
             ConnectionMgr.getPreparedStatement( selectSAStr );
         ResultSet           result  = null;
@@ -145,7 +147,6 @@ public class TestDB
             while ( result.next() )
             {
                 int     ident   = result.getInt( "id" );
-                int     termID  = result.getInt( "term_id" );
                 String  url     = result.getString( "url" );
                 SeeAlso seeAlso = new SeeAlso( ident, term, url );
                 list.add( seeAlso );
@@ -163,6 +164,25 @@ public class TestDB
         }
         
         return list;
+    }
+    
+    public Definition queryDefGivenID( Integer ident )
+    {
+        Definition          def     = null;
+        PreparedStatement   sql     = 
+            ConnectionMgr.getPreparedStatement( queryDefByIDStr );
+        try
+        {
+            sql.setInt( 1, ident );
+            ResultSet   resultSet   = sql.executeQuery();
+            if ( resultSet.next() )
+                def = new Definition( resultSet );
+        }
+        catch ( SQLException exc )
+        {
+            exc.printStackTrace();
+        }
+        return def;
     }
     
     public boolean insert( List<SeeAlso> list )

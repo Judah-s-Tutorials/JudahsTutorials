@@ -41,6 +41,11 @@ public class SeeAlso
         this( null, termID, url );
     }
     
+    public SeeAlso( String url )
+    {
+        this( null, null, url );
+    }
+    
     public SeeAlso()
     {
         this( null, null, "" );
@@ -88,8 +93,7 @@ public class SeeAlso
             PreparedStatement   deleteSQL   =
                 ConnectionMgr.getPreparedStatement( deleteString );
             deleteSQL.setInt( 1, ident );
-            if ( deleteSQL.executeUpdate() != 1 )
-                SQLUtils.postSQLError( "Delete failure" );
+            deleteSQL.executeUpdate();
 
         }
         catch ( SQLException exc )
@@ -132,10 +136,8 @@ public class SeeAlso
         try
         {
             deleteSQL.setInt( 1, ident );
-            if ( deleteSQL.executeUpdate() == 1 )
-                ident = null;
-            else
-                SQLUtils.postSQLError( "Delete SeeAlso failure" );
+            deleteSQL.executeUpdate();
+            ident = null;
         }
         catch ( SQLException exc )
         {

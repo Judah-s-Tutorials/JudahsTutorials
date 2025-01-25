@@ -6,8 +6,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JOptionPane;
-
 public class Definition
 {
     private static final String     selectString    =
@@ -28,16 +26,23 @@ public class Definition
     private Integer     ident       = null;
     private String      term        = "";
     private Integer     seqNum      = null;
-    private String      slug        = null;
-    private String      description = null;
+    private String      slug        = "";
+    private String      description = "";
 
     private transient final List<SeeAlso>   seeAlso = new ArrayList<>();
-    private transient boolean   isError         = false;
     private transient boolean   markedForDelete = false;
     
     public Definition()
     {
-        
+    }
+    
+    public 
+    Definition( String term, Integer seqNum, String slug, String desc )
+    {
+        setTerm( term );
+        setSeqNum( seqNum );
+        setSlug( slug );
+        setDescription( desc );
     }
     
     public Definition( ResultSet resultSet )
@@ -81,33 +86,18 @@ public class Definition
             PreparedStatement   sql     = 
                 ConnectionMgr.getPreparedStatement( insertString );
             insert( sql );
+            seeAlso.forEach( s -> s.updateTermID( ident ) );
+            SeeAlso.commit( seeAlso );
         }
         else
         {
             PreparedStatement   sql     = 
                 ConnectionMgr.getPreparedStatement( updateString );
             update( sql );
+            seeAlso.forEach( s -> s.updateTermID( ident ) );
+            SeeAlso.commit( seeAlso );
         }
         ConnectionMgr.closeConnection();
-    }
-    
-    public 
-    Definition( String term, Integer seqNum, String slug, String desc )
-    {
-        setTerm( term );
-        setSeqNum( seqNum );
-        setSlug( slug );
-        setDescription( desc );
-    }
-    
-    public boolean isError()
-    {
-        return isError;
-    }
-    
-    public void resetError()
-    {
-        isError = false;
     }
     
     public void addSeeAlso( SeeAlso seeAlso )
@@ -151,7 +141,7 @@ public class Definition
     
     public void insert()
     {
-        if ( ident != null )
+        if ( ident == null )
         {
             PreparedStatement   insertSQL   =
                 ConnectionMgr.getPreparedStatement( insertString );
@@ -165,10 +155,8 @@ public class Definition
         try
         {
             deleteSQL.setInt( 1, ident );
-            if ( !deleteSQL.execute() )
-                SQLUtils.postSQLError( "Delete SeeAlso failure" );
-            else
-                SeeAlso.deleteAll( ident );
+            deleteSQL.executeUpdate();
+            SeeAlso.deleteAll( ident );
         }
         catch ( SQLException exc )
         {
@@ -250,6 +238,8 @@ public class Definition
                     throw new Error( "Failed to get generated key" );
                 }
                 ident = result.getInt( 1 );
+                seeAlso.forEach( s -> s.updateTermID( ident ) );
+                SeeAlso.commit( seeAlso );
                 result.close();
             }
         }
@@ -269,13 +259,12 @@ public class Definition
             updateSQL.setString( 3, getSlug() );
             updateSQL.setString( 4, description );
             updateSQL.setInt( 5, getID() );
-            System.out.println( updateSQL );
-            if ( updateSQL.executeUpdate() != 1 )
-                throw new Error( "Update failure" );
+            updateSQL.executeUpdate();
         }
         catch ( SQLException exc )
         {
-            SQLUtils.postSQLException( "Insert definition", exc );
+            exc.printStackTrace();
+            SQLUtils.postSQLException( "Update definition", exc );
         }
         return ident;
     }
@@ -311,10 +300,5 @@ public class Definition
     public void setID( int ident )
     {
         this.ident = ident;
-    }
-    
-    private static void postError( String err )
-    {
-        JOptionPane.showMessageDialog( null, err );
     }
 }
