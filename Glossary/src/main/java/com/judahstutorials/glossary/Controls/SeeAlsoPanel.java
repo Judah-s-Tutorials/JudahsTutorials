@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
-import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -26,6 +25,11 @@ import com.judahstutorials.glossary.SeeAlso;
 @SuppressWarnings("serial")
 public class SeeAlsoPanel extends JPanel
 {
+    public static final String  SEE_ALSO_JLIST      = "seeAlsoJList";
+    public static final String  SEE_ALSO_NEW_TEXT   = "seeAlsoJList";
+    public static final String  DELETE_BUTTON       = 
+        "seeAlsoDeleteButton";
+    
     private final DefaultListModel<SeeAlso> seeAlsoModel    =
         new DefaultListModel<>();
     private final JList<SeeAlso>            seeAlsoList     = 
@@ -71,6 +75,7 @@ public class SeeAlsoPanel extends JPanel
     {
         JScrollPane pane = new JScrollPane();
         pane.setViewportView( seeAlsoList );
+        seeAlsoList.setName( SEE_ALSO_JLIST );
         
         seeAlsoList.addMouseListener( new MouseAdapter() {
             @Override
@@ -93,6 +98,7 @@ public class SeeAlsoPanel extends JPanel
         panel.setBorder( border );
         
         JButton delete  = new JButton( "Delete Selected" );
+        delete.setName( DELETE_BUTTON );
         delete.addActionListener( this::toggleDelete );
         panel.add( delete );
         panel.add( getAddPanel() );
@@ -105,6 +111,7 @@ public class SeeAlsoPanel extends JPanel
         BoxLayout   layout      = new BoxLayout( panel, BoxLayout.X_AXIS );
         panel.setLayout( layout );
 
+        addField.setName( SEE_ALSO_NEW_TEXT );
         addField.setValue( "" );
         addField.addPropertyChangeListener( "value", this::newSeeAlso );
         addField.addActionListener( this::newSeeAlso );

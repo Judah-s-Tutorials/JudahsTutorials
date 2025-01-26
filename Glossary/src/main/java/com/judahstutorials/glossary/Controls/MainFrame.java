@@ -32,6 +32,19 @@ import com.judahstutorials.glossary.SeeAlso;
 
 public class MainFrame
 {
+    public static final String  SEE_ALSO_PANEL      = "seeAlsoPanel";
+    public static final String  TERM_ID_FIELD       = "defTermIDField";
+    public static final String  TERM_FIELD          = "defTermField";
+    public static final String  SEQ_NUM_FIELD       = "defSeqNumField";
+    public static final String  SLUG_FIELD          = "defSlugField";
+    public static final String  DESC_FIELD          = "defDefinitionText";
+    public static final String  NEW_BUTTON          = "defNewButton";
+    public static final String  QUERY_BUTTON        = "defQueryButton";
+    public static final String  COMMIT_BUTTON       = "defCommitButton";
+    public static final String  DELETE_BUTTON       = "defDeleteButton";
+    public static final String  CANCEL_BUTTON       = "defCancelButton";
+    public static final String  EXIT_BUTTON         = "defExitButton";
+
     private static final int    textWidth       = 20;
     
     private final JFrame            frame       =
@@ -52,6 +65,12 @@ public class MainFrame
     private final SeeAlsoPanel          seeAlsoPanel    =
         new SeeAlsoPanel();
     
+    private final JButton   newButton       = new JButton( "New" );
+    private final JButton   queryButton     = new JButton( "Query" );
+    private final JButton   deleteButton    = new JButton( "Delete" );
+    private final JButton   commitButton    = new JButton( "Commit" );
+    private final JButton   cancelButton    = new JButton( "Cancel" );
+    private final JButton   exitButton      = new JButton( "Exit" );
     private final List<JComponent>      abledComponents =
         getAbledComponents();
     
@@ -61,6 +80,8 @@ public class MainFrame
     {
         frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
         JPanel      contentPane = new JPanel( new BorderLayout() );
+        
+        seeAlsoPanel.setName( SEE_ALSO_PANEL );
         contentPane.add( getMainPanel(), BorderLayout.CENTER );
         contentPane.add( seeAlsoPanel, BorderLayout.EAST );
         contentPane.add( getControlPanel(), BorderLayout.SOUTH );
@@ -89,6 +110,7 @@ public class MainFrame
         panel.add( getHeaderPanel(), BorderLayout.NORTH );
         panel.add( description, BorderLayout.CENTER );
         
+        description.setLineWrap( true );
         description.addKeyListener( new KeyAdapter() {
             @Override
             public void keyTyped( KeyEvent evt )
@@ -145,15 +167,17 @@ public class MainFrame
             BorderFactory.createLineBorder( Color.BLACK, 2 );
         panel.setBorder( border );
         
-        JButton     newButton       = new JButton( "New" );
-        JButton     queryButton     = new JButton( "Query" );
-        JButton     commitButton    = new JButton( "Commit" );
-        JButton     deleteButton    = new JButton( "Delete" );
-        JButton     cancelButton    = new JButton( "Cancel" );
-        JButton     exitButton      = new JButton( "Exit" );
+        newButton.setName( NEW_BUTTON );
+        queryButton.setName( QUERY_BUTTON );
+        commitButton.setName( COMMIT_BUTTON );
+        deleteButton.setName( DELETE_BUTTON );
+        cancelButton.setName( CANCEL_BUTTON );
+        exitButton.setName( EXIT_BUTTON );
+
         newButton.addActionListener( this::newDef );
         queryButton.addActionListener( this::query );
         commitButton.addActionListener( this::commit );
+        deleteButton.addActionListener( this::delete );
         cancelButton.addActionListener( e -> reset( false ) );
         deleteButton.addActionListener( this::deleteDef );
         exitButton.addActionListener( e -> {
@@ -163,6 +187,7 @@ public class MainFrame
         
         panel.add( newButton );
         panel.add( queryButton );
+        panel.add( deleteButton );
         panel.add( commitButton );
         panel.add( cancelButton );
         panel.add( exitButton );
@@ -187,6 +212,9 @@ public class MainFrame
                 seqNum, 
                 slug, 
                 description, 
+                commitButton,
+                cancelButton,
+                deleteButton,
                 seeAlsoPanel
         );
         List<JComponent>    ulist   =
@@ -201,6 +229,31 @@ public class MainFrame
             reset( false );
         seeAlsoPanel.setDefinition( currDef );
         frame.repaint();
+    }
+    
+    private void delete( ActionEvent evt )
+    {
+        Object  source  = evt.getSource();
+        if ( source instanceof JButton )
+        {
+            JButton button      = (JButton)source;
+            boolean newState    = !currDef.isMarkedForDelete();
+            currDef.markForDelete( newState );
+            if ( newState )
+            {
+                button.setBackground( Color.RED );
+                reset( false );
+                deleteButton.setEnabled( true );
+                newButton.setEnabled( true );
+                cancelButton.setEnabled( true );
+            }
+            else
+            {
+                button.setBackground( null );
+                reset( true );
+            }
+            frame.repaint();
+        }
     }
     
     private void deleteDef( ActionEvent evt )

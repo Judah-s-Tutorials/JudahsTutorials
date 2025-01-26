@@ -1,10 +1,5 @@
 package com.judahstutorials.glossary;
 
-import static com.judahstutorials.glossary.GConstants.TITLE;
-
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-
 public class Utils
 {
     private static final String validSlugChars  =
@@ -24,39 +19,6 @@ public class Utils
     {
         
     }
-    
-    public static String getTitle( Element root )
-    {
-        String      title   = "Title Not Found";
-        NodeList    list    = root.getElementsByTagName( TITLE );
-        if ( list.getLength() > 0 )
-            title = list.item( 0 ).getTextContent();
-        return title;
-    }
-    
-    public static String getSlug( Definition_draft def )
-    {
-        String  rawSlug = def.getSlug();
-        if ( rawSlug == null )
-        {
-            rawSlug = def.getTerm();
-            Integer seqNum  = def.getSeqNum();
-            if ( seqNum != null )
-                rawSlug += "-" + seqNum;
-        }
-        String  slug    = encodeSlug( rawSlug );
-        return slug;
-    }
-    
-    public static String getTerm( Definition_draft def )
-    {
-        String  term    = def.getSlug();
-            Integer seqNum  = def.getSeqNum();
-        if ( seqNum != null )
-            term += "(" + seqNum + ")";
-        return term;
-    }
-    
     public static String encodeSlug( String rawSlug )
     {
         StringBuilder   slugBldr    = new StringBuilder();
