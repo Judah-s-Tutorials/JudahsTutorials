@@ -79,7 +79,11 @@ public class Definition
         {
             PreparedStatement   sql     = 
                 ConnectionMgr.getPreparedStatement( deleteString );
-            delete( sql );
+            if ( ident != null )
+            {
+                delete( sql );
+                SeeAlso.deleteAll( ident );
+            }
         }
         else if ( ident == null )
         {
@@ -192,8 +196,8 @@ public class Definition
     
     public void setSlug( String slug )
     {
-        if ( slug == null || slug.isEmpty() )
-            this.slug = null;
+        if ( slug == null )
+            this.slug = "";
         else
             this.slug = slug;
     }

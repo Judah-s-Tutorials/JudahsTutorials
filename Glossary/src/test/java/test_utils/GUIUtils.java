@@ -60,4 +60,16 @@ public class GUIUtils
             (screenSize.height - windowSize.height) / 2;
         window.setLocation( xco, yco );
     }
+    
+    public static void pause( long millis )
+    {
+        try
+        {
+            Thread.sleep( millis );
+        }
+        catch ( InterruptedException exc )
+        {
+            
+        }
+    }
 }

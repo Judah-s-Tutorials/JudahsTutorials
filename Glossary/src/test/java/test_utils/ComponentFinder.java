@@ -250,7 +250,7 @@ public class ComponentFinder
 //            .peek( System.out::println )
             .filter( topWindowFilter )
 //            .peek( System.out::println )
-            .filter( w -> (w instanceof JDialog))
+//            .filter( w -> (w instanceof JDialog))
 //            .peek( System.out::println )
             .filter( pred )
             .findFirst()

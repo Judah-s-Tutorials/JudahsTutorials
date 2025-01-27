@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
@@ -23,6 +24,10 @@ import test_utils.TestDB;
 
 class DefinitionTest
 {
+    private static final String     testTerm    = "Test Term";
+    private static final String     testURL     = "Test URL ";
+    private static List<SeeAlso>    testURLList = getURLList();
+    
     private TestDB  testDB;
     @BeforeAll
     static void setUpBeforeClass() throws Exception
@@ -159,6 +164,43 @@ class DefinitionTest
         expDef.addSeeAlso( new SeeAlso( null, "url B" ) );
         expDef.addSeeAlso( new SeeAlso( null, "url C" ) );
         testCommit( expDef );
+    }
+    
+    @Test
+    public void testCommitMisc()
+    {
+        Definition  expDef  = getTestTransaction();
+        expDef.commit();
+        assertNotNull( expDef.getID() );
+        Definition  actDef  = testDB.queryDefGivenID( expDef.getID() );
+        assertDefEquals( expDef, actDef );
+        
+        int             newSeqNum   = 100;
+        List<SeeAlso>   list        = expDef.getSeeAlso();
+        List<SeeAlso>   expURLList  = new ArrayList<>();
+        int             lastInx     = list.size();
+        expDef.setSeqNum( newSeqNum );
+        IntStream.iterate( 0, i -> i < lastInx, i -> i + 1 )
+            .forEach( i -> {
+                SeeAlso seeAlso = list.get( i );
+                if ( i % 2 == 0 )
+                {
+                    String  newURL  = seeAlso.getURL();
+                    seeAlso.updateURL( newURL + " updated" );
+                    expURLList.add( seeAlso );
+                }
+                else if ( i % 3 == 0 )
+                    seeAlso.markForDelete( true );
+                else
+                    expURLList.add( seeAlso );
+            });
+        expDef.commit();
+        actDef = testDB.queryDefGivenID( expDef.getID() );
+        List<SeeAlso>   actURLList  = actDef.getSeeAlso();
+        assertEquals( expURLList.size(), actURLList.size() );
+        expURLList.stream()
+            .map( SeeAlso::getURL )
+            .forEach( s -> assertNotNull( getByURL( s, actURLList ) ) );
     }
     
     @Test
@@ -440,5 +482,37 @@ class DefinitionTest
                 .findFirst()
                 .orElse( null );
         return seeAlso;
+    }
+    
+    /**
+     * Creates a copy of testURLList.
+     * Each member of the new list
+     * is a copy of a member of  testURLList,
+     * so changes to the members
+     * of the copy
+     * will not change the corresponding member
+     * of testURLList.
+     * 
+     * @return  an unmodifiable copy of testURLList
+     */
+    private Definition getTestTransaction()
+    {
+        Definition  def = new Definition();
+        def.setTerm( testTerm );
+        testURLList.stream()
+            .map( s -> s.getURL() )
+            .map( SeeAlso::new )
+            .forEach( def::addSeeAlso );
+        return def;
+    }
+    
+    private static List<SeeAlso> getURLList()
+    {
+        List<SeeAlso>   list    =
+            IntStream.iterate( 0, i -> i < 12 , i -> i + 1 )
+                .mapToObj( i -> testURL + i )
+                .map( SeeAlso::new )
+                .toList();
+        return list;
     }
 }

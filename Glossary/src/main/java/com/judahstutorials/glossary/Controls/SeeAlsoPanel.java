@@ -25,9 +25,9 @@ import com.judahstutorials.glossary.SeeAlso;
 @SuppressWarnings("serial")
 public class SeeAlsoPanel extends JPanel
 {
-    public static final String  SEE_ALSO_JLIST      = "seeAlsoJList";
-    public static final String  SEE_ALSO_NEW_TEXT   = "seeAlsoJList";
-    public static final String  DELETE_BUTTON       = 
+    public static final String  SA_JLIST            = "seeAlsoJList";
+    public static final String  SA_NEW_TEXT         = "seeAlsoNewText";
+    public static final String  SA_DELETE_BUTTON    = 
         "seeAlsoDeleteButton";
     
     private final DefaultListModel<SeeAlso> seeAlsoModel    =
@@ -36,6 +36,8 @@ public class SeeAlsoPanel extends JPanel
         new JList<>( seeAlsoModel );
     private final JFormattedTextField       addField        = 
         new JFormattedTextField();
+    private final JButton                   delete          = 
+        new JButton( "Delete Selected" );
     
     private Definition currDef;
 
@@ -60,7 +62,7 @@ public class SeeAlsoPanel extends JPanel
         if ( def != null )
         {
             seeAlsoModel.addAll( def.getSeeAlso() );
-            setEnabled( true );
+            addField.setEnabled( true );
         }
     }
     
@@ -68,14 +70,34 @@ public class SeeAlsoPanel extends JPanel
     {
         seeAlsoModel.clear();
         addField.setValue( "" );
-        setEnabled( false );
+        delete.setEnabled( false );
+        if ( currDef == null )
+        {
+            addField.setEnabled( false );
+        }
+        else
+        {
+            addField.setEnabled( true );
+        }
     }
 
     private JScrollPane getScrolledList()
     {
         JScrollPane pane = new JScrollPane();
         pane.setViewportView( seeAlsoList );
-        seeAlsoList.setName( SEE_ALSO_JLIST );
+        seeAlsoList.setName( SA_JLIST );
+        
+        seeAlsoList.addListSelectionListener( e -> {
+            Object  source  = e.getSource();
+            if ( source instanceof JList<?> && !e.getValueIsAdjusting() )
+            {
+                JList<?>    jList   = (JList<?>)source;
+                if ( jList.getSelectedIndex() < 0 )
+                    delete.setEnabled( false );
+                else
+                    delete.setEnabled( true );
+            }
+        });
         
         seeAlsoList.addMouseListener( new MouseAdapter() {
             @Override
@@ -97,8 +119,8 @@ public class SeeAlsoPanel extends JPanel
         panel.setLayout( layout );
         panel.setBorder( border );
         
-        JButton delete  = new JButton( "Delete Selected" );
-        delete.setName( DELETE_BUTTON );
+        delete.setEnabled( false );
+        delete.setName( SA_DELETE_BUTTON );
         delete.addActionListener( this::toggleDelete );
         panel.add( delete );
         panel.add( getAddPanel() );
@@ -111,13 +133,14 @@ public class SeeAlsoPanel extends JPanel
         BoxLayout   layout      = new BoxLayout( panel, BoxLayout.X_AXIS );
         panel.setLayout( layout );
 
-        addField.setName( SEE_ALSO_NEW_TEXT );
+        addField.setName( SA_NEW_TEXT );
         addField.setValue( "" );
         addField.addPropertyChangeListener( "value", this::newSeeAlso );
         addField.addActionListener( this::newSeeAlso );
         
         panel.add( new JLabel( "New link: " ) );
         panel.add( addField );
+        addField.setEnabled( false );
         return panel;
     }
     

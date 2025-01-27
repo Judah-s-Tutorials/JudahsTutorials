@@ -103,6 +103,11 @@ public class MainFrame
 
     private JPanel getMainPanel()
     {
+        description.setName( DESC_FIELD );
+        ident.setName( TERM_ID_FIELD );
+        term.setName( TERM_FIELD );
+        seqNum.setName( SEQ_NUM_FIELD );
+        slug.setName( SLUG_FIELD );
         JPanel      panel   = new JPanel( new BorderLayout() );
         Border      border  =
             BorderFactory.createLineBorder( Color.BLACK, 2 );
@@ -180,6 +185,7 @@ public class MainFrame
         deleteButton.addActionListener( this::delete );
         cancelButton.addActionListener( e -> reset( false ) );
         deleteButton.addActionListener( this::deleteDef );
+        deleteButton.setEnabled( false );
         exitButton.addActionListener( e -> {
             ConnectionMgr.closeConnection();
             System.exit( 0 );
@@ -214,7 +220,6 @@ public class MainFrame
                 description, 
                 commitButton,
                 cancelButton,
-                deleteButton,
                 seeAlsoPanel
         );
         List<JComponent>    ulist   =
@@ -242,15 +247,10 @@ public class MainFrame
             if ( newState )
             {
                 button.setBackground( Color.RED );
-                reset( false );
-                deleteButton.setEnabled( true );
-                newButton.setEnabled( true );
-                cancelButton.setEnabled( true );
             }
             else
             {
                 button.setBackground( null );
-                reset( true );
             }
             frame.repaint();
         }
@@ -293,11 +293,22 @@ public class MainFrame
         }
     }
     
+    private void enableInput( boolean enable )
+    {
+        ident.setEnabled( enable );
+        term.setEnabled( enable );
+        slug.setEnabled( enable );
+        description.setEnabled( enable );
+    }
+    
     private void reset( boolean live )
     {
+        deleteButton.setEnabled( false );
+        
         ident.setText( "" );
         term.setValue( "" );
         slug.setValue( "" );
+        seqNum.setText( "" );
         description.setText( "" );
         abledComponents.forEach( c -> c.setEnabled( live ) );
         seeAlsoPanel.setDefinition( null );
