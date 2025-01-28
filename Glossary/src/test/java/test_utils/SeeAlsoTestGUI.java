@@ -37,7 +37,6 @@ public class SeeAlsoTestGUI
     private final   JList<SeeAlso>              seeAlsoList;
     private final   DefaultListModel<SeeAlso>   seeAlsoModel;
     
-    
     private SeeAlsoTestGUI()
     {
         frame = new JFrame();

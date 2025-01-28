@@ -196,6 +196,7 @@ public class SeeAlsoPanel extends JPanel
         {
             SeeAlso next    = new SeeAlso( currDef.getID(), url );
             seeAlsoModel.addElement( next );
+            currDef.addSeeAlso( next );
             int rowCount    = seeAlsoModel.getSize();
             if ( rowCount > 0 )
                 seeAlsoList.setSelectedIndex( rowCount - 1 );

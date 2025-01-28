@@ -100,6 +100,11 @@ public class MainFrame
                 }
         });
     }
+    
+    public Definition getCurrDef()
+    {
+        return currDef;
+    }
 
     private JPanel getMainPanel()
     {
@@ -184,7 +189,6 @@ public class MainFrame
         commitButton.addActionListener( this::commit );
         deleteButton.addActionListener( this::delete );
         cancelButton.addActionListener( e -> reset( false ) );
-        deleteButton.addActionListener( this::deleteDef );
         deleteButton.setEnabled( false );
         exitButton.addActionListener( e -> {
             ConnectionMgr.closeConnection();
@@ -229,9 +233,14 @@ public class MainFrame
     
     private void commit( ActionEvent evt )
     {
+        currDef.setDescription( description.getText() );
         currDef.commit();
+        ConnectionMgr.closeConnection();
         if ( currDef.isMarkedForDelete() )
+        {
+            currDef = null;
             reset( false );
+        }
         seeAlsoPanel.setDefinition( currDef );
         frame.repaint();
     }
@@ -303,7 +312,15 @@ public class MainFrame
     
     private void reset( boolean live )
     {
-        deleteButton.setEnabled( false );
+        deleteButton.setBackground( null );
+        if ( currDef != null && currDef.getID() != null ) 
+        {
+            deleteButton.setEnabled( true );
+            if ( currDef.isMarkedForDelete() )
+                deleteButton.setBackground( Color.RED );
+        }
+        else
+            deleteButton.setEnabled( false );
         
         ident.setText( "" );
         term.setValue( "" );

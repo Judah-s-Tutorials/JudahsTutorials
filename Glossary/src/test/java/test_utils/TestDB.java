@@ -78,7 +78,7 @@ public class TestDB
             def3.addSeeAlso( seeAlso );
         });
         
-//        ConnectionMgr.closeConnection();
+        ConnectionMgr.closeConnection();
     }
     
     public int getNumDefinitions()

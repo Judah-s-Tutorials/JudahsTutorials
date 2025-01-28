@@ -3,9 +3,9 @@ $letterClosureNeeded = false;
 $conn;
 
 function getQueryByLetter( $letter ) {
-    $query = "SELECT * FROM DEFINITION "
+    $query = "SELECT * FROM definition "
         . "WHERE term like \"" . $letter . "%\" " 
-        . "order by term, SEQ_NUM";
+        . "order by term, seq_num";
     return $query;
 }
 
@@ -35,8 +35,8 @@ function traverseAlphabet()
         if ( $letterResult -> num_rows > 0 ) {
             newLetter( $l );
             foreach ($letterResult as $row) {
-                $id = $row['ID'];
-                $seeAlsoResult = $conn -> query("SELECT * FROM SEE_ALSO WHERE TERM_ID = $id");
+                $id = $row['id'];
+                $seeAlsoResult = $conn -> query("SELECT * FROM see_also WHERE term_id = $id");
                 formatEntry( $row, $seeAlsoResult );
                 $seeAlsoResult -> free_result();
             }
@@ -47,24 +47,24 @@ function traverseAlphabet()
 }
 
 function formatEntry( $row, $see ){
-    $seq = $row['SEQ_NUM'];
-    $slug = $row['SLUG'];
+    $seq = $row['seq_num'];
+    $slug = $row['slug'];
     $termSlug = $slug . "-term";
     $defSlug = $slug . "-def";
     echo "<dt " . "id=\"" . $termSlug . "\" onclick=\"hideShow('" . $defSlug . "')\">";
-    echo $row['TERM'];
+    echo $row['term'];
     if ( $seq != 0 )
         echo "($seq)" . " ";
     echo "</dt>\n";
     echo "<dd id=\"" . $defSlug . "\">\n";
-    echo $row['DESCRIPTION'];
+    echo $row['description'];
     
     $seeCount=mysqli_num_rows($see);
     if ( $seeCount > 0 ) {
         echo "<p class=\"see-also\">See Also:</p>\n";
         echo "<ul>\n";
         foreach ($see as $row) {
-            $text = $row['SEE'];
+            $text = $row['url'];
             echo "<li>" . $text . "</li>\n";
         }
         echo "</ul>\n";

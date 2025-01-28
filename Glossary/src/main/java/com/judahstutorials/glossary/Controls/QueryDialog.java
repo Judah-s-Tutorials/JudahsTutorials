@@ -64,6 +64,7 @@ public class QueryDialog extends JDialog
     
     public int showDialog()
     {
+        resultModel.removeAllElements();
         setVisible( true );
         return choice;
     }

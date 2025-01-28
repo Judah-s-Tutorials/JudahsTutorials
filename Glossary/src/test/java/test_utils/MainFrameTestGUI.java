@@ -20,7 +20,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 
-import com.judahstutorials.glossary.Utils;
+import com.judahstutorials.glossary.Definition;
 import com.judahstutorials.glossary.Controls.MainFrame;
 import com.judahstutorials.glossary.Controls.SeeAlsoPanel;
 
@@ -118,6 +118,14 @@ public class MainFrameTestGUI
         else
             consumer = () -> ((JTextComponent)comp).setText( text );
         setProperty( consumer );
+    }
+    
+    public void setValue( String name, String value )
+    {
+        JComponent  comp        = componentMap.get( name );
+        assertNotNull( comp );
+        assertTrue( comp instanceof JFormattedTextField );
+        setProperty( () -> ((JFormattedTextField)comp).setValue( value ) );
     }
     
     public void setValue( String name, Integer value )

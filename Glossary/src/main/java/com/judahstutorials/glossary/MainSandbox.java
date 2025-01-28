@@ -4,7 +4,7 @@ import javax.swing.SwingUtilities;
 
 import com.judahstutorials.glossary.Controls.MainFrame;
 
-public class Main
+public class MainSandbox
 {
     /**
      * Application entry point.
@@ -14,11 +14,11 @@ public class Main
     */
     public static void main(String[] args)
     {
-        ConnectionMgr.selectDatabase( ConnectionMgr.PRODUCTION );
+        ConnectionMgr.selectDatabase( ConnectionMgr.SANDBOX );
         SwingUtilities.invokeLater( () -> new MainFrame() );
     }
     
-    public Main()
+    public MainSandbox()
     {
         // TODO Auto-generated constructor stub
     }

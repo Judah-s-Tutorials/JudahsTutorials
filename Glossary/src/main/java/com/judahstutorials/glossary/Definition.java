@@ -234,6 +234,8 @@ public class Definition
             insertSQL.setInt( 2, getSeqNum() );
             insertSQL.setString( 3, getSlug() );
             insertSQL.setString( 4, getDescription() );
+            System.out.println( getDescription() );
+            System.out.println( insertSQL );
             if ( insertSQL.executeUpdate() == 1 )
             {
                 ResultSet   result  = insertSQL.getGeneratedKeys();
