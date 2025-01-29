@@ -1,4 +1,7 @@
-<?php require( "functions.php" ); ?>
+<?php 
+    require( "functions.php" ); 
+    define( "JONES", "https://judahstutorials.com/Classes/JavaClass/textbook/chap" )
+?>
 
 <!DOCTYPE html>
 <html lang="en">

@@ -1,4 +1,6 @@
-<?php require( "functions.php" ); ?>
+<?
+    // php require( "functions.php" );
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -17,19 +19,14 @@
 ?>
 </p>
 <h1>Glossary</h1>
-<dl>
+<p>
 <?php
-    $conn = connect();
-    if ($result = $conn -> query("SELECT * FROM DEFINITION")) {
-        foreach ($result as $row) {
-            $id = $row['ID'];
-            $seeAlsoResult = $conn -> query("SELECT * FROM SEE_ALSO WHERE TERM_ID = $id");
-            formatEntry( $row, $seeAlsoResult );
-            $seeAlsoResult -> free_result();
-        }
-        $result -> free_result();
-    }
+    $id = 5;
+    $str = "SELECT * FROM see_also "
+                    . "WHERE term_id = $id"
+                    . "ORDER BY url";
+    echo( $str . "<br>" );
 ?>
-</dl>
+</p>
 </body>
 </html>

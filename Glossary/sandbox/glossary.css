@@ -1,8 +1,16 @@
+body
+{
+    max-width: 40em;
+}
 dt:hover
 {
     color: red;
 }
-
+pre.example
+{
+    padding: 1em 1em 1em 1em;
+    border: 1px solid black;
+}
 dl
 {
 	margin-top: 0;

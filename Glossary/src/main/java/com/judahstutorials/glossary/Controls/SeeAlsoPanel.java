@@ -87,6 +87,10 @@ public class SeeAlsoPanel extends JPanel
         pane.setViewportView( seeAlsoList );
         seeAlsoList.setName( SA_JLIST );
         
+        SeeAlso listProtype = 
+            new SeeAlso( "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX" );
+        seeAlsoList.setPrototypeCellValue( listProtype );
+        
         seeAlsoList.addListSelectionListener( e -> {
             Object  source  = e.getSource();
             if ( source instanceof JList<?> && !e.getValueIsAdjusting() )

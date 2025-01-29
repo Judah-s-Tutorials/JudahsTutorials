@@ -36,7 +36,10 @@ function traverseAlphabet()
             newLetter( $l );
             foreach ($letterResult as $row) {
                 $id = $row['id'];
-                $seeAlsoResult = $conn -> query("SELECT * FROM see_also WHERE term_id = $id");
+                $seeAlsoResult = $conn -> 
+                    query("SELECT * FROM see_also "
+                    . "WHERE term_id = $id "
+                    . "ORDER BY url" );
                 formatEntry( $row, $seeAlsoResult );
                 $seeAlsoResult -> free_result();
             }
@@ -47,8 +50,15 @@ function traverseAlphabet()
 }
 
 function formatEntry( $row, $see ){
+    $term = $row['term'];
     $seq = $row['seq_num'];
     $slug = $row['slug'];
+    if ( empty( $slug ) ) {
+        $slug = $term;
+        if ( $seq > 0 ) {
+            $slug = $slug . "-" . $seq;
+        }
+    }
     $termSlug = $slug . "-term";
     $defSlug = $slug . "-def";
     echo "<dt " . "id=\"" . $termSlug . "\" onclick=\"hideShow('" . $defSlug . "')\">";
@@ -65,12 +75,48 @@ function formatEntry( $row, $see ){
         echo "<ul>\n";
         foreach ($see as $row) {
             $text = $row['url'];
+            trim( $text );
+            $firstChar = $text[0];
+            if ( $firstChar == "#" ){
+                $text = getGlossaryRef( $text );
+            }
+            elseif ( $firstChar =='-' ) {
+                $text = getJonesRef( $text );
+            }
             echo "<li>" . $text . "</li>\n";
         }
         echo "</ul>\n";
     }
     
     echo "</dd>\n";
+}
+
+function getGlossaryRef( $term ) {
+    $href = $term . "-term";
+    $href = "<a href=\"" 
+        . $href 
+        . "\">"
+        .$term
+        . "</a>";
+    return $href;
+}
+
+function getJonesRef( $chapter ) {
+    if ( strlen( $chapter ) > 1 )
+    {
+        $num = substr( $chapter, 1 );
+        if ( strlen( $num ) < 2 ) {
+            $num = "0" . $num;
+        }
+        $href = JONES . $num . ".pdf";
+        $aaa  =
+            "<a href=\"" 
+            . $href 
+            . "\">"
+            . "Jones, Chapter " . $num
+            . "</a>";
+    }
+    return $aaa;
 }
 
 function newLetter( $letter ) {

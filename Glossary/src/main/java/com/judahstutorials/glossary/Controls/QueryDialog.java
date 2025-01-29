@@ -72,7 +72,7 @@ public class QueryDialog extends JDialog
     public Definition getSelection()
     {
         Definition  def     = null;
-        if ( selection > 0 && selection < results.size() )
+        if ( selection >= 0 && selection <= results.size() )
             def = results.get( selection );
         return def;
     }
