@@ -121,8 +121,8 @@ import com.acmemail.judah.cartesian_plane.input.ProfileParser;
  * Property values can be saved from
  * or applied to
  * a profile via
- * {@link ProfileParser#getProperties()} and
- * {@link ProfileParser#loadProperties(Stream)}.
+ * {@linkplain ProfileParser#getProperties()} and
+ * {@linkplain ProfileParser#loadProperties(Stream)}.
  * <p>
  * To interrogate or edit values
  * the programmer can obtain
@@ -143,13 +143,10 @@ import com.acmemail.judah.cartesian_plane.input.ProfileParser;
  * by calling the {@linkplain #apply()} method,
  * or reset property values
  * from the PropertyManager via the {@linkplain #reset()} method.
- * Previously saved Profile objects
- * can be instantiated via the {@linkplain #Profile(Stream)} constructor
- * by providing it with the prior output
- * of the {@linkplain #getProperties()} method
- * or the equivalent.
  * </p>
  * @author Jack Straub
+ * 
+ * @see ProfileParser
  */
 public class Profile
 {

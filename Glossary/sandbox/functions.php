@@ -61,6 +61,8 @@ function formatEntry( $row, $see ){
     }
     $termSlug = $slug . "-term";
     $defSlug = $slug . "-def";
+    $termSlug = refineSlug( $termSlug );
+    $defSlug = refineSlug( $defSlug );
     echo "<dt " . "id=\"" . $termSlug . "\" onclick=\"hideShow('" . $defSlug . "')\">";
     echo $row['term'];
     if ( $seq != 0 )
@@ -78,7 +80,7 @@ function formatEntry( $row, $see ){
             trim( $text );
             $firstChar = $text[0];
             if ( $firstChar == "#" ){
-                $text = getGlossaryRef( $text );
+                $text = getGlossaryRef( $text, $termSlug );
             }
             elseif ( $firstChar =='-' ) {
                 $text = getJonesRef( $text );
@@ -91,10 +93,9 @@ function formatEntry( $row, $see ){
     echo "</dd>\n";
 }
 
-function getGlossaryRef( $term ) {
-    $href = $term . "-term";
+function getGlossaryRef( $term, $termSlug ) {
     $href = "<a href=\"" 
-        . $href 
+        . "#" . $termSlug
         . "\">"
         .$term
         . "</a>";
@@ -140,6 +141,31 @@ function closeLetter() {
         echo "</div>\n";
         $letterClosureNeeded = false;
     }
+}
+
+// replace invalid charaters in an ID
+function refineSlug( $slugIn ) {
+    $misc = ".-_";
+    $slugOut = "";
+    $temp = "";
+    if ( strlen( $slugIn ) > 1 ) {
+        $temp = substr( $slugIn, 1 );
+    }
+    if ( ctype_alpha( $slugIn[0]) ) {
+        $slugOut .= $slugIn[0];
+    }
+    else {
+        $slugOut .= 'X';
+    }
+    foreach ( str_split( $temp ) as $c ) {
+        if ( ctype_alnum( $c ) or str_contains( $misc, $c ) ) {
+            $slugOut .= $c;
+        }
+        else{
+            $slugOut .= '_';
+        }   
+    }
+    return $slugOut;
 }
 ?>
 

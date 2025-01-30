@@ -12,12 +12,14 @@ import javax.swing.BoxLayout;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
+import javax.swing.JFormattedTextField.AbstractFormatter;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.Border;
+import javax.swing.text.DefaultFormatter;
 
 import com.judahstutorials.glossary.Definition;
 import com.judahstutorials.glossary.SeeAlso;
@@ -141,11 +143,18 @@ public class SeeAlsoPanel extends JPanel
         addField.setValue( "" );
         addField.addPropertyChangeListener( "value", this::newSeeAlso );
         addField.addActionListener( this::newSeeAlso );
+        initFormattedTextField( addField );
         
         panel.add( new JLabel( "New link: " ) );
         panel.add( addField );
         addField.setEnabled( false );
         return panel;
+    }
+    
+    private void initFormattedTextField( JFormattedTextField textField )
+    {
+        AbstractFormatter formatter = textField.getFormatter();
+        ((DefaultFormatter)formatter).setOverwriteMode( false );
     }
     
     private void toggleDelete( ActionEvent evt )

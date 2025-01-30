@@ -132,7 +132,7 @@ class SeeAlsoTest
     @Test
     public void testGetURL()
     {
-        String  testURL = "Test URL";
+        String  testURL = "Temp URL";
         SeeAlso seeAlso = new SeeAlso();
         assertFalse( seeAlso.isMarkedForUpdate() );
         seeAlso.updateURL( testURL );

@@ -27,8 +27,8 @@ import static com.judahstutorials.glossary.Controls.SeeAlsoPanel.*;
 
 class MainFrameTest
 {
-    private static final String     testTerm    = "Test Term";
-    private static final String     testURL     = "Test URL ";
+    private static final String     testTerm    = "Temp Term";
+    private static final String     testURL     = "Temp URL ";
     private static List<SeeAlso>    testURLList = getURLList();
 
     private static MainFrame        mainFrame   = null;
@@ -95,9 +95,9 @@ class MainFrameTest
         );
         validateNotEnabled( DELETE_BUTTON, SA_DELETE_BUTTON );
         
-        testGUI.setText( TERM_FIELD, "test term" );
-        testGUI.setText( SLUG_FIELD, "test slug" );
-        testGUI.setText( DESC_FIELD, "test description" );
+        testGUI.setText( TERM_FIELD, "temp term" );
+        testGUI.setText( SLUG_FIELD, "temp slug" );
+        testGUI.setText( DESC_FIELD, "temp description" );
         testGUI.setValue( SEQ_NUM_FIELD, 5 );
 
         validateEnabled( NEW_BUTTON );
@@ -120,10 +120,10 @@ class MainFrameTest
     @Test
     public void testCommitMisc()
     {
-        String  testTerm    = "Test Term";
+        String  testTerm    = "Temp Term";
         int     testSeqNum  = 5;
-        String  testSlug    = "Test SLUG";
-        String  testDescr   = "Test Description";
+        String  testSlug    = "Temp SLUG";
+        String  testDescr   = "Temp Description";
         List<SeeAlso> list  = getURLList();
         testGUI.click( NEW_BUTTON );
         validateEnabled( 

@@ -151,12 +151,15 @@ public class QueryDialog extends JDialog
                 results.add( def );
             }
             resultSet.close();
-            ConnectionMgr.closeConnection();
         }
         catch ( SQLException exc )
         {
             exc.printStackTrace();
             System.exit( 1 );
+        }
+        finally
+        {
+            ConnectionMgr.closeConnection();
         }
     }
     

@@ -24,8 +24,8 @@ import test_utils.TestDB;
 
 class DefinitionTest
 {
-    private static final String     testTerm    = "Test Term";
-    private static final String     testURL     = "Test URL ";
+    private static final String     testTerm    = "Temp Term";
+    private static final String     testURL     = "Temp URL ";
     private static List<SeeAlso>    testURLList = getURLList();
     
     private TestDB  testDB;
@@ -358,7 +358,7 @@ class DefinitionTest
     @Test
     public void testSetSlug()
     {
-        String      testSlug    = "Test Slug";
+        String      testSlug    = "Temp Slug";
         Definition  def         = new Definition();
         assertEquals( "", def.getSlug() );
         def.setSlug( testSlug );
@@ -368,7 +368,7 @@ class DefinitionTest
     @Test
     public void testSetDescription()
     {
-        String      testDesc    = "Test Definition";
+        String      testDesc    = "Temp Definition";
         Definition  def         = new Definition();
         assertEquals( "", def.getDescription() );
         def.setDescription( testDesc );
@@ -381,10 +381,10 @@ class DefinitionTest
         // make sure toString doesn't crash on a trivial Definition
         new Definition().toString();
         
-        String      testTerm    = "Test Term";
+        String      testTerm    = "Temp Term";
         Integer     testSeqNum  = 1;
-        String      testSlug    = "Test Slug";
-        String      testDesc    = "Test";
+        String      testSlug    = "Temp Slug";
+        String      testDesc    = "Temp";
         Definition  def         = new Definition(
             testTerm,
             testSeqNum,
@@ -431,17 +431,17 @@ class DefinitionTest
         def.setID( 1000 );
         def.insert();
         
-        def.setTerm( "test" );
+        def.setTerm( "temp" );
         def.setSeqNum( null );
         def.setSlug( null );
         assertNotNull( def.getSlug() );
-        assertEquals( "test", def.getSlug() );
+        assertEquals( "temp", def.getSlug() );
         def.setSlug( "" );
         assertNotNull( def.getSlug() );
-        assertEquals( "test", def.getSlug() );
+        assertEquals( "temp", def.getSlug() );
         def.setSlug( null );
         def.setSeqNum( 1 );
-        assertEquals( "test-1", def.getSlug() );
+        assertEquals( "temp-1", def.getSlug() );
     }
     
     private void testCommit( Definition expDef )
