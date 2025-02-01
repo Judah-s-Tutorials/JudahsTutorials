@@ -8,7 +8,6 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -22,13 +21,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.Border;
 
 import com.judahstutorials.glossary.ConnectionMgr;
 import com.judahstutorials.glossary.Definition;
-import com.judahstutorials.glossary.SeeAlso;
 
 public class MainFrame
 {
@@ -108,7 +107,6 @@ public class MainFrame
 
     private JPanel getMainPanel()
     {
-        description.setName( DESC_FIELD );
         ident.setName( TERM_ID_FIELD );
         term.setName( TERM_FIELD );
         seqNum.setName( SEQ_NUM_FIELD );
@@ -118,8 +116,8 @@ public class MainFrame
             BorderFactory.createLineBorder( Color.BLACK, 2 );
         panel.setBorder( border );
         panel.add( getHeaderPanel(), BorderLayout.NORTH );
-        panel.add( description, BorderLayout.CENTER );
         
+        description.setName( DESC_FIELD );
         description.setLineWrap( true );
         description.addKeyListener( new KeyAdapter() {
             @Override
@@ -129,6 +127,8 @@ public class MainFrame
                     currDef.setDescription( description.getText() );
             }
         });
+        JScrollPane scrollPane  = new JScrollPane( description );
+        panel.add( scrollPane, BorderLayout.CENTER );
         ident.setEditable( false );
         reset( false );
         return panel;

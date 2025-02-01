@@ -30,7 +30,7 @@ import util.LineMetrics;
  * which are then compared to the actual values
  * produced by LineGenerator.
  * <p>
- * This is <em>note</em> intended to be
+ * This is <em>not</em> intended to be
  * a thorough unit test for the LineGenerator class;
  * see {@linkplain LineGeneratorTest}.
  * </p>

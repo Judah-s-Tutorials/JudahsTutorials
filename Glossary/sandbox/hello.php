@@ -6,8 +6,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Glossary of Java Terms</title>
-    <link rel="stylesheet" href="glossary.css"> 
+    <title>Ad Hoc</title>
+    <link rel="stylesheet" href="glossary.css">
     <script src="glossary.js"></script> 
 </head>
 <body>
@@ -19,32 +19,28 @@
 ?>
 </p>
 <h1>Glossary</h1>
-<p style="font-family: monospace;">
+<p>
 <?php
-    $misc = ".-_";
-    $strIn = "01abc-a.b_c@d-e&f_g^hA(9";
-    $strOut = "";
-    $temp = "";
-    if ( strlen( $strIn ) > 1 ) {
-        $temp = substr( $strIn, 1 );
-    }
-    if ( ctype_alpha( $strIn[0]) ) {
-        $strOut .= $strIn[0];
-    }
-    else {
-        $strOut .= 'X';
-    }
-    foreach ( str_split( $temp ) as $c ) {
-        if ( ctype_alnum( $c ) or str_contains( $misc, $c ) ) {
-            $strOut .= $c;
-        }
-        else{
-            $strOut .= '_';
-        }   
-    }
-    echo( $strIn . "<br>" );
-    echo( $strOut . "<br>" );
+$str = getGlossaryRef( "#class-2", "#class-2" );
+echo $str . "<br>";
+echo "<a href=\"#dupe\">Testing</a> <br>";
+function getGlossaryRef( $term, $termSlug ) {
+    $href = "<a href=\""
+    . $termSlug
+    . "\">"
+        .$term
+        . "</a>";
+    return $href;
+}
 ?>
 </p>
+<p>
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+</p>
+<div id="dupe">
+<p>
+"Jump to here"
+</p>
+</div>
 </body>
 </html>

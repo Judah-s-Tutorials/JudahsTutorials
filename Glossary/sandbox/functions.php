@@ -80,7 +80,8 @@ function formatEntry( $row, $see ){
             trim( $text );
             $firstChar = $text[0];
             if ( $firstChar == "#" ){
-                $text = getGlossaryRef( $text, $termSlug );
+                $termRef = $text;
+                $text = getGlossaryRef( $text, $termRef );
             }
             elseif ( $firstChar =='-' ) {
                 $text = getJonesRef( $text );
@@ -95,7 +96,7 @@ function formatEntry( $row, $see ){
 
 function getGlossaryRef( $term, $termSlug ) {
     $href = "<a href=\"" 
-        . "#" . $termSlug
+        . $termSlug . "-term"
         . "\">"
         .$term
         . "</a>";
