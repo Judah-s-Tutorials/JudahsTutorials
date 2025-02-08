@@ -18,7 +18,8 @@ dl
 }
 dt
 {
-	margin-top: 0;
+	margin-top: .2em;
+    font-family:  Arial, Helvetica, sans-serif;
 	margin-bottom: 0;
 	font-weight: bold;
     cursor: pointer;
@@ -60,4 +61,13 @@ p.letter-heading
 	margin-bottom: 0;
     font-weight: bold;
     font-size: 110%;
+}
+ul.see-also, li.see-also
+{
+    margin-top: 0;
+    margin-bottom: 0;
+}
+span.highlight
+{
+    background-color: yellow; 
 }

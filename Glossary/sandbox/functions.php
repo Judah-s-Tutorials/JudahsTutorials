@@ -74,30 +74,40 @@ function formatEntry( $row, $see ){
     $seeCount=mysqli_num_rows($see);
     if ( $seeCount > 0 ) {
         echo "<p class=\"see-also\">See Also:</p>\n";
-        echo "<ul>\n";
+        echo "<ul class=\"see-also\">\n";
         foreach ($see as $row) {
             $text = $row['url'];
             trim( $text );
             $firstChar = $text[0];
             if ( $firstChar == "#" ){
-                $termRef = $text;
-                $text = getGlossaryRef( $text, $termRef );
+                $term = substr( $text, 1 );
+                $termRef = refineSlug( $text );
+                $text = getGlossaryRef( $term, $termRef );
             }
             elseif ( $firstChar =='-' ) {
                 $text = getJonesRef( $text );
             }
-            echo "<li>" . $text . "</li>\n";
+            elseif ( $firstChar == '@' ) {
+                $text = getURLRef( $text );
+            }
+            echo "<li class=\"see-also\">" . $text . "</li>\n";
         }
         echo "</ul>\n";
     }
-    
     echo "</dd>\n";
 }
 
 function getGlossaryRef( $term, $termSlug ) {
+    $termSlugTail = substr( $termSlug, 1 );
+    /*
     $href = "<a href=\"" 
-        . $termSlug . "-term"
+        . "#". $termSlugTail . "-term"
         . "\">"
+        .$term
+        . "</a>";
+    */
+    $id = $termSlugTail . "-term";
+    $href = "<a href=\"javascript:linkShow( '$id' )\">"
         .$term
         . "</a>";
     return $href;
@@ -119,6 +129,39 @@ function getJonesRef( $chapter ) {
             . "</a>";
     }
     return $aaa;
+}
+
+/**
+ * <p>Assumptions:</p>
+ * <ol>
+ *      <li>'text' begins with an at sign (@)</li>
+ *      <li>
+ *          Following the @, text contains
+ *          an address, including an
+ *          optional domain reference,
+ *          optional path, and
+ *          optional fragment,
+ *          beginning with '#'.
+ *      </li>
+ *      <li>The address is followed by whitespace.</li>
+ *      <li>The whitespace is follwed by the link text.</li>
+ * </ol>
+ */
+function getURLRef( $text ) {
+    $addrPart = "";
+    $idPart = $text;
+    $pos = strpos( $text, " " );
+    if ( $pos )
+    {
+        $addrPart = "#" . substr( $text, 1, $pos- 1 );
+        $idPart = trim( substr( $text, $pos + 1 ) );
+    }
+    $ref = "<a href=\"https://" 
+    . $addrPart 
+    . "\">"
+    . $idPart
+    . "</a>";
+    return $ref;
 }
 
 function newLetter( $letter ) {

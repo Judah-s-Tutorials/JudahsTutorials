@@ -1,0 +1,72 @@
+<!DOCTYPE HTML>
+<html lang="en">
+<head>
+	<title>LineGenerator</title>
+</head>
+<body>
+    <div style=
+        "margin-left: 2em; 
+        padding: .5em .5em .5em .5em;
+        background-color: #EFEFEF;
+        border: 1px solid black;"
+    >
+        <p style="margin-top: 0; margin-bottom: 0">
+            <strong><sup>*</sup>Two thoughts</strong> on constructors
+            in the context of testing:
+        </p>
+        <ol>
+            <li>
+                If multiple constructors
+                are complicating the testing process,
+                we might consider eliminating
+                some of the constructors.
+                We have to balance convenience
+                to the developer 
+                with the cost of development and maintenance.
+                Consider:
+                <ul>
+                    <li>
+                        How often are developers
+                        going use a given constructor?
+                    </li>
+                    <li>
+                        How much convenience 
+                        do developers derive 
+                        from all those constructors?
+                        On this topic let's acknowledge that:
+                        <ul>
+                            <li>
+                                All those constructors
+                                might reduce development time
+                                significantly.
+                            </li>
+                            <li>
+                                If instantiating a particular class
+                                entails a complex calculation
+                                for a parameter,
+                                multiple constructors 
+                                can be helpful in confining the calculation
+                                to a single place (the constructor)
+                                rather than requiring the developer
+                                to perform the calculation.
+                                This would reduce the complexity of the code,
+                                leading to a product that is easier 
+                                to maintain and enhance.
+                            </li>
+                        </ul>
+                    </li>
+                    <li>
+                        How difficult will it be
+                        to write a unit test
+                        for a particular constructer?
+                    </li>
+                    <li>
+                        What impact does unit test development
+                        have on the overall development schedule?
+                    </li>
+                </ul>
+            </li>
+        </ol>
+    </div>
+</body>
+</html>
