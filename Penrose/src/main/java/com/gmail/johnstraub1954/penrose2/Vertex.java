@@ -5,7 +5,8 @@ import java.awt.geom.Point2D;
 
 public class Vertex
 {
-    private static final double twoPI   = 2 * Math.PI;
+    private static final double twoPI       = 2 * Math.PI;
+    private static final double toRadians   = Math.PI / 180;
     
     private final Point2D   coords;
     private final double    angle;
@@ -19,7 +20,7 @@ public class Vertex
     )
     {
         this.coords = coords;
-        this.angle = angle;
+        this.angle = angle * toRadians;
         this.adjSide = adjSide;
         this.isDotted = isDotted;
     }
@@ -32,7 +33,7 @@ public class Vertex
     )
     {
         this.coords = from.getNext();
-        this.angle = (from.angle + angle) % twoPI;
+        this.angle = (from.angle + angle * toRadians );
         this.adjSide = adjSide;
         this.isDotted = isDotted;
     }
@@ -67,9 +68,7 @@ public class Vertex
 
     public Line2D getAdjLine()
     {
-        double  xco     = coords.getX() + Math.cos( angle ) * adjSide;
-        double  yco     = coords.getY() - Math.sin( angle ) * adjSide;
-        Point2D end     = new Point2D.Double( xco, yco );
+        Point2D end     = getNext();
         Line2D  line    = new Line2D.Double( coords, end );
         return line;
     }

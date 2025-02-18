@@ -3,7 +3,6 @@ package com.gmail.johnstraub1954.penrose;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import java.io.Serializable;
 
 public class PDart extends PShape
 {
@@ -23,7 +22,7 @@ public class PDart extends PShape
     @Override
     public Path2D initPath(double longSide)
     {
-        double  base    = longSide * ( Math.sin( D36 ) / Math.sin( D108 ) );
+        double  base    = longSide * (Math.sin( D36 ) / Math.sin( D108 ));
         
         System.out.println( longSide + ", " + base );
         double  rightXco    = longSide * Math.cos( D36 );
