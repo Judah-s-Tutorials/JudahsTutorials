@@ -37,7 +37,7 @@ public class VertexDemo2 extends JPanel
         queue.add( vertex );
         vertex = new Vertex( vertex, 36 - 180, shortSide, true );
         queue.add( vertex );
-        vertex = new Vertex( vertex, 216 - 180, shortSide, true );
+        vertex = new Vertex( vertex, 216 - 180, shortSide, false );
         queue.add( vertex );
 
         int winSize = (int)(2 * longSide );

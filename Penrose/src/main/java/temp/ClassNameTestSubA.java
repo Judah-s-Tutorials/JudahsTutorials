@@ -1,4 +1,4 @@
-package test;
+package temp;
 
 public class ClassNameTestSubA extends ClassNameTestSuper
 {
