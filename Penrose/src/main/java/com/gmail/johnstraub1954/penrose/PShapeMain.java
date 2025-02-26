@@ -28,7 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class PShapeDemo1
+public class PShapeMain
 {
     /** Unicode for an up-arrow. */
     private static final String         upArrow     = "\u21e7";
@@ -51,7 +51,7 @@ public class PShapeDemo1
     
     public static void main(String[] args)
     {
-        PShapeDemo1 demo2   = new PShapeDemo1();
+        PShapeMain demo2   = new PShapeMain();
         String      clazz   = PKite.class.getSimpleName();
         PShape.setDefaultFillColor( clazz, new Color( 0x900C3F ) );
         clazz = PDart.class.getSimpleName();
@@ -66,7 +66,7 @@ public class PShapeDemo1
         });
     }
     
-    public PShapeDemo1()
+    public PShapeMain()
     {
         String  userDir = System.getProperty( "user.dir" );
         File    baseDir = new File( userDir );
@@ -80,6 +80,7 @@ public class PShapeDemo1
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new JPanel( new BorderLayout() );
         canvas = new PCanvas();
+        canvas.showGrid( true );
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );
         pane.add( new PMenuBar(), BorderLayout.NORTH );

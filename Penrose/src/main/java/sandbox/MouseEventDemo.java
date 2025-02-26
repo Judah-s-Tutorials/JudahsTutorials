@@ -1,4 +1,4 @@
-package com.gmail.johnstraub1954.penrose;
+package sandbox;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -37,6 +37,7 @@ public class MouseEventDemo
         frame.setVisible( true );
     }
 
+    @SuppressWarnings("serial")
     private static class Canvas extends JPanel
     {
         public Canvas()

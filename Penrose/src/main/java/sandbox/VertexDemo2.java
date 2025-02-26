@@ -1,7 +1,7 @@
-package com.gmail.johnstraub1954.penrose2;
+package sandbox;
 
-import static com.gmail.johnstraub1954.penrose2.PShape.D108;
-import static com.gmail.johnstraub1954.penrose2.PShape.D36;
+import static com.gmail.johnstraub1954.penrose.PShape.D108;
+import static com.gmail.johnstraub1954.penrose.PShape.D36;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -15,6 +15,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.gmail.johnstraub1954.penrose.Vertex;
+
+@SuppressWarnings("serial")
 public class VertexDemo2 extends JPanel
 {
     private static final double     longSide    = 200;

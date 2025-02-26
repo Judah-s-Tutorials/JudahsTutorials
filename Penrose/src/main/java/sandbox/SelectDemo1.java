@@ -1,4 +1,4 @@
-package com.gmail.johnstraub1954.penrose;
+package sandbox;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -18,6 +18,10 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import com.gmail.johnstraub1954.penrose.PDart;
+import com.gmail.johnstraub1954.penrose.PKite;
+import com.gmail.johnstraub1954.penrose.PShape;
 
 public class SelectDemo1
 {
@@ -166,13 +170,6 @@ public class SelectDemo1
         public void addShape( PShape shape )
         {
             shapes.add( shape );
-            repaint();
-        }
-        
-        public void removeShape( PShape shape )
-        {
-            shapes.remove( shape );
-            selected.remove( shape );
             repaint();
         }
         

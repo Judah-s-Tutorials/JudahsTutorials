@@ -10,19 +10,29 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+
+import com.gmail.johnstraub1954.penrose.matcher.Matcher;
+import com.gmail.johnstraub1954.penrose.matcher.VertexPair;
 
 public abstract class PShape implements Serializable
 {
     private static final long serialVersionUID = 3627364027645370422L;
     
-    public static final double  D18     = 18 * Math.PI / 180;
-    public static final double  D36     = 36 * Math.PI / 180;
-    public static final double  D72     = 72 * Math.PI / 180;
-    public static final double  D108    = 108 * Math.PI / 180;
-    public static final double  D01     = Math.PI / 180;
-    public static final double  TWO_PI  = 2 * Math.PI;
+    public static final double  D18         = 18 * Math.PI / 180;
+    public static final double  D36         = 36 * Math.PI / 180;
+    public static final double  D72         = 72 * Math.PI / 180;
+    public static final double  D108        = 108 * Math.PI / 180;
+    public static final double  D01         = Math.PI / 180;
+    public static final double  TWO_PI      = 2 * Math.PI;
+    public static final double  DOT_XIER    = .05;
+    public static final double  DOT_OFFSET  = DOT_XIER / 2;
     
     private static final Color              defaultFill     = Color.WHITE;
     private static final Map<String,Color>  fillColorMap    = 
@@ -36,24 +46,24 @@ public abstract class PShape implements Serializable
     
     private final Path2D        path;
     private final Rectangle2D   rightBounds;
-    private final double        longSide;
     
     private double  xco             = 0;
     private double  yco             = 0;
     private double  rotation        = 0;
     private Color   edgeColor       = null;
-    private Color   color       = null;
+    private Color   color           = null;
     private Color   highlightColor  = Color.CYAN;
     private int     highlightWidth  = 1;
     private Shape   workShape;
     
-    public abstract Path2D initPath( double longSide );
-    public abstract Point2D[] getVertices( double longSide );
+    public abstract Path2D getPath( double longSide );
+    
+    public abstract Deque<Vertex> getVertices( double longSide );
+    public abstract Deque<Vertex> getVertices();
     
     public PShape( double longSide )
     {
-        this.longSide = longSide;
-        path = initPath( longSide );
+        path = getPath( longSide );
         rightBounds = path.getBounds2D();
         computePath();
     }
@@ -138,16 +148,11 @@ public abstract class PShape implements Serializable
     public void render( Graphics2D gtx )
     {
         Color   save    = gtx.getColor();
-        double  xcoPin  = xco + rightBounds.getWidth() / 2;
-        double  ycoPin  = yco + rightBounds.getHeight() / 2;
         
         gtx.setColor( getColor() );
         gtx.fill( workShape );
         gtx.setColor( getEdgeColor() );
         gtx.draw( workShape );
-        
-        gtx.setColor( Color.RED );
-        gtx.drawOval( (int)xcoPin, (int)ycoPin, 3, 3 );
         
         gtx.setColor( save );
     }
@@ -228,14 +233,105 @@ public abstract class PShape implements Serializable
         return dotDiam;
     }
     
+    /**
+     * Given sets A and B, distinct coordinates a1, a2 elements
+     * of A and distinct coordinates b1, b2 elements of B.
+     * Find two pairs of coordinates (a1, b1) and (a2, b2)
+     * such that the distance a1 -> b1 is the same as a2 -> b2.
+     * <p>
+     * For each element a of A:
+     * <ul>
+     * <li>
+     *      Create a list of the distances from a to each element
+     *      of B.
+     * </li>    
+     * <li>
+     *      For each element
+     * </li>  to
+     * </ul>
+     */
     public void snapTo( PShape toShape )
     {
-        Point2D[]   fromVertices    = getTransformedVertices();
-        Point2D[]   toVertices      = 
-            toShape.getTransformedVertices();
-        Point2D     delta           = 
-            getDistance( toVertices, fromVertices );
-        move( delta.getX(), delta.getY() );
+        Collection<Vertex>  fromVertices    = getTransformedVertices2();
+        Collection<Vertex>  toVertices      = 
+            toShape.getTransformedVertices2();
+        Matcher             matcher         = 
+            new Matcher( fromVertices, toVertices );
+        List<VertexPair[]>  allPairs        = matcher.match();
+        if ( allPairs.size() == 0 )
+            System.out.println( "no match" );
+        else
+        {
+            dump( allPairs );
+            VertexPair[]    pairs   = allPairs.get( 0 );
+            
+            Point2D toCoords    = pairs[0].getToVertex().getCoords();
+            Point2D fromCoords  = pairs[0].getFromVertex().getCoords();
+            double  deltaX      = toCoords.getX() - fromCoords.getX();
+            double  deltaY      = toCoords.getY() - fromCoords.getY();
+            move( deltaX, deltaY );
+        }
+    }
+    
+    private static void dump( List<VertexPair[]> list )
+    {
+        list.forEach( p -> dump( p ) );
+        System.out.println( "#############################" );
+        System.out.println( "#############################" );
+    }
+    
+    private static void dump( VertexPair[] pairs )
+    {
+        final String fmt    =
+            "%s (%6.2f,%6.2f) -> (%6.2f,%6.2f) %6.2f%n";
+        Vertex  fromA       = pairs[0].getFromVertex();
+        Point2D fromPointA  = fromA.getCoords();
+        double  fromXcoA    = round( fromPointA.getX() );
+        double  fromYcoA    = round( fromPointA.getY() );
+        
+        Vertex  toA         = pairs[0].getToVertex();
+        Point2D toPointA    = toA.getCoords();
+        double  toXcoA      = round( toPointA.getX() );
+        double  toYcoA      = round( toPointA.getY() );
+        
+        Vertex  fromB       = pairs[1].getFromVertex();
+        Point2D fromPointB  = fromB.getCoords();
+        double  fromXcoB    = round( fromPointB.getX() );
+        double  fromYcoB    = round( fromPointB.getY() );
+        
+        Vertex  toB         = pairs[1].getToVertex();
+        Point2D toPointB    = toB.getCoords();
+        double  toXcoB      = round( toPointB.getX() );
+        double  toYcoB      = round( toPointB.getY() );
+        
+        double  distA       = fromPointA.distance( toPointA );
+        double  distB       = fromPointB.distance( toPointB );
+        
+        System.out.printf( fmt, "A ", fromXcoA, fromYcoA, toXcoA, toYcoA, distA );
+        System.out.printf( fmt, "B ", fromXcoB, fromYcoB, toXcoB, toYcoB, distB );
+        System.out.println( "***************************" );
+    }
+    
+    private static double round( double from )
+    {
+        int     iRounded    = (int)(from * 100);
+        double  dRounded    = iRounded / 100d;
+        return dRounded;
+    }
+    
+    /**
+     * Gets, in degrees, 
+     * the supplementary angle 
+     * of the given angle.
+     * 
+     * @param angle the given angle
+     * 
+     * @return  the supplementary angle
+     */
+    public double outer( double angle )
+    {
+        double  supp    = angle - 180;
+        return supp;
     }
     
     public static void setDotDiam( double diam )
@@ -308,10 +404,36 @@ public abstract class PShape implements Serializable
         AffineTransform transform   = new AffineTransform();
         transform.rotate( rotation, xcoPin, ycoPin );
         transform.translate( xco, yco );
-        Point2D[]       vertices    = getVertices( longSide );
-        int             len         = vertices.length;
+        Deque<Vertex>   vertices    = getVertices();
+        int             len         = vertices.size();
+        Point2D[]       from        = new Point2D.Double[len];
+        int             inx         = 0;
+        for ( Vertex vertex : vertices )
+            from[inx++] = vertex.getCoords();
         Point2D[]       transformed = new Point2D.Double[len];
-        transform.transform( vertices, 0, transformed, 0, len );
+        transform.transform( from, 0, transformed, 0, len );
         return transformed;
+    }
+    
+    public Deque<Vertex> getTransformedVertices2()
+    {
+        Deque<Vertex>   verticesOut = new LinkedList<>();
+        double          xcoPin      = xco + rightBounds.getWidth() / 2;
+        double          ycoPin      = yco + rightBounds.getHeight() / 2;
+        AffineTransform transform   = new AffineTransform();
+        transform.rotate( rotation, xcoPin, ycoPin );
+        transform.translate( xco, yco );
+        Deque<Vertex>   verticesIn  = getVertices();
+        int             len         = verticesIn.size();
+        Point2D[]       from        = new Point2D.Double[len];
+        int             inx         = 0;
+        for ( Vertex vertex : verticesIn )
+            from[inx++] = vertex.getCoords();
+        Point2D[]       transformed = new Point2D.Double[len];
+        transform.transform( from, 0, transformed, 0, len );
+        inx = 0;
+        for ( Vertex vertex : verticesIn )
+            verticesOut.add( new Vertex( vertex, transformed[inx++] ) );
+        return verticesOut;
     }
 }

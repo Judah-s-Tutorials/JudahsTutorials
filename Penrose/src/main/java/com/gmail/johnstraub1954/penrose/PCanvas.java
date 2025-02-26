@@ -1,5 +1,6 @@
 package com.gmail.johnstraub1954.penrose;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -33,9 +34,10 @@ public class PCanvas extends JPanel implements Serializable
     /** Rectangle describing a rubber band operation. */
     private Rectangle2D rubberBand  = new Rectangle2D.Double();
     
-    private transient Graphics2D  gtx;
-    private transient int         width;
-    private transient int         height;
+    private transient boolean       showGrid    = false;
+    private transient Graphics2D    gtx;
+    private transient int           width;
+    private transient int           height;
     
     public PCanvas()
     {
@@ -100,6 +102,17 @@ public class PCanvas extends JPanel implements Serializable
         shapes.remove( shape );
     }
     
+    public void showGrid( boolean show )
+    {
+        showGrid = show;
+        repaint();
+    }
+    
+    public boolean isShowGrid()
+    {
+        return showGrid;
+    }
+    
     @Override
     public void paintComponent( Graphics graphics )
     {
@@ -122,6 +135,9 @@ public class PCanvas extends JPanel implements Serializable
             gtx.setColor( Color.BLACK );
             gtx.draw( rubberBand );
         }
+        
+        if (showGrid )
+            drawGrid();
 
         this.grabFocus();
         gtx.dispose();
@@ -205,6 +221,16 @@ public class PCanvas extends JPanel implements Serializable
         addMouseListener( mListener );
         addMouseMotionListener( mListener );
         addKeyListener( kListener );
+    }
+    
+    private void drawGrid()
+    {
+        gtx.setColor( Color.BLACK );
+        gtx.setStroke( new BasicStroke( 1 ) );
+        for ( int inx = 100 ; inx < width ; inx += 100 )
+            gtx.drawLine( inx, 0, inx, height );
+        for ( int inx = 100 ; inx < height ; inx += 100 )
+            gtx.drawLine( 0, inx, width, inx );
     }
 
     private class MListener extends MouseAdapter implements Serializable

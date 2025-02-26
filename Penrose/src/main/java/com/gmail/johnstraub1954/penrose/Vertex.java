@@ -1,11 +1,10 @@
-package com.gmail.johnstraub1954.penrose2;
+package com.gmail.johnstraub1954.penrose;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
 public class Vertex
 {
-    private static final double twoPI       = 2 * Math.PI;
     private static final double toRadians   = Math.PI / 180;
     
     private final Point2D   coords;
@@ -23,6 +22,23 @@ public class Vertex
         this.angle = angle * toRadians;
         this.adjSide = adjSide;
         this.isDotted = isDotted;
+    }
+    
+    /**
+     * Creates a Vertex derived from a given source Vertex.
+     * The new Vertex will have the same values as the source
+     * except for the coordinates,
+     * which will be set to the given value.
+     * 
+     * @param source    the given source
+     * @param coords    the given coordinates
+     */
+    public Vertex( Vertex source, Point2D coords )
+    {
+        this.coords = coords;
+        this.angle = source.angle;
+        this.adjSide = source.adjSide;
+        this.isDotted = source.isDotted;
     }
     
     public Vertex( 

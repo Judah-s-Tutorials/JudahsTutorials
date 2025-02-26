@@ -1,12 +1,22 @@
 package com.gmail.johnstraub1954.penrose;
 
+import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.util.Deque;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 public class PKite extends PShape
 {
-    private static final long serialVersionUID = 6004387132704487172L;
+    private static final long serialVersionUID = 3715598631373436809L;
+    private static final Deque<Vertex>  queue       = new LinkedList<>();
+    private static final Path2D         path        = new Path2D.Double();
+    private static final double         dotXier     = .1;
+    
+    private static double               longSide;
+
     
     public PKite( double longSide )
     {
@@ -19,52 +29,85 @@ public class PKite extends PShape
         moveTo( xco, yco );
     }
     
-    public Path2D initPath( double longSide )
+    @Override
+    public Path2D getPath( double longSide )
     {
-        double  midXOff     = longSide * Math.cos( D36 );
-        double  midYOff     = longSide * Math.sin( D36 );
-        double  rightXOff   = longSide;
-        double  bottomYOff  = 2 * midYOff;
-        
-        Path2D  path        = new Path2D.Double();
-        path.reset();
-        path.moveTo( 0, midYOff );
-        path.lineTo( midXOff, 0 );
-        path.lineTo( midXOff, 0 );
-        path.lineTo( rightXOff, midYOff );
-        path.lineTo( midXOff, bottomYOff );
-        path.lineTo( 0, midYOff );
-        
-        double      diam    = getDotDiam();
-        double      half    = diam / 2;
-        Ellipse2D   dot = 
-            new Ellipse2D.Double( diam, midYOff - half, diam, diam );
-        path.append( dot, false );
-        dot = new Ellipse2D.Double( 
-            rightXOff - (diam + half), 
-            midYOff - half, 
-            diam, 
-            diam
-        );
-        path.append( dot, false );
+        if ( path.getCurrentPoint() == null )
+        {
+            path.reset();
+    
+            Deque<Vertex>       queue   = getVertices( longSide );
+            Iterator<Vertex>    iter    = queue.iterator();
+            Vertex              vertex  = iter.next();
+            Point2D             coords  = vertex.getCoords();
+            path.moveTo( coords.getX(), coords.getY() );
+            while ( iter.hasNext() )
+            {
+                vertex = iter.next();
+                coords = vertex.getCoords();
+                path.lineTo( coords.getX(), coords.getY() );
+            }
+            path.closePath();
+            
+            for ( Vertex next : queue )
+            {
+                if ( next.isDotted() )
+                {
+                    Shape   dot = getDot( next.getCoords() );
+                    path.append( dot, false );
+                }
+            }
+        }
+
         return path;
     }
     
-    public Point2D[] getVertices( double longSide )
+    @Override
+    public Deque<Vertex> getVertices()
     {
-        double  midXOff     = longSide * Math.cos( D36 );
-        double  midYOff     = longSide * Math.sin( D36 );
-        double  rightXOff   = longSide;
-        double  bottomYOff  = 2 * midYOff;
-        
-        Point2D[]   vertices    = 
+        if ( queue == null )
         {
-            new Point2D.Double( 0, midYOff ),
-            new Point2D.Double( midXOff, 0 ),
-            new Point2D.Double( midXOff, 0 ),
-            new Point2D.Double( rightXOff, midYOff ),
-            new Point2D.Double( midXOff, bottomYOff )
-        };
-        return vertices;
+            String  msg = "Vertex queue not initialized";
+            throw new NullPointerException( msg );
+        }
+        return queue;
+    }
+    
+    @Override
+    public Deque<Vertex> getVertices( double longSide )
+    {
+        if ( queue.isEmpty() )
+        {
+            PKite.longSide = longSide;
+            double          shortSide   = 
+                longSide * (Math.sin( D36 ) / Math.sin( D108 ));
+            Point2D         begin       = new Point2D.Double( 0, shortSide );
+            Vertex  vertex  = new Vertex( begin, 36, longSide, true );
+            queue.add( vertex );
+            vertex = new Vertex( vertex, 72 - 180, shortSide, false );
+            queue.add( vertex );
+            vertex = new Vertex( vertex, 144 - 180, shortSide, true );
+            queue.add( vertex );
+            vertex = new Vertex( vertex, 72 - 180, longSide, false );
+            queue.add( vertex );
+        }
+
+        return queue;
+    }
+    
+    private Shape getDot( Point2D coords )
+    {
+        double      dotDiam     = longSide * dotXier;
+        double      dotOffset   = dotDiam / 2;
+        double      xco         = coords.getX();
+        double      yco         = coords.getY();
+        double      dotYco      = yco - dotOffset;
+        double      xOffset     = dotDiam + dotOffset;
+        double      dotXco      = 
+            xco == 0 ? xco + xOffset : xco - xOffset;
+        Ellipse2D   ellipse = 
+            new Ellipse2D.Double( dotXco, dotYco, dotDiam, dotDiam );
+        return ellipse;
+
     }
 }
