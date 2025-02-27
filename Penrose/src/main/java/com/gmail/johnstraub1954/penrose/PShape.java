@@ -10,7 +10,6 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
@@ -18,6 +17,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
+import com.gmail.johnstraub1954.penrose.matcher.MatchDialog;
 import com.gmail.johnstraub1954.penrose.matcher.Matcher;
 import com.gmail.johnstraub1954.penrose.matcher.VertexPair;
 
@@ -257,13 +259,15 @@ public abstract class PShape implements Serializable
             toShape.getTransformedVertices2();
         Matcher             matcher         = 
             new Matcher( fromVertices, toVertices );
-        List<VertexPair[]>  allPairs        = matcher.match();
-        if ( allPairs.size() == 0 )
+        List<VertexPair[]>  allPairs        = matcher.match();        
+        allPairs.sort( (v1,v2) -> 
+            (int)(v1[0].getDistance() - v2[0].getDistance()) );
+        VertexPair[]        pairs        = select( allPairs );
+        if ( pairs == null )
             System.out.println( "no match" );
         else
         {
             dump( allPairs );
-            VertexPair[]    pairs   = allPairs.get( 0 );
             
             Point2D toCoords    = pairs[0].getToVertex().getCoords();
             Point2D fromCoords  = pairs[0].getFromVertex().getCoords();
@@ -271,6 +275,29 @@ public abstract class PShape implements Serializable
             double  deltaY      = toCoords.getY() - fromCoords.getY();
             move( deltaX, deltaY );
         }
+    }
+    
+    private VertexPair[] select( List<VertexPair[]> list )
+    {
+        VertexPair[]    selectedPair    = null;
+        int             size            = list.size();
+        if ( size == 0 )
+            ;
+        else if ( size == 1 )
+            selectedPair = list.get( 0 );
+        else
+        {
+            int[]   choice  = new int[]{ 0 };
+            MatchDialog matchDialog = new MatchDialog( null, list );
+            matchDialog.setOptionMonitor( i -> {
+                System.out.println( i );
+                choice[0] = i;
+            });
+            int     option  = matchDialog.showDialog();
+            if ( option == JOptionPane.OK_OPTION )
+                selectedPair = list.get( choice[0] );
+        }
+        return selectedPair;
     }
     
     private static void dump( List<VertexPair[]> list )
