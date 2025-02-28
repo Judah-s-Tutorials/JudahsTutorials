@@ -46,8 +46,8 @@ public class PShapeMain
     private static double       longSide    = 50;
     private final JFileChooser  chooser;
     private static final String chooserTitle    = "Choose File";
-    private JFrame        frame;
-    private PCanvas canvas;
+    private JFrame              frame;
+    private PCanvas             canvas;
     
     public static void main(String[] args)
     {
@@ -79,7 +79,7 @@ public class PShapeMain
         frame   = new JFrame( "Dart Demo" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new JPanel( new BorderLayout() );
-        canvas = new PCanvas();
+        canvas = PCanvas.getDefaultCanvas();
         canvas.showGrid( true );
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );

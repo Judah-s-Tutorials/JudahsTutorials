@@ -88,4 +88,11 @@ public class Vertex
         Line2D  line    = new Line2D.Double( coords, end );
         return line;
     }
+    
+    public Line2D getEdge( Vertex other )
+    {
+        Line2D  edge    =
+            new Line2D.Double( coords, other.getCoords() );
+        return edge;
+    }
 }

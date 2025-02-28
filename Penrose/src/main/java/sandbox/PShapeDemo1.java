@@ -35,7 +35,7 @@ public class PShapeDemo1
     {
         JFrame  frame   = new JFrame( "PShape Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        canvas = new PCanvas();
+        canvas = PCanvas.getDefaultCanvas();
         frame.setContentPane( canvas );
         frame.pack();
         frame.setVisible( true );

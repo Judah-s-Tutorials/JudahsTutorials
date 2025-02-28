@@ -6,10 +6,12 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -23,9 +25,18 @@ import javax.swing.JPanel;
 public class PCanvas extends JPanel implements Serializable
 {
     private static final long serialVersionUID = 1L;
+    
+    private static PCanvas  defaultCanvas   = null;
 
     private final   List<PShape>    shapes      = new ArrayList<>();
     private final   List<PShape>    selected    = new ArrayList<>();
+    private final   List<Line2D>    highlightedEdges    = 
+        new ArrayList<>();
+    
+    /** Color to use when highlighting edges. */
+    private Color       highlightedEdgeColor    = Color.RED;
+    /** Width to use when drawing a highlighted edge. */
+    private float       highlightedEdgeWidth    = 3;
     
     /** Start point of a drag operation. */
     private Point2D     dragFrom    = null;
@@ -39,12 +50,19 @@ public class PCanvas extends JPanel implements Serializable
     private transient int           width;
     private transient int           height;
     
-    public PCanvas()
+    public static PCanvas getDefaultCanvas()
     {
-        this( 500, 500 );
+        return getDefaultCanvas( 500, 500 );
     }
     
-    public PCanvas( int width, int height )
+    public static PCanvas getDefaultCanvas( int width, int height )
+    {
+        if ( defaultCanvas == null )
+            defaultCanvas = new PCanvas( width, height );
+        return defaultCanvas;
+    }
+    
+    private PCanvas( int width, int height )
     {
         setPreferredSize( new Dimension( width, height ) );
         setFocusable( true );
@@ -113,6 +131,21 @@ public class PCanvas extends JPanel implements Serializable
         return showGrid;
     }
     
+    public void addEdge( Line2D edge )
+    {
+        highlightedEdges.add( edge );
+    }
+    
+    public void removeEdge( Line2D edge )
+    {
+        highlightedEdges.remove( edge );
+    }
+    
+    public void clearEdges()
+    {
+        highlightedEdges.clear();
+    }
+    
     @Override
     public void paintComponent( Graphics graphics )
     {
@@ -129,6 +162,7 @@ public class PCanvas extends JPanel implements Serializable
         gtx.fillRect( 0, 0, width, height );
         shapes.forEach( s -> s.render( gtx ) );
         selected.forEach( s -> s.highlight( gtx ) );
+        drawHighlightedEdges();
         
         if ( dragFrom != null && dragTo != null )
         {
@@ -221,6 +255,17 @@ public class PCanvas extends JPanel implements Serializable
         addMouseListener( mListener );
         addMouseMotionListener( mListener );
         addKeyListener( kListener );
+    }
+    
+    private void drawHighlightedEdges()
+    {
+        float   width   = highlightedEdgeWidth;
+        int     cap     = BasicStroke.CAP_BUTT;
+        int     join    = BasicStroke.JOIN_ROUND;
+        Stroke  stroke  = new BasicStroke( width, cap, join );
+        gtx.setStroke( stroke );
+        gtx.setColor( highlightedEdgeColor );
+        highlightedEdges.forEach( gtx::draw );
     }
     
     private void drawGrid()

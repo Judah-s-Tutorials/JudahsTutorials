@@ -26,7 +26,7 @@ public class KiteDemo1
     {
         JFrame  frame   = new JFrame( "Dart Demo 1" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        canvas = new PCanvas();
+        canvas = PCanvas.getDefaultCanvas();
         frame.setContentPane( canvas );
         frame.pack();
         frame.setVisible( true );
