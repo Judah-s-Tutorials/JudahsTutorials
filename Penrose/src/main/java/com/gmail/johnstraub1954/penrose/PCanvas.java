@@ -278,6 +278,150 @@ public class PCanvas extends JPanel implements Serializable
             gtx.drawLine( 0, inx, width, inx );
     }
 
+//    private class MListener extends MouseAdapter implements Serializable
+//    {
+//        private static final long serialVersionUID = -8780588853585090448L;
+//
+//        @Override
+//        public void mousePressed( MouseEvent evt )
+//        {
+//            requestFocusInWindow();
+//            if ( evt.getButton() == 1 )
+//            {
+//                int xco = evt.getX();
+//                int yco = evt.getY();
+//                dragFrom = new Point2D.Double( xco, yco );
+//            }
+//        }
+//        
+//        @Override
+//        public void mouseReleased( MouseEvent evt )
+//        {
+//            if ( evt.getButton() == 1 && dragFrom != null )
+//            {
+//                // Determine if this is the completion of a drag operation.
+//                // If drag is in progress and the selected list is
+//                // is non-empty, the drag was performing a move operation,
+//                // which is handled entirely by the mouseDragged method.
+//                // If the selected list is empty, the drag was a 
+//                // rubber-banding operation which must no be completed by
+//                // selecting all shapes within the rubber band.
+//                if ( selected.isEmpty() )
+//                {
+//                    double      startX  = dragFrom.getX();
+//                    double      startY  = dragFrom.getY();
+//                    double      endX    = evt.getX();
+//                    double      endY    = evt.getY();
+//                    double      width   = endX - dragFrom.getX();
+//                    double      height  = endY - dragFrom.getY();
+//                    if ( width < 0 )
+//                    {
+//                        double  temp    = startX;
+//                        startX = endX;
+//                        endX = temp;
+//                        width = -width;
+//                    }
+//                    if ( height < 0 )
+//                    {
+//                        double  temp    = startY;
+//                        startY = endY;
+//                        endY = temp;
+//                        height = - height;
+//                    }
+//                    Rectangle2D rect    = 
+//                        new Rectangle2D.Double( 
+//                            startX,
+//                            startY,
+//                            width,
+//                            height
+//                        );
+//                    shapes.stream()
+//                        .filter( s -> s.intersects( rect ) )
+//                        .forEach( selected::add );
+//                }
+//                dragFrom = null;
+//                dragTo = null;
+//                repaint();
+//            }
+//        }
+//        
+//        @Override
+//        public void mouseClicked( MouseEvent evt )
+//        {
+//            if ( evt.getButton() == 1 )
+//            {
+//                System.out.println( evt );
+//                if ( evt.isControlDown() )
+//                    snap( evt );
+//                else 
+//                {
+//                    if ( !evt.isShiftDown() )
+//                        selected.clear();
+//                    int xco = evt.getX();
+//                    int yco = evt.getY();
+//                    select( xco, yco );
+//                }
+//            }
+//        }
+//        
+//        @Override
+//        public void mouseDragged( MouseEvent evt )
+//        {
+//            if ( dragFrom != null )
+//            {
+//                double  newXco  = evt.getX();
+//                double  newYco  = evt.getY();
+//                double  deltaX  = newXco - dragFrom.getX();
+//                double  deltaY  = newYco - dragFrom.getY();
+//                if ( !selected.isEmpty() )
+//                {
+//                    selected.forEach( s -> s.move( deltaX, deltaY ) );
+//                    dragFrom.setLocation( newXco, newYco );
+//                }
+//                else
+//                {
+//                    double      startX  = dragFrom.getX();
+//                    double      startY  = dragFrom.getY();
+//                    double      endX    = evt.getX();
+//                    double      endY    = evt.getY();
+//                    double      width   = endX - dragFrom.getX();
+//                    double      height  = endY - dragFrom.getY();
+//                    if ( width < 0 )
+//                    {
+//                        double  temp    = startX;
+//                        startX = endX;
+//                        endX = temp;
+//                        width = -width;
+//                    }
+//                    if ( height < 0 )
+//                    {
+//                        double  temp    = startY;
+//                        startY = endY;
+//                        endY = temp;
+//                        height = - height;
+//                    }
+//                    dragTo = new Point2D.Double( endX, endY );
+//                    rubberBand.setRect( startX, startY, width, height ); 
+//                }
+//                repaint();
+//            }
+//        }
+//        
+//        private void snap( MouseEvent evt )
+//        {
+//            int xco = evt.getX();
+//            int yco = evt.getY();
+//            select( xco, yco );
+//            if ( selected.size() == 2 )
+//            {
+//                PShape  toShape     = selected.get( 1 );
+//                PShape  fromShape   = selected.get( 0 );
+//                fromShape.snapTo( toShape );
+//                repaint();
+//            }
+//        }
+//    }
+
     private class MListener extends MouseAdapter implements Serializable
     {
         private static final long serialVersionUID = -8780588853585090448L;
@@ -350,13 +494,17 @@ public class PCanvas extends JPanel implements Serializable
         {
             if ( evt.getButton() == 1 )
             {
+                System.out.println( evt );
                 if ( evt.isControlDown() )
                     snap( evt );
-                else if ( !evt.isShiftDown() )
-                    selected.clear();
-                int xco = evt.getX();
-                int yco = evt.getY();
-                select( xco, yco );
+                else 
+                {
+                    if ( !evt.isShiftDown() )
+                        selected.clear();
+                    int xco = evt.getX();
+                    int yco = evt.getY();
+                    select( xco, yco );
+                }
             }
         }
         
