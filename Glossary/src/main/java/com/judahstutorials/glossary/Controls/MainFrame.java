@@ -111,6 +111,7 @@ public class MainFrame
         term.setName( TERM_FIELD );
         seqNum.setName( SEQ_NUM_FIELD );
         slug.setName( SLUG_FIELD );
+        seqNum.setValue( Integer.valueOf( 0 ) );
         JPanel      panel   = new JPanel( new BorderLayout() );
         Border      border  =
             BorderFactory.createLineBorder( Color.BLACK, 2 );

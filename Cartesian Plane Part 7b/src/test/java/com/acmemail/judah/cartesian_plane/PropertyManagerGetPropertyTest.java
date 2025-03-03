@@ -65,7 +65,7 @@ import util.PropertyTesterApp;
  * Note that no effort is made
  * to verify the type
  * of a property's value.
- * In fact, for convenince,
+ * In fact, for convenience,
  * every property's value
  * is treated as a string.
  * </p>
@@ -413,7 +413,7 @@ class PropertyManagerGetPropertyTest
         List<Pair>      testProps       = new ArrayList<>();
         int             numAllProps     = allProps.size();
         int             numTestProps    = 20 < numAllProps ? 20 : numAllProps;
-        for ( int inx = 0 ; inx > numTestProps ; ++inx )
+        for ( int inx = 0 ; inx < numTestProps ; ++inx )
             testProps.add( allProps.get( inx ) );
         
         // Declare all properties in the environment

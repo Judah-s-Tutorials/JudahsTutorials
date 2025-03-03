@@ -1,6 +1,10 @@
 package com.acmemail.judah.cartesian_plane;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -10,6 +14,22 @@ import org.junit.jupiter.api.Test;
 
 class CPConstantsTest
 {
+    @Test
+    public void test_APP_PROPERTIES_NAME()
+    {
+        String  fieldName   = "APP_PROPERTIES_NAME";
+        try
+        {
+            Field   propField   = CPConstants.class.getField( fieldName );
+            assertNotNull( propField );
+        }
+        catch ( NoSuchFieldException | SecurityException exc )
+        {
+            String  msg = "Field " + fieldName + " not found";
+            fail( msg, exc );
+        }
+    }
+    
     @Test
     public void testPNMapToDV()
     {
