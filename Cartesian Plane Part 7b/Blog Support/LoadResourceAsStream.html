@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ClassLoader.getResourceAsStream</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="max-width: 50em; padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p>
+<strong>
+    Digression: 
+    How <em>ClassLoader.getResourceAsStream</em> Finds Resources<br>
+</strong>
+<img 
+    src = "https://judahstutorials.com/wp-content/uploads/2025/03/ResourcesDigression.png"
+    alt = "Resources Digression"
+    style = "padding-left: 1em; float:right; width:35%; height:35%;"
+>
+Recall that, previously,
+we went into our project build configuration
+and made <em>src/main/resources</em> a source folder.
+</p>
+<p>
+<img
+    src = "https://judahstutorials.com/wp-content/uploads/2025/03/Compiliation-of-Resources-Directory.png"
+    alt = "Handling Resources"
+    style = "padding-right: 1em; float:left; width:35%; height:35%;"
+>
+Suppose we put the file <em>AppConfig.ini</em>
+into the directory <em>src/main/resources</em>
+in the project root.
+Because Eclipse is aware that <em>src/main/resources</em> is a source folder,
+and <em>AppConfig.ini</em> is not a <em>.java</em> file,
+during the build process
+it copies the contents of the resources folder
+into the project's binary folder 
+(<em>target/classes</em>).
+Now, if we look at our application's classpath:
+</p>
+<pre style="padding-left:2em;">String  classPath   =
+    System.getProperty( "java.class.path" );
+System.out.println( classPath );
+>>> projectRoot/target/classes;lib/...</pre>
+<p>
+We see that the <em>target/classes</em> directory
+is part of the classpath.
+The <em>ClassLoader.getResourceAsStream</em> method
+searches through all the directories in the classpath
+until it finds the file we're looking for.
+If you package your project in a jar file,
+Eclipse will copy <em>target/classes/AppConfig.ini</em>
+into the jar file
+so that it gets distributed
+along with the rest of your code.
+</p>
+
+</div>
+</body>
+</html>
