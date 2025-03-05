@@ -12,7 +12,7 @@ import java.util.Set;
  * 
  * @author Jack Straub
  * 
- * @see IPCParentSimpleDemo
+ * @see IPCParentSimpleDemo2
  */
 public class IPCChildSimpleDemo
 {

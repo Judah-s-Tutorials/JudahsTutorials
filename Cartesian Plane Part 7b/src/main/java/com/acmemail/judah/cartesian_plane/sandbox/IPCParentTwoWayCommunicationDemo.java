@@ -21,7 +21,7 @@ import java.util.Map;
  * @author Jack Straub
  * 
  * @see IPCChildTwoWayCommunicationDemo
- * @see IPCParentSimpleDemo
+ * @see IPCParentSimpleDemo2
  */
 public class IPCParentTwoWayCommunicationDemo
 {
@@ -64,7 +64,7 @@ public class IPCParentTwoWayCommunicationDemo
      * Create and have a query/response dialog with
      * another Java process. 
      * Additional details can be found
-     * in the IPCParentSimpleDemo class.
+     * in the IPCParentSimpleDemo2 class.
      * 
      * @param clazz Class class containing main method to execute
      * 
@@ -72,7 +72,7 @@ public class IPCParentTwoWayCommunicationDemo
      * @throws  InterruptedException 
      *          if interrupted while waiting for child process termination
      *          
-     * @see IPCParentSimpleDemo#exec
+     * @see IPCParentSimpleDemo2#exec
      */
     private static void exec(Class<?> clazz) 
         throws IOException, InterruptedException
