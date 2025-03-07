@@ -17,9 +17,9 @@ import java.util.StringTokenizer;
  * 
  * @author Jack Straub
  * 
- * @see IPCParentTwoWayCommunicationDemo
+ * @see TwoWayIPCDemoParent
  */
-public class IPCChildTwoWayCommunicationDemo
+public class TwoWayIPCDemoChild
 {
     private static final String exitResponse    = "exiting";
     
@@ -65,10 +65,8 @@ public class IPCChildTwoWayCommunicationDemo
         if ( tizer.hasMoreTokens() )
             arg2 = tizer.nextToken();
         
-        if ( count > 2 )
-            response = " error: command too long";
-        else if ( count < 1 )
-            response = "error: no command found";
+        if ( count > 2 || count < 1 )
+            response = " error: invalid command";
         else
         {
             switch ( arg1 )
@@ -78,7 +76,7 @@ public class IPCChildTwoWayCommunicationDemo
                 break;
             case "getEnv":
                 if ( arg2 == null )
-                    response = "invalid command";
+                    response = " error: invalid command";
                 else
                 {
                     response = System.getenv( arg2 );
@@ -88,7 +86,7 @@ public class IPCChildTwoWayCommunicationDemo
                 break;
             case "getProp":
                 if ( arg2 == null )
-                    response = "NULL: invalid command";
+                    response = " error: invalid command";
                 else
                 {
                     response = System.getProperty( arg2 );

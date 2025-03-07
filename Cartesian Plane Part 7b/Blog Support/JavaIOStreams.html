@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Java IO Streams</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="max-width: 50em; padding-left: .25em; padding-right: .25em; border: .25em solid black; background-color: #EEE8AA;">
+<p>
+<strong>
+    Working with Java I/O Streams
+</strong>
+</p>
+<p>
+In case you’re unfamiliar with I/O in Java, reading data always begins with a raw stream of bytes from a source. The source can be anything capable of producing said stream, such as a file, a web page, your keyboard, or an array of bytes. In line XX of <em>IPCDemo2Parent</em>, we establish an <em>InputStream</em>, which encapsulates the raw stream of bytes issuing from the child process’s <em>stdout</em>. If we want to treat the <em>InputStream</em> as a stream of characters, we need a more sophisticated device; in Java, input streams of characters are encapsulated in <em>Readers</em>, so at line XX, we transform the <em>InputStream</em> into an <em>InputReader</em>. <em>InputReaders</em> are still primitive and incapable of performing things such as buffering and interpreting line-endings, so at line XX, we transform the <em>InputReader</em> into a <em>BufferedReader</em>, which can distinguish between individual lines in a stream of characters. For more information about I/O stream-handling in Java, see 
+<a href="https://docs.oracle.com/javase/tutorial/essential/io/">
+    Basic I/O
+</a>
+in the Oracle Java Tutorial.</p>
+</div>
+</body>
+</html>

@@ -10,6 +10,9 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+import temp.IPCParentSimpleDemo2;
 
 /**
  * This application demonstrates how to create
@@ -20,15 +23,15 @@ import java.util.Map;
  * 
  * @author Jack Straub
  * 
- * @see IPCChildTwoWayCommunicationDemo
+ * @see TwoWayIPCDemoChild
  * @see IPCParentSimpleDemo2
  */
-public class IPCParentTwoWayCommunicationDemo
+public class TwoWayIPCDemoParent
 {
     /** Holds the names of environment variables to interrogate. */
-    private static List<String> envQueries  = new ArrayList<>();
+    private static final List<String> envQueries  = new ArrayList<>();
     /** Holds the names of properties to interrogate. */
-    private static List<String> propQueries = new ArrayList<>();
+    private static final List<String> propQueries = new ArrayList<>();
     
     // Initialize the lists of environment variable names
     // and property names.
@@ -52,7 +55,7 @@ public class IPCParentTwoWayCommunicationDemo
     {
         try
         {
-            exec( IPCChildTwoWayCommunicationDemo.class );
+            exec( TwoWayIPCDemoChild.class );
         }
         catch ( IOException | InterruptedException exc )
         {
@@ -116,8 +119,16 @@ public class IPCParentTwoWayCommunicationDemo
             printer.println( "exit" );
         }
 
-        int exitVal = process.waitFor();
-        System.out.println( process.exitValue() );
-        System.out.println( "exitVal: " + exitVal );
+        // Wait for child process to terminate and print its exit
+        // value. Note that process.waitFor() can throw an
+        // InterruptedException.
+        boolean childTerminated = 
+            process.waitFor( 1000, TimeUnit.MILLISECONDS );
+        String  message         = "";
+        if ( childTerminated )
+            message = "child exit value: " + process.exitValue();
+        else
+            message = "child failed to terminate as expected";
+        System.out.println( message );
     }
 }

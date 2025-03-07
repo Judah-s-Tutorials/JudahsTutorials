@@ -14,7 +14,7 @@ import java.util.Set;
  * 
  * @see IPCParentSimpleDemo2
  */
-public class IPCChildSimpleDemo
+public class IPCDemo2Child
 {
     /**
      * Application entry point.
@@ -32,8 +32,6 @@ public class IPCChildSimpleDemo
         
         for ( String key : keySet )
             System.out.println( key + " -> " + envMap.get( key ) );
-        
-        System.err.println( "error message" );
-        System.exit( 42 );
+        System.out.println( "done" );
     }
 }

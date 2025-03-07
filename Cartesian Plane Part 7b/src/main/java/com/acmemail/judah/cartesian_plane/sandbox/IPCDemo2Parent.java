@@ -8,6 +8,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This application demonstrates 
@@ -16,13 +17,13 @@ import java.util.Map;
  * 
  * @author Jack Straub
  *
- * @see IPCChildSimpleDemo
+ * @see IPCDemo2Child
  */
 /**
  * @author Jack Straub
  *
  */
-public class IPCParentSimpleDemo
+public class IPCDemo2Parent
 {
     /** 
      * Application entry point.
@@ -33,7 +34,7 @@ public class IPCParentSimpleDemo
     {
         try
         {
-            exec( IPCChildSimpleDemo.class );
+            exec( IPCDemo2Child.class );
         }
         catch ( IOException | InterruptedException exc )
         {
@@ -64,7 +65,7 @@ public class IPCParentSimpleDemo
         // Get the classpath to use to start the child process
         String          classpath   = System.getProperty( "java.class.path" );
         
-        // Get the name of the class the encapsulates the child process
+        // Get the name of the class that encapsulates the child process
         String          className   = clazz.getName();
         
         // Create a list that will encapsulate the command used to execute
@@ -83,6 +84,8 @@ public class IPCParentSimpleDemo
         Map<String, String> env = builder.environment();
         env.clear();
         env.put( "XXX", "yyy" );
+        env.put( "ABC", "def" );
+        env.put( "SPOT", "hound" );
         
         // Start the child process. Note that the start method can
         // throw an IOEception.
@@ -91,22 +94,33 @@ public class IPCParentSimpleDemo
         // Get an input stream that can be used to read the child
         // process's stdout. Try-with-resources is used in order to
         // facilitate closing the input stream. Note that when using
-        // a try-with-resources statement a catch bloc is optional
+        // a try-with-resources statement a catch block is optional
         try ( 
             InputStream childStdout = process.getInputStream();
-            InputStreamReader   inReader    = new InputStreamReader( childStdout );
-            BufferedReader      bufReader   = new BufferedReader( inReader );
+            InputStreamReader   inReader    = 
+                new InputStreamReader( childStdout );
+            BufferedReader      bufReader   = 
+                new BufferedReader( inReader );
         )
         {
-            String              line        = null;
-            while ( (line = bufReader.readLine()) != null )
-                System.out.println( "from target process: " + line );
+            String  line    = bufReader.readLine();
+            while ( line != null && !line.equals( "done" ) )
+            {
+                System.out.println( "from child process: " + line );
+                line = bufReader.readLine();
+            }
         }
 
         // Wait for child process to terminate and print its exit
         // value. Note that process.waitFor() can throw an
         // InterruptedException.
-        int exitVal = process.waitFor();
-        System.out.println( "exitVal: " + exitVal );
+        boolean childTerminated = 
+            process.waitFor( 1000, TimeUnit.MILLISECONDS );
+        String  message         = "";
+        if ( childTerminated )
+            message = "child exit value: " + process.exitValue();
+        else
+            message = "child failed to terminate as expected";
+        System.out.println( message );
     }
 }
