@@ -3,8 +3,6 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,7 +61,8 @@ public class IPCDemo2Parent
         String          javaBin     = bldr.toString();
         
         // Get the classpath to use to start the child process
-        String          classpath   = System.getProperty( "java.class.path" );
+        String          classpath   = 
+            System.getProperty( "java.class.path" );
         
         // Get the name of the class that encapsulates the child process
         String          className   = clazz.getName();
@@ -71,7 +70,7 @@ public class IPCDemo2Parent
         // Create a list that will encapsulate the command used to execute
         // the child process. Each token in the list will wind up as an
         // argument on the command line, for example:
-        //     JAVA_HONME\bin\java --class-path .;lib/toots.jar SampleChildClass
+        // JAVA_HONME\bin\java --class-path .;lib/toots.jar SampleChildClass
         List<String>    command     = new ArrayList<>();
         command.add( javaBin );
         command.add(  "--class-path" );
@@ -96,11 +95,7 @@ public class IPCDemo2Parent
         // facilitate closing the input stream. Note that when using
         // a try-with-resources statement a catch block is optional
         try ( 
-            InputStream childStdout = process.getInputStream();
-            InputStreamReader   inReader    = 
-                new InputStreamReader( childStdout );
-            BufferedReader      bufReader   = 
-                new BufferedReader( inReader );
+            BufferedReader bufReader = process.inputReader();
         )
         {
             String  line    = bufReader.readLine();

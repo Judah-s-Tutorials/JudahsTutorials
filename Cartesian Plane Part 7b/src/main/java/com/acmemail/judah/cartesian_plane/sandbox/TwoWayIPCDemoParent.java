@@ -3,8 +3,6 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -39,10 +37,10 @@ public class TwoWayIPCDemoParent
     {
         envQueries.add( "JAVA_HOME" );
         envQueries.add( "XXX" );
-        envQueries.add( "nonsense" );
+        envQueries.add( "NONSENSE" );
         
-        propQueries.add( "sampleProp" );
         propQueries.add( "java.class.path" );
+        propQueries.add( "sampleProp" );
         propQueries.add( "notExpectedToBeFound" );
     }
     
@@ -81,8 +79,10 @@ public class TwoWayIPCDemoParent
         throws IOException, InterruptedException
     {
         String          javaHome    = System.getProperty( "java.home" );
-        String          javaBin     = javaHome + File.separator + "bin" + File.separator + "java";
-        String          classpath   = System.getProperty( "java.class.path" );
+        String          javaBin     = 
+            javaHome + File.separator + "bin" + File.separator + "java";
+        String          classpath   = 
+            System.getProperty( "java.class.path" );
         String          className   = clazz.getName();
         
         List<String>    command     = new ArrayList<>();
@@ -97,11 +97,9 @@ public class TwoWayIPCDemoParent
         env.put( "XXX", "yyy" );
         Process process = builder.start();
         try ( 
-            InputStream childStdOut = process.getInputStream();
-            InputStreamReader inReader = new InputStreamReader( childStdOut );
-            BufferedReader bufReader = new BufferedReader( inReader );
+            BufferedReader bufReader = process.inputReader();
             OutputStream childStdIn = process.getOutputStream();
-            PrintWriter printer     = new PrintWriter( childStdIn, true );
+            PrintWriter printer = new PrintWriter( childStdIn, true );
         )
         {
             for ( String envName : envQueries )
@@ -117,6 +115,8 @@ public class TwoWayIPCDemoParent
                 System.out.println( "prop from child: " + propName + " = " + response );
             }
             printer.println( "exit" );
+            String  response    = bufReader.readLine();
+            System.out.println( "child status: " + response );
         }
 
         // Wait for child process to terminate and print its exit
