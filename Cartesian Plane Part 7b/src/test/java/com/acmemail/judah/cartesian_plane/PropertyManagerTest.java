@@ -153,7 +153,7 @@ class PropertyManagerTest
 
     @ParameterizedTest
     @ValueSource( ints={ 5, 10, 15, 20 } )
-    void testIntAccessors( int expVal )
+    public void testIntAccessors( int expVal )
     {
         String  propName    = "phonyIntProp";
         pmgr.setProperty( propName, expVal );
@@ -163,7 +163,7 @@ class PropertyManagerTest
 
     @ParameterizedTest
     @ValueSource(floats={ 5.5f, 10.5f, 15.5f, 20.5f } )
-    void testFloatAccessors( float expVal )
+    public void testFloatAccessors( float expVal )
     {
         String  propName    = "phonyFloatProp";
         pmgr.setProperty( propName, expVal );
@@ -173,7 +173,7 @@ class PropertyManagerTest
 
     @ParameterizedTest
     @ValueSource(booleans={ true, false, true, false } )
-    void testBooleanAccessors( boolean expVal )
+    public void testBooleanAccessors( boolean expVal )
     {
         String  propName    = "phonyBooleanProp";
         pmgr.setProperty( propName, expVal );
@@ -183,7 +183,7 @@ class PropertyManagerTest
 
     @ParameterizedTest
     @ValueSource(strings={ "abc", "def", "ghi", "jkl" } )
-    void testStringAccessors( String expVal )
+    public void testStringAccessors( String expVal )
     {
         String  propName    = "phonyStringProp";
         pmgr.setProperty( propName, expVal );
@@ -193,7 +193,7 @@ class PropertyManagerTest
 
     @ParameterizedTest
     @ValueSource(strings={ "0xFF0000", "0x00FF00", "0x0000FF", "#FF00FF" } )
-    void testColorAccessors( String strVal )
+    public void testColorAccessors( String strVal )
     {
         String  propName    = "phonyColorProp";
         int     intColor    = Integer.decode( strVal );
@@ -204,7 +204,7 @@ class PropertyManagerTest
     }
 
     @Test
-    void testFontStyleAccessor()
+    public void testFontStyleAccessor()
     {
         String  propName    = "phonyFontStyleProp";
         
