@@ -23,7 +23,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import util.PropertyTesterApp;
@@ -616,13 +615,11 @@ class PropertyManagerGetPropertyTest
                 String  pNamePrefix = fieldName.substring( 0, pNameLen - 3 );
                 String  dvName      = pNamePrefix + "_DV";
                 
-                String  propName    = "";
-                String  propDefault = "";
                 try
                 {
                     Field   dvField = CPConstants.class.getField( dvName );
-                    propName = (String)pnField.get( null );
-                    propDefault = (String)dvField.get( null );
+                    String  propName = (String)pnField.get( null );
+                    String  propDefault = (String)dvField.get( null );
                     allProps.add( new Pair( propName, propDefault ) );
                 }
                 catch ( NoSuchFieldException | IllegalAccessException exc )
