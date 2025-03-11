@@ -685,20 +685,27 @@ class PropertyManagerGetPropertyTest
     {
         if ( childProcess != null )
         {
-            if ( childStdin != null )
-                childStdin.println( PropertyTesterApp.EXIT_COMMAND );
+            assertNotNull( childStdin );
+            childStdin.println( PropertyTesterApp.EXIT_COMMAND );
+            boolean status  = false;
             try
             {
-                childProcess.waitFor( waitForTimeout, waitForTimeUnit );
+                status = 
+                    childProcess.waitFor( waitForTimeout, waitForTimeUnit );
+                if ( !status )
+                    childProcess.destroyForcibly();
+                childProcess = null;
+                assertTrue( status, "Child process failed to terminate" );
             }
             catch ( InterruptedException exc )
             {
                 String  msg =
-                    "Unexpected InterruptedException from child process";
+                    "Unexpected exception while closing "
+                    + "child process";
                 exc.printStackTrace();
-                fail( msg );
+                childProcess = null;
+                fail( msg, exc );
             }
-            childProcess = null;
         }
     }
 
@@ -871,16 +878,6 @@ class PropertyManagerGetPropertyTest
         }
         
         /**
-         * Starts the PropertyTesterApp as a child process.
-         * 
-         * @see #startChildProcess(Class)
-         */
-        public void startChildProcess()
-        {
-            startChildProcess( PropertyTesterApp.class );
-        }
-        
-        /**
          * Start a child process, 
          * applying the give environment variables
          * and properties.
@@ -894,7 +891,7 @@ class PropertyManagerGetPropertyTest
          * @param clazz     Class class containing 
          *                  the main method of the child process
          */
-        public void startChildProcess( Class<?> clazz )
+        public void startChildProcess()
         {
             assertNull( childProcess );
             assertNull( childStdin );
@@ -929,7 +926,7 @@ class PropertyManagerGetPropertyTest
                 command.add( prop.toString() );
             }
             // Name of class to execute is last on command line
-            command.add( clazz.getName() );
+            command.add( PropertyTesterApp.class.getName() );
             
             // Create the process builder and configure the environment
             // that will be used when the child process is executed.
