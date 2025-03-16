@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import util.PropertyTesterApp;
@@ -123,6 +124,9 @@ class PropertyManagerGetPropertyTest
     /** Directory in which user and app ini files reside. */
     private static String           iniDir      = null;
     
+    /** Child .err file. */
+    private static File             errFile     = new File( "err.txt" );
+    
     /** 
      * Length of time to wait for the child process to exit.
      * Must be coordinated with {@linkplain #waitForTimeUnit}.
@@ -172,12 +176,19 @@ class PropertyManagerGetPropertyTest
         
         // create the app ini file
         appIniFile = new File( iniDir, CPConstants.APP_PROPERTIES_NAME );
-        if ( !appIniFile.exists() )
-            appIniFile.createNewFile();
         appIniFile.deleteOnExit();
+        emptyFile( appIniFile );
         
         // initialize test data
         initTestData();
+    }
+    
+    @BeforeEach
+    public void beforeEach()
+    {
+        // Ensure there's an empty app ini file in the
+        // temporary directory.
+        emptyFile( appIniFile );
     }
     
     /**
@@ -194,8 +205,44 @@ class PropertyManagerGetPropertyTest
         childStdout = null;
         closeResource( childStdin );
         childStdin = null;
-        appIniFile.delete();
-        userIniFile.delete();
+    }
+    
+    private static void emptyFile( File file )
+    {
+        try
+        {
+            if ( file.exists() )
+                file.delete();
+            file.createNewFile();
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            System.exit( 1 );
+        }
+    }
+    
+    /**
+     * Can we read all properties
+     * when we have nothing but CPConstants
+     * to provide values?
+     */
+    @Test
+    public void testBase()
+    {
+        // don't put test data directory in the child's classpath
+        // don't declare test data directory on the child's command line
+        // put nothing in the environment
+        // add nothing to the command line
+        ChildProcess    childProcess    = new ChildProcess();
+        childProcess.startChildProcess();
+        for ( Pair pair : allProps )
+        {
+            String  name        = pair.propName;
+            String  expValue    = pair.propValue;
+            String  actValue    = getPropVal( name );
+            assertEquals( expValue, actValue, name );
+        }
     }
     
     /**
@@ -204,23 +251,15 @@ class PropertyManagerGetPropertyTest
     @Test
     public void testUserIniFile()
     {
-        ChildProcess    childProcess    = new ChildProcess();
-        
-        // all properties under test
         List<Pair>      testProps       = new ArrayList<>();
-        int             numAllProps     = allProps.size();
-        int             numTestProps    = 10 < numAllProps ? 10 : numAllProps;
-        for ( int inx = 0 ; inx > numTestProps ; ++inx )
-            testProps.add( allProps.get( inx ) );
-        
-        List<Pair>  userProps   = new ArrayList<>();
-        for ( Pair pair : testProps )
+        for ( Pair pair : allProps )
         {
-            String  userVal     = pair.propValue + appIdent;
-            Pair    userPair    = new Pair( pair.propName, userVal );
-            userProps.add( userPair );
+            String  name    = pair.propName;
+            String  value   = pair.propValue + userIdent;
+            testProps.add( new Pair( name, value ) );
         }
-        makeUserIniFile( userProps );
+        makeUserIniFile( testProps );
+        ChildProcess    childProcess    = new ChildProcess();
 
         // add the -D option that identifies the location
         // of the user's ini file
@@ -228,10 +267,12 @@ class PropertyManagerGetPropertyTest
         // start the child process; interrogate PropertyManager
         childProcess.startChildProcess();
 
-        for ( Pair pair : userProps )
+        for ( Pair pair : allProps )
         {
-            String  actVal  = getPropVal( pair.propName );
-            assertEquals( pair.propValue, actVal );
+            String  name    = pair.propName;
+            String  actVal  = getPropVal( name );
+            assertNotNull( actVal );
+            assertTrue( actVal.endsWith( userIdent ), name );
         }
     }
     
@@ -241,30 +282,85 @@ class PropertyManagerGetPropertyTest
     @Test
     public void testAppIniFile()
     {
-        ChildProcess    childProcess    = new ChildProcess();
         List<Pair>      testProps       = new ArrayList<>();
-        int             numAllProps     = allProps.size();
-        int             numTestProps    = 10 < numAllProps ? 10 : numAllProps;
-        for ( int inx = 0 ; inx > numTestProps ; ++inx )
-            testProps.add( allProps.get( inx ) );
-        
-        List<Pair>  appProps    = new ArrayList<>();
-        for ( Pair pair : testProps )
+        for ( Pair pair : allProps )
         {
-            String  appVal      = pair.propValue + appIdent;
-            Pair    appPair     = new Pair( pair.propName, appVal );
-            appProps.add( appPair );
+            String  name    = pair.propName;
+            String  value   = pair.propValue + appIdent;
+            testProps.add( new Pair( name, value ) );
         }
-        makeAppIniFile( appProps );
-        System.out.println( userIniFile.getAbsolutePath() );
+        makeAppIniFile( testProps );
+        ChildProcess    childProcess    = new ChildProcess();
 
         // start the child process; interrogate PropertyManager
         childProcess.startChildProcess();
 
-        for ( Pair pair : appProps )
+        for ( Pair pair : allProps )
         {
-            String  actVal  = getPropVal( pair.propName );
-            assertEquals( pair.propValue, actVal );
+            String  name    = pair.propName;
+            String  actVal  = getPropVal( name );
+            System.out.println( name + "=" + actVal );
+            assertNotNull( actVal );
+            assertTrue( actVal.endsWith( appIdent ), name );
+        }
+    }
+    
+    /**
+     * Can we read from the command line.
+     */
+    @Test
+    public void testCmd()
+    {
+        List<Pair>      testProps       = new ArrayList<>();
+        int             maxProps        = 10;
+        for ( int inx = 0 ; inx < maxProps ; ++inx )
+        {
+            Pair    pair    = allProps.get( inx );
+            String  name    = pair.propName;
+            String  value   = pair.propValue + cmdIdent;
+            testProps.add( new Pair( name, value ) );
+        }
+        ChildProcess    childProcess    = new ChildProcess();
+        childProcess.addCmdProperties( testProps );
+
+        // start the child process; interrogate PropertyManager
+        childProcess.startChildProcess();
+
+        for ( int inx = 0 ; inx < maxProps ; ++inx )
+        {
+            Pair    pair    = allProps.get( inx );
+            String  name    = pair.propName;
+            String  actVal  = getPropVal( name );
+            assertNotNull( actVal );
+            assertTrue( actVal.endsWith( cmdIdent ), name );
+        }
+    }
+    
+    /**
+     * Can we read from the environment.
+     */
+    @Test
+    public void testEnv()
+    {
+        List<Pair>      testProps       = new ArrayList<>();
+        for ( Pair pair : allProps )
+        {
+            String  name    = pair.propName;
+            String  value   = pair.propValue + envIdent;
+            testProps.add( new Pair( name, value ) );
+        }
+        ChildProcess    childProcess    = new ChildProcess();
+        childProcess.addEnvProperties( testProps );;
+
+        // start the child process; interrogate PropertyManager
+        childProcess.startChildProcess();
+
+        for ( Pair pair : allProps )
+        {
+            String  name    = pair.propName;
+            String  actVal  = getPropVal( name );
+            assertNotNull( actVal );
+            assertTrue( actVal.endsWith( envIdent ), name );
         }
     }
     
@@ -277,34 +373,15 @@ class PropertyManagerGetPropertyTest
     {
         ChildProcess    childProcess    = new ChildProcess();
         
-        // all properties under test
         List<Pair>      testProps       = new ArrayList<>();
-        int             numAllProps     = allProps.size();
-        int             numTestProps    = 20 < numAllProps ? 20 : numAllProps;
-        for ( int inx = 0 ; inx > numTestProps ; ++inx )
-            testProps.add( allProps.get( inx ) );
-        
-        // Declare all properties in app ini file
-        List<Pair>  appProps    = new ArrayList<>();
-        for ( Pair pair : testProps )
+        for ( Pair pair : allProps )
         {
-            String  userVal     = pair.propValue + appIdent;
-            Pair    userPair    = new Pair( pair.propName, userVal );
-            appProps.add( userPair );
+            String  name    = pair.propName;
+            String  value   = pair.propValue + userIdent;
+            testProps.add( new Pair( name, value ) );
         }
-        makeUserIniFile( appProps );
-        
-        // Declare about half the properties in the user ini file
-        int         half        = testProps.size() / 2;
-        List<Pair>  userProps   = new ArrayList<>();
-        for ( int inx = 0 ; inx < half ; ++inx )
-        {
-            Pair    pair        = testProps.get( inx );
-            String  userVal     = pair.propValue + userIdent;
-            Pair    userPair    = new Pair( pair.propName, userVal );
-            userProps.add( userPair );
-        }
-        makeUserIniFile( userProps );
+        makeUserIniFile( testProps );
+        makeAppIniFile( allProps );
 
         // add the -D option that identifies the location
         // of the user's ini file
@@ -312,20 +389,12 @@ class PropertyManagerGetPropertyTest
         // start the child process; interrogate PropertyManager
         childProcess.startChildProcess();
 
-        // make some maps for convenience
-        Map<String,String>  userMap = cvtListToMap( userProps );
-        Map<String,String>  appMap  = cvtListToMap( appProps );
         for ( Pair pair : testProps )
         {
-            String  actVal      = getPropVal( pair.propName );
-            String  expVal      = userMap.get( pair.propName );
-            if ( expVal != null )
-                assertEquals( expVal, actVal );
-            else
-            {
-                expVal = appMap.get( pair.propName );
-                assertEquals( expVal, actVal );
-            }
+            String  name    = pair.propName;
+            String  actVal  = getPropVal( name );
+            assertNotNull( actVal );
+            assertTrue( actVal.endsWith( userIdent ), name );
         }
     }
     
@@ -338,44 +407,16 @@ class PropertyManagerGetPropertyTest
     {
         ChildProcess    childProcess    = new ChildProcess();
         
-        // all properties under test
         List<Pair>      testProps       = new ArrayList<>();
-        int             numAllProps     = allProps.size();
-        int             numTestProps    = 20 < numAllProps ? 20 : numAllProps;
-        for ( int inx = 0 ; inx > numTestProps ; ++inx )
-            testProps.add( allProps.get( inx ) );
-        
-        // Declare all properties in app ini file
-        List<Pair>  appProps    = new ArrayList<>();
-        for ( Pair pair : testProps )
+        for ( Pair pair : allProps )
         {
-            String  userVal     = pair.propValue + appIdent;
-            Pair    userPair    = new Pair( pair.propName, userVal );
-            appProps.add( userPair );
+            String  name    = pair.propName;
+            String  value   = pair.propValue + envIdent;
+            testProps.add( new Pair( name, value ) );
         }
-        makeUserIniFile( appProps );
-        
-        // Declare all properties in the user ini file
-        List<Pair>  userProps   = new ArrayList<>();
-        for ( Pair pair : testProps )
-        {
-            String  userVal     = pair.propValue + userIdent;
-            Pair    userPair    = new Pair( pair.propName, userVal );
-            userProps.add( userPair );
-        }
-        makeUserIniFile( userProps );
-        
-        // Declare about half the properties in the environment
-        int         half        = testProps.size() / 2;
-        List<Pair>  envProps    = new ArrayList<>();
-        for ( int inx = 0 ; inx < half ; ++inx )
-        {
-            Pair    pair        = testProps.get( inx );
-            String  envVal      = pair.propValue + envIdent;
-            Pair    envPair     = new Pair( pair.propName, envVal );
-            envProps.add( envPair );
-        }
-        childProcess.addEnvProperties( envProps );
+        makeUserIniFile( allProps );
+        makeAppIniFile( allProps );
+        childProcess.addEnvProperties( testProps );
 
         // add the -D option that identifies the location
         // of the user's ini file
@@ -383,22 +424,12 @@ class PropertyManagerGetPropertyTest
         // start the child process; interrogate PropertyManager
         childProcess.startChildProcess();
 
-        // make some maps for convenience
-        Map<String,String>  userMap = cvtListToMap( userProps );
-        Map<String,String>  envMap  = cvtListToMap( envProps );
         for ( Pair pair : testProps )
         {
-            // If it's not declared in the environment
-            // it must come from the user ini file
-            String  actVal      = getPropVal( pair.propName );
-            String  expVal      = envMap.get( pair.propName );
-            if ( expVal != null )
-                assertEquals( expVal, actVal );
-            else
-            {
-                expVal = userMap.get( pair.propName );
-                assertEquals( expVal, actVal );
-            }
+            String  name    = pair.propName;
+            String  actVal  = getPropVal( name );
+            assertNotNull( actVal );
+            assertTrue( actVal.endsWith( envIdent ), name );
         }
     }
     
@@ -409,59 +440,32 @@ class PropertyManagerGetPropertyTest
     @Test
     public void testCmdOverEnv()
     {
+        List<Pair>      envProps        = new ArrayList<>();
+        List<Pair>      cmdProps        = new ArrayList<>();
+        int             maxProps        = 10;
+        for ( int inx = 0 ; inx < maxProps ; ++inx )
+        {
+            Pair    pair        = allProps.get( inx );
+            String  name        = pair.propName;
+            String  cmdValue    = pair.propValue + cmdIdent;
+            String  envValue    = pair.propValue + envIdent;
+            cmdProps.add( new Pair( name, cmdValue ) );
+            envProps.add( new Pair( name, envValue ) );
+        }
         ChildProcess    childProcess    = new ChildProcess();
-        
-        // all properties under test
-        List<Pair>      testProps       = new ArrayList<>();
-        int             numAllProps     = allProps.size();
-        int             numTestProps    = 20 < numAllProps ? 20 : numAllProps;
-        for ( int inx = 0 ; inx < numTestProps ; ++inx )
-            testProps.add( allProps.get( inx ) );
-        
-        // Declare all properties in the environment
-        List<Pair>  envProps    = new ArrayList<>();
-        for ( Pair pair : testProps )
-        {
-            String  envVal      = pair.propValue + envIdent;
-            Pair    envPair     = new Pair( pair.propName, envVal );
-            envProps.add( envPair );
-        }
         childProcess.addEnvProperties( envProps );
-        
-        // Declare about half the properties on the command line
-        int         half        = testProps.size() / 2;
-        List<Pair>  cmdProps     = new ArrayList<>();
-        for ( int inx = 0 ; inx < half ; ++inx )
-        {
-            Pair    pair        = testProps.get( inx );
-            String  cmdVal      = pair.propValue + envIdent;
-            Pair    clPair      = new Pair( pair.propName, cmdVal );
-            cmdProps.add( clPair );
-        }
         childProcess.addCmdProperties( cmdProps );
 
-        // add the -D option that identifies the location
-        // of the user's ini file
-        childProcess.addUserIniOption();
         // start the child process; interrogate PropertyManager
         childProcess.startChildProcess();
 
-        // make some maps for convenience
-        Map<String,String>  cmdMap  = cvtListToMap( cmdProps );
-        Map<String,String>  envMap  = cvtListToMap( envProps );
-        for ( Pair pair : testProps )
+        for ( int inx = 0 ; inx < maxProps ; ++inx )
         {
-            // If it's not declared on the command line
-            // it must come from the environment
-            String  actVal      = getPropVal( pair.propName );
-            String  expVal      = cmdMap.get( pair.propName );
-            if ( expVal != null )
-                assertEquals( expVal, actVal );
-            else
-            {
-                expVal = envMap.get( pair.propName );
-                assertEquals( expVal, actVal );
-            }
+            Pair    pair    = allProps.get( inx );
+            String  name    = pair.propName;
+            String  actVal  = getPropVal( name );
+            assertNotNull( actVal );
+            assertTrue( actVal.endsWith( cmdIdent ), name );
         }
     }
     
@@ -563,6 +567,8 @@ class PropertyManagerGetPropertyTest
      */
     private static void initTestData()
     {
+        final String    userPropsName   = CPConstants.USER_PROPERTIES_PN;
+        
         // Get all property names and their default values.
         for ( Field pnField : CPConstants.class.getFields() )
         {
@@ -570,15 +576,19 @@ class PropertyManagerGetPropertyTest
             if ( fieldName.endsWith( "_PN" ) )
             {
                 int     pNameLen    = fieldName.length();
-                String  pNamePrefix = fieldName.substring( 0, pNameLen - 3 );
+                String  pNamePrefix = 
+                    fieldName.substring( 0, pNameLen - 3 );
                 String  dvName      = pNamePrefix + "_DV";
                 
                 try
                 {
                     Field   dvField = CPConstants.class.getField( dvName );
                     String  propName = (String)pnField.get( null );
-                    String  propDefault = (String)dvField.get( null );
-                    allProps.add( new Pair( propName, propDefault ) );
+                    if ( !propName.equals( userPropsName ) )
+                    {
+                        String  propDefault = (String)dvField.get( null );
+                        allProps.add( new Pair( propName, propDefault ) );
+                    }
                 }
                 catch ( NoSuchFieldException | IllegalAccessException exc )
                 {
@@ -617,22 +627,6 @@ class PropertyManagerGetPropertyTest
         }
         
         return propVal;
-    }
-    
-    /**
-     * Convert a list of name/value pairs
-     * to a Map that maps name to value.
-     * 
-     * @param list  list to convert
-     * 
-     * @return the converted map
-     */
-    private Map<String,String> cvtListToMap( List<Pair> list )
-    {
-        Map<String,String>  map = new HashMap<>();
-        for ( Pair pair : list )
-            map.put( pair.propName, pair.propValue );
-        return map;
     }
     
     /**
@@ -884,7 +878,6 @@ class PropertyManagerGetPropertyTest
             // that will be used when the child process is executed.
             ProcessBuilder procBldr = new ProcessBuilder(command);
             Map<String, String> env = procBldr.environment();
-            env.clear();
             for ( Pair pair : envPairs )
                 env.put( pair.propName, pair.propValue );
             try
@@ -934,21 +927,6 @@ class PropertyManagerGetPropertyTest
         public Pair( String propName, String propValue )
         {
             this.propName = propName;
-            this.propValue = propValue;
-        }
-        
-        /**
-         * Constructor.
-         * Create a new Pair
-         * using the name from an existing pair
-         * and a given property value.
-         * 
-         * @param pair          given Pair
-         * @param propValue     given property value
-         */
-        public Pair( Pair pair, String propValue )
-        {
-            this.propName = pair.propName;
             this.propValue = propValue;
         }
         

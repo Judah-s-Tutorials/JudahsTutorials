@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * Manage the properties for this application.
@@ -101,7 +102,7 @@ public enum PropertyManager
 {
     /** The single instance of this class. */
     INSTANCE;
-    
+
     /** 
      * The name of the default properties file.
      */
@@ -557,7 +558,7 @@ public enum PropertyManager
                 CPConstants.USER_PROPERTIES_PN,
                 CPConstants.USER_PROPERTIES_DV
             );
-        
+        System.err.println( propsFile );
         if ( propsFile != null && !propsFile.isEmpty() )
         {
             try ( FileInputStream inStream = new FileInputStream( propsFile ) )

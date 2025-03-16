@@ -1,9 +1,13 @@
 package util;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.util.logging.Logger;
 
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 
@@ -26,6 +30,8 @@ import com.acmemail.judah.cartesian_plane.PropertyManager;
  */
 public class PropertyTesterApp
 {
+    private static final Logger logger =
+        Logger.getLogger( "Judah" );
     /** This is the response if a property name can't be found. */
     public static final String  NOT_FOUND       = "++NULL";
     /** Receiving this command will cause this process to exit. */
@@ -68,9 +74,16 @@ public class PropertyTesterApp
      * @see #EXIT_FAILURE
      * @see #NOT_FOUND
      */
-    public static void main(String[] args)
+    public static void main(String[] args) throws IOException
     {
-        System.err.println( "child: main" );
+        File    file    = new File( "C:\\Users\\johns\\Workspaces\\Judah\\JudahsTutorials\\Cartesian Plane Part 7b\\Log.txt" );
+        FileWriter  writer  = new FileWriter( file, true );
+        PrintWriter   printer = new PrintWriter( writer, true );
+        printer.println( "Maine" );
+        printer.close();
+//        FileHandler handler = new FileHandler( "C:\\Users\\johns\\Workspaces\\Judah\\JudahsTutorials\\Cartesian Plane Part 7b\\Log.txt" );
+//        logger.addHandler( handler );
+//        logger.info( "main" );
         try ( 
             Reader reader  = new InputStreamReader( System.in );
             BufferedReader  bufReader   = new BufferedReader( reader );
@@ -79,6 +92,7 @@ public class PropertyTesterApp
             String          propName    = "";
             while ( !(propName = bufReader.readLine()).equals( EXIT_COMMAND ) )
             {
+                logger.info( propName );
                 String  propValue   = pMgr.asString( propName );
                 System.out.println( propValue );
             }
