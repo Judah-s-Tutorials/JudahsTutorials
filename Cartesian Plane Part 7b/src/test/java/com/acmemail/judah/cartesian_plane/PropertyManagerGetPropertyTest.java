@@ -124,9 +124,6 @@ class PropertyManagerGetPropertyTest
     /** Directory in which user and app ini files reside. */
     private static String           iniDir      = null;
     
-    /** Child .err file. */
-    private static File             errFile     = new File( "err.txt" );
-    
     /** 
      * Length of time to wait for the child process to exit.
      * Must be coordinated with {@linkplain #waitForTimeUnit}.
@@ -230,10 +227,11 @@ class PropertyManagerGetPropertyTest
     @Test
     public void testBase()
     {
-        // don't put test data directory in the child's classpath
-        // don't declare test data directory on the child's command line
+        // work with an empty application ini file
+        // do not declare the location of the user ini file
         // put nothing in the environment
         // add nothing to the command line
+        // verify that all properties map to their default values
         ChildProcess    childProcess    = new ChildProcess();
         childProcess.startChildProcess();
         for ( Pair pair : allProps )
@@ -242,6 +240,35 @@ class PropertyManagerGetPropertyTest
             String  expValue    = pair.propValue;
             String  actValue    = getPropVal( name );
             assertEquals( expValue, actValue, name );
+        }
+    }
+    
+    /**
+     * Properties can be read from the application.
+     */
+    @Test
+    public void testAppIniFile()
+    {
+        ChildProcess    childProcess    = new ChildProcess();
+        
+        List<Pair>      testProps       = new ArrayList<>();
+        for ( Pair pair : allProps )
+        {
+            String  name    = pair.propName;
+            String  value   = pair.propValue + appIdent;
+            testProps.add( new Pair( name, value ) );
+        }
+        makeAppIniFile( testProps );
+
+        // start the child process; interrogate PropertyManager
+        childProcess.startChildProcess();
+
+        for ( Pair pair : testProps )
+        {
+            String  name    = pair.propName;
+            String  actVal  = getPropVal( name );
+            assertNotNull( actVal );
+            assertTrue( actVal.endsWith( appIdent ), name );
         }
     }
     
@@ -277,39 +304,10 @@ class PropertyManagerGetPropertyTest
     }
     
     /**
-     * Can we read from the application's ini file.
-     */
-    @Test
-    public void testAppIniFile()
-    {
-        List<Pair>      testProps       = new ArrayList<>();
-        for ( Pair pair : allProps )
-        {
-            String  name    = pair.propName;
-            String  value   = pair.propValue + appIdent;
-            testProps.add( new Pair( name, value ) );
-        }
-        makeAppIniFile( testProps );
-        ChildProcess    childProcess    = new ChildProcess();
-
-        // start the child process; interrogate PropertyManager
-        childProcess.startChildProcess();
-
-        for ( Pair pair : allProps )
-        {
-            String  name    = pair.propName;
-            String  actVal  = getPropVal( name );
-            System.out.println( name + "=" + actVal );
-            assertNotNull( actVal );
-            assertTrue( actVal.endsWith( appIdent ), name );
-        }
-    }
-    
-    /**
      * Can we read from the command line.
      */
     @Test
-    public void testCmd()
+    public void testCmdLine()
     {
         List<Pair>      testProps       = new ArrayList<>();
         int             maxProps        = 10;
@@ -487,17 +485,17 @@ class PropertyManagerGetPropertyTest
     @Test
     public void testComprehensive()
     {
-        Map<String,String>  expMap          = new HashMap<>();
         List<Pair>          toAddAppIni     = new ArrayList<>();
         List<Pair>          toAddUserIni    = new ArrayList<>();
         List<Pair>          toAddEnv        = new ArrayList<>();
         List<Pair>          toAddCmd        = new ArrayList<>();
+        Map<String,String>  expMap          = new HashMap<>();
         
-        int chunkSize   = 5;
+        int chunkSize   = allProps.size() / 5;
         int mainIndex   = 0;
         int maxInx      = 4 * chunkSize;
         
-        assertTrue( allProps.size() > maxInx );
+        assertTrue( allProps.size() > maxInx + 1 );
         for ( int inx = 0 ; inx < maxInx ; ++inx )
         {
             int     chunk       = mainIndex % chunkSize;
@@ -509,7 +507,7 @@ class PropertyManagerGetPropertyTest
             if ( chunk >= 0 )
             {
                 workPair = new Pair( baseName, baseValue + appIdent );
-                toAddUserIni.add( workPair );
+                toAddAppIni.add( workPair );
             }
             
             if ( chunk >= 1 )
@@ -536,11 +534,8 @@ class PropertyManagerGetPropertyTest
         for ( ; mainIndex < allProps.size() ; ++mainIndex )
         {
             Pair    pair    = allProps.get( mainIndex );
-            if ( !pair.propName.equals( CPConstants.USER_PROPERTIES_PN ) )
-                expMap.put( pair.propName, pair.propValue );
+            expMap.put( pair.propName, pair.propValue );
         }
-        String  user    = CPConstants.USER_PROPERTIES_PN;
-        expMap.put( user, userIniFile.getAbsolutePath() );
         
         ChildProcess    childProcess    = new ChildProcess();
         childProcess.addEnvProperties( toAddEnv );
