@@ -47,40 +47,44 @@ class PropertyManagerTest
     @Test
     public void testRemovePropertyChangeListener()
     {
-        String          origName        = CPConstants.TIC_MAJOR_WEIGHT_PN;
-        float           origOldVal      = pmgr.asFloat( origName );
-        float           origNewVal      = origOldVal + 1;
+        String          prop1           = CPConstants.TIC_MAJOR_WEIGHT_PN;
+        float           prop1OldVal     = pmgr.asFloat( prop1 );
+        float           prop1NewVal     = prop1OldVal + 1;
         TestListener    listener        = new TestListener();
         
-        pmgr.setProperty( origName, origOldVal );
         pmgr.addPropertyChangeListener( listener );
-        pmgr.setProperty( origName, origNewVal );
+        pmgr.setProperty( prop1, prop1NewVal );
         
         // Verify that the listener fired as expected
-        float   actOldVal   = Float.parseFloat( (String)listener.getOldVal() );
-        float   actNewVal   = Float.parseFloat( (String)listener.getNewVal() );
-        assertEquals( origOldVal, actOldVal );
-        assertEquals( origNewVal, actNewVal );
-        assertEquals( origName, listener.getName() );
+        float   actOldVal   = 
+            Float.parseFloat( (String)listener.getOldVal() );
+        float   actNewVal   = 
+            Float.parseFloat( (String)listener.getNewVal() );
+        assertEquals( prop1OldVal, actOldVal );
+        assertEquals( prop1NewVal, actNewVal );
+        assertEquals( prop1, listener.getName() );
         
         // Remove the listener and verify that it does NOT fire
         // when a property is changed
         pmgr.removePropertyChangeListener( listener );
-        String      nextName        = CPConstants.TIC_MAJOR_COLOR_PN;
-        Color       nextVal         = Color.BLUE;
+        String      prop2           = CPConstants.GRID_UNIT_PN;
+        float       prop2OldVal     = pmgr.asFloat( prop2 );
+        float       prop2NewVal     = prop2OldVal + 1;
         
-        // Sanity check; nextName should be different from origName,
-        // nextVal should be different from origNewVal
-        assertNotEquals( origName, nextName );
-        assertNotEquals( origNewVal, nextVal );
+        // Sanity check; prop2 oldVal and newVal must be different
+        assertNotEquals( prop2OldVal, prop2NewVal );
+        // Sanity check; prop1 and prop2 names must be different
+        assertNotEquals( prop1, prop2 );
+        // Sanity check; prop1 newVal and prop2 newVal must be different
+        assertNotEquals( prop1NewVal, prop2NewVal );
         
-        pmgr.setProperty( nextName, nextVal );
+        pmgr.setProperty( prop2, prop2OldVal );
         
         actOldVal   = Float.parseFloat( (String)listener.getOldVal() );
         actNewVal   = Float.parseFloat( (String)listener.getNewVal() );
-        assertEquals( origOldVal, actOldVal );
-        assertEquals( origNewVal, actNewVal );
-        assertEquals( origName, listener.getName() );
+        assertEquals( prop1OldVal, actOldVal );
+        assertEquals( prop1NewVal, actNewVal );
+        assertEquals( prop1, listener.getName() );
     }
 
     @Test
@@ -89,34 +93,35 @@ class PropertyManagerTest
         // Set up per-property listeners for two properties. Change one
         // of them. Verify that the correct listener fires for the change
         // and the other does not.
-        String          posProp     = CPConstants.TIC_MAJOR_WEIGHT_PN;
-        float           expOldValue = pmgr.asFloat( posProp );
-        float           expNewValue = expOldValue + 1;
-        TestListener    posListener = new TestListener();
-        pmgr.addPropertyChangeListener( posProp, posListener );
+        String          prop1           = CPConstants.TIC_MAJOR_WEIGHT_PN;
+        float           prop1OldValue   = pmgr.asFloat( prop1 );
+        float           prop1NewValue   = prop1OldValue + 1;
+        TestListener    prop1Listener   = new TestListener();
+        pmgr.addPropertyChangeListener( prop1, prop1Listener );
         
-        String          negProp     = CPConstants.TIC_MINOR_WEIGHT_PN;
-        TestListener    negListener = new TestListener();
-        pmgr.addPropertyChangeListener( negProp, negListener );
+        String          prop2           = CPConstants.TIC_MINOR_WEIGHT_PN;
+        TestListener    prop2Listener   = new TestListener();
+        pmgr.addPropertyChangeListener( prop2, prop2Listener );
         
-        pmgr.setProperty( posProp, expNewValue );
+        pmgr.setProperty( prop1, prop1NewValue );
         
         // Check the listener that should have fired.
         // Keep in mind old/new values in TestListener are stored as
         // type Object, and are actually type String.
         float   actOldVal   = 
-            Float.parseFloat( (String)posListener.getOldVal() );
+            Float.parseFloat( (String)prop1Listener.getOldVal() );
         float   actNewVal   = 
-            Float.parseFloat( (String)posListener.getNewVal() );
-        assertEquals( posProp, posListener.getName() );
-        assertEquals( expNewValue, actNewVal );
-        assertEquals( expOldValue, actOldVal );
-        assertEquals( pmgr, posListener.getSource() );
+            Float.parseFloat( (String)prop1Listener.getNewVal() );
+        assertEquals( prop1, prop1Listener.getName() );
+        assertEquals( prop1NewValue, actNewVal );
+        assertEquals( prop1OldValue, actOldVal );
+        assertEquals( pmgr, prop1Listener.getSource() );
         
         // Check the listener that should not have fired.
-        assertNull( negListener.getName() );
-        assertNull( negListener.getNewVal() );
-        assertNull( negListener.getOldVal() );
+        assertNull( prop2Listener.getName() );
+        assertNull( prop2Listener.getNewVal() );
+        assertNull( prop2Listener.getOldVal() );
+        assertNull( prop2Listener.getSource() );
     }
     
     @Test
