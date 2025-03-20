@@ -22,7 +22,7 @@ import java.util.Random;
  * 
  * @see SortingExampleInteger5
  */
-public class SortingExampleInteger6
+public class SortingExampleInteger7
 {
     /**
      * Application entry point.
@@ -36,7 +36,7 @@ public class SortingExampleInteger6
         for ( int inx = 0 ; inx < 100 ; ++inx )
             randomList.add( randy.nextInt( 100 ) );
         
-        Comparator<Integer> comp    =
+        randomList.sort( 
             new Comparator<>()
             { 
                 public int compare( Integer num1, Integer num2 )
@@ -55,8 +55,7 @@ public class SortingExampleInteger6
                         rcode = -1;
                     return rcode;
                 }
-            };
-            randomList.sort( comp );
+            });
         for ( Integer num : randomList )
             System.out.println( num );
     }
