@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>PointSorter</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="overflow-x: auto; font-size: 75%; padding-left: .25em; padding-right: .25em; background-color: #EEE8AA;">
+    <table style="border-spacing: 10px; border-collapse: separate;">
+        <tbody>
+            <tr>
+                <td style="border: .1em solid black; vertical-align: top;">
+                    <p><b>PointSorterA</b></p>
+<pre>public static void main(String[] args)
+{
+    Point       origin  = new Point( 0, 0 );
+    List&lt;Point> points  = new ArrayList&lt;>();
+    for ( int inx = 0 ; inx &lt; 25 ; ++inx )
+        points.add( Utils.randomPoint() );
+    points.sort( new Comparator&lt;Point>() {
+        public int compare( Point p1, Point p2 )
+        {
+            double  p1Dist  = origin.distance( p1 );
+            double  p2Dist  = origin.distance( p2 );
+            int     result  = (int)(p1Dist - p2Dist);
+            return result;
+        }
+    });
+    for ( Point point : points )
+        System.out.println( point );
+}</pre>
+                </td>
+                <td style="border: .1em solid black;">
+                    <p><b>PointSorterB</b></p>
+<pre>public static void main( String[] args )
+{
+    Point       origin  = new Point( 0, 0 );
+    List&lt;Point> points  = new ArrayList&lt;>();
+    for ( int inx = 0 ; inx &lt; 25 ; ++inx )
+        points.add( Utils.randomPoint() );
+    Comparator&lt;Point>   comp    =
+        new Comparator&lt;Point>() {
+            public int compare( Point p1, Point p2 )
+            {
+                double  p1Dist  = origin.distance( p1 );
+                double  p2Dist  = origin.distance( p2 );
+                int     result  = (int)(p1Dist - p2Dist);
+                return result;
+            }
+        };
+    points.sort( comp );
+    for ( Point point : points )
+        System.out.println( point );
+}</pre>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
