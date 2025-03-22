@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IntSorter</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="overflow-x: auto; font-size: 75%; padding-left: .25em; padding-right: .25em; background-color: #EEE8AA;">
+    <table style="border-spacing: 10px; border-collapse: separate;">
+        <tbody>
+            <tr>
+                <td style="border: .1em solid black; vertical-align: top;">
+                    <p><b>IntSorterA</b></p>
+<pre>public static void main(String[] args)
+{
+    Random          randy   = new Random( 0 );
+    List&lt;Integer>   numbers = new ArrayList&lt;>();
+    for ( int inx = 0 ; inx &lt; 25 ; ++inx )
+        numbers.add( randy.nextInt( 200 ) - 100 );
+    numbers.sort( <span style="background-color: yellow;">new Comparator&lt;Integer>() {
+        public int compare( Integer num1, Integer num2 )
+        {
+            return num2 - num1;
+        }
+    }</span>);
+    for ( Integer num : numbers )
+        System.out.println( num );
+}</pre>
+                </td>
+                <td style="border: .1em solid black; vertical-align: top;">
+                    <p><b>IntSorterA1</b></p>
+<pre>public static void main(String[] args)
+{
+    Random          randy   = new Random( 0 );
+    List&lt;Integer>   numbers = new ArrayList&lt;>();
+    for ( int inx = 0 ; inx &lt; 25 ; ++inx )
+        numbers.add( randy.nextInt( 200 ) - 100 );
+    numbers.sort( <span style="background-color: yellow;">(num1,num2) -> {
+        return num2 - num1;
+    }</span>);
+    for ( Integer num : numbers )
+        System.out.println( num );
+}</pre>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

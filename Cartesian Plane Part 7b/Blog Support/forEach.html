@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IntSorter</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="overflow-x: auto; font-size: 75%; padding-left: .25em; padding-right: .25em; background-color: #EEE8AA;">
+    <table style="border-spacing: 10px; border-collapse: separate;">
+        <tbody>
+            <tr>
+                <td style="border: .1em solid black; vertical-align: top;">
+                    <p><b>IntSorterA</b></p>
+<pre>numbers.forEach( new Consumer&lt;Integer>() {
+    public void accept( Integer p ){
+        System.out.println( p );
+    }
+});</pre>
+                </td>
+                <td style="border: .1em solid black; vertical-align: top;">
+                    <p><b>IntSorterA1</b></p>
+<pre>numbers.forEach( p -> System.out.println( p ) );</pre>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
