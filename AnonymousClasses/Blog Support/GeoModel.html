@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>GeoModel</title>
+     <link rel="stylesheet" href="main.css"> 
+</head>
+<body>
+<div  style="max-width: 50em; margin-left: 2em; margin-right: 2em; padding: 1em; border: .25em solid black; background-color: #EEEEEE; font-family:sans-serif;">
+<p>
+<strong>
+    Working with Java I/O Streams
+</strong>
+</p>
+<p>
+<u>class GeoModel</u><br>
+An instance of this class
+encapsulates a model of a rectangular area.
+The model typically evolves over time
+but it can be temporarly frozen,
+during which time it doesn't change.
+It has many methods to get and set properties,
+among them:
+</p>
+<ul>
+    <li>
+        <span style="font-family: monospace;">
+            public double force( Point point )<br>
+            public double stress( Point point )<br>
+            public double velocity( Point point )<br>
+            public double acceleration( Point point )<br>
+        </span>
+        Returns the value of the named property
+        at the given point.<br>&nbsp;
+    </li>
+    <li>
+        <span style="font-family: monospace;">
+            public double force()<br>
+            public double stress()<br>
+            public double velocity()<br>
+            public double acceleration()<br>
+        </span>
+        Returns the value of the named property
+        averaged over all points.<br>&nbsp;
+    </li>
+    <li>
+        <span style="font-family: monospace;">
+            public void setForce( Point point )<br>
+            public void setStress( Point point )<br>
+            public void setVelocity( Point point )<br>
+            public void setAcceleration( Point point )<br>
+        </span>
+        Sets the value of the named property
+        at the given point.
+    </li>
+</ul>
+<p>
+<strong>Important:</strong>
+</p>
+<ul>
+    <li>
+        For the purpose of testing,
+        the model must be frozen
+        before attempting to get or set a property.
+    </li>
+    <li>
+        For the purpose of testing,
+        a frozen model
+        must not be frozen a second time.
+    </li>
+    <li>
+        For the purpose of testing,
+        an unfrozen model
+        must not be unfrozen a second time.
+    </li>
+</ul>
+<p>
+    <u>class ModelMonitor</u><br>
+    This class is used during testing only.
+    It maintains a GeoModel as an instance variable:<br>
+    <span style="font-family:monospace;">
+        &nbsp;&nbsp;&nbsp;&nbsp;private GeoModel    model;<br>
+    </span>
+    and ensures that the model is accessed correctly.
+    For example,
+    each getter and setter in the model
+    is reflected by a corresponding getter/setter
+    in the ModelMonitor.
+    When the unit test class needs to get the velocity
+    of the model at a given point,
+    it calls <em>getStress(Point)</em> in the monitor;
+    the monitor makes sure that the model is frozen
+    prior to getting the property from the model,
+    and, if necessary, restores the state of model
+    after the operation completes.
+</p>
+</div>
+</body>
+</html>
