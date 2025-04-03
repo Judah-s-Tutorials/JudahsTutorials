@@ -27,8 +27,9 @@ public class DoubleSupplierDemo
      */
     public static void main(String[] args)
     {
-        Polynomial      poly        = new Polynomial( 2, 3, 1 );
-        List<Point2D>   points  = poly.plot( 10, new XGenerator( -2, .5 ) );
+        Polynomial      poly    = new Polynomial( 2, 3, 1 );
+        List<Point2D>   points  = 
+            poly.plot( 10, new XGenerator( -2, .5 ) );
         points.forEach( p -> 
             System.out.println( p.getX() + "->" + p.getY() )
         );

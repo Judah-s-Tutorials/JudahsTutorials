@@ -25,7 +25,8 @@ public class PredicateDefaultMethodDemo1
         System.out.println( "****************" );
         
         Predicate<ShowDog>  lessThan    = d -> d.getAge() < 6;
-        Predicate<ShowDog>  breedEquals = d -> d.getBreed().equals( "Collie" );
+        Predicate<ShowDog>  breedEquals = d -> 
+            d.getBreed().equals( "Collie" );
         
         // Get the first ShowDog that is less than 6,
         // or which is a Collie.

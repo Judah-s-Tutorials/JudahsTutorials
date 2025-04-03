@@ -25,11 +25,12 @@ public class LocalDispatchService
      * @param message   the message to dispatch
      * @param consumer  the given consumer
      */
-    public static void dispatch( Message message, Consumer<Message> consumer )
+    public static void 
+    dispatch( Message message, Consumer<Message> consumer )
     {
-        ZonedDateTime   zonedDateTime   = ZonedDateTime.now();
-        String          strDateTime     = 
-            zonedDateTime.format( DateTimeFormatter.ISO_ZONED_DATE_TIME );
+        ZonedDateTime   dateTime    = ZonedDateTime.now();
+        String          strDateTime = 
+            dateTime.format( DateTimeFormatter.ISO_ZONED_DATE_TIME );
         message.setDateTimeUTC( strDateTime );
         
         message.setEncoding( "utf-16" );
