@@ -3,7 +3,7 @@ package com.acmemail.judah.anonymous_classes.functional_interfaces;
 import java.awt.Point;
 import java.util.function.Function;
 
-public class ModelTester
+public class ModelMonitor
 {
     private GeoModel    model;
     
@@ -43,7 +43,8 @@ public class ModelTester
             model.setFrozen( true );
         }
         rval = getter.apply( point );
-        model.setFrozen( isFrozen );
+        if ( !isFrozen )
+            model.setFrozen( false );
         return rval;
     }
 }
