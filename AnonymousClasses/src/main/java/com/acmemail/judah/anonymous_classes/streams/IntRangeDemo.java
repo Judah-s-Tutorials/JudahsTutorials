@@ -8,7 +8,7 @@ import java.util.stream.IntStream;
  * 
  * @author Jack Straub
  */
-public class GenerateDemo
+public class IntRangeDemo
 {
     /**
      * Application entry point.
