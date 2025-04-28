@@ -98,8 +98,6 @@ public class NonAxialPositioning extends JPanel
     private final Font          lineFont;
     /** Font for drawing all other text. */
     private final Font          textFont;
-    /** Object to use for drawing vertical lines. */
-    private final Line2D        line;
     /** Copy of the graphics context. Initialized in paintComponent. */
     private Graphics2D          gtx;
     /** Context for position coordinates. */
@@ -133,7 +131,6 @@ public class NonAxialPositioning extends JPanel
         setPreferredSize( dim );
         lineFont = getFont().deriveFont( Font.PLAIN );
         textFont = getFont().deriveFont( Font.ITALIC );
-        line = new Line2D.Double();
     }
     
     @Override

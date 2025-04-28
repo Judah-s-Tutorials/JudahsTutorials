@@ -10,8 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import temp.IPCParentSimpleDemo2;
-
 /**
  * This application demonstrates how to create
  * and communicate with a child process.

@@ -25,6 +25,7 @@ import javax.swing.JPanel;
  */
 public class CartesianPlane_2 extends JPanel
 {
+	private static final long serialVersionUID = -1164428632900299140L;
 	/** The initial width of the window, in pixels. */
     private int         initWidth           = 815;
     /** The initial height of the window, in pixels. */
@@ -35,8 +36,6 @@ public class CartesianPlane_2 extends JPanel
     private Color       ticMajorColor       = new Color( .5f, .5f, .5f );
     /** The color of the minor tic marks */
     private Color       ticMinorColor       = new Color( .75f, .75f, .75f );
-    /** The color of the x- and y-axes */
-    private Color       axisColor           = new Color( 0f, 0f, 0f );
     /** The color of the grid lines */
     private Color       gridLineColor       = new Color( .7f, .7f, .7f );
     /** Distance between minor tic marks */

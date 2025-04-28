@@ -1,7 +1,6 @@
 package util;
 
 import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
@@ -41,7 +40,7 @@ public class LinePropertyTester
      * <li>
      * </ul>
      */
-    private static final int    gridUnit        = 16;
+//    private static final int    gridUnit        = 16;
     /** 
      * Minor tic marks-per-unit.
      * Puts a minor tic mark at:
@@ -305,7 +304,6 @@ public class LinePropertyTester
         private final int   vXco;
         private final int   vYco;
         private final int   hXco;
-        private final int   hYco;
         private int         len;
         private int         width;
         private Color       color;
@@ -322,20 +320,9 @@ public class LinePropertyTester
             this.vXco = vXco;
             this.vYco = vYco;
             this.hXco = hXco;
-            this.hYco = hYco;
             this.len = len;
             this.width = width;
             this.color = color;
-        }
-        
-        public void configForTest()
-        {
-            int oldColor    = color.getRGB();
-            int newColor    = oldColor + 0x101010;
-            color = new Color( newColor );
-            if ( len != -1 )
-                len *= 2;
-            width = 5;
         }
     }
 }

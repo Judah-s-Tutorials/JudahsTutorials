@@ -27,7 +27,8 @@ import javax.swing.JPanel;
  */
 public class CartesianPlane_01 extends JPanel
 {
-    /** The initial width of the window, in pixels. */
+    private static final long serialVersionUID = -1558945098668006678L;
+	/** The initial width of the window, in pixels. */
     private static int  initWidth           = 815;
     /** The initial height of the window, in pixels. */
     private static int  initHeight          = 515;
