@@ -2,8 +2,6 @@ package com.acmemail.judah.anonymous_classes.functional_interfaces;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Predicate;
-import java.util.function.ToIntBiFunction;
 
 import com.acmemail.judah.anonymous_classes.lambdas.ShowDog;
 
