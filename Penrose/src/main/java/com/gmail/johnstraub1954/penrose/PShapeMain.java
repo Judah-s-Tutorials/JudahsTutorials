@@ -53,9 +53,9 @@ public class PShapeMain
     {
         PShapeMain demo2   = new PShapeMain();
         String      clazz   = PKite.class.getSimpleName();
-        PShape.setDefaultFillColor( clazz, new Color( 0x900C3F ) );
+        PShape.setDefaultFillColor( clazz, new Color( 0xff99ff ) );
         clazz = PDart.class.getSimpleName();
-        PShape.setDefaultFillColor( clazz, new Color( 0x663399 ) );
+        PShape.setDefaultFillColor( clazz, new Color( 0x99ccff ) );
 
         SwingUtilities.invokeLater( () -> {
             demo2.build();

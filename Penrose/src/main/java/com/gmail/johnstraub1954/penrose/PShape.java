@@ -6,6 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
@@ -82,14 +83,6 @@ public abstract class PShape implements Serializable
         return result;
     }
     
-    public void draw( Graphics2D gtx )
-    {
-        Color   save    = gtx.getColor();
-        gtx.setColor( getEdgeColor() );
-        gtx.draw( workShape );
-        gtx.setColor( save );
-    }
-    
     public void highlight( Graphics2D gtx )
     {
         Color   saveColor   = gtx.getColor();
@@ -100,14 +93,6 @@ public abstract class PShape implements Serializable
         gtx.setStroke( saveStroke );
         gtx.draw( workShape );
         gtx.setColor( saveColor );
-    }
-    
-    public void fill( Graphics2D gtx )
-    {
-        Color   save    = gtx.getColor();
-        gtx.setColor( getColor() );
-        gtx.fill( workShape );
-        gtx.setColor( save );
     }
     
     public void rotate( double radians )
@@ -150,12 +135,30 @@ public abstract class PShape implements Serializable
     
     public void render( Graphics2D gtx )
     {
-        Color   save    = gtx.getColor();
+        Color       save    = gtx.getColor();
         
         gtx.setColor( getColor() );
         gtx.fill( workShape );
         gtx.setColor( getEdgeColor() );
         gtx.draw( workShape );
+        
+        // debugging stuff
+        double      pinXco  = xco + rightBounds.getCenterX();
+        double      pinYco  = yco + rightBounds.getCenterY();
+        Ellipse2D   center  = 
+            new Ellipse2D.Double( pinXco - 2, pinYco - 2, 4, 4 );
+
+        gtx.setColor( Color.RED );
+        gtx.fill( center );
+        
+        gtx.setColor( Color.YELLOW );
+        Rectangle2D rect    =
+            new Rectangle2D.Double( 0, 0, rightBounds.getWidth(), rightBounds.getHeight() );
+        AffineTransform transform   = new AffineTransform();
+        transform.rotate( rotation, pinXco, pinYco );
+        transform.translate( xco, yco );
+        Shape       rectShape = transform.createTransformedShape( rect );
+        gtx.draw( rectShape );
         
         gtx.setColor( save );
     }
