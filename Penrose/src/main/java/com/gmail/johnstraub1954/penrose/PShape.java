@@ -14,7 +14,6 @@ import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,17 +58,64 @@ public abstract class PShape implements Serializable
     private Color   highlightColor  = Color.CYAN;
     private int     highlightWidth  = 1;
     private Shape   workShape;
+    private int     currVertex      = 0;
     
     public abstract Path2D getPath( double longSide );
     
-    public abstract Deque<Vertex> getVertices( double longSide );
-    public abstract Deque<Vertex> getVertices();
+    public abstract List<Vertex>  getVertices( double longSide );
+    public abstract List<Vertex>  getVertices();
+    
+    private final List<Vertex>    vertexList;
+    public void nextVertex()
+    {
+        if ( ++currVertex >= vertexList.size() )
+            currVertex = 0;
+        
+    }
+    
+    public Line2D getCurrEdge()
+    {
+        List<Vertex>    transformedVertices = getTransformedVertices();
+        int             toInx               = currVertex + 1;
+        if ( toInx >= transformedVertices.size() )
+            toInx = 0;
+        Vertex          fromVertex          = transformedVertices.get( currVertex );
+        Vertex          toVertex            = transformedVertices.get( toInx );
+        Line2D          edge                = fromVertex.getEdge( toVertex );
+        return edge;
+    }
+    
+    public String getCurrDotState()
+    {
+        int nextVertex  = currVertex + 1;
+        if ( nextVertex >= vertexList.size() )
+            nextVertex = 0;
+        Vertex  fromVertex  = vertexList.get( currVertex );
+        Vertex  toVertex    = vertexList.get( nextVertex );
+        String  str = fromVertex.isDotted() + "/" + toVertex.isDotted();
+        return str;
+    }
+    
+    public double getCurrSlope()
+    {
+        Line2D  line    = getCurrEdge();
+        double  slope   = (line.getY1() - line.getY2()) / (line.getX1() - line.getX2() );
+        return slope;
+    }
+    
+    public double getCompSlope()
+    {
+        Line2D  line    = getCurrEdge();
+        double  slope   = (line.getY2() - line.getY1()) / (line.getX2() / line.getX1() );
+        return slope;
+    }
     
     public PShape( double longSide )
     {
         path = getPath( longSide );
         rightBounds = path.getBounds2D();
         computePath();
+        vertexList = getVertices();
     }
     
     public boolean contains( double xco, double yco ) 
@@ -92,6 +138,11 @@ public abstract class PShape implements Serializable
         gtx.draw( workShape );
         gtx.setStroke( saveStroke );
         gtx.draw( workShape );
+        
+        gtx.setColor( Color.BLUE );
+        Line2D  edge    = getCurrEdge();
+        gtx.draw( edge );
+        
         gtx.setColor( saveColor );
     }
     
@@ -393,7 +444,7 @@ public abstract class PShape implements Serializable
         workShape = transform.createTransformedShape( path );
     }
     
-    public Collection<Vertex> getTransformedVertices()
+    public List<Vertex> getTransformedVertices()
     {
         List<Vertex>    verticesOut = new ArrayList<>();
         double          xcoPin      = xco + rightBounds.getWidth() / 2;
@@ -401,7 +452,7 @@ public abstract class PShape implements Serializable
         AffineTransform transform   = new AffineTransform();
         transform.rotate( rotation, xcoPin, ycoPin );
         transform.translate( xco, yco );
-        Deque<Vertex>   verticesIn  = getVertices();
+        List<Vertex>    verticesIn  = getVertices();
         int             len         = verticesIn.size();
         Point2D[]       from        = new Point2D.Double[len];
         int             inx         = 0;

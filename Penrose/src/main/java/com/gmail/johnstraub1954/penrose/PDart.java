@@ -7,11 +7,12 @@ import java.awt.geom.Point2D;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 
 public class PDart extends PShape
 {
     private static final long serialVersionUID = 3715598631373436809L;
-    private static final Deque<Vertex>  queue       = new LinkedList<>();
+    private static final List<Vertex>   queue       = new LinkedList<>();
     private static final Path2D         path        = new Path2D.Double();
     private static final double         dotXier     = .1;
     
@@ -36,7 +37,7 @@ public class PDart extends PShape
         {
             path.reset();
     
-            Deque<Vertex>       queue   = getVertices( longSide );
+            List<Vertex>        queue   = getVertices( longSide );
             Iterator<Vertex>    iter    = queue.iterator();
             Vertex              vertex  = iter.next();
             Point2D             coords  = vertex.getCoords();
@@ -63,7 +64,7 @@ public class PDart extends PShape
     }
     
     @Override
-    public Deque<Vertex> getVertices()
+    public List<Vertex> getVertices()
     {
         if ( queue == null )
         {
@@ -74,7 +75,7 @@ public class PDart extends PShape
     }
     
     @Override
-    public Deque<Vertex> getVertices( double longSide )
+    public List<Vertex> getVertices( double longSide )
     {
         if ( queue.isEmpty() )
         {
