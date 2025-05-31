@@ -85,28 +85,27 @@ public abstract class PShape implements Serializable
         return edge;
     }
     
-    public String getCurrDotState()
+    public boolean[] getCurrDotState()
     {
-        int nextVertex  = currVertex + 1;
+        int         nextVertex  = currVertex + 1;
         if ( nextVertex >= vertexList.size() )
             nextVertex = 0;
-        Vertex  fromVertex  = vertexList.get( currVertex );
-        Vertex  toVertex    = vertexList.get( nextVertex );
-        String  str = fromVertex.isDotted() + "/" + toVertex.isDotted();
-        return str;
+        Vertex      fromVertex  = vertexList.get( currVertex );
+        Vertex      toVertex    = vertexList.get( nextVertex );
+        boolean[]   dotted      = { fromVertex.isDotted(), toVertex.isDotted() };
+        return dotted;
+    }
+    
+    public double getCurrLength()
+    {
+        double  length  = vertexList.get( currVertex ).getLength();
+        return length;
     }
     
     public double getCurrSlope()
     {
         Line2D  line    = getCurrEdge();
         double  slope   = (line.getY1() - line.getY2()) / (line.getX1() - line.getX2() );
-        return slope;
-    }
-    
-    public double getCompSlope()
-    {
-        Line2D  line    = getCurrEdge();
-        double  slope   = (line.getY2() - line.getY1()) / (line.getX2() / line.getX1() );
         return slope;
     }
     
@@ -144,6 +143,21 @@ public abstract class PShape implements Serializable
         gtx.draw( edge );
         
         gtx.setColor( saveColor );
+        gtx.setStroke( saveStroke );
+    }
+    
+    public void highlightEdge( Graphics2D gtx )
+    {
+        Color   saveColor   = gtx.getColor();
+        Stroke  saveStroke  = gtx.getStroke();
+        
+        gtx.setColor( Color.BLUE );
+        gtx.setStroke( new BasicStroke( highlightWidth ) );
+        Line2D  edge    = getCurrEdge();
+        gtx.draw( edge );
+        
+        gtx.setColor( saveColor );
+        gtx.setStroke( saveStroke );
     }
     
     public void rotate( double radians )

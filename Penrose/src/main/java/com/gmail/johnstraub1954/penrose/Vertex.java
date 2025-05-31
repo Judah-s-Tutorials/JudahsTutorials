@@ -9,18 +9,18 @@ public class Vertex
     
     private final Point2D   coords;
     private final double    angle;
-    private final double    adjSide;
+    private final double    length;
     private final boolean   isDotted;
     public Vertex( 
         Point2D coords, 
         double  angle, 
-        double  adjSide, 
+        double  length, 
         boolean isDotted 
     )
     {
         this.coords = coords;
         this.angle = angle * toRadians;
-        this.adjSide = adjSide;
+        this.length = length;
         this.isDotted = isDotted;
     }
     
@@ -37,7 +37,7 @@ public class Vertex
     {
         this.coords = coords;
         this.angle = source.angle;
-        this.adjSide = source.adjSide;
+        this.length = source.length;
         this.isDotted = source.isDotted;
     }
     
@@ -50,7 +50,7 @@ public class Vertex
     {
         this.coords = from.getNext();
         this.angle = (from.angle + angle * toRadians );
-        this.adjSide = adjSide;
+        this.length = adjSide;
         this.isDotted = isDotted;
     }
     
@@ -64,9 +64,16 @@ public class Vertex
         return angle;
     }
     
-    public double getAdjSide()
+    public double getSlope()
     {
-        return adjSide;
+        Point2D next    = getNext();
+        double  slope   = (coords.getY() - next.getY()) / (coords.getX() - next.getX() );
+        return slope;
+    }
+    
+    public double getLength()
+    {
+        return length;
     }
     
     public boolean isDotted()
@@ -76,8 +83,8 @@ public class Vertex
     
     public Point2D getNext()
     {
-        double  xco     = coords.getX() + Math.cos( angle ) * adjSide;
-        double  yco     = coords.getY() - Math.sin( angle ) * adjSide;
+        double  xco     = coords.getX() + Math.cos( angle ) * length;
+        double  yco     = coords.getY() - Math.sin( angle ) * length;
         Point2D end     = new Point2D.Double( xco, yco );
         return end;
     }
@@ -89,6 +96,13 @@ public class Vertex
         return line;
     }
     
+    public Line2D getEdge()
+    {
+        Point2D next    = getNext();
+        Line2D  edge    = new Line2D.Double( coords, next );
+        return edge;
+    }
+
     public Line2D getEdge( Vertex other )
     {
         Line2D  edge    =

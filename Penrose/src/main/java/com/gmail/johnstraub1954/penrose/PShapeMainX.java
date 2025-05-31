@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Image;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -12,10 +13,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URL;
 import java.util.List;
 import java.util.function.Consumer;
 
 import javax.swing.Box;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
@@ -28,8 +31,17 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.gmail.johnstraub1954.penrose.utils.SelectionEvent;
+
 public class PShapeMainX
 {
+    /** Scale factor for traffic light icons. */
+    private static final double iconSize    = .25;
+    
+    private final ImageIcon canBeMapped = getIcon( "CanBeMapped.png" );
+    private final ImageIcon isMapped    = getIcon( "IsMapped.png" );
+    private final ImageIcon noMapping   = getIcon( "NoMapping.png" );
+
     /** Unicode for an up-arrow. */
     private static final String         upArrow     = "\u21e7";
     /** Unicode for a down-arrow. */
@@ -48,6 +60,7 @@ public class PShapeMainX
     private static final String chooserTitle    = "Choose File";
     private JFrame              frame;
     private PCanvasX            canvas;
+    private final JLabel        trafficLight    = new JLabel( noMapping );
     
     public static void main(String[] args)
     {
@@ -81,6 +94,15 @@ public class PShapeMainX
         JPanel  pane    = new JPanel( new BorderLayout() );
         canvas = PCanvasX.getDefaultCanvas();
         canvas.showGrid( true );
+        canvas.addSelectionListener( e -> {
+            int mapping = e.getMapState();
+            if ( mapping == SelectionEvent.CAN_MAP )
+                trafficLight.setIcon( canBeMapped );
+            else if ( mapping == SelectionEvent.IS_MAPPED )
+                trafficLight.setIcon( isMapped );
+            else
+                trafficLight.setIcon( noMapping );
+        });
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );
         pane.add( new PMenuBar(), BorderLayout.NORTH );
@@ -96,6 +118,8 @@ public class PShapeMainX
     {
         final Dimension rigidDim    = new Dimension( 5, 0 );
         JPanel  panel   = new JPanel();
+        panel.add( trafficLight );
+        panel.add( Box.createRigidArea( rigidDim ) );
         panel.add( getTranslatePanel() );
         panel.add( Box.createRigidArea( rigidDim ) );
         panel.add( getAddRotatePanel() );
@@ -252,6 +276,19 @@ public class PShapeMainX
                 );
             }
         }
+    }
+    
+    private static ImageIcon getIcon( String path )
+    {
+        ClassLoader loader  = PCanvasX.class.getClassLoader();
+        URL         url     = loader.getResource( path );
+        ImageIcon   icon    = new ImageIcon( url );
+        Image       image   = icon.getImage();
+        int         width   = (int)(image.getWidth( null ) * .25);
+        int         height  = (int)(image.getHeight( null ) * .25);
+        image = image.getScaledInstance( width, height, Image.SCALE_SMOOTH );
+        icon = new ImageIcon( image );
+        return icon;
     }
 
     private class PMenuBar extends JMenuBar
