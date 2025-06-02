@@ -1,19 +1,14 @@
 package com.gmail.johnstraub1954.penrose;
 
-import java.awt.Color;
-
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 public class KiteDemo1
 {
-    private PCanvas canvas;
+    private PCanvas    canvas;
     
     public static void main(String[] args)
     {
-        String      kiteName    = PKite.class.getSimpleName();
-        PShape.setDefaultFillColor( kiteName,  new Color( 0x900C3F ) );
-        
         KiteDemo1   demo        = new KiteDemo1();
         SwingUtilities.invokeLater( () -> {
             demo.build(); 

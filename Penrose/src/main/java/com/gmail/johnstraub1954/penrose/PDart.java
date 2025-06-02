@@ -1,13 +1,15 @@
 package com.gmail.johnstraub1954.penrose;
 
+import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+
+import com.gmail.johnstraub1954.penrose.utils.ColorMap;
 
 public class PDart extends PShape
 {
@@ -17,6 +19,14 @@ public class PDart extends PShape
     private static final double         dotXier     = .1;
     
     private static double               longSide;
+    
+    private static final ColorMap   defColorMap     = 
+        new ColorMap(
+            FILL_COLOR, new Color( 0xeb4034 ),
+            EDGE_COLOR, Color.BLACK,
+            SELECTED_COLOR, new Color( 0x00bfff ),
+            CURR_SIDE_COLOR, new Color( 0x0150ff )
+    );
 
     
     public PDart( double longSide )
@@ -28,6 +38,7 @@ public class PDart extends PShape
     {
         super( longSide );
         moveTo( xco, yco );
+        putColors( getClass(), defColorMap );
     }
     
     @Override
@@ -74,8 +85,7 @@ public class PDart extends PShape
         return queue;
     }
     
-    @Override
-    public List<Vertex> getVertices( double longSide )
+    private List<Vertex> getVertices( double longSide )
     {
         if ( queue.isEmpty() )
         {

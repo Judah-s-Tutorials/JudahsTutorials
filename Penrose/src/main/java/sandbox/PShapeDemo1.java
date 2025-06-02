@@ -1,26 +1,18 @@
 package sandbox;
 
-import java.awt.Color;
-
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 
 import com.gmail.johnstraub1954.penrose.PCanvas;
 import com.gmail.johnstraub1954.penrose.PDart;
 import com.gmail.johnstraub1954.penrose.PKite;
-import com.gmail.johnstraub1954.penrose.PShape;
 
 public class PShapeDemo1
 {
-    private PCanvas canvas;
+    private PCanvas    canvas;
     
     public static void main(String[] args)
     {
-        String      kiteName    = PKite.class.getSimpleName();
-        PShape.setDefaultFillColor( kiteName,  new Color( 0xe63900 ) );
-        String      dartName    = PDart.class.getSimpleName();
-        PShape.setDefaultFillColor( dartName, new Color( 0x0073e6 ) );
-
         PShapeDemo1   demo        = new PShapeDemo1();
         SwingUtilities.invokeLater( () -> {
             demo.build(); 

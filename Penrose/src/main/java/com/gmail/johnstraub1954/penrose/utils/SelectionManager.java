@@ -1,6 +1,6 @@
 package com.gmail.johnstraub1954.penrose.utils;
 
-import java.beans.PropertyChangeSupport;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,8 +12,13 @@ import com.gmail.johnstraub1954.penrose.PShape;
  * The main reason for its creation
  * is to isolate property change logic.
  */
-public class SelectionManager
+public class SelectionManager implements Serializable
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5494592525711839694L;
+
     private static final double     epsilon     = .001;
     
     private final List<SelectionListener>   selectionListeners  = new ArrayList<>();
@@ -85,6 +90,41 @@ public class SelectionManager
     public List<PShape> getSelected()
     {
         return selected;
+    }
+    
+    public int getMapping()
+    {
+        computeMapping();
+        return mapping;
+    }
+    
+    public boolean snapTo()
+    {
+        boolean performed   = false;
+        computeMapping();
+        if ( mapping == SelectionEvent.IS_MAPPED )
+        {
+            PShape  fromShape   = selected.get( 0 );
+            PShape  toShape     = selected.get( 1 );
+            fromShape.snapTo( toShape );
+            performed = true;
+        }
+        return performed;
+    }
+    
+    /**
+     * Recompute the mapping state.
+     * Propagate SelectionEvent if it has changed.
+     * 
+     * @return the recomputed mapping state
+     */
+    public int testMapping()
+    {
+        int currState   = mapping;
+        computeMapping();
+        if ( mapping != currState )
+            propagateEvent( null, true );
+        return mapping;
     }
     
     private void propagateEvent( PShape shape, boolean selected )
