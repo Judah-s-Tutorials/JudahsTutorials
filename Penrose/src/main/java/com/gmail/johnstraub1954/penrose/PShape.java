@@ -348,6 +348,17 @@ public abstract class PShape implements Serializable
         return result;
     }
     
+    public void appendDot( Path2D path, Point2D coords )
+    {
+        double  xco = (int)coords.getX();
+        double  yco = (int)coords.getY();
+        for ( double diam = dotDiam ; diam > 0 ; --diam, ++xco, ++yco )
+        {
+            Shape   dot = new Ellipse2D.Double( xco, yco, diam, diam );
+            path.append( dot, false );
+        }
+    }
+    
     /**
      * Draws the outline of this shape
      * in the designated highlight color.

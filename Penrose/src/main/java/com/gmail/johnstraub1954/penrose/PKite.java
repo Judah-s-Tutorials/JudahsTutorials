@@ -5,13 +5,14 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.gmail.johnstraub1954.penrose.utils.ColorMap;
 
-public class PKite extends PShape
+public class PKite extends PShape implements Serializable
 {
     private static final long serialVersionUID = 3715598631373436809L;
     private static final List<Vertex>   queue       = new LinkedList<>();
@@ -64,8 +65,8 @@ public class PKite extends PShape
             {
                 if ( next.isDotted() )
                 {
-                    Shape   dot = getDot( next.getCoords() );
-                    path.append( dot, false );
+                    Point2D dotCoords   = getDotCoords( next.getCoords() );
+                    appendDot( path, dotCoords );
                 }
             }
         }
@@ -105,9 +106,9 @@ public class PKite extends PShape
         return queue;
     }
     
-    private Shape getDot( Point2D coords )
+    private Point2D getDotCoords( Point2D coords )
     {
-        double      dotDiam     = longSide * dotXier;
+        double      dotDiam     = getDotDiam();
         double      dotOffset   = dotDiam / 2;
         double      xco         = coords.getX();
         double      yco         = coords.getY();
@@ -115,9 +116,7 @@ public class PKite extends PShape
         double      xOffset     = dotDiam + dotOffset;
         double      dotXco      = 
             xco == 0 ? xco + xOffset : xco - xOffset;
-        Ellipse2D   ellipse = 
-            new Ellipse2D.Double( dotXco, dotYco, dotDiam, dotDiam );
-        return ellipse;
-
+        Point2D     dotCoords   = new Point2D.Double( dotXco, dotYco ); 
+        return dotCoords;
     }
 }

@@ -87,6 +87,13 @@ public class SelectionManager implements Serializable
         return shapes;
     }
     
+    public void setShapes( List<PShape> shapes )
+    {
+        this.shapes.clear();
+        this.shapes.addAll( shapes );
+        selected.clear();
+    }
+    
     public List<PShape> getSelected()
     {
         return selected;

@@ -5,13 +5,14 @@ import java.awt.Shape;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import com.gmail.johnstraub1954.penrose.utils.ColorMap;
 
-public class PDart extends PShape
+public class PDart extends PShape implements Serializable
 {
     private static final long serialVersionUID = 3715598631373436809L;
     private static final List<Vertex>   queue       = new LinkedList<>();
@@ -65,8 +66,11 @@ public class PDart extends PShape
             {
                 if ( next.isDotted() )
                 {
-                    Shape   dot = getDot( next.getCoords() );
-                    path.append( dot, false );
+                    // Get the coordinates of the dot, then let the 
+                    // superclass draw the dot, because the superclass
+                    // knows the trick for simulating a filled Ellipse.
+                    Point2D dotCoords   = getDotCoords( next );
+                    appendDot( path, dotCoords );
                 }
             }
         }
@@ -106,19 +110,37 @@ public class PDart extends PShape
         return queue;
     }
     
-    private Shape getDot( Point2D coords )
+    /**
+     * Get the coordinates of a dot to be drawn
+     * in a given Vertex.
+     * The dots for this shape are drawn in the 
+     * northwest and southwest corners.
+     * In both cases the x-coordinates are offset
+     * to the east.
+     * The northwest vertex has a y-coordinate of 0,
+     * so the y-coordinate for the dot 
+     * will be south of the vertex,
+     * and the southwest dot will have a y-coordinate
+     * that is north of the vertex.
+     * 
+     * @param vertex    the given vertex
+     * 
+     * @return  the coordinates of the bounding rectangle
+     *          of the dot to be drawn in the given vertex
+     */
+    private Point2D getDotCoords( Vertex vertex )
     {
-        double      dotDiam     = longSide * dotXier;
-        double      dotOffset   = dotDiam;
-        double      xco         = coords.getX();
-        double      yco         = coords.getY();
-        double      dotXco      = xco + 1.3 * dotDiam;
-        double      yOffset     = dotDiam + dotOffset;
-        double      dotYco      = 
+        Point2D     vertexCoords    = vertex.getCoords();
+        double      dotDiam         = longSide * dotXier;
+        double      dotOffset       = dotDiam;
+        double      xco             = vertexCoords.getX();
+        double      yco             = vertexCoords.getY();
+        double      dotXco          = xco + 1.3 * dotDiam;
+        double      yOffset         = dotDiam + dotOffset;
+        double      dotYco          = 
             yco == 0 ? yco + yOffset : yco - yOffset - dotDiam;
-        Ellipse2D   ellipse = 
-            new Ellipse2D.Double( dotXco, dotYco, dotDiam, dotDiam );
-        return ellipse;
+        Point2D     dotCoords   = new Point2D.Double( dotXco, dotYco );
+        return dotCoords;
 
     }
 }

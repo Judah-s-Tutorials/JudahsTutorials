@@ -17,7 +17,22 @@ import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
  */
 public class DialogInputApp
 {
-    private static final String prompt      = "Enter a command> ";
+    /** Unicode for an up-arrow. */
+    private static final String upArrow     = "\u21e7";
+    /** Unicode for a down-arrow. */
+    private static final String downArrow   = "\u21e9";
+    /** Unicode for a left-arrow. */
+    private static final String leftArrow   = "\u21e6";
+    /** Unicode for a right-arrow. */
+    private static final String rightArrow  = "\u21e8";
+    /** Unicode for a rotate-left arrow. */
+    private static final String rotateLeft  = "\u21B6";
+    /** Unicode for a rotate-right arrow. */
+    private static final String rotateRight = "\u21B7";
+    
+    private static final String prompt      = "Enter a Command";
+    
+
     private static final String dialogTitle = "Command Input";
     
     /**

@@ -28,7 +28,7 @@ public class PCanvas extends JPanel implements Serializable
 
     private static PCanvas  defaultCanvas   = null;
 
-    private final SelectionManager  selectionMgr        = new SelectionManager();
+    private final  SelectionManager  selectionMgr        = new SelectionManager();
     
     /** Start point of a drag operation. */
     private Point2D     dragFrom    = null;

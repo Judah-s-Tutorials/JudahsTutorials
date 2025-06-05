@@ -2,9 +2,15 @@ package com.gmail.johnstraub1954.penrose;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.io.Serializable;
 
-public class Vertex
+public class Vertex implements Serializable
 {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -5502764660017096967L;
+
     private static final double toRadians   = Math.PI / 180;
     
     private final Point2D   coords;

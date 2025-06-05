@@ -32,8 +32,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.gmail.johnstraub1954.penrose.utils.Malfunction;
 import com.gmail.johnstraub1954.penrose.utils.SelectionEvent;
 import com.gmail.johnstraub1954.penrose.utils.SelectionListener;
+import com.gmail.johnstraub1954.penrose.utils.SelectionManager;
 
 public class PShapeMain implements Serializable
 {
@@ -63,7 +65,7 @@ public class PShapeMain implements Serializable
     private static final String         rotateRight = "\u21B7";
     
     private static double       longSide    = 50;
-    private final transient JFileChooser  chooser;
+    private final JFileChooser  chooser;
     private static final String chooserTitle    = "Choose File";
     private JFrame              frame;
     private PCanvas             canvas;
@@ -96,7 +98,7 @@ public class PShapeMain implements Serializable
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  pane    = new JPanel( new BorderLayout() );
         canvas = PCanvas.getDefaultCanvas();
-        canvas.showGrid( true );
+//        canvas.showGrid( true );
         canvas.addSelectionListener( new TrafficLightMgr() );
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );
@@ -201,7 +203,7 @@ public class PShapeMain implements Serializable
     {
         int         width   = canvas.getWidth();
         int         height  = canvas.getHeight();
-        Rectangle2D rect    = shape.getBounds();
+        Rectangle2D rect    = shape.getBounds();    
         double      xco     = width / 2 - rect.getWidth() / 2;
         double      yco     = height / 2 - rect.getHeight() / 2;
         canvas.addShape( shape );
@@ -223,7 +225,9 @@ public class PShapeMain implements Serializable
                     new ObjectOutputStream( fileStream );
             )
             {
-                outStream.writeObject( canvas );
+                SelectionManager    mgr     = canvas.getSelectionManager();
+                List<PShape>        shapes  = mgr.getShapes();
+                outStream.writeObject( shapes );
             }
             catch ( IOException exc )
             {
@@ -251,13 +255,11 @@ public class PShapeMain implements Serializable
             )
             {
                 Object input    = inStream.readObject();
-                if ( !(input instanceof PCanvas ) )
-                    throw new ClassNotFoundException( "Class not found" );
-                JPanel  pane    = (JPanel)frame.getContentPane();
-                pane.remove( canvas );
-                canvas = (PCanvas)input;
-                pane.add( canvas, BorderLayout.CENTER );
-                frame.pack();
+                if ( !(input instanceof List<?>) )
+                    throw new Malfunction( "Invalid object read" );
+                List<PShape>        shapes  = (List<PShape>)input;
+                SelectionManager    mgr     = canvas.getSelectionManager();
+                mgr.setShapes( shapes );
                 canvas.repaint();
             }
             catch ( ClassNotFoundException | IOException exc )
