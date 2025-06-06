@@ -1,4 +1,4 @@
-package com.gmail.johnstraub1954.penrose;
+package com.gmail.johnstraub1954.penrose.app;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -32,6 +32,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.gmail.johnstraub1954.penrose.PCanvas;
+import com.gmail.johnstraub1954.penrose.PDart;
+import com.gmail.johnstraub1954.penrose.PKite;
+import com.gmail.johnstraub1954.penrose.PShape;
 import com.gmail.johnstraub1954.penrose.utils.Malfunction;
 import com.gmail.johnstraub1954.penrose.utils.SelectionEvent;
 import com.gmail.johnstraub1954.penrose.utils.SelectionListener;

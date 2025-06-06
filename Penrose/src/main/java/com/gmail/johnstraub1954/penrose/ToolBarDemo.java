@@ -3,14 +3,20 @@ package com.gmail.johnstraub1954.penrose;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Image;
+import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
-import java.util.stream.Stream;
+import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -21,12 +27,6 @@ public class ToolBarDemo
     private static final String title       = "Penrose Tiles Toolbar";
     private final JToolBar      toolBar     = 
         new JToolBar( title, JToolBar.HORIZONTAL );
-    private final ImageIcon canBeMapped = getIcon( "CanBeMapped.png" );
-    private final ImageIcon isMapped    = getIcon( "IsMapped.png" );
-    private final ImageIcon noMapping   = getIcon( "NoMapping.png" );
-    
-    private static final String redLight    = "RedLED.png";
-    private static final String rightArrow = "RightArrow.png";
     private static final int    iconSize  = 16;
     private static final Dimension  buttonDim   = new Dimension( iconSize, iconSize );
 
@@ -43,6 +43,98 @@ public class ToolBarDemo
     /** Unicode for a rotate-right arrow. */
     private static final String         rotateRight = "\u21B7";
     
+    private static final String redLEDToolTip       = 
+        "No compatible shapes selected";
+    private static final String yellowLEDToolTip    = 
+        "Compatible shapes selected";
+    private static final String greenLEDToolTip     = "Ready to snap";
+
+    private static final String doubleLeftArrowToolTip    = 
+        "Shift selected shapes left";
+    private static final String doubleRightArrowToolTip    = 
+        "Shift selected shapes right";
+    private static final String doubleUpArrowToolTip    = 
+        "Shift selected shapes up";
+    private static final String doubleDownArrowToolTip    = 
+        "Shift selected shapes down";
+    private static final String leftArrowToolTip    = 
+        "Select previous side";
+    private static final String rightArrowToolTip    = 
+        "Select next side";
+    private static final String rotateRightToolTip    = 
+        "Rotate right (selected)";
+    private static final String rotateLeftToolTip    = 
+        "Rotate left (selected)";
+    private final ButtonDesc[]          buttonDescs =
+    {
+        new ButtonDesc( 
+            "redLED.png", 
+            redLEDToolTip, 
+            () -> new JLabel(), 
+            null
+        ),
+        new ButtonDesc( 
+            "yellowLED.png", 
+            yellowLEDToolTip, 
+            () -> new JLabel(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "greenLED.png", 
+            greenLEDToolTip, 
+            () -> new JLabel(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "DoubleLeftArrow.png", 
+            doubleLeftArrowToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "DoubleRightArrow.png", 
+            doubleRightArrowToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "DoubleUpArrow.png",
+            doubleUpArrowToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "DoubleDownArrow.png",
+            doubleDownArrowToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "RotateRight16.png", 
+            rotateRightToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "RotateLeft16.png", 
+            rotateLeftToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "RightArrow.png", 
+            rightArrowToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "LeftArrow.png", 
+            leftArrowToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+    };
+
     public static void main( String[] args )
     {
         ToolBarDemo demo    = new ToolBarDemo();
@@ -68,20 +160,8 @@ public class ToolBarDemo
     
     private void makeToolBar()
     {
-        String[]    arr = 
-        { 
-            "redLED.png", 
-            "DoubleLeftArrow.png",
-            "DoubleRightArrow.png",
-            "DoubleUpArrow.png",
-            "DoubleDownArrow.png",
-            "LeftArrow.png",
-            "RightArrow.png",
-        };
-        Stream.of( arr )
-            .map( ToolBarDemo::getIcon )
-            .map( JButton::new )
-            .forEach( toolBar::add );
+        for ( ButtonDesc desc : buttonDescs )
+            toolBar.add( desc.getComponent() );
     }
     
     private static ImageIcon getIcon( String path )
@@ -90,6 +170,8 @@ public class ToolBarDemo
         try
         {
             URL         url     = classLoader.getResource( path );
+            if ( url == null )
+                throw new FileNotFoundException();
             Image       image   = ImageIO.read( url );
             image = image.getScaledInstance( iconSize, iconSize, Image.SCALE_SMOOTH );
             icon = new ImageIcon( image );
@@ -101,5 +183,40 @@ public class ToolBarDemo
             System.exit( 1 );
         }
         return icon;
+    }
+    
+    public static class ButtonDesc
+    {
+        public final JComponent component;
+        
+        public ButtonDesc( 
+            String path, 
+            String toolTip, 
+            Supplier<JComponent> getter,
+            ActionListener action
+        )
+        {
+            component = getter.get();
+            Icon    icon    = getIcon( path );
+            component.setToolTipText( toolTip );
+            if ( component instanceof AbstractButton )
+            {
+                AbstractButton  button  = (AbstractButton)component;
+                button.addActionListener( action );
+                button.setIcon( icon );
+            }
+            else if ( component instanceof JLabel )
+            {
+                JLabel  label   = (JLabel)component;
+                label.setIcon( icon );
+            }
+            else
+                ;
+        }
+        
+        public JComponent getComponent()
+        {
+            return component;
+        }
     }
 }
