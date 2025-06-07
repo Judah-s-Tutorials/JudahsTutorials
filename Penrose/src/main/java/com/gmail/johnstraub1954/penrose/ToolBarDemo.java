@@ -7,6 +7,8 @@ import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.imageio.ImageIO;
@@ -29,6 +31,7 @@ public class ToolBarDemo
         new JToolBar( title, JToolBar.HORIZONTAL );
     private static final int    iconSize  = 16;
     private static final Dimension  buttonDim   = new Dimension( iconSize, iconSize );
+    private final PCanvas       canvas  = PCanvas.getDefaultCanvas();
 
     /** Unicode for an up-arrow. */
     private static final String         upArrow     = "\u21e7";
@@ -58,13 +61,25 @@ public class ToolBarDemo
     private static final String doubleDownArrowToolTip    = 
         "Shift selected shapes down";
     private static final String leftArrowToolTip    = 
-        "Select previous side";
+        "Source select previous side";
     private static final String rightArrowToolTip    = 
-        "Select next side";
+        "Source select next side";
     private static final String rotateRightToolTip    = 
         "Rotate right (selected)";
     private static final String rotateLeftToolTip    = 
         "Rotate left (selected)";
+    private static final String sourceSelectLeftToolTip    = 
+        "Source select previous side";
+    private static final String sourceSelectRightToolTip    = 
+        "Source select next side";
+    private static final String destinationSelectLeftToolTip    = 
+        "Destination select previous side";
+    private static final String destinationSelectRightToolTip    = 
+        "Destination select next side";
+    private static final String snapToolTip    = 
+        "Snap selected shapes together";
+    private static final String exitToolTip    = 
+        "Exit";
     private final ButtonDesc[]          buttonDescs =
     {
         new ButtonDesc( 
@@ -89,49 +104,73 @@ public class ToolBarDemo
             "DoubleLeftArrow.png", 
             doubleLeftArrowToolTip, 
             () -> new JButton(), 
-            null 
+            e -> action( p -> p.move( -4, 0 ) ) 
         ),
         new ButtonDesc( 
             "DoubleRightArrow.png", 
             doubleRightArrowToolTip, 
             () -> new JButton(), 
-            null 
+            e -> action( p -> p.move( 4, 0 ) ) 
         ),
         new ButtonDesc( 
             "DoubleUpArrow.png",
             doubleUpArrowToolTip, 
             () -> new JButton(), 
-            null 
+            e -> action( p -> p.move( 0, -4 ) ) 
         ),
         new ButtonDesc( 
             "DoubleDownArrow.png",
             doubleDownArrowToolTip, 
             () -> new JButton(), 
-            null 
+            e -> action( p -> p.move( 0, 4 ) ) 
         ),
         new ButtonDesc( 
             "RotateRight16.png", 
             rotateRightToolTip, 
             () -> new JButton(), 
-            null 
+            e -> action( p -> p.rotate( PShape.D18 ) )
         ),
         new ButtonDesc( 
             "RotateLeft16.png", 
             rotateLeftToolTip, 
             () -> new JButton(), 
-            null 
+            e -> action( p -> p.rotate( -PShape.D18 ) )
         ),
         new ButtonDesc( 
-            "RightArrow.png", 
-            rightArrowToolTip, 
+            "SourceSelectLeft.png", 
+            sourceSelectLeftToolTip, 
             () -> new JButton(), 
             null 
         ),
         new ButtonDesc( 
-            "LeftArrow.png", 
-            leftArrowToolTip, 
+            "SourceSelectRight.png", 
+            sourceSelectRightToolTip, 
             () -> new JButton(), 
             null 
+        ),
+        new ButtonDesc( 
+            "DestinationSelectLeft.png", 
+            destinationSelectLeftToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "DestinationSelectRight.png", 
+            destinationSelectRightToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "Snap.png", 
+            snapToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "Exit.png", 
+            exitToolTip, 
+            () -> new JButton(), 
+            e -> System.exit( 0 ) 
         ),
     };
 
@@ -185,6 +224,14 @@ public class ToolBarDemo
         return icon;
     }
     
+    private void action( Consumer<PShape> consumer )
+    {
+        List<PShape>    list    = canvas.getSelected();
+        list.forEach( consumer );
+        canvas.repaint();
+    }
+
+    
     public static class ButtonDesc
     {
         public final JComponent component;
@@ -202,6 +249,7 @@ public class ToolBarDemo
             if ( component instanceof AbstractButton )
             {
                 AbstractButton  button  = (AbstractButton)component;
+                button.set
                 button.addActionListener( action );
                 button.setIcon( icon );
             }
