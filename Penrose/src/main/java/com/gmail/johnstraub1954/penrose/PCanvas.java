@@ -26,10 +26,9 @@ public class PCanvas extends JPanel implements Serializable
 {
     private static final long serialVersionUID = 1L;
 
-    private static PCanvas  defaultCanvas   = null;
+    private static PCanvas          defaultCanvas   = null;
+    private final SelectionManager  selectionMgr    = new SelectionManager();
 
-    private final  SelectionManager  selectionMgr        = new SelectionManager();
-    
     /** Start point of a drag operation. */
     private Point2D     dragFrom    = null;
     /** Start point of a drag operation. */
@@ -85,9 +84,9 @@ public class PCanvas extends JPanel implements Serializable
         selectionMgr.deselect( shape );
     }
     
-    public void select( PShape shape )
+    public void select( PShape shape, int direction )
     {
-        selectionMgr.select( shape );
+        selectionMgr.select( shape, direction );
     }
     
     public void select( double xco, double yco )
@@ -101,7 +100,7 @@ public class PCanvas extends JPanel implements Serializable
                 if ( selected.contains( s ) )
                     deselect( s );
                 else
-                    select( s );
+                    select( s, 0 );
             });
         repaint();
     }
@@ -109,6 +108,14 @@ public class PCanvas extends JPanel implements Serializable
     public void delete( PShape shape )
     {
         selectionMgr.remove( shape );
+    }
+    
+    public void deleteSelected()
+    {
+        List<PShape>    selected    = getSelected();
+        while ( !selected.isEmpty() )
+            delete( selected.get( 0 ) );
+        repaint();
     }
     
     public SelectionManager getSelectionManager()
@@ -181,20 +188,63 @@ public class PCanvas extends JPanel implements Serializable
         return selectionMgr.getShapes();
     }
     
-    public void rotate( double radians )
+    public boolean rotate( double radians )
     {
-        List<PShape>    selected    = selectionMgr.getSelected();
+        boolean         eventConsumed  = false;
+        List<PShape>    selected        = selectionMgr.getSelected();
         if ( selected.size() > 0 )
         {
             PShape  shape   = selected.get( 0 );
             shape.rotate( radians);
             selectionMgr.testMapping();
+            eventConsumed = true;
+            repaint();
         }
+        return eventConsumed;
+    }
+    
+    public boolean consumeSnap()
+    {
+        boolean eventConsumed   = selectionMgr.snapTo();
+        if ( eventConsumed )
+            repaint();
+        return eventConsumed;
     }
     
     public void move( double deltaX, double deltaY )
     {
         getSelected().forEach( s -> s.move( deltaX, deltaY ) );
+        repaint();
+    }
+    
+    public boolean selectSource( int direction )
+    {
+        boolean         eventConsumed   = false;
+        List<PShape>    selected        = getSelected();
+        int             size            = selected.size();
+        if ( size > 0 )
+        {
+            select( selected.get( 0 ), direction );
+            eventConsumed = true;
+        }
+        if ( eventConsumed )
+            repaint();
+        return eventConsumed;
+    }
+    
+    public boolean selectDestination( int direction )
+    {
+        boolean         eventConsumed   = false;
+        List<PShape>    selected        = getSelected();
+        int             size            = selected.size();
+        if ( size > 1 )
+        {
+            select( selected.get( 1 ), direction );
+            eventConsumed = true;
+        }
+        if ( eventConsumed )
+            repaint();
+        return eventConsumed;
     }
     
     private class KListener extends KeyAdapter
@@ -226,19 +276,18 @@ public class PCanvas extends JPanel implements Serializable
                 {
                 case KeyEvent.VK_LEFT:
                     move( -1d, 0d );
-                    repaint();
                     break;
                 case KeyEvent.VK_RIGHT:
                     move( 1d, 0d );
-                    repaint();
                     break;
                 case KeyEvent.VK_UP:
                     move( 0d, -1d );
-                    repaint();
                     break;
                 case KeyEvent.VK_DOWN:
                     move( 0d, 1d );
-                    repaint();
+                    break;
+                case KeyEvent.VK_DELETE:
+                    deleteSelected();
                     break;
                 }
             }
@@ -255,35 +304,30 @@ public class PCanvas extends JPanel implements Serializable
          * 
          * @return  true if the event is consumed
          */
-        private boolean consumeSnapEvent( KeyEvent evt )
+        public boolean consumeSnapEvent( KeyEvent evt )
         {
             boolean eventConsumed   = false;
             if ( evt.isControlDown() && evt.isAltDown() )
             {
-                List<PShape>    selected    = selectionMgr.getSelected();
                 int             keyCode     = evt.getKeyCode();
                 switch ( keyCode )
                 {
-                case KeyEvent.VK_N:
-                    if ( selected.size() > 0 )
-                    {
-                        select( selected.get( 0 ) );
-                        eventConsumed = true;
-                    }
+                case KeyEvent.VK_RIGHT:
+                    if ( evt.isShiftDown() )
+                        eventConsumed = selectDestination( 1 );
+                    else
+                        eventConsumed = selectSource( 1 );
                     break;
-                case KeyEvent.VK_O:
-                    if ( selected.size() > 1 )
-                    {
-                        select( selected.get( 1 ) );
-                        eventConsumed = true;
-                    }
+                case KeyEvent.VK_LEFT:
+                    if ( evt.isShiftDown() )
+                        eventConsumed = selectDestination( -1 );
+                    else
+                        eventConsumed = selectSource( -1 );
                     break;
                 case KeyEvent.VK_S:
-                    eventConsumed = selectionMgr.snapTo();
+                    eventConsumed = consumeSnap();
                     break;
                 }
-                if ( eventConsumed )
-                    repaint();
             }
             return eventConsumed;
         }
@@ -447,9 +491,6 @@ public class PCanvas extends JPanel implements Serializable
         private void snap( MouseEvent evt )
         {
             List<PShape>    selected    = selectionMgr.getSelected();
-            int xco = evt.getX();
-            int yco = evt.getY();
-            select( xco, yco );
             if ( selected.size() == 2 )
             {
                 PShape  toShape     = selected.get( 1 );

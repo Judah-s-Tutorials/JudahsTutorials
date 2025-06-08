@@ -36,6 +36,7 @@ import com.gmail.johnstraub1954.penrose.PCanvas;
 import com.gmail.johnstraub1954.penrose.PDart;
 import com.gmail.johnstraub1954.penrose.PKite;
 import com.gmail.johnstraub1954.penrose.PShape;
+import com.gmail.johnstraub1954.penrose.PToolbar;
 import com.gmail.johnstraub1954.penrose.utils.Malfunction;
 import com.gmail.johnstraub1954.penrose.utils.SelectionEvent;
 import com.gmail.johnstraub1954.penrose.utils.SelectionListener;
@@ -69,11 +70,12 @@ public class PShapeMain implements Serializable
     private static final String         rotateRight = "\u21B7";
     
     private static double       longSide    = 50;
-    private final JFileChooser  chooser;
     private static final String chooserTitle    = "Choose File";
-    private JFrame              frame;
-    private PCanvas             canvas;
+    private static final String appTitle        = "Penrose Tiling";
+    private final JFrame        frame           = new JFrame( appTitle );
+    private final PCanvas       canvas          = PCanvas.getDefaultCanvas();
     private final JLabel        trafficLight    = new JLabel( noMapping );
+    private final JFileChooser  chooser;
     
     public static void main(String[] args)
     {
@@ -98,20 +100,18 @@ public class PShapeMain implements Serializable
     
     public void build()
     {
-        frame   = new JFrame( "Dart Demo" );
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        frame.setJMenuBar( new PMenuBar() );
         JPanel  pane    = new JPanel( new BorderLayout() );
-        canvas = PCanvas.getDefaultCanvas();
-//        canvas.showGrid( true );
         canvas.addSelectionListener( new TrafficLightMgr() );
         pane.add( canvas, BorderLayout.CENTER );
         pane.add( getControlPanel(), BorderLayout.SOUTH );
-        pane.add( new PMenuBar(), BorderLayout.NORTH );
-        frame.setContentPane( pane );
+        PToolbar toolbar         = new PToolbar();
+        pane.add( toolbar.getJToolbar(), BorderLayout.NORTH );
         
+        frame.setContentPane( pane );
         frame.setLocation( 350, 100 );
         frame.pack();
-        
         frame.setVisible( true );
     }
     
@@ -130,7 +130,7 @@ public class PShapeMain implements Serializable
         JButton exit    = new JButton( "Exit" );
         exit.addActionListener( e -> System.exit( 0 ) );
         select.addActionListener( e -> {
-            canvas.getShapes().forEach( canvas::select );
+            canvas.getShapes().forEach( s -> canvas.select( s, 0 ) );
             canvas.repaint();
         });
         panel.add( select );
@@ -213,7 +213,7 @@ public class PShapeMain implements Serializable
         canvas.addShape( shape );
         shape.moveTo( xco, yco );
         canvas.deselect();
-        canvas.select( shape );
+        canvas.select( shape,0 );
         canvas.repaint();
     }
     
@@ -246,6 +246,7 @@ public class PShapeMain implements Serializable
         }
     }
     
+    @SuppressWarnings("unchecked")
     private void open()
     {
         int choice  = chooser.showSaveDialog( canvas );
@@ -356,7 +357,7 @@ public class PShapeMain implements Serializable
             JMenuItem   dartEColor  = new JMenuItem( "Dart Edge Color" );
             
             select.addActionListener( e -> {
-                canvas.getShapes().forEach( canvas::select );
+                canvas.getShapes().forEach( s -> canvas.select( s,  0  ) );
                 canvas.repaint();
             });
             
@@ -365,12 +366,7 @@ public class PShapeMain implements Serializable
                 canvas.repaint();
             });
             
-            delete.addActionListener( e -> {
-                List<PShape>    selected    = canvas.getSelected();
-                while ( !selected.isEmpty() )
-                    canvas.delete( selected.get( 0 ) );
-                canvas.repaint();
-            });
+            delete.addActionListener( e -> canvas.deleteSelected() );
             
             color.addActionListener( e -> {
                 String  title       = "Choose a Fill Color";

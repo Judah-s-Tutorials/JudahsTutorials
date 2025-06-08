@@ -264,6 +264,18 @@ public abstract class PShape implements Serializable
     }
     
     /**
+     * Advances the currently selected vertex for this PShape
+     * to the next Vertex in this PShape's list of vertices.
+     * The Vertex following the last Vertex in the list
+     * is the first Vertex in the list.
+     */
+    public void previousVertex()
+    {
+        if ( --currVertex  < 0 )
+            currVertex = vertexList.size() - 1;
+    }
+    
+    /**
      * Gets the representation of the edge
      * associated with the currently selected Vertex.
      * 
@@ -272,7 +284,8 @@ public abstract class PShape implements Serializable
     public Line2D getCurrEdge()
     {
         List<Vertex>    transformedVertices = getTransformedVertices();
-        int             toInx       = currVertex + 1;
+        int             toInx       = 
+            (currVertex + 1) % transformedVertices.size();
         if ( toInx >= transformedVertices.size() )
             toInx = 0;
         Vertex          fromVertex  = transformedVertices.get( currVertex );

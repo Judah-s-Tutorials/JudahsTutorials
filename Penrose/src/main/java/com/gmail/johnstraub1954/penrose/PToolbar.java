@@ -3,6 +3,7 @@ package com.gmail.johnstraub1954.penrose;
 import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
@@ -16,21 +17,24 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JToolBar;
-import javax.swing.SwingUtilities;
 
-public class ToolBarDemo
+import com.gmail.johnstraub1954.penrose.utils.FileManager;
+
+public class PToolbar
 {
-    private static final ClassLoader classLoader    = ToolBarDemo.class.getClassLoader();
+    private static final ClassLoader classLoader    = PToolbar.class.getClassLoader();
     private static final String title       = "Penrose Tiles Toolbar";
+    private static final String chooserTitle    = "Choose File";
     private final JToolBar      toolbar     = 
         new JToolBar( title, JToolBar.HORIZONTAL );
+    private final JFileChooser  chooser;
+
     private static final int    iconSize  = 16;
-    private final PCanvas       canvas  = PCanvas.getDefaultCanvas();
 
     /** Unicode for an up-arrow. */
     private static final String         upArrow     = "\u2191";
@@ -73,10 +77,21 @@ public class ToolBarDemo
     private static final String destinationSelectRightToolTip    = 
         "Destination select next side(Ctrl+Alt+Q)";
     private static final String snapToolTip    = 
-        "Snap selected shapes together(Ctrl+Alt+S)";
+        "Snap selected shapes together (Ctrl+Alt+S)";
+    
+    private static final String selectAllToolTip    = 
+        "Select all (Ctrl+A)";
+    private static final String newDartToolTip    = 
+        "New dart (Ctrl+D)";
+    private static final String newKiteToolTip    = 
+        "New kite (Ctrl+K)";
+    private static final String deleteSelectedToolTip   = 
+        "Delete selected (del)";
     
     private static final String exitToolTip    = "Exit";
-    private final ButtonDesc[]          buttonDescs =
+    
+    private final PCanvas       canvas      = PCanvas.getDefaultCanvas();
+    private final ButtonDesc[]  buttonDescs =
     {
         new ButtonDesc( 
             "redLED.png", 
@@ -101,19 +116,19 @@ public class ToolBarDemo
             "OpenFile.png", 
             openToolTip, 
             () -> new JButton(), 
-            null 
+            e -> FileManager.open()
         ),
         new ButtonDesc( 
             "SaveFile.png", 
             saveToolTip, 
             () -> new JButton(), 
-            null 
+            e -> FileManager.save()
         ),
         new ButtonDesc( 
             "SaveAs.png", 
             saveAsToolTip, 
             () -> new JButton(), 
-            null 
+            e -> FileManager.saveAs()
         ),
         new Separator(),
         new ButtonDesc( 
@@ -144,44 +159,69 @@ public class ToolBarDemo
             "RotateRight16.png", 
             rotateRightToolTip, 
             () -> new JButton(), 
-            e -> action( p -> p.rotate( PShape.D18 ) )
+            e -> canvas.rotate( PShape.D18 )
         ),
         new ButtonDesc( 
             "RotateLeft16.png", 
             rotateLeftToolTip, 
             () -> new JButton(), 
-            e -> action( p -> p.rotate( -PShape.D18 ) )
+            e -> canvas.rotate( -PShape.D18 )
         ),
         new Separator(),
         new ButtonDesc( 
             "SourceSelectLeft.png", 
             sourceSelectLeftToolTip, 
             () -> new JButton(), 
-            null 
+            e -> canvas.selectSource( -1 ) 
         ),
         new ButtonDesc( 
             "SourceSelectRight.png", 
             sourceSelectRightToolTip, 
             () -> new JButton(), 
-            null 
+            e -> canvas.selectSource( 1 ) 
         ),
         new ButtonDesc( 
             "DestinationSelectLeft.png", 
             destinationSelectLeftToolTip, 
             () -> new JButton(), 
-            null 
+            e -> canvas.selectDestination( -1 ) 
         ),
         new ButtonDesc( 
             "DestinationSelectRight.png", 
             destinationSelectRightToolTip, 
             () -> new JButton(), 
-            null 
+            e -> canvas.selectDestination( 1 ) 
         ),
         new ButtonDesc( 
             "Snap.png", 
             snapToolTip, 
             () -> new JButton(), 
-            null 
+            e -> canvas.consumeSnap() 
+        ),
+        new Separator(),
+        new ButtonDesc( 
+            "SelectAll.png", 
+            selectAllToolTip, 
+            () -> new JButton(), 
+            null
+        ),
+        new ButtonDesc( 
+            "KiteIcon.png", 
+            newKiteToolTip, 
+            () -> new JButton(), 
+            null
+        ),
+        new ButtonDesc( 
+            "DartIcon.png", 
+            newDartToolTip, 
+            () -> new JButton(), 
+            null
+        ),
+        new ButtonDesc( 
+            "Delete.png", 
+            deleteSelectedToolTip, 
+            () -> new JButton(), 
+            e -> canvas.deleteSelected()
         ),
         new Separator(),
         new ButtonDesc( 
@@ -191,41 +231,43 @@ public class ToolBarDemo
             e -> System.exit( 0 ) 
         ),
     };
+    private JComponent saveButton  = null;
 
-    public static void main( String[] args )
+    public JToolBar getJToolbar()
     {
-        ToolBarDemo demo    = new ToolBarDemo();
-        SwingUtilities.invokeLater(  () -> demo.build() );
+        return toolbar;
     }
 
-    public ToolBarDemo()
+    public PToolbar()
     {
-        // TODO Auto-generated constructor stub
+        String  userDir = System.getProperty( "user.dir" );
+        File    baseDir = new File( userDir );
+        chooser = new JFileChooser( baseDir );
+        chooser.setDialogTitle( chooserTitle );
+        FileManager.addPropertyChangeListener( e -> {
+            if ( saveButton != null )
+                saveButton.setEnabled( e.getNewValue() != null );
+        });
+        makeToolbar();
     }
     
-    public void build()
-    {
-        JFrame  frame       = new JFrame( "Tool Bar Demo" );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
-        JPanel  panel       = new JPanel( new BorderLayout() );
-        makeToolBar();
-        panel.add( toolbar, BorderLayout.NORTH );
-        frame.setContentPane( panel );
-        frame.pack();
-        frame.setVisible( true );
-    }
-    
-    private void makeToolBar()
+    private void makeToolbar()
     {
         for ( ButtonDesc desc : buttonDescs )
         {
             if ( desc instanceof Separator )
                 toolbar.addSeparator();
             else
-                toolbar.add( desc.getComponent() );
+            {
+                JComponent  comp    = desc.getComponent();
+                String      toolTip = comp.getToolTipText();
+                if ( saveToolTip.equals( toolTip ) )
+                    saveButton = comp;
+                toolbar.add( comp );   
+            }
         }
     }
-    
+
     private static ImageIcon getIcon( String path )
     {
         ImageIcon   icon    = null;
@@ -254,7 +296,7 @@ public class ToolBarDemo
         canvas.repaint();
     }
     
-    public static class ButtonDesc
+    private static class ButtonDesc
     {
         public final JComponent component;
         

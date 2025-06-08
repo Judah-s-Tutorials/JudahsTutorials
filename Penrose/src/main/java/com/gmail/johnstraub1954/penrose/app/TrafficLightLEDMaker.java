@@ -18,7 +18,7 @@ import javax.swing.JOptionPane;
 /**
  * Applic
  */
-public class LEDMaker
+public class TrafficLightLEDMaker
 {
     private static final String directoryName       = "src/main/resources";
     private static final File   directoryFile       = new File( directoryName );
@@ -39,7 +39,7 @@ public class LEDMaker
 
     public static void main( String[] args )
     {
-        LEDMaker    ledMaker    = new LEDMaker();
+        TrafficLightLEDMaker    ledMaker    = new TrafficLightLEDMaker();
         ledMaker.execute();
     }
     

@@ -59,12 +59,14 @@ public class SelectionManager implements Serializable
      * 
      * @param shape the given shape
      */
-    public void select( PShape shape )
+    public void select( PShape shape, int direction )
     {
         if ( !selected.contains( shape ) )
             selected.add( shape );
-        else
+        else if ( direction >= 0 )
             shape.nextVertex();
+        else
+            shape.previousVertex();
         propagateEvent( shape, true );
     }
     
