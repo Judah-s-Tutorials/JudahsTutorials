@@ -1,7 +1,6 @@
 package com.gmail.johnstraub1954.penrose;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
@@ -20,6 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSeparator;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
@@ -27,59 +27,55 @@ public class ToolBarDemo
 {
     private static final ClassLoader classLoader    = ToolBarDemo.class.getClassLoader();
     private static final String title       = "Penrose Tiles Toolbar";
-    private final JToolBar      toolBar     = 
+    private final JToolBar      toolbar     = 
         new JToolBar( title, JToolBar.HORIZONTAL );
     private static final int    iconSize  = 16;
-    private static final Dimension  buttonDim   = new Dimension( iconSize, iconSize );
     private final PCanvas       canvas  = PCanvas.getDefaultCanvas();
 
     /** Unicode for an up-arrow. */
-    private static final String         upArrow     = "\u21e7";
+    private static final String         upArrow     = "\u2191";
     /** Unicode for a down-arrow. */
-    private static final String         downArrow   = "\u21e9";
+    private static final String         downArrow   = "\u2193";
     /** Unicode for a left-arrow. */
-    private static final String         leftArrow   = "\u21e6";
+    private static final String         leftArrow   = "\u2190";
     /** Unicode for a right-arrow. */
-//    private static final String         rightArrow  = "\u21e8";
-    /** Unicode for a rotate-left arrow. */
-    private static final String         rotateLeft  = "\u21B6";
-    /** Unicode for a rotate-right arrow. */
-    private static final String         rotateRight = "\u21B7";
-    
+    private static final String         rightArrow  = "\u2192";
+   
     private static final String redLEDToolTip       = 
         "No compatible shapes selected";
     private static final String yellowLEDToolTip    = 
         "Compatible shapes selected";
     private static final String greenLEDToolTip     = "Ready to snap";
+    
+    private static final String openToolTip     = "Open file (Ctrl+O)";
+    private static final String saveToolTip     = "Save file (Ctrl+S)";
+    private static final String saveAsToolTip   = "Save as (Ctrl+Shift+S)";
 
     private static final String doubleLeftArrowToolTip    = 
-        "Shift selected shapes left";
+        "Shift selected shapes left (" + leftArrow + ")";
     private static final String doubleRightArrowToolTip    = 
-        "Shift selected shapes right";
+        "Shift selected shapes right (" + rightArrow + ")";
     private static final String doubleUpArrowToolTip    = 
-        "Shift selected shapes up";
+        "Shift selected shapes up (" + upArrow + ")";
     private static final String doubleDownArrowToolTip    = 
-        "Shift selected shapes down";
-    private static final String leftArrowToolTip    = 
-        "Source select previous side";
-    private static final String rightArrowToolTip    = 
-        "Source select next side";
+        "Shift selected shapes down (" + downArrow + ")";
     private static final String rotateRightToolTip    = 
-        "Rotate right (selected)";
+        "Rotate right (selected) (Ctrl+" + rightArrow + ")";
     private static final String rotateLeftToolTip    = 
-        "Rotate left (selected)";
+        "Rotate left (selected) (Ctrl+" + leftArrow + ")";
+    
     private static final String sourceSelectLeftToolTip    = 
-        "Source select previous side";
+        "Source select previous side (Ctrl+Alt+N)";
     private static final String sourceSelectRightToolTip    = 
-        "Source select next side";
+        "Source select next side (Ctrl+Alt+O)";
     private static final String destinationSelectLeftToolTip    = 
-        "Destination select previous side";
+        "Destination select previous side(Ctrl+Alt+P)";
     private static final String destinationSelectRightToolTip    = 
-        "Destination select next side";
+        "Destination select next side(Ctrl+Alt+Q)";
     private static final String snapToolTip    = 
-        "Snap selected shapes together";
-    private static final String exitToolTip    = 
-        "Exit";
+        "Snap selected shapes together(Ctrl+Alt+S)";
+    
+    private static final String exitToolTip    = "Exit";
     private final ButtonDesc[]          buttonDescs =
     {
         new ButtonDesc( 
@@ -100,6 +96,26 @@ public class ToolBarDemo
             () -> new JLabel(), 
             null 
         ),
+        new Separator(),
+        new ButtonDesc( 
+            "OpenFile.png", 
+            openToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "SaveFile.png", 
+            saveToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new ButtonDesc( 
+            "SaveAs.png", 
+            saveAsToolTip, 
+            () -> new JButton(), 
+            null 
+        ),
+        new Separator(),
         new ButtonDesc( 
             "DoubleLeftArrow.png", 
             doubleLeftArrowToolTip, 
@@ -136,6 +152,7 @@ public class ToolBarDemo
             () -> new JButton(), 
             e -> action( p -> p.rotate( -PShape.D18 ) )
         ),
+        new Separator(),
         new ButtonDesc( 
             "SourceSelectLeft.png", 
             sourceSelectLeftToolTip, 
@@ -166,6 +183,7 @@ public class ToolBarDemo
             () -> new JButton(), 
             null 
         ),
+        new Separator(),
         new ButtonDesc( 
             "Exit.png", 
             exitToolTip, 
@@ -191,7 +209,7 @@ public class ToolBarDemo
         frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         JPanel  panel       = new JPanel( new BorderLayout() );
         makeToolBar();
-        panel.add( toolBar, BorderLayout.NORTH );
+        panel.add( toolbar, BorderLayout.NORTH );
         frame.setContentPane( panel );
         frame.pack();
         frame.setVisible( true );
@@ -200,7 +218,12 @@ public class ToolBarDemo
     private void makeToolBar()
     {
         for ( ButtonDesc desc : buttonDescs )
-            toolBar.add( desc.getComponent() );
+        {
+            if ( desc instanceof Separator )
+                toolbar.addSeparator();
+            else
+                toolbar.add( desc.getComponent() );
+        }
     }
     
     private static ImageIcon getIcon( String path )
@@ -230,11 +253,21 @@ public class ToolBarDemo
         list.forEach( consumer );
         canvas.repaint();
     }
-
     
     public static class ButtonDesc
     {
         public final JComponent component;
+        
+        /**
+         * Default constructor.
+         * Placed here to support the Separator class.
+         * 
+         * @see Separator
+         */
+        public ButtonDesc()
+        {
+            component = null;
+        }
         
         public ButtonDesc( 
             String path, 
@@ -249,7 +282,6 @@ public class ToolBarDemo
             if ( component instanceof AbstractButton )
             {
                 AbstractButton  button  = (AbstractButton)component;
-                button.set
                 button.addActionListener( action );
                 button.setIcon( icon );
             }
@@ -266,5 +298,9 @@ public class ToolBarDemo
         {
             return component;
         }
+    }
+    
+    private static class Separator extends ButtonDesc
+    {
     }
 }
