@@ -1,8 +1,6 @@
 package com.gmail.johnstraub1954.penrose;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
@@ -17,9 +15,6 @@ public class PKite extends PShape implements Serializable
     private static final long serialVersionUID = 3715598631373436809L;
     private static final List<Vertex>   queue       = new LinkedList<>();
     private static final Path2D         path        = new Path2D.Double();
-    private static final double         dotXier     = .1;
-    
-    private static double               longSide;
     
     private static final ColorMap   defColorMap     = 
         new ColorMap(
@@ -28,15 +23,30 @@ public class PKite extends PShape implements Serializable
             SELECTED_COLOR, new Color( 0x00bfff ),
             CURR_SIDE_COLOR, new Color( 0xb80031 )
     );
+    
+    public PKite()
+    {
+        this( getLongSide(), 0, 0 );
+    }
 
     public PKite( double longSide )
     {
         this( longSide, 0, 0 );
     }
     
+    public PKite( double xco, double yco )
+    {
+        this( getLongSide(), xco, yco );
+    }
+    
     public PKite( double longSide, double xco, double yco )
     {
         super( longSide );
+        initInstance( xco, yco );
+    }
+    
+    private void initInstance( double xco, double yco )
+    {
         moveTo( xco, yco );
         putColors( getClass(), defColorMap );
     }
@@ -89,7 +99,6 @@ public class PKite extends PShape implements Serializable
     {
         if ( queue.isEmpty() )
         {
-            PKite.longSide = longSide;
             double          shortSide   = 
                 longSide * (Math.sin( D36 ) / Math.sin( D108 ));
             Point2D         begin       = new Point2D.Double( 0, shortSide );

@@ -66,7 +66,27 @@ public class PCanvas extends JPanel implements Serializable
     
     public void addShape( PShape shape )
     {
+        addShape( shape, false, false );
+    }
+    
+    public void addShape( PShape shape, boolean center, boolean select )
+    {
         selectionMgr.add( shape );
+        if ( center )
+        {
+            int         width   = getWidth();
+            int         height  = getHeight();
+            Rectangle2D rect    = shape.getBounds();    
+            double      xco     = width / 2 - rect.getWidth() / 2;
+            double      yco     = height / 2 - rect.getHeight() / 2;
+            shape.moveTo( xco, yco );
+        }
+        if ( select )
+        {
+            deselect();
+            select( shape,0 );
+        }
+        repaint();
     }
     
     public void removeShape( PShape shape )
@@ -268,6 +288,14 @@ public class PCanvas extends JPanel implements Serializable
                     rotate( angle );
                     repaint();
                     break;
+                case KeyEvent.VK_K:
+                    addShape( new PKite(), true, true );
+                    repaint();
+                    break;
+                case KeyEvent.VK_D:
+                    addShape( new PDart(), true, true );
+                    repaint();
+                    break;
                 }
             }
             else
@@ -362,7 +390,6 @@ public class PCanvas extends JPanel implements Serializable
         public void mousePressed( MouseEvent evt )
         {
             requestFocusInWindow();
-            System.out.println( "Pressed " + evt.getClickCount() );
             if ( evt.getButton() == 1 )
             {
                 int xco = evt.getX();
@@ -430,7 +457,6 @@ public class PCanvas extends JPanel implements Serializable
             List<PShape>    selected    = selectionMgr.getSelected();
             if ( evt.getButton() == 1 )
             {
-                System.out.println( evt );
                 if ( evt.isControlDown() )
                     snap( evt );
                 else 

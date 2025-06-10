@@ -80,10 +80,11 @@ public class PShapeMain implements Serializable
     public static void main(String[] args)
     {
         PShapeMain demo2   = new PShapeMain();
+        PShape.setLongSide( longSide );
 
         SwingUtilities.invokeLater( () -> {
             demo2.build();
-            demo2.canvas.addShape( new PKite( longSide, 0, 0 ) );
+            demo2.canvas.addShape( new PKite( 0, 0 ) );
             demo2.canvas.addShape( new PDart( longSide, 100, 0 ) );
             demo2.canvas.addShape( new PKite( longSide, 0, 100 ) );
             demo2.canvas.addShape( new PDart( longSide, 100, 100 ) );
@@ -183,7 +184,7 @@ public class PShapeMain implements Serializable
             action( p -> p.rotate(  PShape.D18 ) )
         );
         kiteButton.addActionListener( e -> 
-            addShape( new PKite( longSide, 0, 0 ) ) 
+            canvas.addShape( new PKite(), true, true ) 
         );
         dartButton.addActionListener( e -> 
             addShape( new PDart( longSide, 0, 0 ) ) 
@@ -205,16 +206,7 @@ public class PShapeMain implements Serializable
     
     private void addShape( PShape shape )
     {
-        int         width   = canvas.getWidth();
-        int         height  = canvas.getHeight();
-        Rectangle2D rect    = shape.getBounds();    
-        double      xco     = width / 2 - rect.getWidth() / 2;
-        double      yco     = height / 2 - rect.getHeight() / 2;
-        canvas.addShape( shape );
-        shape.moveTo( xco, yco );
-        canvas.deselect();
-        canvas.select( shape,0 );
-        canvas.repaint();
+        canvas.addShape( shape, false, false );
     }
     
     private void save()

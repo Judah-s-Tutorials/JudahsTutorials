@@ -1,8 +1,6 @@
 package com.gmail.johnstraub1954.penrose;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.io.Serializable;
@@ -29,10 +27,19 @@ public class PDart extends PShape implements Serializable
             CURR_SIDE_COLOR, new Color( 0x0150ff )
     );
 
+    public PDart()
+    {
+        this( getLongSide(), 0, 0 );
+    }
     
     public PDart( double longSide )
     {
         this( longSide, 0, 0 );
+    }
+
+    public PDart( double xco, double yco )
+    {
+        this( getLongSide(), xco, yco );
     }
     
     public PDart( double longSide, double xco, double yco )

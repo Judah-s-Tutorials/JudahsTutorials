@@ -153,7 +153,7 @@ public class FileManager
     private static void fireChangeListeners( Object oldValue )
     {
         PropertyChangeEvent evt = 
-            new PropertyChangeEvent( null, "CurrFile", oldValue, currFile );
+            new PropertyChangeEvent( canvas, "CurrFile", oldValue, currFile );
         changeListeners.forEach( l -> l.propertyChange( evt ) );
     }
 }

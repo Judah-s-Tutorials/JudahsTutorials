@@ -209,13 +209,13 @@ public class PToolbar
             "KiteIcon.png", 
             newKiteToolTip, 
             () -> new JButton(), 
-            null
+            e -> canvas.addShape( new PKite(), true, true )
         ),
         new ButtonDesc( 
             "DartIcon.png", 
             newDartToolTip, 
             () -> new JButton(), 
-            null
+            e -> canvas.addShape( new PDart(), true, true )
         ),
         new ButtonDesc( 
             "Delete.png", 

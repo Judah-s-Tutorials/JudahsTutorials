@@ -142,6 +142,17 @@ public abstract class PShape implements Serializable
     private static double       dotDiam = 4;
     
     /**
+     * The default length of the longest side of a PShape.
+     * Setting this value only affects the geometry
+     * of newly instantiated shapes;
+     * it will not change the geometry of existing shapes.
+     * 
+     * @see #setLongSide(double)
+     * @see #getLongSide()
+     */
+    private static double       longSide  = 50;
+    
+    /**
      * A PShape's path. Set by subclasses.
      * This path never changes. 
      * When a PShape is rotated or translated,
@@ -158,6 +169,16 @@ public abstract class PShape implements Serializable
      * @see #workShape
      */
     private final Rectangle2D   rightBounds;
+    
+    /**
+     * List of vertices that comprise this PShape.
+     * Supplied by subclass; 
+     * created during construction and never changed.
+     * 
+     * @see #getVertices()
+     * @see #getTransformedVertices()
+     */
+    private final List<Vertex>  vertexList;
     
     /**
      * The x-coordinate of this PShape.
@@ -190,16 +211,6 @@ public abstract class PShape implements Serializable
      * @see PShape#getVertices()
      */
     private int     currVertex      = 0;
-    
-    /**
-     * List of vertices that comprise this PShape.
-     * Supplied by subclass; 
-     * created during construction and never changed.
-     * 
-     * @see #getVertices()
-     * @see #getTransformedVertices()
-     */
-    private final List<Vertex>    vertexList;
     
     /**
      * Constructor.
@@ -618,6 +629,29 @@ public abstract class PShape implements Serializable
         dotDiam = diam;
     }
     
+    /**
+     * Sets the default length of a PShape to the given value.
+     * Setting this value only affects the geometry
+     * of newly instantiated shapes;
+     * it will not change the geometry of existing shapes.
+     * 
+     * @param longSide  the given value
+     */
+    public static void setLongSide( double longSide )
+    {
+        PShape.longSide = longSide;
+    }
+    
+    /**
+     * Gets the default length of the longest side of a PShape.
+     * 
+     * @return  the default length of the longest side of a PShape
+     */
+    public static double getLongSide()
+    {
+        return longSide;
+    }
+
     /**
      * Calculates the path to draw
      * for this PShape.
