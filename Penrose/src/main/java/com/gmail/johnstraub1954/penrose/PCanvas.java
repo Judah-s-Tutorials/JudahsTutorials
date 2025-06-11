@@ -19,6 +19,7 @@ import java.util.List;
 
 import javax.swing.JPanel;
 
+import com.gmail.johnstraub1954.penrose.utils.FileManager;
 import com.gmail.johnstraub1954.penrose.utils.SelectionListener;
 import com.gmail.johnstraub1954.penrose.utils.SelectionManager;
 
@@ -135,6 +136,28 @@ public class PCanvas extends JPanel implements Serializable
         List<PShape>    selected    = getSelected();
         while ( !selected.isEmpty() )
             delete( selected.get( 0 ) );
+        repaint();
+    }
+    
+    /**
+     * Convenience method for calling SelectionManager.clearSelected().
+     * 
+     * @see SelectionManager#toggleSelectAll()
+     */
+    public void clearSelected()
+    {
+        selectionMgr.clearSelected();
+        repaint();
+    }
+    
+    /**
+     * Convenience method for calling SelectionManager.toggleSelectAll.
+     * 
+     * @see SelectionManager#toggleSelectAll()
+     */
+    public void toggleSelectAll()
+    {
+        selectionMgr.toggleSelectAll();
         repaint();
     }
     
@@ -296,6 +319,21 @@ public class PCanvas extends JPanel implements Serializable
                     addShape( new PDart(), true, true );
                     repaint();
                     break;
+                case KeyEvent.VK_A:
+                    toggleSelectAll();
+                    repaint();
+                    break;
+                case KeyEvent.VK_S:
+                    if ( evt.isShiftDown() )
+                        FileManager.save();
+                    else
+                        FileManager.saveAs();
+                    repaint();
+                    break;
+                case KeyEvent.VK_O:
+                    FileManager.open();
+                    repaint();
+                    break;
                 }
             }
             else
@@ -324,9 +362,9 @@ public class PCanvas extends JPanel implements Serializable
         /**
          * If possible,
          * process a key event that may be associated with snapping.
-         * All such event require the control and alt keys to be pressed.
+         * All such events require the control and alt keys to be pressed.
          * The specific event may or may not
-         * correspond to a valid snap event.
+         * correspond to a valid snap operation.
          * 
          * @param evt   the key event to process
          * 
@@ -454,7 +492,6 @@ public class PCanvas extends JPanel implements Serializable
         @Override
         public void mouseClicked( MouseEvent evt )
         {
-            List<PShape>    selected    = selectionMgr.getSelected();
             if ( evt.getButton() == 1 )
             {
                 if ( evt.isControlDown() )
@@ -462,7 +499,7 @@ public class PCanvas extends JPanel implements Serializable
                 else 
                 {
                     if ( !evt.isShiftDown() )
-                        selected.clear();
+                        clearSelected();
                     int xco = evt.getX();
                     int yco = evt.getY();
                     select( xco, yco );

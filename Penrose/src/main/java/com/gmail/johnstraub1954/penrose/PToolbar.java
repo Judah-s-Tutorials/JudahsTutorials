@@ -1,6 +1,5 @@
 package com.gmail.johnstraub1954.penrose;
 
-import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -18,12 +17,13 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
 import com.gmail.johnstraub1954.penrose.utils.FileManager;
+import com.gmail.johnstraub1954.penrose.utils.Malfunction;
+import com.gmail.johnstraub1954.penrose.utils.SelectionEvent;
+import com.gmail.johnstraub1954.penrose.utils.SelectionListener;
 
 public class PToolbar
 {
@@ -52,8 +52,8 @@ public class PToolbar
     private static final String greenLEDToolTip     = "Ready to snap";
     
     private static final String openToolTip     = "Open file (Ctrl+O)";
-    private static final String saveToolTip     = "Save file (Ctrl+S)";
-    private static final String saveAsToolTip   = "Save as (Ctrl+Shift+S)";
+    private static final String saveToolTip     = "Save file (Ctrl+Shift+S)";
+    private static final String saveAsToolTip   = "Save as (Ctrl+S)";
 
     private static final String doubleLeftArrowToolTip    = 
         "Shift selected shapes left (" + leftArrow + ")";
@@ -80,7 +80,7 @@ public class PToolbar
         "Snap selected shapes together (Ctrl+Alt+S)";
     
     private static final String selectAllToolTip    = 
-        "Select all (Ctrl+A)";
+        "Toggle select-all (Ctrl+A)";
     private static final String newDartToolTip    = 
         "New dart (Ctrl+D)";
     private static final String newKiteToolTip    = 
@@ -91,24 +91,26 @@ public class PToolbar
     private static final String exitToolTip    = "Exit";
     
     private final PCanvas       canvas      = PCanvas.getDefaultCanvas();
+    private final LEDManager    ledManager  = new LEDManager();
+    @SuppressWarnings("unused")
     private final ButtonDesc[]  buttonDescs =
     {
         new ButtonDesc( 
-            "redLED.png", 
+            null, 
             redLEDToolTip, 
-            () -> new JLabel(), 
+            () -> ledManager.getLabel( redLEDToolTip ), 
             null
         ),
         new ButtonDesc( 
-            "yellowLED.png", 
+            null, 
             yellowLEDToolTip, 
-            () -> new JLabel(), 
+            () -> ledManager.getLabel( yellowLEDToolTip ), 
             null 
         ),
         new ButtonDesc( 
-            "greenLED.png", 
+            null, 
             greenLEDToolTip, 
-            () -> new JLabel(), 
+            () -> ledManager.getLabel( greenLEDToolTip ), 
             null 
         ),
         new Separator(),
@@ -203,7 +205,7 @@ public class PToolbar
             "SelectAll.png", 
             selectAllToolTip, 
             () -> new JButton(), 
-            null
+            e -> canvas.toggleSelectAll()
         ),
         new ButtonDesc( 
             "KiteIcon.png", 
@@ -249,6 +251,7 @@ public class PToolbar
                 saveButton.setEnabled( e.getNewValue() != null );
         });
         makeToolbar();
+        canvas.getSelectionManager().addSelectionListener( ledManager );
     }
     
     private void makeToolbar()
@@ -318,19 +321,25 @@ public class PToolbar
             ActionListener action
         )
         {
+            Icon    icon    =  path != null ? getIcon( path ) : null;
+
             component = getter.get();
-            Icon    icon    = getIcon( path );
             component.setToolTipText( toolTip );
+            if ( path != null )
+            {
+            }
             if ( component instanceof AbstractButton )
             {
                 AbstractButton  button  = (AbstractButton)component;
                 button.addActionListener( action );
-                button.setIcon( icon );
+                if ( icon != null )
+                    button.setIcon( icon );
             }
             else if ( component instanceof JLabel )
             {
                 JLabel  label   = (JLabel)component;
-                label.setIcon( icon );
+                if ( icon != null )
+                    label.setIcon( icon );
             }
             else
                 ;
@@ -339,6 +348,57 @@ public class PToolbar
         public JComponent getComponent()
         {
             return component;
+        }
+    }
+    
+    private class LEDManager implements SelectionListener
+    {
+        private Icon    redLED      = getIcon( "redLED.png" );
+        private Icon    yellowLED   = getIcon( "yellowLED.png" );
+        private Icon    greenLED    = getIcon( "greenLED.png" );
+        private Icon    blackLED    = getIcon( "blackLED.png" );
+
+        private JLabel  redLabel     = new JLabel( redLED );
+        private JLabel  yellowLabel  = new JLabel( blackLED );
+        private JLabel  greenLabel   = new JLabel( blackLED );
+
+        public JLabel getLabel( String toolTip )
+        {
+            JLabel  label   = null;
+            if ( toolTip == redLEDToolTip )
+                label = redLabel;
+            else if ( toolTip == yellowLEDToolTip )
+                label = yellowLabel;
+            else if ( toolTip == greenLEDToolTip )
+                label = greenLabel;
+            else
+                throw new Malfunction( "Invalid LED specified" );
+            
+            return label;
+        }
+
+        @Override
+        public void select( SelectionEvent event )
+        {
+            int mapState    = event.getMapState();
+            if ( mapState == SelectionEvent.CAN_MAP )
+            {
+                redLabel.setIcon( blackLED );
+                yellowLabel.setIcon( yellowLED );
+                greenLabel.setIcon( blackLED );
+            } 
+            else if ( mapState == SelectionEvent.IS_MAPPED )
+            {
+                redLabel.setIcon( blackLED );
+                yellowLabel.setIcon( blackLED );
+                greenLabel.setIcon( greenLED );
+            }
+            else
+            {
+                redLabel.setIcon( redLED );
+                yellowLabel.setIcon( blackLED );
+                greenLabel.setIcon( blackLED );
+            }
         }
     }
     

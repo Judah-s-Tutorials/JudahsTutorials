@@ -49,15 +49,31 @@ public class SelectionManager implements Serializable
         selected.remove( shape );
     }
     
+    public void deselectAll()
+    {
+        clearSelected();
+    }
+    
     public void deselect()
     {
         selected.clear();
     }
     
     /**
-     * The given shape is added to the selected list.
+     * If the given shape is not in the selected list it is added;
+     * if already in the selected list
+     * the next or previous side is selected.
+     * If the shape is already selected,
+     * the direction parameter determines 
+     * whether the next side (direction >= 0)
+     * or the previous side (direction < 0)
+     * is selected.
      * 
-     * @param shape the given shape
+     * A select event is propagated for the given shape.
+     * 
+     * @param shape     the given shape
+     * @param direction determines whether the shape's next side
+     *                  or previous side is selected
      */
     public void select( PShape shape, int direction )
     {
@@ -71,17 +87,67 @@ public class SelectionManager implements Serializable
     }
     
     /**
-     * Removes the given shape from the selected list.
+     * Every shape is removed from the selected list.
+     * A deselect event is propagated for each shape.
+     */
+    public void clearSelected()
+    {
+        int size    = selected.size();
+        while ( size > 0 )
+        {
+            PShape  shape   = selected.remove( --size );
+            propagateEvent( shape, false );
+        }
+    }
+    
+    /**
+     * If the given shape is in the selected list remove it.
+     * A deselect event is generated for the shape, 
+     * even if it was not in the selected list.
      * 
      * @param shape the given shape
      */
     public void deselect( PShape shape )
     {
+        selected.remove( shape );
+        propagateEvent( shape, false );
+    }
+    
+    /**
+     * If the given shape is not in the selected list add it.
+     * A select event is generated for the shape,
+     * even if it was already in the selected list.
+     * 
+     * @param shape the given shape
+     */
+    public void select( PShape shape )
+    {
         if ( !selected.contains( shape ) )
             selected.add( shape );
-        else
-            shape.nextVertex();
-        propagateEvent( shape, false );
+        propagateEvent( shape, true );
+    }
+    
+    /**
+     * If all shapes are selected, deselects all shapes,
+     * otherwise selects all shapes.
+     * If one or more shapes (but not all shapes)
+     * are already selected, 
+     * first the selected shapes are deselected,
+     * then all shapes are selected.
+     * Deselect and select events are propagated 
+     * for all deselected/selected shapes.
+     */
+    public void toggleSelectAll()
+    {
+        int     shapesSize      = shapes.size();
+        int     selectedSize    = selected.size();
+        clearSelected();
+        if ( selectedSize < shapesSize )
+        {
+            shapes.stream()
+                .peek( selected::add )
+                .forEach( s -> propagateEvent( s, true ) );
+        }
     }
     
     public List<PShape> getShapes()
