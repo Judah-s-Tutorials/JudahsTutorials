@@ -69,13 +69,13 @@ public class PToolbar
         "Rotate left (selected) (Ctrl+" + leftArrow + ")";
     
     private static final String sourceSelectLeftToolTip    = 
-        "Source select previous side (Ctrl+Alt+N)";
+        "Source select previous side (Ctrl+Alt+Left)";
     private static final String sourceSelectRightToolTip    = 
-        "Source select next side (Ctrl+Alt+O)";
+        "Source select next side (Ctrl+Alt+Right)";
     private static final String destinationSelectLeftToolTip    = 
-        "Destination select previous side(Ctrl+Alt+P)";
+        "Destination select previous side(Ctrl+Shift+Alt+Left)";
     private static final String destinationSelectRightToolTip    = 
-        "Destination select next side(Ctrl+Alt+Q)";
+        "Destination select next side(Ctrl+Shift+Alt+Rght)";
     private static final String snapToolTip    = 
         "Snap selected shapes together (Ctrl+Alt+S)";
     

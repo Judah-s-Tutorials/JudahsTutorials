@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 import javax.swing.JPanel;
 
@@ -42,6 +43,8 @@ public class PCanvas extends JPanel implements Serializable
     private transient int           width;
     private transient int           height;
     
+    private transient BiConsumer<Graphics2D,SelectionManager>   tweaker = null;
+    
     public static PCanvas getDefaultCanvas()
     {
         return getDefaultCanvas( 500, 500 );
@@ -63,6 +66,11 @@ public class PCanvas extends JPanel implements Serializable
         addMouseListener( mListener );
         addMouseMotionListener( mListener );
         addKeyListener( kListener );
+    }
+    
+    public void setTweaker( BiConsumer<Graphics2D,SelectionManager> tweaker )
+    {
+        this.tweaker = tweaker;
     }
     
     public void addShape( PShape shape )
@@ -216,6 +224,9 @@ public class PCanvas extends JPanel implements Serializable
         
         if (showGrid )
             drawGrid();
+        
+        if ( tweaker != null )
+            tweaker.accept( gtx, selectionMgr );
 
         this.grabFocus();
         gtx.dispose();
@@ -391,11 +402,33 @@ public class PCanvas extends JPanel implements Serializable
                         eventConsumed = selectSource( -1 );
                     break;
                 case KeyEvent.VK_S:
-                    eventConsumed = consumeSnap();
+                    if ( evt.isShiftDown() )
+                        eventConsumed = testIntersection();
+                    else
+                        eventConsumed = consumeSnap();
                     break;
                 }
             }
             return eventConsumed;
+        }
+        
+        private boolean testIntersection()
+        {
+            List<PShape>    selectedList    = selectionMgr.getSelected();
+            if ( !selectedList.isEmpty() )
+            {
+                PShape  selectedShape   = selectedList.get( 0 );
+                for ( PShape shape : selectionMgr.getShapes() )
+                {
+                    if ( shape != selectedShape )
+                    {
+                        if ( selectedShape.intersects( shape.getBounds() ) )
+                            selectionMgr.select( shape );
+                    }
+                }
+            }
+            repaint();
+            return true;
         }
     }
     

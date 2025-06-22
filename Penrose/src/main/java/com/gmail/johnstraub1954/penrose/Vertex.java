@@ -12,6 +12,7 @@ public class Vertex implements Serializable
     private static final long serialVersionUID = -5502764660017096967L;
 
     private static final double toRadians   = Math.PI / 180;
+    private static final double epsilon     = .01;
     
     private final Point2D   coords;
     private final double    angle;
@@ -114,5 +115,25 @@ public class Vertex implements Serializable
         Line2D  edge    =
             new Line2D.Double( coords, other.getCoords() );
         return edge;
+    }
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder   bldr   = new StringBuilder();
+        String  xco     = String.format( "%5.1f", coords.getX() );
+        String  yco     = String.format( "%5.1f", coords.getY() );
+        bldr.append( "(" );
+        bldr.append( xco ).append( "," ).append( yco );
+        bldr.append( ") " );
+        return bldr.toString();
+    }
+    
+    public boolean matches( Vertex that )
+    {
+        boolean match   = 
+            Math.abs( coords.getX() - that.coords.getX() ) < epsilon &&
+            Math.abs( coords.getY() - that.coords.getY() ) < epsilon;
+        return match;
     }
 }

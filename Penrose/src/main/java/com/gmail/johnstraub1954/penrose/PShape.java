@@ -29,7 +29,16 @@ import com.gmail.johnstraub1954.penrose.utils.ColorMap;
  */
 public abstract class PShape implements Serializable
 {
+    /**
+     * Generated serial version UID.
+     */
     private static final long serialVersionUID = 3627364027645370422L;
+    
+    /**
+     * Variable to turn on for debugging and experimentation.
+     */
+    public static final boolean DEBUG   = 
+        "on".equals( System.getenv( "debug" ) );
     
     /**
      * Given the longest side in a Penrose shape,
@@ -362,6 +371,18 @@ public abstract class PShape implements Serializable
     }
     
     /**
+     * Returns true if this shape intersects the given shape.
+     * @param shape  the given shape
+     * @return  
+     *      true if this shape intersects the given shape's bounding rectangle
+     */
+    public boolean intersects( PShape shape )
+    {
+        boolean result  = workShape.intersects( shape.getBounds() );
+        return result;
+    }
+    
+    /**
      * Returns true if this shape intersects the given rectangle.
      * @param rect  the given rectangle
      * @return  true if this shape intersects the given rectangle
@@ -533,16 +554,23 @@ public abstract class PShape implements Serializable
         gtx.setColor( edgeColor );
         gtx.draw( workShape );
         
-        // debugging stuff...
-        //     ... draw red circle at rotation pin
-        double      pinXco  = xco + rightBounds.getCenterX();
-        double      pinYco  = yco + rightBounds.getCenterY();
-        Ellipse2D   center  = 
-            new Ellipse2D.Double( pinXco - 2, pinYco - 2, 4, 4 );
-
-        gtx.setColor( Color.RED );
-        gtx.fill( center );
-        // end debugging stuff
+        if ( DEBUG )
+        {
+            // debugging stuff...
+            //     ... draw red circle at rotation pin
+            double      pinXco  = xco + rightBounds.getCenterX();
+            double      pinYco  = yco + rightBounds.getCenterY();
+            Ellipse2D   center  = 
+                new Ellipse2D.Double( pinXco - 2, pinYco - 2, 4, 4 );
+    
+            gtx.setColor( Color.GREEN );
+            gtx.fill( center );
+            
+            Rectangle2D bounds  = getBounds();
+            gtx.setColor( Color.YELLOW );
+            gtx.draw( bounds );
+            // end debugging stuff
+        }   
         
         gtx.setColor( save );
     }
@@ -616,6 +644,11 @@ public abstract class PShape implements Serializable
     {
         double  supp    = angle - 180;
         return supp;
+    }
+    
+    public Shape getWorkShape()
+    {
+        return workShape;
     }
     
     /**
