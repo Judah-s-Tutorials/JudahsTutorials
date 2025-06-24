@@ -66,16 +66,37 @@ public class PShapeIntersection
     }
 
     /**
-     * @return the isEdge
+     * Returns true if the intersection of the encapsulated PShapes
+     * is non-empty, and the intersection is limited 
+     * to a common edge.
+     * 
+     * @return 
+     *      true if the intersection of the encapsulated PShapes
+     *      is limited to a common edge
      */
     public boolean isEdge()
     {
         return isEdge;
     }
     
+    /**
+     * Returns true if the intersection 
+     * of the encapsulated PShapes is empty
+     * 
+     * @return  true if the intersection of the encapsulated PShapes is empty
+     */
     public boolean isEmpty()
     {
         return intersection.isEmpty();
+    }
+    
+    public static boolean intersect( PShape pShapeA, PShape pShapeB)
+    {
+        Area    areaA   = new Area( pShapeA.getWorkShape() );
+        Area    areaB   = new Area( pShapeB.getWorkShape() );
+        areaA.intersect( areaB );
+        boolean result = !areaA.isEmpty();
+        return result;
     }
 
     private Line2D computeEdge()

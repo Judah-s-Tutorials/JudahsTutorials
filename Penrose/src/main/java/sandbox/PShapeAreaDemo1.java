@@ -10,7 +10,6 @@ import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -32,6 +31,7 @@ import com.gmail.johnstraub1954.penrose.utils.CQueue;
 import com.gmail.johnstraub1954.penrose.utils.Malfunction;
 import com.gmail.johnstraub1954.penrose.utils.PShapeIntersection;
 import com.gmail.johnstraub1954.penrose.utils.SelectionManager;
+import com.gmail.johnstraub1954.penrose.utils.Utils;
 
 public class PShapeAreaDemo1 implements Serializable
 {
@@ -88,11 +88,12 @@ public class PShapeAreaDemo1 implements Serializable
     {
         Color           saveColor   = gtx.getColor();
         Stroke          saveStroke  = gtx.getStroke();
-//        tweakA( gtx, mgr );twea
-//        tweakB( gtx, mgr );
+//        tweakA( gtx, mgr );
+//      tweakB( gtx, mgr );
+      tweakB1( gtx, mgr );
 //        tweakC( gtx, mgr );
-        tweakD( gtx, mgr );
-        tweakE( gtx, mgr );
+//        tweakD( gtx, mgr );
+//        tweakE( gtx, mgr );
         gtx.setStroke( saveStroke );
         gtx.setColor( saveColor );
     }
@@ -182,10 +183,33 @@ public class PShapeAreaDemo1 implements Serializable
             {
                 if ( shape != selectedShape )
                 {
-                    Shape       workShape   = shape.getWorkShape();
-                    Rectangle2D workBounds  = workShape.getBounds2D();
-                    if ( selectedWorkShape.intersects( workBounds ) )
-                        gtx.draw( workShape );
+                    if ( PShapeIntersection.intersect( selectedShape, shape ) )
+                    {
+                        gtx.draw( shape.getWorkShape() );
+                    }
+                }
+            }
+        }
+    }
+    
+    private void tweakB1( Graphics2D gtx, SelectionManager mgr )
+    {
+        List<PShape>    shapes      = mgr.getShapes();
+        List<PShape>    selected    = mgr.getSelected();
+        if ( selected.size() == 1 )
+        {
+            gtx.setColor( Color.GREEN );
+            PShape  selectedShape       = selected.get( 0 );
+            Shape   selectedWorkShape   = selectedShape.getWorkShape();
+            for ( PShape shape : shapes )
+            {
+                if ( shape != selectedShape )
+                {
+                    if ( selectedShape.intersects( shape ) )
+                    {
+                        gtx.draw( shape.getWorkShape() );
+                        printIntersection2( shape, selectedShape );
+                    }
                 }
             }
         }
@@ -264,6 +288,20 @@ public class PShapeAreaDemo1 implements Serializable
             System.out.println( "********************************" );
             System.out.println( nameA + " -> " + nameB );
             System.out.println( edge.getP1() + "," + edge.getP2() );
+            System.out.println( "################################\n\n\n" );
+        }
+    }
+    
+    private void printIntersection2( PShape pShapeA, PShape pShapeB )
+    {
+        String  str     = Utils.formatIntersection( pShapeA, pShapeB );
+        if ( !str.isEmpty() )
+        {
+            String  nameA   = pShapeA.getClass().getSimpleName();
+            String  nameB   = pShapeB.getClass().getSimpleName();
+            System.out.println( "********************************" );
+            System.out.println( nameA + " -> " + nameB );
+            System.out.println( str );            
             System.out.println( "################################\n\n\n" );
         }
     }
