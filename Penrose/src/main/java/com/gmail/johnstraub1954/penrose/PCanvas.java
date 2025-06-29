@@ -39,6 +39,7 @@ public class PCanvas extends JPanel implements Serializable
     private Rectangle2D rubberBand  = new Rectangle2D.Double();
     
     private transient boolean       showGrid    = false;
+    private transient int           gridSpacing = 100;;
     private transient Graphics2D    gtx;
     private transient int           width;
     private transient int           height;
@@ -193,6 +194,16 @@ public class PCanvas extends JPanel implements Serializable
     public boolean isShowGrid()
     {
         return showGrid;
+    }
+    
+    public int getGridSpacing()
+    {
+        return gridSpacing;
+    }
+    
+    public void setGridSpacing( int spacing )
+    {
+        gridSpacing = spacing;
     }
     
     @Override
@@ -445,12 +456,19 @@ public class PCanvas extends JPanel implements Serializable
     
     private void drawGrid()
     {
-        gtx.setColor( Color.BLACK );
         gtx.setStroke( new BasicStroke( 1 ) );
-        for ( int inx = 100 ; inx < width ; inx += 100 )
+        for ( int inx = gridSpacing ; inx < width ; inx += gridSpacing )
+        {
+            Color   color   = inx % 100 == 0 ? Color.RED : Color.BLACK;
+            gtx.setColor( color );
             gtx.drawLine( inx, 0, inx, height );
-        for ( int inx = 100 ; inx < height ; inx += 100 )
+        }
+        for ( int inx = gridSpacing ; inx < height ; inx += gridSpacing )
+        {
+            Color   color   = inx % 100 == 0 ? Color.RED : Color.BLACK;
+            gtx.setColor( color );
             gtx.drawLine( 0, inx, width, inx );
+        }
     }
 
     private class MListener extends MouseAdapter implements Serializable

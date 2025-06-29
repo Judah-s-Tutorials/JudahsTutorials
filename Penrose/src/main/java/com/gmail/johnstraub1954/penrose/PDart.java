@@ -104,13 +104,13 @@ public class PDart extends PShape implements Serializable
             double          shortSide   = 
                 longSide * (Math.sin( D36 ) / Math.sin( D108 ));
             Point2D         begin       = new Point2D.Double( 0, 0 );
-            Vertex  vertex  = new Vertex( begin, -36, longSide, true );
+            Vertex  vertex  = new Vertex( begin, -D36, longSide, true );
             queue.add( vertex );
-            vertex = new Vertex( vertex, 72 - 180, longSide, false );
+            vertex = new Vertex( vertex, D72 - Math.PI, longSide, false );
             queue.add( vertex );
-            vertex = new Vertex( vertex, 36 - 180, shortSide, true );
+            vertex = new Vertex( vertex, D36 - Math.PI, shortSide, true );
             queue.add( vertex );
-            vertex = new Vertex( vertex, 216 - 180, shortSide, false );
+            vertex = new Vertex( vertex, D216 - Math.PI, shortSide, false );
             queue.add( vertex );
         }
 

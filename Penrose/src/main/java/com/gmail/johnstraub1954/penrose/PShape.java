@@ -90,13 +90,21 @@ public abstract class PShape implements Serializable
      */
     public static final double  D72         = 72 * Math.PI / 180;
     /**
+     * 144 degrees converted to radians
+     */
+    public static final double  D144        = 144 * Math.PI / 180;
+    /**
      * 108 degrees converted to radians
      */
     public static final double  D108        = 108 * Math.PI / 180;
     /**
+     * 108 degrees converted to radians
+     */
+    public static final double  D216        = 216 * Math.PI / 180;
+    /**
      * 1 degree converted to radians
      */
-    public static final double  D01         = Math.PI / 180;
+    public static final double  D01         = 180 / Math.PI;
     /**
      * 2 * PI
      */
@@ -310,7 +318,7 @@ public abstract class PShape implements Serializable
             toInx = 0;
         Vertex          fromVertex  = transformedVertices.get( currVertex );
         Vertex          toVertex    = transformedVertices.get( toInx );
-        Line2D          edge        = fromVertex.getEdge( toVertex );
+        Line2D          edge        = fromVertex.getAdjLine();
         return edge;
     }
     
@@ -689,7 +697,7 @@ public abstract class PShape implements Serializable
      * Calculates the path to draw
      * for this PShape.
      * Calculated from the base path
-     * and this PShapes current coordinates and rotation.
+     * and this PShape's current coordinates and rotation.
      */
     private void computePath()
     {
@@ -711,24 +719,23 @@ public abstract class PShape implements Serializable
      */
     public List<Vertex> getTransformedVertices()
     {
+        AffineTransform transform   = getTransform();
         List<Vertex>    verticesOut = new ArrayList<>();
+        List<Vertex>    verticesIn  = getVertices();
+        for ( Vertex vertexIn : verticesIn )
+//            verticesOut.add( vertexIn.getVertex( xco, yco, rotation ) );
+            verticesOut.add( vertexIn.getVertex( transform ) );
+        return verticesOut;
+    }
+    
+    public AffineTransform getTransform()
+    {
         double          xcoPin      = xco + rightBounds.getWidth() / 2;
         double          ycoPin      = yco + rightBounds.getHeight() / 2;
         AffineTransform transform   = new AffineTransform();
         transform.rotate( rotation, xcoPin, ycoPin );
         transform.translate( xco, yco );
-        List<Vertex>    verticesIn  = getVertices();
-        int             len         = verticesIn.size();
-        Point2D[]       from        = new Point2D.Double[len];
-        int             inx         = 0;
-        for ( Vertex vertex : verticesIn )
-            from[inx++] = vertex.getCoords();
-        Point2D[]       transformed = new Point2D.Double[len];
-        transform.transform( from, 0, transformed, 0, len );
-        inx = 0;
-        for ( Vertex vertex : verticesIn )
-            verticesOut.add( new Vertex( vertex, transformed[inx++] ) );
-        return verticesOut;
+        return transform;
     }
     
     /**
