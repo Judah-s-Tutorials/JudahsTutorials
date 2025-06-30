@@ -24,15 +24,123 @@ public class Utils
     
     public static boolean liesOn( Point2D point, Line2D line )
     {
+        boolean result      = false;
         double  xco         = point.getX();
         double  yco         = point.getY();
-        double  slope       = slope( line );
-        double  yIntercept  = xco;
-        if ( slope != Double.POSITIVE_INFINITY )
-            yIntercept = yco - slope * xco;
-        double  diff        = yco - (slope * xco + yIntercept );
-        boolean result      = match( diff, 0 );
+        Point2D point1      = line.getP1();
+        Point2D point2      = line.getP2();
+        double  slopeLine   = slope( line );
+        double  slopePoint  = slope( point1, point );
+        if ( Utils.match( point, point1 ) )
+            result = true;
+        else if ( Utils.match( point, point2  ) )
+            result = true;
+        else if ( !match( slopeLine, slopePoint ) )
+            result = false;
+        else
+        {
+            double  point1Xco   = point1.getX();
+            double  point1Yco   = point1.getY();
+            double  point2Xco   = point2.getX();
+            double  point2Yco   = point2.getY();
+            boolean xResult     = false;
+            boolean yResult     = false;
+            if ( point1Xco < point2Xco )
+                xResult = xco >= point1Xco && xco <= point2Xco;
+            else
+                xResult = xco <= point1Xco && xco >= point2Xco;
+                
+            if ( point1Yco < point2Yco )
+                yResult = yco >= point1Yco && xco <= point2Yco;
+            else
+                yResult = yco <= point1Yco && yco >= point2Yco;
+                
+            result = xResult && yResult;
+        }
+        
         return result;
+    }
+    
+    public static Line2D contains( Line2D line1, Line2D line2 )
+    {
+        return null;
+    }
+    
+    public static Line2D round( Line2D lineIn )
+    {
+        Point2D point1Rounded   = round( lineIn.getP1() );
+        Point2D point2Rounded   = round( lineIn.getP2() );
+        Line2D  lineRounded     = 
+            new Line2D.Double( point1Rounded, point2Rounded );
+        return lineRounded;
+    }
+    
+    // Subtract pointA from pointB
+    public static Point2D subtract( Point2D pointA, Point2D pointB )
+    {
+        double  xDiff   = pointB.getX() - pointA.getX();
+        double  yDiff   = pointB.getY() - pointA.getY();
+        Point2D diff    = new Point2D.Double( xDiff, yDiff );
+        return diff;
+    }
+    
+    public static boolean lineContains( Line2D line, Point2D point )
+    {
+        boolean result  = false;
+        double  slope1  = slope( line );
+        Point2D point1  = line.getP1();
+        Point2D point2  = line.getP2();
+        double  slope2  = slope( point1, point );
+        if ( Utils.match( point, point1 ) )
+            result = true;
+        else if ( Utils.match( point, point2  ) )
+            result = true;
+        else if ( !match( slope1, slope2 ) )
+            result = false;
+        else
+        {
+            double  pointXco    = point.getX();
+            double  pointYco    = point.getY();
+            double  point1Xco   = point1.getX();
+            double  point1Yco   = point1.getY();
+            double  point2Xco   = point2.getX();
+            double  point2Yco   = point2.getY();
+            if ( slope1 < 0 )
+            {
+                result = 
+                    pointXco <= point1Xco && pointYco <= point1Yco
+                    && pointXco >= point2Xco && pointYco >= point2Yco;
+            }
+            else
+            {
+                result = 
+                    pointXco >= point1Xco && pointYco >= point1Yco
+                    && pointXco <= point2Xco && pointYco <= point2Yco;
+            }
+        }
+        
+        return result;
+    }
+    
+    public static Point2D round( Point2D pointIn )
+    {
+        double  xcoRounded      = round( pointIn.getX() );
+        double  ycoRounded      = round( pointIn.getX() );
+        Point2D pointRounded    = new Point2D.Double( xcoRounded, ycoRounded );
+        return pointRounded;
+    }
+    
+    /**
+     * Round a given number to the nearest tenth.
+     * 
+     * @param val   the given number
+     * @return  the given number rounded to the nearest tenth.
+     */
+    public static double round( double val )
+    {
+        double  rounded = (int)((val + .05) * 10); 
+        rounded /= 10;
+        return rounded;
     }
     
     public static double slope( Line2D line )
@@ -41,11 +149,20 @@ public class Utils
         return slope;
     }
     
+    public static double length( Line2D line )
+    {
+        Point2D point1  = line.getP1();
+        double  length  = point1.distance( line.getP2() );
+        return length;
+    }
+    
     public static double slope( Point2D point1, Point2D point2 )
     {
         double  deltaX  = point1.getX() - point2.getX();
         double  deltaY  = point1.getY() - point2.getY();
         double  slope   = deltaY / deltaX;
+        // return slope relative to Cartesian plane
+        slope = -slope;
         return slope;
     }
     

@@ -10,27 +10,61 @@ import com.gmail.johnstraub1954.penrose.utils.Utils;
 public class Vertex implements Serializable
 {
     /**
-     * 
+     * Default serial version UID.
      */
     private static final long serialVersionUID = -5502764660017096967L;
 
+    /**
+     * Used to test the approximate equality of two 
+     * floating point numbers.
+     * See {@link #matches(Vertex)}.
+     */
     private static final double epsilon     = .01;
     
+    /**
+     * The coordinates of this Vertex; 
+     * the starting point of the Vertex's adjacent line.
+     */
     private final Point2D   coords;
+    /**
+     * The starting point of the Vertex's adjacent line;
+     * also, the coordinates of the next Vertex in the queue.
+     */
     private final Point2D   nextCoords;
-    private final double    angleRadians;
+    /**
+     * The angle, in radians, of the adjacent line of this Vertex.
+     */
+    private final double    angle;
+    /**
+     * The length of this Vertex's adjacent line.
+     */
     private final double    length;
+    /**
+     * True, if this is a dotted vertex.
+     */
     private final boolean   isDotted;
     
+    /**
+     * Constructor.
+     * Fully initializes a new object
+     * of the Vertex class.
+     * 
+     * @param coords        the coordinates of this Vertex
+     * @param angle         the angle, in radians, of this Vertex's adjacent line
+     *                      with respect to the adjacent line
+     *                      of the previous Vertex
+     * @param length        the length of this Vertex's adjacent line
+     * @param isDotted      true, if this is a dotted vertex
+     */
     public Vertex( 
         Point2D coords, 
-        double  angleRadians, 
+        double  angle, 
         double  length, 
         boolean isDotted 
     )
     {
         this.coords = coords;
-        this.angleRadians = angleRadians;
+        this.angle = angle;
         this.length = length;
         this.isDotted = isDotted;
         nextCoords = calculateNext();
@@ -48,7 +82,7 @@ public class Vertex implements Serializable
      * and the source will be the predecessor of this Vertex.
      * 
      * @param from      the referent Vertex
-     * @param angle     the angle of this Vertex relative
+     * @param angle     the angle, in radians, of this Vertex relative
      *                  to the adjacent side of referent
      * @param adjSide   the length of the adjacent side of this Vertex
      * @param isDotted  true if this is a dotted Vertex
@@ -61,7 +95,7 @@ public class Vertex implements Serializable
     )
     {
         this.coords = from.getNext();
-        this.angleRadians = (from.angleRadians + angle );
+        this.angle = (from.angle + angle );
         this.length = adjSide;
         this.isDotted = isDotted;
         nextCoords = calculateNext();
@@ -85,24 +119,24 @@ public class Vertex implements Serializable
     {
         this.coords = from;
         this.nextCoords = next;
-        this.angleRadians = Utils.radians( from, next );
+        this.angle = Utils.radians( from, next );
         this.length = adjSide;
         this.isDotted = isDotted;
     }
     
     /**
-     * Given the starting point (@link {@link #coords}) and angle
-     * of the adjacent of this Vertex,
-     * calculate the endpoint of the adjacent line
-     * (which is also the starting point
-     * for the next Vertex in the shape).
+     * Given the starting point ({@link #coords}) 
+     * and angle ({@link #angle}) of this Vertex,
+     * calculate the coordinates of the endpoint of the adjacent line
+     * (which are also the coordinates
+     * of the next Vertex in this shape).
      * 
      * @return  a new Vertex with transformed coordinates
      */
     private Point2D calculateNext()
     {
-        double  nextXco = coords.getX() + Math.cos( angleRadians ) * length;
-        double  nextYco = coords.getY() - Math.sin( angleRadians ) * length;
+        double  nextXco = coords.getX() + Math.cos( angle ) * length;
+        double  nextYco = coords.getY() - Math.sin( angle ) * length;
         Point2D next    = new Point2D.Double( nextXco, nextYco );
         return next;
     }
@@ -124,7 +158,7 @@ public class Vertex implements Serializable
      */
     public double getAngle()
     {
-        return angleRadians;
+        return angle;
     }
     
     /**

@@ -9,6 +9,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -23,6 +24,8 @@ import com.gmail.johnstraub1954.penrose.PShape;
 import com.gmail.johnstraub1954.penrose.PToolbar;
 import com.gmail.johnstraub1954.penrose.Vertex;
 import com.gmail.johnstraub1954.penrose.utils.CQueue;
+import com.gmail.johnstraub1954.penrose.utils.Neighborhood;
+import com.gmail.johnstraub1954.penrose.utils.PShapeIntersection;
 import com.gmail.johnstraub1954.penrose.utils.SelectionManager;
 import com.gmail.johnstraub1954.penrose.utils.Utils;
 
@@ -33,7 +36,7 @@ public class PShapeAreaDemo1 implements Serializable
      */
     private static final long serialVersionUID = 3168160266742270027L;
     
-    private static double       longSide    = 100;
+    private static double       longSide        = 200;
     private static final String chooserTitle    = "Choose File";
     private static final String appTitle        = "Penrose Tiling";
     private final JFrame        frame           = new JFrame( appTitle );
@@ -84,18 +87,111 @@ public class PShapeAreaDemo1 implements Serializable
         Color           saveColor   = gtx.getColor();
         Stroke          saveStroke  = gtx.getStroke();
 //        findMismatchedLengths( gtx, mgr );
-        findCommonEdges( gtx, mgr );
-        findAllCommonEdges( gtx, mgr );
+//        findCommonEdges( gtx, mgr );
+//        findAllCommonEdges( gtx, mgr );
         printEdges( gtx, mgr );
+        findMisaligned( gtx, mgr );
+//        findInvalidIntersections( gtx, mgr );
 
         gtx.setStroke( saveStroke );
         gtx.setColor( saveColor );
     }
     
+    private void findMisaligned( Graphics2D gtx, SelectionManager mgr )
+    {
+        List<PShape>    selected    = mgr.getSelected();
+        if ( selected.size() == 2 )
+        {
+            gtx.setColor( Color.BLUE );
+            gtx.setStroke( new BasicStroke( 3 ) );
+            PShape          shape1      = selected.get( 0 );
+            List<Vertex>    vertices1   = shape1.getTransformedVertices();
+            PShape  shape2  = selected.get( 1 );
+            List<Vertex>    vertices2   = shape2.getTransformedVertices();
+            List<Vertex>    solutions   = new ArrayList<>();
+            for ( Vertex vertex1 : vertices1 )
+            {
+                Line2D  line1   = vertex1.getAdjLine();
+                solutions.clear();
+                for ( Vertex vertex2 : vertices2 )
+                {
+                    Line2D  line2       = vertex2.getAdjLine();
+                    Line2D  shortLine   = getContainedLine( line1, line2 );
+                    if ( shortLine != null )
+                        gtx.draw( shortLine );
+                }
+            }
+        }
+    }
+    
+    /**
+     * One line contains another if they have the same slope,
+     * different lengths,
+     * and both endpoints of the shorter line
+     * intersect the longer line.
+     * @param line1
+     * @param line2
+     * @return
+     */
+    private Line2D getContainedLine( Line2D line1, Line2D line2 )
+    {
+        Line2D  shortLine   = null;
+        Line2D  longLine    = null;
+        double  slope1      = Utils.slope( line1 );
+        double  slope2      = Utils.slope( line2 );
+        if ( Utils.match( slope1, slope2 ) )
+        {
+            double  len1    = Utils.length( line1 ) ;
+            len1 = Utils.round( len1 );
+            double  len2    = Utils.length( line2 );
+            len2 = Utils.round( len2 );
+            if ( len1 < len2 )
+            {
+                shortLine = line1;
+                longLine = line2;
+            }
+            else if ( len2 < len1 )
+            {
+                shortLine = line2;
+                longLine = line1;
+            }
+            else
+                ;
+        }
+        if ( shortLine != null )
+        {
+            if ( !Utils.liesOn( shortLine.getP1(), longLine ) )
+                shortLine = null;
+            else if ( !Utils.liesOn( shortLine.getP2(), longLine ) )
+                shortLine = null;
+            else
+                ;
+        }
+        return shortLine;
+    }
+    
+    private int getNumSharedEndpoint2( Line2D line1, Line2D line2 )
+    {
+        int     count       = 0;
+        Point2D end1Left    = line1.getP1();
+        Point2D end1Right   = line1.getP2();
+        Point2D end2Left    = line2.getP1();
+        Point2D end2Right   = line2.getP2();
+        if ( Utils.match( end1Left, end2Left ) )
+            ++count;
+        if ( Utils.match( end1Right, end2Left ) )
+            ++count;
+        if ( Utils.match( end1Left, end2Right ) )
+            ++count;
+        if ( Utils.match( end1Right, end2Right ) )
+            ++count;
+        return count;
+    }
+            
     private void printEdges( Graphics2D gtx, SelectionManager mgr )
     {
         List<PShape>    selected    = mgr.getSelected();
-        if ( selected.size() >= 3 )
+        if ( selected.size() == 2 )
         {
             PShape          shape1      = selected.get( 0 );
             List<Vertex>    vertices1   = shape1.getTransformedVertices();
@@ -103,11 +199,45 @@ public class PShapeAreaDemo1 implements Serializable
             List<Vertex>    vertices2   = shape2.getTransformedVertices();
             System.out.println( "##################################" );
             for ( Vertex vertex : vertices1 )
-                System.out.println( "1: " + getAdjLine( vertex ) );
+            {
+                String  adjLine = getAdjLine( vertex );
+                String  slope   = getSlope( vertex );
+                System.out.println( "1: " + adjLine + " m: " + slope );
+            }
             System.out.println( "----------------------------------" );
             for ( Vertex vertex : vertices2 )
-                System.out.println( "2: " + getAdjLine( vertex ) );
+            {
+                String  adjLine = getAdjLine( vertex );
+                String  slope   = getSlope( vertex );
+                System.out.println( "2: " + adjLine + " m: " + slope );
+            }
         }
+    }
+    
+    private void 
+    findInvalidIntersections( Graphics2D gtx, SelectionManager mgr )
+    {
+        List<PShape>    selected    = mgr.getSelected();
+        if ( selected.size() == 1 )
+        {
+            PShape          shape   = selected.get( 0 );
+            List<PShape>    shapes  = mgr.getShapes();
+            Neighborhood    neighborhood    = new Neighborhood( shape, shapes );
+            gtx.setColor( Color.YELLOW );
+            for ( PShape pShape : neighborhood )
+            {
+                PShapeIntersection  intersection    = 
+                    new PShapeIntersection( shape, pShape );
+                if ( intersection.isInvalid() )
+                    gtx.fill( pShape.getWorkShape() );
+            }
+        }
+    }
+    
+    private static String getSlope( Vertex vertex )
+    {
+        String  slope   = String.format( "%6.2f", vertex.getSlope() );
+        return slope;
     }
     
     private static String getAdjLine( Vertex vertex )
@@ -128,29 +258,29 @@ public class PShapeAreaDemo1 implements Serializable
         return bldr.toString();
     }
     
+    /**
+     * Find the common edges of the first two selected shapes.
+     * 
+     * @param gtx
+     * @param mgr
+     */
     private void findCommonEdges( Graphics2D gtx, SelectionManager mgr )
     {
         List<PShape>    selected    = mgr.getSelected();
         if ( selected.size() >= 2 )
         {
             PShape          shape1      = selected.get( 0 );
-//            List<Vertex>    vertices1   = shape1.getTransformedVertices();
             PShape  shape2  = selected.get( 1 );
             findCommonEdges( gtx, shape1, shape2 );
-//            List<Vertex>    vertices2   = shape2.getTransformedVertices();
-//            for ( Vertex vertex1 : vertices1 )
-//            {
-//                Line2D  line1   = vertex1.getAdjLine();
-//                for ( Vertex vertex2 : vertices2 )
-//                {
-//                    Line2D  line2   = vertex2.getAdjLine();
-//                    if ( Utils.match( line1, line2 ) )
-//                        gtx.draw( line1 );
-//                }
-//            }
         }
     }
     
+    /**
+     * Find the common edges of any two shapes in the application.
+     * 
+     * @param gtx
+     * @param mgr
+     */
     private void findAllCommonEdges( Graphics2D gtx, SelectionManager mgr )
     {
         List<PShape>    shapes  = mgr.getShapes();
@@ -160,6 +290,12 @@ public class PShapeAreaDemo1 implements Serializable
                     findCommonEdges( gtx, shape1, shape2 );
     }
     
+    /**
+     * Find the common edges of the two given shapes.
+     * @param gtx
+     * @param shape1
+     * @param shape2
+     */
     private void 
     findCommonEdges( Graphics2D gtx, PShape shape1, PShape shape2 )
     {
@@ -175,59 +311,6 @@ public class PShapeAreaDemo1 implements Serializable
                 Line2D  line2   = vertex2.getAdjLine();
                 if ( Utils.match( line1, line2 ) )
                     gtx.draw( line1 );
-            }
-        }
-    }
-    
-    /**
-     * When exactly two PShapes are selected,
-     * find the edges in the shapes 
-     * that have the same slope.
-     * 
-     * @param gtx
-     * @param mgr
-     */
-    private void compareSlopes( Graphics2D gtx, SelectionManager mgr )
-    {
-        List<PShape>    selected    = mgr.getSelected();
-        double          epsilon     = .05;
-        if ( selected.size() == 2 )
-        {
-            System.out.println( "#################################" );
-            PShape          shape0  = selected.get( 0 );
-            List<Vertex>    vList0  = shape0.getTransformedVertices();
-            PShape          shape1  = selected.get( 1 );
-            List<Vertex>    vList1  = shape1.getTransformedVertices();
-            int             ident0  = 0;
-            for ( Vertex vertex0 : vList0 )
-            {
-                double  slope0      = vertex0.getSlope();
-                int     ident1      = 0;
-                for ( Vertex vertex1 : vList1 )
-                {
-                    double  slope1  = vertex1.getSlope();
-                    double  diff    = Math.abs( slope0 - slope1);
-                    
-                    if ( diff < epsilon )
-                    {
-                        double  len0        = vertex0.getLength();
-                        String  strLen0     = String.format( "%6.2f", len0 );
-                        String  strSlope0   = String.format( "%6.2f", slope0 );
-                        double  len1        = vertex1.getLength();
-                        String  strLen1     = String.format( "%6.2f", len1 );
-                        String  strSlope1   = String.format( "%6.2f", slope1 );
-                        StringBuilder   bldr        = new StringBuilder();
-                        bldr.append( ident0 ).append( ": " )
-                            .append( strSlope0 ).append( ", " )
-                            .append( strLen0 ).append( "; " )
-                            .append( ident1 ).append( ": " )
-                            .append( strSlope1 ).append( ", " )
-                            .append( strLen1 );
-                        System.out.println( bldr );
-                    }
-                    ++ident1;
-                }
-                ++ident0;
             }
         }
     }

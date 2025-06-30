@@ -135,7 +135,7 @@ public class FileManager
             exc.printStackTrace();
             JOptionPane.showMessageDialog(
                 canvas, 
-                "Save Failed", 
+                "Open Failed: " + exc.getMessage(), 
                 "IO Error", 
                 JOptionPane.ERROR_MESSAGE
             );

@@ -90,6 +90,12 @@ public class PShapeIntersection
         return intersection.isEmpty();
     }
     
+    public boolean isInvalid()
+    {
+        boolean result  = !intersection.isEmpty() && !isEdge;
+        return result;
+    }
+    
     public static boolean intersect( PShape pShapeA, PShape pShapeB)
     {
         Area    areaA   = new Area( pShapeA.getWorkShape() );
