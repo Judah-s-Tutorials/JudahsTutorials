@@ -1,4 +1,4 @@
-package sandbox;
+package com.gmail.johnstraub1954.penrose.sandbox;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -36,7 +36,7 @@ public class PShapeAreaDemo1 implements Serializable
      */
     private static final long serialVersionUID = 3168160266742270027L;
     
-    private static double       longSide        = 200;
+    private static double       longSide        = 100;
     private static final String chooserTitle    = "Choose File";
     private static final String appTitle        = "Penrose Tiling";
     private final JFrame        frame           = new JFrame( appTitle );
@@ -89,7 +89,7 @@ public class PShapeAreaDemo1 implements Serializable
 //        findMismatchedLengths( gtx, mgr );
 //        findCommonEdges( gtx, mgr );
 //        findAllCommonEdges( gtx, mgr );
-        printEdges( gtx, mgr );
+//        printEdges( gtx, mgr );
         findMisaligned( gtx, mgr );
 //        findInvalidIntersections( gtx, mgr );
 
@@ -228,7 +228,7 @@ public class PShapeAreaDemo1 implements Serializable
             {
                 PShapeIntersection  intersection    = 
                     new PShapeIntersection( shape, pShape );
-                if ( intersection.isInvalid() )
+                if ( !intersection.isValid() )
                     gtx.fill( pShape.getWorkShape() );
             }
         }

@@ -5,6 +5,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -12,12 +14,15 @@ import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.Serializable;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.gmail.johnstraub1954.penrose.utils.ColorMap;
+import com.gmail.johnstraub1954.penrose.utils.Utils;
 
 /**
  * Base class for shapes used to construct aperiodic tiling.
@@ -29,6 +34,9 @@ import com.gmail.johnstraub1954.penrose.utils.ColorMap;
  */
 public abstract class PShape implements Serializable
 {
+    private static Toolkit              toolkit = Toolkit.getDefaultToolkit();
+    private static DateTimeFormatter    formatter = 
+        DateTimeFormatter.ofPattern("HH:mm:ss");
     /**
      * Generated serial version UID.
      */
@@ -317,7 +325,6 @@ public abstract class PShape implements Serializable
         if ( toInx >= transformedVertices.size() )
             toInx = 0;
         Vertex          fromVertex  = transformedVertices.get( currVertex );
-        Vertex          toVertex    = transformedVertices.get( toInx );
         Line2D          edge        = fromVertex.getAdjLine();
         return edge;
     }
@@ -511,6 +518,28 @@ public abstract class PShape implements Serializable
     }
     
     /**
+     * Translates this shape to the given coordinates.
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     */
+    public void moveTo( Point2D coordinates )
+    {
+        moveTo( coordinates.getX(), coordinates.getY() );
+    }
+    
+    /**
+     * Gets the current coordinates of this PShape.
+     * 
+     * @return  the current coordinates of this PShape
+     */
+    public Point2D getCoordinates()
+    {
+        Point2D coords  = new Point2D.Double( xco, yco );
+        return coords;
+    }
+    
+    /**
      * Returns the bounds of this shape
      * with translation and rotation applied.
      * 
@@ -638,6 +667,21 @@ public abstract class PShape implements Serializable
         double          deltaX          = toCoords.getX() - fromCoords.getX();
         double          deltaY          = toCoords.getY() - fromCoords.getY();
         move( deltaX, deltaY );
+        print( fromVertices, toVertices );
+    }
+    
+    private static void 
+    print( List<Vertex> fromVertices, List<Vertex> toVertices )
+    {
+        if ( toolkit.getLockingKeyState( KeyEvent.VK_CAPS_LOCK ) )
+        {
+            LocalTime   now     =  LocalTime.now();
+            String      time    = now.format( formatter );
+            System.out.println( "########## " + time + " ##########" );
+            Utils.print( "from", fromVertices );
+            System.out.println( "**********************************" );
+            Utils.print( "to", toVertices );
+        }
     }
     
     /**

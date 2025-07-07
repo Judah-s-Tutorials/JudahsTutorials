@@ -102,6 +102,21 @@ public class Vertex implements Serializable
     }
     
     /**
+     * Copy constructor.
+     * Makes a copy of the given Vertex.
+     * This constructor is useful for creating
+     * @param vertex
+     */
+    public Vertex( Vertex vertex )
+    {
+        this.coords = vertex.coords;
+        this.angle = vertex.angle;
+        this.length = vertex.length;
+        this.isDotted = vertex.isDotted;
+        this.nextCoords = vertex.nextCoords;
+    }
+    
+    /**
      * Used internally to obtain a copy of a Vertex
      * with transformed coordinates.
      * 

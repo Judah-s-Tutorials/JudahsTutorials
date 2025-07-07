@@ -1,4 +1,4 @@
-package sandbox;
+package com.gmail.johnstraub1954.penrose.sandbox;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;

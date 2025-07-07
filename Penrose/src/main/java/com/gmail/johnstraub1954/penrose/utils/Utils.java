@@ -4,8 +4,11 @@ import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.util.List;
 
 import com.gmail.johnstraub1954.penrose.PShape;
+import com.gmail.johnstraub1954.penrose.Vertex;
 
 public class Utils
 {
@@ -20,43 +23,10 @@ public class Utils
         // not used
     }
     
-//    public static boolean liesOn( )
-    
     public static boolean liesOn( Point2D point, Line2D line )
     {
-        boolean result      = false;
-        double  xco         = point.getX();
-        double  yco         = point.getY();
-        Point2D point1      = line.getP1();
-        Point2D point2      = line.getP2();
-        double  slopeLine   = slope( line );
-        double  slopePoint  = slope( point1, point );
-        if ( Utils.match( point, point1 ) )
-            result = true;
-        else if ( Utils.match( point, point2  ) )
-            result = true;
-        else if ( !match( slopeLine, slopePoint ) )
-            result = false;
-        else
-        {
-            double  point1Xco   = point1.getX();
-            double  point1Yco   = point1.getY();
-            double  point2Xco   = point2.getX();
-            double  point2Yco   = point2.getY();
-            boolean xResult     = false;
-            boolean yResult     = false;
-            if ( point1Xco < point2Xco )
-                xResult = xco >= point1Xco && xco <= point2Xco;
-            else
-                xResult = xco <= point1Xco && xco >= point2Xco;
-                
-            if ( point1Yco < point2Yco )
-                yResult = yco >= point1Yco && xco <= point2Yco;
-            else
-                yResult = yco <= point1Yco && yco >= point2Yco;
-                
-            result = xResult && yResult;
-        }
+        double  distance    = line.ptSegDist( point );
+        boolean result      = distance < EPSILON;
         
         return result;
     }
@@ -64,6 +34,43 @@ public class Utils
     public static Line2D contains( Line2D line1, Line2D line2 )
     {
         return null;
+    }
+    
+    public static boolean intersect( Line2D line1, Line2D line2 )
+    {
+        Rectangle2D bounds1     = line1.getBounds2D();
+        Rectangle2D bounds2     = line2.getBounds2D();
+        double      xco1Left    = bounds1.getX();
+        double      xco1Right   = xco1Left + bounds1.getWidth();
+        double      yco1Top     = bounds1.getY();
+        double      yco1Bottom  = yco1Top + bounds1.getHeight();
+        double      xco2Left    = bounds2.getX();
+        double      xco2Right   = xco2Left + bounds2.getWidth();
+        double      yco2Top     = bounds2.getY();
+        double      yco2Bottom  = yco2Top + bounds2.getHeight();
+        boolean     result      =
+            xco1Left <= xco2Right && xco1Right >= xco2Left &&
+            yco1Top <= yco2Bottom && yco1Bottom >= yco2Top;
+        return result;
+    }
+    
+    public static void print( String label, List<Vertex> vertices )
+    {
+        StringBuilder   bldr    = new StringBuilder();
+        int             size    = vertices.size();
+        for ( int inx = 0 ; inx < size ; ++inx )
+        {
+            Vertex  vertex      = vertices.get( inx );
+            Point2D coords      = vertex.getCoords();
+            String  strCoords   = 
+                String.format( "(%5.1f, %5.1f) ", coords.getX(), coords.getY() );
+            String  strSlope    = String.format( "m=%4.1f ", vertex.getSlope() );
+            String  strLength   = String.format( "l=%4.1f", vertex.getLength() );
+            bldr.append( label ).append( " " ).append( inx ).append( ": " )
+                .append( strCoords ).append( strSlope ).append( strLength )
+                .append( newl );
+        }
+        System.out.print( bldr );
     }
     
     public static Line2D round( Line2D lineIn )
@@ -202,7 +209,13 @@ public class Utils
     
     public static boolean match( double val1, double val2 )
     {
-        double  diff    = Math.abs( val1 - val2 );
+        double  diff    = 0;
+        if ( Math.abs( val2 ) == Double.POSITIVE_INFINITY 
+            && Math.abs( val1 ) == Double.POSITIVE_INFINITY
+        )
+            diff = 0;
+        else
+            diff = Math.abs( val1 - val2 );
         boolean result  = diff < EPSILON;
         return result;
     }

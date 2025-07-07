@@ -1,10 +1,12 @@
 package com.gmail.johnstraub1954.penrose.utils;
 
+import java.awt.Toolkit;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 import com.gmail.johnstraub1954.penrose.PShape;
+import com.gmail.johnstraub1954.penrose.Vertex;
 
 /**
  * This is a simple class
@@ -20,7 +22,8 @@ public class SelectionManager implements Serializable
     private static final long serialVersionUID = -5494592525711839694L;
 
     private static final double     epsilon     = .001;
-    
+    private static Toolkit              toolkit = Toolkit.getDefaultToolkit();
+
     private final List<SelectionListener>   selectionListeners  = new ArrayList<>();
     private final List<PShape>              shapes              = new ArrayList<>();
     private final List<PShape>              selected            = new ArrayList<>();
@@ -216,31 +219,136 @@ public class SelectionManager implements Serializable
             mapping = SelectionEvent.NO_MAPPING;
         else
         {
-            PShape      fromShape   = selected.get( 0 );
-            PShape      toShape     = selected.get( 1 );
-            double      fromSlope   = fromShape.getCurrSlope();
-            double      toSlope     = toShape.getCurrSlope();
-            double      fromLength  = fromShape.getCurrLength();
-            double      toLength    = toShape.getCurrLength();
-            boolean[]   fromDotted  = fromShape.getCurrDotState();
-            boolean[]   toDotted    = toShape.getCurrDotState();
-            if ( !testDoubles( fromSlope, toSlope ) )
-                mapping = SelectionEvent.CAN_MAP;
-            else if ( !testDoubles( fromLength, toLength ) )
-                mapping = SelectionEvent.CAN_MAP;
-            else if ( fromDotted[0] != toDotted[1] )
-                mapping = SelectionEvent.CAN_MAP;
-            else if ( fromDotted[1] != toDotted[0] )
-                mapping = SelectionEvent.CAN_MAP;
-            else
+            SnapValidator   validator   = new SnapValidator( this );
+            if ( validator.validate() )
                 mapping = SelectionEvent.IS_MAPPED;
+            else
+                mapping = SelectionEvent.CAN_MAP;
         }
+//        else
+//        {
+//            PShape      fromShape   = selected.get( 0 );
+//            PShape      toShape     = selected.get( 1 );
+//            double      fromSlope   = fromShape.getCurrSlope();
+//            double      toSlope     = toShape.getCurrSlope();
+//            double      fromLength  = fromShape.getCurrLength();
+//            double      toLength    = toShape.getCurrLength();
+//            boolean[]   fromDotted  = fromShape.getCurrDotState();
+//            boolean[]   toDotted    = toShape.getCurrDotState();
+//            if ( !Utils.match( fromSlope, toSlope ) )
+//                mapping = SelectionEvent.CAN_MAP;
+//            else if ( !Utils.match( fromLength, toLength ) )
+//                mapping = SelectionEvent.CAN_MAP;
+//            else if ( fromDotted[0] != toDotted[1] )
+//                mapping = SelectionEvent.CAN_MAP;
+//            else if ( fromDotted[1] != toDotted[0] )
+//                mapping = SelectionEvent.CAN_MAP;
+//            else
+//                mapping = SelectionEvent.IS_MAPPED;
+//        }
     }
     
-    private static boolean testDoubles( double dVal1, double dVal2 )
+    /**
+     * Determines if the selected edge of the given from-shape
+     * correctly maps to the given to-shape.
+     * In this context, the edges can be mapped if:
+     * <ol>
+     *      <li>The edges have the same slope;</li>
+     *      <li>The edges have the same length;</li>
+     *      <li>The 'dotted' property of corresponding vertices are equal.</li>
+     * </ol>
+     * <p>
+     * This is just one of several tests that have to be passed
+     * in order for one shape to be mapped to another.
+     * 
+     * @param fromShape the given from-shape
+     * @param toShape   the given to-shape
+     * 
+     * @return
+     *      SelectionEvent.IS_MAPPED if the edges pass the check,
+     *      SelectionEvent.CAN_MAP otherwise.
+     *      
+     * @see #computeMapping()
+     */
+    private int checkMappedEdges( PShape fromShape, PShape toShape )
     {
-        double  diff    = dVal1 - dVal2;
-        boolean match   = Math.abs( diff ) < epsilon;
-        return match;
+        int result  = SelectionEvent.CAN_MAP;
+        double      fromSlope   = fromShape.getCurrSlope();
+        double      toSlope     = toShape.getCurrSlope();
+        double      fromLength  = fromShape.getCurrLength();
+        double      toLength    = toShape.getCurrLength();
+        boolean[]   fromDotted  = fromShape.getCurrDotState();
+        boolean[]   toDotted    = toShape.getCurrDotState();
+        if ( !Utils.match( fromSlope, toSlope ) )
+            result = SelectionEvent.CAN_MAP;
+        else if ( !Utils.match( fromLength, toLength ) )
+            result = SelectionEvent.CAN_MAP;
+        else if ( fromDotted[0] != toDotted[1] )
+            result = SelectionEvent.CAN_MAP;
+        else if ( fromDotted[1] != toDotted[0] )
+            result = SelectionEvent.CAN_MAP;
+        else
+            result = SelectionEvent.IS_MAPPED;
+        return result;
+    }
+    
+//    private int checkIntersections( PShape fromShape, PShape toShape )
+//    {
+//        int     result      = SelectionEvent.NO_MAPPING;
+//        // To a test-mapping of the selected edges
+//        Point2D saveCoords  = fromShape.getCoordinates();
+//        fromShape.snapTo( toShape );
+//        
+//        // for each prospective neighbor:
+//        Neighborhood    neighborhood    = new Neighborhood( fromShape, shapes );
+//        for ( PShape neighbor : neighborhood )
+//        {
+//            PShapeIntersection  intersect   = 
+//                new PShapeIntersection( fromShape, neighbor );
+//            // Possibilities:
+//            // ... no intersection: valid mapping
+//            // ... intersection on an edge: may be valid mapping;
+//            //     depends on matching dots
+//            // ... intersection at a vertex: may be valid mapping
+//            // ... anything else: invalid mapping.
+//            if ( !intersect.isEmpty() )
+//            {
+//                if ( intersect.isEdge() )
+//                    ;
+////                else if ( intersect.isVertex() )
+////                    ;
+//                else
+//                {
+//                    result = SelectionEvent.NO_MAPPING;
+//                    break;
+//                }
+//            }
+//        }
+//    }
+    
+    private int testDotState( PShape shapeA, PShape shapeB )
+    {
+        int             isMapped    = SelectionEvent.IS_MAPPED;
+        int             result      = isMapped;
+        List<Vertex>    listA       = shapeA.getTransformedVertices();
+        int             sizeA       = listA.size();
+        List<Vertex>    listB       = shapeB.getTransformedVertices();
+        int             sizeB       = listB.size();
+        for ( int inx = 0 ; inx < sizeA && result == isMapped ; ++inx  )
+        {
+            Vertex  vertexA = listA.get( inx );
+            for ( int jnx = 0 ; jnx < sizeB && result == isMapped ; ++jnx )
+            {
+                Vertex  vertexB = listB.get( jnx );
+                // If the vertex is shared between shapes, 
+                // is the dot-state valid?
+                if ( vertexA.matches( vertexB ) )
+                {
+                    if ( vertexA.isDotted() != vertexB.isDotted() )
+                        result = SelectionEvent.NO_MAPPING;
+                }
+            }
+        }
+        return result;
     }
 }
