@@ -1,20 +1,186 @@
 package com.gmail.johnstraub1954.penrose.utils;
 
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.lang.reflect.InvocationTargetException;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.IntStream;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import com.gmail.johnstraub1954.penrose.PShape;
 import com.gmail.johnstraub1954.penrose.Vertex;
+import com.gmail.johnstraub1954.penrose.sandbox.TempPanel;
 
-public class SnapValidator
+public class SnapValidator_orig
 {
+    private static Toolkit              toolkit = Toolkit.getDefaultToolkit();
+    private static DateTimeFormatter    formatter = 
+        DateTimeFormatter.ofPattern("HH:mm:ss");
     private final List<PShape>      allShapes;
     private final PShape            fromShape;
     private final PShape            toShape;
     private Neighborhood            neighborhood    = null;
     
-    public SnapValidator( SelectionManager mgr )
+    private static TempPanel    panel;
+    
+//    public static void main( String[] args )
+//    {
+//        try
+//        {
+//            SwingUtilities.invokeAndWait( () -> panel = new TempPanel() );
+//        }
+//        catch ( InterruptedException | InvocationTargetException exc )
+//        {
+//            exc.printStackTrace();
+//            System.exit( 1 );
+//        }
+//        validIntersectionAtOnePoint();
+//        validIntersectionAtMultiplePoints();
+//        invalidIntersectionAtMultiplePoints();
+//        System.exit( 0 );
+//    }
+    
+    private static void validIntersectionAtMultiplePoints()
+    {
+        Point2D pointA  = new Point2D.Double( 20, 20 );
+        Point2D pointB  = new Point2D.Double( 100, 100 );
+        Point2D pointC  = new Point2D.Double( 20, 100 );
+        Line2D  line1   = new Line2D.Double( pointA, pointB );
+        Line2D  line2   = new Line2D.Double( pointA, pointB );
+        Line2D  line3   = new Line2D.Double( pointA, pointC );
+        Line2D  line4   = new Line2D.Double( pointA, pointC );
+
+        IntStream.iterate( 0, i -> i < 3, i -> i + 1 ).forEach(i -> {
+//            test( line1, line2, i );
+//            test( line3, line4, i );
+        });
+    }
+    
+    private static void validIntersectionAtOnePoint()
+    {
+        Point2D point10_10  = new Point2D.Double( 20, 10 );
+        Point2D point20_10  = new Point2D.Double( 120, 10 );
+        Point2D point10_20  = new Point2D.Double( 220, 10 );
+        Line2D  line1       = new Line2D.Double( point10_10, point20_10 );
+        Line2D  line2       = new Line2D.Double( point20_10, point10_20 );
+        
+        Point2D pointA  = new Point2D.Double( 20, 40 );
+        Point2D pointB  = new Point2D.Double( 200, 40 );
+        Point2D pointC  = new Point2D.Double( 20, 100 );
+        Point2D pointD  = new Point2D.Double( 200, 100 );
+        Line2D  line3   = new Line2D.Double( pointA, pointB );
+        Line2D  line4   = new Line2D.Double( pointA, pointC );
+        Line2D  line5   = new Line2D.Double( pointB, pointD );
+
+        IntStream.iterate( 0, i -> i < 4, i -> i + 1 ).forEach(i -> {
+            test( line1, line2, i );
+            test( line3, line4, i );
+            test( line3, line5, i );
+        });
+    }
+    
+    private static void invalidIntersectionAtMultiplePoints()
+    {
+        Point2D baseLeft    = new Point2D.Double( 40, 40 );
+        Point2D baseRight   = new Point2D.Double( 100, 100 );
+        Point2D farLeft     = new Point2D.Double( 20, 20 );
+        Point2D farRight    = new Point2D.Double( 120, 120 );
+        Point2D intLeft     = new Point2D.Double( 60, 60 );
+        Point2D intRight    = new Point2D.Double( 90, 90 );
+        Line2D  base        = new Line2D.Double( baseLeft, baseRight );
+        Line2D  matchLeft   = new Line2D.Double( baseLeft, intRight );
+        Line2D  matchRight  = new Line2D.Double( intLeft, baseRight );
+        Line2D  matchNoneA  = new Line2D.Double( farLeft, farRight );
+        Line2D  matchNoneB  = new Line2D.Double( intLeft, intRight );
+        Line2D  matchNoneC  = new Line2D.Double( farLeft, intRight );
+        Line2D  matchNoneD  = new Line2D.Double( intLeft, farRight );
+
+        IntStream.iterate( 0, i -> i < 3, i -> i + 1 ).forEach(i -> {
+            test( base, matchLeft, i );
+            test( base, matchRight, i );
+            test( base, matchNoneA, i );
+            test( base, matchNoneB, i );
+            test( base, matchNoneC, i );
+            test( base, matchNoneD, i );
+        });
+    }
+    
+    private static void test( Line2D line1, Line2D line2, int config )
+    {
+        Point2D point11 = line1.getP1();
+        Point2D point12 = line1.getP2();
+        Point2D point21 = line2.getP1();
+        Point2D point22 = line2.getP2();
+        Line2D  lineA   = new Line2D.Double();
+        Line2D  lineB   = new Line2D.Double();
+        switch ( config )
+        {
+        case 0:
+            // as configured
+            lineA.setLine( point11, point12 );
+            lineB.setLine( point21, point22 );
+            break;
+        case 1:
+            // reverse endpoint in line 1
+            lineA.setLine( point12, point11 );
+            lineB.setLine( point21, point22 );
+            break;
+        case 2:
+            // reverse endpoints in line 2
+            lineA.setLine( point11, point12 );
+            lineB.setLine( point22, point21 );
+            break;
+        case 3:
+            // reverse endpoints in line both lines
+            lineA.setLine( point12, point11 );
+            lineB.setLine( point22, point21 );
+            break;
+        }
+        
+        panel.removeAll();
+        panel.addShape( lineA );
+        panel.addShape( lineB );
+        panel.repaint();
+        test( lineA, lineB );
+        JOptionPane.showMessageDialog( null, "ready?" );
+    }
+    
+    private static void test( Line2D line1, Line2D line2 )
+    {
+        boolean valid       = testEndpoints( line1, line2 );
+        String  strLine1    = formatLine( line1 );
+        String  strLine2    = formatLine( line2 );
+        String  feedback    =
+            strLine1 + " / " + strLine2 + ": " + valid;
+        System.out.println( "###############################" );
+        System.out.println( feedback );
+    }
+    
+    private static String formatLine( Line2D line )
+    {
+        String  format  = "[%s -> %s]";
+        String  point1  = formatPoint( line.getP1() );
+        String  point2  = formatPoint( line.getP2() );
+        String  result  = String.format( format, point1, point2 );
+        return result;
+        
+    }
+    
+    private static String formatPoint( Point2D point )
+    {
+        String  format  = "(%3.0f,%3.0f)";
+        String  result  = String.format( format, point.getX(), point.getY() );
+        return result;
+        
+    }
+    
+    public SnapValidator_orig( SelectionManager mgr )
     {
         allShapes = mgr.getShapes();
         List<PShape>    selectedShapes  = mgr.getSelected();
@@ -35,6 +201,7 @@ public class SnapValidator
             Point2D originalCoordinates = fromShape.getCoordinates();
             fromShape.snapTo( toShape );
             neighborhood = new Neighborhood( fromShape, allShapes );
+            print( fromShape.getTransformedVertices(), toShape.getTransformedVertices() );
             if ( !validateAllVertices() )
                 result = false;
             else if ( !validateAllSides() )
@@ -107,6 +274,22 @@ public class SnapValidator
             }
         }
         return valid;
+    }
+    
+    private static void 
+    print( List<Vertex> fromVertices, List<Vertex> toVertices )
+    {
+        if ( toolkit.getLockingKeyState( KeyEvent.VK_CAPS_LOCK ) )
+        {
+            LocalTime   now     =  LocalTime.now();
+            String      time    = now.format( formatter );
+            String      fromStr = Utils.print( "from", fromVertices );
+            String      toStr   = Utils.print( "to", toVertices );
+            System.out.println( "########## " + time + " ##########" );
+            System.out.println( fromStr );
+            System.out.println( "**********************************" );
+            System.out.println( toStr );
+        }
     }
 
     private boolean testOneVertex( Vertex toTest, List<Vertex> list )

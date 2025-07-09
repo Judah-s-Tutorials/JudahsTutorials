@@ -10,10 +10,29 @@ import java.util.List;
 import com.gmail.johnstraub1954.penrose.PShape;
 import com.gmail.johnstraub1954.penrose.Vertex;
 
+/**
+ * 
+ */
 public class Utils
 {
-    public static final double  EPSILON = .05;
-    
+    /**
+     * The number of decimal points to which floating point numbers
+     * are rounded;
+     * 0 indicates the nearest integer,
+     * -1 the nearest one-tenth of a unit, 
+     * -2 the nearest one-hundredth of a unit,
+     * etc.
+     */
+    public static final int     PRECISION   = -1;
+    /**
+     * Value to use when testing the distance 
+     * between two floating point values
+     * after allowing for rounding error; based on the established {@linkplain #PRECISION}.
+     */
+    public static final double  EPSILON     = Math.pow( 10, PRECISION ) / 2;
+    /**
+     * Environment dependent line separator for use producing reports.
+     */
     private static final String  newl   = System.lineSeparator();
     /**
      * Default constructor; not used.
@@ -23,6 +42,16 @@ public class Utils
         // not used
     }
     
+    /**
+     * Indicates whether a given point 
+     * lies on a given line segment.
+     * Allowance is made for floating point rounding error;
+     * {@linkplain Utils}.
+     * 
+     * @param point the given point
+     * @param line  the given line segment
+     * @return
+     */
     public static boolean liesOn( Point2D point, Line2D line )
     {
         double  distance    = line.ptSegDist( point );
@@ -30,31 +59,81 @@ public class Utils
         
         return result;
     }
-    
-    public static Line2D contains( Line2D line1, Line2D line2 )
-    {
-        return null;
-    }
-    
+      
+    /**
+     * Indicates whether two given line segments intersect
+     * at one or more points.
+     * 
+     * @param line1 one given line segments
+     * @param line2 the other given line segment
+     * 
+     * @return  true if the given line segments intersect
+     */
     public static boolean intersect( Line2D line1, Line2D line2 )
     {
         Rectangle2D bounds1     = line1.getBounds2D();
         Rectangle2D bounds2     = line2.getBounds2D();
-        double      xco1Left    = bounds1.getX();
-        double      xco1Right   = xco1Left + bounds1.getWidth();
-        double      yco1Top     = bounds1.getY();
-        double      yco1Bottom  = yco1Top + bounds1.getHeight();
-        double      xco2Left    = bounds2.getX();
-        double      xco2Right   = xco2Left + bounds2.getWidth();
-        double      yco2Top     = bounds2.getY();
-        double      yco2Bottom  = yco2Top + bounds2.getHeight();
-        boolean     result      =
-            xco1Left <= xco2Right && xco1Right >= xco2Left &&
-            yco1Top <= yco2Bottom && yco1Bottom >= yco2Top;
+        // Pretest: if bounding boxes do not intersect, the line segments
+        // do not intersect. If bounding boxes intersect, more inspection
+        // if required.
+        boolean     result      = bounds1.intersects( bounds2 );
+        if ( result )
+        {
+            double      xco1Left    = bounds1.getX();
+            double      xco1Right   = xco1Left + bounds1.getWidth();
+            double      yco1Top     = bounds1.getY();
+            double      yco1Bottom  = yco1Top + bounds1.getHeight();
+            double      xco2Left    = bounds2.getX();
+            double      xco2Right   = xco2Left + bounds2.getWidth();
+            double      yco2Top     = bounds2.getY();
+            double      yco2Bottom  = yco2Top + bounds2.getHeight();
+        }
         return result;
     }
     
-    public static void print( String label, List<Vertex> vertices )
+    /**
+     * Determine the orientation of three given points.
+     * Orientation is indicated by the return value as follows:
+     * <ol>
+     *      <li>-1: counterclockwise</li>
+     *      <li>1: clockwise</li>
+     *      <li>0: collinear</li>
+     * </ol>
+     * <p>
+     * Orientation is calculated with respect to the 
+     * usual definition of the Cartesian plane.
+     * 
+     * @param pointP    the first given point
+     * @param pointQ    the second given point
+     * @param pointR    the third given point
+     * 
+     * @return  -1 if 
+     */
+    public static int 
+    orientation( Point2D pointP, Point2D pointQ, Point2D pointR )
+    {
+        double  xcoP        = pointP.getX();
+        double  ycoP        = pointP.getY();
+        double  xcoQ        = pointQ.getX();
+        double  ycoQ        = pointQ.getY();
+        double  xcoR        = pointR.getX();
+        double  ycoR        = pointR.getY();
+        double  crossA      = (xcoQ - xcoP) * (ycoR - ycoP);
+        double  crossB      = (xcoR - xcoP) * (ycoQ - ycoP);
+        double  diff        = crossA - crossB;
+        // - sign accounts for the difference between Cartesian plane
+        // coordinates (y-coordinates increase to the North) and
+        // display coordinates (y-coordintates increase to the South.
+        int     orientation = -(int)Math.signum( diff );
+        return orientation;
+    }
+    
+    /**
+     * Compiles a report
+     * @param label
+     * @param vertices
+     */
+    public static String print( String label, List<Vertex> vertices )
     {
         StringBuilder   bldr    = new StringBuilder();
         int             size    = vertices.size();
@@ -70,7 +149,7 @@ public class Utils
                 .append( strCoords ).append( strSlope ).append( strLength )
                 .append( newl );
         }
-        System.out.print( bldr );
+        return bldr.toString();
     }
     
     public static Line2D round( Line2D lineIn )
@@ -132,21 +211,30 @@ public class Utils
     public static Point2D round( Point2D pointIn )
     {
         double  xcoRounded      = round( pointIn.getX() );
-        double  ycoRounded      = round( pointIn.getX() );
+        double  ycoRounded      = round( pointIn.getY() );
         Point2D pointRounded    = new Point2D.Double( xcoRounded, ycoRounded );
         return pointRounded;
     }
     
     /**
      * Round a given number to the nearest tenth.
+     * Negative numbers round away from 0;
+     * e.g. -3.5 rounds to 4.
      * 
      * @param val   the given number
      * @return  the given number rounded to the nearest tenth.
      */
     public static double round( double val )
     {
-        double  rounded = (int)((val + .05) * 10); 
-        rounded /= 10;
+        double  rounded     = val;
+        if ( Math.abs( rounded ) != Double.POSITIVE_INFINITY )
+        {
+            double  multiplied  = Math.abs( val ) * 10;
+            double  incremented = multiplied +.5;
+            rounded = (int)incremented; 
+            rounded /= 10;
+            rounded *= Math.signum( val );
+        }
         return rounded;
     }
     

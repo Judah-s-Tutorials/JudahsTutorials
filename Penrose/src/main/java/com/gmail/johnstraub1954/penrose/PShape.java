@@ -677,10 +677,12 @@ public abstract class PShape implements Serializable
         {
             LocalTime   now     =  LocalTime.now();
             String      time    = now.format( formatter );
+            String      fromStr = Utils.print( "from", fromVertices );
+            String      toStr   = Utils.print( "to", toVertices );
             System.out.println( "########## " + time + " ##########" );
-            Utils.print( "from", fromVertices );
+            System.out.println( fromStr );
             System.out.println( "**********************************" );
-            Utils.print( "to", toVertices );
+            System.out.println( toStr );
         }
     }
     
