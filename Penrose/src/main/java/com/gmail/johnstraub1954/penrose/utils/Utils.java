@@ -4,14 +4,19 @@ import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.util.List;
 
 import com.gmail.johnstraub1954.penrose.PShape;
 import com.gmail.johnstraub1954.penrose.Vertex;
 
 /**
- * 
+ * This class contains miscellaneous utilities
+ * for support of the Penrose Aperiodic tiling project.
+ * Most of the utilities are associated with rounding
+ * and approximation issues
+ * ({@linkplain #EPSILON}, {@linkplain #PRECISION}
+ * related to handling floating point rounding errors
+ * when comparing coordinates.
  */
 public class Utils
 {
@@ -45,12 +50,17 @@ public class Utils
     /**
      * Indicates whether a given point 
      * lies on a given line segment.
-     * Allowance is made for floating point rounding error;
-     * {@linkplain Utils}.
+     * A point is determined to lie on a line segment
+     * if its distance from the line segment
+     * is below a fixed threshold;
+     * see {@linkplain #EPSILON}.
      * 
      * @param point the given point
      * @param line  the given line segment
-     * @return
+     *  
+     * @return  
+     *      true, if the given point is determined
+     *      to lie on the given line segment
      */
     public static boolean liesOn( Point2D point, Line2D line )
     {
@@ -71,23 +81,7 @@ public class Utils
      */
     public static boolean intersect( Line2D line1, Line2D line2 )
     {
-        Rectangle2D bounds1     = line1.getBounds2D();
-        Rectangle2D bounds2     = line2.getBounds2D();
-        // Pretest: if bounding boxes do not intersect, the line segments
-        // do not intersect. If bounding boxes intersect, more inspection
-        // if required.
-        boolean     result      = bounds1.intersects( bounds2 );
-        if ( result )
-        {
-            double      xco1Left    = bounds1.getX();
-            double      xco1Right   = xco1Left + bounds1.getWidth();
-            double      yco1Top     = bounds1.getY();
-            double      yco1Bottom  = yco1Top + bounds1.getHeight();
-            double      xco2Left    = bounds2.getX();
-            double      xco2Right   = xco2Left + bounds2.getWidth();
-            double      yco2Top     = bounds2.getY();
-            double      yco2Bottom  = yco2Top + bounds2.getHeight();
-        }
+        boolean result  = line1.intersectsLine( line2 );
         return result;
     }
     
@@ -107,7 +101,14 @@ public class Utils
      * @param pointQ    the second given point
      * @param pointR    the third given point
      * 
-     * @return  -1 if 
+     * @return  
+     *      -1, 0, or 1, describing an orientation that is
+     *      counterclockwise, collinear, or clockwise, respectively.
+     *      
+     * @see <a href="https://www.geeksforgeeks.org/dsa/orientation-3-ordered-points/">
+     *          Orientation of 3 ordered points
+     *     </a>
+     *     on GeeksforGeeks.
      */
     public static int 
     orientation( Point2D pointP, Point2D pointQ, Point2D pointR )
@@ -129,9 +130,12 @@ public class Utils
     }
     
     /**
-     * Compiles a report
-     * @param label
-     * @param vertices
+     * Compiles a report of the details of all vertices in a list.
+     * 
+     * @param label     label to begin the report
+     * @param vertices  the list of vertices to report
+     * 
+     * @return the detailed report
      */
     public static String print( String label, List<Vertex> vertices )
     {
@@ -152,6 +156,36 @@ public class Utils
         return bldr.toString();
     }
     
+    /**
+     * Create a new point with coordinates obtained
+     * by subtracting one point from another.
+     * The new point will have coordinates
+     * equivalent to the difference of the x- and y-coordinates
+     * of the two arguments.
+     * 
+     * @param pointA    the subtrahend (right-hand side) of the operation
+     * @param pointB    the minuend (left-hand side) of the operation
+     * 
+     * @return  the result of the operation pointB - pointA
+     */
+    public static Point2D subtract( Point2D pointA, Point2D pointB )
+    {
+        double  xDiff   = pointB.getX() - pointA.getX();
+        double  yDiff   = pointB.getY() - pointA.getY();
+        Point2D diff    = new Point2D.Double( xDiff, yDiff );
+        return diff;
+    }
+    
+    /**
+     * Create a new line with coordinates copied and rounded
+     * from a given line.
+     * 
+     * @param lineIn    the given line
+     * 
+     * @return  the new line
+     * 
+     * @see Utils
+     */
     public static Line2D round( Line2D lineIn )
     {
         Point2D point1Rounded   = round( lineIn.getP1() );
@@ -161,53 +195,18 @@ public class Utils
         return lineRounded;
     }
     
-    // Subtract pointA from pointB
-    public static Point2D subtract( Point2D pointA, Point2D pointB )
-    {
-        double  xDiff   = pointB.getX() - pointA.getX();
-        double  yDiff   = pointB.getY() - pointA.getY();
-        Point2D diff    = new Point2D.Double( xDiff, yDiff );
-        return diff;
-    }
-    
-    public static boolean lineContains( Line2D line, Point2D point )
-    {
-        boolean result  = false;
-        double  slope1  = slope( line );
-        Point2D point1  = line.getP1();
-        Point2D point2  = line.getP2();
-        double  slope2  = slope( point1, point );
-        if ( Utils.match( point, point1 ) )
-            result = true;
-        else if ( Utils.match( point, point2  ) )
-            result = true;
-        else if ( !match( slope1, slope2 ) )
-            result = false;
-        else
-        {
-            double  pointXco    = point.getX();
-            double  pointYco    = point.getY();
-            double  point1Xco   = point1.getX();
-            double  point1Yco   = point1.getY();
-            double  point2Xco   = point2.getX();
-            double  point2Yco   = point2.getY();
-            if ( slope1 < 0 )
-            {
-                result = 
-                    pointXco <= point1Xco && pointYco <= point1Yco
-                    && pointXco >= point2Xco && pointYco >= point2Yco;
-            }
-            else
-            {
-                result = 
-                    pointXco >= point1Xco && pointYco >= point1Yco
-                    && pointXco <= point2Xco && pointYco <= point2Yco;
-            }
-        }
-        
-        return result;
-    }
-    
+    /**
+     * Create a new point with coordinates copied and rounded
+     * from a given point.
+     * 
+     * @param pointIn   the given point
+     * 
+     * @return  
+     *      a new point with coordinates copied and rounded
+     *      from the given point
+     *      
+     * @see Utils
+     */
     public static Point2D round( Point2D pointIn )
     {
         double  xcoRounded      = round( pointIn.getX() );
@@ -217,9 +216,10 @@ public class Utils
     }
     
     /**
-     * Round a given number to the nearest tenth.
+     * Round a given number As described in the
+     * {@linkplain Utils} documentation.
      * Negative numbers round away from 0;
-     * e.g. -3.5 rounds to 4.
+     * e.g. -3.35 rounds to 3.4.
      * 
      * @param val   the given number
      * @return  the given number rounded to the nearest tenth.
@@ -238,12 +238,26 @@ public class Utils
         return rounded;
     }
     
+    /**
+     * Calculate the slope of a given line.
+     * 
+     * @param line  the given line
+     * 
+     * @return  the slope of the given line
+     */
     public static double slope( Line2D line )
     {
         double  slope  = slope( line.getP1(), line.getP2() );
         return slope;
     }
     
+    /**
+     * Calculates the length of a given line.
+     * 
+     * @param line  the given line
+     * 
+     * @return  the length of the given line
+     */
     public static double length( Line2D line )
     {
         Point2D point1  = line.getP1();
@@ -251,6 +265,14 @@ public class Utils
         return length;
     }
     
+    /**
+     * Calculate the slope of the line drawn through two given points.
+     * 
+     * @param point1    the first given point
+     * @param point2    the second given point
+     * 
+     * @return  the slope of the line drawn through the given points
+     */
     public static double slope( Point2D point1, Point2D point2 )
     {
         double  deltaX  = point1.getX() - point2.getX();
@@ -261,6 +283,17 @@ public class Utils
         return slope;
     }
     
+    /**
+     * Determine if two given lines have the same endpoints
+     * after accounting for rounding error.
+     * 
+     * @param line1 the first given line
+     * @param line2 the second given line
+     * 
+     * @return  true, if the given lines have approximately the same coordinates
+     * 
+     * @see Utils
+     */
     public static boolean match( Line2D line1, Line2D line2 )
     {
         boolean result      = false;
@@ -287,6 +320,18 @@ public class Utils
         return result;
     }
     
+    /**
+     * Determine if two given points have the same endpoints
+     * after accounting for rounding error.
+     * 
+     * @param point1 the first given point
+     * @param point2 the second given point
+     * 
+     * @return  
+     *      true, if the given points have approximately the same coordinates
+     * 
+     * @see Utils
+     */
     public static boolean match( Point2D point1, Point2D point2 )
     {
         double  xDiff   = Math.abs( point1.getX() - point2.getX() );
@@ -295,6 +340,15 @@ public class Utils
         return result;
     }
     
+    /**
+     * Determine if two floating point value are approximately equal
+     * after accounting for rounding error.
+     * 
+     * @param val1  the first value
+     * @param val2  the second value
+     * 
+     * @return  true, if the given values are approximately equal
+     */
     public static boolean match( double val1, double val2 )
     {
         double  diff    = 0;
@@ -308,6 +362,16 @@ public class Utils
         return result;
     }
 
+    /**
+     * Creates a formatted report
+     * describing the intersection of two PShapes.
+     * This method is mainly useful for debugging.
+     * 
+     * @param pShapeA   the first PShape
+     * @param pShapeB   the second PShape
+     * 
+     * @return  a formatted report describing the intersection of two PShapes
+     */
     public static String formatIntersection( PShape pShapeA, PShape pShapeB )
     {
         String  result  = "";
@@ -319,6 +383,16 @@ public class Utils
         return result;
     }
     
+    /**
+     * Creates a formatted report describing the properties
+     * of a given PathIterator.
+     * 
+     * @param iter  the given PathIterator
+     * 
+     * @return  
+     *      a formatted report describing the properties
+     *      of the given PathIterator
+     */
     public static String formatPathIterator( PathIterator iter )
     {
         StringBuilder   bldr    = new StringBuilder();
@@ -339,12 +413,29 @@ public class Utils
         return bldr.toString();
     }
     
+    /**
+     * Converts a given line's slope to radians,
+     * describing the angle that the line makes
+     * with respect to the x-axis.
+     * 
+     * @param line  the given line
+     * 
+     * @return  the slope of the given line converted to radians
+     */
     public static double radians( Line2D line )
     {
         double  radians = radians( line.getP1(), line.getP2() );
         return radians;
     }
     
+    /**
+     * Describes the angle of a line drawn through two points.
+     * 
+     * @param point1    the first point
+     * @param point2    the second point
+     * 
+     * @return  the angle of a line drawn through two points
+     */
     public static double radians( Point2D point1, Point2D point2 )
     {
         double  slope   = slope( point1, point2 );
@@ -352,6 +443,17 @@ public class Utils
         return radians;
     }
     
+    /**
+     * Creates a formatted string describing the coordinates
+     * stored in consecutive cells of an array.
+     *  
+     * @param coords    the array containing the coordinates to format
+     * @param from      the index with the array of the first coordinate
+     * 
+     * @return
+     *      formatted string describing the coordinates
+     *      stored in consecutive cells of an array
+     */
     private static String decodeCoords( double[] coords, int from )
     {
         String          strXco  = String.format( "%6.2f", coords[from] );
@@ -362,6 +464,15 @@ public class Utils
         return bldr.toString();
     }
     
+    /**
+     * Returns a string describing the type 
+     * of a segment of a PathIterator,
+     * for example "moveTo" or "lineTo."
+     * 
+     * @param type  the type to describe
+     * 
+     * @return  a string describing the type of a PathIterator segment
+     */
     private static String decodeIteratorType( int type )
     {
         String  strType = "???";

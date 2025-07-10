@@ -4,33 +4,36 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.Test;
 
 public class UtilsTestIntersectLine2Line2D
 {
-    private static TwoLineTestFeedback    feedbackPanel = 
-        new TwoLineTestFeedback();
+    private static TwoLineTestFeedback    feedbackPanel = null;
+//        new TwoLineTestFeedback();
     
-    private static Point2D  point1End1  = null;
-    private static Point2D  point1End2  = null;
-    private static Point2D  point2End1  = null;
-    private static Point2D  point2End2  = null;
-    private static Point2D  endPoint    = null;
-    private static Line2D   line1       = null;
-    private static Line2D   line2       = null;  
+    private static Point2D  point1End1  = new Point2D.Double();
+    private static Point2D  point1End2  = new Point2D.Double();
+    private static Point2D  point2End1  = new Point2D.Double();
+    private static Point2D  point2End2  = new Point2D.Double();
+    private static Point2D  endPoint    = new Point2D.Double();
+    private static Line2D   line1       = new Line2D.Double();
+    private static Line2D   line2       = new Line2D.Double();  
     
     @Test
     public void test()
     {
         testIntersectTrue();
+        testIntersectFalse();
     }
     
-    @Test
     public static void testIntersectTrue()
     {
-        // Intersect at left endpoint
-        // Intersect at one endpoint
+        // Intersect at left, right endpoints
         point1End1  = new Point2D.Double( 10, 20 );
         endPoint    = new Point2D.Double( 40, 80 );
         point2End2  = new Point2D.Double( 80, 160 );
@@ -59,7 +62,48 @@ public class UtilsTestIntersectLine2Line2D
         test( line1, line2, true );
         test( line2, line1, true );
     }
+    
+    public static void testIntersectFalse()
+    {
+        // Just miss at the end points
+        point1End1.setLocation( 10, 20 );
+        point1End2.setLocation( 40, 80 );
+        point2End1.setLocation( 40.1, 80.2 );
+        point2End2.setLocation( 90, 180 );
+        line1   = new Line2D.Double( point1End1, point1End2 );
+        line2   = new Line2D.Double( point2End1, point2End2 );  
+        test( line1, line2, false );
+        test( line2, line1, false );
+        
+        point1End1.setLocation( 10, 20 );
+        point1End2.setLocation( 40, 80 );
+        point2End1.setLocation( 5, 10 );
+        point2End2.setLocation( 9.9, 19.8 );
+        line1   = new Line2D.Double( point1End1, point1End2 );
+        line2   = new Line2D.Double( point2End1, point2End2 );  
+        test( line1, line2, false );
+        test( line2, line1, false );
 
+        // Miss a little in the middle
+        point1End1.setLocation( 10, 20 );
+        point1End2.setLocation( 40, 80 );
+        point2End1.setLocation( 20, 39.9 );
+        point2End2.setLocation( 50, 99.9 );
+        line1   = new Line2D.Double( point1End1, point1End2 );
+        line2   = new Line2D.Double( point2End1, point2End2 );  
+        test( line1, line2, false );
+        test( line2, line1, false );
+
+        point1End1.setLocation( 10, 20 );
+        point1End2.setLocation( 40, 80 );
+        point2End1.setLocation( 10.1, 20 );
+        point2End2.setLocation( 90.1, 180 );
+        line1   = new Line2D.Double( point1End1, point1End2 );
+        line2   = new Line2D.Double( point2End1, point2End2 );  
+        test( line1, line2, false );
+        test( line2, line1, false );
+    }
+    
     private static void test( Line2D line1, Line2D line2, boolean expResult )
     {
         Point2D line1End1   = line1.getP1(); 

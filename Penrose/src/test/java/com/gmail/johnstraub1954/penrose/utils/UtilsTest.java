@@ -1,7 +1,8 @@
 package com.gmail.johnstraub1954.penrose.utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -9,7 +10,7 @@ import java.awt.geom.Point2D;
 import org.junit.jupiter.api.Test;
 
 public class UtilsTest
-{
+{    
     @Test
     public void testRoundLine2D()
     {
@@ -149,6 +150,146 @@ public class UtilsTest
         pointB  = new Point2D.Double( 11, 20 );
         pointC  = new Point2D.Double( 11, 8 );
         testOrientation( pointA, pointB, pointC, 0 );
+    }
+    
+    @Test
+    public void testLiesOnPoint2DLine2D()
+    {
+        Point2D endPoint1   = new Point2D.Double( -2, -2 );
+        Point2D midPoint1   = new Point2D.Double( -1, -1 );
+        Point2D midPoint2   = new Point2D.Double( 1, 1 );
+        Point2D endPoint2   = new Point2D.Double( 2, 2 );
+        Point2D miscPoint   = new Point2D.Double();
+        Line2D  testLine    = new Line2D.Double( endPoint1, endPoint2 );
+        assertTrue( Utils.liesOn( endPoint1, testLine ) );
+        assertTrue( Utils.liesOn( midPoint1, testLine ) );
+        assertTrue( Utils.liesOn( midPoint2, testLine ) );
+        assertTrue( Utils.liesOn( endPoint2, testLine ) );
+        
+        // On the same virtual (infinitely long) line, but not on 
+        // the given line segment.
+        miscPoint.setLocation( -2.1, -2.1 );
+        assertFalse( Utils.liesOn( miscPoint, testLine ) );
+        miscPoint.setLocation( 2.1, 2.1 );
+        assertFalse( Utils.liesOn( miscPoint, testLine ) );
+        
+        // A little below, a little above the given line segment.
+        miscPoint.setLocation( -2, -2.1 );
+        assertFalse( Utils.liesOn( miscPoint, testLine ) );
+        miscPoint.setLocation( -2, -1.9 );
+        assertFalse( Utils.liesOn( miscPoint, testLine ) );
+        miscPoint.setLocation( 2, 2.1 );
+        assertFalse( Utils.liesOn( miscPoint, testLine ) );
+        miscPoint.setLocation( 2, 1.9 );
+        assertFalse( Utils.liesOn( miscPoint, testLine ) );
+        
+        // A little to the left, a little to the right 
+        // of the given line segment.
+        miscPoint.setLocation( -2.1, -2 );
+        assertFalse( Utils.liesOn( miscPoint, testLine ) );
+        miscPoint.setLocation( 2.1, 2 );
+        assertFalse( Utils.liesOn( miscPoint, testLine ) );
+    }
+    
+    @Test
+    public void testIntersectLine2DLine2D()
+    {
+        UtilsTestIntersectLine2Line2D.testIntersectTrue();
+        UtilsTestIntersectLine2Line2D.testIntersectFalse();
+    }
+    
+    @Test
+    public void testSubtractPoint2DPoint2D()
+    {
+        double  xcoA    = 5;
+        double  ycoA    = 10;
+        double  xcoB    = 1;
+        double  ycoB    = 6;
+        double  expXco  = xcoB - xcoA;
+        double  expYco  = ycoB - ycoA;
+        Point2D pointA  = new Point2D.Double( xcoA, ycoA );
+        Point2D pointB  = new Point2D.Double( xcoB, ycoB );
+        Point2D act     = Utils.subtract( pointA, pointB );
+        assertEquals( expXco, act.getX() );
+        assertEquals( expYco, act.getY() );
+        
+    }
+    
+    @Test
+    public void testSlopeLine2D()
+    {
+        Line2D  line    = new Line2D.Double( 2, 3, 6, 7 );
+        double  slope   = Utils.slope( line );
+        assertEquals( -1, slope );
+        
+        line.setLine( 2, 1, 1, 2 );
+        slope   = Utils.slope( line );
+        assertEquals( 1, slope );
+        
+        line.setLine( 2, 1, 5, 1 );
+        slope   = Utils.slope( line );
+        assertEquals( 0, slope );
+        
+        line.setLine( 1, 1, 1, 10 );
+        slope   = Utils.slope( line );
+        assertEquals( Double.POSITIVE_INFINITY, slope );
+        
+        line.setLine( 1, 10, 1, 1 );
+        slope   = Utils.slope( line );
+        assertEquals( Double.NEGATIVE_INFINITY, slope );
+    }
+    
+    @Test
+    public void testLengthLine2D()
+    {
+        Line2D  line    = new Line2D.Double( 3, 3, 6, 7 );
+        double  len     = Utils.length( line );
+        assertEquals( 5, len );
+        
+        line.setLine( 3, 3, 3, 3 );
+        len = Utils.length( line );
+        assertEquals( 0, len );
+    }
+     
+    @Test
+    public void testMatchLine2DLine2D()
+    {
+        Line2D  line1   = new Line2D.Double( 5.13, 10.11, 10.51, 11.61 );
+        Line2D  line2   = new Line2D.Double( 5.11, 10.12, 10.50, 11.64 );
+        assertTrue( Utils.match( line1, line2 ) );
+
+        line2.setLine( 5.16, 10.17, 10.55, 11.66 );
+        assertFalse( Utils.match( line1, line2 ) );
+        
+        line1.setLine( 5.15, 10.16, 10.57, 11.65 );
+        assertTrue( Utils.match( line1, line2 ) );
+    }
+    
+    @Test
+    public void testMatchPoint2DPoint2D()
+    {
+        Point2D point1  = new Point2D.Double( 5.13, 10.11 );
+        Point2D point2  = new Point2D.Double( 5.10, 10.14 );
+        assertTrue( Utils.match( point1, point2 ) );
+        
+        point2.setLocation( 5.18, 10.16 );
+        assertFalse( Utils.match( point1, point2 ) );
+
+        point1.setLocation( 5.15, 10.15 );
+        assertTrue( Utils.match( point1, point2 ) );
+    }
+
+    
+    @Test
+    public void testMatchDoubleDouble()
+    {
+        double  posInfinity = Double.POSITIVE_INFINITY;
+        double  negInfinity = Double.NEGATIVE_INFINITY;
+        assertTrue( Utils.match( 10.19, 10.21 ) );
+        assertFalse( Utils.match( 10.19, 10.11 ) );
+        assertTrue( Utils.match( posInfinity, posInfinity ) );
+        assertTrue( Utils.match( negInfinity, negInfinity ) );
+        assertTrue( Utils.match( posInfinity, negInfinity ) );
     }
     
     private void 
