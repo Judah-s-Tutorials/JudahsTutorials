@@ -35,7 +35,9 @@ public class SnapValidator
             Point2D originalCoordinates = fromShape.getCoordinates();
             fromShape.snapTo( toShape );
             neighborhood = new Neighborhood( fromShape, allShapes );
-            if ( !validateAllVertices() )
+            if ( !validateIntersection() )
+                result = false;
+            else if ( !validateAllVertices() )
                 result = false;
             else if ( !validateAllSides() )
                 result = false;
@@ -43,6 +45,17 @@ public class SnapValidator
                 result = true;
             fromShape.moveTo( originalCoordinates );
         }
+        return result;
+    }
+    
+    private boolean validateIntersection()
+    {
+        long    count   = neighborhood.stream()
+            .map( s -> new PShapeIntersection( fromShape, s ) )
+            .filter( val -> !val.isValid() )
+            .limit( 1 )
+            .count();
+        boolean result = count == 0;
         return result;
     }
     
@@ -143,14 +156,7 @@ public class SnapValidator
     private boolean testOneSide( Vertex toTest, List<Vertex> list )
     {
         Line2D  toTestSide  = toTest.getAdjLine();
-//        long    count   = list.stream()
-//            .filter( v -> Utils.match( toTest.getSlope(), v.getSlope() ) )
-//            .filter( toTest::matches )
-//            .map( Vertex::getAdjLine )
-//            .filter( l -> !testOneLine( side, l ) )
-//            .limit( 1 )
-//            .count();
-//        boolean valid   = count == 0;
+        toTestSide = Utils.round( toTestSide );
         boolean valid   = true;
         double  toTestSlope = toTest.getSlope();
         int     numVertices = list.size();
@@ -160,6 +166,7 @@ public class SnapValidator
             if ( Utils.match( toTestSlope, vertex.getSlope() ) )
             {
                 Line2D  side    = vertex.getAdjLine();
+                side = Utils.round( side );
                 valid = testOneLine( toTestSide, side );
             }
         }

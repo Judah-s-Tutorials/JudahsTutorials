@@ -6,6 +6,9 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import static java.awt.geom.PathIterator.SEG_CLOSE;
+import static java.awt.geom.PathIterator.SEG_MOVETO;
+import static java.awt.geom.PathIterator.SEG_LINETO;
 
 import com.gmail.johnstraub1954.penrose.PShape;
 
@@ -126,7 +129,8 @@ public class PShapeIntersection
      */
     public boolean isEmpty()
     {
-        return intersection.isEmpty();
+        boolean result  = intersection.isEmpty(); 
+        return result;
     }
     
     /**
@@ -173,14 +177,14 @@ public class PShapeIntersection
 
         // It might be a vertex if the path iterator begins with a MOVE_TO,
         // and every remaining segment is a LINE_TO or a CLOSE.
-        boolean         done        = type != PathIterator.SEG_MOVETO;
+        boolean         done        = type != SEG_MOVETO;
         while ( !done && !pathIter.isDone() )
         {
             // If the intersection is a vertex, every segment after
             // the first will be a close or a lineTo.
-            if ( type == PathIterator.SEG_CLOSE )
+            if ( type == SEG_CLOSE )
                 done = true;
-            else if ( type != PathIterator.SEG_LINETO )
+            else if ( type != SEG_LINETO && type != SEG_MOVETO )
             {
                 done = true;
                 isValid = false;

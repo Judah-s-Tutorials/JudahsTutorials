@@ -6,8 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
+
+import com.gmail.johnstraub1954.penrose.PDart;
+import com.gmail.johnstraub1954.penrose.Vertex;
 
 public class UtilsTest
 {    
@@ -228,15 +232,17 @@ public class UtilsTest
         
         line.setLine( 2, 1, 5, 1 );
         slope   = Utils.slope( line );
+        // don't distinguish between 0.0 and -0.0
+        slope = Math.abs( slope );
         assertEquals( 0, slope );
         
         line.setLine( 1, 1, 1, 10 );
         slope   = Utils.slope( line );
-        assertEquals( Double.POSITIVE_INFINITY, slope );
+        assertEquals( Double.NEGATIVE_INFINITY, slope );
         
         line.setLine( 1, 10, 1, 1 );
         slope   = Utils.slope( line );
-        assertEquals( Double.NEGATIVE_INFINITY, slope );
+        assertEquals( Double.POSITIVE_INFINITY, slope );
     }
     
     @Test
@@ -262,6 +268,12 @@ public class UtilsTest
         assertFalse( Utils.match( line1, line2 ) );
         
         line1.setLine( 5.15, 10.16, 10.57, 11.65 );
+        assertTrue( Utils.match( line1, line2 ) );
+        
+        line2.setLine( line1 );
+        assertTrue( Utils.match( line1, line2 ) );
+        
+        line2.setLine( line1.getP2(), line1.getP1() );
         assertTrue( Utils.match( line1, line2 ) );
     }
     
@@ -290,6 +302,99 @@ public class UtilsTest
         assertTrue( Utils.match( posInfinity, posInfinity ) );
         assertTrue( Utils.match( negInfinity, negInfinity ) );
         assertTrue( Utils.match( posInfinity, negInfinity ) );
+    }
+    
+    @Test
+    public void testRadiansPoint2DPoint2D()
+    {
+        Point2D pointA      = new Point2D.Double( 1, 1 );
+        Point2D pointB      = new Point2D.Double( 5, 5 );
+        double  radians     = Utils.radians( pointA, pointB );
+        double  expected    = -Math.PI / 4;
+        assertEquals( expected, radians, .0001 );
+        
+        radians = Utils.radians( pointB, pointA );
+        assertEquals( expected, radians, .0001 );
+        
+        pointB.setLocation( 0, 2 );
+        radians = Utils.radians( pointA, pointB );
+        expected = Math.PI / 4;
+        assertEquals( expected, radians, .0001 );
+        
+        pointB.setLocation( 1,5 );
+        radians = Utils.radians( pointA, pointB );
+        expected = -Math.PI / 2;
+        assertEquals( expected, radians, .0001 );
+        
+        pointB.setLocation( 0, 0 );
+        radians = Utils.radians( pointA, pointB );
+        expected = -Math.PI / 4;
+        assertEquals( expected, radians, .0001 );
+        
+        pointB.setLocation( 0, 1 );
+        radians = Utils.radians( pointA, pointB );
+        // don't distinguish between 0.0 and -0.0
+        radians = Math.abs( radians );
+        expected = 0;
+        assertEquals( expected, radians, .0001 );
+    }
+    
+    @Test
+    public void testRadiansLine2D()
+    {
+        Point2D pointA      = new Point2D.Double( 1, 1 );
+        Point2D pointB      = new Point2D.Double( 5, 5 );
+        Line2D  line        = new Line2D.Double( pointA, pointB );
+        double  radians     = Math.abs( Utils.radians( line ) );
+        double  expected    = Math.PI / 4;
+        assertEquals( expected, radians, .0001 );
+        
+        pointB.setLocation( 0, 0 );
+        line.setLine( pointA, pointB );
+        radians = Math.abs( Utils.radians( line ) );
+        expected = Math.PI / 4;
+        assertEquals( expected, radians, .0001 );
+        
+        pointB.setLocation( 1, 5 );
+        line.setLine( pointA, pointB );
+        radians = Math.abs( Utils.radians( line ) );
+        expected = Math.PI / 2;
+        assertEquals( expected, radians, .0001 );
+    }
+    
+    @Test
+    public  void testFormatPathIteratorPathIterator()
+    {
+        // This test is just to improve test coverage.
+        // "formatPathIterator" is a debugging aid, and should
+        // be deleted in the near future.
+        Line2D  line    = new Line2D.Double( 0, 0, 10, 10 );
+        Utils.formatPathIterator( line.getPathIterator( null ) );
+    }
+    
+    @Test
+    public  void testPrintStringList()
+    {
+        // This test is just to improve test coverage.
+        // "print" is a debugging aid, and should
+        // be deleted in the near future.
+        PDart           dart    = new PDart( 100 );
+        List<Vertex>    list    = dart.getVertices();
+        Utils.print( "", list );
+    }
+    
+    @Test
+    public  void testFormatIntersectionPShapePShape()
+    {
+        // This test is just to improve test coverage.
+        // "formatIntersection" is a debugging aid, and should
+        // be deleted in the near future.
+        PDart           dart1   = new PDart( 100 );
+        PDart           dart2   = new PDart( 100 );
+        Utils.formatIntersection( dart1, dart2 );
+        
+        dart2.moveTo( 500, 500 );
+        Utils.formatIntersection( dart1, dart2 );
     }
     
     private void 

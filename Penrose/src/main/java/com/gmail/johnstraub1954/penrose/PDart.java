@@ -139,10 +139,10 @@ public class PDart extends PShape implements Serializable
     {
         Point2D     vertexCoords    = vertex.getCoords();
         double      dotDiam         = longSide * dotXier;
-        double      dotOffset       = dotDiam;
+        double      dotOffset       = dotDiam / 2;
         double      xco             = vertexCoords.getX();
         double      yco             = vertexCoords.getY();
-        double      dotXco          = xco + 1.3 * dotDiam;
+        double      dotXco          = xco + 1.1 * dotDiam;
         double      yOffset         = dotDiam + dotOffset;
         double      dotYco          = 
             yco == 0 ? yco + yOffset : yco - yOffset - dotDiam;

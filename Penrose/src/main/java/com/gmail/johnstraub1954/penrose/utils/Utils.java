@@ -275,8 +275,8 @@ public class Utils
      */
     public static double slope( Point2D point1, Point2D point2 )
     {
-        double  deltaX  = point1.getX() - point2.getX();
-        double  deltaY  = point1.getY() - point2.getY();
+        double  deltaX  = point2.getX() - point1.getX();
+        double  deltaY  = point2.getY() - point1.getY();
         double  slope   = deltaY / deltaX;
         // return slope relative to Cartesian plane
         slope = -slope;
@@ -438,8 +438,11 @@ public class Utils
      */
     public static double radians( Point2D point1, Point2D point2 )
     {
-        double  slope   = slope( point1, point2 );
-        double  radians = Math.atan( slope );
+        double  deltaX  = point2.getX() - point1.getX();
+        // choosing y1 - y2 (instead of y2 - y1) will convert the
+        // factor from screen coordinates to Cartesian coordinates 
+        double  deltaY  = point1.getY() - point2.getY();
+        double  radians = Math.atan( deltaY / deltaX );
         return radians;
     }
     
@@ -483,12 +486,6 @@ public class Utils
             break;
         case PathIterator.SEG_LINETO:
             strType = "lineTo";
-            break;
-        case PathIterator.SEG_QUADTO:
-            strType = "quadTo";
-            break;
-        case PathIterator.SEG_CUBICTO:
-            strType = "cubicTo";
             break;
         case PathIterator.SEG_CLOSE:
             strType = "close";
