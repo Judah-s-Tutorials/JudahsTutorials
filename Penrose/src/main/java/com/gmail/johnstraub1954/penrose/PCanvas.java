@@ -261,7 +261,7 @@ public class PCanvas extends JPanel implements Serializable
         {
             PShape  shape   = selected.get( 0 );
             shape.rotate( radians);
-            selectionMgr.testMapping();
+            selectionMgr.testMapping( shape );
             eventConsumed = true;
             repaint();
         }
@@ -532,7 +532,7 @@ public class PCanvas extends JPanel implements Serializable
                         );
                     shapes.stream()
                         .filter( s -> s.intersects( rect ) )
-                        .forEach( selected::add );
+                        .forEach( selectionMgr::select );
                 }
                 dragFrom = null;
                 dragTo = null;

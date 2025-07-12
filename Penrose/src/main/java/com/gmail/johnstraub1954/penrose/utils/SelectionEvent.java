@@ -2,10 +2,25 @@ package com.gmail.johnstraub1954.penrose.utils;
 
 import com.gmail.johnstraub1954.penrose.PShape;
 
+/**
+ * An object of this class
+ * describes the selection or deselection
+ * of a PShape by the {@linkplain SelectionManager}.
+ */
 public class SelectionEvent
 {
+    /**
+     * Source and destination PSHapes selected for snapping,
+     * but require configuration before snapping can occur.
+     */
     public static final int     CAN_MAP     = 0;
+    /**
+     * Source and destination PShapes ready to be snapped.
+     */
     public static final int     IS_MAPPED   = 1;
+    /**
+     * Source and destination PShapes not selected for snapping.
+     */
     public static final int     NO_MAPPING  = 2;
     
     /** Shape that was selected or deselected. */

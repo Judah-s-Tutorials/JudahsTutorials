@@ -3,6 +3,23 @@ package com.gmail.johnstraub1954.penrose.utils;
 import java.awt.Color;
 import java.util.HashMap;
 
+import com.gmail.johnstraub1954.penrose.PShape;
+
+/**
+ * An object of this type
+ * encapsulates a map of Integers to Colors.
+ * An example of the use of a ColorMap
+ * can be found in {@linkplain PShape}
+ * which sometimes needs to find the color
+ * of a PShape component
+ * based on the specific PShape subclass:
+ * 
+ * <p style="margin-left:1.5em; font-family:monospace;">
+ * Map&lt;Class&lt;? extends PShape>, ColorMap>classColorMap;<br>
+ * ColorMap colorMap    = classColorMap.get( getClass() );<br>
+ * Color    color       = colorMap.get( FILL_COLOR );
+ * </p>
+ */
 public class ColorMap extends HashMap<Integer,Color>
 {
     /**

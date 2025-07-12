@@ -18,8 +18,17 @@ import java.util.List;
  */
 public class CQueue<T> implements Iterable<T>
 {
+    /**
+     * The list of items in the queue.
+     */
     private final   List<T> queue   = new ArrayList<>();
+    /**
+     * The number of items in the queue.
+     */
     private final   int     size;
+    /**
+     * Index to the current item in the queue.
+     */
     private int             currInx = 0;
     
     /**
@@ -58,7 +67,7 @@ public class CQueue<T> implements Iterable<T>
      * Increments the current item index
      * and returns the new current item.
      *  
-     * @return  the current item
+     * @return  the current item after incrementing the current item index
      */
     public T getNext()
     {
@@ -163,10 +172,25 @@ public class CQueue<T> implements Iterable<T>
      */
     private static class ForwardIterator<T> implements Iterator<T>
     {
+        /**
+         * The list of items in the queue.
+         */
         private final List<T>   list;
+        /**
+         * The number of items in the queue.
+         */
         private final int       size;
-        private final   int     start;
+        /**
+         * The index of the first item in the queue.
+         */
+        private final int       start;
+        /**
+         * The index of the next item in the queue.
+         */
         private int             currInx;
+        /**
+         * True, if the queue has be fully traversed.
+         */
         private boolean         hasNext;
         
         /**

@@ -12,15 +12,65 @@ import static java.awt.geom.PathIterator.SEG_LINETO;
 
 import com.gmail.johnstraub1954.penrose.PShape;
 
+/**
+ * An object of this class describes
+ * the intersection of two PShapes,
+ * allowing the user to determine if two PShapes
+ * are positioned correctly.
+ * In a perfect scenario, 
+ * two correctly positioned PShapes
+ * would not intersect at all.
+ * However, due to rounding errors 
+ * when rotating and positioning PShapes,
+ * sometimes two PShapes will appear to overlap
+ * even when they are correctly positioned.
+ * If this is the case
+ * the intersection will be either an edge
+ * or a vertex.
+ * If the intersection is non-empty,
+ * and is not an edge or a vertex,
+ * the positioning of the two PShapes
+ * should be treated as invalid.
+ * 
+ * @see #isValid()
+ */
 public class PShapeIntersection
 {
+    /**
+     * The first of the encapsulated shapes.
+     */
     private final PShape    pShapeA;
+    /**
+     * The second of the encapsulated shapes.
+     */
     private final PShape    pShapeB;
+    /**
+     * The intersection of the two encapsulated shapes;
+     * may be empty.
+     */
     private final Area      intersection;
 
+    /**
+     * If the intersection of the encapsulated PShapes is an edge,
+     * this object describes the intersection;
+     * null if the intersection is not an edge.
+     */
     private final Line2D    edge;
+    /**
+     * If the intersection of the encapsulated PShapes is a point,
+     * this object describes the intersection;
+     * null if the intersection is not a point.
+     */
     private final Point2D   point;
 
+    /**
+     * Evaluates the intersection of two PShapes.
+     * Determines whether the intersection is empty,
+     * a line, a point, or none of the above.
+     *  
+     * @param pShapeA   the first PShape to evaluate
+     * @param pShapeB   the second PShape to evaluate
+     */
     public PShapeIntersection( PShape pShapeA, PShape pShapeB )
     {
         this.pShapeA = pShapeA;
@@ -46,7 +96,9 @@ public class PShapeIntersection
     }
     
     /**
-     * @return the pShapeA
+     * Gets the first of the encapsulated PShapes.
+     * 
+     * @return the first of the encapsulated PShapes
      */
     public PShape getPShapeA()
     {
@@ -54,7 +106,9 @@ public class PShapeIntersection
     }
 
     /**
-     * @return the pShapeB
+     * Gets the second of the encapsulated PShapes.
+     * 
+     * @return the second of the encapsulated PShapes
      */
     public PShape getPShapeB()
     {
@@ -62,7 +116,10 @@ public class PShapeIntersection
     }
 
     /**
-     * @return the intersection
+     * Gets the intersection of the encapsulated PShapes.
+     * 
+     * @return 
+     *      the intersection of the encapsulated PShapes
      */
     public Area getIntersection()
     {
@@ -148,40 +205,36 @@ public class PShapeIntersection
         return result;
     }
     
-    public static boolean intersect( PShape pShapeA, PShape pShapeB)
-    {
-        Area    areaA   = new Area( pShapeA.getWorkShape() );
-        Area    areaB   = new Area( pShapeB.getWorkShape() );
-        areaA.intersect( areaB );
-        boolean result = !areaA.isEmpty();
-        return result;
-    }
-    
     /**
      * If the intersection is non-empty and not an edge,
      * it ought to be a vertex.
+     * If it is a vertex, the approximate location is returned.
+     * If it is not a vertex, null is returned.
      * 
-     * @return
+     * @return  
+     *      the approximate location of the vertex,
+     *      or null if no vertex found
      */
     private Point2D computeVertex()
     {
         PathIterator    pathIter    = intersection.getPathIterator( null );
-        double[]        coords      = new double[6];
-        int             type        = pathIter.currentSegment( coords );
         boolean         isValid     = true;
         
-        double          minXco  = coords[0];
-        double          maxXco  = minXco;
-        double          minYco  = coords[1];
-        double          maxYco  = minYco;
+        double          minXco  = Double.MAX_VALUE;
+        double          maxXco  = Double.MIN_VALUE;
+        double          minYco  = Double.MAX_VALUE;
+        double          maxYco  = Double.MIN_VALUE;
 
         // It might be a vertex if the path iterator begins with a MOVE_TO,
         // and every remaining segment is a LINE_TO or a CLOSE.
-        boolean         done        = type != SEG_MOVETO;
+        double[]        coords      = new double[6];
+        boolean         done        = false;
         while ( !done && !pathIter.isDone() )
         {
-            // If the intersection is a vertex, every segment after
-            // the first will be a close or a lineTo.
+            int type    = pathIter.currentSegment( coords );
+            // If the intersection is a vertex, the first segment will
+            // be a moveTo, and each following segment will be a
+            // close or a lineTo.
             if ( type == SEG_CLOSE )
                 done = true;
             else if ( type != SEG_LINETO && type != SEG_MOVETO )
@@ -202,7 +255,6 @@ public class PShapeIntersection
                 maxYco = Math.max( maxYco, yco );
             }
             pathIter.next();
-            type = pathIter.currentSegment( coords );
         }
         
         // If the path iterator describes a vertex, the difference between 
@@ -225,6 +277,18 @@ public class PShapeIntersection
         return vertex;
     }
 
+    /**
+     * Determine if two PShapes intersect at an edge.
+     * If this is the case,
+     * a Line2D object describing the edge
+     * is created and returned.
+     * If the intersection is not an edge
+     * null is returned.
+     * 
+     * @return  
+     *      an object describing the edge where the intersection occurred,
+     *      or null if none
+     */
     private Line2D computeEdge()
     {
         PathIterator    pathIter    = intersection.getPathIterator( null );

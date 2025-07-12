@@ -1,65 +1,119 @@
 package com.gmail.johnstraub1954.penrose.utils;
 
-import java.awt.Toolkit;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.gmail.johnstraub1954.penrose.PShape;
-import com.gmail.johnstraub1954.penrose.Vertex;
 
 /**
  * This is a simple class
- * to manage lists of selected/unselected PShapes.
+ * to manage lists of selected/unselected PShapes;
+ * also manages SelectionEvent propagation
+ * (property change logic).
  * The main reason for its creation
  * is to isolate property change logic.
  */
 public class SelectionManager implements Serializable
 {
     /**
-     * 
+     * Generated serial version UID.
      */
     private static final long serialVersionUID = -5494592525711839694L;
 
-    private static final double     epsilon     = .001;
-    private static Toolkit              toolkit = Toolkit.getDefaultToolkit();
-
-    private final List<SelectionListener>   selectionListeners  = new ArrayList<>();
-    private final List<PShape>              shapes              = new ArrayList<>();
-    private final List<PShape>              selected            = new ArrayList<>();
-    private int                             mapping             = SelectionEvent.NO_MAPPING;
+    /**
+     * List of SelectionListeners.
+     */
+    private final List<SelectionListener>   
+    selectionListeners  = new ArrayList<>();
+    /**
+     * List of all PShapes.
+     */
+    private final List<PShape>              
+    shapes = new ArrayList<>();
+    /**
+     * List of currently selected PShapes.
+     */
+    private final List<PShape>              
+    selected = new ArrayList<>();
+    /**
+     * The current state of the snapping state;
+     * NO_MAPPING: source and destination PShapes not selected;
+     * CAN_MAP: source and destination PShapes selected,
+     * but not correctly configured for snapping;
+     * IS_MAPPED: selected PShapes can be snapped.
+     */
+    private int mapping = SelectionEvent.NO_MAPPING;
     
+    /**
+     * Default constructor, 
+     * contains no special logic.
+     */
+    public SelectionManager()
+    {
+    }
+    
+    /**
+     * If not already present,
+     * adds the given listener to this list of SelectionListeners.
+     * 
+     * @param listener  the given listener
+     */
     public void addSelectionListener( SelectionListener listener )
     {
         if ( !selectionListeners.contains( listener ) )
             selectionListeners.add( listener );
     }
     
+    /**
+     * Remove the given listener from the list
+     * of SelectionListeners;
+     * ignored if not present in the list.
+     * 
+     * @param listener  the given istener
+     */
     public void removeSelectionListener( SelectionListener listener )
     {
         selectionListeners.remove( listener );
     }
     
+    /**
+     * Adds the given PShape to the list of PShapes.
+     * If the PShape is already in the list
+     * the operation is ignored.
+     * 
+     * @param shape the given shape
+     */
     public void add( PShape shape )
     {
         if ( !shapes.contains( shape ) )
             shapes.add( shape );
     }
     
+    /**
+     * Removes the given PShape from the list of PShapes.
+     * If selected, the given PShape is deselected.
+     * 
+     * @param shape the given shape.
+     * 
+     * @see #deselect(PShape)
+     */
     public void remove( PShape shape )
     {
         shapes.remove( shape );
-        selected.remove( shape );
+        deselect( shape );
     }
     
-    public void deselectAll()
-    {
-        clearSelected();
-    }
-    
+    /**
+     * Deselects all selected PShapes,
+     * propagating a SelectionEvent
+     * for each deselected shape.
+     * Equivalent to 
+     */
     public void deselect()
     {
-        selected.clear();
+        clearSelected();
     }
     
     /**
@@ -69,7 +123,7 @@ public class SelectionManager implements Serializable
      * If the shape is already selected,
      * the direction parameter determines 
      * whether the next side (direction >= 0)
-     * or the previous side (direction < 0)
+     * or the previous side (direction &lt; 0)
      * is selected.
      * 
      * A select event is propagated for the given shape.
@@ -153,11 +207,26 @@ public class SelectionManager implements Serializable
         }
     }
     
+    /**
+     * Returns an unmodifiable list of all PShapes
+     * under management.
+     * 
+     * @return  an unmodifiable list of all PShapes under management
+     */
     public List<PShape> getShapes()
     {
-        return shapes;
+        List<PShape>    unmodifiable    = 
+            Collections.unmodifiableList( shapes );
+        return unmodifiable;
     }
     
+    /**
+     * Creates a new list of PShapesa
+     * and copies to it the contents
+     * of a given list.
+     * 
+     * @param shapes    the given list
+     */
     public void setShapes( List<PShape> shapes )
     {
         this.shapes.clear();
@@ -165,17 +234,31 @@ public class SelectionManager implements Serializable
         selected.clear();
     }
     
+    /**
+     * Returns an unmodifiable list of all 
+     * currently selected PShapes.
+     * 
+     * @return  an unmodifiable list of all PShapes under management
+     */
     public List<PShape> getSelected()
     {
-        return selected;
+        List<PShape>    unmodifiable    = 
+            Collections.unmodifiableList( selected );
+        return unmodifiable;
     }
     
-    public int getMapping()
-    {
-        computeMapping();
-        return mapping;
-    }
-    
+    /**
+     * Checks the current mapping state and,
+     * if valid,
+     * snaps the source shape 
+     * (the first selected shape)
+     * to the destination shape
+     * (the second selected shape).
+     * Returns true if the snap operation
+     * was performed
+     * 
+     * @return true if the snap operation was performed
+     */
     public boolean snapTo()
     {
         boolean performed   = false;
@@ -191,28 +274,67 @@ public class SelectionManager implements Serializable
     }
     
     /**
-     * Recompute the mapping state.
+     * Recompute the mapping state
+     * after the properties of a PShape
+     * have been updated.
      * Propagate SelectionEvent if it has changed.
-     * 
+     *
+     * @param shape the PShape that was modified
+     *
      * @return the recomputed mapping state
      */
-    public int testMapping()
+    public int testMapping( PShape shape )
     {
         int currState   = mapping;
         computeMapping();
         if ( mapping != currState )
-            propagateEvent( null, true );
+            propagateEvent( shape, true );
         return mapping;
     }
     
+    /**
+     * Propagates a SelectionEvent
+     * designating the given PShape as the source
+     * of the event.
+     * 
+     * @param shape     the given PShape
+     * @param selected  true, if the given PShape is selected
+     */
     private void propagateEvent( PShape shape, boolean selected )
     {
         computeMapping();
-        SelectionEvent  event   = new SelectionEvent( shape, selected, mapping );
+        SelectionEvent  event   = 
+            new SelectionEvent( shape, selected, mapping );
         for ( SelectionListener listener : selectionListeners )
             listener.select( event );
     }
     
+    /**
+     * Computes the mapping state,
+     * which determines whether a snap operation can be executed.
+     * The state is computed as follows:
+     * <ul>
+     *      <li>
+     *          If fewer than two PShapes are currently selected,
+     *          the mapping state is set to NO_MAPPING.
+     *      </li>
+     *      <li>
+     *          If at least two PShapes are selected,
+     *          but their selection states are not compatible;
+     *          for example selected sides
+     *          do not have the same slope,
+     *          or the dot-state of selected vertices doesn't match,
+     *          the mapping state is set to CAN_MAP.
+     *      </li>
+     *      <li>
+     *          If two PShapes are selected
+     *          and are property configured for snapping,
+     *          the state is set to IS_MAPPED.
+     *      </li>
+     * </ul>
+     * 
+     * @see SnapValidator#validate()
+     */
     private void computeMapping()
     {
         if ( selected.size() < 2 )
@@ -225,130 +347,5 @@ public class SelectionManager implements Serializable
             else
                 mapping = SelectionEvent.CAN_MAP;
         }
-//        else
-//        {
-//            PShape      fromShape   = selected.get( 0 );
-//            PShape      toShape     = selected.get( 1 );
-//            double      fromSlope   = fromShape.getCurrSlope();
-//            double      toSlope     = toShape.getCurrSlope();
-//            double      fromLength  = fromShape.getCurrLength();
-//            double      toLength    = toShape.getCurrLength();
-//            boolean[]   fromDotted  = fromShape.getCurrDotState();
-//            boolean[]   toDotted    = toShape.getCurrDotState();
-//            if ( !Utils.match( fromSlope, toSlope ) )
-//                mapping = SelectionEvent.CAN_MAP;
-//            else if ( !Utils.match( fromLength, toLength ) )
-//                mapping = SelectionEvent.CAN_MAP;
-//            else if ( fromDotted[0] != toDotted[1] )
-//                mapping = SelectionEvent.CAN_MAP;
-//            else if ( fromDotted[1] != toDotted[0] )
-//                mapping = SelectionEvent.CAN_MAP;
-//            else
-//                mapping = SelectionEvent.IS_MAPPED;
-//        }
-    }
-    
-    /**
-     * Determines if the selected edge of the given from-shape
-     * correctly maps to the given to-shape.
-     * In this context, the edges can be mapped if:
-     * <ol>
-     *      <li>The edges have the same slope;</li>
-     *      <li>The edges have the same length;</li>
-     *      <li>The 'dotted' property of corresponding vertices are equal.</li>
-     * </ol>
-     * <p>
-     * This is just one of several tests that have to be passed
-     * in order for one shape to be mapped to another.
-     * 
-     * @param fromShape the given from-shape
-     * @param toShape   the given to-shape
-     * 
-     * @return
-     *      SelectionEvent.IS_MAPPED if the edges pass the check,
-     *      SelectionEvent.CAN_MAP otherwise.
-     *      
-     * @see #computeMapping()
-     */
-    private int checkMappedEdges( PShape fromShape, PShape toShape )
-    {
-        int result  = SelectionEvent.CAN_MAP;
-        double      fromSlope   = fromShape.getCurrSlope();
-        double      toSlope     = toShape.getCurrSlope();
-        double      fromLength  = fromShape.getCurrLength();
-        double      toLength    = toShape.getCurrLength();
-        boolean[]   fromDotted  = fromShape.getCurrDotState();
-        boolean[]   toDotted    = toShape.getCurrDotState();
-        if ( !Utils.match( fromSlope, toSlope ) )
-            result = SelectionEvent.CAN_MAP;
-        else if ( !Utils.match( fromLength, toLength ) )
-            result = SelectionEvent.CAN_MAP;
-        else if ( fromDotted[0] != toDotted[1] )
-            result = SelectionEvent.CAN_MAP;
-        else if ( fromDotted[1] != toDotted[0] )
-            result = SelectionEvent.CAN_MAP;
-        else
-            result = SelectionEvent.IS_MAPPED;
-        return result;
-    }
-    
-//    private int checkIntersections( PShape fromShape, PShape toShape )
-//    {
-//        int     result      = SelectionEvent.NO_MAPPING;
-//        // To a test-mapping of the selected edges
-//        Point2D saveCoords  = fromShape.getCoordinates();
-//        fromShape.snapTo( toShape );
-//        
-//        // for each prospective neighbor:
-//        Neighborhood    neighborhood    = new Neighborhood( fromShape, shapes );
-//        for ( PShape neighbor : neighborhood )
-//        {
-//            PShapeIntersection  intersect   = 
-//                new PShapeIntersection( fromShape, neighbor );
-//            // Possibilities:
-//            // ... no intersection: valid mapping
-//            // ... intersection on an edge: may be valid mapping;
-//            //     depends on matching dots
-//            // ... intersection at a vertex: may be valid mapping
-//            // ... anything else: invalid mapping.
-//            if ( !intersect.isEmpty() )
-//            {
-//                if ( intersect.isEdge() )
-//                    ;
-////                else if ( intersect.isVertex() )
-////                    ;
-//                else
-//                {
-//                    result = SelectionEvent.NO_MAPPING;
-//                    break;
-//                }
-//            }
-//        }
-//    }
-    
-    private int testDotState( PShape shapeA, PShape shapeB )
-    {
-        int             isMapped    = SelectionEvent.IS_MAPPED;
-        int             result      = isMapped;
-        List<Vertex>    listA       = shapeA.getTransformedVertices();
-        int             sizeA       = listA.size();
-        List<Vertex>    listB       = shapeB.getTransformedVertices();
-        int             sizeB       = listB.size();
-        for ( int inx = 0 ; inx < sizeA && result == isMapped ; ++inx  )
-        {
-            Vertex  vertexA = listA.get( inx );
-            for ( int jnx = 0 ; jnx < sizeB && result == isMapped ; ++jnx )
-            {
-                Vertex  vertexB = listB.get( jnx );
-                // If the vertex is shared between shapes, 
-                // is the dot-state valid?
-                if ( vertexA.matches( vertexB ) )
-                {
-                    if ( vertexA.isDotted() != vertexB.isDotted() )
-                        result = SelectionEvent.NO_MAPPING;
-                }
-            }
-        }
-        return result;
     }
 }

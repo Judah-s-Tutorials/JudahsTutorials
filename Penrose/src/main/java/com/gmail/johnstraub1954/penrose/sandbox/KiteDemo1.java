@@ -1,7 +1,10 @@
-package com.gmail.johnstraub1954.penrose;
+package com.gmail.johnstraub1954.penrose.sandbox;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+
+import com.gmail.johnstraub1954.penrose.PCanvas;
+import com.gmail.johnstraub1954.penrose.PKite;
 
 public class KiteDemo1
 {

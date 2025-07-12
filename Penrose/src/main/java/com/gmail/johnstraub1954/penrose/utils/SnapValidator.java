@@ -167,7 +167,7 @@ public class SnapValidator
             {
                 Line2D  side    = vertex.getAdjLine();
                 side = Utils.round( side );
-                valid = testOneLine( toTestSide, side );
+                valid = testOneSide( toTestSide, side );
             }
         }
         return valid;
@@ -181,7 +181,7 @@ public class SnapValidator
      * @param line2
      * @return
      */
-    private static boolean testOneLine( Line2D line1, Line2D line2 )
+    private static boolean testOneSide( Line2D line1, Line2D line2 )
     {
         boolean result      = true;
         if ( Utils.intersect( line1, line2 ) )
