@@ -141,8 +141,8 @@ public class PShapeMain implements Serializable
             menu.add( save );
             menu.add( open );
             
-            save.addActionListener( _ -> FileManager.save() );
-            open.addActionListener( _ -> FileManager.open() );
+            save.addActionListener( s -> FileManager.save() );
+            open.addActionListener( s -> FileManager.open() );
             
             return menu;
         }
@@ -164,26 +164,24 @@ public class PShapeMain implements Serializable
             JMenuItem   dartColor   = new JMenuItem( "Dart Color" );
             JMenuItem   dartEColor  = new JMenuItem( "Dart Edge Color" );
             
-            select.addActionListener( _ -> {
-                canvas.getShapes().forEach( s -> canvas.select( s,  0  ) );
+            select.addActionListener( s -> {
+                canvas.getShapes().forEach( t -> canvas.select( t,  0  ) );
                 canvas.repaint();
             });
             
-            deselect.addActionListener( _ -> {
+            deselect.addActionListener( o -> {
                 canvas.getSelected().forEach( canvas::deselect );
                 canvas.repaint();
             });
             
-            delete.addActionListener( _ -> canvas.deleteSelected() );
+            delete.addActionListener( o -> canvas.deleteSelected() );
             
-            color.addActionListener( _ -> {
+            color.addActionListener( o -> {
                 String  title       = "Choose a Fill Color";
                 Color   shapeColor  = 
                     JColorChooser.showDialog( null, title, null );
                 if ( shapeColor != null )
                 {
-//                    canvas.getSelected()
-//                        .forEach( s -> s.putColor( PShape.FILL_COLOR, shapeColor ) );
                     canvas.repaint();
                 }
             });

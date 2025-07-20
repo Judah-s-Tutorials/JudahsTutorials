@@ -90,7 +90,7 @@ public class SelectDemo1
         panel.add( Box.createRigidArea( rigidDim ) );
         
         JButton exit    = new JButton( "Exit" );
-        exit.addActionListener( _ -> System.exit( 0 ) );
+        exit.addActionListener( o -> System.exit( 0 ) );
         panel.add( exit );
         return panel;
     }
@@ -103,16 +103,16 @@ public class SelectDemo1
         JButton leftButton  = new JButton( leftArrow );
         JButton rightButton = new JButton( rightArrow );
         
-        upButton.addActionListener( _ -> 
+        upButton.addActionListener( o -> 
             action( p -> p.move( 0, -4 ) )
         );
-        downButton.addActionListener( _ -> 
+        downButton.addActionListener( o -> 
             action( p -> p.move( 0, 4 ) )
         );
-        leftButton.addActionListener( _ -> 
+        leftButton.addActionListener( o -> 
             action( p -> p.move( -4, 0 ) )
         );
-        rightButton.addActionListener( _ -> 
+        rightButton.addActionListener( o -> 
             action( p -> p.move( 4,0 ) )
         );
         
@@ -132,10 +132,10 @@ public class SelectDemo1
         JButton rightButton = new JButton( rotateRight );
         
         float   rotateIncr  = (float)(Math.PI / 64);
-        leftButton.addActionListener( _ -> 
+        leftButton.addActionListener( o -> 
             action( p -> p.rotate( rotateIncr ) )
         );
-        rightButton.addActionListener( _ -> 
+        rightButton.addActionListener( o -> 
             action( p -> p.rotate( -rotateIncr ) )
         );
         
