@@ -4,6 +4,7 @@ doc/
 AdHoc/
 adhoc/
 ad_hoc/
+*Java2Day*
 
 *.class
 *.exe
