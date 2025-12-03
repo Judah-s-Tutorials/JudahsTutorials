@@ -1,0 +1,5 @@
+https://api.weather.gov/points/q=41.4,2.2
+https://api.weatherapi.com/v1/current.json?key=cb4566e090b84696a7d161318252911&q=41.4,2.2
+ 
+
+cb4566e090b84696a7d161318252911
