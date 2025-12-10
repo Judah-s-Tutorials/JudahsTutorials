@@ -35,6 +35,52 @@ public class ForecastDay
         }
     }
     
+    /**
+     * @return the date
+     */
+    public String getDate()
+    {
+        return date;
+    }
+
+    /**
+     * @return the epoch
+     */
+    public long getEpoch()
+    {
+        return epoch;
+    }
+
+    /**
+     * @return the day
+     */
+    public Day getDay()
+    {
+        return day;
+    }
+
+    /**
+     * @return the astro
+     */
+    public Astro getAstro()
+    {
+        return astro;
+    }
+
+    /**
+     * @return the hours
+     */
+    public List<Hour> getHours()
+    {
+        return hours;
+    }
+    
+    public Hour getHour( int index ) throws IndexOutOfBoundsException
+    {
+        Hour    hour    = hours.get( index );
+        return hour;
+    }
+
     public String toString()
     {
         StringBuilder   bldr    = new StringBuilder();

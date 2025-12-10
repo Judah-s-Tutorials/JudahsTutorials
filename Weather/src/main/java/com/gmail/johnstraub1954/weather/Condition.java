@@ -45,6 +45,30 @@ public class Condition
 //        System.out.println( this );
     }
     
+    /**
+     * @return the text
+     */
+    public String getText()
+    {
+        return text;
+    }
+
+    /**
+     * @return the icon
+     */
+    public Icon getIcon()
+    {
+        return icon;
+    }
+
+    /**
+     * @return the code
+     */
+    public int getCode()
+    {
+        return code;
+    }
+
     public String toString()
     {
         StringBuilder   bldr        = new StringBuilder();

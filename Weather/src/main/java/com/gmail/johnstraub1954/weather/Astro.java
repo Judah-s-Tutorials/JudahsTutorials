@@ -39,6 +39,70 @@ public class Astro
         return bldr.toString();
     }
     
+    /**
+     * @return the sunrise
+     */
+    public String getSunrise()
+    {
+        return sunrise;
+    }
+
+    /**
+     * @return the sunset
+     */
+    public String getSunset()
+    {
+        return sunset;
+    }
+
+    /**
+     * @return the moonrise
+     */
+    public String getMoonrise()
+    {
+        return moonrise;
+    }
+
+    /**
+     * @return the moonset
+     */
+    public String getMoonset()
+    {
+        return moonset;
+    }
+
+    /**
+     * @return the moonPhase
+     */
+    public String getMoonPhase()
+    {
+        return moonPhase;
+    }
+
+    /**
+     * @return the moonIllumination
+     */
+    public int getMoonIllumination()
+    {
+        return moonIllumination;
+    }
+
+    /**
+     * @return the isMoonUp
+     */
+    public boolean isMoonUp()
+    {
+        return isMoonUp;
+    }
+
+    /**
+     * @return the isSunUp
+     */
+    public boolean isSunUp()
+    {
+        return isSunUp;
+    }
+
     private static boolean getBoolean( JSONObject obj, String key )
     {
         int     asInt       = obj.getInt( key );

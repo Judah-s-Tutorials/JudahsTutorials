@@ -25,6 +25,70 @@ public class Location
         time        = location.getString( "localtime" );
     }
     
+    /**
+     * @return the city
+     */
+    public String getCity()
+    {
+        return city;
+    }
+
+    /**
+     * @return the region
+     */
+    public String getRegion()
+    {
+        return region;
+    }
+
+    /**
+     * @return the country
+     */
+    public String getCountry()
+    {
+        return country;
+    }
+
+    /**
+     * @return the latitude
+     */
+    public double getLatitude()
+    {
+        return latitude;
+    }
+
+    /**
+     * @return the longitude
+     */
+    public double getLongitude()
+    {
+        return longitude;
+    }
+
+    /**
+     * @return the timeZone
+     */
+    public String getTimeZone()
+    {
+        return timeZone;
+    }
+
+    /**
+     * @return the epoch
+     */
+    public long getEpoch()
+    {
+        return epoch;
+    }
+
+    /**
+     * @return the time
+     */
+    public String getTime()
+    {
+        return time;
+    }
+
     public String toString()
     {
         StringBuilder   bldr    = new StringBuilder();

@@ -78,6 +78,270 @@ public class BasicData
         gti = current.getDouble( "gti" );
     }
 
+    /**
+     * @return the epoch
+     */
+    public long getEpoch()
+    {
+        return epoch;
+    }
+
+    /**
+     * @return the lastUpdated
+     */
+    public String getLastUpdated()
+    {
+        return lastUpdated;
+    }
+
+    /**
+     * @return the celsius
+     */
+    public double getCelsius()
+    {
+        return celsius;
+    }
+
+    /**
+     * @return the fahrenheit
+     */
+    public double getFahrenheit()
+    {
+        return fahrenheit;
+    }
+
+    /**
+     * @return the isDay
+     */
+    public boolean isDay()
+    {
+        return isDay;
+    }
+
+    /**
+     * @return the condition
+     */
+    public Condition getCondition()
+    {
+        return condition;
+    }
+
+    /**
+     * @return the windMPH
+     */
+    public double getWindMPH()
+    {
+        return windMPH;
+    }
+
+    /**
+     * @return the windKPH
+     */
+    public double getWindKPH()
+    {
+        return windKPH;
+    }
+
+    /**
+     * @return the windDegree
+     */
+    public int getWindDegree()
+    {
+        return windDegree;
+    }
+
+    /**
+     * @return the windDir
+     */
+    public String getWindDir()
+    {
+        return windDir;
+    }
+
+    /**
+     * @return the pressureMBs
+     */
+    public double getPressureMBs()
+    {
+        return pressureMBs;
+    }
+
+    /**
+     * @return the pressureInches
+     */
+    public double getPressureInches()
+    {
+        return pressureInches;
+    }
+
+    /**
+     * @return the precipMillis
+     */
+    public double getPrecipMillis()
+    {
+        return precipMillis;
+    }
+
+    /**
+     * @return the precipInches
+     */
+    public double getPrecipInches()
+    {
+        return precipInches;
+    }
+
+    /**
+     * @return the humidity
+     */
+    public int getHumidity()
+    {
+        return humidity;
+    }
+
+    /**
+     * @return the cloudCover
+     */
+    public int getCloudCover()
+    {
+        return cloudCover;
+    }
+
+    /**
+     * @return the feelsLikeC
+     */
+    public double getFeelsLikeC()
+    {
+        return feelsLikeC;
+    }
+
+    /**
+     * @return the feelsLikeF
+     */
+    public double getFeelsLikeF()
+    {
+        return feelsLikeF;
+    }
+
+    /**
+     * @return the windChillC
+     */
+    public double getWindChillC()
+    {
+        return windChillC;
+    }
+
+    /**
+     * @return the windChillF
+     */
+    public double getWindChillF()
+    {
+        return windChillF;
+    }
+
+    /**
+     * @return the heatIndexC
+     */
+    public double getHeatIndexC()
+    {
+        return heatIndexC;
+    }
+
+    /**
+     * @return the heatIndexF
+     */
+    public double getHeatIndexF()
+    {
+        return heatIndexF;
+    }
+
+    /**
+     * @return the dewPointC
+     */
+    public double getDewPointC()
+    {
+        return dewPointC;
+    }
+
+    /**
+     * @return the dewPointF
+     */
+    public double getDewPointF()
+    {
+        return dewPointF;
+    }
+
+    /**
+     * @return the visibilityKM
+     */
+    public double getVisibilityKM()
+    {
+        return visibilityKM;
+    }
+
+    /**
+     * @return the visibilityMiles
+     */
+    public double getVisibilityMiles()
+    {
+        return visibilityMiles;
+    }
+
+    /**
+     * @return the uvIndex
+     */
+    public double getUvIndex()
+    {
+        return uvIndex;
+    }
+
+    /**
+     * @return the gustKPH
+     */
+    public double getGustKPH()
+    {
+        return gustKPH;
+    }
+
+    /**
+     * @return the gustMPH
+     */
+    public double getGustMPH()
+    {
+        return gustMPH;
+    }
+
+    /**
+     * @return the shortRad
+     */
+    public double getShortRad()
+    {
+        return shortRad;
+    }
+
+    /**
+     * @return the diffRad
+     */
+    public double getDiffRad()
+    {
+        return diffRad;
+    }
+
+    /**
+     * @return the dni
+     */
+    public double getDni()
+    {
+        return dni;
+    }
+
+    /**
+     * @return the gti
+     */
+    public double getGti()
+    {
+        return gti;
+    }
+
     @Override
     public String toString()
     {

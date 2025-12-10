@@ -50,6 +50,166 @@ public class Day
         condition = new Condition( jsonCondition );
     }
     
+    /**
+     * @return the maxtempC
+     */
+    public double getMaxtempC()
+    {
+        return maxtempC;
+    }
+
+    /**
+     * @return the maxtempF
+     */
+    public double getMaxtempF()
+    {
+        return maxtempF;
+    }
+
+    /**
+     * @return the mintempC
+     */
+    public double getMintempC()
+    {
+        return mintempC;
+    }
+
+    /**
+     * @return the mintempF
+     */
+    public double getMintempF()
+    {
+        return mintempF;
+    }
+
+    /**
+     * @return the avgtempC
+     */
+    public double getAvgtempC()
+    {
+        return avgtempC;
+    }
+
+    /**
+     * @return the avgtempF
+     */
+    public double getAvgtempF()
+    {
+        return avgtempF;
+    }
+
+    /**
+     * @return the maxwindMPH
+     */
+    public double getMaxwindMPH()
+    {
+        return maxwindMPH;
+    }
+
+    /**
+     * @return the maxwindKPH
+     */
+    public double getMaxwindKPH()
+    {
+        return maxwindKPH;
+    }
+
+    /**
+     * @return the totalprecipMMs
+     */
+    public double getTotalprecipMMs()
+    {
+        return totalprecipMMs;
+    }
+
+    /**
+     * @return the totalprecipInches
+     */
+    public double getTotalprecipInches()
+    {
+        return totalprecipInches;
+    }
+
+    /**
+     * @return the totalsnowCM
+     */
+    public double getTotalsnowCM()
+    {
+        return totalsnowCM;
+    }
+
+    /**
+     * @return the avgvisKMs
+     */
+    public double getAvgvisKMs()
+    {
+        return avgvisKMs;
+    }
+
+    /**
+     * @return the avgvisMiles
+     */
+    public double getAvgvisMiles()
+    {
+        return avgvisMiles;
+    }
+
+    /**
+     * @return the avgHumidity
+     */
+    public int getAvgHumidity()
+    {
+        return avgHumidity;
+    }
+
+    /**
+     * @return the dailyWillItRain
+     */
+    public boolean isDailyWillItRain()
+    {
+        return dailyWillItRain;
+    }
+
+    /**
+     * @return the dailyChanceOfRain
+     */
+    public int getDailyChanceOfRain()
+    {
+        return dailyChanceOfRain;
+    }
+
+    /**
+     * @return the dailyWillItSnow
+     */
+    public boolean isDailyWillItSnow()
+    {
+        return dailyWillItSnow;
+    }
+
+    /**
+     * @return the dailyChanceOfSnow
+     */
+    public int getDailyChanceOfSnow()
+    {
+        return dailyChanceOfSnow;
+    }
+
+    /**
+     * @return the condition
+     */
+    public Condition getCondition()
+    {
+        return condition;
+    }
+
+    /**
+     * @return the uvIndex
+     */
+    public double getUvIndex()
+    {
+        return uvIndex;
+    }
+
     public String toString()
     {
         StringBuilder   bldr    = new StringBuilder();
