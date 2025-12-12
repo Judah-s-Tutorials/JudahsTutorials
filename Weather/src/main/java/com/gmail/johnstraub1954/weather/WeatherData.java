@@ -97,6 +97,18 @@ public class WeatherData
     }
     
     /**
+     * Convenience routine to get the region name
+     * from the Location object.
+     * 
+     * @return  the reegion name from the Location object
+     */
+    public String getRegion()
+    {
+        String  region  = getLocation().getRegion();
+        return region;
+    }
+    
+    /**
      * Convenience routine to get the country name
      * from the Location object.
      * 
@@ -108,6 +120,44 @@ public class WeatherData
         return country;
     }
     
+    /**
+     * Convenience routine to get the latitude
+     * from the Location object.
+     * 
+     * @return  the latitude from the Location object
+     */
+    public double getLatitude()
+    {
+        double  latitude    = getLocation().getLatitude();
+        return latitude;
+    }
+    
+    /**
+     * Convenience routine to get the longitude
+     * from the Location object.
+     * 
+     * @return  the longitude from the Location object
+     */
+    public double getLongitude()
+    {
+        double  longitude    = getLocation().getLongitude();
+        return longitude;
+    }
+    
+    /**
+     * Convenience routine to get the time zone
+     * from the Location object.
+     * This data does not include
+     * the UTC offset.
+     * 
+     * @return  the time zone from the Location object
+     */
+    public String getTimeZone()
+    {
+        String  timeZone    = getLocation().getTimeZone();
+        return timeZone;
+    }
+
     /**
      * Convenience method to get
      * the current temperature in Fahrenheit.

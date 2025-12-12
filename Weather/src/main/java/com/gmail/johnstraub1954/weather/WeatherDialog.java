@@ -95,7 +95,8 @@ public class WeatherDialog
         String  label0Text  =
             "<html>"
             + "<span style='font-size: 150%;'>"
-            + data.getCity() + ", "
+            + data.getCity() + " "
+            + data.getRegion() + ", "
             + data.getCountry() + " "
             + data.getCurrentTime()
             + "</span>";
@@ -143,6 +144,14 @@ public class WeatherDialog
             + data.getCurrentMinTempF() + "F<br>";
         JLabel  label3          = new JLabel( label3Text );
         
+        String  label4Text      =
+            "<html>"
+            + "Latitude: " + data.getLatitude() + "<br>"
+            + "Longitude: " + data.getLongitude() + "<br>"
+            + "Time zone: " + data.getTimeZone() + "<br>"
+            + "***";
+        JLabel  label4          = new JLabel( label4Text );
+        
         JPanel  panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.LINE_AXIS );
         panel.setLayout( layout );
@@ -161,6 +170,8 @@ public class WeatherDialog
         panel.add( label1 );
         panel.add( Box.createRigidArea( dim ) );
         panel.add( label3 );
+        panel.add( Box.createRigidArea( dim ) );
+        panel.add( label4 );
         return panel;
     }
     

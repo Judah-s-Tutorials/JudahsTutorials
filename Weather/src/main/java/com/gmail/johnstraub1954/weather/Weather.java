@@ -15,9 +15,10 @@ import org.json.JSONObject;
 
 public class Weather
 {
-    private static final String apiKey      =   "cb4566e090b84696a7d161318252911";
-    private static final String urlHost     =   "api.weatherapi.com";
-    private static final String urlPath     =   "/v1/forecast.json";
+    private static final String apiKey      = "cb4566e090b84696a7d161318252911";
+    private static final String urlHost     = "api.weatherapi.com";
+    private static final String weatherPath = "/v1/forecast.json";
+    private static final String tzPath      = "/free/v2/tz.ashx";
     
     private WeatherData data;
     
@@ -45,9 +46,10 @@ public class Weather
             System.out.println( strData.length() );
             
             JSONObject  jsonObj = new JSONObject( strData );
-            data    = new WeatherData( jsonObj );
+            data = new WeatherData( jsonObj );
             String      title   = data.getCity() + ", " + data.getCountry();
             System.out.println( strData );
+            System.out.println( getTimeZone( data ) );
             
             WeatherDialog   dialog  = 
                 WeatherDialog.of( null, title, data );
@@ -61,7 +63,7 @@ public class Weather
             URLEncoder.encode( location, StandardCharsets.UTF_8 );
         String  params          = 
             "key=" + apiKey + "&q=" + encodedLocation + "&days=" + days;
-        String  urlStr          = "https://" + urlHost + urlPath + "?" + params;
+        String  urlStr          = "https://" + urlHost + weatherPath + "?" + params;
         String  data            = null;
         try
         {
@@ -87,13 +89,15 @@ public class Weather
         return data;
     }
     
-    private static String getTimeZone( String location, int days )
+    private static String getTimeZone( WeatherData weatherData )
     {
+        String  location        =
+            weatherData.getLatitude() + "," + weatherData.getLongitude();
         String  encodedLocation = 
             URLEncoder.encode( location, StandardCharsets.UTF_8 );
         String  params          = 
-            "key=" + apiKey + "&q=" + encodedLocation + "&days=" + days;
-        String  urlStr          = "https://" + urlHost + urlPath + "?" + params;
+            "key=" + "VNS12YSM9CHM" + "&q=" + encodedLocation + "&format=" + "json";
+        String  urlStr          = "https://" + urlHost + tzPath + "?" + params;
         String  data            = null;
         try
         {
@@ -104,6 +108,7 @@ public class Weather
                 new InputStreamReader( url.openStream()  );
             BufferedReader bufStream    = new BufferedReader( inReader );
             data = bufStream.readLine();
+            System.out.println( data );
         }
         catch ( URISyntaxException | IOException exc  )
         {

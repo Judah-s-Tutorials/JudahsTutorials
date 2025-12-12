@@ -3,3 +3,6 @@ https://api.weatherapi.com/v1/current.json?key=cb4566e090b84696a7d161318252911&q
  
 
 cb4566e090b84696a7d161318252911
+
+TimeZoneDB API Key
+VNS12YSM9CHM
