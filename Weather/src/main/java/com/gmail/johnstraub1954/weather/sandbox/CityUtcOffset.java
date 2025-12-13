@@ -45,6 +45,7 @@ public class CityUtcOffset {
         
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
             String line = reader.readLine();
+            System.out.println( line );
             if (line != null && !line.isEmpty()) {
                 // Parse first result's lat
                 String latStr = extractJsonValue(line, "\"lat\":");

@@ -33,10 +33,10 @@ public class BasicData
     private final double    uvIndex;
     private final double    gustKPH;
     private final double    gustMPH;
-    private final double    shortRad;   // short-range radar
-    private final double    diffRad;    // doppler radar
-    private final double    dni;        // Direct Normal Irradiance
-    private final double    gti;        // Geopotential Height
+//    private final double    shortRad;   // short-range radar
+//    private final double    diffRad;    // doppler radar
+//    private final double    dni;        // Direct Normal Irradiance
+//    private final double    gti;        // Geopotential Height
     
     public BasicData( JSONObject current )
     {
@@ -72,10 +72,10 @@ public class BasicData
         uvIndex = current.getDouble( "uv" );
         gustKPH = current.getDouble( "gust_kph" );
         gustMPH = current.getDouble( "gust_mph" );
-        shortRad = current.getDouble( "short_rad" );
-        diffRad = current.getDouble( "diff_rad" );
-        dni = current.getDouble( "dni" );
-        gti = current.getDouble( "gti" );
+//        shortRad = current.getDouble( "short_rad" );
+//        diffRad = current.getDouble( "diff_rad" );
+//        dni = current.getDouble( "dni" );
+//        gti = current.getDouble( "gti" );
     }
 
     /**
@@ -313,34 +313,34 @@ public class BasicData
     /**
      * @return the shortRad
      */
-    public double getShortRad()
-    {
-        return shortRad;
-    }
+//    public double getShortRad()
+//    {
+//        return shortRad;
+//    }
 
     /**
      * @return the diffRad
      */
-    public double getDiffRad()
-    {
-        return diffRad;
-    }
+//    public double getDiffRad()
+//    {
+//        return diffRad;
+//    }
 
     /**
      * @return the dni
      */
-    public double getDni()
-    {
-        return dni;
-    }
+//    public double getDni()
+//    {
+//        return dni;
+//    }
 
     /**
      * @return the gti
      */
-    public double getGti()
-    {
-        return gti;
-    }
+//    public double getGti()
+//    {
+//        return gti;
+//    }
 
     @Override
     public String toString()
@@ -374,11 +374,11 @@ public class BasicData
             .append( "visibilityMiles=" ).append( visibilityMiles ).append( "," )
             .append( "uvIndex=" ).append( uvIndex ).append( "," )
             .append( "gustKPH=" ).append( gustKPH ).append( "," )
-            .append( "gustMPH=" ).append( gustMPH ).append( "," )
-            .append( "shortRad=" ).append( shortRad ).append( "," )
-            .append( "diffRad=" ).append( diffRad ).append( "," )
-            .append( "dni=" ).append( dni ).append( "," )
-            .append( "gti=" ).append( gti );
+            .append( "gustMPH=" ).append( gustMPH ).append( "," );
+//            .append( "shortRad=" ).append( shortRad ).append( "," )
+//            .append( "diffRad=" ).append( diffRad ).append( "," )
+//            .append( "dni=" ).append( dni ).append( "," )
+//            .append( "gti=" ).append( gti );
         return bldr.toString();
     }
     

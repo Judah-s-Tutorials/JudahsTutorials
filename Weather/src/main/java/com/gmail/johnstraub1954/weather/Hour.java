@@ -38,10 +38,10 @@ public class Hour
     private final double    gustMPH;
     private final double    gustKPH;
     private final double    uvIndex;
-    private final double    shortRad;   // short-range radar
-    private final double    diffRad;    // doppler radar
-    private final double    dni;        // Direct Normal Irradiance
-    private final double    gti;        // Geopotential Height
+//    private final double    shortRad;   // short-range radar
+//    private final double    diffRad;    // doppler radar
+//    private final double    dni;        // Direct Normal Irradiance
+//    private final double    gti;        // Geopotential Height
     
     
     public Hour( JSONObject hour )
@@ -83,10 +83,10 @@ public class Hour
         gustKPH = hour.getDouble( "gust_kph" );
         gustMPH = hour.getDouble( "gust_mph" );
         uvIndex = hour.getDouble( "uv" );
-        shortRad = hour.getDouble( "short_rad" );
-        diffRad = hour.getDouble( "diff_rad" );
-        dni = hour.getDouble( "dni" );
-        gti = hour.getDouble( "gti" );
+//        shortRad = hour.getDouble( "short_rad" );
+//        diffRad = hour.getDouble( "diff_rad" );
+//        dni = hour.getDouble( "dni" );
+//        gti = hour.getDouble( "gti" );
     }
 
     @Override
@@ -126,11 +126,7 @@ public class Hour
             .append( "visibilityMiles=" ).append( visibilityMiles ).append( "," )
             .append( "gustKPH=" ).append( gustKPH ).append( "," )
             .append( "gustMPH=" ).append( gustMPH ).append( "," )
-            .append( "uvIndex=" ).append( uvIndex ).append( "," )
-            .append( "shortRad=" ).append( shortRad ).append( "," )
-            .append( "diffRad=" ).append( diffRad ).append( "," )
-            .append( "dni=" ).append( dni ).append( "," )
-            .append( "gti=" ).append( gti );
+            .append( "uvIndex=" ).append( uvIndex ).append( "," );
         return bldr.toString();
     }
     

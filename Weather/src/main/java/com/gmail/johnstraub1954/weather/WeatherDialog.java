@@ -148,9 +148,19 @@ public class WeatherDialog
             "<html>"
             + "Latitude: " + data.getLatitude() + "<br>"
             + "Longitude: " + data.getLongitude() + "<br>"
-            + "Time zone: " + data.getTimeZone() + "<br>"
-            + "***";
-        JLabel  label4          = new JLabel( label4Text );
+            + "Time zone: " + data.getTimeZone();
+        TimeZone    timeZone    = TimeZone.of( data );
+        if ( timeZone != null )
+        {
+            int seconds = timeZone.getOffsetSeconds();
+            int minutes = seconds / 60;
+            int hours   = minutes / 60;
+            minutes %= 60;
+            label4Text += 
+                "<br>UTC: " + hours + ":" + minutes + ", "
+                    + "DST: " + timeZone.isDst();
+        }
+        JLabel      label4      = new JLabel( label4Text );
         
         JPanel  panel   = new JPanel();
         BoxLayout   layout  = new BoxLayout( panel, BoxLayout.LINE_AXIS );

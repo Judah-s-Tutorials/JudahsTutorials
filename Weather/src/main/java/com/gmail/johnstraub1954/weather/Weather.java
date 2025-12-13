@@ -49,7 +49,7 @@ public class Weather
             data = new WeatherData( jsonObj );
             String      title   = data.getCity() + ", " + data.getCountry();
             System.out.println( strData );
-            System.out.println( getTimeZone( data ) );
+            System.out.println( TimeZone.of( data ) );
             
             WeatherDialog   dialog  = 
                 WeatherDialog.of( null, title, data );
@@ -74,41 +74,6 @@ public class Weather
                 new InputStreamReader( url.openStream()  );
             BufferedReader bufStream    = new BufferedReader( inReader );
             data = bufStream.readLine();
-        }
-        catch ( URISyntaxException | IOException exc  )
-        {
-            exc.printStackTrace();
-            String  title   = "Unable to get data for " + location;
-            JOptionPane.showMessageDialog( 
-                null, 
-                exc.getMessage(), 
-                title, 
-                JOptionPane.ERROR_MESSAGE
-            );
-        }
-        return data;
-    }
-    
-    private static String getTimeZone( WeatherData weatherData )
-    {
-        String  location        =
-            weatherData.getLatitude() + "," + weatherData.getLongitude();
-        String  encodedLocation = 
-            URLEncoder.encode( location, StandardCharsets.UTF_8 );
-        String  params          = 
-            "key=" + "VNS12YSM9CHM" + "&q=" + encodedLocation + "&format=" + "json";
-        String  urlStr          = "https://" + urlHost + tzPath + "?" + params;
-        String  data            = null;
-        try
-        {
-            System.out.println( urlStr );
-            URI uri = new URI( urlStr );
-            URL url = uri.toURL();
-            InputStreamReader inReader  = 
-                new InputStreamReader( url.openStream()  );
-            BufferedReader bufStream    = new BufferedReader( inReader );
-            data = bufStream.readLine();
-            System.out.println( data );
         }
         catch ( URISyntaxException | IOException exc  )
         {

@@ -16,6 +16,8 @@ public class Input
     public static String askLocation()
     {
         String  result  =   JOptionPane.showInputDialog( null, askLocation );
+        if ( result != null && result.isEmpty() )
+            result = "sayville";
         return result;
     }
 }
