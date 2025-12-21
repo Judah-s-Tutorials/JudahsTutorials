@@ -9,7 +9,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 
 import javax.swing.JOptionPane;
 
@@ -58,6 +57,12 @@ public class TimeZone
             + "&by=position"
             + "&lat=" + latitude
             + "&lng=" + longitude;
+        TimeZone    timeZone    = executeQuery( params );
+        return timeZone;
+    }
+    
+    private static TimeZone executeQuery( String params )
+    {
         String  urlStr          = 
             "https://" + urlHost + tzPath + "?" + params;
         String  data            = null;
@@ -120,7 +125,8 @@ public class TimeZone
         zoneStart = helper.getLong( "zoneStart", -1 );
         zoneEnd = helper.getLong( "zoneEnd", -1 );
         nextZoneAbbreviation = helper.getString( "nextAbbreviation" );
-        timeStamp = getEpoch( data, "timestamp" );
+        timeStamp = helper.getEpochAsLocalDateTime( "timestamp" );
+//        timeStamp = getEpoch( data, "timestamp" );
     }
     
     /**
@@ -279,17 +285,8 @@ public class TimeZone
             .append( "zoneEnd=" ).append( zoneEnd ).append( "," )
             .append( "nextZoneAbbreviation=" ).append( nextZoneAbbreviation )
                 .append( "," )
-            .append( "timeStamp={").append( timeStamp ).append( timeStamp )
-                .append( "}" );
+            .append( "timeStamp={").append( timeStamp ).append( "}" );
         return bldr.toString();
-    }
-    
-    private static LocalDateTime getEpoch( JSONObject data, String key )
-    {
-        long            epoch       = data.getLong( key );
-        LocalDateTime   dateTime    = 
-            LocalDateTime.ofEpochSecond( epoch, 0, ZoneOffset.UTC );
-        return dateTime;
     }
     
     private static void reportError( Exception exc, String location )

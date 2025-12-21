@@ -1,5 +1,7 @@
 package com.gmail.johnstraub1954.weather;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.function.BiFunction;
 
 import org.json.JSONException;
@@ -112,5 +114,30 @@ public class JSONHelper
             result = def;
         }
         return result;
+    }
+    
+    public LocalDateTime 
+    getEpochAsLocalDateTime( String key )
+    {
+        LocalDateTime   dateTime    = getEpochAsLocalDateTime( key, LocalDateTime.MIN );
+        return dateTime;
+    }
+    
+    public LocalDateTime 
+    getEpochAsLocalDateTime( String key, LocalDateTime def )
+    {
+        LocalDateTime   result  = null;
+        try
+        {
+            long    offset  = data.getLong( key );
+            result = 
+                LocalDateTime.ofEpochSecond( offset, 0, ZoneOffset.UTC );
+        }
+        catch ( JSONException exc )
+        {
+            result = def;
+        }
+        return result;
+
     }
 }
