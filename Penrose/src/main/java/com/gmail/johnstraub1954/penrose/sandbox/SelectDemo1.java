@@ -191,7 +191,7 @@ public class SelectDemo1
         public void paintComponent( Graphics graphics )
         {
             super.paintComponent( graphics );
-            gtx = (Graphics2D)graphics.create();
+            gtx = (Graphics2D)graphics;
             width = getWidth();
             height = getHeight();
             
@@ -199,8 +199,6 @@ public class SelectDemo1
             gtx.fillRect( 0, 0, width, height );
             shapes.forEach( s -> s.render( gtx ) );
             selected.forEach( s -> s.highlight( gtx ) );
-            
-            gtx.dispose();
         }
         
         public List<PShape> getSelected()

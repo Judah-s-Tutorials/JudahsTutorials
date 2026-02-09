@@ -78,7 +78,7 @@ public class StrokeFeedback extends Feedback
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        Graphics2D  gtx         = (Graphics2D)graphics.create();
+        Graphics2D  gtx         = (Graphics2D)graphics;
         int         width       = getWidth();
         int         height      = getHeight();
         double      weight      = weightSupplier.getAsDouble();
@@ -96,7 +96,6 @@ public class StrokeFeedback extends Feedback
         gtx.setStroke( stroke );
         line.setLine( xco1, yco, xco2, yco );
         gtx.draw( line );
-        gtx.dispose();
     }
     
     @Override

@@ -417,7 +417,7 @@ public class CartesionPlaneWithOCR extends JFrame
         public void paintComponent( Graphics graphics )
         {
             super.paintComponent( graphics );
-            gtx = (Graphics2D)graphics.create();
+            gtx = (Graphics2D)graphics;
             
             drawManager.refresh( gtx, this.getVisibleRect() );
             drawManager.drawBackground();
@@ -433,8 +433,6 @@ public class CartesionPlaneWithOCR extends JFrame
                 drawManager.drawHorizontalLabels();
             if ( vertLabelCheckBox.isSelected() )
                 drawManager.drawVerticalLabels();
-            
-            gtx.dispose();
         }
     }
 }

@@ -56,7 +56,7 @@ public class TwoLineTestFeedback extends JPanel
     @Override
     public void paintComponent( Graphics graphics )
     {
-        Graphics2D  gtx = (Graphics2D)graphics.create();
+        Graphics2D  gtx = (Graphics2D)graphics;
         
         gtx.setColor( Color.LIGHT_GRAY );
         gtx.fillRect( 0,  0,  getWidth(), getHeight() );
@@ -72,7 +72,5 @@ public class TwoLineTestFeedback extends JPanel
             gtx.setColor( Color.RED );
             gtx.draw( line2 );
         }
-        
-        gtx.dispose();
     }
 }

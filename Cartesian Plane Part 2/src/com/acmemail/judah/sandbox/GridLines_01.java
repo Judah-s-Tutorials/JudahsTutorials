@@ -54,10 +54,6 @@ public class GridLines_01 extends JPanel
         // end boilerplate
         
         drawGrid();
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void drawGrid()

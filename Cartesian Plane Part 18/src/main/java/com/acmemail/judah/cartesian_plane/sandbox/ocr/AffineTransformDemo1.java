@@ -346,7 +346,7 @@ public class AffineTransformDemo1 extends JPanel
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         
         width = getWidth();
         height = getHeight();
@@ -359,8 +359,6 @@ public class AffineTransformDemo1 extends JPanel
         int         xco     = -imageWidth / 2;
         int         yco     = -imageHeight / 2;
         gtx.drawImage( image, xco, yco, this );
-        
-        gtx.dispose();
     }
     
     /**

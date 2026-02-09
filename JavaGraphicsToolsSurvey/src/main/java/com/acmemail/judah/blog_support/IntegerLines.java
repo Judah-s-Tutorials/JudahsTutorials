@@ -32,7 +32,7 @@ public class IntegerLines extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         fontMetrics = gtx.getFontMetrics();
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
@@ -58,10 +58,6 @@ public class IntegerLines extends JPanel
         int strXco  = xco1;
         int strYco  = (int)(yco2 - 2 * rect.getHeight());
         gtx.drawString( comment, strXco, strYco );
-
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void drawCoordinates( int xco, int yco, boolean above )

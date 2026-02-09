@@ -207,7 +207,7 @@ public class PictureMaker2 extends JPanel
     {
         width = getWidth();
         height = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         
         gtx.setColor( bgColor );
         applyScale();
@@ -219,8 +219,6 @@ public class PictureMaker2 extends JPanel
         gtx.setColor( textColor );
         drawAlphaText( 2 );
         drawNumericText( 4 );
-        
-        gtx.dispose();
     }
     
     private void applyScale()

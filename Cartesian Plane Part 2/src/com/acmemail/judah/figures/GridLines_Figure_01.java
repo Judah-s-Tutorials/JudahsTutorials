@@ -83,14 +83,6 @@ public class GridLines_Figure_01 extends JPanel
         // drawMinorTicMarks();
         // drawMajorTicMarks();
         // drawXYLabels();
-
-        ////////////////////////////////////
-        // Begin boilerplate
-        ////////////////////////////////////
-        gtx.dispose();
-        ////////////////////////////////////
-        // End boiler plate
-        ////////////////////////////////////
     }
     
     private void drawAxes()

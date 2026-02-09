@@ -50,7 +50,7 @@ public class FontDemo extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
@@ -67,9 +67,5 @@ public class FontDemo extends JPanel
         Font    fontC   = new Font("Monospaced", Font.PLAIN, 14 );
         gtx.setFont( fontC );
         gtx.drawString( "Monospaced, plain, 14", 20, 75 );
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
 }

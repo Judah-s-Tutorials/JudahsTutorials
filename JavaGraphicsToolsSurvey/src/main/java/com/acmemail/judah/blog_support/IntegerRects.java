@@ -33,7 +33,7 @@ public class IntegerRects extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         fontMetrics = gtx.getFontMetrics();
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
@@ -47,10 +47,6 @@ public class IntegerRects extends JPanel
         int     width   = (int)(currWidth * .6);
         int     height  = (int)(currHeight * .9) - yco;
         drawRect( xco, yco, width, height );
-
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void drawCoordinates( int xco, int yco, boolean above )

@@ -98,7 +98,7 @@ public class LineWidthDemo
             super.paintComponent( graphics );
             currWidth = getWidth();
             currHeight = getHeight();
-            gtx = (Graphics2D)graphics.create();
+            gtx = (Graphics2D)graphics;
             gtx.setColor( bgColor );
             gtx.fillRect( 0,  0, currWidth, currHeight );
             // end boilerplate
@@ -109,10 +109,6 @@ public class LineWidthDemo
             gtx.drawImage( offline, 0, 0, null );
             
             dLines.forEach( this::tagLine );
-                        
-            // begin boilerplate
-            gtx.dispose();
-            // end boilerplate
         }
         
         public void paintComponentBI( Graphics2D gtx )

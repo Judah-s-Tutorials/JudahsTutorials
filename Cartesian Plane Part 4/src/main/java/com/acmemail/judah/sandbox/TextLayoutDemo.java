@@ -80,7 +80,7 @@ public class TextLayoutDemo extends JPanel
         // Begin boilerplate
         ////////////////////////////////////
         super.paintComponent( graphics );
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         currWidth = getWidth();
         currHeight = getHeight();
         gtx.setColor( bgColor );
@@ -110,13 +110,5 @@ public class TextLayoutDemo extends JPanel
                 (float)bounds.getHeight()
             );
         gtx.draw( rect );
-
-        ////////////////////////////////////
-        // Begin boilerplate
-        ////////////////////////////////////
-        gtx.dispose();
-        ////////////////////////////////////
-        // End boiler plate
-        ////////////////////////////////////
     }
 }

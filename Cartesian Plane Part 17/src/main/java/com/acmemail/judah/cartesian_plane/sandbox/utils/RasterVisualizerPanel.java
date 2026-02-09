@@ -57,7 +57,7 @@ public class RasterVisualizerPanel extends JPanel
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        Graphics2D  gtx = (Graphics2D)graphics.create();
+        Graphics2D  gtx = (Graphics2D)graphics;
         gtx.setColor( bgColor );
         gtx.fillRect( 0, 0, prefWidth, prefHeight );
 //        gtx.drawImage( raster, 0, 0, this );

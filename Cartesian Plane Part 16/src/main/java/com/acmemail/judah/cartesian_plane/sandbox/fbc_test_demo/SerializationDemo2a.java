@@ -138,8 +138,6 @@ public class SerializationDemo2a
         gtx.setColor( fgColor );
         gtx.setStroke( new BasicStroke( (float)weight ) );
         gtx.draw( line );
-        
-        gtx.dispose();
         FBCompTADetail  detail  = 
             new FBCompTADetail( length, weight, image );
         writeDetail( detail );

@@ -222,7 +222,7 @@ public class LineGeneratorDemo2
 
         public void paintComponent( Graphics graphics )
         {
-            Graphics2D  gtx     = (Graphics2D)graphics.create();
+            Graphics2D  gtx     = (Graphics2D)graphics;
             Rectangle2D rect    = getBounds();
             gtx.setColor( Color.WHITE );
             gtx.fillRect( 0, 0, getWidth(), getHeight() );
@@ -233,7 +233,6 @@ public class LineGeneratorDemo2
             LineGenerator   lineGen     = 
                 new LineGenerator( rect, gpu, lpu );
             lineGen.forEach( gtx::draw );
-            gtx.dispose();
         }
     }
 }

@@ -52,14 +52,9 @@ public class ColorPrimer extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
-        // end boilerplate
-        
-        
-        // begin boilerplate
-        gtx.dispose();
         // end boilerplate
     }
 }

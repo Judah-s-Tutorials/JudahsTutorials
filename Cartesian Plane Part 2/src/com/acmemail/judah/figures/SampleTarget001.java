@@ -110,10 +110,6 @@ public class SampleTarget001 extends JPanel
 //        drawAxes();
 //        drawText();
 //        drawUserText();
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void drawAxes()

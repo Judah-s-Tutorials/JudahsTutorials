@@ -87,10 +87,6 @@ public class GridLines_02 extends JPanel
         centerYco = minYco + gridHeight / 2f;
 
         drawGrid();
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void drawGrid()

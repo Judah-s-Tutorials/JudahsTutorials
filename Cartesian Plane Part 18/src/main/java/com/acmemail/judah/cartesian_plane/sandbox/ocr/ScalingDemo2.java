@@ -211,7 +211,7 @@ public class ScalingDemo2 extends JPanel
     {
         width = getWidth();
         height = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         
         gtx.setColor( bgColor );
         gtx.fillRect( 0, 0, width, height );
@@ -226,8 +226,6 @@ public class ScalingDemo2 extends JPanel
         drawAlphaText();
         ++currLine;
         drawNumericText();
-        
-        gtx.dispose();
     }
     
     /**

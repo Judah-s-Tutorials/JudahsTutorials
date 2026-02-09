@@ -124,7 +124,7 @@ public class LineGeneratorFigure extends JPanel
         // Begin boilerplate
         ////////////////////////////////////
         super.paintComponent( graphics );
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         currWidth = getWidth();
         currHeight = getHeight();
         gtx.setColor( bgColor );
@@ -176,13 +176,5 @@ public class LineGeneratorFigure extends JPanel
         Line2D  yAxis      = 
             new Line2D.Float( yAxisXco, yAxisYco1, yAxisXco, yAxisYco2 );
         gtx.draw( yAxis );
-
-        ////////////////////////////////////
-        // Begin boilerplate
-        ////////////////////////////////////
-        gtx.dispose();
-        ////////////////////////////////////
-        // End boiler plate
-        ////////////////////////////////////
     }
 }

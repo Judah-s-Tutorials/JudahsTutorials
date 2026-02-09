@@ -556,7 +556,7 @@ public class CartesianPlane
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( mwBGColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
@@ -592,10 +592,6 @@ public class CartesianPlane
         drawHorizontalLabels();
         drawVerticalLabels();
         paintMargins();
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     public void propertyChange( PropertyChangeEvent evt )

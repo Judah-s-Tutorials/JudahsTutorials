@@ -745,8 +745,6 @@ public class ProfileEditorFeedbackTest
         FontRenderContext   frc     = gtx.getFontRenderContext();
         TextLayout          layout  = new TextLayout( "1.00", font, frc );
         Rectangle2D         rect    = layout.getBounds();
-        
-        gtx.dispose();
         return rect;
     }
     

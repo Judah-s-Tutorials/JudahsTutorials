@@ -374,8 +374,6 @@ public class Tess4JDemo4 extends JPanel
         
         gtx.setColor( textColor );
         drawNumericText();
-        
-        gtx.dispose();
     }
     
     /**

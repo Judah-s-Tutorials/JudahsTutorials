@@ -136,7 +136,7 @@ public class NonAxialPositioning extends JPanel
     @Override
     public void paintComponent( Graphics graphics )
     {
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setFont( lineFont );
         frc = gtx.getFontRenderContext();
         
@@ -155,8 +155,6 @@ public class NonAxialPositioning extends JPanel
         drawLineDistances();
         drawUnitDistances();
         drawLegend();
-        
-        gtx.dispose();
     }
     
     /**

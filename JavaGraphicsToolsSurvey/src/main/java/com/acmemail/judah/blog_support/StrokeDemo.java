@@ -38,7 +38,7 @@ public class StrokeDemo extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
@@ -86,9 +86,5 @@ public class StrokeDemo extends JPanel
             );
         gtx.setStroke( dashedStroke );
         gtx.drawRect( 20,  40, 100, 75 );
-
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
 }

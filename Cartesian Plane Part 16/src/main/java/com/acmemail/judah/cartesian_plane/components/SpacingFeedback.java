@@ -106,7 +106,7 @@ public class SpacingFeedback extends Feedback
     public void paintComponent( Graphics graphics )
     {
         super.paintComponent( graphics );
-        Graphics2D  gtx             = (Graphics2D)graphics.create();
+        Graphics2D  gtx             = (Graphics2D)graphics;
         int         width           = getWidth();
         int         height          = getHeight();
         double      centerXco       = width / 2.;
@@ -127,6 +127,5 @@ public class SpacingFeedback extends Feedback
         right.setLine( xcoRight, ycoTop, xcoRight, ycoBottom );
         gtx.draw( left );
         gtx.draw( right );
-        gtx.dispose();
     }
 }

@@ -55,7 +55,7 @@ public class ColorPrimer extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
@@ -82,10 +82,6 @@ public class ColorPrimer extends JPanel
         gtx.drawString( "Goo goo g'joob", bXco, bYco + 250 );
         
         paintTransparentOverlay();
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void paintTransparentOverlay()

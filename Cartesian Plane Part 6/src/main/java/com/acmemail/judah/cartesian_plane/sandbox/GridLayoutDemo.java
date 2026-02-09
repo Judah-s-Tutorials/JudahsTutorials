@@ -170,7 +170,7 @@ public class GridLayoutDemo extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
@@ -186,10 +186,6 @@ public class GridLayoutDemo extends JPanel
         drawAxes();
         drawUnits();
         drawGridLines();
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     /**

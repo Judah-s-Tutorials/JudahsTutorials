@@ -224,7 +224,7 @@ public class GraphicsCaptureDemo2
         public void paint( Graphics graphics )
         {
             super.paint( graphics );
-            gtx = (Graphics2D)graphics.create();
+            gtx = (Graphics2D)graphics;
             if ( copy != null )
             {
                 int         dimWidth    = ( copy.getWidth() + 2 * margin );

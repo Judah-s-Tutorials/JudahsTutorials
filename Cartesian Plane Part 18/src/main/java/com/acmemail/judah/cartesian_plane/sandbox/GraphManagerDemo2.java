@@ -273,7 +273,7 @@ public class GraphManagerDemo2
         {
             width = getWidth();
             height = getHeight();
-            gtx = (Graphics2D)graphics.create();
+            gtx = (Graphics2D)graphics;
             tile();
 //            gtx.setColor( Color.WHITE );
 //            gtx.fillRect( 0, 0, width, height );
@@ -284,8 +284,6 @@ public class GraphManagerDemo2
             rect.height = height - topMargin - bottomMargin;
             drawManager.refresh( gtx, rect );
             drawManager.drawAll();
-
-            gtx.dispose();
         }
         
         /**

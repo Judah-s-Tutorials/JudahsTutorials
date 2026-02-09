@@ -86,7 +86,7 @@ public class SampleTarget001 extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
@@ -108,10 +108,6 @@ public class SampleTarget001 extends JPanel
         drawAxes();
         drawText();
         drawUserText();
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void drawAxes()

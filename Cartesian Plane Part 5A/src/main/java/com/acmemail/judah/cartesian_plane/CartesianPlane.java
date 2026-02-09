@@ -546,7 +546,7 @@ public class CartesianPlane extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( mwBGColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
@@ -573,10 +573,6 @@ public class CartesianPlane extends JPanel
         drawHorizontalLabels();
         drawVerticalLabels();
         paintMargins();
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void drawAxes()

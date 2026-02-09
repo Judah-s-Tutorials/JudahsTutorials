@@ -153,7 +153,7 @@ public class GraphicsCaptureDemo1
         public void paint( Graphics graphics )
         {
             super.paint( graphics );
-            gtx = (Graphics2D)graphics.create();
+            gtx = (Graphics2D)graphics;
             
             int width       = getWidth();
             int height      = getHeight();

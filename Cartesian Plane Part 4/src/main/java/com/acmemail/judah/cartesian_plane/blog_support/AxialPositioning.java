@@ -121,7 +121,7 @@ public class AxialPositioning extends JPanel
     @Override
     public void paintComponent( Graphics graphics )
     {
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         font = gtx.getFont();
         frc = gtx.getFontRenderContext();
         
@@ -149,8 +149,6 @@ public class AxialPositioning extends JPanel
         drawLabel( rightXco, bottomYco );
         drawWidth();
         drawHeight();
-        
-        gtx.dispose();
     }
     
     /**

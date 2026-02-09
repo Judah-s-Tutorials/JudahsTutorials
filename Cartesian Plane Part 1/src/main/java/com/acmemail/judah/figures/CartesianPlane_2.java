@@ -53,11 +53,13 @@ public class CartesianPlane_2 extends JPanel
     /** Width of a major tic mark*/
     private double      ticMajorWidth       = ticMinorWidth;
     /** The width of the x- and y-axes */
+    @SuppressWarnings("unused")
     private double      axisWidth           = ticMajorWidth;
     /** The color of the grid lines */
     private double      gridLineWidth       = 1;
     
     /** True to display a legend, false to leave it off. */
+    @SuppressWarnings("unused")
     private boolean     showLegend          = true;
     /**
      * Width of the legend in pixels;
@@ -67,6 +69,7 @@ public class CartesianPlane_2 extends JPanel
      * @see #fontUnits
      * @see #legendWidth
      */
+    @SuppressWarnings("unused")
     private double      legendPixels        = -1;
     /**
      * Width of the legend.
@@ -77,6 +80,7 @@ public class CartesianPlane_2 extends JPanel
      * @see #legendPixels
      * @see #fontDecimals
      */
+    @SuppressWarnings("unused")
     private double      legendWidth         = 0;
     /** The name of the font used for the legend */
     private String      fontName            = "fixed";
@@ -85,6 +89,7 @@ public class CartesianPlane_2 extends JPanel
      * interpreted as EMS, anything else is interpreted as points.
      * @see #fontSize
      */
+    @SuppressWarnings("unused")
     private String      fontUnits           = "em";
     /** 
      * Size of the font in the given units.
@@ -92,11 +97,13 @@ public class CartesianPlane_2 extends JPanel
      */
     private int         fontSize            = 5;
     /** Number of decimal points to use in legend numbers. */
+    @SuppressWarnings("unused")
     private int         fontDecimals        = 2;
     /** 
      * Number of places consumed by a number in the legend,
      * including the decimal point.
      */
+    @SuppressWarnings("unused")
     private int         fontFieldWidth      = 3;
     /** 
      * Font style. Specified by one of the constants
@@ -133,6 +140,7 @@ public class CartesianPlane_2 extends JPanel
         this.setPreferredSize( size );
         
         // Set the font to be used in the legend.
+        @SuppressWarnings("unused")
         Font    font    = new Font( fontName, fontStyle, fontSize );
     }
     
@@ -141,7 +149,7 @@ public class CartesianPlane_2 extends JPanel
     {
         // Begin boilerplate
         super.paintComponent( graphics );
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         currWidth = getWidth();
         currHeight = getHeight();
         gtx.setColor( bgColor );
@@ -161,10 +169,6 @@ public class CartesianPlane_2 extends JPanel
             ticMajorWidth, 
             ticMajorLen
         );
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     /**
@@ -239,6 +243,7 @@ public class CartesianPlane_2 extends JPanel
         double  centerY = currHeight / 2.0;
         double  firstX  = 0;
         double  lastX   = currWidth;
+        @SuppressWarnings("unused")
         double  firstY  = 0;
         double  lastY   = currHeight;
         Line2D.Double   line    = new Line2D.Double();

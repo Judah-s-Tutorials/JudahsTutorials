@@ -37,7 +37,7 @@ public class ScalingDemo1A extends JPanel
     
     public void paintComponent( Graphics graphics )
     {
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( Color.WHITE );
         gtx.fillRect( 0,  0, getWidth(), getHeight() );
         gtx.setColor( Color.BLACK );

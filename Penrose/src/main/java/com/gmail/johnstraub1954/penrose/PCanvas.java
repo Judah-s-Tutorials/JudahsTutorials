@@ -213,7 +213,7 @@ public class PCanvas extends JPanel implements Serializable
         List<PShape>    shapes      = selectionMgr.getShapes();
         List<PShape>    selected    = selectionMgr.getSelected();
 
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         width = getWidth();
         height = getHeight();
         
@@ -240,7 +240,6 @@ public class PCanvas extends JPanel implements Serializable
             tweaker.accept( gtx, selectionMgr );
 
         this.grabFocus();
-        gtx.dispose();
     }
     
     public List<PShape> getSelected()

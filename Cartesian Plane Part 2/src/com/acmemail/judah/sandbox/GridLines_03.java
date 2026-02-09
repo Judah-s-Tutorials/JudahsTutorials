@@ -90,10 +90,6 @@ public class GridLines_03 extends JPanel
 
         drawGrid();
         paintMargins();
-        
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void drawGrid()

@@ -105,7 +105,7 @@ public class ScalingDemo1 extends JPanel
     {
         int         width   = getWidth();
         int         height  = getHeight();
-        Graphics2D  gtx     = (Graphics2D)graphics.create();
+        Graphics2D  gtx     = (Graphics2D)graphics;
         
         gtx.setColor( bgColor );
         gtx.fillRect( 0, 0, width, height );
@@ -118,8 +118,6 @@ public class ScalingDemo1 extends JPanel
         xco = 0;
         yco += margin + imageOrig.getHeight();
         gtx.drawImage( imageScaled, xco, yco, this );
-        
-        gtx.dispose();
     }
     
     /**

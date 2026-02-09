@@ -27,7 +27,7 @@ public class Canvas extends JPanel
     @Override
     public void paintComponent( Graphics graphics )
     {
-        Graphics2D  gtx = (Graphics2D)graphics.create();
+        Graphics2D  gtx = (Graphics2D)graphics;
         gtx.setColor( Color.blue );
         gtx.fillRect( 0,  0, getWidth(), getHeight() );
     }

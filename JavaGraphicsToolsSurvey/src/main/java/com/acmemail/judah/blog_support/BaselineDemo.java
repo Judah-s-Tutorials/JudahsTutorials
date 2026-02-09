@@ -49,17 +49,13 @@ public class BaselineDemo extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics.create();
+        gtx = (Graphics2D)graphics;
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
         
         drawString( "Brique peter junquet", 50, 75 );
         drawString( "11.21", 50, 150 );
-
-        // begin boilerplate
-        gtx.dispose();
-        // end boilerplate
     }
     
     private void drawString( String str, int xco, int yco )
