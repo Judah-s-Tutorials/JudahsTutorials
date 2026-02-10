@@ -1,6 +1,8 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 
 import javax.swing.text.html.StyleSheet;
@@ -41,10 +43,11 @@ public class StyleSheetFromURLDemo
         StyleSheet  styleSheet  = new StyleSheet();
         try
         {
-            URL         url         = new URL( urlStr );
+            URI         uri         = new URI( urlStr );
+            URL         url         = uri.toURL();
             styleSheet.importStyleSheet( url );
         }
-        catch ( MalformedURLException exc )
+        catch ( URISyntaxException | MalformedURLException exc )
         {
             exc.printStackTrace();
             System.exit( 1 );

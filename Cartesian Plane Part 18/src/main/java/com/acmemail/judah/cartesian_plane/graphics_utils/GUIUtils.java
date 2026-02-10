@@ -6,9 +6,6 @@ import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
-
-import org.junit.platform.commons.util.ExceptionUtils;
-
 public class GUIUtils
 {
     /**
@@ -37,7 +34,7 @@ public class GUIUtils
             exc.printStackTrace();
             Throwable   cause   = exc.getCause();
             if ( cause != null )
-                ExceptionUtils.throwAsUncheckedException( cause );
+                throw new RuntimeException( cause );
             else
                 throw new RuntimeException( exc );
         }

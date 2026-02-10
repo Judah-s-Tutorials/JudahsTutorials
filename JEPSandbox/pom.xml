@@ -15,12 +15,18 @@
         <maven.compiler.target>1.14</maven.compiler.target>
     </properties>
     <dependencies>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<version>5.9.2</version>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>6.0.2</version>
 			<scope>test</scope>
-		</dependency>    
+        </dependency>    
+        <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-suite</artifactId>
+            <version>6.0.2</version>
+			<scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>net.objecthunter</groupId>
             <artifactId>exp4j</artifactId>

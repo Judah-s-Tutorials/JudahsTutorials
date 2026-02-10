@@ -10,6 +10,7 @@ import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.stream.Stream;
@@ -549,9 +550,10 @@ public class CPMenuBar extends JMenuBar
             URL temp    = null;
             try
             {
-                temp = new URL( urlStr );
+                URI uri = new URI( urlStr );
+                temp = uri.toURL();
             }
-            catch ( MalformedURLException exc )
+            catch ( URISyntaxException | MalformedURLException exc )
             {
                 exc.printStackTrace();
                 System.exit( 1 );
