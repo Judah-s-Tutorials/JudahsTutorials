@@ -5,7 +5,6 @@ import java.util.stream.Stream;
 
 public class SlopeToRadians
 {
-    private static final double xier    = Math.PI / 180;
     public SlopeToRadians()
     {
         // TODO Auto-generated constructor stub

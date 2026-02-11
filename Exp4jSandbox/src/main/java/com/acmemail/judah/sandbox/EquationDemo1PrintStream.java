@@ -43,8 +43,7 @@ public class EquationDemo1PrintStream
     public void execute() throws IOException
     {
         equation.setRange( -2, 2, .5 );
-        Command cmd = Command.NONE;
-        while ( (cmd = getCommand()) != Command.EXIT )
+        while ( getCommand() != Command.EXIT )
         {
             ValidationResult    result  =
                 equation.setYExpression( argString );

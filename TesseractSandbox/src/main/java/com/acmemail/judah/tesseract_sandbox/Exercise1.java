@@ -9,8 +9,6 @@ public class Exercise1
 {
     private static final String imagePathStr    = 
         "src/main/resources/images";
-    private static final File   imagePath       = 
-        new File( imagePathStr );
     private static final String imageName       = 
         "TestImage16Point.png";
 //        "Notepad++Snap.png";
@@ -18,8 +16,6 @@ public class Exercise1
         new File( imagePathStr, imageName );
     private static final String dataPathStr     = 
         System.getenv( "TESSDATA_PREFIX" );
-    private static final File   dataPath        = 
-        new File( dataPathStr );
 
     /**
      * Application entry point.

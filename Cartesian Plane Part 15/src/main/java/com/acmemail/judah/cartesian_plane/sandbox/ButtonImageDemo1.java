@@ -55,8 +55,6 @@ public class ButtonImageDemo1
         frame.setLocation( 300, 100 );
         frame.pack();
         frame.setVisible( true );
-        
-        ImageIcon   icon    = new ImageIcon( "images/Forward.png" );
     }
     
     private JPanel getButtonPanel()

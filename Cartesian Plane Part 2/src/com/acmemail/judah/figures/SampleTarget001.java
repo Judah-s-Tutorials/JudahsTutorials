@@ -3,8 +3,6 @@ package com.acmemail.judah.figures;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
@@ -18,27 +16,13 @@ import com.acmemail.judah.cartesian_plane.Root;
 public class SampleTarget001 extends JPanel
 {
     private final Color     bgColor     = new Color( .9f, .9f, .9f );
-    private final Color     ticColor    = Color.BLACK;
-    private final Color     axisColor   = Color.BLACK;
     private final Color     gridColor   = new Color( .75f, .75f, .75f);
-    private final Color     textColor   = Color.BLACK;
     private final Color     marginColor = new Color( 0x008080 );
     
-    private final float		axisWeight			= 4;
-    private final float		majorTicWeight		= 3;
-    private final float		minorTicWeight	    = 2;
     private final float     gridWeight          = 1;
-    private final Font      textFont            = 
-        new Font( "Monospace", Font.PLAIN, 10 );
-    private final Font      userFont            = 
-        new Font( "Dialog", Font.PLAIN, 16 );
     
-    private final int		minorTicsPerUnit	= 10;
     private final int		majorTicsPerUnit	= 2;
     private final float		pixelsPerUnit		= 75;
-    
-    private final float     minorTicLen         = 7;
-    private final float     majorTicLen         = 2 * minorTicLen;
     
     private final int       leftMargin          = 60;
     private final int       rightMargin         = 20;
@@ -105,82 +89,7 @@ public class SampleTarget001 extends JPanel
         
         drawMargins();
         drawGrid();
-//        drawMinorTics();
-//        drawMajorTics();
-//        drawAxes();
-//        drawText();
-//        drawUserText();
-    }
-    
-    private void drawAxes()
-    {
-        Line2D  xAxis   = 
-            new Line2D.Float( minXco, centerYco, maxXco, centerYco );
-        Line2D  yAxis   = 
-            new Line2D.Float( centerXco, minYco, centerXco, maxYco );
-        gtx.setStroke( new BasicStroke( axisWeight ) );
-        gtx.setColor( axisColor );
-        gtx.draw( xAxis );
-        gtx.draw( yAxis );
-    }
-    
-    private void drawMajorTics()
-    {
-        gtx.setColor( ticColor );
-        gtx.setStroke( new BasicStroke( majorTicWeight ) );
-        float   ticDist     = pixelsPerUnit / majorTicsPerUnit;
-        
-        float   numXUnits   = gridWidth / pixelsPerUnit;
-        float   numXTicsNeg = (int)(numXUnits * majorTicsPerUnit / 2);
-        float   firstXco    = centerXco - (int)numXTicsNeg * ticDist;
-        float   yco1        = centerYco - majorTicLen / 2;
-        float   yco2        = yco1 + majorTicLen;
-        for ( float xco = firstXco ; xco <= maxXco ; xco += ticDist )
-        {
-            Line2D  tic     = new Line2D.Float( xco, yco1, xco, yco2 );
-            gtx.draw( tic );
-        }
-        
-        float   numYUnits   = gridHeight / pixelsPerUnit;
-        float   numYTicsPos = (int)(numYUnits * majorTicsPerUnit / 2);
-        float   firstYco    = centerYco - (int)numYTicsPos * ticDist;
-        float   xco1        = centerXco - majorTicLen / 2;
-        float   xco2        = xco1 + majorTicLen;
-        for ( float yco = firstYco ; yco <= maxYco ; yco += ticDist )
-        {
-            Line2D  tic     = new Line2D.Float( xco1, yco, xco2, yco );
-            gtx.draw( tic );
-        }
-    }
-        
-    private void drawMinorTics()
-    {
-        gtx.setColor( ticColor );
-        gtx.setStroke( new BasicStroke( minorTicWeight ) );
-        float   ticDist     = pixelsPerUnit / minorTicsPerUnit;
-        
-        float   numXUnits   = gridWidth / pixelsPerUnit;
-        int     numXTicsNeg = (int)(numXUnits * minorTicsPerUnit / 2);
-        float   firstXco    = centerXco - (int)numXTicsNeg * ticDist;
-        float   yco1        = centerYco - minorTicLen / 2;
-        float   yco2        = yco1 + minorTicLen;
-        for ( float xco = firstXco ; xco <= maxXco ; xco += ticDist )
-        {
-            Line2D  tic     = new Line2D.Float( xco, yco1, xco, yco2 );
-            gtx.draw( tic );
-        }
-        
-        float   numYUnits   = gridHeight / pixelsPerUnit;
-        int     numYTicsPos = (int)(numYUnits * minorTicsPerUnit / 2);
-        float   firstYco    = centerYco - (int)numYTicsPos * ticDist;
-        float   xco1        = centerXco - minorTicLen / 2;
-        float   xco2        = xco1 + minorTicLen;
-        for ( float yco = firstYco ; yco <= maxYco ; yco += ticDist )
-        {
-            Line2D  tic     = new Line2D.Float( xco1, yco, xco2, yco );
-            gtx.draw( tic );
-        }
-    }
+    }    
     
     private void drawGrid()
     {
@@ -204,49 +113,6 @@ public class SampleTarget001 extends JPanel
         {
             Line2D  tic     = new Line2D.Float( minXco, yco, maxXco, yco );
             gtx.draw( tic );
-        }
-    }
-    
-    private void drawText()
-    {
-        gtx.setColor( textColor );
-        gtx.setFont( textFont );
-        FontMetrics metrics = gtx.getFontMetrics();
-        float       ticDist = pixelsPerUnit / majorTicsPerUnit;
-        
-        float   numXUnits   = gridWidth / pixelsPerUnit;
-        float   numXTicsNeg = (int)(numXUnits * majorTicsPerUnit / 2);
-        float   firstXco    = centerXco - (int)numXTicsNeg * ticDist;
-        float   nextXUnit   = -numXTicsNeg / majorTicsPerUnit;
-        for ( float xco = firstXco ; xco <= maxXco ; xco += ticDist )
-        {
-            if ( nextXUnit != 0 )
-            {
-                String      label   = String.format( "%.1f", nextXUnit );
-                Rectangle2D rect    = metrics.getStringBounds( label, gtx );
-                float       baseXco = xco - (float)rect.getWidth() / 2;
-                float       baseYco = 
-                    centerYco + majorTicLen / 2 + (float)rect.getHeight();
-                gtx.drawString( label, baseXco, baseYco );
-            }
-            nextXUnit += 1.0 / majorTicsPerUnit;
-        }
-        
-        float   numYUnits   = gridHeight / pixelsPerUnit;
-        float   numYTicsPos = (int)(numYUnits * majorTicsPerUnit / 2);
-        float   firstYco    = centerYco - (int)numYTicsPos * ticDist;
-        float   baseXco     = centerXco + majorTicLen / 2 + 3;
-        float   nextYUnit   = numYTicsPos / majorTicsPerUnit;
-        for ( float yco = firstYco ; yco <= maxYco ; yco += ticDist )
-        {
-            if ( nextYUnit != 0 )
-            {
-                String      label   = String.format( "%.1f", nextYUnit );
-                Rectangle2D rect    = metrics.getStringBounds( label, gtx );
-                float       baseYco = yco + (float)rect.getHeight() / 3;
-                gtx.drawString( label, baseXco, baseYco );
-            }
-            nextYUnit -= 1.0 / majorTicsPerUnit;
         }
     }
     
@@ -284,31 +150,5 @@ public class SampleTarget001 extends JPanel
             currHeight
         );
         gtx.fill( rect );
-    }
-    
-    private void drawUserText()
-    {
-        gtx.setFont( userFont );
-        gtx.setColor( Color.BLACK );
-        String          equation    =
-            "y = x\u00B2 + 3x - 7";
-        FontMetrics     metrics     = gtx.getFontMetrics();
-        Rectangle2D     rect        = 
-            metrics.getStringBounds( equation, gtx );
-        float           baselineXco = 
-            minXco + (gridWidth - (float)rect.getWidth()) / 2;
-        float           baselineYco = maxYco + (float)rect.getHeight() * 2;
-        gtx.drawString( equation, baselineXco, baselineYco );
-        
-        String  str = "Author: ";
-        rect = metrics.getStringBounds( str, gtx );
-        baselineXco = 3;
-        baselineYco = minYco + (float)rect.getHeight();
-        gtx.drawString( str, baselineXco, baselineYco );
-        
-        str = "J. Gibbs";
-        rect = metrics.getStringBounds( str, gtx );
-        baselineYco += (float)rect.getHeight();
-        gtx.drawString( str, baselineXco, baselineYco );
     }
 }

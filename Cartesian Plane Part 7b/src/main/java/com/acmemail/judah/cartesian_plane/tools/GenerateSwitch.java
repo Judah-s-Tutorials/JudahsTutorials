@@ -159,8 +159,7 @@ public class GenerateSwitch
     
     private void skipHeader() throws IOException
     {
-        String  line    = null;
-        while ( !(line = nextLine()).contains( "public class" ) )
+        while ( !(nextLine()).contains( "public class" ) )
             ;
     }
     

@@ -3,6 +3,7 @@ package com.gmail.johnstraub1954.weather.sandbox;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -39,7 +40,8 @@ public class CityUtcOffset {
         String query = URLEncoder.encode(cityName, StandardCharsets.UTF_8);
         String urlString = String.format("%s?q=%s&format=json&limit=1", OSM_NOMINATIM_URL, query);
         
-        URL url = new URL(urlString);
+        URI uri = new URI( urlString );
+        URL url = uri.toURL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestProperty("User-Agent", "CityUtcOffset/1.0");
         
@@ -59,7 +61,8 @@ public class CityUtcOffset {
         String query = URLEncoder.encode(cityName, StandardCharsets.UTF_8);
         String urlString = String.format("%s?q=%s&format=json&limit=1", OSM_NOMINATIM_URL, query);
         
-        URL url = new URL(urlString);
+        URI uri = new URI(urlString);
+        URL url = uri.toURL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestProperty("User-Agent", "CityUtcOffset/1.0");
         
@@ -84,7 +87,8 @@ public class CityUtcOffset {
         );
         
         System.out.println( urlString );
-        URL url = new URL(urlString);
+        URI uri = new URI(urlString);
+        URL url = uri.toURL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestProperty("User-Agent", "CityUtcOffset/1.0");
         

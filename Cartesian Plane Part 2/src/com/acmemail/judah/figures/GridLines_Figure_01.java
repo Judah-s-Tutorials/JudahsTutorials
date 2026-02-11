@@ -16,6 +16,7 @@ import javax.swing.JPanel;
  * @author Jack Straub
  *
  */
+@SuppressWarnings("serial")
 public class GridLines_Figure_01 extends JPanel
 {
     /** The initial width of the window, in pixels. */

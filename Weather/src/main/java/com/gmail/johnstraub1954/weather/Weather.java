@@ -18,7 +18,6 @@ public class Weather
     private static final String apiKey      = "cb4566e090b84696a7d161318252911";
     private static final String urlHost     = "api.weatherapi.com";
     private static final String weatherPath = "/v1/forecast.json";
-    private static final String tzPath      = "/free/v2/tz.ashx";
     
     private WeatherData data;
     

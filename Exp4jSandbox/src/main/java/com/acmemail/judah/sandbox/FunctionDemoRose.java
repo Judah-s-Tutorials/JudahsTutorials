@@ -6,8 +6,6 @@ import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
-import net.objecthunter.exp4j.function.Function;
-
 public class FunctionDemoRose
 {
     private static final CartesianPlane plane   = new CartesianPlane();
@@ -29,34 +27,7 @@ public class FunctionDemoRose
         pmgr.setProperty( CPConstants.TIC_MINOR_MPU_PN, 5 );
         pmgr.setProperty( CPConstants.GRID_UNIT_PN, 50 );
         Root    root    = new Root( plane );
-        root.start();
-        
-        Function    roseX   = new Function( "rosex", 3 ) {
-            @Override
-            public double apply( double... args )
-            {
-                double  t = args[0];
-                double  a = args[1];
-                double  b = args[2];
-                
-                double  x = a * Math.cos( b * t ) * Math.cos( t );
-                return x;
-            }
-        };
-        
-        Function    roseY   = new Function( "rosey", 3 ) {
-            @Override
-            public double apply( double... args )
-            {
-                double  t = args[0];
-                double  a = args[1];
-                double  b = args[2];
-                
-                double  y =a * Math.cos( b * t ) * Math.sin( t );
-                return y;
-            }
-        };
-        
+        root.start();        
         
 //        plane.setStreamSupplier( () ->
 //            Stream.concat( Stream.of( shape, color), plotStream() )

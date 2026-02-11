@@ -8,7 +8,6 @@ public class SmartRect
     private static final float  DEFAULT_WIDTH   = 127.3f;
     private static final float  DEFAULT_HEIGHT  = 99.6f;
     
-    private final Color color;
     private final float width;
     private final float height;
     
@@ -29,7 +28,6 @@ public class SmartRect
     
     public SmartRect( Color color, float width, float height )
     {
-        this.color = color;
         this.width = width;
         this.height = height;
     }

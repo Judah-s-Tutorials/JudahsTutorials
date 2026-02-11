@@ -14,9 +14,6 @@ import com.acmemail.judah.graphics.Root;
 public class FontDemo extends JPanel
 {
     private final Color     bgColor     = new Color( .9f, .9f, .9f );
-    private final Color     fillColor   = Color.BLUE;
-    private final Color     edgeColor   = Color.BLACK;
-    private final int       edgeWidth   = 3;
     
     private int             currWidth;
     private int             currHeight;

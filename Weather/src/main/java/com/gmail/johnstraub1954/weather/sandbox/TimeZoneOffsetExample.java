@@ -3,6 +3,7 @@ package com.gmail.johnstraub1954.weather.sandbox;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 
 import org.json.JSONObject;
@@ -33,7 +34,8 @@ public class TimeZoneOffsetExample {
         );
 
         System.out.println( urlStr );
-        URL url = new URL(urlStr);
+        URI uri = new URI( urlStr );
+        URL url = uri.toURL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestMethod("GET");
 

@@ -126,11 +126,6 @@ public class EquationDemo3UserInputWithFileIO
         }
     }
     
-    private void open()
-    {
-        
-    }
-    
     private void displayResult( ValidationResult result )
     {
         List<String>    list    = result.getErrors();

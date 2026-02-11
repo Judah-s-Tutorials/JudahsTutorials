@@ -104,7 +104,6 @@ public class KiteDartIconMaker
         }
     }
 
-    @SuppressWarnings("unused")
     private static boolean showImage( BufferedImage image )
     {
         Icon    icon        = new ImageIcon( image );

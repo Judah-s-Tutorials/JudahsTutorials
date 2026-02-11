@@ -26,7 +26,6 @@ public class GenerateCPConstants
     private BufferedReader  reader;
     private PrintWriter     writer;
     
-    private String          previousLine    = null;
     private int             lineNo          = 0;
     
     public static void main(String[] args)

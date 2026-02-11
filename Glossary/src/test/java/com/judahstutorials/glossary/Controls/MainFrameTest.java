@@ -23,8 +23,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.swing.JOptionPane;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -40,9 +38,7 @@ import test_utils.TestDB;
 
 class MainFrameTest
 {
-    private static final String     testTerm    = "Temp Term";
     private static final String     testURL     = "Temp URL ";
-    private static List<SeeAlso>    testURLList = getURLList();
 
     private static MainFrame        mainFrame   = null;
     private static MainFrameTestGUI testGUI     = null;
@@ -232,17 +228,6 @@ class MainFrameTest
     }
 
 
-    private Definition getTestTransaction()
-    {
-        Definition  def = new Definition();
-        def.setTerm( testTerm );
-        testURLList.stream()
-            .map( s -> s.getURL() )
-            .map( SeeAlso::new )
-            .forEach( def::addSeeAlso );
-        return def;
-    }
-
     private void validateEnabled( String... strings )
     {
         Stream.of( strings ).forEach( s ->
@@ -284,10 +269,5 @@ class MainFrameTest
                 .map( SeeAlso::new )
                 .toList();
         return list;
-    }
-    
-    private static void pause()
-    {
-        JOptionPane.showMessageDialog( null, "Waiting" );
     }
 }

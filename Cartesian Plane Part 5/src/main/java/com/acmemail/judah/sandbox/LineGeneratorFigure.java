@@ -21,6 +21,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  * @author Jack Straub
  *
  */
+@SuppressWarnings("serial")
 public class LineGeneratorFigure extends JPanel
 {
     /** Background color of the Canvas. */

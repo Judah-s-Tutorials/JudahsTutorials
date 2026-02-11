@@ -496,8 +496,6 @@ public class CartesianPlane
     //   Label properties (these are the labels that
     //   go on the x- and y-axes, e.g., 1.1, 1.2)
     /////////////////////////////////////////////////
-    private Color   labelFontColor      =
-        pmgr.asColor( CPConstants.LABEL_FONT_COLOR_PN );
     private String  labelFontName       =
         pmgr.asString( CPConstants.LABEL_FONT_NAME_PN );
     private int     labelFontStyle      =
@@ -677,9 +675,6 @@ public class CartesianPlane
             break;
         case CPConstants.AXIS_WEIGHT_PN:
             axisWeight = CPConstants.asFloat( newVal );
-            break;
-        case CPConstants.LABEL_FONT_COLOR_PN:
-            labelFontColor = CPConstants.asColor( newVal );
             break;
         case CPConstants.LABEL_FONT_NAME_PN:
             labelFontName = newVal;

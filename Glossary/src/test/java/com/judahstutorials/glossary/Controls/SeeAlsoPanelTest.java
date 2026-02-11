@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import javax.swing.JOptionPane;
-
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,13 +19,11 @@ import com.judahstutorials.glossary.Definition;
 import com.judahstutorials.glossary.SeeAlso;
 
 import test_utils.SeeAlsoTestGUI;
-import test_utils.TestDB;
 
 class SeeAlsoPanelTest
 {
     private static final SeeAlsoTestGUI testGUI = 
         SeeAlsoTestGUI.getTestGUI();
-    private TestDB  testDB;
     
     @BeforeAll
     static void setUpBeforeClass() throws Exception
@@ -37,7 +33,6 @@ class SeeAlsoPanelTest
     @BeforeEach
     public void setUp() throws Exception
     {
-        testDB = new TestDB();
         testGUI.reset();
     }
 
@@ -144,10 +139,5 @@ class SeeAlsoPanelTest
                 .filter( s -> url.equals( s.getURL() ) )
                 .findFirst().orElse( null );
         return seeAlso;
-    }
-
-    private void pause()
-    {
-        JOptionPane.showMessageDialog( null, "Waiting..." );;
     }
 }

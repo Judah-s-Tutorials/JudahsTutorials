@@ -19,17 +19,6 @@ public class TestDB
     private static final String     insertDefStr    =
         "INSERT INTO definition (term, seq_num, slug, description ) "
             + "VALUES (?, ?, ?, ?);";
-    private static final String     selectDefStr    =
-        "SELECT * FROM definition WHERE term = ?";
-    private static final String     updateDefStr    = 
-        "UPDATE definition SET "
-            + "term = ?"
-            + " ,seq_num = ?"
-            + " ,slug = ?"
-            + " ,description = ?"
-            + " WHERE id = ?";
-    private static final String     deleteDefStr    =
-        "DELETE from definition where id = ?";
     private static final String     queryDefByIDStr =
         "SELECT * from definition where id = ?";
 
@@ -37,14 +26,6 @@ public class TestDB
         "INSERT INTO see_also (term_id, url) VALUES (?, ?)";
     private static final String     selectSAStr     =
         "SELECT * FROM see_also WHERE term_id = ?";
-    private static final String     updateSAStr     = 
-        "UPDATE see_also SET "
-            + "url = ?"
-            + "where id = ?";
-    private static final String     deleteSAStr     =
-        "DELETE from see_also where id = ?";
-    private static final String     deleteSATermStr =
-        "DELETE from see_also where term_id = ?";
     
     private final Definition        def1    = new Definition();
     private final Definition        def2    = new Definition();

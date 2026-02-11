@@ -1,5 +1,6 @@
 package com.judahstutorials.glossary;
 
+@SuppressWarnings("serial")
 public class FormatException extends Error
 {
 

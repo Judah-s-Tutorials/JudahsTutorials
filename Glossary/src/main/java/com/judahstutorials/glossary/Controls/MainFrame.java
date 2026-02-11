@@ -266,15 +266,6 @@ public class MainFrame
         }
     }
     
-    private void deleteDef( ActionEvent evt )
-    {
-        if ( currDef != null && currDef.getID() != null )
-        {
-            boolean currState   = currDef.isMarkedForDelete();
-            currDef.markForDelete( !currState );
-        }
-    }
-    
     private void newDef( ActionEvent evt )
     {
         currDef = new Definition();
@@ -301,14 +292,6 @@ public class MainFrame
             
             seeAlsoPanel.setDefinition( currDef );
         }
-    }
-    
-    private void enableInput( boolean enable )
-    {
-        ident.setEnabled( enable );
-        term.setEnabled( enable );
-        slug.setEnabled( enable );
-        description.setEnabled( enable );
     }
     
     private void reset( boolean live )

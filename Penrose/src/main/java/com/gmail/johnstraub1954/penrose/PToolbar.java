@@ -92,7 +92,6 @@ public class PToolbar
     
     private final PCanvas       canvas      = PCanvas.getDefaultCanvas();
     private final LEDManager    ledManager  = new LEDManager();
-    @SuppressWarnings("unused")
     private final ButtonDesc[]  buttonDescs =
     {
         new ButtonDesc( 

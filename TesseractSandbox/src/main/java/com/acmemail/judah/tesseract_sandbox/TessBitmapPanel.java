@@ -9,6 +9,7 @@ import javax.swing.JTextArea;
 import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 
+@SuppressWarnings("serial")
 public class TessBitmapPanel extends JPanel
 {
     private static final String dataPathStr     = 

@@ -3,6 +3,7 @@ package com.gmail.johnstraub1954.weather.sandbox;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -45,7 +46,8 @@ public class CityCoordinates {
         String encodedCity = URLEncoder.encode(city, StandardCharsets.UTF_8);
         String urlString = String.format("%s?q=%s&format=json&limit=1", NOMINATIM_URL, encodedCity);
         
-        URL url = new URL(urlString);
+        URI uri = new URI( urlString );
+        URL url = uri.toURL();
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setRequestProperty("User-Agent", "CityCoordinatesApp/1.0");
         
