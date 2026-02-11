@@ -1,6 +1,7 @@
 package com.acmemail.judah.graphics.sandbox;
 
 import java.awt.Dimension;
+
 import javax.swing.JPanel;
 
 @SuppressWarnings("serial")

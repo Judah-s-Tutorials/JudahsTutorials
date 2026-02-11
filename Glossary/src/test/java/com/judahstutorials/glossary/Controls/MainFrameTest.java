@@ -1,8 +1,24 @@
 package com.judahstutorials.glossary.Controls;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.judahstutorials.glossary.Controls.MainFrame.CANCEL_BUTTON;
+import static com.judahstutorials.glossary.Controls.MainFrame.COMMIT_BUTTON;
+import static com.judahstutorials.glossary.Controls.MainFrame.DELETE_BUTTON;
+import static com.judahstutorials.glossary.Controls.MainFrame.DESC_FIELD;
+import static com.judahstutorials.glossary.Controls.MainFrame.EXIT_BUTTON;
+import static com.judahstutorials.glossary.Controls.MainFrame.NEW_BUTTON;
+import static com.judahstutorials.glossary.Controls.MainFrame.QUERY_BUTTON;
+import static com.judahstutorials.glossary.Controls.MainFrame.SEQ_NUM_FIELD;
+import static com.judahstutorials.glossary.Controls.MainFrame.SLUG_FIELD;
+import static com.judahstutorials.glossary.Controls.MainFrame.TERM_FIELD;
+import static com.judahstutorials.glossary.Controls.MainFrame.TERM_ID_FIELD;
+import static com.judahstutorials.glossary.Controls.SeeAlsoPanel.SA_DELETE_BUTTON;
+import static com.judahstutorials.glossary.Controls.SeeAlsoPanel.SA_NEW_TEXT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -21,9 +37,6 @@ import com.judahstutorials.glossary.SeeAlso;
 import test_utils.GUIUtils;
 import test_utils.MainFrameTestGUI;
 import test_utils.TestDB;
-
-import static com.judahstutorials.glossary.Controls.MainFrame.*;
-import static com.judahstutorials.glossary.Controls.SeeAlsoPanel.*;
 
 class MainFrameTest
 {

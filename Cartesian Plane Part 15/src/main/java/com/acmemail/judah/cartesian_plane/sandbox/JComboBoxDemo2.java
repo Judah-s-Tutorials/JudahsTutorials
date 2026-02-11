@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;

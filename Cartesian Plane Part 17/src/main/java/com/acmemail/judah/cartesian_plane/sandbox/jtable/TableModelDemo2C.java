@@ -48,7 +48,6 @@ public class TableModelDemo2C
         String[]    headers = { "State", "Capital", "Population" };
         Object[][]  data    = 
             State.getDataSet( "state", "capital", "population" );
-        @SuppressWarnings("serial")
         TableModel  model       =   
             new DefaultTableModel( data, headers ) {
                 public Class<?> getColumnClass( int col ) 

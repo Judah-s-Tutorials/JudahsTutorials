@@ -3,7 +3,6 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.text.ParseException;
-import java.time.LocalDate;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -14,7 +13,6 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.SpinnerListModel;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 

@@ -55,15 +55,18 @@
   <build>
         <plugins>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.version}</version>
+                <version>3.6.0</version>
                 <configuration>
-                    <verbose>true</verbose>
-                    <fork>true</fork>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                    <executable>${JAVA_HOME}/bin/javac</executable>
+                <!--    
+                    <source>1.8</source>
+                    <target>1.8</target>
+                -->
+                    <release>21</release>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                        <arg>-Xlint:serial</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>

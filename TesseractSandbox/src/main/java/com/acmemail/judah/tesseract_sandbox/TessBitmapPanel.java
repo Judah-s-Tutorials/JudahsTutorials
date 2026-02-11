@@ -1,9 +1,7 @@
 package com.acmemail.judah.tesseract_sandbox;
 
-import java.awt.Window;
 import java.awt.image.BufferedImage;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;

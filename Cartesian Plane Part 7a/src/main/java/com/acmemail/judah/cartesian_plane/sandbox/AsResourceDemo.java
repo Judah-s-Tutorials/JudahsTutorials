@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import com.acmemail.judah.cartesian_plane.PropertyManager;
-
 public class AsResourceDemo
 {
     private static final String         appPropertiesName   = 

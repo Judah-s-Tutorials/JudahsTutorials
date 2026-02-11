@@ -1,7 +1,6 @@
 package com.acmemail.judah.cartesian_plane;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import static util.BaseCaseParameters.BASE_GRID_HEIGHT;
 import static util.BaseCaseParameters.BASE_GRID_UNIT;
 import static util.BaseCaseParameters.BASE_GRID_WIDTH;

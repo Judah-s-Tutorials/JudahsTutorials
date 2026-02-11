@@ -42,16 +42,22 @@
 	</dependencies>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
+             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>${maven.compiler.version}</version>
+                <version>3.6.0</version>
                 <configuration>
-                    <source>${maven.compiler.target}</source>
-                    <source>${maven.compiler.target}</source>
+                <!--    
+                    <source>1.8</source>
+                    <target>1.8</target>
+                -->
+                    <release>21</release>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                        <arg>-Xlint:serial</arg>
+                    </compilerArgs>
                 </configuration>
-      </plugin>
-            <plugin>
+            </plugin>
+           <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <groupId>org.apache.maven.plugins</groupId>
                 <version>3.0.0</version>

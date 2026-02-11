@@ -1,8 +1,6 @@
 package com.acmemail.judah.sandbox;
 
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 

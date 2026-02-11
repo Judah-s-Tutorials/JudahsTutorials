@@ -60,7 +60,6 @@ public class TwoDDemo
         gtx.drawString( testStr, xco, 2 * size - (int)(.6 * size) );
     }
     
-    @SuppressWarnings("serial")
     private static void post( BufferedImage image )
     {
         JFrame      frame      = new JFrame( "Bold Demo" );

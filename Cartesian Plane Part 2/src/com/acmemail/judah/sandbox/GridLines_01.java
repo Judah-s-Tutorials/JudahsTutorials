@@ -3,16 +3,11 @@ package com.acmemail.judah.sandbox;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
-
-import com.acmemail.judah.cartesian_plane.Root;
 
 @SuppressWarnings("serial")
 public class GridLines_01 extends JPanel

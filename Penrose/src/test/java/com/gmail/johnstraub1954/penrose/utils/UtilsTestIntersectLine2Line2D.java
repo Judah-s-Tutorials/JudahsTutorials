@@ -4,10 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
-import java.lang.reflect.InvocationTargetException;
-
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.Test;
 

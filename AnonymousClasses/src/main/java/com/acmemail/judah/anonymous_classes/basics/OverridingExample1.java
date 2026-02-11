@@ -19,7 +19,6 @@ import java.util.Random;
  */
 public class OverridingExample1
 {
-    @SuppressWarnings("serial")
     private static final List<String>  processQueue    = new ArrayList<>()
     {
         @Override

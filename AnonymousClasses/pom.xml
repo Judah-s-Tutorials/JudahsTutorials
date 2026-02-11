@@ -31,8 +31,11 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.6.0</version>
                 <configuration>
-                    <source>1.14</source>
-                    <target>1.14</target>
+                <!--    
+                    <source>1.8</source>
+                    <target>1.8</target>
+                -->
+                    <release>21</release>
                     <compilerArgs>
                         <arg>-Xlint:all</arg>
                         <arg>-Xlint:serial</arg>

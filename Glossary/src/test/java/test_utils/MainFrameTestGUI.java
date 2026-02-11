@@ -20,7 +20,6 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 
-import com.judahstutorials.glossary.Definition;
 import com.judahstutorials.glossary.Controls.MainFrame;
 import com.judahstutorials.glossary.Controls.SeeAlsoPanel;
 

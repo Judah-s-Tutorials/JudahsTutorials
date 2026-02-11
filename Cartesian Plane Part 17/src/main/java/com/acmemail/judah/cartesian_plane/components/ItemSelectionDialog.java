@@ -159,7 +159,6 @@ public class ItemSelectionDialog
         pane.setViewportView( jList );
 
         // Define action
-        @SuppressWarnings("serial")
         Action      action      = new AbstractAction() {
             public void actionPerformed( ActionEvent evt ) {
                 setAndClose( CANCEL_STATUS );
