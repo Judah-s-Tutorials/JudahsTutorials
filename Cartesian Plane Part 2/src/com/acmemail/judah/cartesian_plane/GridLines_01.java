@@ -10,47 +10,48 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
-@SuppressWarnings("serial")
-public class CartesianPlane extends JPanel
+@SuppressWarnings( { "serial", "unused" } )
+public class GridLines_01 extends JPanel
 {
-    private Color   bgColor             = new Color( .9f, .9f, .9f );
-    private Color   gridColor           = new Color( .75f, .75f, .75f);
-    private Color   marginColor         = new Color( 0x008080 );
+    private Color       bgColor     = new Color( .9f, .9f, .9f );
+    private Color       gridColor   = new Color( .75f, .75f, .75f);
+    private Color       marginColor = new Color( 0x008080 );
     
     // Draw grid lines at units 0.0, 0.5, 1.5, 2.0, etc.
-    private float   gridLinesPerUnit    = 2;
+    private float       gridLinesPerUnit    = 2;
     // The number of pixels between each unit 
-    private float   pixelsPerUnit       = 75;
-    private float   gridWeight          = 1;
+    private float       pixelsPerUnit       = 75;
+    private float       gridWeight  = 1;
     
-    private int     leftMargin          = 60;
-    private int     rightMargin         = 20;
-    private int     topMargin           = 20;
-    private int     bottomMargin        = 60;
-
+    private int         leftMargin      = 60;
+    private int         rightMargin     = 20;
+    private int         topMargin       = 20;
+    private int         bottomMargin    = 60;
+        
     ///////////////////////////////////////////////////////
     //
-    // The following values are recalculated every time 
-    // paintComponent is invoked.
+    //The following values are recalculated every time 
+    //paintComponent is invoked.
     //
     ///////////////////////////////////////////////////////
     private int             currWidth;
     private int             currHeight;
     private Graphics2D      gtx;
     
-    // These variables describe the shape of the rectangle, exclusive
-    // of the margins, in which the grid is drawn. Their values
-    // are recalculated every time paintComponent is invoked.
-    private float           gridWidth;      // width of the rectangle
-    private float           gridHeight;     // height of the rectangle
-    private float           centerXco;      // center x-coordinate
-    private float           minXco;         // left-most x-coordinate
-    private float           maxXco;         // right-most x-coordinate
-    private float           centerYco;      // center y-coordinate
-    private float           minYco;         // top-most y-coordinate
-    private float           maxYco;         // bottom-most y-coordinate
-    
-    public CartesianPlane( int width, int height )
+     // These variables describe the shape of the rectangle, exclusive
+     // of the margins, in which the grid is drawn. Their values
+     // are recalculated every time paintComponent is invoked.
+     private float           gridWidth;      // width of the rectangle
+     private float           gridHeight;     // height of the rectangle
+     private float           centerXco;      // center x-coordinate
+     private float           minXco;         // left-most x-coordinate
+     private float           maxXco;         // right-most x-coordinate
+     private float           centerYco;      // center y-coordinate
+     private float           minYco;         // top-most y-coordinate
+     private float           maxYco;         // bottom-most y-coordinate
+     // ...
+
+    public GridLines_01( int width, int height )
     {
         Dimension   dim = new Dimension( width, height );
         setPreferredSize( dim );
@@ -58,7 +59,7 @@ public class CartesianPlane extends JPanel
     
     /**
      * This method is where you do all your drawing.
-     * Note the the window must be COMPLETELY redrawn
+     * Note that the window must be COMPLETELY redrawn
      * every time this method is called;
      * Java does not remember anything you previously drew.
      * 
@@ -75,7 +76,7 @@ public class CartesianPlane extends JPanel
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
-        
+
         // Describe the rectangle containing the grid
         gridWidth = currWidth - leftMargin - rightMargin;
         minXco = leftMargin;
@@ -85,7 +86,7 @@ public class CartesianPlane extends JPanel
         minYco = topMargin;
         maxYco = minYco + gridHeight;
         centerYco = minYco + gridHeight / 2f;
-
+        
         drawGrid();
         paintMargins();
     }
@@ -94,10 +95,10 @@ public class CartesianPlane extends JPanel
     {
         gtx.setColor( gridColor );
         gtx.setStroke( new BasicStroke( gridWeight ) );
-        float   gridSpacing = pixelsPerUnit / gridLinesPerUnit;
         
-        float   numLeft = (float)Math.floor( gridWidth / 2 / gridSpacing );
-        float   leftXco = centerXco - numLeft * gridSpacing;
+        float gridSpacing = pixelsPerUnit / gridLinesPerUnit;
+        float numLeft     = (float)Math.floor( gridWidth / 2 / gridSpacing );
+        float leftXco = centerXco - numLeft * gridSpacing;
         for ( float xco = leftXco ; xco <= maxXco ; xco += gridSpacing )
         {
             Line2D  gridLine    = 
@@ -105,8 +106,8 @@ public class CartesianPlane extends JPanel
             gtx.draw( gridLine );
         }
         
-        float   numTop  = (float)Math.floor( gridHeight / 2f / gridSpacing );
-        float   topYco  = centerYco - numTop * gridSpacing;
+        float numTop  = (float)Math.floor( currHeight / 2f / gridSpacing );
+        float topYco  = centerYco - numTop * gridSpacing;
         for ( float yco = topYco ; yco <= maxYco ; yco += gridSpacing )
         {
             Line2D  gridLine    = 
@@ -114,7 +115,6 @@ public class CartesianPlane extends JPanel
             gtx.draw( gridLine );
         }
     }
-    
     private void paintMargins()
     {
         gtx.setColor( marginColor );
