@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<title>Java Constant Variables</title>
+</head>
+<body>
+
+<h1>Java Constant Variables</h1>
+<p>
+    See also:
+    <a href="https://docs.oracle.com/javase/specs/jls/se11/html/jls-4.html#jls-4.12.4">
+        The Java® Language Specification Section 4.12.4
+    </a>
+</p>
+
+<p>
+    Strictly speaking,
+    a Java <em>constant variable</em> is defined as a:
+</p>
+<ol>
+    <li>A primitive type, or <em>String</em>.</li>
+    <li>Declared <em>static</em> and <em>final.</em></li>
+    <li>Intialized with a compile-time constant expression.</li>
+</ol>
+<p>
+    The first two requirements should be clear.
+    Here's an example of a <em>primitive, static, final</em> variable
+    which is not a <em>constant variable</em>
+    because it is not initialized with a compile-time constant value:
+</p>
+<pre style="padding-left: 4em;">public class FinalVarInitializedAtRuntime
+{
+    public static final long    SESSION_KEY = makeSessionKey();
+    // ...
+    private static long makeSessionKey()
+    {
+        long    mask    = 0xFF00FF00FF00FF00L;
+        long    millis  = System.currentTimeMillis();
+        long    key      = millis ^ mask;
+        return key;
+    }
+}</pre>
+<p>
+    One of the principal reasons
+    for using constant Variables
+    is because a constant variable
+    can be extracted from a class
+    without first loading the class.
+    This is a great advantage
+    because loading a class
+    is an expensive, time-consuming operation.
+</p>
+<p>
+    Attentive Java programmers follow the convention
+    that constant variable identifiers
+    are not to include lowercase characters.
+    Should that convention apply
+    to the SESSION_KEY variable above,
+    since it's not a constant variable
+    as defined by the Java Language Specification?
+    What about the ONE and TEN constants
+    in the BigInteger class,
+    which are not primitives?
+    What about private identifiers,
+    which will never be extracted from a class
+    without first loading the class?
+    The advice I give to my students is:
+    "If it's public, static, and final,
+    treat it is a constant variable.
+    It it's private do whatever seems logical.
+</p>
+
+</body>
+</html>
