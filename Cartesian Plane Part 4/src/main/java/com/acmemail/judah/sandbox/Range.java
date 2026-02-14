@@ -17,7 +17,7 @@ public class Range implements Iterable<Integer>
     
     public Iterator<Integer> iterator()
     {
-        IntIterator iter    = new IntIterator( upperBound, lowerBound );
+        IntIterator iter    = new IntIterator( lowerBound, upperBound );
         return iter;
     }
 }

@@ -10,7 +10,7 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
-@SuppressWarnings( { "serial", "unused" } )
+@SuppressWarnings( { "serial" } )
 public class GridLines_01 extends JPanel
 {
     private Color       bgColor     = new Color( .9f, .9f, .9f );

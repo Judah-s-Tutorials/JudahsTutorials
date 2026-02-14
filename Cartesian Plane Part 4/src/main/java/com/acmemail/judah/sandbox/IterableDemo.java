@@ -1,10 +1,10 @@
 package com.acmemail.judah.sandbox;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
-public class listIteratorDemo
+public class IterableDemo
 {
     public static void main(String[] args)
     {
@@ -15,7 +15,7 @@ public class listIteratorDemo
         list.add( "deserves" );
         list.add( "favor" );
         
-        ListIterator<String>    iter    = list.listIterator();
+        Iterator<String>    iter    = list.iterator();
         while ( iter.hasNext() )
         {
             String  str = iter.next();
