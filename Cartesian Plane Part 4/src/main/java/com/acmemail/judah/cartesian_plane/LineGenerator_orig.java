@@ -153,7 +153,7 @@ gtx.draw( axisIterator.next() );
  *
  * @author Jack Straub
  */
-public class LineGenerator implements Iterable<Line2D>
+public class LineGenerator_orig implements Iterable<Line2D>
 {
     public static final int HORIZONTAL  = 1;
     /** Indicates that the iterable generates vertical lines. */
@@ -164,8 +164,6 @@ public class LineGenerator implements Iterable<Line2D>
      */
     public static final int BOTH        = HORIZONTAL | VERTICAL;
 
-    /** The grid's bounding rectangle, set in constructor. */
-    private final Rectangle2D   gridRect;
     /** Grid unit, set in constructor. */
     private final float         gpu;
     /** Lines-per-unit, set in constructor. */
@@ -184,12 +182,6 @@ public class LineGenerator implements Iterable<Line2D>
     /** List containing the non-axial vertical lines. */
     private final List<Line2D>  vertLines   = new LinkedList<>();
     
-    /**  
-     * The number of pixels between lines drawn in the bounding rectangle.
-     * This is equal to the grid unit divided by the lines-per-unit.
-     */
-    private final float         spacing;
-    
     /** 
      * X-coordinate of the origin of the encapsulated grid. Equivalent
      * to rect.getCenterX(), declared here for convenience. Set
@@ -203,29 +195,29 @@ public class LineGenerator implements Iterable<Line2D>
      */
     private final float         originYco;
     /**
-     * X-coordinate of the leftmost vertical line to be drawn inside the
-     * bounding rectangle. This must never be coincident with the border
-     * of the rectangle.
+     * X-coordinate of the left side of the rectangle. Equivalent
+     * to rect.getMinX(), declared here for convenience. Set
+     * in constructor.
      */
-    private final float         leftLine;
+    private final float         leftLimit;
     /**
-     * X-coordinate of the rightmost vertical line to be drawn inside the
-     * bounding rectangle. This must never be coincident with the border
-     * of the rectangle.
+     * X-coordinate of the right side of the rectangle. Equivalent
+     * to rect.getMaxX(), declared here for convenience. Set
+     * in constructor.
      */
-    private final float         rightLine;
+    private final float         rightLimit;
     /**
-     * Y-coordinate of the topmost horizontal line to be drawn inside the
-     * bounding rectangle. This must never be coincident with the border
-     * of the rectangle.
+     * Y-coordinate of the top of the rectangle. Equivalent
+     * to rect.getMinY(), declared here for convenience. Set
+     * in constructor.
      */
-    private final float         topLine;
+    private final float         topLimit;
     /**
-     * Y-coordinate of the bottom-most horizontal line to be drawn inside 
-     * the bounding rectangle. This must never be coincident with the border
-     * of the rectangle.
+     * Y-coordinate of the bottom of the rectangle. Equivalent
+     * to rect.getMaxY(), declared here for convenience. Set
+     * in constructor.
      */
-    private final float         bottomLine;
+    private final float         bottomLimit;
     
     /**
      * Constructor.
@@ -243,7 +235,7 @@ public class LineGenerator implements Iterable<Line2D>
      * @param gridUnit  the given grid unit
      * @param lpu       the given lines-per-unit
      */
-    public LineGenerator( Rectangle2D rect, float gridUnit, float lpu )
+    public LineGenerator_orig( Rectangle2D rect, float gridUnit, float lpu )
     {
         this( rect, gridUnit, lpu, -1, BOTH );
     }
@@ -263,7 +255,7 @@ public class LineGenerator implements Iterable<Line2D>
      * @param length    the given line length
      */
     public 
-    LineGenerator( 
+    LineGenerator_orig( 
         Rectangle2D rect, 
         float       gridUnit,
         float       lpu,
@@ -286,7 +278,7 @@ public class LineGenerator implements Iterable<Line2D>
      * @param length        the given line length
      * @param orientation   the given orientation
      */
-    public LineGenerator( 
+    public LineGenerator_orig( 
         Rectangle2D rect, 
         float       gridUnit,
         float       lpu,
@@ -294,41 +286,18 @@ public class LineGenerator implements Iterable<Line2D>
         int         orientation
     )
     {
-        this.gridRect = rect;
         this.gpu = gridUnit;
         this.lpu = lpu;
-        this.spacing = gridUnit / lpu;
         this.horLength = length != -1 ? length : (float)rect.getWidth();
         this.vertLength = length != -1 ? length : (float)rect.getHeight();
         this.orientation = orientation;
         
         originXco = (float)rect.getCenterX();
         originYco = (float)rect.getCenterY();
-        
-        // Calculate the number of horizontal lines to the left or right
-        // of the y-axis. This is always an integer, and never includes
-        // the left or right border of the bounding rectangle.
-        double  halfWidth   = rect.getWidth() / 2;
-        int     halfHor     = (int)(halfWidth / spacing);
-        // Make sure the left and right borders are excluded from the count.
-        if ( equals( halfHor * spacing, halfWidth ) )
-            --halfHor;
-        
-        leftLine = (float)(originXco - halfHor * spacing);
-        rightLine = (float)(originXco + halfHor * spacing);
-        
-        // Calculate the number of vertical lines above or below the
-        // x-axis. This is always an integer, and never includes
-        // the top or bottom border of the bounding rectangle.
-        double  halfHeight  = rect.getHeight() / 2;
-        int     halfVert    = (int)(halfHeight / spacing);
-        // Make sure the left and right borders are excluded from the count.
-        if ( equals( halfVert * spacing, halfHeight ) )
-            -- halfVert;
-        
-        topLine = (float)(originYco - halfVert * spacing);
-        bottomLine = (float)(originYco + halfVert * spacing);
-        
+        leftLimit = (float)rect.getMinX();
+        rightLimit = (float)rect.getMaxX();
+        topLimit = (float)rect.getMinY();
+        bottomLimit = (float)rect.getMaxY();
         computeHorizontals();
         computeVerticals();
         computeAxes();
@@ -346,7 +315,7 @@ public class LineGenerator implements Iterable<Line2D>
      */
     public static Iterator<Line2D> axesIterator( Rectangle2D rect )
     {
-        LineGenerator       lineGen = new LineGenerator( rect, 1, 1, -1 );
+        LineGenerator_orig       lineGen = new LineGenerator_orig( rect, 1, 1, -1 );
         Iterator<Line2D>    iter    = lineGen.axesIterator();
         return iter;
     }
@@ -401,7 +370,7 @@ public class LineGenerator implements Iterable<Line2D>
      *      the number of non-axial horizontal lines
      *      in the encapsulated grid
      */
-    public int getHorLineCount()
+    public float getHorLineCount()
     {
         return horLines.size();
     }
@@ -415,7 +384,7 @@ public class LineGenerator implements Iterable<Line2D>
      *      the number of non-axial vertical lines
      *      in the encapsulated grid
      */
-    public int getVertLineCount()
+    public float getVertLineCount()
     {
         return vertLines.size();
     }
@@ -428,18 +397,32 @@ public class LineGenerator implements Iterable<Line2D>
      */
     private void computeHorizontals()
     {
-        float   xco1        = originXco - horLength / 2;
-        float   xco2        = originXco + horLength / 2;
-        for ( float yco = topLine ; yco <= bottomLine ; yco += spacing )
+        float   spacing = gpu / lpu;
+        float   xco1    = originXco - horLength / 2;
+        float   xco2    = originXco + horLength / 2;
+
+        for ( 
+            float yco = originYco - spacing ; 
+            yco > topLimit ; 
+            yco -= spacing
+        )
         {
-            // Do not add x-axis to list of horizontal lines
-            if ( !equals( yco, originYco ) )
-            {
-                Point2D left    = new Point2D.Double( xco1, yco );
-                Point2D right   = new Point2D.Double( xco2, yco );
-                Line2D  line    = new Line2D.Double( left, right );
-                horLines.add( line );
-            }
+            Point2D left    = new Point2D.Double( xco1, yco );
+            Point2D right   = new Point2D.Double( xco2, yco );
+            Line2D  line    = new Line2D.Double( left, right );
+            horLines.add( 0, line );
+        }
+
+        for ( 
+            float yco = originYco + spacing ; 
+            yco < bottomLimit ; 
+            yco += spacing
+        )
+        {
+            Point2D left    = new Point2D.Double( xco1, yco );
+            Point2D right   = new Point2D.Double( xco2, yco );
+            Line2D  line    = new Line2D.Double( left, right );
+            horLines.add( line );
         }
     }
     
@@ -451,18 +434,32 @@ public class LineGenerator implements Iterable<Line2D>
      */
     private void computeVerticals()
     {
-        float   yco1        = originYco - vertLength / 2;
-        float   yco2        = originYco + vertLength / 2;
-        for ( float xco = leftLine ; xco <= rightLine ; xco += spacing )
+        float   spacing = gpu / lpu;
+        float   yco1    = originYco - vertLength / 2;
+        float   yco2    = originYco + vertLength / 2;
+
+        for ( 
+            float xco = originXco - spacing ;
+            xco > leftLimit ; 
+            xco -= spacing
+        )
         {
-            // Do not add y-axis to list of vertical lines
-            if ( !equals( xco, originXco ) )
-            {
-                Point2D top     = new Point2D.Double( xco, yco1 );
-                Point2D bottom  = new Point2D.Double( xco, yco2 );
-                Line2D  line    = new Line2D.Double( top, bottom );
-                vertLines.add( line );
-            }
+            Point2D top     = new Point2D.Double( xco, yco1 );
+            Point2D bottom  = new Point2D.Double( xco, yco2 );
+            Line2D  line    = new Line2D.Double( top, bottom );
+            vertLines.add( 0, line );
+        }
+
+        for ( 
+            float xco = originXco + spacing ; 
+            xco < rightLimit ; 
+            xco += spacing
+        )
+        {
+            Point2D top     = new Point2D.Double( xco, yco1 );
+            Point2D bottom  = new Point2D.Double( xco, yco2 );
+            Line2D  line    = new Line2D.Double( top, bottom );
+            vertLines.add( line );
         }
     }
     
@@ -471,28 +468,11 @@ public class LineGenerator implements Iterable<Line2D>
      */
     private void computeAxes()
     {
-        Point2D hPoint1 = new Point2D.Double( leftLine, originYco );
-        Point2D hPoint2 = new Point2D.Double( rightLine, originYco );
-        Point2D vPoint1 = new Point2D.Double( originXco, topLine );
-        Point2D vPoint2 = new Point2D.Double( originXco, bottomLine );
+        Point2D hPoint1 = new Point2D.Double( leftLimit, originYco );
+        Point2D hPoint2 = new Point2D.Double( rightLimit, originYco );
+        Point2D vPoint1 = new Point2D.Double( originXco, topLimit );
+        Point2D vPoint2 = new Point2D.Double( originXco, bottomLimit );
         axes.add( new Line2D.Double( hPoint1, hPoint2 ) );
         axes.add( new Line2D.Double( vPoint1, vPoint2 ) );
-    }
-    
-    /**
-     * Compare two floating point values for equality
-     * using the epsilon test.
-     * 
-     * @param dNum1 the first number to compare
-     * @param dNum2 the second number to compare
-     * 
-     * @return  true if the two numbers are approximately equal
-     */
-    private static boolean equals( double dNum1, double dNum2 )
-    {
-        final double    epsilon = .00001;
-        double          diff    = Math.abs( dNum1 - dNum2 );
-        boolean         result  = diff < epsilon;
-        return result;
     }
 }
