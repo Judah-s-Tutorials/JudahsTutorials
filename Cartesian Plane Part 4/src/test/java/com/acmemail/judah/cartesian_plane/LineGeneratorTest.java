@@ -4,9 +4,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -48,47 +48,148 @@ class LineGeneratorTest
     }
 
     @Test
-    void testLineGeneratorRectangle2DFloatFloat()
+    public void testLineGeneratorRectangle2DFloatFloat()
     {
-        fail("Not yet implemented");
+        // hidden LineGenerator parameters default to -1 and BOTH
+        Rectangle2D     rect    = 
+            new Rectangle2D.Double( 0, 0, width, height );
+        TestParams      params  = new TestParams( 0, 0, -1 );
+        int             numVert = params.getVerticalCount();
+        int             numHori = params.getHorizontalCount();
+
+        LineGenerator       lineGen =
+            new LineGenerator( rect, gpu, lpu, -1 );
+        Iterator<Line2D>    iter    = lineGen.iterator();
+        verifyLineCount( iter, numHori + numVert );
+        verifyLineLength( iter, width, height );
+        
+        iter = lineGen.axesIterator();
+        verifyLineCount( iter, 2 );
+        verifyLineLength( iter, height, width );
     }
 
     @Test
-    void testLineGeneratorRectangle2DFloatFloatFloat()
+    public void testLineGeneratorRectangle2DFloatFloatFloat()
     {
-        fail("Not yet implemented");
+        // hidden LineGenerator parameter defaults to BOTH
+        int             expLen  = 32;
+        Rectangle2D     rect    = 
+            new Rectangle2D.Double( 0, 0, width, height );
+        TestParams      params  = new TestParams( 0, 0, expLen );
+        int             numVert = params.getVerticalCount();
+        int             numHori = params.getHorizontalCount();
+
+        LineGenerator       lineGen =
+            new LineGenerator( rect, gpu, lpu, expLen );
+        Iterator<Line2D>    iter    = lineGen.iterator();
+        verifyLineCount( iter, numHori + numVert );
+        verifyLineLength( iter, expLen );
+        
+        iter = lineGen.axesIterator();
+        verifyLineCount( iter, 2 );
+        verifyLineLength( iter, height, width );
     }
 
     @Test
-    void testLineGeneratorRectangle2DFloatFloatFloatInt()
+    public void testLineGeneratorRectangle2DFloatFloatMinus1Int()
     {
-        fail("Not yet implemented");
+        final int       HORIZONTAL  = LineGenerator.HORIZONTAL;
+        final int       VERTICAL    = LineGenerator.VERTICAL;
+        final int       BOTH        = LineGenerator.BOTH;
+        Rectangle2D     rect    = 
+            new Rectangle2D.Double( 0, 0, width, height );
+        TestParams      params  = new TestParams( 0, 0, -1 );
+        int             numVert = params.getVerticalCount();
+        int             numHori = params.getHorizontalCount();
+
+        LineGenerator       lineGen =
+            new LineGenerator( rect, gpu, lpu, -1, HORIZONTAL );
+        Iterator<Line2D>    iter    = lineGen.iterator();
+        verifyLineCount( iter, numHori );
+        verifyLineLength( iter, width );
+
+        lineGen = new LineGenerator( rect, gpu, lpu, -1, VERTICAL );
+        iter = lineGen.iterator();
+        verifyLineCount( iter, numVert );
+        verifyLineLength( iter, height );
+
+        lineGen = new LineGenerator( rect, gpu, lpu, -1, BOTH );
+        iter = lineGen.iterator();
+        verifyLineCount( iter, numVert + numHori );
+        verifyLineLength( iter, height, width );
+        
+        iter = lineGen.axesIterator();
+        verifyLineCount( iter, 2 );
+        verifyLineLength( iter, height, width );
     }
 
     @Test
-    void testAxesIteratorRectangle2D()
+    public void testLineGeneratorRectangle2DFloatFloatLengthInt()
     {
-        // See testAxesIterator()
+        final int       HORIZONTAL  = LineGenerator.HORIZONTAL;
+        final int       VERTICAL    = LineGenerator.VERTICAL;
+        final int       BOTH        = LineGenerator.BOTH;
+        int             expLen      = 32;
+        Rectangle2D     rect    = 
+            new Rectangle2D.Double( 0, 0, width, height );
+        TestParams      params  = new TestParams( 0, 0, expLen );
+        int             numVert = params.getVerticalCount();
+        int             numHori = params.getHorizontalCount();
+
+        LineGenerator       lineGen =
+            new LineGenerator( rect, gpu, lpu, expLen, HORIZONTAL );
+        Iterator<Line2D>    iter    = lineGen.iterator();
+        verifyLineCount( iter, numHori );
+        verifyLineLength( iter, expLen );
+
+        lineGen = new LineGenerator( rect, gpu, lpu, expLen, VERTICAL );
+        iter = lineGen.iterator();
+        verifyLineCount( iter, numVert );
+        verifyLineLength( iter, expLen );
+
+        lineGen = new LineGenerator( rect, gpu, lpu, expLen, BOTH );
+        iter = lineGen.iterator();
+        verifyLineCount( iter, numVert + numHori );
+        verifyLineLength( iter, expLen );
+        
+        iter = lineGen.axesIterator();
+        verifyLineCount( iter, 2 );
+        verifyLineLength( iter, height, width );
     }
 
     @Test
-    void testIterator()
+    public void testAxesIteratorRectangle2D()
     {
-        // See:
-        // testSpanning(), testNonSpanning()
+        Rectangle2D         rect    = 
+            new Rectangle2D.Double( 0, 0, width, height );
+        Iterator<Line2D>    iter    = LineGenerator.axesIterator( rect );
+        verifyLineCount( iter, 2 );
+        verifyLineLength( iter, height, width );
     }
 
     @Test
-    void testAxesIterator()
+    public void testIterator()
     {
-        double      xco = spacing;
-        double      yco = 2 * spacing;
-        TestParams  params  = new TestParams( xco, yco, -1 );
-        params.testAxes();
+        // hidden LineGenerator parameters default to -1 and BOTH
+        Rectangle2D     rect    = 
+            new Rectangle2D.Double( 0, 0, width, height );
+        TestParams      params  = new TestParams( 0, 0, -1 );
+        int             numVert = params.getVerticalCount();
+        int             numHori = params.getHorizontalCount();
+
+        LineGenerator       lineGen =
+            new LineGenerator( rect, gpu, lpu );
+        Iterator<Line2D>    iter    = lineGen.iterator();
+        verifyLineCount( iter, numHori + numVert );
+        verifyLineLength( iter, width, height );
+        
+        iter = lineGen.axesIterator();
+        verifyLineCount( iter, 2 );
+        verifyLineLength( iter, height, width );
     }
 
     @Test
-    void testGetLineCount()
+    public void testGetLineCount()
     {
         // If xco and yco are even multiples of spacing, the generated
         // lines might fall on the rectangle boundaries. We want to make 
@@ -202,6 +303,41 @@ class LineGeneratorTest
         return result;
     }
     
+    private static double getLineLength( Line2D line )
+    {
+        Point2D end1    = line.getP1();
+        Point2D end2    = line.getP2();
+        double  len     = end1.distance( end2 );
+        return len;
+    }
+    
+    private static void 
+    verifyLineLength( Iterator<Line2D> iter, double... length )
+    {
+        List<Double>    list    = new ArrayList<>();
+        for ( double len : length )
+            list.add( len );
+        String          msg     = "Expected: " + list + " actual: ";
+        while ( iter.hasNext() )
+        {
+            Line2D  line    = iter.next();
+            double  actLen  = getLineLength( line );
+            assertTrue( list.contains( actLen ), msg + actLen );
+        }
+    }
+    
+    private static void 
+    verifyLineCount( Iterator<Line2D> iter, int expCount )
+    {
+        int actCount    = 0;
+        while ( iter.hasNext() )
+        {
+            iter.next();
+            ++actCount;
+        }
+        assertEquals( expCount, actCount );
+    }
+    
     private static class TestParams
     {
         private final Rectangle2D   rect;
@@ -209,7 +345,6 @@ class LineGeneratorTest
         private final List<Line2D>  allVert;
         private final double        originYco;
         private final List<Line2D>  allHoriz;
-        private final List<Line2D>  axes;
         private final double        minXco;
         private final double        maxXco;
         private final double        leftXco;
@@ -251,7 +386,6 @@ class LineGeneratorTest
                 bottomYco = originYco + halfLen;
             }
             spacing = gpu / lpu;
-            axes = computeAxes( rect );
             allHoriz = computeAllHoriz();
             allVert = computeAllVert();
         }
@@ -292,37 +426,14 @@ class LineGeneratorTest
             testLines( lineGen, allVert );
         }
         
-        public void testAxes()
+        public int getHorizontalCount()
         {
-            int                 orient  = LineGenerator.BOTH;
-            LineGenerator       lineGen =
-                new LineGenerator( rect, gpu, lpu, length, orient );
-            Iterator<Line2D>    iter    = lineGen.axesIterator();
-            testAxesIterator( iter );
-            
-            iter = LineGenerator.axesIterator( rect );
-            testAxesIterator( iter );
+            return allHoriz.size();
         }
         
-        private void testAxesIterator( Iterator<Line2D> iter )
+        public int getVerticalCount()
         {
-            Line2D  expAxisA    = axes.get( 0 );
-            Line2D  expAxisB    = axes.get( 1 );
-            assertTrue( iter.hasNext() );
-            Line2D  actAxis1    = iter.next();
-            assertTrue( iter.hasNext() );
-            Line2D  actAxis2    = iter.next();
-            assertFalse( iter.hasNext() );
-            if ( LineGeneratorTest.equals( expAxisA, actAxis1 ) )
-            {
-                assertTrue( LineGeneratorTest.equals( expAxisB, actAxis2 ) );
-            }
-            else if ( LineGeneratorTest.equals( expAxisA, actAxis2 ) )
-            {
-                assertTrue( LineGeneratorTest.equals( expAxisB, actAxis1 ) );
-            }
-            else
-                fail( "expAxisA not found" );
+            return allVert.size();
         }
         
         private void testLines( LineGenerator lineGen, List<Line2D> lines )
@@ -339,22 +450,6 @@ class LineGeneratorTest
                 assertTrue( areEqual, lineSpec );
             }
             assertFalse( iter.hasNext() );
-        }
-    
-        private List<Line2D> computeAxes( Rectangle2D rect )
-        {
-            List<Line2D>    list    = new ArrayList<>();
-            double          minX    = rect.getMinX();
-            double          maxX    = rect.getMaxX();
-            double          minY    = rect.getMinY();
-            double          maxY    = rect.getMaxY();
-            Line2D          xAxis   = 
-                new Line2D.Double( minX, originYco, maxX, originYco ); 
-            Line2D          yAxis   = 
-                new Line2D.Double( originXco, minY, originXco, maxY ); 
-            list.add( xAxis );
-            list.add( yAxis );
-            return list;
         }
         
         private List<Line2D> computeAllHoriz()
@@ -394,9 +489,9 @@ class LineGeneratorTest
                 list.add( 0, line );
             }
             for ( double xco = originXco + spacing ; 
-                xco < minXco ; 
+                xco < maxXco ; 
                 xco += spacing
-          )
+            )
           {
               Line2D  line    = 
                   new Line2D.Double( xco, topYco, xco, bottomYco );

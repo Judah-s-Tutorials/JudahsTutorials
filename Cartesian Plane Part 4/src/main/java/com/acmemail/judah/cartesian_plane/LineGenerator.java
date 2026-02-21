@@ -166,10 +166,6 @@ public class LineGenerator implements Iterable<Line2D>
 
     /** The grid's bounding rectangle, set in constructor. */
     private final Rectangle2D   gridRect;
-    /** Grid unit, set in constructor. */
-    private final float         gpu;
-    /** Lines-per-unit, set in constructor. */
-    private final float         lpu;
     /** Horizontal line length, set in constructor. */
     private final float         horLength;
     /** Vertical line length, set in constructor. */
@@ -295,8 +291,6 @@ public class LineGenerator implements Iterable<Line2D>
     )
     {
         this.gridRect = rect;
-        this.gpu = gridUnit;
-        this.lpu = lpu;
         this.spacing = gridUnit / lpu;
         this.horLength = length != -1 ? length : (float)rect.getWidth();
         this.vertLength = length != -1 ? length : (float)rect.getHeight();
@@ -471,10 +465,14 @@ public class LineGenerator implements Iterable<Line2D>
      */
     private void computeAxes()
     {
-        Point2D hPoint1 = new Point2D.Double( leftLine, originYco );
-        Point2D hPoint2 = new Point2D.Double( rightLine, originYco );
-        Point2D vPoint1 = new Point2D.Double( originXco, topLine );
-        Point2D vPoint2 = new Point2D.Double( originXco, bottomLine );
+        double  left    = gridRect.getMinX();
+        double  right   = gridRect.getMaxX();
+        double  top     = gridRect.getMinY();
+        double  bottom  = gridRect.getMaxY();
+        Point2D hPoint1 = new Point2D.Double( left, originYco );
+        Point2D hPoint2 = new Point2D.Double( right, originYco );
+        Point2D vPoint1 = new Point2D.Double( originXco, top );
+        Point2D vPoint2 = new Point2D.Double( originXco, bottom );
         axes.add( new Line2D.Double( hPoint1, hPoint2 ) );
         axes.add( new Line2D.Double( vPoint1, vPoint2 ) );
     }

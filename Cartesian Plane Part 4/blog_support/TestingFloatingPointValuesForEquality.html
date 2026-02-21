@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<title>Testing Floating Point Values for Equality</title>
+</head>
+<body>
+
+<div style="border: 2px solid black; 
+    max-width: 60em;
+    margin-left: 4em; 
+    padding-left: 1em;
+    padding-right: 1em;
+    font-family: sans-serif; 
+    font-size: 90%; 
+    background-color: #D3D3D3;"
+>
+<p style="font-siZe: 110%; font-weight: bold;">
+    Testing Floating Point Values for Equality
+</p>
+<p>
+As you may know, 
+testing floating point values for equality 
+can be tricky because of rounding errors. 
+If you are unaware of that, 
+try running this bit of code:
+</p>
+
+<pre style="margin-left: 4em;">public class RoundingErrorDemo
+{
+    public static void main(String[] args)
+    {
+        double  dVar1   = .7 + .1;
+        double  dVar2   = .9 - .1;
+        System.out.println( dVar1 == dVar2 );
+    }
+}</pre>
+<p>
+To circumvent this problem, 
+we can use the <em>epsilon test for equality</em>
+(sometimes called the <em>delta test for equality</em>).
+Choose a very small value for epsilon, say .00001.
+Now, take the difference between the two values;
+if the difference is less than epsilon
+we can treat the two values as though they were equal.
+Here’s a helper method to illustrate the technique:
+</p>
+<pre style="padding-left: 4em;">private static boolean equal( float fVal1, float fVal2 )
+{
+    final float epsilon = .0001f;
+    float       diff    = Math.abs( fVal1 - fVal2 );
+    boolean     equal   = diff  &lt; epsilon;
+    return equal;
+}</pre>
+<p>
+<strong>Note:</strong>
+If you’re a devotee of numerical analysis,
+you may object to calling this method "equal."
+If so, feel free to rename it “closeEnoughForJazz.”
+</p>
+</div>
+</body>
+</html>
