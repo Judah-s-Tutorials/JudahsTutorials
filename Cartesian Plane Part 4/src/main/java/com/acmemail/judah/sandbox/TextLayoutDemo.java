@@ -102,6 +102,8 @@ public class TextLayoutDemo extends JPanel
         float       textYco = 50F;
         layout.draw( gtx, textXco, textYco );
         
+        // The x- and y-coordinates of the bounding rectangle are screwy;
+        // they're offsets from the baseline of the text.
         Rectangle2D rect    =
             new Rectangle2D.Float(
                 textXco + (float)bounds.getX(),
@@ -110,5 +112,19 @@ public class TextLayoutDemo extends JPanel
                 (float)bounds.getHeight()
             );
         gtx.draw( rect );
+        
+        // Demonstrate that the bounding rectangle's x- and y-values
+        // offsets from the test's baseline to the upper-left corner
+        // of the bounding rectangle.
+        double  boundsXco   = bounds.getX();
+        double  boundsYco   = bounds.getY();
+        int     noteXco     = (int)(textXco);
+        int     noteYco     = (int)(textYco + 25);
+        String  fmt         = "bounds x = %2.1f, bounds y = %2.1f";
+        String  note        = String.format( fmt, boundsXco, boundsYco );
+        Font    noteFont    = 
+            new Font( Font.SANS_SERIF, Font.PLAIN, 15 );
+        gtx.setFont( noteFont );
+        gtx.drawString( note, noteXco, noteYco );
     }
 }
