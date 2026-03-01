@@ -1,34 +1,6 @@
 package com.acmemail.judah.battleship;
-
 public class Ship
 {
-    public enum Orientation
-    {
-        HORIZONTAL,
-        VERTICAL
-    }
-    
-    public enum Type
-    {
-        BATTLESHIP( 4),
-        CARRIER( 5 ),
-        CRUISER( 3 ),
-        DESTROYER( 3 ),
-        SUBMARINE( 2 );
-        
-        private final int   length;
-        
-        Type( int length )
-        {
-            this.length = length;
-        }
-        
-        public int getLength()
-        {
-            return length;
-        }
-    }
-    
     private static final String DEF_NAME    = "Default Name";
     
     private final String        type;
@@ -37,6 +9,16 @@ public class Ship
     private final OrderedPair   lastSquare;
     private final int           length;
     private final Orientation   orientation;
+    public Ship( 
+        String type, 
+        OrderedPair first, 
+        int length, 
+        Orientation orientation
+    )
+    {
+        this( type, DEF_NAME, first, length, orientation );
+    }
+    
     public Ship( 
         String type, 
         String name, 
@@ -89,6 +71,23 @@ public class Ship
         int     yco         = square.getYco();
         boolean contains    = contains( xco, yco );
         return contains;
+    }
+    
+    public boolean intersects( Ship that )
+    {
+        boolean result  = false;
+        if ( orientation != that.orientation )
+        {
+            if ( orientation == Orientation.VERTICAL )
+                result = testIntersectDiff( this, that );
+            else
+                result = testIntersectDiff( that, this );
+        }
+        else if ( orientation == Orientation.VERTICAL )
+            result = testIntersectVertical( this, that );
+        else
+            result = testIntersectnHorizontal( this, that );
+        return result;
     }
     
     public int getMinX()
@@ -159,5 +158,59 @@ public class Ship
         return orientation;
     }
     
+    private static boolean 
+    testIntersectDiff( Ship vertical, Ship horizontal )
+    {
+        int     vXco    = vertical.getMaxX();
+        int     vMinYco = vertical.getMinY();
+        int     vMaxYco = vertical.getMaxY();
+        int     hYco    = horizontal.getMaxY();
+        int     hMinXco = horizontal.getMinX();
+        int     hMaxXco = horizontal.getMaxX();
+        
+        boolean result  = 
+            vXco >= hMinXco && vXco <= hMaxXco &&
+            vMinYco <= hYco && vMaxYco >= hYco;
+        return result;
+    }
     
+    private static boolean 
+    testIntersectVertical( Ship ship1, Ship ship2 )
+    {
+        int     ship1Xco        = ship1.getMaxX();
+        int     ship2Xco        = ship2.getMaxX();
+        int     ship1MinYco     = ship1.getMinY();
+        int     ship1MaxYco     = ship1.getMaxY();
+        int     ship2MinYco     = ship2.getMinY();
+        int     ship2MaxYco     = ship2.getMaxY();
+        
+        boolean result  = false;
+        if ( ship1Xco != ship2Xco )
+            result = false;
+        else if ( ship1MinYco <= ship2MinYco )
+            result = ship1MaxYco >= ship2MinYco;
+        else 
+            result = ship2MaxYco >= ship1MinYco;
+        return result;
+    }
+    
+    private static boolean 
+    testIntersectnHorizontal( Ship ship1, Ship ship2 )
+    {
+        int     ship1Yco        = ship1.getMaxY();
+        int     ship2Yco        = ship2.getMaxY();
+        int     ship1MinXco     = ship1.getMinX();
+        int     ship1MaxXco     = ship1.getMaxX();
+        int     ship2MinXco     = ship2.getMinX();
+        int     ship2MaxXco     = ship2.getMinX();
+        
+        boolean result  = false;
+        if ( ship1Yco != ship2Yco )
+            result = false;
+        else if ( ship1MinXco <= ship2MinXco )
+            result = ship1MaxXco >= ship2MinXco;
+        else 
+            result = ship2MaxXco >= ship1MinXco;
+        return result;
+    }
 }
