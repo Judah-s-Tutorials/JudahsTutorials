@@ -42,6 +42,8 @@ class LineGeneratorTest
         assertEquals( Math.floor( gpu ), gpu );
         assertEquals( Math.floor( lpu ), lpu );
         assertEquals( spacing % 2, 0 );
+        assertEquals( width % spacing, 0 );
+        assertEquals( height % spacing, 0 );
         assertEquals( width % 2, 0 );
         assertEquals( height % 2, 0 );
         assertEquals( testLen % 2, 0 );
@@ -49,30 +51,30 @@ class LineGeneratorTest
     }
 
     @Test
-public void testLineGeneratorRectangle2DFloatFloat()
-{
-    // hidden LineGenerator parameters default to -1 and BOTH
-    Rectangle2D     rect        = 
-        new Rectangle2D.Double( 0, 0, width, height );
-    TestParams      params      = new TestParams( 0, 0, -1 );
-    int             expNumVert  = params.getVerticalCount();
-    int             expNumHori  = params.getHorizontalCount();
-
-    LineGenerator       lineGen = new LineGenerator( rect, gpu, lpu );
-    Iterator<Line2D>    iter    = lineGen.iterator();
-    verifyLineCount( iter, expNumHori + expNumVert );
-    // Don't forget to create a new iterator; the first one was
-    // exhausted by verifyLineCount
-    iter = lineGen.iterator();
-    verifyLineLength( iter, width, height );
+    public void testLineGeneratorRectangle2DFloatFloat()
+    {
+        // hidden LineGenerator parameters default to -1 and BOTH
+        Rectangle2D     rect        = 
+            new Rectangle2D.Double( 0, 0, width, height );
+        TestParams      params      = new TestParams( 0, 0, -1 );
+        int             expNumVert  = params.getVerticalCount();
+        int             expNumHori  = params.getHorizontalCount();
     
-    iter = lineGen.axesIterator();
-    verifyLineCount( iter, 2 );
-    // Don't forget to create a new iterator; the first one was
-    // exhausted by verifyLineCount
-    iter = lineGen.iterator();
-    verifyLineLength( iter, height, width );
-}
+        LineGenerator       lineGen = new LineGenerator( rect, gpu, lpu );
+        Iterator<Line2D>    iter    = lineGen.iterator();
+        verifyLineCount( iter, expNumHori + expNumVert );
+        // Don't forget to create a new iterator; the first one was
+        // exhausted by verifyLineCount
+        iter = lineGen.iterator();
+        verifyLineLength( iter, width, height );
+        
+        iter = lineGen.axesIterator();
+        verifyLineCount( iter, 2 );
+        // Don't forget to create a new iterator; the first one was
+        // exhausted by verifyLineCount
+        iter = lineGen.iterator();
+        verifyLineLength( iter, height, width );
+    }
 
     @Test
     public void testLineGeneratorRectangle2DFloatFloatFloat()
@@ -239,8 +241,8 @@ public void testLineGeneratorRectangle2DFloatFloat()
         // If xco and yco are even multiples of spacing, the generated
         // lines might fall on the rectangle boundaries. We want to make 
         // sure that doesn't happen.
-        double      xco = spacing;
-        double      yco = 2 * spacing;
+        double      xco     = spacing;
+        double      yco     = 2 * spacing;
         TestParams  params  = new TestParams( xco, yco, -1 );
         params.testHorizontalCount();
         params.testVerticalCount();
@@ -292,8 +294,8 @@ public void testLineGeneratorRectangle2DFloatFloat()
     {
         private final Rectangle2D   rect;
         private final double        originXco;
-        private final List<Line2D>  allVert;
         private final double        originYco;
+        private final List<Line2D>  allVert;
         private final List<Line2D>  allHoriz;
         private final double        minXco;
         private final double        maxXco;
@@ -306,11 +308,11 @@ public void testLineGeneratorRectangle2DFloatFloat()
         private final double        spacing;
         private final float         length;
     
-    public TestParams(
-        double      rectXco,
-        double      rectYco,
-        double      length
-    )
+        public TestParams(
+            double      rectXco,
+            double      rectYco,
+            double      length
+        )
         {
             rect = new Rectangle2D.Double( rectXco, rectYco, width, height );
             this.length = (float)length;

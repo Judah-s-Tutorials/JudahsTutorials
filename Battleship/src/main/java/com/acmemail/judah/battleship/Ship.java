@@ -39,11 +39,11 @@ public class Ship
         if ( orientation == Orientation.VERTICAL )
         {
             lastXco = first.getXco();
-            lastYco = first.getYco() + length;
+            lastYco = first.getYco() + length - 1;
         }
         else
         {
-            lastXco = first.getXco() + length;
+            lastXco = first.getXco() + length - 1;
             lastYco = first.getYco();
         }
         lastSquare = new OrderedPair( lastXco, lastYco );
@@ -53,7 +53,7 @@ public class Ship
     {
         boolean contains    =
             xco >= firstSquare.getXco() && xco <= lastSquare.getXco()
-            && yco >= firstSquare.getYco() && xco <= lastSquare.getYco();
+            && yco >= firstSquare.getYco() && yco <= lastSquare.getYco();
         return contains;
     }
     

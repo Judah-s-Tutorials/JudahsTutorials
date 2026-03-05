@@ -10,8 +10,8 @@ public class Grid extends HashMap<OrderedPair, Square>
     private static final long serialVersionUID = 1L;
     
     private static final String DEF_GRID_NAME       = "THIS GRID";
-    private static final int    DEF_ROW_LEN = 10;
-    private static final int    DEF_COL_LEN = 10;
+    private static final int    DEF_ROW_LEN = 100;
+    private static final int    DEF_COL_LEN = 100;
     private static final int    ROW_LEN;
     private static final int    COL_LEN;
     private static final Map<String,Grid>  allGrids   = new HashMap<>();
