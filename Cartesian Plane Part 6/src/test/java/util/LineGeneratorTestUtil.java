@@ -1,6 +1,7 @@
 package util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.geom.Line2D;
@@ -84,6 +85,19 @@ public class LineGeneratorTestUtil
         return lineGenerator;
     }
     
+    public void validateInstanceAxesIterator()
+    {
+        Iterator<Line2D>    iter    = lineGenerator.axesIterator();
+        validateAxesIterator( iter );
+    }
+    
+    public void validateClassAxesIterator()
+    {
+        Iterator<Line2D>    iter    = 
+            LineGenerator.axesIterator( gridRect );
+        validateAxesIterator( iter );
+    }
+    
     public void validateCount()
     {
         int     expHCount   = allHor.size();
@@ -136,6 +150,70 @@ public class LineGeneratorTestUtil
         }
     }
     
+    public void validateLines()
+    {
+        if ( (orientation & LineGenerator.HORIZONTAL) != 0 )
+            validateHorizontalLines();
+        if ( (orientation & LineGenerator.VERTICAL) != 0 )
+            validateVerticalLines();
+    }
+    
+    public void validateGetHorizontalCount()
+    {
+        int expCount    = allHor.size();
+        int actCount    = lineGenerator.getHorLineCount();
+        assertEquals( expCount, actCount );
+    }
+    
+    public void validateGetVerticalCount()
+    {
+        int expCount    = allVert.size();
+        int actCount    = lineGenerator.getVertLineCount();
+        assertEquals( expCount, actCount );
+    }
+    
+    private void validateAxesIterator( Iterator<Line2D> iter )
+    {
+        List<Line2D>        axes    = new ArrayList<>();
+        while ( iter.hasNext() )
+            axes.add( iter.next() );
+        assertFalse( iter.hasNext() );
+    }
+    
+    private void validateHorizontalLines()
+    {
+        Iterator<Line2D>    actIterator = lineGenerator.iterator();
+        Iterator<Line2D>    expIterator = allHor.iterator();
+        while ( actIterator.hasNext() )
+        {
+            Line2D  actLine = actIterator.next();
+            if ( isHorizontal( actLine ) )
+            {
+                assertTrue( expIterator.hasNext() );
+                Line2D  expLine = expIterator.next();
+                assertTrue( equals( expLine, actLine ) );
+            }
+        }
+        assertFalse( expIterator.hasNext() );
+    }
+    
+    private void validateVerticalLines()
+    {
+        Iterator<Line2D>    actIterator = lineGenerator.iterator();
+        Iterator<Line2D>    expIterator = allVert.iterator();
+        while ( actIterator.hasNext() )
+        {
+            Line2D  actLine = actIterator.next();
+            if ( isVertical( actLine ) )
+            {
+                assertTrue( expIterator.hasNext() );
+                Line2D  expLine = expIterator.next();
+                assertTrue( equals( expLine, actLine ) );
+            }
+        }
+        assertFalse( expIterator.hasNext() );
+    }
+    
     private float getLength( Line2D line )
     {
         Point2D point1  = line.getP1();
@@ -166,8 +244,8 @@ public class LineGeneratorTestUtil
         originXco = (float)gridRect.getCenterX();
         originYco = (float)gridRect.getCenterY();
         assertEquals( intSpacing, spacing );
-        assertEquals( intSpacing % gridWidth, 0 );
-        assertEquals( intSpacing % gridHeight, 0 );
+        assertEquals( gridWidth % intSpacing, 0 );
+        assertEquals( gridHeight % intSpacing, 0 );
         
         calculateAllHor();
         calculateAllVert();
@@ -175,6 +253,7 @@ public class LineGeneratorTestUtil
     
     private void calculateAllHor()
     {
+        allHor.clear();
         float   leftEnd;
         float   rightEnd;
         if ( length == -1 )
@@ -207,6 +286,7 @@ public class LineGeneratorTestUtil
     
     private void calculateAllVert()
     {
+        allVert.clear();
         float   upEnd;
         float   downEnd;
         if ( length == -1 )
@@ -234,5 +314,49 @@ public class LineGeneratorTestUtil
                 new Line2D.Double( xco, upEnd, xco, downEnd ); 
             allVert.add( line );
         }
+    }
+    
+    private boolean equals( Line2D lineA, Line2D lineB )
+    {
+        Point2D lineAP1 = lineA.getP1();
+        Point2D lineAP2 = lineA.getP2();
+        Point2D lineBP1 = lineB.getP1();
+        Point2D lineBP2 = lineB.getP2();
+        boolean rcode   = false;
+        if ( equals( lineAP1, lineBP1 ) )
+        {
+            rcode = equals( lineAP2, lineBP2 );
+        }
+        else if ( equals( lineAP1, lineBP2 ) )
+        {
+            rcode = equals( lineAP2, lineBP1 );
+        }
+        else
+            rcode = false;
+        return rcode;
+    }
+    
+    private boolean equals( Point2D pointA, Point2D pointB )
+    {
+        boolean rcode   = 
+            pointA.getX() == pointB.getX() &&
+            pointA.getY() == pointB.getY();
+        return rcode;
+    }
+    
+    private boolean isHorizontal( Line2D line )
+    {
+        double  yco1    = line.getY1();
+        double  yco2    = line.getY2();
+        boolean rcode   = yco1 == yco2;
+        return rcode;
+    }
+    
+    private boolean isVertical( Line2D line )
+    {
+        double  xco1    = line.getX1();
+        double  xco2    = line.getX2();
+        boolean rcode   = xco1 == xco2;
+        return rcode;
     }
 }

@@ -1,6 +1,11 @@
 package com.acmemail.judah.battleship;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+import java.awt.geom.Rectangle2D;
 
 import org.junit.jupiter.api.Test;
 
@@ -229,6 +234,26 @@ class ShipTest
     void testGetOrientation()
     {
         fail("Not yet implemented");
+    }
+    
+    private Rectangle2D 
+    getTopRect( int length, boolean isVertical, Ship testShip )
+    {
+        int         testShipLength      = testShip.getLength();
+        int         testShipWidth       = 0;
+        int         testShipHeight      = 0;
+        if ( testShip.getOrientation() == Orientation.HORIZONTAL )
+        {
+            testShipWidth = length;
+            testShipHeight = 1;
+        }
+        else
+        {
+            testShipWidth = 1;
+            testShipHeight = length;
+        }
+        OrderedPair testShipTopLeft     = testShip.getFirstSquare();
+        OrderedPair testShipBottomRight = testShip.getLastSquare();
     }
 
     private static void 
