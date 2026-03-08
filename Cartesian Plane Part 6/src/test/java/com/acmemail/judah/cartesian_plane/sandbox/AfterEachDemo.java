@@ -9,8 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
-
-import util.TestUtils;
+import com.acmemail.judah.cartesian_plane.test_util.TestUtils;
 
 /**
  * This class illustrates the use of

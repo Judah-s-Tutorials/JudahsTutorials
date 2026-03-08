@@ -7,7 +7,7 @@ import javax.swing.JPanel;
 
 import org.junit.jupiter.api.Test;
 
-import util.TestUtils;
+import com.acmemail.judah.cartesian_plane.test_util.TestUtils;
 
 class RootTest
 {

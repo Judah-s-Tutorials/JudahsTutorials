@@ -27,7 +27,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import util.PropertyTesterApp;
+import com.acmemail.judah.cartesian_plane.test_util.PropertyTesterApp;
 
 /**
  * This test is strictly to verify that the PropertyManager

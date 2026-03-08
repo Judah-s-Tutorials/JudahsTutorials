@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 
 import org.junit.jupiter.api.Test;
@@ -245,15 +246,47 @@ class ShipTest
         if ( testShip.getOrientation() == Orientation.HORIZONTAL )
         {
             testShipWidth = length;
-            testShipHeight = 1;
+            testShipHeight = 0;
         }
         else
         {
-            testShipWidth = 1;
+            testShipWidth = 0;
             testShipHeight = length;
         }
+        
+        int testShipFirstXco    = testShip.getMinX();
+        int testShipLastXco     = testShip.getMaxX();
+        int testShipFirstYco    = testShip.getMinY();
+        int testShipLastYco     = testShip.getMaxY();
+
+        int         workShipWidth       = 0;
+        int         workShipHeight      = 0;
+        if ( isVertical )
+        {
+            workShipWidth = 0;
+            workShipHeight = length;
+        }
+        else
+        {
+            workShipWidth = length;
+            workShipHeight = 0;
+        }
+        
+        // The last row that the work ship can live in without
+        // intersecting the test ship.
+        int workShipLastYco = testShipFirstYco - workShipHeight - 1;
+        // The last column that the work ship can live in without
+        // exceeding the width of the grid.
+        int workShipLastXco = colLen - workShipWidth - 1;
+        Rectangle   rect    = new Rectangle( 0, 0, workShipLastXco, workShopLastYco );
+
         OrderedPair testShipTopLeft     = testShip.getFirstSquare();
         OrderedPair testShipBottomRight = testShip.getLastSquare();
+        
+        // the last row that can contain the work ship
+        // without intersecting the test ship.
+        
+        return null;
     }
 
     private static void 
