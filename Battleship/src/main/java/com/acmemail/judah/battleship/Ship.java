@@ -1,29 +1,31 @@
 package com.acmemail.judah.battleship;
+import static com.acmemail.judah.battleship.Orientation.*;
 public class Ship
 {
     private static final String DEF_NAME    = "Default Name";
     
-    private final String        type;
+    private final ShipType      type;
     private final String        name;
     private final OrderedPair   firstSquare;
-    private final OrderedPair   lastSquare;
-    private final int           length;
+//    private final OrderedPair   lastSquare;
+//    private final int           length;
+//    private final int           width;
+//    private final int           height;
     private final Orientation   orientation;
+    
     public Ship( 
-        String type, 
+        ShipType type, 
         OrderedPair first, 
-        int length, 
         Orientation orientation
     )
     {
-        this( type, DEF_NAME, first, length, orientation );
+        this( type, DEF_NAME, first, orientation );
     }
     
     public Ship( 
-        String type, 
+        ShipType type, 
         String name, 
         OrderedPair first, 
-        int length, 
         Orientation orientation
     )
     {
@@ -31,29 +33,14 @@ public class Ship
         this.type = type;
         this.name = name;
         this.firstSquare = first;
-        this.length = length;
         this.orientation = orientation;
-        
-        int lastXco;
-        int lastYco;
-        if ( orientation == Orientation.VERTICAL )
-        {
-            lastXco = first.getXco();
-            lastYco = first.getYco() + length - 1;
-        }
-        else
-        {
-            lastXco = first.getXco() + length - 1;
-            lastYco = first.getYco();
-        }
-        lastSquare = new OrderedPair( lastXco, lastYco );
     }
     
     public boolean contains( int xco, int yco )
     {
         boolean contains    =
-            xco >= firstSquare.getXco() && xco <= lastSquare.getXco()
-            && yco >= firstSquare.getYco() && yco <= lastSquare.getYco();
+            xco >= getMinX() && xco < getMaxX()
+            && yco >= getMinY() && yco < getMaxY();
         return contains;
     }
     
@@ -75,19 +62,42 @@ public class Ship
     
     public boolean intersects( Ship that )
     {
-        boolean result  = false;
-        if ( orientation != that.orientation )
-        {
-            if ( orientation == Orientation.VERTICAL )
-                result = testIntersectDiff( this, that );
-            else
-                result = testIntersectDiff( that, this );
-        }
-        else if ( orientation == Orientation.VERTICAL )
-            result = testIntersectVertical( this, that );
+        boolean result      = false;
+        int     thisMinX    = getMinX();
+        int     thisMaxX    = getMaxX();
+        int     thatMinX    = that.getMinX();
+        int     thatMaxX    = that.getMaxX();
+        int     thisMinY    = getMinY();
+        int     thisMaxY    = getMaxY();
+        int     thatMinY    = that.getMinY();
+        int     thatMaxY    = that.getMaxY();
+        if ( thisMinY >= thatMaxY )
+            result = false;
+        else if ( thisMaxY <= thatMinY )
+            result = false;
+        else if ( thisMinX >= thatMaxX )
+            result = false;
+        else if ( thisMaxX <= thatMinX )
+            result = false;
         else
-            result = testIntersectnHorizontal( this, that );
+            result = true;
+        
+//        if ( thisMaxX >= thatMinX && thisMinX < thatMaxX )
+//            if ( thisMaxY >= thatMinY && thisMinY < thatMaxY )
+//                result = true;
         return result;
+    }
+    
+    public int getWidth()
+    {
+        int width   = orientation == HORIZONTAL ? type.getLength() : 1;
+        return width;
+    }
+    
+    public int getHeight()
+    {
+        int height  = orientation == VERTICAL ? type.getLength() : 1;
+        return height;
     }
     
     public int getMinX()
@@ -97,7 +107,8 @@ public class Ship
     
     public int getMaxX()
     {
-        return lastSquare.getXco();
+        int maxXco  = getMinX() + getWidth();
+        return maxXco;
     }
     
     public int getMinY()
@@ -107,13 +118,14 @@ public class Ship
     
     public int getMaxY()
     {
-        return lastSquare.getYco();
+        int maxY    = getMinY() + getHeight();
+        return maxY;
     }
 
     /**
      * @return the type
      */
-    public String getType()
+    public ShipType getType()
     {
         return type;
     }
@@ -135,19 +147,12 @@ public class Ship
     }
 
     /**
-     * @return the lastSquare
-     */
-    public OrderedPair getLastSquare()
-    {
-        return lastSquare;
-    }
-
-    /**
      * @return the length
      */
     public int getLength()
     {
-        return length;
+        int len = type.getLength();
+        return len;
     }
 
     /**
@@ -158,59 +163,17 @@ public class Ship
         return orientation;
     }
     
-    private static boolean 
-    testIntersectDiff( Ship vertical, Ship horizontal )
+    @Override
+    public String toString()
     {
-        int     vXco    = vertical.getMaxX();
-        int     vMinYco = vertical.getMinY();
-        int     vMaxYco = vertical.getMaxY();
-        int     hYco    = horizontal.getMaxY();
-        int     hMinXco = horizontal.getMinX();
-        int     hMaxXco = horizontal.getMaxX();
+        int             len     = getLength();
+        StringBuilder   bldr    = new StringBuilder();
+        bldr.append( "name=" ).append( name )
+            .append( ",type=" ).append( type )
+            .append( ",start=" ).append( firstSquare )
+            .append( ",orient=" ).append( orientation )
+            .append( ",length=" ).append( len );
         
-        boolean result  = 
-            vXco >= hMinXco && vXco <= hMaxXco &&
-            vMinYco <= hYco && vMaxYco >= hYco;
-        return result;
-    }
-    
-    private static boolean 
-    testIntersectVertical( Ship ship1, Ship ship2 )
-    {
-        int     ship1Xco        = ship1.getMaxX();
-        int     ship2Xco        = ship2.getMaxX();
-        int     ship1MinYco     = ship1.getMinY();
-        int     ship1MaxYco     = ship1.getMaxY();
-        int     ship2MinYco     = ship2.getMinY();
-        int     ship2MaxYco     = ship2.getMaxY();
-        
-        boolean result  = false;
-        if ( ship1Xco != ship2Xco )
-            result = false;
-        else if ( ship1MinYco <= ship2MinYco )
-            result = ship1MaxYco >= ship2MinYco;
-        else 
-            result = ship2MaxYco >= ship1MinYco;
-        return result;
-    }
-    
-    private static boolean 
-    testIntersectnHorizontal( Ship ship1, Ship ship2 )
-    {
-        int     ship1Yco        = ship1.getMaxY();
-        int     ship2Yco        = ship2.getMaxY();
-        int     ship1MinXco     = ship1.getMinX();
-        int     ship1MaxXco     = ship1.getMaxX();
-        int     ship2MinXco     = ship2.getMinX();
-        int     ship2MaxXco     = ship2.getMinX();
-        
-        boolean result  = false;
-        if ( ship1Yco != ship2Yco )
-            result = false;
-        else if ( ship1MinXco <= ship2MinXco )
-            result = ship1MaxXco >= ship2MinXco;
-        else 
-            result = ship2MaxXco >= ship1MinXco;
-        return result;
+        return bldr.toString();
     }
 }

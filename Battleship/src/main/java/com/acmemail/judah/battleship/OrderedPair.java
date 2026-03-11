@@ -22,5 +22,14 @@ public class OrderedPair
     {
         return yco;
     }
-
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder   bldr    = new StringBuilder();
+        bldr.append( "(" ).append( xco ).append( "," ).append( yco )
+            .append( "),splatted=" ).append( splatted );
+        
+        return bldr.toString();
+    }
 }
