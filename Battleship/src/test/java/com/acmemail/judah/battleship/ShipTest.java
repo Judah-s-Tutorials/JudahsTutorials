@@ -4,9 +4,10 @@ import static com.acmemail.judah.battleship.Orientation.HORIZONTAL;
 import static com.acmemail.judah.battleship.Orientation.VERTICAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,19 +42,59 @@ class ShipTest
         new Ship(
             defTypeHor,
             defNameHor,
-            new OrderedPair( horStartXco, midYco ),
+            new Point( horStartXco, midYco ),
             Orientation.HORIZONTAL
         );
     private static final Ship   defVer      =
         new Ship(
             defTypeVer,
             defNameVer,
-            new OrderedPair( verStartXco, verStartYco ),
+            new Point( verStartXco, verStartYco ),
             Orientation.VERTICAL
         );
+    
+    @Test
+    public void testShipTypePointOrientation()
+    {
+        testShipTypePointOrientation( ShipType.CARRIER, 10, 20, VERTICAL );
+        testShipTypePointOrientation( ShipType.CRUISER, 20, 10, HORIZONTAL );
+    }
+    
+    private static void 
+    testShipTypePointOrientation( 
+        ShipType type, 
+        int xco, 
+        int yco, 
+        Orientation orient 
+    )
+    {
+        Point   point       = new Point( xco, yco );
+        int     expLen      = type.getLength();
+        int     expWidth;
+        int     expHeight;
+        if ( orient == HORIZONTAL )
+        {
+            expWidth = expLen;
+            expHeight = 1;
+        }
+        else
+        {
+            expWidth = 1;
+            expHeight = expLen;
+        }
+        Ship    ship    = new Ship( type, point, orient );
+        assertEquals( type, ship.getType() );
+        assertEquals( orient, ship.getOrientation() );
+        assertEquals( expWidth, ship.getWidth() );
+        assertEquals( expHeight, ship.getHeight() );
+        assertNotNull( ship.getName() );
+        Point   actPoint    = ship.getFirstSquare();
+        assertEquals( xco, actPoint.x );
+        assertEquals( yco, actPoint.y );
+    }
 
     @Test
-    void testShipAllParams()
+    public void testShipAllParams()
     {
         assertEquals( defTypeHor, defHor.getType() );
         assertEquals( defNameHor, defHor.getName() );
@@ -64,67 +105,17 @@ class ShipTest
 
         assertEquals( defTypeVer, defVer.getType() );
         assertEquals( defNameVer, defVer.getName() );
-        assertEquals( horStartXco, defVer.getMinX() );
-        assertEquals( midYco, defVer.getMinY() );
+        assertEquals( verStartXco, defVer.getMinX() );
+        assertEquals( verStartYco, defVer.getMinY() );
         assertEquals( defLenVer, defVer.getLength() );
         assertEquals( Orientation.VERTICAL, defVer.getOrientation() );
     }
 
     @Test
-    void testShipDefName()
-    {
-        assertEquals( defTypeHor, defHor.getType() );
-        assertEquals( horStartXco, defHor.getMinX() );
-        assertEquals( midYco, defHor.getMinY() );
-        assertEquals( defLenHor, defHor.getLength() );
-        assertEquals( Orientation.HORIZONTAL, defHor.getOrientation() );
-
-        assertEquals( defTypeVer, defVer.getType() );
-        assertEquals( horStartXco, defVer.getMinX() );
-        assertEquals( midYco, defVer.getMinY() );
-        assertEquals( defLenVer, defVer.getLength() );
-        assertEquals( Orientation.VERTICAL, defVer.getOrientation() );
-    }
-
-    @Test
-    void testContainsOrderedPair()
+    public void testContainsOrderedPair()
     {
         testContainsOrderedPair( defHor );
         testContainsOrderedPair( defVer );
-    }
-    
-    private void testContainsOrderedPair( Ship ship )
-    {
-        int minRow  = ship.getMinY();
-        int maxRow  = ship.getMaxY();
-        int minCol  = ship.getMinX();
-        int maxCol  = ship.getMaxX();
-        for ( int row = minRow ; row < maxRow ; ++row )
-            for ( int col = minCol ; col < maxCol ; ++col )
-            {
-                OrderedPair pair    = new OrderedPair( col, row );
-                assertTrue( ship.contains( pair ) );
-            }
-        
-        int rowLow  = minRow - 1;
-        int rowHigh = maxRow;
-        for ( int col = 0 ; col < colLen ; ++col )
-        {
-            OrderedPair pairLow     = new OrderedPair( col, rowLow );
-            OrderedPair pairHigh    = new OrderedPair( col, rowHigh );
-            assertFalse( ship.contains( pairLow ) );
-            assertFalse( ship.contains( pairHigh ) );
-        }
-        
-        int colLow  = minCol - 1;
-        int colHigh = maxCol;
-        for ( int row = 0 ; row < rowLen ; ++row )
-        {
-            OrderedPair pairLow     = new OrderedPair( colLow, row );
-            OrderedPair pairHigh    = new OrderedPair( colHigh, row );
-            assertFalse( ship.contains( pairLow ) );
-            assertFalse( ship.contains( pairHigh ) );
-        }
     }
     
     @Test
@@ -136,35 +127,6 @@ class ShipTest
         testIntersects( HORIZONTAL, defVer );
     }
 
-    private void testIntersects( Orientation orient, Ship testShip )
-    {
-        Rectangle   rect    = getIntersectionRect( orient, testShip );
-        runIntersectTest( rect, orient, testShip );
-    }
-    
-    private void 
-    runIntersectTest( Rectangle rect, Orientation orient, Ship testShip )
-    {
-        BiFunction<Integer,Integer,Ship>    shipGetter  =
-            orient == HORIZONTAL ?
-                (x,y) -> getHorizontalShip( x, y ) :
-                (x,y) -> getVerticalShip( x, y );
-        int         minCol      = rect.x;
-        int         minRow      = rect.y;
-        int         maxCol      = rect.width;
-        int         maxRow      = rect.height;
-        for ( int row = minRow ; row < maxRow ; ++row )
-            for ( int col = minCol ; col < maxCol ; ++col )
-            {
-                Ship    ship    = shipGetter.apply( col, row );
-                System.out.println( ship );
-                String  comment = getComment( ship, testShip );
-                assertTrue( ship.intersects( testShip ), comment );
-                assertTrue( testShip.intersects( ship ), comment );
-            }
-        System.out.println( testShip );
-    }
-
     @Test
     public void testIntersectsNeg()
     {
@@ -172,6 +134,94 @@ class ShipTest
         testIntersectsNeg( HORIZONTAL, defVer );
         testIntersectsNeg( VERTICAL, defVer );
         testIntersectsNeg( VERTICAL, defHor );
+    }
+
+    @Test
+    public void testGetMinX()
+    {
+        int expMinHor   = horStartXco;
+        int actMinHor   = defHor.getMinX();
+        assertEquals( expMinHor, actMinHor );
+        
+        int expMinVer   = verStartXco;
+        int actMinVer   = defVer.getMinX();
+        assertEquals( expMinVer, actMinVer );
+    }
+
+    @Test
+    public void testGetMaxX()
+    {
+        int expMaxHor   = horStartXco + defLenHor;
+        int actMaxHor   = defHor.getMaxX();
+        assertEquals( expMaxHor, actMaxHor );
+        
+        int expMaxVer   = verStartXco + 1;
+        int actMaxVer   = defVer.getMaxX();
+        assertEquals( expMaxVer, actMaxVer );
+    }
+
+    @Test
+    public void testGetMinY()
+    {
+        int expMinHor   = horStartYco;
+        int actMinHor   = defHor.getMinY();
+        assertEquals( expMinHor, actMinHor );
+        
+        int expMinVer   = verStartYco;
+        int actMinVer   = defVer.getMinY();
+        assertEquals( expMinVer, actMinVer );
+    }
+
+    @Test
+    public void testGetMaxY()
+    {
+        int expMaxHor   = horStartYco + 1;
+        int actMaxHor   = defHor.getMaxY();
+        assertEquals( expMaxHor, actMaxHor );
+        
+        int expMaxVer   = verStartYco + defLenVer;
+        int actMaxVer   = defVer.getMaxY();
+        assertEquals( expMaxVer, actMaxVer );
+    }
+
+    @Test
+    public void testGetType()
+    {
+        assertEquals( defTypeHor, defHor.getType() );
+        assertEquals( defTypeVer, defVer.getType() );
+    }
+
+    @Test
+    public void testGetName()
+    {
+        assertEquals( defNameHor, defHor.getName() );
+        assertEquals( defNameVer, defVer.getName() );
+    }
+
+    @Test
+    public void testGetFirstSquare()
+    {
+        Point   horPair = defHor.getFirstSquare();
+        assertEquals( horPair.x, horStartXco );
+        assertEquals( horPair.y, horStartYco );
+
+        Point   verPair = defVer.getFirstSquare();
+        assertEquals( verPair.x, verStartXco );
+        assertEquals( verPair.y, verStartYco );
+    }
+
+    @Test
+    public void testGetLength()
+    {
+        assertEquals( defLenHor, defHor.getLength() );
+        assertEquals( defLenVer, defVer.getLength() );
+    }
+
+    @Test
+    public void testGetOrientation()
+    {
+        assertEquals( HORIZONTAL, defHor.getOrientation() );
+        assertEquals( VERTICAL, defVer.getOrientation() );
     }
 
     private void testIntersectsNeg( Orientation orient, Ship testShip )
@@ -202,12 +252,12 @@ class ShipTest
                 assertFalse( testShip.intersects( ship ), comment );
             }
     }
-    
+
     private static String getComment( Ship ship1, Ship ship2 )
     {
         StringBuilder   bldr    = new StringBuilder();
-        OrderedPair     pair1   = ship1.getFirstSquare();
-        OrderedPair     pair2   = ship2.getFirstSquare();
+        Point           pair1   = ship1.getFirstSquare();
+        Point           pair2   = ship2.getFirstSquare();
         int             len1    = ship1.getLength();
         int             len2    = ship2.getLength();
         bldr.append( pair1 ).append( "/" ).append( len1 ).append( "->" )
@@ -215,82 +265,67 @@ class ShipTest
         return bldr.toString();
     }
 
-    @Test
-    void testGetMinX()
+    private void testIntersects( Orientation orient, Ship testShip )
     {
-        int expMinHor   = horStartXco;
-        int actMinHor   = defHor.getMinX();
-        assertEquals( expMinHor, actMinHor );
+        Rectangle   rect    = getIntersectionRect( orient, testShip );
+        runIntersectTest( rect, orient, testShip );
+    }
+    
+    private void 
+    runIntersectTest( Rectangle rect, Orientation orient, Ship testShip )
+    {
+        BiFunction<Integer,Integer,Ship>    shipGetter  =
+            orient == HORIZONTAL ?
+                (x,y) -> getHorizontalShip( x, y ) :
+                (x,y) -> getVerticalShip( x, y );
+        int         minCol      = rect.x;
+        int         minRow      = rect.y;
+        int         maxCol      = rect.width;
+        int         maxRow      = rect.height;
+        for ( int row = minRow ; row < maxRow ; ++row )
+            for ( int col = minCol ; col < maxCol ; ++col )
+            {
+                Ship    ship    = shipGetter.apply( col, row );
+                System.out.println( ship );
+                String  comment = getComment( ship, testShip );
+                assertTrue( ship.intersects( testShip ), comment );
+                assertTrue( testShip.intersects( ship ), comment );
+            }
+        System.out.println( testShip );
+    }
+    
+    private void testContainsOrderedPair( Ship ship )
+    {
+        int minRow  = ship.getMinY();
+        int maxRow  = ship.getMaxY();
+        int minCol  = ship.getMinX();
+        int maxCol  = ship.getMaxX();
+        for ( int row = minRow ; row < maxRow ; ++row )
+            for ( int col = minCol ; col < maxCol ; ++col )
+            {
+                Point   pair    = new Point( col, row );
+                assertTrue( ship.contains( pair ) );
+            }
         
-        int expMinVer   = verStartXco;
-        int actMinVer   = defVer.getMinX();
-        assertEquals( expMinVer, actMinVer );
-    }
-
-    @Test
-    void testGetMaxX()
-    {
-        int expMaxHor   = horStartXco + defLenHor;
-        int actMaxHor   = defHor.getMaxX();
-        assertEquals( expMaxHor, actMaxHor );
+        int rowLow  = minRow - 1;
+        int rowHigh = maxRow;
+        for ( int col = 0 ; col < colLen ; ++col )
+        {
+            Point       pairLow     = new Point( col, rowLow );
+            Point       pairHigh    = new Point( col, rowHigh );
+            assertFalse( ship.contains( pairLow ) );
+            assertFalse( ship.contains( pairHigh ) );
+        }
         
-        int expMaxVer   = verStartXco + 1;
-        int actMaxVer   = defVer.getMaxX();
-        assertEquals( expMaxVer, actMaxVer );
-    }
-
-    @Test
-    void testGetMinY()
-    {
-        int expMinHor   = horStartYco;
-        int actMinHor   = defHor.getMinY();
-        assertEquals( expMinHor, actMinHor );
-        
-        int expMinVer   = verStartYco;
-        int actMinVer   = defVer.getMinY();
-        assertEquals( expMinVer, actMinVer );
-    }
-
-    @Test
-    void testGetMaxY()
-    {
-        int expMaxHor   = horStartYco + 1;
-        int actMaxHor   = defHor.getMaxY();
-        assertEquals( expMaxHor, actMaxHor );
-        
-        int expMaxVer   = verStartYco + defLenVer;
-        int actMaxVer   = defVer.getMaxY();
-        assertEquals( expMaxVer, actMaxVer );
-    }
-
-    @Test
-    void testGetType()
-    {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testGetName()
-    {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testGetFirstSquare()
-    {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testGetLength()
-    {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testGetOrientation()
-    {
-        fail("Not yet implemented");
+        int colLow  = minCol - 1;
+        int colHigh = maxCol;
+        for ( int row = 0 ; row < rowLen ; ++row )
+        {
+            Point       pairLow     = new Point( colLow, row );
+            Point       pairHigh    = new Point( colHigh, row );
+            assertFalse( ship.contains( pairLow ) );
+            assertFalse( ship.contains( pairHigh ) );
+        }
     }
     
     private Rectangle
@@ -366,7 +401,7 @@ class ShipTest
     
     private static Ship getHorizontalShip( int xco, int yco )
     {
-        OrderedPair start   = new OrderedPair( xco, yco );
+        Point       start   = new Point( xco, yco );
         Ship        ship    = new Ship( 
             defTypeHor,  
             defNameHor, 
@@ -378,7 +413,7 @@ class ShipTest
     
     private static Ship getVerticalShip( int xco, int yco )
     {
-        OrderedPair start   = new OrderedPair( xco, yco );
+        Point       start   = new Point( xco, yco );
         Ship        ship    = new Ship( 
             defTypeVer,  
             defNameVer, 

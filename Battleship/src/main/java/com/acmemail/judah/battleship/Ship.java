@@ -1,21 +1,20 @@
 package com.acmemail.judah.battleship;
-import static com.acmemail.judah.battleship.Orientation.*;
+import static com.acmemail.judah.battleship.Orientation.HORIZONTAL;
+import static com.acmemail.judah.battleship.Orientation.VERTICAL;
+
+import java.awt.Point;
 public class Ship
 {
     private static final String DEF_NAME    = "Default Name";
     
     private final ShipType      type;
     private final String        name;
-    private final OrderedPair   firstSquare;
-//    private final OrderedPair   lastSquare;
-//    private final int           length;
-//    private final int           width;
-//    private final int           height;
+    private final Point         firstSquare;
     private final Orientation   orientation;
     
     public Ship( 
         ShipType type, 
-        OrderedPair first, 
+        Point first, 
         Orientation orientation
     )
     {
@@ -25,7 +24,7 @@ public class Ship
     public Ship( 
         ShipType type, 
         String name, 
-        OrderedPair first, 
+        Point first, 
         Orientation orientation
     )
     {
@@ -44,18 +43,10 @@ public class Ship
         return contains;
     }
     
-    public boolean contains( OrderedPair pair )
+    public boolean contains( Point pair )
     {
-        int     xco         = pair.getXco();
-        int     yco         = pair.getYco();
-        boolean contains    = contains( xco, yco );
-        return contains;
-    }
-    
-    public boolean contains( Square square )
-    {
-        int     xco         = square.getXco();
-        int     yco         = square.getYco();
+        int     xco         = pair.x;
+        int     yco         = pair.y;
         boolean contains    = contains( xco, yco );
         return contains;
     }
@@ -102,7 +93,7 @@ public class Ship
     
     public int getMinX()
     {
-        return firstSquare.getXco();
+        return firstSquare.x;
     }
     
     public int getMaxX()
@@ -113,7 +104,7 @@ public class Ship
     
     public int getMinY()
     {
-        return firstSquare.getYco();
+        return firstSquare.y;
     }
     
     public int getMaxY()
@@ -141,7 +132,7 @@ public class Ship
     /**
      * @return the firstSquare
      */
-    public OrderedPair getFirstSquare()
+    public Point getFirstSquare()
     {
         return firstSquare;
     }

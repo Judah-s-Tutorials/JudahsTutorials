@@ -1,17 +1,18 @@
 package com.acmemail.judah.battleship;
 
+import java.awt.Point;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Grid extends HashMap<OrderedPair, Square>
+public class Grid extends HashMap<Point, Ship>
 {
     private static final long serialVersionUID = 1L;
     
     private static final String DEF_GRID_NAME       = "THIS GRID";
-    private static final int    DEF_ROW_LEN = 100;
-    private static final int    DEF_COL_LEN = 100;
+    private static final int    DEF_ROW_LEN         = 100;
+    private static final int    DEF_COL_LEN         = 100;
     private static final int    ROW_LEN;
     private static final int    COL_LEN;
     private static final Map<String,Grid>  allGrids   = new HashMap<>();
@@ -53,42 +54,6 @@ public class Grid extends HashMap<OrderedPair, Square>
     }
     
     /**
-     * Creates a new square with the given coordinates
-     * and adds it to this Grid.
-     * 
-     * @param xco   the x-coordinate of the new Square
-     * @param yco   the x-coordinate of the new Square
-     */
-    public void put( int xco, int yco )
-    {
-        Square      square  = new Square( xco, yco );
-        put( square );
-    }
-    
-    /**
-     * Adds the given Square to this Grid.
-     * 
-     * @param square    the given square
-     */
-    public void put( Square square )
-    {
-        put( square.getOrderedPair(), square );
-    }
-    
-    /**
-     * Retrieves the Square at the given coordinates.
-     * 
-     * @param xco   the given x-coordinate
-     * @param yco   the given y-coordinate
-     * @return  the Square at the given coordinates.
-     */
-    public Square get( int xco, int yco )
-    {
-        Square  square  = get( new OrderedPair( xco, yco ) );
-        return square;
-    }
-    
-    /**
      * Returns true if the the square if the given coordinates
      * identify a square that has been splatted.
      * 
@@ -100,8 +65,8 @@ public class Grid extends HashMap<OrderedPair, Square>
      */
     public boolean isSplatted( int xco, int yco )
     {
-        Square  square  = get( xco, yco );
-        return square.isSplatted();
+//        Square  square  = get( xco, yco );
+        return false;
     }
     
     /**
@@ -124,23 +89,6 @@ public class Grid extends HashMap<OrderedPair, Square>
     }
     
     /**
-     * Determine if the coordinates of a given OrderedPair
-     * are valid for this Grid.
-     * 
-     * @param pair  the given OrderedPair
-     * 
-     * @return  true if the coordinates of the given ordered pair are valid
-     *          for this grid
-     *          
-     * @see #isValidCoord(int, int)
-     */
-    public static boolean isValidCoord( OrderedPair pair )
-    {
-        boolean valid   = isValidCoord( pair.getXco(), pair.getYco() );
-        return valid;
-    }
-    
-    /**
      * Determine if the coordinates of a given Square
      * are valid for this Grid.
      * 
@@ -151,9 +99,9 @@ public class Grid extends HashMap<OrderedPair, Square>
      *          
      * @see #isValidCoord(int, int)
      */
-    public static boolean isValidCoord( Square square )
+    public static boolean isValidCoord( Point square )
     {
-        boolean valid   = isValidCoord( square.getXco(), square.getYco() );
+        boolean valid   = isValidCoord( square.x, square.y );
         return valid;
     }
     
