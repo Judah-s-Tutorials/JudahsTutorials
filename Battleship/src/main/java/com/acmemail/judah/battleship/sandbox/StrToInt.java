@@ -13,7 +13,7 @@ public class StrToInt
         for ( int inx = 0 ; inx < 200 ; ++inx )
         {
             String  alpha   = decimalToAlpha( inx );
-            int     decimal = alphaToInt( alpha );
+            int     decimal = alphaToDecimal( alpha );
             System.out.printf( "%d -> %s -> %d%n", inx, alpha, decimal );
         }
     }
@@ -43,18 +43,6 @@ public class StrToInt
             num = num * 26 + value;
         }
         --num;
-        return num;
-    }
-
-    private static int strToInt( String str )
-    {
-        int     len     = str.length();
-        int     num     = 0;
-        for ( int inx = 0 ; inx < len ; ++inx )
-        {
-            int next    = str.charAt( inx ) - '0';
-            num = num * 10 + next;
-        }
         return num;
     }
 }

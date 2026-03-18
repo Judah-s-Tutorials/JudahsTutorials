@@ -2,19 +2,19 @@ package com.acmemail.judah.battleship;
 import static com.acmemail.judah.battleship.Orientation.HORIZONTAL;
 import static com.acmemail.judah.battleship.Orientation.VERTICAL;
 
-import java.awt.Point;
+import java.awt.Rectangle;
 public class Ship
 {
     private static final String DEF_NAME    = "Default Name";
     
     private final ShipType      type;
     private final String        name;
-    private final Point         firstSquare;
+    private final GridCoords    firstSquare;
     private final Orientation   orientation;
     
     public Ship( 
         ShipType type, 
-        Point first, 
+        GridCoords first, 
         Orientation orientation
     )
     {
@@ -24,7 +24,7 @@ public class Ship
     public Ship( 
         ShipType type, 
         String name, 
-        Point first, 
+        GridCoords first, 
         Orientation orientation
     )
     {
@@ -43,10 +43,10 @@ public class Ship
         return contains;
     }
     
-    public boolean contains( Point pair )
+    public boolean contains( GridCoords pair )
     {
-        int     xco         = pair.x;
-        int     yco         = pair.y;
+        int     xco         = pair.getXco();
+        int     yco         = pair.getYco();
         boolean contains    = contains( xco, yco );
         return contains;
     }
@@ -72,11 +72,14 @@ public class Ship
             result = false;
         else
             result = true;
-        
-//        if ( thisMaxX >= thatMinX && thisMinX < thatMaxX )
-//            if ( thisMaxY >= thatMinY && thisMinY < thatMaxY )
-//                result = true;
         return result;
+    }
+    
+    public Rectangle getRect()
+    {
+        Rectangle   rect    =
+            new Rectangle( getMinX(), getMinY(), getWidth(), getHeight() );
+        return rect;
     }
     
     public int getWidth()
@@ -93,7 +96,7 @@ public class Ship
     
     public int getMinX()
     {
-        return firstSquare.x;
+        return firstSquare.getXco();
     }
     
     public int getMaxX()
@@ -104,7 +107,7 @@ public class Ship
     
     public int getMinY()
     {
-        return firstSquare.y;
+        return firstSquare.getYco();
     }
     
     public int getMaxY()
@@ -114,11 +117,23 @@ public class Ship
     }
 
     /**
-     * @return the type
+     * Gets the ship type.
+     * 
+     * @return the ship type
      */
     public ShipType getType()
     {
         return type;
+    }
+
+    /**
+     * Gets the name of the ship type.
+     * 
+     * @return the ship type name
+     */
+    public String getTypeName()
+    {
+        return type.getTypeName();
     }
 
     /**
@@ -132,7 +147,7 @@ public class Ship
     /**
      * @return the firstSquare
      */
-    public Point getFirstSquare()
+    public GridCoords getFirstSquare()
     {
         return firstSquare;
     }

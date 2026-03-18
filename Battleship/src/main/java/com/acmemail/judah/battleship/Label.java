@@ -2,8 +2,8 @@ package com.acmemail.judah.battleship;
 
 public class Label
 {
-    private static final int        rowLen      = Grid.getRowLen();
-    private static final int        colLen      = Grid.getColLen();
+    private static final int        rowLen      = Grid.getNumRows();
+    private static final int        colLen      = Grid.getNumCols();
     private static final int        maxRowDigs;
     private static final int        maxColDigs;
     private static final String     decToStrFmt;
@@ -29,6 +29,18 @@ public class Label
                 String.format( "%d -> %s -> %d", inx, base26, base10 );
             System.out.println( str );
         }
+    }
+    
+    public static String intToString( int num )
+    {
+        if ( num < 0 )
+        {
+            String  fmt     = "Input (%d) must be >= 0";
+            String  message = String.format( fmt,  num );
+            throw new BattleshipException( message );
+        }
+        String  str = String.format( decToStrFmt, num + 1 );
+        return str;
     }
     
     public static int strToInt( String str )
@@ -65,7 +77,8 @@ public class Label
     {
         if ( num < 0 )
         {
-            String  message = "Input must be >= 0";
+            String  fmt     = "Input (%d) must be >= 0";
+            String  message = String.format( fmt,  num );
             throw new BattleshipException( message );
         }
         int             worker  = num + 1;

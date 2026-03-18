@@ -1,28 +1,31 @@
 package com.acmemail.judah.battleship;
 
-import java.awt.Point;
+import static com.acmemail.judah.battleship.Constants.KEY_NUM_COLS;
+import static com.acmemail.judah.battleship.Constants.KEY_NUM_ROWS;
+
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Grid extends HashMap<Point, Ship>
+public class Grid extends HashMap<GridCoords,Cell>
 {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1368725798587899020L;
     
-    private static final String DEF_GRID_NAME       = "THIS GRID";
-    private static final int    DEF_ROW_LEN         = 100;
-    private static final int    DEF_COL_LEN         = 100;
-    private static final int    ROW_LEN;
-    private static final int    COL_LEN;
+    private static final String DEF_GRID_NAME       = "HOME";
+    private static final int    DEF_NUM_ROWS        = 10;
+    private static final int    DEF_NUM_COLS        = 15;
+    private static final int    NUM_ROWS;
+    private static final int    NUM_COLS;
     private static final Map<String,Grid>  allGrids   = new HashMap<>();
     
     public final String     name;
     
     static
     {
-        ROW_LEN = parseIntProperty( "ROW_LENGTH", DEF_ROW_LEN );
-        COL_LEN = parseIntProperty( "COL_LENGTH", DEF_COL_LEN );
+        NUM_ROWS = parseIntProperty( KEY_NUM_ROWS, DEF_NUM_ROWS );
+        NUM_COLS = parseIntProperty( KEY_NUM_COLS, DEF_NUM_COLS );
         new Grid();
     }
     
@@ -45,12 +48,28 @@ public class Grid extends HashMap<Point, Ship>
         if ( allGrids.containsKey( name ) )
         {
             String  msg =
-                "A Grid with the name \""
-                + name
-                + "\"  already exists";
-            throw new IllegalStateException( msg );
+                "A Grid with this name already exists: " + name;
+            throw new BattleshipException( msg );
         }
         allGrids.put( name, this );
+        for ( int yco = 0 ; yco < NUM_ROWS ; ++ yco )
+            for ( int xco = 0 ; xco < NUM_COLS ; ++xco )
+            {
+                Cell    cell    = new Cell( xco, yco );
+                System.out.println( cell );
+                put( cell );
+            }
+    }
+    
+    public static Grid getHomeGrid()
+    {
+        Grid    home    = allGrids.get( DEF_GRID_NAME );
+        if ( home == null )
+        {
+            String  message = "Can't find hme grid: " + DEF_GRID_NAME;
+            throw new BattleshipException( message );
+        }
+        return home;
     }
     
     /**
@@ -65,8 +84,68 @@ public class Grid extends HashMap<Point, Ship>
      */
     public boolean isSplatted( int xco, int yco )
     {
-//        Square  square  = get( xco, yco );
-        return false;
+        GridCoords  coords  = new GridCoords( xco, yco );
+        boolean splatted    = isSplatted( coords );
+        return splatted;
+    }
+    
+    public Ship getShip( int xco, int yco )
+    {
+        Cell    cell    = get( xco, yco );
+        Ship    ship    = cell.getShip();
+        return ship;
+    }
+    
+    public void attack( int xco, int yco )
+    {
+        GridCoords  coords  = new GridCoords( xco, yco );
+        attack( coords );
+    }
+    
+    public void attack( GridCoords coords )
+    {
+        List<String>    errors  = evaluateBounds( coords );
+        if ( !errors.isEmpty() )
+            throw new BattleshipException( errors.get( 0 ) );
+        Cell    cell    = get( coords );
+        cell.setSplatted( true );
+    }
+    
+    public void put( Ship ship )
+    {
+        List<String>    errors  = evaluateBounds( ship );
+        if ( !errors.isEmpty() )
+            throw new BattleshipException( errors.get( 0 ) );
+        int     minXco      = ship.getMinX();
+        int     maxXco      = ship.getMaxX();
+        int     minYco      = ship.getMinY();
+        int     maxYco      = ship.getMaxY();
+        for ( int yco = minYco ; yco < maxYco ; ++yco )
+            for ( int xco = minXco ; xco < maxXco ; ++xco )
+            {
+                GridCoords  coords  = new GridCoords( xco, yco );
+                Cell        cell    = get( coords );
+                if ( cell == null )
+                {
+                    String  message = 
+                        "Unexpected failure to find Cell: " + coords;
+                    throw new BattleshipException( message );
+                }
+                cell.setShip( ship );
+                put( coords, cell );
+            }
+    }
+
+    public boolean isSplatted( GridCoords coords )
+    {
+        Cell    cell    = get( coords );
+        if ( cell == null )
+        {
+            String  message = "No cell exists at coordinates: " + coords;
+            throw new BattleshipException( message );
+        }
+        boolean splatted    = cell.isSplatted();
+        return splatted;
     }
     
     /**
@@ -84,7 +163,7 @@ public class Grid extends HashMap<Point, Ship>
      */
     public static boolean isValidCoord( int xco, int yco )
     {
-        boolean valid   = xco < ROW_LEN && yco < COL_LEN;
+        boolean valid   = xco < NUM_ROWS && yco < NUM_COLS;
         return valid;
     }
     
@@ -92,35 +171,87 @@ public class Grid extends HashMap<Point, Ship>
      * Determine if the coordinates of a given Square
      * are valid for this Grid.
      * 
-     * @param square  the given Square
+     * @param coords  the given Square
      * 
      * @return  true if the coordinates of the given Square are valid
      *          for this grid
      *          
      * @see #isValidCoord(int, int)
      */
-    public static boolean isValidCoord( Point square )
+    public static boolean isValidCoord( GridCoords coords )
     {
-        boolean valid   = isValidCoord( square.x, square.y );
+        boolean valid   = isValidCoord( coords.getXco(), coords.getYco() );
         return valid;
     }
     
-    /**
-     * Get the row length of the grid.
-     * @return the row length
-     */
-    public static int getRowLen()
+    public Cell get( int xco, int yco )
     {
-        return ROW_LEN;
+        GridCoords  coords  = new GridCoords( xco, yco );
+        Cell        cell    = get( coords );
+        return cell;
+    }
+    
+    @Override
+    public Cell get( Object obj )
+    {
+        Cell    cell    = super.get( obj );
+        if ( cell == null )
+        {
+            String  message = "There is no cell at coordinates: " + obj;
+            throw new BattleshipException( message );
+        }
+        return cell;
+    }
+    
+    public void put( Cell cell )
+    {
+        put( cell.getCoords(), cell );
+    }
+    
+    @Override
+    public Cell put( GridCoords coords, Cell cell )
+    {
+        List<String>    errors  = evaluateBounds( coords );
+        if ( !errors.isEmpty() )
+            throw new BattleshipException( errors.get( 0 ) );
+        Cell    oldVal  = super.put( coords, cell );
+        return oldVal;
+    }
+    
+    /**
+     * Get the number of rows in this grid.
+     * @return the number of rows in this grid
+     */
+    public static int getNumRows()
+    {
+        return NUM_ROWS;
     }
 
     /**
-     * Get the column length of the grid;
-     * @return the column length
+     * Get the number of columns in this grid.
+     * @return the number of columns in this grid
      */
-    public static int getColLen()
+    public static int getNumCols()
     {
-        return COL_LEN;
+        return NUM_COLS;
+    }
+    
+    public static List<String> evaluateBounds( GridCoords coords )
+    {
+        List<String>    list    = new ArrayList<>();
+        int             xco     = coords.getXco();
+        int             yco     = coords.getYco();
+        if ( xco < 0 || xco >= getNumCols() )
+        {
+            String  message = "X-coordinates out of bounds: " + xco;
+            list.add( message );
+        }
+        if ( yco < 0 || yco >= getNumRows() )
+        {
+            String  message = "Y-coordinates out of bounds: " + yco;
+            list.add( message );
+        }
+        return list;
     }
     
     /**
@@ -145,36 +276,42 @@ public class Grid extends HashMap<Point, Ship>
         if ( minX < 0 )
         {
             String  remark  =
-                "Minimum x coordinate( "
-                + minX
-                + ") is out of bounds";
+                "Minimum x coordinate is out of bounds: " + minX;
             remarks.add( remark );
         }
         
         int             maxX    = ship.getMaxX();
-        if ( maxX >= ROW_LEN )
+        if ( maxX > NUM_COLS )
         {
             String  remark  =
-                "Maximum x coordinate( "
-                + maxX
-                + ") is out of bounds";
+                "Maximum x coordinate is out of bounds: " + maxX;
             remarks.add( remark );
         }
         int             minY    = ship.getMinY();
         if ( minY < 0 )
         {
             String  remark  =
-                "Minimum y coordinate( "
-                + minY
-                + ") is out of bounds";
+                "Minimum y coordinate is out of bounds: " + minY;
             remarks.add( remark );
         }        
         int             maxY    = ship.getMaxY();
+        if ( maxY > NUM_ROWS )
         {
             String  remark  =
-                "Maximum y coordinate( "
-                + maxY
-                + ") is out of bounds";
+                "Minimum y coordinate is out of bounds: " + maxY;
+            remarks.add( remark );
+        }
+        List<Ship>  ships           = Fleet.getShips();
+        Ship        existingShip    =
+            ships.stream()
+                .filter( s -> s != ship )
+                .filter( s -> s.intersects( ship ) )
+                .findFirst()
+                .orElse( null );
+        if ( existingShip != null )
+        {
+            String  remark  =
+                "Overlaps existing ship: " + existingShip;
             remarks.add( remark );
         }
         return remarks;
@@ -197,7 +334,8 @@ public class Grid extends HashMap<Point, Ship>
     private static int parseIntProperty( String key, int defVal )
     {
         int     val;
-        String  strVal   = System.getProperty( "ROW_LENGTH" );
+        String  propName = Constants.NAME_PREFIX + key;
+        String  strVal   = System.getProperty( propName );
         if ( strVal == null )
             val = defVal;
         else if ( (val = parseInt( strVal )) <= 0)
@@ -218,7 +356,7 @@ public class Grid extends HashMap<Point, Ship>
      */
     private static int parseInt( String strVal )
     {
-        int val;
+        int     val;
         try
         {
             val = Integer.parseInt( strVal );

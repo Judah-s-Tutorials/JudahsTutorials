@@ -7,7 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,12 +14,15 @@ import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.battleship.default_ship_types.Carrier;
+import com.acmemail.judah.battleship.default_ship_types.Cruiser;
+
 class ShipTest
 {
     private static final String     defNameHor  = "DefNameHorizontal";
     private static final String     defNameVer  = "DefNameVertical";
-    private static final ShipType   defTypeHor  = ShipType.CARRIER;
-    private static final ShipType   defTypeVer  = ShipType.CRUISER;
+    private static final ShipType   defTypeHor  = new Carrier();
+    private static final ShipType   defTypeVer  = new Cruiser();
     private static final int        defLenHor   = defTypeHor.getLength();
     private static final int        defLenVer   = defTypeVer.getLength();
     private static final int        rowLen      = 10; //Grid.getRowLen();
@@ -42,36 +44,36 @@ class ShipTest
         new Ship(
             defTypeHor,
             defNameHor,
-            new Point( horStartXco, midYco ),
+            new GridCoords( horStartXco, midYco ),
             Orientation.HORIZONTAL
         );
     private static final Ship   defVer      =
         new Ship(
             defTypeVer,
             defNameVer,
-            new Point( verStartXco, verStartYco ),
+            new GridCoords( verStartXco, verStartYco ),
             Orientation.VERTICAL
         );
     
     @Test
-    public void testShipTypePointOrientation()
+    public void testShipTypeGridCoordsOrientation()
     {
-        testShipTypePointOrientation( ShipType.CARRIER, 10, 20, VERTICAL );
-        testShipTypePointOrientation( ShipType.CRUISER, 20, 10, HORIZONTAL );
+        testShipTypeGridCoordsOrientation( defTypeVer, 10, 20, VERTICAL );
+        testShipTypeGridCoordsOrientation( defTypeHor, 20, 10, HORIZONTAL );
     }
     
     private static void 
-    testShipTypePointOrientation( 
+    testShipTypeGridCoordsOrientation( 
         ShipType type, 
         int xco, 
         int yco, 
         Orientation orient 
     )
     {
-        Point   point       = new Point( xco, yco );
-        int     expLen      = type.getLength();
-        int     expWidth;
-        int     expHeight;
+        GridCoords  coords      = new GridCoords( xco, yco );
+        int         expLen      = type.getLength();
+        int         expWidth;
+        int         expHeight;
         if ( orient == HORIZONTAL )
         {
             expWidth = expLen;
@@ -82,15 +84,15 @@ class ShipTest
             expWidth = 1;
             expHeight = expLen;
         }
-        Ship    ship    = new Ship( type, point, orient );
+        Ship        ship        = new Ship( type, coords, orient );
         assertEquals( type, ship.getType() );
         assertEquals( orient, ship.getOrientation() );
         assertEquals( expWidth, ship.getWidth() );
         assertEquals( expHeight, ship.getHeight() );
         assertNotNull( ship.getName() );
-        Point   actPoint    = ship.getFirstSquare();
-        assertEquals( xco, actPoint.x );
-        assertEquals( yco, actPoint.y );
+        GridCoords  actCoords    = ship.getFirstSquare();
+        assertEquals( xco, actCoords.getXco() );
+        assertEquals( yco, actCoords.getYco() );
     }
 
     @Test
@@ -201,13 +203,13 @@ class ShipTest
     @Test
     public void testGetFirstSquare()
     {
-        Point   horPair = defHor.getFirstSquare();
-        assertEquals( horPair.x, horStartXco );
-        assertEquals( horPair.y, horStartYco );
+        GridCoords   horPair = defHor.getFirstSquare();
+        assertEquals( horPair.getXco(), horStartXco );
+        assertEquals( horPair.getYco(), horStartYco );
 
-        Point   verPair = defVer.getFirstSquare();
-        assertEquals( verPair.x, verStartXco );
-        assertEquals( verPair.y, verStartYco );
+        GridCoords   verPair = defVer.getFirstSquare();
+        assertEquals( verPair.getXco(), verStartXco );
+        assertEquals( verPair.getYco(), verStartYco );
     }
 
     @Test
@@ -256,8 +258,8 @@ class ShipTest
     private static String getComment( Ship ship1, Ship ship2 )
     {
         StringBuilder   bldr    = new StringBuilder();
-        Point           pair1   = ship1.getFirstSquare();
-        Point           pair2   = ship2.getFirstSquare();
+        GridCoords      pair1   = ship1.getFirstSquare();
+        GridCoords      pair2   = ship2.getFirstSquare();
         int             len1    = ship1.getLength();
         int             len2    = ship2.getLength();
         bldr.append( pair1 ).append( "/" ).append( len1 ).append( "->" )
@@ -303,7 +305,7 @@ class ShipTest
         for ( int row = minRow ; row < maxRow ; ++row )
             for ( int col = minCol ; col < maxCol ; ++col )
             {
-                Point   pair    = new Point( col, row );
+                GridCoords  pair    = new GridCoords( col, row );
                 assertTrue( ship.contains( pair ) );
             }
         
@@ -311,8 +313,8 @@ class ShipTest
         int rowHigh = maxRow;
         for ( int col = 0 ; col < colLen ; ++col )
         {
-            Point       pairLow     = new Point( col, rowLow );
-            Point       pairHigh    = new Point( col, rowHigh );
+            GridCoords  pairLow     = new GridCoords( col, rowLow );
+            GridCoords  pairHigh    = new GridCoords( col, rowHigh );
             assertFalse( ship.contains( pairLow ) );
             assertFalse( ship.contains( pairHigh ) );
         }
@@ -321,8 +323,8 @@ class ShipTest
         int colHigh = maxCol;
         for ( int row = 0 ; row < rowLen ; ++row )
         {
-            Point       pairLow     = new Point( colLow, row );
-            Point       pairHigh    = new Point( colHigh, row );
+            GridCoords  pairLow     = new GridCoords( colLow, row );
+            GridCoords  pairHigh    = new GridCoords( colHigh, row );
             assertFalse( ship.contains( pairLow ) );
             assertFalse( ship.contains( pairHigh ) );
         }
@@ -401,7 +403,7 @@ class ShipTest
     
     private static Ship getHorizontalShip( int xco, int yco )
     {
-        Point       start   = new Point( xco, yco );
+        GridCoords  start   = new GridCoords( xco, yco );
         Ship        ship    = new Ship( 
             defTypeHor,  
             defNameHor, 
@@ -413,7 +415,7 @@ class ShipTest
     
     private static Ship getVerticalShip( int xco, int yco )
     {
-        Point       start   = new Point( xco, yco );
+        GridCoords  start   = new GridCoords( xco, yco );
         Ship        ship    = new Ship( 
             defTypeVer,  
             defNameVer, 
