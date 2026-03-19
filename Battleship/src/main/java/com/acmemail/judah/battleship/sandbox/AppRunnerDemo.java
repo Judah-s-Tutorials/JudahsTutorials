@@ -6,20 +6,27 @@ import static com.acmemail.judah.battleship.Orientation.VERTICAL;
 import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.battleship.Fleet;
 import com.acmemail.judah.battleship.Grid;
 import com.acmemail.judah.battleship.GridCoords;
+import com.acmemail.judah.battleship.Orientation;
 import com.acmemail.judah.battleship.Ship;
 import com.acmemail.judah.battleship.ShipType;
 import com.acmemail.judah.battleship.artwork.GraphicalGrid;
 
 public class AppRunnerDemo
 {
+    private static GraphicalGrid    graphicalGrid;
     public static void main(String[] args)
     {
+        double  d1  = 0xba;
+        double  d2  = 0x8e;
+        double  d3  = 0x23;
+        System.out.printf( "%f, %f, %f%n", d1/255, d2/255, d3/255 );
         Grid    grid    = Grid.getHomeGrid();
         
         Ship        ship;
@@ -53,9 +60,40 @@ public class AppRunnerDemo
             frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
             JPanel  pane    = new JPanel( new BorderLayout() );
             frame.setContentPane( pane );
-            pane.add( new GraphicalGrid( grid ), BorderLayout.CENTER );
+            graphicalGrid = new GraphicalGrid( grid );
+            pane.add( graphicalGrid, BorderLayout.CENTER );
             frame.pack();
             frame.setVisible( true );
         });
+        
+        SwingUtilities.invokeLater( () -> playGhost() );
+    }
+    
+    private static void playGhost()
+    {
+        int         xco = 0;
+        int         yco = 1;
+        Orientation orientation = HORIZONTAL;
+        for ( int inx = 0 ; inx < 5 ; ++inx )
+        {
+            ShipType    shipType    = ShipType.getShipType( "Carrier" );
+            GridCoords  gridCoords  = new GridCoords( xco, yco );
+            Ship        ship        = 
+                new Ship( shipType, gridCoords, orientation );
+            orientation = orientation == HORIZONTAL ? VERTICAL : HORIZONTAL; 
+            graphicalGrid.setGhostShip( ship );
+//            graphicalGrid.update();
+//            pause();
+//            graphicalGrid.setGhostShip( null );
+//            graphicalGrid.update();
+//            pause();
+//            xco += 1;
+//            yco += 1;
+        }
+    }
+    
+    private static void pause()
+    {
+        JOptionPane.showMessageDialog( null, "next" );
     }
 }

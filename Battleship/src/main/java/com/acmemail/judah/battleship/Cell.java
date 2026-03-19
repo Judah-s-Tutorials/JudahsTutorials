@@ -1,7 +1,5 @@
 package com.acmemail.judah.battleship;
 
-import java.awt.Point;
-
 public class Cell
 {
     private final GridCoords coords;

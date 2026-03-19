@@ -26,7 +26,7 @@ public class GridCoords
     @Override
     public String toString()
     {
-        String  result  = String.format( "(%d,%d", xco, yco );
+        String  result  = String.format( "(%d,%d)", xco, yco );
         return result;
     }
     

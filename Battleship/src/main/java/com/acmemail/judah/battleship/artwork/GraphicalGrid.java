@@ -8,7 +8,10 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
 
@@ -17,7 +20,11 @@ import javax.swing.JPanel;
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Cell;
 import com.acmemail.judah.battleship.Grid;
+import com.acmemail.judah.battleship.GridCoords;
 import com.acmemail.judah.battleship.Label;
+import com.acmemail.judah.battleship.Orientation;
+import com.acmemail.judah.battleship.Ship;
+import com.acmemail.judah.battleship.ShipType;
 
 public class GraphicalGrid extends JPanel implements Artwork
 {
@@ -32,6 +39,8 @@ public class GraphicalGrid extends JPanel implements Artwork
     private static final Color  deadColor   = Color.RED;
     private static final Stroke gridStroke  = new BasicStroke( 1 );
     private static final Stroke shipStroke  = new BasicStroke( 3 );
+    
+    private Ship        ghostShip   = null;
     
     private Grid        grid        = null;
     private int         cellSide    = 15;
@@ -55,6 +64,7 @@ public class GraphicalGrid extends JPanel implements Artwork
             2 * margin + numRows * cellSide + labelHeight;
         Dimension   prefSize    = new Dimension( prefWidth, prefHeight );
         setPreferredSize( prefSize );
+        addMouseMotionListener( new MouseMonitor() );
     }
     
     @Override
@@ -70,6 +80,15 @@ public class GraphicalGrid extends JPanel implements Artwork
         repaint();
     }
     
+    public Ship getGhostShip()
+    {
+        return ghostShip;
+    }
+    
+    public void setGhostShip( Ship ship )
+    {
+        ghostShip = ship;
+    }
     
     @Override
     public void paintComponent( Graphics graphics )
@@ -91,6 +110,7 @@ public class GraphicalGrid extends JPanel implements Artwork
         drawCells( cells );
         drawRowLabels();
         drawColLabels();
+        fillGhostShip();
     }
     
     private void drawCells( Collection<Cell> cells )
@@ -108,11 +128,6 @@ public class GraphicalGrid extends JPanel implements Artwork
             rect.setRect( xco, yco, cellSide, cellSide );
             gtx.setStroke( stroke );
             gtx.draw( rect );
-//            
-//            int     strXco  = xco + 1;
-//            int     strYco  = yco + (int)(cellSide * .7);
-//            String  str     = String.format( "(%d,%d)", gridXco, gridYco );
-//            gtx.drawString( str, strXco, strYco );
         }
     }
     
@@ -172,6 +187,90 @@ public class GraphicalGrid extends JPanel implements Artwork
             gtx.drawString( label, 0, 0 );
             gtx.setTransform( origTransform );
             gtx.drawLine( xco + cellSide, 0, xco + cellSide, yco );
+        }
+    }
+    
+    private void fillGhostShip()
+    {
+        Rectangle2D rect    = getGhostRect();
+//        Color       color   = new Color( .73f, .56f, .14f, .7f );
+        Color       color   = new Color( .3f, .3f, .3f, .7f );
+        gtx.setColor( color );
+        gtx.fill( rect );
+    }
+    
+    private Rectangle2D getGhostRect()
+    {
+        Rectangle2D ghostRect   = new Rectangle2D.Double();
+        if ( ghostShip != null )
+        {
+            Rectangle2D cellRect    = ghostShip.getRect();
+            double      xco         = 
+                cellRect.getX() * cellSide + labelWidth;
+            double      yco         = 
+                cellRect.getY() * cellSide + labelHeight;
+            double      width       = cellRect.getWidth() * cellSide;
+            double      height      = cellRect.getHeight() * cellSide;
+            ghostRect.setRect( xco, yco, width, height );
+        }
+        return ghostRect;
+    }
+    
+    private Cell getCell( Point2D point )
+    {
+        Cell    cell    = null;
+        double  xco     = point.getX() - margin;
+        double  yco     = point.getX() - margin;
+        int     col     = (int)(xco / cellSide);
+        int     row     = (int)(yco / cellSide);
+        if ( col >= 0 && col < colCells
+            && row >= 0 && row < numRows )
+        {
+            cell = new Cell( col, row );
+        }
+        return cell;
+    }
+    
+    private void paintCell( Cell cell, Color color )
+    {
+        int xco = margin + cell.getXco() * cellSide;
+        int yco = margin + cell.getYco() * cellSide;
+    }
+    
+    private class MouseMonitor extends MouseAdapter
+    {
+        private Cell selectedCell   = null;
+        
+        @Override
+        public void mousePressed( MouseEvent evt )
+        {
+            
+        }
+        
+        @Override
+        public void mouseMoved( MouseEvent evt )
+        {
+            if ( ghostShip != null )
+            {
+                GridCoords  curr    = getGridCoords( evt.getX(), evt.getY() );
+                if ( !curr.equals( ghostShip.getFirstSquare() ) )
+                {
+                    System.out.println( curr );
+                    ShipType    type        = ghostShip.getType();
+                    Orientation orientation = ghostShip.getOrientation();
+                    Ship        ship        = new Ship( type, curr, orientation );
+                    setGhostShip( ship );
+                    update();
+                }
+            }
+        }
+        
+        private GridCoords getGridCoords( int pixelXco, int pixelYco )
+        {
+            int         xco     = (pixelXco - margin - labelWidth) / cellSide;
+            int         yco     = (pixelYco - margin - labelHeight) / cellSide;
+            GridCoords  coords  = new GridCoords( xco, yco );
+            return coords;
         }
     }
 }
