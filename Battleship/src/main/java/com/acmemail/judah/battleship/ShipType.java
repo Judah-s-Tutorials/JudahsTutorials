@@ -51,6 +51,15 @@ public abstract class ShipType
         return null;
     }
     
+    @Override
+    public String toString()
+    {
+        StringBuilder   bldr    = new StringBuilder();
+        bldr.append( typeName )
+            .append( " (").append( length ).append( ")" );
+        return bldr.toString();
+    }
+    
     public static ShipType getShipType( String typeName )
     {
         ShipType    type    = allTypes.get( typeName );

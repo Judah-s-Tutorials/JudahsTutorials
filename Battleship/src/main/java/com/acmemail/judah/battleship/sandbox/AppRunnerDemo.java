@@ -4,15 +4,19 @@ import static com.acmemail.judah.battleship.Orientation.HORIZONTAL;
 import static com.acmemail.judah.battleship.Orientation.VERTICAL;
 
 import java.awt.BorderLayout;
+import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Fleet;
 import com.acmemail.judah.battleship.Grid;
 import com.acmemail.judah.battleship.GridCoords;
+import com.acmemail.judah.battleship.Label;
 import com.acmemail.judah.battleship.Orientation;
 import com.acmemail.judah.battleship.Ship;
 import com.acmemail.judah.battleship.ShipType;
@@ -69,6 +73,126 @@ public class AppRunnerDemo
         SwingUtilities.invokeLater( () -> playGhost() );
     }
     
+    private static void place()
+    {
+        final String    title   = "Place Ship";
+        final String    prompt  = "Enter ship type, row ID, col ID";
+        final String    seps    = " ,";
+        String          command = null;
+        while ( (command = getInput( prompt, title )) != null )
+        {
+            StringTokenizer tizer   = new StringTokenizer( command, seps );
+            if ( tizer.countTokens() != 3 )
+                showErrorMessage( "Invalid number of arguments", command );
+            else
+            {
+                String      typeToken   = tizer.nextToken();
+                String      rowToken    = tizer.nextToken();
+                String      colToken    = tizer.nextToken();
+                ShipType    shipType    = parseShipType( typeToken );
+                int         row         = parseRow( rowToken );
+                int         col         = parseCol( colToken );
+                GridCoords  coords      = null;
+                Ship        ship        = null;
+                
+                if ( shipType == null )
+                    ;
+                else if ( row < 0 )
+                    ;
+                else if ( col < 0 )
+                    ;
+                else if ( (coords = getGridCoords( col, row )) == null )
+                    ;
+                else if ( (ship = getShip( shipType, coords )) == null )
+                    ;
+                else
+                    Fleet.add( ship );
+            }
+        }
+    }
+    
+    private static GridCoords getGridCoords( int col, int row )
+    {
+        GridCoords      coords  = new GridCoords( col, row );
+        List<String>    errors  = Grid.evaluateBounds( coords );
+        if ( errors.size() > 0 )
+        {
+            coords = null;
+            showErrorMessage( "Invalid grid coordinates", errors );
+        }
+        return coords;
+    }
+    
+    private static ShipType parseShipType( String token )
+    {
+        ShipType    type    = ShipType.getShipType( token );
+        if ( type == null )
+            showErrorMessage( "Invalid ship type", token );
+        return type;
+    }
+    
+    private static int parseRow( String rowToken )
+    {
+        int row = -1;
+        try
+        {
+            row = Label.alphaToDecimal( rowToken );
+        }
+        catch ( BattleshipException exc )
+        {
+            showErrorMessage( "Invalid row ID", rowToken );
+        }
+        return row;
+    }
+    
+    private static int parseCol( String colToken )
+    {
+        int col = -1;
+        try
+        {
+            col = Label.colStrToInt( colToken );
+        }
+        catch ( BattleshipException exc )
+        {
+            showErrorMessage( "Invalid column ID", colToken );
+        }
+        return col;
+    }
+    
+    private static void showErrorMessage( String message, String input )
+    {
+        final String    title       = "Parse Error";
+        final int       errorIcon   = JOptionPane.ERROR_MESSAGE;
+        StringBuilder   bldr        = new StringBuilder();
+        bldr.append( message )
+            .append( ": \"" )
+            .append( input )
+            .append( "\"" );
+        JOptionPane.showMessageDialog( null, message, title, errorIcon );
+    }
+    
+    private static 
+    void showErrorMessage( String message, List<String> errors )
+    {
+        final String    title       = "Parse Error";
+        final int       errorIcon   = JOptionPane.ERROR_MESSAGE;
+        StringBuilder   bldr        = new StringBuilder();
+        bldr.append( message ).append( ": \n" );
+        for ( String error : errors )
+            bldr.append( error ).append( "\n" );
+        JOptionPane.showMessageDialog( null, message, title, errorIcon );
+    }
+    
+    private static String getInput( String prompt, String title )
+    {
+        final int   messageType = JOptionPane.QUESTION_MESSAGE;
+        String      input       = 
+            JOptionPane.showInputDialog( null, prompt, title, messageType );
+        if ( input != null )
+            input = input.trim();
+        return input;
+    }
+    
     private static void playGhost()
     {
         int         xco = 0;
@@ -90,6 +214,40 @@ public class AppRunnerDemo
 //            xco += 1;
 //            yco += 1;
         }
+    }
+    
+    private static Ship getShip( ShipType type, GridCoords coords )
+    {
+        final String    errorMessage    = "Cannot place ship";
+        final String    prompt          = "Choose orientation";
+        final String    title           = "Orientation Selection";
+        final int       messageType     = JOptionPane.QUESTION_MESSAGE;
+        final int       optionType      = JOptionPane.CANCEL_OPTION;
+        Orientation[]   options         = Orientation.values();
+        Ship            ship            = null;
+        int             option          = 
+            JOptionPane.showOptionDialog(
+                null, 
+                prompt, 
+                title, 
+                optionType,
+                messageType, 
+                null,
+                options,
+                0
+            );
+        if ( option >= 0 && option < options.length )
+        {
+            Orientation     orientation = options[option];
+            ship = new Ship( type, coords, orientation );
+            List<String>    errors      = Grid.evaluateBounds(ship);
+            if ( errors.size() > 0 )
+            {
+                ship = null;
+                showErrorMessage( errorMessage, errors);
+            }
+        }
+        return ship;
     }
     
     private static void pause()

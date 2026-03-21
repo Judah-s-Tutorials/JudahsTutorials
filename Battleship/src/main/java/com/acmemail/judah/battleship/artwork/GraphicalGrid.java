@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -14,6 +15,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
+import java.util.List;
 
 import javax.swing.JPanel;
 
@@ -30,15 +32,20 @@ public class GraphicalGrid extends JPanel implements Artwork
 {
     private static final long serialVersionUID = -8860690179464933270L;
     
-    private static final Font   font        = new 
+    private static final Font   font            = new 
         Font( Font.SANS_SERIF, Font.PLAIN, 14 );
-    private static final Color  bgColor     = new Color( 0xf5f5f5 );
-    private static final Color  lineColor   = Color.BLACK;
-    private static final Color  hitColor    = Color.PINK;
-    private static final Color  shipColor   = new Color( .75f, .75f, .75f );
-    private static final Color  deadColor   = Color.RED;
-    private static final Stroke gridStroke  = new BasicStroke( 1 );
-    private static final Stroke shipStroke  = new BasicStroke( 3 );
+    private static final Color  bgColor         = new Color( 0xf5f5f5 );
+    private static final Color  lineColor       = Color.BLACK;
+    private static final Color  hitColor        = Color.PINK;
+    private static final Color  shipColor       = 
+        new Color( .75f, .75f, .75f );
+    private static final Color  deadColor       = Color.RED;
+    private static final Color  validcolor      = 
+        new Color( 0x4d, 0x4d, 0x4d, 0xbf );
+    private static final Color  inValidcolor    = 
+        new Color( 0xFF, 0x74, 0x74, 0xbf );
+    private static final Stroke gridStroke      = new BasicStroke( 1 );
+    private static final Stroke shipStroke      = new BasicStroke( 3 );
     
     private Ship        ghostShip   = null;
     
@@ -192,11 +199,15 @@ public class GraphicalGrid extends JPanel implements Artwork
     
     private void fillGhostShip()
     {
-        Rectangle2D rect    = getGhostRect();
-//        Color       color   = new Color( .73f, .56f, .14f, .7f );
-        Color       color   = new Color( .3f, .3f, .3f, .7f );
-        gtx.setColor( color );
-        gtx.fill( rect );
+        if ( ghostShip != null )
+        {
+            Rectangle2D     rect    = getGhostRect();
+            List<String>    errors  = Grid.evaluateBounds( ghostShip );
+            Color           color   = 
+                errors.isEmpty() ? validcolor : inValidcolor;
+            gtx.setColor( color );
+            gtx.fill( rect );
+        }
     }
     
     private Rectangle2D getGhostRect()
@@ -231,12 +242,6 @@ public class GraphicalGrid extends JPanel implements Artwork
         return cell;
     }
     
-    private void paintCell( Cell cell, Color color )
-    {
-        int xco = margin + cell.getXco() * cellSide;
-        int yco = margin + cell.getYco() * cellSide;
-    }
-    
     private class MouseMonitor extends MouseAdapter
     {
         private Cell selectedCell   = null;
@@ -258,7 +263,8 @@ public class GraphicalGrid extends JPanel implements Artwork
                     System.out.println( curr );
                     ShipType    type        = ghostShip.getType();
                     Orientation orientation = ghostShip.getOrientation();
-                    Ship        ship        = new Ship( type, curr, orientation );
+                    Ship        ship        = 
+                        new Ship( type, curr, orientation );
                     setGhostShip( ship );
                     update();
                 }

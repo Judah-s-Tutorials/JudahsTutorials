@@ -3,7 +3,6 @@ package com.acmemail.judah.battleship;
 import static com.acmemail.judah.battleship.Constants.KEY_NUM_COLS;
 import static com.acmemail.judah.battleship.Constants.KEY_NUM_ROWS;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +55,6 @@ public class Grid extends HashMap<GridCoords,Cell>
             for ( int xco = 0 ; xco < NUM_COLS ; ++xco )
             {
                 Cell    cell    = new Cell( xco, yco );
-                System.out.println( cell );
                 put( cell );
             }
     }

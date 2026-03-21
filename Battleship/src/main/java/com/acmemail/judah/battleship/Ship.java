@@ -51,27 +51,17 @@ public class Ship
         return contains;
     }
     
+    public boolean intersects( Rectangle rect )
+    {
+        Rectangle   thisRect    = getRect();
+        boolean     result      = rect.intersects( thisRect );
+        return result;
+    }
+    
     public boolean intersects( Ship that )
     {
-        boolean result      = false;
-        int     thisMinX    = getMinX();
-        int     thisMaxX    = getMaxX();
-        int     thatMinX    = that.getMinX();
-        int     thatMaxX    = that.getMaxX();
-        int     thisMinY    = getMinY();
-        int     thisMaxY    = getMaxY();
-        int     thatMinY    = that.getMinY();
-        int     thatMaxY    = that.getMaxY();
-        if ( thisMinY >= thatMaxY )
-            result = false;
-        else if ( thisMaxY <= thatMinY )
-            result = false;
-        else if ( thisMinX >= thatMaxX )
-            result = false;
-        else if ( thisMaxX <= thatMinX )
-            result = false;
-        else
-            result = true;
+        Rectangle   rect    = that.getRect();
+        boolean     result  = intersects( rect );
         return result;
     }
     
