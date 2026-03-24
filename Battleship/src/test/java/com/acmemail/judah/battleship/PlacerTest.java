@@ -1,7 +1,7 @@
 package com.acmemail.judah.battleship;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -19,10 +19,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class PlacerTest
 {
-    private static final JOptionPaneI   mockedServer    =
+    private static final JOptionPaneI   mockedServer    = 
         mock( JOptionPaneI.class );
     private static final JOptionPaneI   origServer      = 
         Placer.getJOptionPaneInterface();
+    private static final int            numRows     = Grid.getNumRows();
+    private static final int            numCols     = Grid.getNumCols();
+    private static final String         lastRow     = 
+        String.valueOf( (char)('A' + (numRows - 1)) );
+    private static final String         lastCol     = 
+        String.valueOf( numCols);
     
     private Placer  placer;
     
@@ -30,6 +36,7 @@ class PlacerTest
     public static void beforeAll()
     {
         ShipType.registerDefaultTypes();
+        System.out.println( lastRow + ", " + lastCol );
     }
     
     @BeforeEach
@@ -80,7 +87,78 @@ class PlacerTest
     {
         mockGetType( ShipType.getShipType( "Battleship" ) );
         mockGetOrientation( Orientation.VERTICAL );
-        mockGetCoordinates( null );
+        when( mockedServer.
+            showInputDialog( null, "Enter Ship Coordinates" )
+        ).thenReturn( "1A" )
+        .thenReturn( "AA" )
+        .thenReturn( "11" )
+        .thenReturn( null );
+        
+        Ship    ship    = placer.placeShip();
+        assertNull( ship );
+    }
+
+    @Test
+    void testPlaceShipExerciseGetCoordsThenOK()
+    {
+        ShipType    expType     = ShipType.getShipType( "Battleship" );
+        Orientation expOrient   = Orientation.HORIZONTAL;
+        
+        // This column number should make the last cell of the ship
+        // fall 1 cell past the horizontal bounds of the grid.
+        int         invalidCol      = numRows - expType.getLength();
+        String      strInvalidCol   = String.valueOf( invalidCol + 1 );
+        String      strValidCol     = String.valueOf( invalidCol - 1 );
+        String      invalidCoords   = "A" + strInvalidCol;
+        String      validCoords     = "A" + strValidCol;
+        GridCoords  expCoords       = new GridCoords( invalidCol - 1, 0 );
+        Ship        expShip         = new Ship( expType, expCoords, expOrient );
+        
+        mockGetType( ShipType.getShipType( "Battleship" ) );
+        mockGetOrientation( expOrient );
+        when( mockedServer.
+            showInputDialog( null, "Enter Ship Coordinates" )
+        ).thenReturn( invalidCoords )
+        .thenReturn( validCoords );
+        
+        Ship    actShip = placer.placeShip();
+        assertEquals( expShip, actShip );
+    }
+
+    @Test
+    void testPlaceShipBoundsHorizontal()
+    {
+        ShipType    expType     = ShipType.getShipType( "Battleship" );
+        Orientation expOrient   = Orientation.HORIZONTAL;
+        char        expRow      = 'A';
+        char        expCol      = '1';
+        GridCoords  expCoords   = new GridCoords( 0, 0 );
+        Ship        expShip     = new Ship( expType, expCoords, expOrient );
+        
+        mockGetType( ShipType.getShipType( "Battleship" ) );
+        mockGetOrientation( expOrient );
+        when( mockedServer.
+            showInputDialog( null, "Enter Ship Coordinates" )
+        ).thenReturn( "1A" )
+        .thenReturn( "AA" )
+        .thenReturn( "11" )
+        .thenReturn( "A1" );
+        
+        Ship    actShip = placer.placeShip();
+        assertEquals( expShip, actShip );
+    }
+
+    @Test
+    void testPlaceShipExerciseOutOfBoundCoordsThenCancel()
+    {
+        mockGetType( ShipType.getShipType( "Battleship" ) );
+        mockGetOrientation( Orientation.VERTICAL );
+        when( mockedServer.
+            showInputDialog( null, "Enter Ship Coordinates" )
+        ).thenReturn( "1A" )
+        .thenReturn( "AA" )
+        .thenReturn( "11" )
+        .thenReturn( null );
         
         Ship    ship    = placer.placeShip();
         assertNull( ship );

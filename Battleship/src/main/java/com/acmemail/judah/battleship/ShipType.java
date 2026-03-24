@@ -3,6 +3,7 @@ import java.awt.Image;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import com.acmemail.judah.battleship.default_ship_types.Battleship;
 import com.acmemail.judah.battleship.default_ship_types.Carrier;
@@ -58,6 +59,34 @@ public abstract class ShipType
         bldr.append( typeName )
             .append( " (").append( length ).append( ")" );
         return bldr.toString();
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        int hashCode    = Objects.hash( typeName, length );
+        return hashCode;
+    }
+    
+    @Override
+    public boolean equals( Object obj )
+    {
+        boolean result  = false;
+        if ( this == obj )
+            result = true;
+        else if ( !(obj instanceof ShipType) )
+            result = false;
+        else
+        {
+            ShipType    that    = (ShipType)obj;
+            if ( !this.typeName.equals( that.typeName ) )
+                result = false;
+            else if ( this.length != that.length )
+                result = false;
+            else
+                result = true;
+        }
+        return result;
     }
     
     public static ShipType getShipType( String typeName )

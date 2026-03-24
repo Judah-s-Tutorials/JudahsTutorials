@@ -3,6 +3,7 @@ import static com.acmemail.judah.battleship.Orientation.HORIZONTAL;
 import static com.acmemail.judah.battleship.Orientation.VERTICAL;
 
 import java.awt.Rectangle;
+import java.util.Objects;
 public class Ship
 {
     private static final String DEF_NAME    = "Default Name";
@@ -171,5 +172,38 @@ public class Ship
             .append( ",length=" ).append( len );
         
         return bldr.toString();
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        int hashCode    = 
+            Objects.hash( type, name, firstSquare, orientation );
+        return hashCode;
+    }
+    
+    @Override
+    public boolean equals( Object obj )
+    {
+        boolean rcode   = false;
+        if ( this == obj )
+            rcode = true;
+        else if ( !(obj instanceof Ship) )
+            rcode = false;
+        else
+        {
+            Ship    that    = (Ship)obj;
+            if ( !this.type.equals( that.type ) )
+                rcode = false;
+            else if ( !this.name.equals( that.name ) )
+                rcode = false;
+            else if ( !this.firstSquare.equals( that.firstSquare ) )
+                rcode = false;
+            else if ( this.orientation != that.orientation )
+                rcode = false;
+            else
+                rcode = true;
+        }
+        return rcode;
     }
 }
