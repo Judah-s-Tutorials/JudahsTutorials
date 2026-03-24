@@ -68,5 +68,6 @@ public class PlacerDemo
             }
             continueOption = JOptionPane.showConfirmDialog( null, "Next?" );
         }
+        System.exit( 0 );
     }
 }

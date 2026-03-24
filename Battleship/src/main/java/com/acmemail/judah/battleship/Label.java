@@ -447,11 +447,11 @@ public class Label
     private static boolean 
     validateAlpha( String input, List<String> errors )
     {
-        final String    errorMessage    = "Not a numberic character: ";
+        final String    errorMessage    = "Not an alphabetic character: ";
         boolean         result          = true;
         for ( char ccc : input.toCharArray() )
         {
-            if ( ccc < '0' || ccc > '9' )
+            if ( !Character.isUpperCase( ccc ) )
             {
                 errors.add( errorMessage + ccc );
                 result = false;

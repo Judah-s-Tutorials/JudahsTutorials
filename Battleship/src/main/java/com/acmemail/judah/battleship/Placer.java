@@ -12,18 +12,35 @@ import javax.swing.JOptionPane;
  */
 public class Placer
 {
+    private static JOptionPaneI jOptionPane = new JOptionPaneS();
     static final String title   = "Place Ship";
 
     private ShipType    type;
     private GridCoords  coords;
     private Orientation orientation;
+    
+    public static JOptionPaneI getJOptionPaneInterface()
+    {
+        return jOptionPane;
+    }
+    
+    public static void setJOptionPaneInterface( JOptionPaneI jOptionPane )
+    {
+        Placer.jOptionPane = jOptionPane;
+    }
+
     /**
      * 
      */
     public Placer()
     {
-        // TODO Auto-generated constructor stub
+//        this( new JOptionPaneS() );
     }
+    
+//    public Placer( JOptionPaneI jOptionPane )
+//    {
+//        this.jOptionPane = jOptionPane;
+//    }
 
     public Ship placeShip()
     {
@@ -56,7 +73,7 @@ public class Placer
         {
             ShipType[]              options     = 
                 allTypes.toArray( new ShipType[numTypes] );
-            option  = JOptionPane.showInputDialog(
+            option  = jOptionPane.showInputDialog(
                     null, 
                     prompt,
                     title,
@@ -71,34 +88,31 @@ public class Placer
     
     private static GridCoords parseCoords( String strCoords )
     {
-        GridCoords      coords  = null;
-        StringTokenizer tizer   = new StringTokenizer( strCoords, " ," );
-        int             row     = -1;
-        int             col     = -1;
-        if ( tizer.countTokens() != 2 )
-            showErrorMessage( "Invalid coordinate format", strCoords );
+        String          worker      = strCoords.trim().toUpperCase();
+        GridCoords      coords      = null;
+        int             row         = -1;
+        int             col         = -1;
+        String[]        parsed      = Label.parseRowCol( worker );
+        
+        GridCoords      temp        = null;
+        String          rowStr      = parsed[0];
+        String          colStr      = parsed[1];
+        List<String>    rowErrors   = Label.validateRowStr( rowStr );
+        List<String>    colErrors   = Label.validateColStr( colStr );
+        if ( rowErrors.size() > 0 )
+            showErrorMessage( "Invalid row format", rowErrors );
+        else if ( colErrors.size() > 0 )
+            showErrorMessage( "Invalid column format", colErrors );
         else
         {
-            GridCoords      temp        = null;
-            String          rowStr      = tizer.nextToken().toUpperCase();
-            String          colStr      = tizer.nextToken();
-            List<String>    rowErrors   = Label.validateRowStr( rowStr );
-            List<String>    colErrors   = Label.validateColStr( colStr );
-            if ( rowErrors.size() > 0 )
-                showErrorMessage( "Invalid row format", rowErrors );
-            else if ( colErrors.size() > 0 )
-                showErrorMessage( "Invalid column format", colErrors );
+            row = Label.alphaToDecimal( rowStr );
+            col = Label.colStrToInt( colStr );
+            temp = new GridCoords( col, row );
+            List<String>    boundsErrors    = Grid.evaluateBounds( temp );
+            if ( boundsErrors.size() > 0 )
+                showErrorMessage( "Invalid coordinates", rowErrors );
             else
-            {
-                row = Label.alphaToDecimal( rowStr );
-                col = Label.colStrToInt( colStr );
-                temp = new GridCoords( col, row );
-                List<String>    boundsErrors    = Grid.evaluateBounds( temp );
-                if ( boundsErrors.size() > 0 )
-                    showErrorMessage( "Invalid coordinates", rowErrors );
-                else
-                    coords =  temp;
-            }
+                coords =  temp;
         }
         return coords;
     }
@@ -109,7 +123,7 @@ public class Placer
         final Orientation[] options     = Orientation.values();
         final int           messageType = JOptionPane.QUESTION_MESSAGE;
         Object              option      =
-            JOptionPane.showInputDialog(
+            jOptionPane.showInputDialog(
                 null, 
                 prompt,
                 title,
@@ -137,7 +151,8 @@ public class Placer
         while ( !valid && !canceled )
         {
             GridCoords  coords  = null;
-            String      input   = JOptionPane.showInputDialog( null, prompt );
+            String      input   = 
+                jOptionPane.showInputDialog( null, prompt );
             if ( input == null )
                 canceled = true;
             else if ( (coords = parseCoords( input )) == null )
@@ -178,7 +193,12 @@ public class Placer
             bldr.append( ": \"" )
                 .append( input )
                 .append( "\"" );
-        JOptionPane.showMessageDialog( null, message, title, messageType );
+        jOptionPane.showMessageDialog( 
+            null, 
+            message, 
+            title, 
+            messageType 
+        );
     }
     
     private static 
@@ -190,6 +210,6 @@ public class Placer
         bldr.append( message ).append( ": \n" );
         for ( String error : errors )
             bldr.append( error ).append( "\n" );
-        JOptionPane.showMessageDialog( null, bldr, title, errorIcon );
+        jOptionPane.showMessageDialog( null, bldr, title, errorIcon );
     }
 }
