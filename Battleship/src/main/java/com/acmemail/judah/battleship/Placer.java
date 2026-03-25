@@ -2,7 +2,6 @@ package com.acmemail.judah.battleship;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.StringTokenizer;
 
 import javax.swing.JOptionPane;
 
@@ -53,8 +52,8 @@ public class Placer
             ship = null;
         else if ( (orientation = getOrientation() ) == null )
             ship = null;
-        else
-            ship = getShip();
+        else if ( (ship = getShip()) != null )
+            Fleet.add(ship);
         return ship;
     }
     
@@ -68,7 +67,7 @@ public class Placer
         int                     numTypes    = allTypes.size();
         Object                  option      = null;
         if ( numTypes == 0 )
-            showErrorMessage( noTypes );
+            throw new BattleshipException( noTypes );
         else
         {
             ShipType[]              options     = 
@@ -150,7 +149,7 @@ public class Placer
         Ship            ship        = null;
         while ( !valid && !canceled )
         {
-            GridCoords  coords  = null;
+            coords = null;
             String      input   = 
                 jOptionPane.showInputDialog( null, prompt );
             if ( input == null )
@@ -170,35 +169,11 @@ public class Placer
                 }
                 else
                 {
-                    this.coords = coords;
                     valid = true;
                 }
             }
         }
         return ship;
-    }
-    
-    private static void showErrorMessage( String message )
-    {
-        showErrorMessage( message, "" );
-    }
-    
-    private static void showErrorMessage( String message, String input )
-    {
-        final String    title       = "Parse Error";
-        final int       messageType = JOptionPane.ERROR_MESSAGE;
-        StringBuilder   bldr        = new StringBuilder();
-        bldr.append( message );
-        if ( input != null && !input.isEmpty() )
-            bldr.append( ": \"" )
-                .append( input )
-                .append( "\"" );
-        jOptionPane.showMessageDialog( 
-            null, 
-            message, 
-            title, 
-            messageType 
-        );
     }
     
     private static 

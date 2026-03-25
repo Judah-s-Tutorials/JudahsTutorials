@@ -2,6 +2,7 @@ package com.acmemail.judah.battleship;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -25,10 +26,6 @@ class PlacerTest
         Placer.getJOptionPaneInterface();
     private static final int            numRows     = Grid.getNumRows();
     private static final int            numCols     = Grid.getNumCols();
-    private static final String         lastRow     = 
-        String.valueOf( (char)('A' + (numRows - 1)) );
-    private static final String         lastCol     = 
-        String.valueOf( numCols);
     
     private Placer  placer;
     
@@ -36,7 +33,6 @@ class PlacerTest
     public static void beforeAll()
     {
         ShipType.registerDefaultTypes();
-        System.out.println( lastRow + ", " + lastCol );
     }
     
     @BeforeEach
@@ -53,7 +49,7 @@ class PlacerTest
     }
 
     @Test
-    void testPlaceShipCancelGetType()
+    public void testPlaceShipCancelGetType()
     {
         mockGetType( null );
         
@@ -62,7 +58,7 @@ class PlacerTest
     }
 
     @Test
-    void testPlaceShipCancelGetOrientation()
+    public void testPlaceShipCancelGetOrientation()
     {
         mockGetType( ShipType.getShipType( "Battleship" ) );
         mockGetOrientation( null );
@@ -72,7 +68,7 @@ class PlacerTest
     }
 
     @Test
-    void testPlaceShipCancelGetCoords()
+    public void testPlaceShipCancelGetCoords()
     {
         mockGetType( ShipType.getShipType( "Battleship" ) );
         mockGetOrientation( Orientation.VERTICAL );
@@ -83,7 +79,7 @@ class PlacerTest
     }
 
     @Test
-    void testPlaceShipExerciseGetCoordsThenCancel()
+    public void testPlaceShipExerciseGetCoordsThenCancel()
     {
         mockGetType( ShipType.getShipType( "Battleship" ) );
         mockGetOrientation( Orientation.VERTICAL );
@@ -99,75 +95,179 @@ class PlacerTest
     }
 
     @Test
-    void testPlaceShipExerciseGetCoordsThenOK()
+    public void testPlaceShipExerciseGetCoordsThenOK()
     {
         ShipType    expType     = ShipType.getShipType( "Battleship" );
         Orientation expOrient   = Orientation.HORIZONTAL;
-        
-        // This column number should make the last cell of the ship
-        // fall 1 cell past the horizontal bounds of the grid.
-        int         invalidCol      = numRows - expType.getLength();
-        String      strInvalidCol   = String.valueOf( invalidCol + 1 );
-        String      strValidCol     = String.valueOf( invalidCol - 1 );
-        String      invalidCoords   = "A" + strInvalidCol;
-        String      validCoords     = "A" + strValidCol;
-        GridCoords  expCoords       = new GridCoords( invalidCol - 1, 0 );
-        Ship        expShip         = new Ship( expType, expCoords, expOrient );
-        
-        mockGetType( ShipType.getShipType( "Battleship" ) );
-        mockGetOrientation( expOrient );
-        when( mockedServer.
-            showInputDialog( null, "Enter Ship Coordinates" )
-        ).thenReturn( invalidCoords )
-        .thenReturn( validCoords );
-        
-        Ship    actShip = placer.placeShip();
-        assertEquals( expShip, actShip );
-    }
-
-    @Test
-    void testPlaceShipBoundsHorizontal()
-    {
-        ShipType    expType     = ShipType.getShipType( "Battleship" );
-        Orientation expOrient   = Orientation.HORIZONTAL;
-        char        expRow      = 'A';
-        char        expCol      = '1';
         GridCoords  expCoords   = new GridCoords( 0, 0 );
         Ship        expShip     = new Ship( expType, expCoords, expOrient );
         
         mockGetType( ShipType.getShipType( "Battleship" ) );
         mockGetOrientation( expOrient );
         when( mockedServer.
-            showInputDialog( null, "Enter Ship Coordinates" )
-        ).thenReturn( "1A" )
-        .thenReturn( "AA" )
-        .thenReturn( "11" )
-        .thenReturn( "A1" );
+                showInputDialog( null, "Enter Ship Coordinates" )
+            ).thenReturn( "AA" )
+            .thenReturn( "11" )
+            .thenReturn( "1A" )
+            .thenReturn( "A1" );
         
         Ship    actShip = placer.placeShip();
         assertEquals( expShip, actShip );
     }
 
     @Test
-    void testPlaceShipExerciseOutOfBoundCoordsThenCancel()
+    public void testPlaceShipExerciseSplitCoords()
+    {
+        String[]    coords  =
+        { "A,1", " A , 1 ", "  A  ,,,  1  ", ", , , A , , , 1", " A  1  " };
+        for ( String str : coords )
+            testSplitCoords( str, 0, 0 );
+    }
+
+    @Test
+    public void testPlaceShipBoundsHorizontal()
+    {
+        ShipType    expType     = ShipType.getShipType( "Battleship" );
+        Orientation expOrient   = Orientation.HORIZONTAL;
+        int         len         = expType.getLength();
+        
+        // this x-coordinate should place the actual ship
+        // one cell past the end of its row
+        int         invXco      = numCols - len + 1;
+        // this x-coordinate should place the actual ship 
+        // flush with the end of its row.
+        int         valXco      = invXco - 1;
+        // this is the 1-based column coordinate corresponding
+        // to invXco
+        String      invCol      = String.valueOf( invXco + 1 );
+        // this is the 1-based column coordinate corresponding
+        // to valXco
+        String      valCol      = String.valueOf( valXco + 1 );
+        GridCoords  expCoords   = new GridCoords( valXco, 0 );
+        Ship        expShip     = new Ship( expType, expCoords, expOrient );
+        
+        mockGetType( ShipType.getShipType( "Battleship" ) );
+        mockGetOrientation( expOrient );
+        when( mockedServer.
+            showInputDialog( null, "Enter Ship Coordinates" )
+        ).thenReturn( "A" + invCol )
+        .thenReturn( "A" + valCol );
+        
+        Ship    actShip = placer.placeShip();
+        assertEquals( expShip, actShip );
+    }
+
+    @Test
+    public void testPlaceShipBoundsVertical()
+    {
+        ShipType    expType     = ShipType.getShipType( "Battleship" );
+        Orientation expOrient   = Orientation.VERTICAL;
+        int         len         = expType.getLength();
+        
+        // this y-coordinate should place the actual ship
+        // one cell past the bottom of its column
+        int         invYco      = numRows - len + 1;
+        // this y-coordinate should place the actual ship 
+        // flush with the bottom of its column.
+        int         valYco      = invYco - 1;
+        // this is the 1-based row coordinate corresponding
+        // to invYco
+        String      invRow      = Label.decimalToAlpha( invYco );
+        // this is the 1-based row coordinate corresponding
+        // to valYco
+        String      valRow      = Label.decimalToAlpha( valYco );
+        GridCoords  expCoords   = new GridCoords( 0, valYco );
+        Ship        expShip     = new Ship( expType, expCoords, expOrient );
+        
+        mockGetType( ShipType.getShipType( "Battleship" ) );
+        mockGetOrientation( expOrient );
+        when( mockedServer.
+            showInputDialog( null, "Enter Ship Coordinates" )
+        ).thenReturn( invRow + "1" )
+        .thenReturn( valRow + "1" );
+        
+        Ship    actShip = placer.placeShip();
+        assertEquals( expShip, actShip );
+    }
+
+    @Test
+    public void testPlaceShipColErrors()
     {
         mockGetType( ShipType.getShipType( "Battleship" ) );
         mockGetOrientation( Orientation.VERTICAL );
         when( mockedServer.
             showInputDialog( null, "Enter Ship Coordinates" )
-        ).thenReturn( "1A" )
-        .thenReturn( "AA" )
-        .thenReturn( "11" )
+        ).thenReturn( "A,A" )
+        .thenReturn( "A,%" )
+        .thenReturn( "A,100" )
+        .thenReturn( "A," )
         .thenReturn( null );
         
         Ship    ship    = placer.placeShip();
         assertNull( ship );
     }
-
+    
     @Test
-    public void testPlaceShipGetBattleship()
+    public void testPlaceShipBadOrientation()
     {
-//        doReturn( )
+        mockGetType( ShipType.getShipType( "Battleship" ) );
+        mockGetOrientation( "not a ShipType" );
+        Class<BattleshipException>  excClass    = BattleshipException.class;
+        assertThrows( excClass, () -> placer.placeShip() );
+    }
+    
+    @Test
+    public void testShipIntersection()
+    {
+        String      shipType1   = "Battleship";
+        ShipType    expType1    = ShipType.getShipType( shipType1 );
+        Orientation expOrient1  = Orientation.HORIZONTAL;
+        GridCoords  expCoords1  = new GridCoords( 0, 0 );
+        Ship        expShip1    = 
+            new Ship( expType1, expCoords1, expOrient1 );
+
+        mockGetType( expType1 );
+        mockGetOrientation( expOrient1 );
+        when( mockedServer.
+            showInputDialog( null, "Enter Ship Coordinates" )
+        ).thenReturn( "A1" );
+        
+        Ship    actShip1        = placer.placeShip();
+        assertEquals( expShip1, actShip1 );
+        
+        String      shipType2   = "Destroyer";
+        ShipType    expType2    = ShipType.getShipType( shipType2 );
+        Orientation expOrient2  = Orientation.HORIZONTAL;
+        GridCoords  expCoords2  = new GridCoords( 1, 1 );
+        Ship        expShip2    = 
+            new Ship( expType2, expCoords2, expOrient2 );
+
+        mockGetType( expType2 );
+        mockGetOrientation( expOrient2 );
+        when( mockedServer.
+            showInputDialog( null, "Enter Ship Coordinates" )
+        ).thenReturn( "A2" ) // ship2 intersects ship1
+        .thenReturn( "B2" ); // ship2 doesn't intersect ship1
+        
+        Ship    actShip2        = placer.placeShip();
+        assertEquals( expShip2, actShip2 );
+}
+    
+    private void testSplitCoords( String coords, int xco, int yco )
+    {
+        ShipType    expType     = ShipType.getShipType( "Battleship" );
+        Orientation expOrient   = Orientation.VERTICAL;
+        GridCoords  expCoords   = new GridCoords( xco, yco );
+        Ship        expShip     = new Ship( expType, expCoords, expOrient );
+        
+        mockGetType( ShipType.getShipType( "Battleship" ) );
+        mockGetOrientation( expOrient );
+        when( mockedServer.
+            showInputDialog( null, "Enter Ship Coordinates" )
+        ).thenReturn( coords );
+        
+        Ship    actShip = placer.placeShip();
+        assertEquals( expShip, actShip );
     }
     
     private void mockGetType( ShipType desiredReturn )
@@ -187,7 +287,6 @@ class PlacerTest
     
     private void mockGetOrientation( Object desiredReturn )
     {
-
         when ( mockedServer.
             showInputDialog( 
                 ArgumentMatchers.isNull(), 

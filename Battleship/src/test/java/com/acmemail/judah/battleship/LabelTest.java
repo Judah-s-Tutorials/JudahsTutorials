@@ -6,7 +6,6 @@ import static com.acmemail.judah.battleship.Constants.NAME_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
@@ -139,14 +138,14 @@ class LabelTest
     @Test
     public void testValidateRowStrGoRight()
     {
-        testValidateRowStrGoRight( "1" );
-        testValidateRowStrGoRight( "111" );
+        testValidateRowStrGoRight( "A" );
+        testValidateRowStrGoRight( "AAA" );
     }
 
     @Test
     public void testValidateRowStrGoWrong()
     {
-        testValidateRowStrGoWrong( "A" );
+        testValidateRowStrGoWrong( "1" );
         testValidateRowStrGoWrong( "" );
         testValidateRowStrGoWrong( null );
     }

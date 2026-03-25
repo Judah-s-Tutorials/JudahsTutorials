@@ -40,7 +40,7 @@ public class AdHocApp
         ShipType    destroyer   = ShipType.getShipType( "Destroyer" );
         ShipType    submarine   = ShipType.getShipType( "Submarine" );
         
-        coords = new GridCoords( 5, 0 );
+        coords = new GridCoords( 6, 0 );
         ship = new Ship( battleship, coords, HORIZONTAL );
         Fleet.add( ship );
 //        
