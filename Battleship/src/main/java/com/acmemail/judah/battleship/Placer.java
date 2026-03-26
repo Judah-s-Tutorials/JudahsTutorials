@@ -50,7 +50,7 @@ import javax.swing.JOptionPane;
  * 
  * @see JOptionPaneI
  * @see JOptionPaneS
- * @see The <a href="https://site.mockito.org/">Mockito Website</a>
+ * @see <a href="https://site.mockito.org/">The Mockito Website</a>
  * @see #setJOptionPaneInterface(JOptionPaneI)
  * @see #getJOptionPaneInterface()
  */
@@ -89,7 +89,8 @@ public class Placer
      * 
      * @param jOptionPane   the given object
      */
-    public static void setJOptionPaneInterface( JOptionPaneI jOptionPane )
+    public static void 
+    setJOptionPaneInterface( JOptionPaneI jOptionPane )
     {
         Placer.jOptionPane = jOptionPane;
     }
@@ -137,7 +138,7 @@ public class Placer
      * @return the ship type selected by the operator, or null if canceled
      * 
      * @see ShipType
-     * @see ShipType()
+     * @see ShipType#ShipType(String, int)
      * @see ShipType#registerDefaultTypes()
      */
     private static ShipType getType()

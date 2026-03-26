@@ -11,6 +11,17 @@ import com.acmemail.judah.battleship.default_ship_types.Cruiser;
 import com.acmemail.judah.battleship.default_ship_types.Destroyer;
 import com.acmemail.judah.battleship.default_ship_types.Submarine;
 
+/**
+ * An instance of this class encapsulates a ship type,
+ * which includes it's name (e.g. "Battleship," "Destroyer")
+ * and the length of a ship of this type.
+ * The class itself contains a collection
+ * of all registered ship types.
+ * Each ship type is registered upon instantiation;
+ * duplicate ship types are not allowed.
+ * 
+ * @see #registerDefaultTypes()
+ */
 public abstract class ShipType
 {
     /** 
@@ -24,6 +35,13 @@ public abstract class ShipType
     /** Number of cells occupied by ship. */
     private final int       length;
     
+    /**
+     * Constructor.
+     * 
+     * @param typeName  
+     *      the name of this ship type; duplicates are not allowed.
+     * @param length    the length of a ship of this type
+     */
     public ShipType( String typeName, int length )
     {
         this.typeName = typeName;
@@ -37,16 +55,31 @@ public abstract class ShipType
         allTypes.put( typeName, this );
     }
     
+    /**
+     * Gets the name of this ship type.
+     * 
+     * @return  the name of this ship type
+     */
     public String getTypeName()
     {
         return typeName;
     }
     
+    /**
+     * Gets the length of a ship of this type.
+     * 
+     * @return  the length of a ship of this type
+     */
     public int getLength()
     {
         return length;
     }
     
+    /**
+     * Gets an image of this ship (NOT IMPLEMENTED).
+     * 
+     * @return  null
+     */
     public Image getImage()
     {
         return null;
@@ -89,12 +122,27 @@ public abstract class ShipType
         return result;
     }
     
+    /**
+     * Returns the ShipType object that encapsulates a given type name.
+     * Returns null if no corresponding ShipType object is found.
+     * 
+     * @param typeName  the given type name
+     * 
+     * @return
+     *      the ShipType object that associated with a given type name,
+     *      or null if none
+     */
     public static ShipType getShipType( String typeName )
     {
         ShipType    type    = allTypes.get( typeName );
         return type;
     }
     
+    /**
+     * Register the default ship types included
+     * in this Battleship implementation,
+     * e.g. Battleship, Carrier, Destroyer, etc.
+     */
     public static void registerDefaultTypes()
     {
         new Battleship();
@@ -104,6 +152,10 @@ public abstract class ShipType
         new Cruiser();
     }
     
+    /**
+     * Returns a Collection of all registered ship types.
+     * @return  a Collection of all registered ship types
+     */
     public static Collection<ShipType> getTypes()
     {
         Collection<ShipType>    values  = allTypes.values();

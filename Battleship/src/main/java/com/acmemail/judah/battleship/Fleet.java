@@ -6,15 +6,27 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * This class keeps track of all ships
+ * that are associated with the home grid.
+ */
 public class Fleet
 {
+    /** The grid associatd with this fleet. */
     private static final    Grid                    gridMap     =
         Grid.getHomeGrid();
+    /** The count of ships of a particular type. */
     private static final    Map<String,Integer>     shipTypes   = 
         new HashMap<>();
+    /** List of all ships in the fleet. */
     private static final    List<Ship>              allShips    = 
         new ArrayList<>();
     
+    /**
+     * Adds a given ship to the fleet.
+     * 
+     * @param ship  the given ship
+     */
     public static synchronized void add( Ship ship )
     {
         String      type    = ship.getTypeName();
@@ -24,6 +36,11 @@ public class Fleet
         gridMap.put( ship );
     }
     
+    /**
+     * Gets a list of all ships in the fleet.
+     * 
+     * @return  a list of all ships in the fleet
+     */
     public static List<Ship> getShips()
     {
         List<Ship>  ships   = Collections.unmodifiableList( allShips );
