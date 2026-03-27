@@ -1,5 +1,7 @@
 package com.acmemail.judah.battleship;
 
+import java.util.Objects;
+
 /**
  * An instance of this class encapsulates the properties
  * of a cell in the grid, including:
@@ -12,8 +14,7 @@ package com.acmemail.judah.battleship;
 public class Cell
 {
     /** The (x,y) coordinates of this cell. */
-    private final GridCoords coords;
-    
+    private final GridCoords coords;    
     /** True if this  cell has been attacked.  */
     private boolean splatted    = false;
     /** The ship that occupies this cell (null if none). */
@@ -134,5 +135,35 @@ public class Cell
         bldr.append( coords ).append( "),splatted=").append( splatted )
             .append( "),ship=" ).append( "{" ).append( ship ).append( "}" );
         return bldr.toString();
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        int hashCode    = Objects.hash( coords, splatted, ship );
+        return hashCode;
+    }
+    
+    @Override
+    public boolean equals( Object obj )
+    {
+        boolean result  = false;
+        if ( this == obj )
+            result = true;
+        else if ( !(obj instanceof Cell) )
+            result = false;
+        else
+        {
+            Cell    that    = (Cell)obj;
+            if ( !this.coords.equals( that.coords ) )
+                result = false;
+            else if ( this.splatted != that.splatted )
+                result = false;
+            else if ( !Objects.equals( this.ship, that.ship ) )
+                result = false;
+            else
+                result = true;
+        }
+        return result;
     }
 }

@@ -4,6 +4,7 @@ import static com.acmemail.judah.battleship.Orientation.HORIZONTAL;
 import static com.acmemail.judah.battleship.Orientation.VERTICAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -14,15 +15,20 @@ import java.util.function.BiFunction;
 
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.battleship.default_ship_types.Battleship;
 import com.acmemail.judah.battleship.default_ship_types.Carrier;
 import com.acmemail.judah.battleship.default_ship_types.Cruiser;
 
 class ShipTest
 {
+    private static final ShipType   battleshipType  = new Battleship();
+    private static final ShipType   carrierType     = new Carrier();
+    private static final ShipType   cruiserType     = new Cruiser();
+    
     private static final String     defNameHor  = "DefNameHorizontal";
     private static final String     defNameVer  = "DefNameVertical";
-    private static final ShipType   defTypeHor  = new Carrier();
-    private static final ShipType   defTypeVer  = new Cruiser();
+    private static final ShipType   defTypeHor  = carrierType;
+    private static final ShipType   defTypeVer  = cruiserType;
     private static final int        defLenHor   = defTypeHor.getLength();
     private static final int        defLenVer   = defTypeVer.getLength();
     private static final int        rowLen      = 10; //Grid.getRowLen();
@@ -225,6 +231,62 @@ class ShipTest
         assertEquals( HORIZONTAL, defHor.getOrientation() );
         assertEquals( VERTICAL, defVer.getOrientation() );
     }
+    
+    @Test
+    public void testGetTypeName()
+    {
+        GridCoords  coords      = new GridCoords( 0, 0 );
+        Orientation orientation = Orientation.HORIZONTAL;
+        ShipType    typeA       = battleshipType;
+        ShipType    typeB       = carrierType;
+        Ship        shipA       = new Ship( typeA, coords, orientation );
+        Ship        shipB       = new Ship( typeB, coords, orientation );
+        
+        assertNotEquals( shipA.getTypeName(), shipB.getTypeName() );
+        shipB = new Ship( typeA, coords, orientation );
+        assertEquals( shipA.getTypeName(), shipB.getTypeName() );
+    }
+    
+    @Test
+    public void testEqualsHash()
+    {
+        ShipType    typeA           = battleshipType;
+        ShipType    typeB           = carrierType;
+        Orientation orientationA    = Orientation.HORIZONTAL;
+        Orientation orientationB    = Orientation.VERTICAL;
+        GridCoords  coordsA         = new GridCoords( 1, 10 );
+        GridCoords  coordsB         = new GridCoords( 2, 11 );
+        String      nameA           = "NameA";
+        String      nameB           = "NameB";
+        Object      obj             = new Object();
+        Ship        shipA           = 
+            new Ship( typeA, nameA, coordsA, orientationA );
+        Ship        shipB           = 
+            new Ship( typeB, nameA, coordsA, orientationA );
+        
+        assertTrue( shipA.equals( shipA ) );
+        assertFalse( shipA.equals( null ) );
+        assertFalse( shipA.equals( obj ) );
+        assertFalse( shipA.equals( shipB ) );
+        assertFalse( shipB.equals( shipA ) );
+        
+        shipB = new Ship( typeA, nameB, coordsA, orientationA );
+        assertFalse( shipA.equals( shipB ) );
+        assertFalse( shipB.equals( shipA ) );
+        
+        shipB = new Ship( typeA, nameA, coordsB, orientationA );
+        assertFalse( shipA.equals( shipB ) );
+        assertFalse( shipB.equals( shipA ) );
+        
+        shipB = new Ship( typeA, nameA, coordsA, orientationB );
+        assertFalse( shipA.equals( shipB ) );
+        assertFalse( shipB.equals( shipA ) );
+        
+        shipB = new Ship( typeA, nameA, coordsA, orientationA );
+        assertEquals( shipA, shipB );
+        assertEquals( shipB, shipA );
+        assertEquals( shipA.hashCode(), shipB.hashCode() );
+}
 
     private void testIntersectsNeg( Orientation orient, Ship testShip )
     {

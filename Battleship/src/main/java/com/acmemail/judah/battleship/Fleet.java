@@ -12,6 +12,13 @@ import java.util.Map;
  */
 public class Fleet
 {
+    /**
+     * Default constructor; not used.
+     */
+    private Fleet()
+    {
+    }
+    
     /** The grid associatd with this fleet. */
     private static final    Grid                    gridMap     =
         Grid.getHomeGrid();
