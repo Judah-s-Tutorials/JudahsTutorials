@@ -44,6 +44,33 @@ public class Fleet
     }
     
     /**
+     * Removes a given ship from the fleet.
+     * 
+     * @param ship  the given ship
+     */
+    public static synchronized void remove( Ship ship )
+    {
+        String      type    = ship.getTypeName();
+        Integer     currNum = shipTypes.getOrDefault( type, 0 );
+        if ( currNum > 0 )
+            shipTypes.put( type, currNum - 1 );
+        allShips.remove( ship );
+        gridMap.remove( ship );
+    }
+    
+    /**
+     * Removes all ships from the fleet.
+     */
+    public static void removeAllShips()
+    {
+        while ( !allShips.isEmpty() )
+        {
+            Ship    ship    = allShips.get( 0 );
+            remove( ship );
+        }
+    }
+    
+    /**
      * Gets a list of all ships in the fleet.
      * 
      * @return  a list of all ships in the fleet

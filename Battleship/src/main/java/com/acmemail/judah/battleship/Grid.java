@@ -64,7 +64,7 @@ public class Grid extends HashMap<GridCoords,Cell>
         Grid    home    = allGrids.get( DEF_GRID_NAME );
         if ( home == null )
         {
-            String  message = "Can't find hme grid: " + DEF_GRID_NAME;
+            String  message = "Can't find home grid: " + DEF_GRID_NAME;
             throw new BattleshipException( message );
         }
         return home;
@@ -133,6 +133,23 @@ public class Grid extends HashMap<GridCoords,Cell>
                 put( coords, cell );
             }
     }
+    
+    public void remove( Ship ship )
+    {
+        List<String>    errors  = evaluateBounds( ship );
+        if ( !errors.isEmpty() )
+            throw new BattleshipException( errors.get( 0 ) );
+        int         minXco  = ship.getMinX();
+        int         minYco  = ship.getMinY();
+        int         maxXco  = ship.getMaxX();
+        int         maxYco  = ship.getMaxY();
+        for ( int yco = minYco ; yco < maxYco ; ++yco )
+            for ( int xco = minXco ; xco < maxXco ; ++xco )
+            {
+                Cell    cell   = get( xco, yco );
+                cell.setShip( null );
+            }
+    }
 
     public boolean isSplatted( GridCoords coords )
     {
@@ -161,7 +178,7 @@ public class Grid extends HashMap<GridCoords,Cell>
      */
     public static boolean isValidCoord( int xco, int yco )
     {
-        boolean valid   = xco < NUM_ROWS && yco < NUM_COLS;
+        boolean valid   = xco < NUM_COLS && yco < NUM_ROWS;
         return valid;
     }
     

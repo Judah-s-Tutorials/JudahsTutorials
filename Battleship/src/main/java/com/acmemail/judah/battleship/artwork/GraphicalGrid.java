@@ -55,7 +55,7 @@ public class GraphicalGrid extends JPanel implements Artwork
     private int         labelHeight = 25;
     private int         margin      = 5;
     private int         numRows     = Grid.getNumRows();
-    private int         colCells    = Grid.getNumCols();
+    private int         numCols     = Grid.getNumCols();
     
     private int         width;
     private int         height;
@@ -66,7 +66,7 @@ public class GraphicalGrid extends JPanel implements Artwork
     {
         this.grid = grid;
         int         prefWidth   = 
-            2 * margin + colCells * cellSide + labelWidth;
+            2 * margin + numCols * cellSide + labelWidth;
         int         prefHeight  = 
             2 * margin + numRows * cellSide + labelHeight;
         Dimension   prefSize    = new Dimension( prefWidth, prefHeight );
@@ -182,7 +182,7 @@ public class GraphicalGrid extends JPanel implements Artwork
     {
         AffineTransform origTransform   = gtx.getTransform();
         int yco = labelHeight;
-        for ( int col = 0 ; col < numRows ; ++col )
+        for ( int col = 0 ; col < numCols ; ++col )
         {
             String  label           = Label.intToString( col );
             int     xco             = col * cellSide + labelWidth;
@@ -231,10 +231,10 @@ public class GraphicalGrid extends JPanel implements Artwork
     {
         Cell    cell    = null;
         double  xco     = point.getX() - margin;
-        double  yco     = point.getX() - margin;
+        double  yco     = point.getY() - margin;
         int     col     = (int)(xco / cellSide);
         int     row     = (int)(yco / cellSide);
-        if ( col >= 0 && col < colCells
+        if ( col >= 0 && col < numCols
             && row >= 0 && row < numRows )
         {
             cell = new Cell( col, row );
@@ -260,7 +260,6 @@ public class GraphicalGrid extends JPanel implements Artwork
                 GridCoords  curr    = getGridCoords( evt.getX(), evt.getY() );
                 if ( !curr.equals( ghostShip.getFirstSquare() ) )
                 {
-                    System.out.println( curr );
                     ShipType    type        = ghostShip.getType();
                     Orientation orientation = ghostShip.getOrientation();
                     Ship        ship        = 

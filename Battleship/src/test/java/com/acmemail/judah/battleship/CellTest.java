@@ -1,10 +1,13 @@
 package com.acmemail.judah.battleship;
 
+import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.battleship.default_ship_types.Battleship;
@@ -12,8 +15,23 @@ import com.acmemail.judah.battleship.default_ship_types.Destroyer;
 
 class CellTest
 {
-    private static final ShipType   battleshipType   = new Battleship();
-    private static final ShipType   destroyerType   = new Destroyer();
+    private static ShipType battleshipType;
+    private static ShipType destroyerType;
+    
+    @BeforeAll
+    public static void beforeAll()
+    {
+        if ( (battleshipType = getShipType( DEF_BATTLESHIP_NAME )) == null )
+            battleshipType = new Battleship();
+        if ( (destroyerType = getShipType( DEF_DESTROYER_NAME )) == null )
+            destroyerType = new Destroyer();
+    }
+    
+    private static ShipType getShipType( String typeName )
+    {
+        ShipType    shipType    = ShipType.getShipType( typeName );
+        return shipType;
+    }
     
     @Test
     void testCellGridCoords()

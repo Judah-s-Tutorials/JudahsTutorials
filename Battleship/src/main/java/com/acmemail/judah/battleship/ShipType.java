@@ -1,4 +1,10 @@
 package com.acmemail.judah.battleship;
+import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_CARRIER_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_CRUISER_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_SUBMARINE_NAME;
+
 import java.awt.Image;
 import java.util.Collection;
 import java.util.HashMap;
@@ -110,6 +116,12 @@ public abstract class ShipType
         else if ( !(obj instanceof ShipType) )
             result = false;
         else
+            result = typeName.equals( ((ShipType)obj).typeName );
+        // a) It's impossible for two different ShipTypes
+        //    to have the same name
+        // b) If two ShipType names are equal, they will necessarily
+        //    have the same length
+        /*
         {
             ShipType    that    = (ShipType)obj;
             if ( !this.typeName.equals( that.typeName ) )
@@ -119,6 +131,7 @@ public abstract class ShipType
             else
                 result = true;
         }
+        */
         return result;
     }
     
@@ -145,11 +158,16 @@ public abstract class ShipType
      */
     public static void registerDefaultTypes()
     {
-        new Battleship();
-        new Carrier();
-        new Destroyer();
-        new Submarine();
-        new Cruiser();
+        if ( getShipType( DEF_BATTLESHIP_NAME ) == null )
+            new Battleship();
+        if ( getShipType( DEF_CARRIER_NAME ) == null )
+            new Carrier();
+        if ( getShipType( DEF_CRUISER_NAME ) == null )
+            new Cruiser();
+        if ( getShipType( DEF_DESTROYER_NAME ) == null )
+            new Destroyer();
+        if ( getShipType( DEF_SUBMARINE_NAME ) == null )
+            new Submarine();
     }
     
     /**

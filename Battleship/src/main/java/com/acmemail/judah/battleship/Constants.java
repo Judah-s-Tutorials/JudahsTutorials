@@ -13,9 +13,42 @@ public class Constants
         "com.acmemail.judah.battleship.";
     
     /* Naming convention same as RenderingHints: "KEY_...description */
+    /** Key to lookup number-of-rows property. */
     public static final String  KEY_NUM_ROWS    = "numRows";
+    /** Key to lookup number-of-columns property. */
     public static final String  KEY_NUM_COLS    = "numCols";
+    
+    /*************************/
+    /* Default ship lengths. */
+    /*************************/
+    /** Default length of a battleship. */
+    public static final int     DEF_BATTLESHIP_LEN  = 4;
+    /** Default length of a carrier. */
+    public static final int     DEF_CARRIER_LEN     = 5;
+    /** Default length of a cruiser. */
+    public static final int     DEF_CRUISER_LEN     = 3;
+    /** Default length of a destroyer. */
+    public static final int     DEF_DESTROYER_LEN   = 2;
+    /** Default length of a submarine. */
+    public static final int     DEF_SUBMARINE_LEN   = 3;
+    
+    /*************************/
+    /* Default ship names. */
+    /*************************/
+    /** Default NAMEgth of a battleship. */
+    public static final String  DEF_BATTLESHIP_NAME  = "Battleship";
+    /** Default NAMEgth of a carrier. */
+    public static final String  DEF_CARRIER_NAME     = "Carrier";
+    /** Default NAMEgth of a cruiser. */
+    public static final String  DEF_CRUISER_NAME     = "Cruiser";
+    /** Default NAMEgth of a destroyer. */
+    public static final String  DEF_DESTROYER_NAME   = "Destroyer";
+    /** Default NAMEgth of a submarine. */
+    public static final String  DEF_SUBMARINE_NAME   = "Submarine";
 
+    /**
+     * Constructor; not used.
+     */
     private Constants()
     {
     }

@@ -33,6 +33,7 @@ class PlacerTest
     public static void beforeAll()
     {
         ShipType.registerDefaultTypes();
+        Fleet.removeAllShips();
     }
     
     @BeforeEach
@@ -46,6 +47,7 @@ class PlacerTest
     public void afterEach()
     {
         Placer.setJOptionPaneInterface( origServer );
+        Fleet.removeAllShips();
     }
 
     @Test
@@ -119,9 +121,11 @@ class PlacerTest
     public void testPlaceShipExerciseSplitCoords()
     {
         String[]    coords  =
-        { "A,1", " A , 1 ", "  A  ,,,  1  ", ", , , A , , , 1", " A  1  " };
+        { "A,1", " B , 2 ", "  C  ,,,  3  ", ", , , D , , , 4", " E  5  " };
+        int xco = 0;
+        int yco = 0;
         for ( String str : coords )
-            testSplitCoords( str, 0, 0 );
+            testSplitCoords( str, xco++, yco++ );
     }
 
     @Test
@@ -193,13 +197,14 @@ class PlacerTest
     @Test
     public void testPlaceShipColErrors()
     {
+        String  invalidCol  = (String.valueOf( numCols + 1 ) );
         mockGetType( ShipType.getShipType( "Battleship" ) );
         mockGetOrientation( Orientation.VERTICAL );
         when( mockedServer.
             showInputDialog( null, "Enter Ship Coordinates" )
         ).thenReturn( "A,A" )
         .thenReturn( "A,%" )
-        .thenReturn( "A,100" )
+        .thenReturn( "A," + invalidCol )
         .thenReturn( "A," )
         .thenReturn( null );
         
