@@ -51,12 +51,8 @@ public class Grid extends HashMap<GridCoords,Cell>
             throw new BattleshipException( msg );
         }
         allGrids.put( name, this );
-        for ( int yco = 0 ; yco < NUM_ROWS ; ++ yco )
-            for ( int xco = 0 ; xco < NUM_COLS ; ++xco )
-            {
-                Cell    cell    = new Cell( xco, yco );
-                put( cell );
-            }
+        // initialize the grid
+        clean();
     }
     
     public static Grid getHomeGrid()
@@ -68,6 +64,29 @@ public class Grid extends HashMap<GridCoords,Cell>
             throw new BattleshipException( message );
         }
         return home;
+    }
+    
+    /**
+     * Gets the name of this grid.
+     * 
+     * @return  the name of this grid
+     */
+    public String getName()
+    {
+        return name;
+    }
+    
+    /**
+     * Gets the grid with the given name.
+     * 
+     * @param name  the given name
+     * 
+     * @return the grid with the given name
+     */
+    public static Grid getGrid( String name )
+    {
+        Grid    grid    = allGrids.get( name );
+        return grid;
     }
     
     /**
@@ -178,8 +197,26 @@ public class Grid extends HashMap<GridCoords,Cell>
      */
     public static boolean isValidCoord( int xco, int yco )
     {
-        boolean valid   = xco < NUM_COLS && yco < NUM_ROWS;
+        boolean valid   = 
+            xco >= 0 && yco >= 0 &&
+            xco < NUM_COLS && yco < NUM_ROWS;
         return valid;
+    }
+    
+    /**
+     * Initialize the grid with new Cell objects.
+     * Any data regarding previously added ships
+     * or attacked cells
+     * will be lost.
+     */
+    public void clean()
+    {
+        for ( int yco = 0 ; yco < NUM_ROWS ; ++ yco )
+            for ( int xco = 0 ; xco < NUM_COLS ; ++xco )
+            {
+                Cell    cell    = new Cell( xco, yco );
+                put( cell );
+            }
     }
     
     /**
@@ -319,7 +356,7 @@ public class Grid extends HashMap<GridCoords,Cell>
         List<Ship>  ships           = Fleet.getShips();
         Ship        existingShip    =
             ships.stream()
-                .filter( s -> s != ship )
+                .filter( s -> !s.equals( ship ) )
                 .filter( s -> s.intersects( ship ) )
                 .findFirst()
                 .orElse( null );

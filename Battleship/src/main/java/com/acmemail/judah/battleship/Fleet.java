@@ -33,14 +33,19 @@ public class Fleet
      * Adds a given ship to the fleet.
      * 
      * @param ship  the given ship
+     * 
+     * @throws BattleshipException
+     *      if the ship cannot be added to the grid
      */
     public static synchronized void add( Ship ship )
     {
         String      type    = ship.getTypeName();
         Integer     currNum = shipTypes.getOrDefault( type, 0 );
+        // try to add to the grid first, which may throw
+        // a BattleshipException
+        gridMap.put( ship );
         shipTypes.put( type, currNum + 1 );
         allShips.add( ship );
-        gridMap.put( ship );
     }
     
     /**
