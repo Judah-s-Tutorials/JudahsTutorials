@@ -173,11 +173,6 @@ public class Grid extends HashMap<GridCoords,Cell>
     public boolean isSplatted( GridCoords coords )
     {
         Cell    cell    = get( coords );
-        if ( cell == null )
-        {
-            String  message = "No cell exists at coordinates: " + coords;
-            throw new BattleshipException( message );
-        }
         boolean splatted    = cell.isSplatted();
         return splatted;
     }

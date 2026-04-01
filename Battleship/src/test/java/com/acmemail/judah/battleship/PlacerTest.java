@@ -17,6 +17,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.acmemail.judah.battleship.util.JOptionPaneI;
+
 @ExtendWith(MockitoExtension.class)
 class PlacerTest
 {

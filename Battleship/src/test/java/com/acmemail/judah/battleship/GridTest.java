@@ -237,6 +237,9 @@ class GridTest
                 homeGrid.attack( coords );
                 assertTrue( homeGrid.isSplatted( coords ) );
             }
+        
+        GridCoords  invalidCoords   = new GridCoords( numCols, numRows );
+        assertThrows( excClass, () -> homeGrid.isSplatted( invalidCoords ) );
     }
 
     /**
@@ -312,7 +315,7 @@ class GridTest
     void testPutCell()
     {
         int     xco     = numCols / 2;
-        int     yco     = numCols / 2;
+        int     yco     = numRows / 2;
         Cell    cell    = homeGrid.get( xco, yco );
         assertFalse( cell.isSplatted() );
         cell.setSplatted( true );
@@ -327,12 +330,17 @@ class GridTest
         int         xco     = numCols / 2;
         int         yco     = numCols / 2;
         GridCoords  coords  = new GridCoords( xco, yco );
-        Cell    cell    = homeGrid.get( coords );
+        Cell        cell    = homeGrid.get( coords );
         assertFalse( cell.isSplatted() );
+        cell = new Cell( coords );
         cell.setSplatted( true );
         homeGrid.put( coords, cell );
         cell = homeGrid.get( coords );
         assertTrue( cell.isSplatted() );
+        
+        GridCoords  invalidCoords   = new GridCoords( numCols, numRows );
+        assertThrows( excClass, () -> 
+            homeGrid.put( invalidCoords, new Cell( invalidCoords ) ) );
     }
 
     @Test
@@ -403,6 +411,12 @@ class GridTest
                 List<String>    errors  = Grid.evaluateBounds( ship );
                 assertTrue( errors.size() > 0 );
             }
+        // test xco and yco less than 0
+        GridCoords  coords  = new GridCoords( -1, -1 );
+        Ship            ship    = 
+            new Ship( type, coords, orientation );
+        List<String>errors  = Grid.evaluateBounds( ship );
+        assertTrue( errors.size() > 0 );
     }
 
     @Test

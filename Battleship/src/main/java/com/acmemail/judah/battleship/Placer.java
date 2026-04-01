@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import com.acmemail.judah.battleship.util.JOptionPaneI;
+import com.acmemail.judah.battleship.util.JOptionPaneS;
+
 /**
  * An instance of this class is used to request a ship configuration
  * from the operator.

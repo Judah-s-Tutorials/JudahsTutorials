@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship;
+package com.acmemail.judah.battleship.util;
 
 import java.awt.Component;
 
