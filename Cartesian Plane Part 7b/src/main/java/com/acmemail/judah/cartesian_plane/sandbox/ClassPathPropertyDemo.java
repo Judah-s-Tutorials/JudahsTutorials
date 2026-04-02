@@ -6,9 +6,11 @@ public class ClassPathPropertyDemo
 {
     public static void main(String[] args)
     {
-        String  separator   = System.getProperty( "path.separator" );
-        String  classPath   = System.getProperty( "java.class.path" );
+        String  separator       = System.getProperty( "path.separator" );
+        String  classPath       = System.getProperty( "java.class.path" );
+        String  envClassPath    = System.getenv( "CLASSPATH" );
         System.out.println( classPath );
+        System.out.println( envClassPath );
         
         StringTokenizer tizer   = new StringTokenizer( classPath, separator );
         while ( tizer.hasMoreTokens() )
