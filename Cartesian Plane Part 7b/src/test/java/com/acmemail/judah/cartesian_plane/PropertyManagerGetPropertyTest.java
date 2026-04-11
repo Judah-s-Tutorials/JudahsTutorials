@@ -267,7 +267,7 @@ class PropertyManagerGetPropertyTest
         {
             String  name    = pair.propName;
             String  actVal  = getPropVal( name );
-            assertNotNull( actVal );
+            assertNotNull( actVal, name );
             assertTrue( actVal.endsWith( appIdent ), name );
         }
     }
