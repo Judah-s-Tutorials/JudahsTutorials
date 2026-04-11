@@ -73,6 +73,7 @@ public class AppRunnerDemo
         SwingUtilities.invokeLater( () -> playGhost() );
     }
     
+    @SuppressWarnings("unused")
     private static void place()
     {
         final String    title   = "Place Ship";
@@ -250,6 +251,7 @@ public class AppRunnerDemo
         return ship;
     }
     
+    @SuppressWarnings("unused")
     private static void pause()
     {
         JOptionPane.showMessageDialog( null, "next" );

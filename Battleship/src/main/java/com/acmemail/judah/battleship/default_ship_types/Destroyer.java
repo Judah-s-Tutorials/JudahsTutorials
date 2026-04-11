@@ -1,8 +1,9 @@
 package com.acmemail.judah.battleship.default_ship_types;
 
-import com.acmemail.judah.battleship.Constants;
+import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_LEN;
+import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_NAME;
+
 import com.acmemail.judah.battleship.ShipType;
-import static com.acmemail.judah.battleship.Constants.*;
 /**
  * Encapsulates the destroyer default ship type.
  */

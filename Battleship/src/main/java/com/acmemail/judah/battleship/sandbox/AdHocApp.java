@@ -25,6 +25,7 @@ import com.acmemail.judah.battleship.artwork.GraphicalGrid;
 public class AdHocApp
 {
     private static GraphicalGrid    graphicalGrid;
+    @SuppressWarnings("unused")
     public static void main(String[] args)
     {
         double  d1  = 0xba;
@@ -73,6 +74,7 @@ public class AdHocApp
         SwingUtilities.invokeLater( () -> playGhost() );
     }
     
+    @SuppressWarnings("unused")
     private static void place()
     {
         final String    title   = "Place Ship";
@@ -250,6 +252,7 @@ public class AdHocApp
         return ship;
     }
     
+    @SuppressWarnings("unused")
     private static void pause()
     {
         JOptionPane.showMessageDialog( null, "next" );

@@ -226,6 +226,7 @@ public class GraphicalGrid extends JPanel implements Artwork
         return ghostRect;
     }
     
+    @SuppressWarnings("unused")
     private Cell getCell( Point2D point )
     {
         Cell    cell    = null;
@@ -243,7 +244,7 @@ public class GraphicalGrid extends JPanel implements Artwork
     
     private class MouseMonitor extends MouseAdapter
     {
-        private Cell selectedCell   = null;
+//        private Cell selectedCell   = null;
         
         @Override
         public void mousePressed( MouseEvent evt )
