@@ -1,0 +1,12 @@
+        modified:   ../Cartesian Plane Part 7b/src/main/java/com/acmemail/judah/cartesian_plane/graphics_utils/Root.java
+        modified:   ../Cartesian Plane Part 7b/src/test/java/com/acmemail/judah/cartesian_plane/PropertyManagerGetPropertyTest.java
+        modified:   ../Cartesian Plane Part 7b/src/test/java/com/acmemail/judah/cartesian_plane/test_util/PropertyTesterApp.java
+        modified:   src/main/java/com/acmemail/judah/cartesian_plane/CircleShape.java
+        modified:   src/main/java/com/acmemail/judah/cartesian_plane/PlotPointCommand.java
+        modified:   src/main/java/com/acmemail/judah/cartesian_plane/SquareShape.java
+        modified:   src/main/java/com/acmemail/judah/cartesian_plane/sandbox/IntIterable.java
+        modified:   src/main/java/com/acmemail/judah/cartesian_plane/sandbox/PolyIteratorDemo.java
+        modified:   src/main/java/com/acmemail/judah/cartesian_plane/sandbox/lines/LineWidthDemo.java
+        deleted:    src/test/java/com/acmemail/judah/cartesian_plane/sandbox/TestClassPathProperties.java
+        modified:   ../GraphicsBootstrap/src/main/java/com/acmemail/judah/glass_panes/EventDispatchDemoA.java
+ 

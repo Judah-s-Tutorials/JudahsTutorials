@@ -31,8 +31,8 @@ public class LineWidthDemo
     private final Color         fgColor         = Color.BLACK;
     private final int           canvasWidth     = 1000;
     private final int           canvasHeight    = 700;
-    private final List<DLine>   dLines  = new ArrayList<>();
-    private final BufferedImage offline = 
+    private final List<DLine>   dLines          = new ArrayList<>();
+    private final BufferedImage offline         = 
         new BufferedImage( 
             canvasWidth, 
             canvasHeight, 
@@ -89,7 +89,7 @@ public class LineWidthDemo
             IntStream.range( 0, 5 ).forEach( 
                 inx -> dLines.add( getVLine( inx ) )
             );
-            paintComponentBI( (Graphics2D)offline.getGraphics() );
+            paintComponentBI( offline );
         }
         
         public void paintComponent( Graphics graphics )
@@ -111,12 +111,13 @@ public class LineWidthDemo
             dLines.forEach( this::tagLine );
         }
         
-        public void paintComponentBI( Graphics2D gtx )
+        public void paintComponentBI( BufferedImage image )//Graphics2D gtx )
         {
-            currWidth = getWidth();
-            currHeight = getHeight();
+            Graphics2D  gtx         = image.createGraphics();
+            int         imageWidth  = image.getWidth();
+            int         imageHeight = image.getHeight();
             gtx.setColor( bgColor );
-            gtx.fillRect( 0,  0, currWidth, currHeight );
+            gtx.fillRect( 0,  0, imageWidth, imageHeight );
 
             gtx.setColor( fgColor );
             dLines.forEach( l -> l.draw( gtx ) );

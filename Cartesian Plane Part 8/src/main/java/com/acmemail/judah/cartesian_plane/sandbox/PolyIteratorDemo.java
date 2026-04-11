@@ -26,7 +26,7 @@ import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
  * </li>
  * <li>
  *      The functional interface
- *      is used in conjunction with {@inkplain FunctionIterator}
+ *      is used in conjunction with {@linkplain FunctionIterator}
  *      to create an <em>Iterator&lt;Point2D&gt;</em>.
  * </li>
  * <li>
