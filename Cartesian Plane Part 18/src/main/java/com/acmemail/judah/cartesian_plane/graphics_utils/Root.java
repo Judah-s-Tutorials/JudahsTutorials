@@ -65,7 +65,7 @@ public class Root implements Runnable
      */
     public boolean isStarted()
     {
-        return frame.isVisible();
+        return frame != null && frame.isVisible();
     }
     
     /**
@@ -75,7 +75,7 @@ public class Root implements Runnable
      */
     public void run()
     {
-        /* Instantiate the frame. */
+    	/* Instantiate the frame. */
         frame = new JFrame( "Graphics Frame" );
         
         /* 
@@ -94,10 +94,10 @@ public class Root implements Runnable
          * https://docs.oracle.com/javase/tutorial/uiswing/layout/index.html.
          * see the JDK documentation.
          */
-        BorderLayout    layout      = new BorderLayout();
+        BorderLayout    layout  = new BorderLayout();
         contentPane = new JPanel( layout );
         
-        /* Make the ProfileEditorFeedback the center child of the content pane. */
+        /* Make the Canvas a child of the content pane. */
         contentPane.add( userPanel, BorderLayout.CENTER );
         /* Set the content pane in the frame. */
         frame.setContentPane( contentPane );
