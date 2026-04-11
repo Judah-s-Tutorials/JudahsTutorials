@@ -15,6 +15,14 @@ import java.awt.geom.Ellipse2D;
  */
 public class CircleShape implements PlotShape
 {
+    /** PropertyManager singleton; declared here for convenience. */
+    private static final PropertyManager    PMGR            = 
+        PropertyManager.INSTANCE;
+    private static final String             GRID_UNIT       =
+        CPConstants.GRID_UNIT_PN;
+    private static final String             TIC_MINOR_MPU   =
+        CPConstants.TIC_MINOR_MPU_PN;
+    
     /** Shape to use to plot a point. */
     private final Ellipse2D shape   = new Ellipse2D.Float();
     
@@ -25,6 +33,16 @@ public class CircleShape implements PlotShape
      * that describes the circle.
      */
     private final float     side;
+    
+    /**
+     * Default constructor.
+     * Instantiate a circle with radius
+     * equal to the spacing between minor ticks.
+     */
+    public CircleShape()
+    {
+        this( getSpacing() );
+    }
     
     /**
      * Constructor.
@@ -46,5 +64,20 @@ public class CircleShape implements PlotShape
         double  cornerYco   = yco - radius;
         shape.setFrame( cornerXco, cornerYco, side, side );
         return shape;
+    }
+    
+    /**
+     * Calculate the spacing between minor ticks
+     * based on the current grid unit and 
+     * tick minor MPU.
+     * 
+     * @return  the current spacing between minor ticks
+     */
+    private static float getSpacing()
+    {
+        float   gridUnit    = PMGR.asFloat( GRID_UNIT );
+        float   mpu         = PMGR.asFloat( TIC_MINOR_MPU );
+        float   spacing     = gridUnit / mpu;
+        return spacing;
     }
 }
