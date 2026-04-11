@@ -67,6 +67,7 @@ public class OracleTutorialGlassPaneDemo {
 /**
  * We have to provide our own glass pane so that it can paint.
  */
+@SuppressWarnings("serial")
 class MyGlassPane extends JComponent
                   implements ItemListener {
     Point point;
@@ -183,7 +184,7 @@ class CBListener extends MouseInputAdapter {
                 MouseEvent  newEvent    =new MouseEvent(component,
                     e.getID(),
                     e.getWhen(),
-                    e.getModifiers(),
+                    e.getModifiersEx(),
                     componentPoint.x,
                     componentPoint.y,
                     e.getClickCount(),

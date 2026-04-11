@@ -1,9 +1,7 @@
 package com.acmemail.judah.glass_panes;
 
 import java.awt.Color;
-import java.awt.EventQueue;
 import java.awt.ItemSelectable;
-import java.awt.Toolkit;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
@@ -72,6 +70,7 @@ public class EventDispatchDemoA
         }
     }
     
+    @SuppressWarnings("unused")
     private class Selectable implements ItemSelectable
     {
         @Override
@@ -108,7 +107,6 @@ public class EventDispatchDemoA
             int         yco     = evt.getY();
             String      format  = "%s: mouse clicked at (%d,%d)";
             String      message = String.format( format, source, xco, yco );
-            Selectable  select  = new Selectable();
             logger.println( message );
             boolean     newState    = !checkBox.isSelected();
             checkBox.setSelected( newState );
