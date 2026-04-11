@@ -65,7 +65,7 @@ public class Root implements Runnable
      */
     public boolean isStarted()
     {
-        return frame.isVisible();
+        return frame != null && frame.isVisible();
     }
     
     /**
