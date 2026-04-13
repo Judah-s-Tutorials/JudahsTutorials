@@ -59,7 +59,7 @@ public class SortingExampleInteger1
         @Override
         public int compare( Integer num1, Integer num2 )
         {
-            int     rcode   = num2 - num1;
+            int     rcode   = Integer.compare( num2, num1 );
             return rcode;
         }
     }

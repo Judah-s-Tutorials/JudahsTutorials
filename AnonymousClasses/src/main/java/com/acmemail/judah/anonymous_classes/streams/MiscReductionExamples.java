@@ -40,6 +40,7 @@ public class MiscReductionExamples
      */
     private static void countDemo()
     {
+        // note: count returns a primitive, not an Optional
         long    count   =
             showDogs
                 .stream()
@@ -57,6 +58,7 @@ public class MiscReductionExamples
      */
     private static void countDemo( Predicate<ShowDog> pred )
     {
+        // note: count returns a primitive, not an Optional
         long    count   =
             showDogs
                 .stream()
@@ -88,16 +90,18 @@ public class MiscReductionExamples
 
     /**
      * Demonstrates the use of the
-     * <em>average</em> reduction operation.
+     * <em>max</em> reduction operation.
      * Find the oldest ShowDog in the showDogs list.
      */
     private static void maxDemo()
     {
-        // Note: .average() returns an Optional
+        // Note: .max() returns an Optional
         Optional<ShowDog>    oldest  =
             showDogs
                 .stream()
-                .max( (d1,d2) -> d1.getAge() - d2.getAge() );
+                .max( (d1,d2) -> 
+                    Integer.compare( d1.getAge(), d2.getAge() )
+                );
         
         String  name    = "none";
         if ( oldest.isPresent() )

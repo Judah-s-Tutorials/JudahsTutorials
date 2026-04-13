@@ -20,7 +20,7 @@ public class PointSorterA
             {
                 double  p1Dist  = origin.distance( p1 );
                 double  p2Dist  = origin.distance( p2 );
-                int     result  = (int)(p1Dist - p2Dist);
+                int     result  = Double.compare(p1Dist, p2Dist);
                 return result;
             }
         });

@@ -31,7 +31,7 @@ public class SortingExampleInteger4
         
         randomList.sort(new Comparator<Integer>(){
             public int compare( Integer num1, Integer num2 ){
-            int     rcode   = num2 - num1; return rcode;}});
+            int     rcode   = Integer.compare( num2, num1 ); return rcode;}});
             
         for ( Integer num : randomList )
             System.out.println( num );

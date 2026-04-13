@@ -828,6 +828,8 @@ public class CartesianPlane
     {
         gtx.setColor( plotColor );
         streamSupplier.get().forEach( c -> c.execute() );
+//        Stream<PlotCommand> stream = streamSupplier.get();
+//        stream.forEach( PlotCommand::execute );
     }
     
     /**

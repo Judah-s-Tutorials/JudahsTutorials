@@ -208,7 +208,7 @@ public class ShowDog
      */
     public static int sortByAge( ShowDog dog1, ShowDog dog2 )
     {
-        return dog1.age - dog2.age;
+        return Integer.compare( dog1.age, dog2.age );
     }
     
     /**
@@ -228,6 +228,6 @@ public class ShowDog
      */
     public static int sortByOwnerID( ShowDog dog1, ShowDog dog2 )
     {
-        return dog1.ownerID - dog2.ownerID;
+        return Integer.compare( dog1.ownerID, dog2.ownerID );
     }
 }

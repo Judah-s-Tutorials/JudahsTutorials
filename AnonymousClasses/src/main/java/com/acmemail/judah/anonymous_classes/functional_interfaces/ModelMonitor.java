@@ -36,15 +36,15 @@ public class ModelMonitor
     private double 
     getDouble( Point point, Function<Point,Double> getter )
     {
-        double  rval    = 0;
+        double  result  = 0;
         boolean isFrozen    = model.isFrozen();
         if ( !isFrozen )
         {
             model.setFrozen( true );
         }
-        rval = getter.apply( point );
+        result = getter.apply( point );
         if ( !isFrozen )
             model.setFrozen( false );
-        return rval;
+        return result;
     }
 }

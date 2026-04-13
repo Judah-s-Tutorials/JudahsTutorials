@@ -76,7 +76,7 @@ public class ModelMonitor
      */
     public double getStress( Point point )
     {
-        double      value   = getDouble( point, model::getAcceleration );
+        double      value   = getDouble( point, model::getStress );
         return value;
     }
     
@@ -104,7 +104,7 @@ public class ModelMonitor
      */
     public double getVelocity( Point point )
     {
-        double      value   = getDouble( point, model::getAcceleration );
+        double      value   = getDouble( point, model::getVelocity );
         return value;
     }
     

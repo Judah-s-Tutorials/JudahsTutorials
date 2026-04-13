@@ -29,7 +29,7 @@ public class LambdaExample3
             randomList.add( randy.nextInt( 100 ) );
         
         // Perform a reverse sort on the list of integers.
-        randomList.sort( (num1, num2) -> num2 - num1 );
+        randomList.sort( (num1, num2) -> Integer.compare( num2, num1 ) );
         for ( Integer num : randomList )
             System.out.println( num );
     }

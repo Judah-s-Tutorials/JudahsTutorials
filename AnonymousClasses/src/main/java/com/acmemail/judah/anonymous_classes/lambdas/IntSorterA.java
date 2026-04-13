@@ -16,7 +16,7 @@ public class IntSorterA
         numbers.sort( new Comparator<Integer>() {
             public int compare( Integer num1, Integer num2 )
             {
-                return num2 - num1;
+                return Integer.compare( num2, num1 );
             }
         });
         for ( Integer num : numbers )

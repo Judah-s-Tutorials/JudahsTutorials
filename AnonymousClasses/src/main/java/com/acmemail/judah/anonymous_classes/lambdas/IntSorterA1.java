@@ -13,7 +13,7 @@ public class IntSorterA1
         for ( int inx = 0 ; inx < 25 ; ++inx )
             numbers.add( randy.nextInt( 200 ) - 100 );
         numbers.sort( (num1,num2) -> {
-            return num2 - num1;
+            return Integer.compare( num2, num1 );
         });
         for ( Integer num : numbers )
             System.out.println( num );
