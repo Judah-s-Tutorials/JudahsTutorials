@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.app;
 
 import java.awt.geom.Point2D;
 import java.util.Iterator;

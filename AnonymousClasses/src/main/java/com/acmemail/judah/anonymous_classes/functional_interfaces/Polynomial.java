@@ -46,6 +46,7 @@ public class Polynomial
      * Evaluates the polynomial 
      * for a given value of <em>x</em>.
      * Returns the calculated value.
+     * Uses Horner's method.
      * 
      * @param xval  the given value of <em>x</em>
      * 
@@ -54,9 +55,9 @@ public class Polynomial
     public double evaluate( double xval )
     {
         int     degree  = coefficients.length - 1;
-        double  yval        = 0;
-        for ( double coeff : coefficients )
-            yval += coeff * Math.pow( xval, degree-- );
+        double  yval    = coefficients[degree];
+        for ( int inx = degree - 1 ; inx >= 0 ; --inx )
+            yval = coefficients[inx] + xval * yval;
         return yval;
     }
     

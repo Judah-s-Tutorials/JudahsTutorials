@@ -40,9 +40,7 @@ public class SquareShape implements PlotShape
     /**
      * Default constructor.
      * Sets the side of the square
-     * to a given value.
-     * 
-     * @param radius    the given value
+     * to the spacing between minor tick marks.
      */
     public SquareShape()
     {
@@ -54,7 +52,7 @@ public class SquareShape implements PlotShape
      * Sets the side of the square
      * to a given value.
      * 
-     * @param radius    the given value
+     * @param side    the given value
      */
     public SquareShape( float side )
     {

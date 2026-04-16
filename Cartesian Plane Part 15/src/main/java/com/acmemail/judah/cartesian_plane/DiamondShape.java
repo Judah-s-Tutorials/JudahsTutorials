@@ -8,7 +8,7 @@ import java.awt.geom.Path2D;
  * to plot points
  * on the CartesianPlane grid.
  * This Shape is constituted by
- * a circle of a given radius.
+ * a rotated rectangle with a given width and height.
  * 
  * @author Jack Straub
  *
@@ -48,10 +48,11 @@ public class DiamondShape implements PlotShape
     
     /**
      * Constructor.
-     * Sets the radius of the circle
-     * to a given value.
+     * Sets the width and height of the rectangle
+     * to the given values.
      * 
-     * @param radius    the given value
+     * @param rectWidth     the given width
+     * @param rectHeight    the given height
      */
     public DiamondShape( float rectWidth, float rectHeight )
     {

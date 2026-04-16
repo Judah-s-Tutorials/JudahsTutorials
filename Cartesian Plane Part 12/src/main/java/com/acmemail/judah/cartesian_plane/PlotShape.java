@@ -26,7 +26,7 @@ public interface PlotShape
      * @param xco   x-coordinate of pixel at center of Shape
      * @param yco   y-coordinate of pixel at center of Shape
      * 
-     * @return  a Shape to be drawn the given coordinates
+     * @return
      */
     Shape getShape( double xco, double yco );
 }

@@ -22,6 +22,15 @@ public class FIUtils
     {
     }
     
+    /**
+     * Returns a {@linkplain ToPlotPoint} instance.
+     * 
+     * @param plane 
+     *      the CartesianPlane object in which the ToPlotPoint instance
+     *      will be applied
+     *      
+     * @return the instantiated ToPlotPoint object
+     */
     public static ToPlotPointCommand 
     toPlotPointCommand( CartesianPlane plane )
     {

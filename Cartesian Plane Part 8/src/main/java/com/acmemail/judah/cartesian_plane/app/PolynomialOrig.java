@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.app;
 
 import java.util.Arrays;
 import java.util.function.DoubleUnaryOperator;
@@ -8,10 +8,12 @@ import java.util.function.DoubleUnaryOperator;
  * of a fixed degree.
  * The degree of the polynomial
  * is determined by the constructor.
+ * It encapsulates the algorithm used in this project
+ * prior to adopting Horner's method.
  * 
  * @author Jack Straub
  */
-public class Polynomial implements DoubleUnaryOperator
+public class PolynomialOrig implements DoubleUnaryOperator
 {
     private final double[]  coefficients;
     
@@ -26,7 +28,7 @@ public class Polynomial implements DoubleUnaryOperator
      * 
      * @param coeff the coefficients of the encapsulated polynomial
      */
-    public Polynomial( double... coeff )
+    public PolynomialOrig( double... coeff )
     {
         coefficients = Arrays.copyOf( coeff, coeff.length );
     }

@@ -5,13 +5,14 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 public class StreamSupplierDemo
 {
     public static void main(String[] args)
     {
         CommandStreamer streamer    = new CommandStreamer();
-        streamer.getAndTraverseStream();
+        scheduleCommandExecution( streamer );
         streamer.setStreamSupplier( () -> streamGetter() );
         
         int status  = JOptionPane.OK_OPTION;
@@ -19,8 +20,16 @@ public class StreamSupplierDemo
         {
             status = JOptionPane.showConfirmDialog( null, "New stream?" );
             if ( status == JOptionPane.OK_OPTION )
-                streamer.getAndTraverseStream();
+                scheduleCommandExecution( streamer );
         }
+    }
+    
+    private static void 
+    scheduleCommandExecution( CommandStreamer streamer )
+    {
+        System.out.println( "*** Scheduling execution" );
+        SwingUtilities.invokeLater( () -> streamer.getAndTraverseStream() );
+        System.out.println( "*** Execution scheduled" );
     }
 
     private static Stream<Command> streamGetter()

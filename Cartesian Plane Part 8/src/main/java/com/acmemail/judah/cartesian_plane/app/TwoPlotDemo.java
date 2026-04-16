@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.app;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
@@ -13,9 +13,9 @@ import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PlotColorCommand;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.app.FIUtils;
 import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
+import com.acmemail.judah.cartesian_plane.sandbox.FunctionIterator;
 
 /**
  * This is a simple application

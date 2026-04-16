@@ -1,10 +1,10 @@
 package com.acmemail.judah.cartesian_plane;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 
 /**
  * This class maintains lists
@@ -53,14 +53,9 @@ public enum NotificationManager
     public void 
     addNotificationListener( String property, NotificationListener listener )
     {
-        List<NotificationListener>  listenerList    =
-            notificationPropertyMap.get( property );
-        if ( listenerList == null )
-        {
-            listenerList = new ArrayList<>();
-            notificationPropertyMap.put( property, listenerList );
-        }
-        listenerList.add( listener );
+        notificationPropertyMap
+            .computeIfAbsent( property, k -> new ArrayList<>() )
+            .add( listener );
     }
     
     /**
@@ -98,7 +93,6 @@ public enum NotificationManager
         NotificationListener listener 
     )
     {
-        notificationListeners.remove( listener );
         List<NotificationListener>  list    = 
             notificationPropertyMap.get( property );
         if ( list != null )
@@ -138,7 +132,7 @@ public enum NotificationManager
     
     /**
      * Instantiates a NotificationEvent
-     * using the give source, property and data,
+     * using the given source, property, and data,
      * and propagates it to all NotificationListeners.
      * 
      * @param source    the given source
@@ -162,13 +156,16 @@ public enum NotificationManager
     public void propagateNotification( NotificationEvent event )
     {
         List<NotificationListener>  perPropertyList =
-            notificationPropertyMap.getOrDefault( 
-                event.getProperty(), 
-                new ArrayList<>()
+            notificationPropertyMap.getOrDefault(
+                event.getProperty(),
+                Collections.emptyList()
         );
-        Stream.concat( 
-            perPropertyList.stream(), 
-            notificationListeners.stream()
-        ).forEach( l -> l.accept( event ) );
+        List<NotificationListener>  toInvoke    =
+            new ArrayList<>(
+                perPropertyList.size() + notificationListeners.size()
+            );
+        toInvoke.addAll( perPropertyList );
+        toInvoke.addAll( notificationListeners );
+        toInvoke.forEach( l -> l.accept( event ) );
     }
 }

@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.app;
 
 import java.awt.geom.Point2D;
 import java.util.Spliterator;
@@ -10,9 +10,9 @@ import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PlotCommand;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.app.FIUtils;
 import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
+import com.acmemail.judah.cartesian_plane.sandbox.FunctionIterator;
 
 /**
  * This is a simple application
@@ -65,10 +65,10 @@ public class PolyIteratorDemo
         Root    root    = new Root( plane );
         root.start();
         
-        ToPlotPointCommand      toPlotPointCmd   = 
+        ToPlotPointCommand  toPlotPointCmd   = 
             FIUtils.toPlotPointCommand( plane );
         
-        Polynomial              poly        = new Polynomial( 3.5f, -5, 0, 1 );
+        Polynomial      poly    = new Polynomial( 3.5f, -5, 0, 1 );
         plane.setStreamSupplier(
             () -> {
                 FunctionIterator        iter        = 

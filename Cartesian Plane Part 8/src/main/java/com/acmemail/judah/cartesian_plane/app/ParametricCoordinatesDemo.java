@@ -1,4 +1,4 @@
-package com.acmemail.judah.cartesian_plane.sandbox;
+package com.acmemail.judah.cartesian_plane.app;
 
 import java.awt.geom.Point2D;
 import java.util.function.DoubleFunction;
@@ -6,7 +6,6 @@ import java.util.function.DoubleFunction;
 import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.PropertyManager;
-import com.acmemail.judah.cartesian_plane.app.FIUtils;
 import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 
