@@ -58,13 +58,14 @@ public class Exp4jDemo7ParametricEquation
         roseExprY.setVariables( vars );
         plane.setStreamSupplier( () ->
             DoubleStream.iterate( 0, t -> t < 2 * Math.PI, t -> t + .001 )
-                .peek( t -> roseExprX.setVariable( "t", t ) )
-                .peek( t -> roseExprY.setVariable( "t", t ) )
-                .mapToObj( t -> 
-                    new Point2D.Double( 
-                        roseExprX.evaluate(), 
-                        roseExprY.evaluate() 
-                 ))
+                .mapToObj( t -> {
+                    roseExprX.setVariable( "t", t );
+                    roseExprY.setVariable( "t", t );
+                    return new Point2D.Double( 
+                            roseExprX.evaluate(), 
+                            roseExprY.evaluate() 
+                        );
+                })
                 .map( toPlotPointCommand::of )
         );
         NotificationManager.INSTANCE

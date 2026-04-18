@@ -41,7 +41,7 @@ public enum Command
         "Expression that describes the increment value "
             + "for traversing the iteration range"
     ),
-    /** Sets the name of the parameter in a parametric equatin. */
+    /** Sets the name of the parameter in a parametric equation. */
     PARAM( "Describes the name of the parameter in a parametric equation" ),
     /** Generates the plot of the function y=f(x). */
     YPLOT( "Generates a plot of the form (x,y) = f(x)" ),

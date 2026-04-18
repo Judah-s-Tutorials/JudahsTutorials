@@ -54,8 +54,10 @@ public class Exp4jDemo6PlottingPoints
         expr.setVariables( vars );
         plane.setStreamSupplier( () ->
             DoubleStream.iterate( -1, d -> d <= 1, d -> d + .005 )
-                .peek( d -> expr.setVariable( "x", d ) )
-                .mapToObj( x -> new Point2D.Double( x, expr.evaluate() ) )
+                .mapToObj( d -> { 
+                    expr.setVariable( "x", d );
+                    return new Point2D.Double( d, expr.evaluate() );
+                })
                 .map( toPlotPointCommand::of )
         );
         NotificationManager.INSTANCE

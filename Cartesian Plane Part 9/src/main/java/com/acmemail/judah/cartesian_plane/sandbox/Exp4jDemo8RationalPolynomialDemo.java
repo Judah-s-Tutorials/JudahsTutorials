@@ -56,8 +56,10 @@ public class Exp4jDemo8RationalPolynomialDemo
         
         plane.setStreamSupplier( () -> 
             DoubleStream.iterate( -10, x -> x <= 10, x -> x + .005 )
-            .peek( d -> expr.setVariable( "x", d ) )
-            .mapToObj( x -> new Point2D.Double( x, expr.evaluate() ) )
+            .mapToObj( d -> { 
+                expr.setVariable( "x", d );
+                return new Point2D.Double( d, expr.evaluate() );
+            })
             .map( toPlotPoint::of ));
         NotificationManager.INSTANCE.propagateNotification( CPConstants.REDRAW_NP );
     }

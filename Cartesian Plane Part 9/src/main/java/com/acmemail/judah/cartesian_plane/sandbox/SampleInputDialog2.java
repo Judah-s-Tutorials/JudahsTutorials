@@ -44,6 +44,7 @@ public class SampleInputDialog2
     {
         jDialog.setTitle( "Expression Manager" );
         jDialog.setModal( true );
+        jDialog.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
         
         Container   contentPane = jDialog.getContentPane();
         contentPane.setLayout( new BorderLayout() );
@@ -66,10 +67,10 @@ public class SampleInputDialog2
                     "<li>Enter an expression to be evaluated;</li>" +
                     "<li>Set the iteration range for plotting an equation;</li>" +
                     "<li>Plot the equation." +
-                    "<ul>" +
+                "</ul>" +
                 "<p style=\"text-align: left;\">" +
-                "For addittional information see " +
-                "<a href=\"https:Overview.html\">Overview</a" +
+                "For additional information see " +
+                "<a href=\"Overview.html\">Overview</a>" +
                 "</p>" +
             "</html>";
         

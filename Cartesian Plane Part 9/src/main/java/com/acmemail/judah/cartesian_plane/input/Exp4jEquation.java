@@ -228,7 +228,10 @@ public class Exp4jEquation implements Equation
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x += rStep )
                 .peek( d -> yExpr.setVariable( "x", d ) )
-                .mapToObj( d -> new Point2D.Double( d, yExpr.evaluate() ) );
+                .mapToObj( d -> {
+                    yExpr.setVariable( "x", d );
+                    return new Point2D.Double( d, yExpr.evaluate() );
+                });
         return stream;
     }
     

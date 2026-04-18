@@ -20,6 +20,8 @@ public class SampleInputDialog1
      */
     public static void main(String[] args)
     {
+        // showInputDialog return value deliberately ignored;
+        // purpose is only to demonstrate dialog's appearance
         JOptionPane.showInputDialog( 
             null,
             "Enter a command:",

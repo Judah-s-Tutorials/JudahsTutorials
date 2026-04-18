@@ -42,8 +42,10 @@ public class CustomFunctionDemo3DegreesRadiansStream
             .build();
         
         Stream.of( 0., Math.PI / 2, Math.PI, 3 * Math.PI / 2, 2 * Math.PI )
-            .peek( r -> dToRExpr.setVariable( "r", r ) )
-            .map( r -> dToRExpr.evaluate() )
+            .map( r -> { 
+                dToRExpr.setVariable( "r", r );
+                return dToRExpr.evaluate();
+            })
             .forEach( System.out::println );
     }
 }

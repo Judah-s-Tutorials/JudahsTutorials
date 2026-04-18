@@ -36,10 +36,12 @@ public class Exp4jDemo5StreamingCoordinates
                 .variables( vars.keySet() )
                 .build();
         
-            expr.setVariables( vars );
-            DoubleStream.iterate( -1, d -> d <= 1, d -> d + .01 )
-                .peek( d -> expr.setVariable( "x", d ) )
-                .mapToObj( x -> new Point2D.Double( x, expr.evaluate() ) )
-                .forEach( System.out::println );
+        expr.setVariables( vars );
+        DoubleStream.iterate( -1, d -> d <= 1, d -> d + .01 )
+            .mapToObj( d -> { 
+                expr.setVariable( "x", d );
+                return new Point2D.Double( d, expr.evaluate() );
+            })
+            .forEach( System.out::println );
     }
 }

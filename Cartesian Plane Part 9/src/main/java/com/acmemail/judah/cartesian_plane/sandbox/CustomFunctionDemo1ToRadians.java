@@ -56,7 +56,7 @@ public class CustomFunctionDemo1ToRadians
         @Override
         public double apply( double... args )
         {
-            double  radians = args[0] * Math.PI / 180.;
+            double  radians = args[0] * Math.PI / 180;
             return radians;
         }        
     }
