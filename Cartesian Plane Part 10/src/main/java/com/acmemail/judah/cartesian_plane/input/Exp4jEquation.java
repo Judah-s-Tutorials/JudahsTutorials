@@ -63,7 +63,7 @@ public class Exp4jEquation implements Equation
      */
     public Exp4jEquation()
     {
-        initMap();
+        initIntrinsicVariables();
         setXExpression( xExprStr );
         setYExpression( yExprStr );
     }
@@ -79,7 +79,7 @@ public class Exp4jEquation implements Equation
      */
     public Exp4jEquation( String expr )
     {
-        initMap();
+        initIntrinsicVariables();
         setXExpression( xExprStr );
         setYExpression( expr );
     }
@@ -96,15 +96,21 @@ public class Exp4jEquation implements Equation
     public Exp4jEquation( Map<String,Double> vars, String expr )
     {
         this.vars.putAll( vars );
-        initMap();
+        initIntrinsicVariables();
         setXExpression( xExprStr );
         setYExpression( expr );
     }
     
     /**
      * Returns a newly initialized Equation.
+     * This is an instance method
+     * because that is what is required by the interface.
+     * The new Equation inherits nothing
+     * from the source instance.
      * 
      * @return  a newly initialized Equation
+     * 
+     * @see Equation
      */
     public Equation newEquation()
     {
@@ -150,10 +156,8 @@ public class Exp4jEquation implements Equation
     @Override
     public Optional<Double> getVar( String name )
     {
-        Optional<Double>    result  = Optional.empty();
-        Double              val     = vars.get( name );
-        if ( val != null )
-            result = Optional.of( val );
+        Optional<Double>    result  = 
+            Optional.ofNullable( vars.get( name ) );
         return result;
     }
     
@@ -220,15 +224,17 @@ public class Exp4jEquation implements Equation
     {
         yExpr.setVariables( vars );
         ValidationResult    result    = yExpr.validate( true );
-        if ( result != ValidationResult.SUCCESS )
+        if ( !result.isValid() )
         {
             String  message = "Unexpected expression validation failure.";
             throw new ValidationException( message );
         }
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x += rStep )
-                .peek( d -> yExpr.setVariable( "x", d ) )
-                .mapToObj( d -> new Point2D.Double( d, yExpr.evaluate() ) );
+                .mapToObj( d -> {
+                    yExpr.setVariable( "x", d );
+                    return new Point2D.Double( d, yExpr.evaluate() );
+                });
         return stream;
     }
     
@@ -260,10 +266,15 @@ public class Exp4jEquation implements Equation
         }
         
         Stream<Point2D> stream  =
-            DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t += rStep )
-                .peek( t -> xExpr.setVariable( param, t ) )
-                .peek( t -> yExpr.setVariable( param, t ) )
-                .mapToObj( t -> new Point2D.Double( xExpr.evaluate(), yExpr.evaluate() ) );
+        DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t += rStep )
+            .mapToObj( t -> { 
+                xExpr.setVariable( param, t );
+                yExpr.setVariable( param, t );
+                return new Point2D.Double( 
+                    xExpr.evaluate(), 
+                    yExpr.evaluate()
+                );
+            });
         return stream;
     }
     
@@ -430,8 +441,7 @@ public class Exp4jEquation implements Equation
     }
     
     /**
-     * Determines if a given string
-     * is a valid double value.
+     * Determines if a given string is a valid expression.
      * 
      * @param valStr  the given string
      * 
@@ -439,7 +449,7 @@ public class Exp4jEquation implements Equation
      */
     public boolean isValidValue( String valStr )
     {
-        Optional<Double>    result  = evaluate( valStr );
+        Optional<Double>    result = evaluate( valStr );
         
         return result.isPresent();
     }
@@ -450,22 +460,56 @@ public class Exp4jEquation implements Equation
         Optional<Double>    result  = Optional.empty();
         try
         {
-            Expression  expr    =
+            Expression          expr    =
                 new ExpressionBuilder( exprStr )
                     .variables( vars.keySet() )
                     .build();
-            ValidationResult    exp4jResult = expr.validate( true );
-            if ( !exp4jResult.isValid() )
-                throw new ValidationException();
-            double      val     = expr.evaluate();
-            result = Optional.of(val );
+            if ( validateExp4j( expr, true ).isValid() )
+            {
+                double  val     = expr.evaluate();
+                result = Optional.of(val );
+            }
         }
         catch ( Exception exc )
         {
-            // Exactly how we get here is unclear. If everything's
-            // working correctly we shouldn't get here at all, but
-            // sometimes ExpressionBuilder throws an undocumented
-            // exception in the face of an invalid expression.
+            // .build may throw an unexpected exception. If it
+            // does, catch it, and return empty Optional
+        }
+        return result;
+    }
+    
+    /**
+     * Encapsulation of exp4j Expression.validate( boolean ).
+     * The validate() method is not supposed to throw an exception,
+     * but sometimes it does.
+     * Here we call the method and
+     * if an exception is thrown, 
+     * create a ValidationResult with a status of false.
+     * 
+     * @return  
+     *      a validation result containing the result of
+     *      Expression.validate()
+     */
+    private ValidationResult 
+    validateExp4j( Expression expr, boolean checkVariableSet )
+    {
+        ValidationResult    result = null;
+        try
+        {
+            result = expr.validate( checkVariableSet );
+        }
+        catch ( Exception exc )
+        {
+            String          message     = 
+                "Unexpected exception from expr4j "
+                + "Expression.validate( " + checkVariableSet + " ); "
+                + "only known to occur when expression is invalid";
+            // List.of (below) throws null pointer exception if an
+            // argument is null, so don't pass exc.getMessage() directly
+            // to List.of.
+            String          excMessage  = String.valueOf( exc.getMessage() );
+            List<String>    messages    = List.of( message, excMessage );
+            result = new ValidationResult( false, messages );
         }
         return result;
     }
@@ -505,7 +549,7 @@ public class Exp4jEquation implements Equation
             Expression expr = new ExpressionBuilder( exprStr )
                 .variables( vars.keySet() )
                 .build();
-            ValidationResult    expr4jResult = expr.validate( false );
+            ValidationResult    expr4jResult = validateExp4j( expr, false );
             if ( expr4jResult.isValid() )
                 destination.accept( expr );
             
@@ -548,7 +592,7 @@ public class Exp4jEquation implements Equation
     
     /**
      * Determine if a given character is alphanumeric:
-     * _, or [a-z], or [A-Z] or [-,9].
+     * _, or [a-z], or [A-Z] or [0-9].
      * 
      * @param ccc   the given character
      * 
@@ -567,16 +611,19 @@ public class Exp4jEquation implements Equation
     /**
      * Initializes the variable map
      * to the default values; see {@linkplain Exp4jEquation}.
+     * Intrinsically declared variables
+     * (x, y, a, b, c, t)
+     * are set to their default values.
      * 
      * @see Exp4jEquation
      */
-    private void initMap()
+    private void initIntrinsicVariables()
     {
-        vars.put( "x",  0. );
-        vars.put( "y",  0. );
-        vars.put( "a",  0. );
-        vars.put( "b",  0. );
-        vars.put( "c",  0. );
-        vars.put( "t",  0. );
+        vars.putIfAbsent( "x",  0. );
+        vars.putIfAbsent( "y",  0. );
+        vars.putIfAbsent( "a",  0. );
+        vars.putIfAbsent( "b",  0. );
+        vars.putIfAbsent( "c",  0. );
+        vars.putIfAbsent( "t",  0. );
     }
 }

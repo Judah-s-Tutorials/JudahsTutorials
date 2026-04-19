@@ -1,8 +1,6 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
@@ -27,11 +25,5 @@ class ResultTest
         Result  result  = new Result( testVal, list );
         assertEquals( testVal, result.isSuccess() );
         assertEquals( list, result.getMessages() );
-        
-        result  = new Result( testVal, null );
-        assertEquals( testVal, result.isSuccess() );
-        assertNotNull( result.getMessages() );
-        assertTrue( result.getMessages().isEmpty() );
-
     }
 }

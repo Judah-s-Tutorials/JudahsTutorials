@@ -43,13 +43,13 @@ public class CustomFunctionDemo2DegreesRadians
             }
         };
         
-        List<Function>  funkList    = new ArrayList<>();
-        funkList.add( degrees );
-        funkList.add( radians );
+        List<Function>  functionList    = new ArrayList<>();
+        functionList.add( degrees );
+        functionList.add( radians );
         
         Expression  dToRExpr    = new ExpressionBuilder( "toRadians( d )" )
             .variables("d")
-            .functions( funkList )
+            .functions( functionList )
             .build();
         
         dToRExpr.setVariable( "d", 180 );
@@ -57,7 +57,7 @@ public class CustomFunctionDemo2DegreesRadians
         
         Expression  rToDExpr    = new ExpressionBuilder( "toDegrees( r )" )
             .variables("r")
-            .functions( funkList )
+            .functions( functionList )
             .build();
         
         rToDExpr.setVariable( "r", Math.PI );

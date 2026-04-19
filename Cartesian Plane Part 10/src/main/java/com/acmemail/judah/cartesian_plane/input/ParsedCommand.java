@@ -12,7 +12,7 @@ import java.util.Objects;
  * is up to the user, 
  * however the above line of text 
  * will likely be interpreted command = 
- * Command.Y_EQUALS, and argument = "x^2 - 1".
+ * Command.YEQUALS, and argument = "x^2 - 1".
  * 
  * @author Jack Straub
  */
@@ -98,7 +98,7 @@ public class ParsedCommand
             result = true;
         else if ( other == null )
             result = false;
-        else if ( !(other instanceof ParsedCommand) )
+        else if ( !(other instanceof ParsedCommand ) )
             result = false;
         else
         {

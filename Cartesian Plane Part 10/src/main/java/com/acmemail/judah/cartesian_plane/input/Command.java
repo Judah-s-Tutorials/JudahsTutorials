@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * Encapsulation of commands
  * used to configure and evaluate
- * a Exp4j expressions.
+ * an Exp4j expressions.
  * 
  * @author Jack Straub
  * 
@@ -41,7 +41,7 @@ public enum Command
         "Expression that describes the increment value "
             + "for traversing the iteration range"
     ),
-    /** Sets the name of the parameter in a parametric equatin. */
+    /** Sets the name of the parameter in a parametric equation. */
     PARAM( "Describes the name of the parameter in a parametric equation" ),
     /** Generates the plot of the function y=f(x). */
     YPLOT( "Generates a plot of the form (x,y) = f(x)" ),
@@ -100,14 +100,17 @@ public enum Command
      * @return  
      *      the first command whose name
      *      matches the given string
+     *      
+     * @throws IllegalArgumentException if input is null
      */
     public static Command toCommand( String from )
     {
-        String  upperFrom   = from.toUpperCase();
+        if ( from == null )
+            throw new IllegalArgumentException( "input may not be null" );
         Command cmd         = NONE;
-        if ( !upperFrom.isEmpty() )
+        if ( !from.isEmpty() )
             cmd = Arrays.stream( values() )
-                .filter( e -> upperFrom.equals( e.name() ) )
+                .filter( e -> from.equalsIgnoreCase( e.name() ) )
                 .findFirst()
                 .orElse( INVALID );
         return cmd;
@@ -127,7 +130,7 @@ public enum Command
             .append( lineSep );
         Arrays.stream( values() )
             .filter( e -> e != INVALID )
-            .filter( e -> e!= NONE )
+            .filter( e -> e != NONE )
             .sorted( (e1,e2) -> e1.name().compareTo( e2.name() ) )
             .forEach( e -> 
                 bldr.append( "    " )

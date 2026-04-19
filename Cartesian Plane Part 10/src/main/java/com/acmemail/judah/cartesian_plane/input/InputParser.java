@@ -57,24 +57,6 @@ public class InputParser
     /**
      * Interprets and executes a command
      * and associated argument, if any.
-     * For details,
-     * see {@linkplain #parseInput(Command, String)}.
-     * 
-     * @param   pCommand    object encapsulating the command
-     *                      and argument to interpret
-     *                      
-     * @return  Result object describing the outcome of the operation
-     */
-    public Result parseInput( ParsedCommand pCommand )
-    {
-        Result  result  = 
-            parseInput( pCommand.getCommand(), pCommand.getArgString() );
-        return result;
-    }
-    
-    /**
-     * Interprets and executes a command
-     * and associated argument, if any.
      * The execution of each possible command
      * is described by the {@linkplain Equation} interface.
      * A Result object
@@ -135,9 +117,9 @@ public class InputParser
             // ignore these
             break;
         default:
-            String  error   = 
-                "Malfunction: " + "enum constant not recognized";
-            errors.add( error );
+            String  message = 
+                "Malfunction: unrecognized command constant: " + command;
+            errors.add( message );
             break;
         }
         
@@ -175,8 +157,7 @@ public class InputParser
         Function<String,Result> setter,
         Supplier<Object> getter
     )
-    {   
-        if ( argString.isEmpty() )
+    {   if ( argString.isEmpty() )
             System.out.println( getter.get() );
         else
         {
@@ -201,10 +182,9 @@ public class InputParser
      * @param getter    method to obtain the current value
      *                  of the indicated resource
      */
-    private void 
-    parseExpression( DoubleConsumer setter, Supplier<Object> getter )
+    private void parseExpression( DoubleConsumer setter, Supplier<Object> getter )
     {
-        if ( argString.isEmpty() )
+        if ( argString.isBlank() )
             System.out.println( getter.get() );
         else
         {
@@ -212,7 +192,7 @@ public class InputParser
             if ( opt.isPresent() )
                 setter.accept( opt.get() );
             else
-                formatError( argString, "is not a valid expression" );
+                formatError( argString, "is not a valid value" );
         }
     }
     
@@ -243,6 +223,21 @@ public class InputParser
                 parseVarPair( varPair );
             }
         }
+    }
+    
+    /**
+     * Prints the name and value
+     * of all currently declared variables
+     * to stdout.
+     */
+    private void printVars()
+    {
+         final String    format  = "%s=%f%n";
+        Set<Map.Entry<String,Double>>   entries =
+            equation.getVars().entrySet();
+        entries.forEach( 
+            e -> System.out.printf( format, e.getKey(), e.getValue() )
+        );
     }
     
     /**
@@ -304,30 +299,12 @@ public class InputParser
                 Optional<Double>    optVal  = 
                     equation.evaluate( valStr );
                 if ( optVal.isPresent() )
-                {
-                    double  val = Double.parseDouble( valStr );
-                    equation.setVar( name, val );
-                }
+                    equation.setVar( name, optVal.get() );
                 else
                     formatError( valStr, "is not a valid value" );
             }
         }
     }
-    
-    /**
-     * Prints the name and value
-     * of all currently declared variables
-     * to stdout.
-     */
-private void printVars()
-{
-    final String    format  = "%s=%f%n";
-    Set<Map.Entry<String,Double>>   entries =
-        equation.getVars().entrySet();
-    entries.forEach( 
-        e -> System.out.printf( format, e.getKey(), e.getValue() )
-    );
-}
     
     /**
      * Sets the name of the parameter

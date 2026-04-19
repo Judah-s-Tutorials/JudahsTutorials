@@ -67,11 +67,13 @@ public class ConsoleInputDemo1
         InputParser         inputParser     = new InputParser();
         ParsedCommand       parsedCommand   = null;
         Command             command         = Command.NONE;
+        String              arg             = null;
         do
         {
             parsedCommand = commandReader.nextCommand( prompt );
             command = parsedCommand.getCommand();
-            Result  result  = inputParser.parseInput( parsedCommand );
+            arg = parsedCommand.getArgString();
+            Result  result  = inputParser.parseInput( command, arg  );
             if ( command == Command.INVALID )
                 System.err.println( Command.usage() );
             else if ( !result.isSuccess() )
