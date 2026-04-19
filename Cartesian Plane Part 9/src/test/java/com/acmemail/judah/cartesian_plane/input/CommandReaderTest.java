@@ -171,7 +171,7 @@ class CommandReaderTest
         throws IOException
     {
         CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand();
+        ParsedCommand command     = cmdReader.nextCommand();
         while ( command.getCommand() != Command.NONE )
         {
             actResults.add( command );

@@ -117,9 +117,9 @@ public class InputParser
             // ignore these
             break;
         default:
-            String  error   = 
-                "Malfunction: " + "enum constant not recognized";
-            errors.add( error );
+            String  message = 
+                "Malfunction: unrecognized command constant: " + command;
+            errors.add( message );
             break;
         }
         
@@ -299,10 +299,7 @@ public class InputParser
                 Optional<Double>    optVal  = 
                     equation.evaluate( valStr );
                 if ( optVal.isPresent() )
-                {
-                    double  val = Double.parseDouble( valStr );
-                    equation.setVar( name, val );
-                }
+                    equation.setVar( name, optVal.get() );
                 else
                     formatError( valStr, "is not a valid value" );
             }

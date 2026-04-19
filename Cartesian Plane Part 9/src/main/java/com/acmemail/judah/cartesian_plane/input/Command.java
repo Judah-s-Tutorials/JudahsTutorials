@@ -5,7 +5,7 @@ import java.util.Arrays;
 /**
  * Encapsulation of commands
  * used to configure and evaluate
- * a Exp4j expressions.
+ * an Exp4j expressions.
  * 
  * @author Jack Straub
  * 
@@ -100,14 +100,17 @@ public enum Command
      * @return  
      *      the first command whose name
      *      matches the given string
+     *      
+     * @throws IllegalArgumentException if input is null
      */
     public static Command toCommand( String from )
     {
-        String  upperFrom   = from.toUpperCase();
+        if ( from == null )
+            throw new IllegalArgumentException( "input may not be null" );
         Command cmd         = NONE;
-        if ( !upperFrom.isEmpty() )
+        if ( !from.isEmpty() )
             cmd = Arrays.stream( values() )
-                .filter( e -> upperFrom.equals( e.name() ) )
+                .filter( e -> from.equalsIgnoreCase( e.name() ) )
                 .findFirst()
                 .orElse( INVALID );
         return cmd;
@@ -127,12 +130,12 @@ public enum Command
             .append( lineSep );
         Arrays.stream( values() )
             .filter( e -> e != INVALID )
-            .filter( e -> e!= NONE )
+            .filter( e -> e != NONE )
             .sorted( (e1,e2) -> e1.name().compareTo( e2.name() ) )
             .forEach( e -> 
                 bldr.append( "    " )
                     .append( e )
-                    .append( ' ' )
+                    .append( ": " )
                     .append( e.desc )
                     .append( lineSep )
             );

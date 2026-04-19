@@ -12,7 +12,7 @@ import java.util.Objects;
  * is up to the user, 
  * however the above line of text 
  * will likely be interpreted command = 
- * Command.Y_EQUALS, and argument = "x^2 - 1".
+ * Command.YEQUALS, and argument = "x^2 - 1".
  * 
  * @author Jack Straub
  */
@@ -22,7 +22,7 @@ public class ParsedCommand
     private final Command   command;
     /** The string that we used to obtain the Command constant. */
     private final String    commandString;
-    /** The argument that was parsed from the original command sgring. */
+    /** The argument that was parsed from the original command string. */
     private final String    argString;
     
     /**
