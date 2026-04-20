@@ -55,6 +55,23 @@ public class InputParser
     }
     
     /**
+     * Extracts the command and argument from the given 
+     * ParsedCommand object,
+     * and passes them to {@linkplain #parseInput(Command, String)}
+     * for processing.
+     * 
+     * @param pCommand  the given ParsedCommand object
+     * 
+     * @return  a Result object describing the status of the operation
+     */
+    public Result parseInput( ParsedCommand pCommand )
+    {
+        Result  result  = 
+            parseInput( pCommand.getCommand(), pCommand.getArgString() );
+        return result;
+    }
+    
+    /**
      * Interprets and executes a command
      * and associated argument, if any.
      * The execution of each possible command
