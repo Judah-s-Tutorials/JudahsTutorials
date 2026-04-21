@@ -464,7 +464,7 @@ public class Exp4jEquation implements Equation
                 new ExpressionBuilder( exprStr )
                     .variables( vars.keySet() )
                     .build();
-            if ( validateExp4j( expr, true ).isValid() )
+            if ( expr.validate().isValid() )
             {
                 double  val     = expr.evaluate();
                 result = Optional.of(val );
@@ -474,42 +474,6 @@ public class Exp4jEquation implements Equation
         {
             // .build may throw an unexpected exception. If it
             // does, catch it, and return empty Optional
-        }
-        return result;
-    }
-    
-    /**
-     * Encapsulation of exp4j Expression.validate( boolean ).
-     * The validate() method is not supposed to throw an exception,
-     * but sometimes it does.
-     * Here we call the method and
-     * if an exception is thrown, 
-     * create a ValidationResult with a status of false.
-     * 
-     * @return  
-     *      a validation result containing the result of
-     *      Expression.validate()
-     */
-    private ValidationResult 
-    validateExp4j( Expression expr, boolean checkVariableSet )
-    {
-        ValidationResult    result = null;
-        try
-        {
-            result = expr.validate( checkVariableSet );
-        }
-        catch ( Exception exc )
-        {
-            String          message     = 
-                "Unexpected exception from expr4j "
-                + "Expression.validate( " + checkVariableSet + " ); "
-                + "only known to occur when expression is invalid";
-            // List.of (below) throws null pointer exception if an
-            // argument is null, so don't pass exc.getMessage() directly
-            // to List.of.
-            String          excMessage  = String.valueOf( exc.getMessage() );
-            List<String>    messages    = List.of( message, excMessage );
-            result = new ValidationResult( false, messages );
         }
         return result;
     }
@@ -549,7 +513,7 @@ public class Exp4jEquation implements Equation
             Expression expr = new ExpressionBuilder( exprStr )
                 .variables( vars.keySet() )
                 .build();
-            ValidationResult    expr4jResult = validateExp4j( expr, false );
+            ValidationResult    expr4jResult = expr.validate( false );
             if ( expr4jResult.isValid() )
                 destination.accept( expr );
             

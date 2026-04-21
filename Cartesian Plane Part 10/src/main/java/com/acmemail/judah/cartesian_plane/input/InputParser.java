@@ -157,7 +157,8 @@ public class InputParser
         Function<String,Result> setter,
         Supplier<Object> getter
     )
-    {   if ( argString.isEmpty() )
+    {   
+        if ( argString.isEmpty() )
             System.out.println( getter.get() );
         else
         {
@@ -233,10 +234,10 @@ public class InputParser
     private void printVars()
     {
          final String    format  = "%s=%f%n";
-        Set<Map.Entry<String,Double>>   entries =
-            equation.getVars().entrySet();
-        entries.forEach( 
-            e -> System.out.printf( format, e.getKey(), e.getValue() )
+         Set<Map.Entry<String,Double>>   entries =
+             equation.getVars().entrySet();
+         entries.forEach( 
+             e -> System.out.printf( format, e.getKey(), e.getValue() )
         );
     }
     
@@ -277,7 +278,8 @@ public class InputParser
         String[]        parts   = varPair.split( "=" );
         
         // var spec must be either "var" or "var=val" 
-        if ( parts.length > 2 )
+        int partsLen    = parts.length;
+        if ( partsLen < 1 || partsLen > 2 )
         {
             String  err =
                 "\"" + varPair + "\""  
@@ -288,7 +290,7 @@ public class InputParser
         {
             String  name    = parts[0].trim();
             String  valStr  = 
-                parts.length == 1 ? "0" : parts[1].trim();
+                partsLen == 1 ? "0" : parts[1].trim();
             
             if ( !equation.isValidName( name ) )
             {
