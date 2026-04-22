@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -93,7 +94,8 @@ class CommandReaderTest
         ioTest( input, this::testSimpleCommand );
     }
     
-    private void testSimpleCommand( BufferedReader reader ) throws IOException
+    private void
+    testSimpleCommand( BufferedReader reader ) throws IOException
     {
         CommandReader   cmdReader   = new CommandReader( reader );
         ParsedCommand   command     = cmdReader.nextCommand( null );
@@ -104,24 +106,47 @@ class CommandReaderTest
         }
         assertEquals( expResults, actResults );
     }
-    
+
     /**
-     * Parse lines of the form "str arg" 
+     * Parse lines of the form "str arg"
      * where str is the shortcut for a command.
+     * Each input line is paired with the ParsedCommand the reader
+     * should produce; whitespace variants live on the input side.
      */
     @Test
-    public void testShortcutsArg()
+    public void testShortcuts()
     {
-        expResults.add( new ParsedCommand( Command.XEQUALS, "x=", "xxx" ) );
-        expResults.add( new ParsedCommand( Command.YEQUALS, "y=", "yyy" ) );
-        expResults.add( new ParsedCommand( Command.XEQUALS, "X=", "XXX" ) );
-        expResults.add( new ParsedCommand( Command.YEQUALS, "Y=", "YYY" ) );
-        // check invalid shortcut
-        expResults.add( new ParsedCommand( Command.INVALID, "z=", "YYY" ) );
-        List<String>    input   = 
-            expResults.stream()
-                .map( p -> p.getCommandString() + " " + p.getArgString() )
-                .collect( Collectors.toList() );
+        List<String>        input       = List.of(
+            "x= xxx",
+            "y= yyy",
+            "X= XXX",
+            "Y= YYY",
+            "Y=  YYY",          // extra space between shortcut and arg
+            "  Y=   YYY   ",    // leading/trailing whitespace on the line
+            "x=",               // shortcut with empty arg
+            "z= YYY"            // z= is not a shortcut
+        );
+        List<ParsedCommand> expected    = List.of(
+            new ParsedCommand( Command.XEQUALS, "x=", "xxx" ),
+            new ParsedCommand( Command.YEQUALS, "y=", "yyy" ),
+            new ParsedCommand( Command.XEQUALS, "X=", "XXX" ),
+            new ParsedCommand( Command.YEQUALS, "Y=", "YYY" ),
+            new ParsedCommand( Command.YEQUALS, "Y=", "YYY" ),
+            new ParsedCommand( Command.YEQUALS, "Y=", "YYY" ),
+            new ParsedCommand( Command.XEQUALS, "x=", "" ),
+            new ParsedCommand( Command.INVALID, "z=", "YYY" )
+        );
+        expResults.addAll( expected );
+        ioTest( input, this::testSimpleCommand );
+    }
+    
+    @Test
+    public void testShortcutNoSpace()
+    {
+        List<String>    input           = List.of( "x=xxx" );
+        ParsedCommand   parsedCommand   = 
+            new ParsedCommand( Command.XEQUALS, "x=", "xxx" );
+        expResults.add( parsedCommand );
         ioTest( input, this::testSimpleCommand );
     }
     
@@ -188,7 +213,7 @@ class CommandReaderTest
     }
     
     /**
-     * Test a mixture lines 
+     * Test a mixture of lines 
      * representing concrete, valid commands 
      * with lines containing empty strings,
      * comments and invalid commands.
@@ -240,7 +265,11 @@ class CommandReaderTest
         // by CommandReader.stream().
         List<String>    input   = 
             expResults.stream()
-                .map( pc -> "  " + pc.getCommandString() + "   " + pc.getArgString() + "   " )
+                .map( pc -> 
+                    "  " + pc.getCommandString() 
+                    + "   " + pc.getArgString() 
+                    + "   "
+                )
                 .flatMap( s ->
                     Stream.of( s, "", "#", "  #  " )
                 )
@@ -253,7 +282,40 @@ class CommandReaderTest
     {
         ioTest( new ArrayList<String>(), this::readStream );
     }
-    
+
+    /**
+     * Verify that nextCommand writes the given prompt to stdout
+     * each time it reads a line from its source.
+     */
+    @Test
+    public void testNextCommandWithPrompt()
+    {
+        List<String>    input   = List.of( "", "# comment", "end" );
+        ioTest( input, this::readWithPrompt );
+    }
+
+    private void readWithPrompt( BufferedReader reader ) throws IOException
+    {
+        final String            prompt      = "cmd> ";
+        PrintStream             saveOut     = System.out;
+        ByteArrayOutputStream   newOut      = new ByteArrayOutputStream();
+        System.setOut( new PrintStream( newOut ) );
+        try
+        {
+            CommandReader   cmdReader   = new CommandReader( reader );
+            ParsedCommand   command     = cmdReader.nextCommand( prompt );
+            assertEquals( Command.END, command.getCommand() );
+        }
+        finally
+        {
+            System.setOut( saveOut );
+        }
+        // Prompt is written once per readLine attempt, so the two
+        // skipped lines (blank, comment) plus the "end" line produce
+        // three prompts.
+        assertEquals( prompt + prompt + prompt, newOut.toString() );
+    }
+
     @ParameterizedTest
     @ValueSource( strings = {"END", "SET", "START"} )
     public void testParseCommandStringWithArg( String str )
@@ -336,19 +398,11 @@ class CommandReaderTest
     private byte[] getByteBuffer( List<String> list )
     {
         byte[]  bytes   = null;
-        try (
-            ByteArrayOutputStream baoStream = new ByteArrayOutputStream();
-            PrintWriter writer = new PrintWriter( baoStream );
-        )
-        {
-            list.forEach( writer::println );
-            writer.flush();
-            bytes = baoStream.toByteArray();
-        }
-        catch ( IOException exc )
-        {
-            fail( "Unexpected I/O error", exc );
-        }
+        ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
+        PrintWriter             writer      = new PrintWriter( baoStream );
+        list.forEach( writer::println );
+        writer.flush();
+        bytes = baoStream.toByteArray();
         return bytes; 
     }
     
