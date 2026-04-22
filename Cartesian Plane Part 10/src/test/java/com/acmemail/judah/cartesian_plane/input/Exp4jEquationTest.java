@@ -331,6 +331,20 @@ class Exp4jEquationTest
         equation.setRangeStep( val );
         assertEquals( val, equation.getRangeStep() );
     }
+    
+    @Test
+    void testEvaluate()
+    {
+        Optional<Double>    validResult     = equation.evaluate( "2^4" );
+        assertFalse( validResult.isEmpty() );
+        assertEquals( 16, validResult.get() );
+        
+        // This gets coverage on the annoying/undocumented exception 
+        // thrown by ExpressionBuilder
+        Optional<Double>    inValidResult   = equation.evaluate( "@" );
+        assertTrue( inValidResult.isEmpty() );
+        assertEquals( 16, validResult.get() );
+    }
 
     @ParameterizedTest
     @ValueSource(strings={ "_", "a", "_Ab", "_99", "__a__b__1__0__" } )
@@ -340,7 +354,7 @@ class Exp4jEquationTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings={ "0_ab", "%", "$a", "" } )
+    @ValueSource(strings={ "0_ab", "%", "$a", "", "aa^a" } )
     void testIsValidNameFalse( String str )
     {
         assertFalse( equation.isValidName( str ), str );

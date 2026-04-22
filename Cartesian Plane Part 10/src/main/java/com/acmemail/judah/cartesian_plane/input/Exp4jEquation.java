@@ -464,7 +464,7 @@ public class Exp4jEquation implements Equation
                 new ExpressionBuilder( exprStr )
                     .variables( vars.keySet() )
                     .build();
-            if ( expr.validate().isValid() )
+            if ( expr.validate( true ).isValid() )
             {
                 double  val     = expr.evaluate();
                 result = Optional.of(val );
@@ -513,13 +513,13 @@ public class Exp4jEquation implements Equation
             Expression expr = new ExpressionBuilder( exprStr )
                 .variables( vars.keySet() )
                 .build();
-            ValidationResult    expr4jResult = expr.validate( false );
-            if ( expr4jResult.isValid() )
+            ValidationResult    exp4jResult = expr.validate( false );
+            if ( exp4jResult.isValid() )
                 destination.accept( expr );
             
             result = new Result( 
-                expr4jResult.isValid(), 
-                expr4jResult.getErrors()
+                exp4jResult.isValid(), 
+                exp4jResult.getErrors()
             );
         }
         catch ( Exception exc )

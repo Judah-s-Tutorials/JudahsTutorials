@@ -34,6 +34,19 @@ class InputParserTest
     }
 
     @Test
+    void testParseInputParsedCommand()
+    {
+        // There's nothing special about the parseInput(ParsedCommand)
+        // method; we mainly need coverage
+        InputParser     parser          = new InputParser();
+        ParsedCommand   parsedCommand   = 
+            new ParsedCommand( Command.EXIT, "exit", "" );
+        Result          result          = 
+            parser.parseInput( parsedCommand );
+        assertTrue( result.isSuccess() );
+    }
+
+    @Test
     public void testParseInputEND()
     {
         InputParser     parser      = new InputParser();

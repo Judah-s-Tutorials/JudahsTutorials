@@ -11,27 +11,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 class InputParserTest
 {
-    private InputParser parser;
-    
-    @BeforeEach
-    public void beforeEach()
-    {
-        parser = new InputParser();
-    }
-    
     @Test
     public void testInputParser()
     {
+        InputParser parser  = new InputParser();
         assertNotNull( parser.getEquation() );
     }
 
@@ -42,20 +32,44 @@ class InputParserTest
         InputParser parser      = new InputParser( equation );
         assertEquals( equation, parser.getEquation() );
     }
-    
+
     @Test
-    public void testIllegalArgumentException()
+    void testParseInputParsedCommand()
     {
-        Class<IllegalArgumentException> clazz   =
-            IllegalArgumentException.class;
+        // There's nothing special about the parseInput(ParsedCommand)
+        // method; we mainly need coverage
+        InputParser     parser          = new InputParser();
+        ParsedCommand   parsedCommand   = 
+            new ParsedCommand( Command.EXIT, "exit", "" );
+        Result          result          = 
+            parser.parseInput( parsedCommand );
+        assertTrue( result.isSuccess() );
+    }
+
+    @Test
+    public void testParseInputEND()
+    {
+        InputParser     parser      = new InputParser();
+        Equation        equation    = parser.getEquation();
+        double          oldVal      = equation.getRangeEnd();
+        double          newVal      = oldVal + 1;
+        Result          result      = 
+            parser.parseInput( Command.END, "" + newVal );
+        assertTrue( result.isSuccess() );
+        assertEquals( newVal, equation.getRangeEnd() );
         
-        assertThrows( clazz, () -> 
-            parser.parseInput( Command.SET, null ) );
+        // test invalid input
+        result = parser.parseInput( Command.END, "%invalidvalue%" );
+        assertFalse( result.isSuccess() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.END, "" + newVal );
     }
 
     @Test
     public void testParseInputEQUATION()
     {
+        InputParser parser      = new InputParser();
         Equation    oldVal      = parser.getEquation();
         parser.parseInput( Command.EQUATION, "" );
         Equation    newVal      = parser.getEquation();
@@ -64,66 +78,149 @@ class InputParserTest
         assertNotEquals( oldVal, newVal );        
     }
 
-    @ParameterizedTest
-    @ValueSource( strings= {"EXIT","NONE","YPLOT","XYPLOT","OPEN","SAVE" } )
-    public void testParseInputNOOP( String strCommand )
+    @Test
+    void testParseInputEXIT()
     {
-        Command command = Command.toCommand( strCommand );
-        Result  result  = parser.parseInput( command, "" );
+        InputParser parser      = new InputParser();
+        Result      result      = 
+            parser.parseInput( Command.EXIT, "" );
         assertTrue( result.isSuccess() );
+    }
+
+    @Test
+    public void testParseInputSTEP()
+    {
+        InputParser     parser      = new InputParser();
+        Equation        equation    = parser.getEquation();
+        double          oldVal      = equation.getRangeStep();
+        double          newVal      = oldVal + 1;
+        Result          result      = 
+            parser.parseInput( Command.STEP, "" + newVal );
+        assertTrue( result.isSuccess() );
+        assertEquals( newVal, equation.getRangeStep() );
+        
+        // test invalid value
+        result = parser.parseInput( Command.STEP, "invalidvalue" );
+        assertFalse( result.isSuccess() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.STEP, "" + newVal );
     }
 
     @Test
     public void testParseInputINVALID()
     {
+        InputParser parser      = new InputParser();
         Result      result      = 
             parser.parseInput( Command.INVALID, "" );
         assertFalse( result.isSuccess() );
     }
 
     @Test
-    public void testParseInputSTART()
+    public void testParseInputNONE()
     {
-        Equation    equation    = parser.getEquation();
-        testSetDouble( Command.START, equation::getRangeStart );
-    }
-
-    @Test
-    public void testParseInputEND()
-    {
-        Equation    equation    = parser.getEquation();
-        testSetDouble( Command.END, equation::getRangeEnd );
-    }
-
-    @Test
-    public void testParseInputSTEP()
-    {
-        Equation    equation    = parser.getEquation();
-        testSetDouble( Command.STEP, equation::getRangeStep );
+        InputParser parser      = new InputParser();
+        Result      result      = 
+            parser.parseInput( Command.NONE, "" );
+        assertTrue( result.isSuccess() );
     }
 
     @Test
     public void testParseInputPARAM()
     {
+        InputParser     parser      = new InputParser();
         Equation        equation    = parser.getEquation();
-        String          newVal      = "newParamName";
-        testSetString( Command.PARAM, newVal, equation::getParam );
+        String          oldVal      = equation.getParam();
+        String          newVal      = oldVal + "x";
+        Result          result      = 
+            parser.parseInput( Command.PARAM, newVal );
+        assertTrue( result.isSuccess() );
+        assertEquals( newVal, equation.getParam() );        
+        
+        // test invalid input
+        result = parser.parseInput( Command.PARAM, "%invalidname%" );
+        assertFalse( result.isSuccess() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.PARAM, "" + newVal );
+    }
+
+    @Test
+    public void testParseInputSTART()
+    {
+        InputParser     parser      = new InputParser();
+        Equation        equation    = parser.getEquation();
+        double          oldVal      = equation.getRangeStart();
+        double          newVal      = oldVal + 1;
+        Result          result      = 
+            parser.parseInput( Command.START, "" + newVal );
+        assertTrue( result.isSuccess() );
+        assertEquals( newVal, equation.getRangeStart() );        
+        
+        // test invalid value
+        result = parser.parseInput( Command.START, "invalidvalue" );
+        assertFalse( result.isSuccess() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.START, "" + newVal );
+    }
+
+    @Test
+    public void testParseInputXYPLOT()
+    {
+        InputParser parser      = new InputParser();
+        Result      result      = 
+            parser.parseInput( Command.XYPLOT, "" );
+        assertTrue( result.isSuccess() );
     }
     
     @Test
     public void testParseInputXEQUALS()
     {
-        Equation        equation    = parser.getEquation();
-        String          newVal      = "a + a + a";
-        testSetString( Command.XEQUALS, newVal, equation::getXExpression );
-    }
+        InputParser parser      = new InputParser();
+        Equation    equation    = parser.getEquation();
+        String      oldVal      = equation.getXExpression();
+        String      newVal      = oldVal + "*4";
+        Result      result      = 
+            parser.parseInput( Command.XEQUALS, newVal );
+        assertTrue( result.isSuccess() );
+        assertEquals( newVal, equation.getXExpression() );        
+        
+        // test invalid value
+        result = parser.parseInput( Command.XEQUALS, "invalidexpression" );
+        assertFalse( result.isSuccess() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.XEQUALS, "" + newVal );
+}
     
     @Test
     public void testParseInputYEQUALS()
     {
-        Equation        equation    = parser.getEquation();
-        String          newVal      = "a + a + a";
-        testSetString( Command.YEQUALS, newVal, equation::getYExpression );
+        InputParser parser      = new InputParser();
+        Equation    equation    = parser.getEquation();
+        String      oldVal      = equation.getYExpression();
+        String      newVal      = oldVal + "*4";
+        Result      result      = 
+            parser.parseInput( Command.YEQUALS, newVal );
+        assertTrue( result.isSuccess() );
+        assertEquals( newVal, equation.getYExpression() );        
+        
+        // test invalid value
+        result = parser.parseInput( Command.YEQUALS, "invalidexpression" );
+        assertFalse( result.isSuccess() );
+        
+        // test no-arg option
+        testEmptyArg( parser, Command.YEQUALS, "" + newVal );
+    }
+
+    @Test
+    public void testParseInputYPLOT()
+    {
+        InputParser parser      = new InputParser();
+        Result      result      = 
+            parser.parseInput( Command.YPLOT, "" );
+        assertTrue( result.isSuccess() );
     }
 
     @ParameterizedTest
@@ -133,6 +230,7 @@ class InputParserTest
         })
     public void testParseVarsWithoutValues( String str )
     {
+        InputParser parser      = new InputParser();
         Equation    equation    = parser.getEquation();
         Result      result      = 
             parser.parseInput( Command.SET, str );
@@ -161,6 +259,7 @@ class InputParserTest
         })
     public void testParseVarsWithValues( String str )
     {
+        InputParser parser      = new InputParser();
         Equation    equation    = parser.getEquation();
         Result      result      = 
             parser.parseInput( Command.SET, str );
@@ -188,6 +287,7 @@ class InputParserTest
         })
     void testParseVarsWithBadNames( String str )
     {
+        InputParser parser      = new InputParser();
         Result      result      = 
             parser.parseInput( Command.SET, str );
         assertFalse( result.isSuccess() );
@@ -202,8 +302,9 @@ class InputParserTest
         { "p=.", "p=.,q=%", " a = 5..0 , b = ..6 , c  =  %7  ,  d = 8$  ",
           "abc = 55.x , def = x 6, ghi = 5 5 jkl = 5 6"
         })
-    public void testParseVarsWithBadValues( String str )
+    void testParseVarsWithBadValues( String str )
     {
+        InputParser   parser      = new InputParser();
         Result        result      = 
             parser.parseInput( Command.SET, str );
         assertFalse( result.isSuccess() );
@@ -213,10 +314,10 @@ class InputParserTest
         errors.forEach( System.out::println );
     }
     
-    @Test
     public void testParseVarsGoodAndBadSpecs()
     {
         String      strVals = "p=10,q=10,%,r=5 5";
+        InputParser parser  = new InputParser();
         Result      result  = 
             parser.parseInput( Command.SET, strVals );
         assertFalse( result.isSuccess() );
@@ -240,51 +341,25 @@ class InputParserTest
         assertFalse( rVal.isPresent() );
     }
     
-    private void testSetDouble( Command cmd, DoubleSupplier getter  )
+    @Test
+    public void testIllegalArgumentException()
     {
-        double  oldVal  = getter.getAsDouble();
-        double  newVal  = oldVal + 1;
-        Result  result  = parser.parseInput( cmd, "" + newVal );
-        assertTrue( result.isSuccess() );
-        assertEquals( newVal, getter.getAsDouble() );        
+        Class<IllegalArgumentException> clazz   =
+            IllegalArgumentException.class;
+        InputParser         parser      = new InputParser();
         
-        // test invalid value
-        result = parser.parseInput( cmd, "invalidvalue" );
-        assertFalse( result.isSuccess() );
-        
-        // test no-arg option
-        testEmptyArg( cmd, "" + newVal );
-    }
-    
-    private void testSetString( 
-        Command          cmd,
-        String           newVal, 
-        Supplier<String> getter
-    )
-    {
-        String  oldVal  = getter.get();
-        assertNotEquals( oldVal, newVal );
-        Result          result      = 
-            parser.parseInput( cmd, newVal );
-        assertTrue( result.isSuccess() );
-        assertEquals( newVal, getter.get() );        
-        
-        // test invalid input
-        result = parser.parseInput( cmd, "%invalid%" );
-        assertFalse( result.isSuccess() );
-        
-        // test no-arg option
-        testEmptyArg( cmd, "" + newVal );
+        assertThrows( clazz, () -> 
+            parser.parseInput( Command.SET, null ) );
     }
     
     private void 
-    testEmptyArg( Command cmd, String expOutput )
+    testEmptyArg( InputParser parser, Command cmd, String expOutput )
     {
-        String  actOutput   = getStdout( cmd, "" );
+        String  actOutput   = getStdOutput( parser, cmd, "" );
         assertEquals( expOutput, actOutput );
     }
     
-    private String getStdout( Command cmd, String arg )
+    private String getStdOutput( InputParser parser, Command cmd, String arg )
     {
         ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
         PrintStream             printStream = new PrintStream( baoStream );

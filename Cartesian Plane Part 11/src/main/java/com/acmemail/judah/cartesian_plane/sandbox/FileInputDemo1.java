@@ -21,7 +21,7 @@ import com.acmemail.judah.cartesian_plane.input.InputParser;
  */
 public class FileInputDemo1
 {
-    private static final CartesianPlane plane   = new CartesianPlane();
+    private static CartesianPlane plane;
     
     /**
      * Application entry point.
@@ -30,9 +30,19 @@ public class FileInputDemo1
      */
     public static void main(String[] args)
     {
-        Root    root    = new Root( plane );
+        plane = new CartesianPlane();
+        Root    root        = new Root( plane );
         root.start();
-        File    file    = new File( "files/InputDemo1.txt" );
+        String  filePath    = "files/InputDemo1.txt";
+        File    file        = new File( filePath );
+        if ( !file.exists() )
+        {
+            String  errorMessage    = 
+                "Demo file not found: \"" + filePath + "\"";
+            System.err.println( errorMessage );
+            System.exit( 1 );
+        }
+        
         try (
             FileReader fileReader  = new FileReader( file );
             BufferedReader bufReader = new BufferedReader( fileReader );

@@ -24,8 +24,8 @@ import com.acmemail.judah.cartesian_plane.input.Result;
  */
 public class ConsoleInputDemo1
 {
-    private static final CartesianPlane plane   = new CartesianPlane();
-    private static final String         prompt  = "Enter a command> ";
+    private static CartesianPlane   plane;
+    private static final String     prompt  = "Enter a command> ";
     
     /**
      * Application entry point.
@@ -34,6 +34,7 @@ public class ConsoleInputDemo1
      */
     public static void main(String[] args)
     {
+        plane = new CartesianPlane();
         Root    root    = new Root( plane );
         root.start();
         try (
@@ -81,7 +82,8 @@ public class ConsoleInputDemo1
             else if ( command == Command.XYPLOT )
                 plotXY( inputParser );
             else
-                ;
+                ; // Always terminate an else/if ladder, even if it's
+                  // an empty else
         } while ( command != Command.EXIT );
     }
     
@@ -98,7 +100,7 @@ public class ConsoleInputDemo1
         if ( list.isEmpty() )
             System.err.println( "input error" );
         else
-            list.forEach( s -> System.out.println( "Error: " + s ) );
+            list.forEach( s -> System.err.println( "Error: " + s ) );
     }
     
     /**

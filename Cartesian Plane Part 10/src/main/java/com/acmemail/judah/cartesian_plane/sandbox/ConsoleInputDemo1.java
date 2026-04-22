@@ -24,8 +24,8 @@ import com.acmemail.judah.cartesian_plane.input.Result;
  */
 public class ConsoleInputDemo1
 {
-    private static final CartesianPlane plane   = new CartesianPlane();
-    private static final String         prompt  = "Enter a command> ";
+    private static final String     prompt  = "Enter a command> ";
+    private static CartesianPlane   plane;
     
     /**
      * Application entry point.
@@ -34,6 +34,7 @@ public class ConsoleInputDemo1
      */
     public static void main(String[] args)
     {
+        plane = new CartesianPlane();
         Root    root    = new Root( plane );
         root.start();
         try (

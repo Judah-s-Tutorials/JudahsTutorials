@@ -7,24 +7,22 @@ import javax.swing.JOptionPane;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
-public class Utils
+/**
+ * This class contains utilities that are helpful
+ * to the demo applications in this project.
+ */
+public final class Utils
 {
-    /** Start of HTML usage string; everything up to start of table body. */
-    private static final String usageHeader =
-        "<html>"
-        +    "<head><title>HTML Usage Demo</title></head>"
-        + "<body>"
-        +    "<table>"
-        +    "<tbody>";
-    
-    /** End of HTML usage string; everything from end of table body. */
-    private static final String usageTrailer =
-        "</tbody>"
-        +    "</table>"
-        + "</body>"
-        + "</html>";
     /** Line separator for this platform. */
     private static final String lineSep = System.lineSeparator();
+    
+    /**
+     * Default constructor; not used.
+     */
+    private Utils()
+    {
+        // not used
+    }
 
    /**
      * Display a dialog containing
@@ -34,7 +32,8 @@ public class Utils
      */
     public static void showUsageDialog()
     {
-        StringBuilder   bldr    = new StringBuilder( usageHeader );
+        StringBuilder   bldr    = new StringBuilder();
+        bldr.append( "<html><table><tbody>" );
         Arrays.stream( Command.values() )
             .filter( e -> e != Command.INVALID )
             .filter( e -> e!= Command.NONE )
@@ -46,7 +45,7 @@ public class Utils
                     .append( e.getDescription() )
                     .append( "</td></tr>")
         );
-        bldr.append( usageTrailer );
+        bldr.append( "</tbody></table></html>" );
         
         JOptionPane.showMessageDialog( null, bldr );
         System.out.println( bldr );

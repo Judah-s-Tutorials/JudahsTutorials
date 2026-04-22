@@ -2,8 +2,8 @@ package com.acmemail.judah.cartesian_plane.input;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Arrays;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -82,51 +82,51 @@ public class CommandReader
             String  line    = reader.readLine();
             if ( line == null )
                 parsedCommand = new ParsedCommand( Command.NONE, "", "" );
-            else if ( (line = line.trim()).isEmpty() )
-                ;
-            else if ( line.startsWith( "#" ) )
-                ;
             else 
-                parsedCommand = parseCommand( line );
+            {
+                line = line.trim();
+                if ( isCommandLine( line ) )
+                    parsedCommand = parseCommand( line );
+            }
         }
         return parsedCommand;
     }
     
     /**
-     * Generates a stream of ParsedCommands
-     * corresponding to lines from the input source.
-     * Per the specification for parsing input lines,
-     * leading and trailing spaces are discarded, and
-     * blank lines and comments are skipped.
+     * Read all lines from the input source,
+     * ignoring blank lines and comments,
+     * and convert to a stream of ParsedCommands.
      * 
-     * @return  a stream of ParsedCommands
-     *          corresponding to lines from the input source
+     * @return a stream of ParsedCommands
+     * 
+     * @throws UncheckedIOException if reading the input source fails
      */
     public Stream<ParsedCommand> stream()
     {
         Stream<ParsedCommand>   pcStream    =
             reader.lines()
             .map( String::trim )
-            .filter( Predicate.not( String::isEmpty ) )
-            .filter( s -> !s.startsWith( "#" ) )
+            .filter( CommandReader::isCommandLine )
             .map( CommandReader::parseCommand );
         
         return pcStream;
     }
     
     /**
-     * Converts a given string to a ParsedCommand.
-     * The input string is assumed to be 
-     * non-null, non-empty and trimmed.
+     * Convert a line of input to a parsed command.
      * 
-     * @param   line    the given string
+     * Precondition: input is non-null
+     * Precondition: input is non-empty
+     * Precondition: input is trimmed
      * 
-     * @return  a ParsedCommand derived from the given string
+     * @param line  the input to convert
+     * 
+     * @return  the converted ParsedCommand
      */
     public static ParsedCommand parseCommand( String line )
     {
-        ParsedCommand   parsedCommand   = processShortcuts( line );
-        if ( parsedCommand == null )
+        ParsedCommand   parsedCommand   = null;
+        if ( (parsedCommand = processShortcuts( line )) == null )
         {
             int     split   = line.indexOf( ' ' );
             String  cmdStr  = line;
@@ -143,6 +143,25 @@ public class CommandReader
         }
         
         return parsedCommand;
+    }
+    
+    /**
+     * Determines if a line should be processed as a command.
+     * This is true if the line is non-null, non-empty, 
+     * and doesn't start with "#".
+     * 
+     * Precondition: if non-null, line is trimmed
+     *  
+     * @param line  the line to test
+     * 
+     * @return true if line should be processed as a command
+     */
+    private static boolean isCommandLine( String line )
+    {
+        boolean isCommand   = false;
+        if ( line != null )
+            isCommand = !line.isEmpty() && !line.startsWith( "#" );
+        return isCommand;
     }
     
     /**

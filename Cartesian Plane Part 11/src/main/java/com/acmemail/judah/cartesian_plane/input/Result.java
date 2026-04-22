@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -60,13 +61,15 @@ public class Result
     }
 
     /**
-     * Returns the list of messages
+     * Returns an unmodifiable list of messages
      * associated with this result.
      * 
      * @return the list of messages associated with this result
      */
     public List<String> getMessages()
     {
-        return messages;
+        List<String>    guardedList = 
+            Collections.unmodifiableList( messages );
+        return guardedList;
     }
 }

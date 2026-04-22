@@ -55,6 +55,25 @@ public class InputParser
     }
     
     /**
+     * Convenience method that takes a ParsedCommand,
+     * extract its constituent command and argument string,
+     * and feed them to {@link #parseInput(Command, String)};
+     * 
+     * @param parsedCommand the command to interrogate
+     * 
+     * @return  the result of the operation
+     * 
+     * @see #parseInput(Command, String)
+     */
+    public Result parseInput( ParsedCommand parsedCommand )
+    {
+        Command command = parsedCommand.getCommand();
+        String  arg     = parsedCommand.getArgString();
+        Result  result  = parseInput( command, arg );
+        return result;
+    }
+    
+    /**
      * Interprets and executes a command
      * and associated argument, if any.
      * The execution of each possible command

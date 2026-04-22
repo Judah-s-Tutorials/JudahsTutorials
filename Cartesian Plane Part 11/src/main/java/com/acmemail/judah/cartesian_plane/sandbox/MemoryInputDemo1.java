@@ -1,7 +1,5 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,8 +23,6 @@ public class MemoryInputDemo1
      * Application entry point.
      * 
      * @param args  command line arguments; not used
-     * 
-     * @throws IOException  if an I/O error occurs
      */
     public static void main(String[] args)
     {
@@ -46,26 +42,20 @@ public class MemoryInputDemo1
         }
         catch ( IOException exc )
         {
-            fail( "Unexpected I/O error", exc );
+            exc.printStackTrace();
+            System.exit( 1 );
         }
     }
     
     private static byte[] getByteArray( List<String> lines )
     {
-        byte[]  bytes   = null;
-        try (
-            ByteArrayOutputStream baoStream = new ByteArrayOutputStream();
-            PrintWriter writer = new PrintWriter( baoStream );
-        )
+        ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
+        try ( PrintWriter writer = new PrintWriter( baoStream ); )
         {
             lines.forEach( writer::println );
             writer.flush();
-            bytes = baoStream.toByteArray();
         }
-        catch ( IOException exc )
-        {
-            fail( "Unexpected I/O error", exc );
-        }
+        byte[]  bytes = baoStream.toByteArray();
         return bytes; 
     }
     

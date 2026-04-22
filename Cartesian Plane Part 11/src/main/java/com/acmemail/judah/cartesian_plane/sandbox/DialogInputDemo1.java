@@ -1,7 +1,5 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import java.io.IOException;
-
 import javax.swing.JOptionPane;
 
 import com.acmemail.judah.cartesian_plane.CPConstants;
@@ -24,7 +22,7 @@ import com.acmemail.judah.cartesian_plane.input.Result;
  */
 public class DialogInputDemo1
 {
-    private static final CartesianPlane plane       = new CartesianPlane();
+    private static CartesianPlane       plane;
     private static final InputParser    inputParser = new InputParser();
 
     
@@ -35,6 +33,7 @@ public class DialogInputDemo1
      */
     public static void main(String[] args)
     {
+        plane = new CartesianPlane();
         Root    root    = new Root( plane );
         root.start();
         exec();
@@ -42,12 +41,8 @@ public class DialogInputDemo1
     }
     
     /**
-     * Get and execute a command from a dialog
+     * Get and execute a command from a dialog.
      * Stop on EXIT command.
-     * 
-     * @param commandReader console
-     * 
-     * @throws IOException  if an I/O error occurs
      */
     private static void exec()
     {

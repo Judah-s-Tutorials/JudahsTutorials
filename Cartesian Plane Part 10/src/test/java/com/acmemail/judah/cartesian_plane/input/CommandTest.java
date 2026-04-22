@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane.input;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 
@@ -38,6 +39,14 @@ class CommandTest
         assertEquals( Command.NONE, Command.toCommand( "" ) );
         // verify that an unrecognized command maps to INVALID
         assertEquals( Command.INVALID, Command.toCommand( "not-a-command" ) );
+    }
+
+    @Test
+    void testToCommandNPE()
+    {
+        Class<IllegalArgumentException> clazz   =
+            IllegalArgumentException.class;
+        assertThrows( clazz, () -> Command.toCommand( null ) );
     }
 
     @Test
