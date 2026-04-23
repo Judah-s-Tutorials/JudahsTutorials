@@ -1,5 +1,6 @@
 package com.acmemail.judah.cartesian_plane.input;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -25,7 +26,7 @@ class Exp4jEquationTest
     private Exp4jEquation   equation;
     
     @BeforeEach
-    void setUp() throws Exception
+    void setUp()
     {
         equation = new Exp4jEquation();
     }
@@ -46,12 +47,13 @@ class Exp4jEquationTest
         validateDefaultVariables();
         validateDefaultRange();
         validateDefaultXExpression();
+        assertEquals( "2x", equation.getYExpression() );
         
         // verify that y expression is set to 2 
         // (see above "new Exp4jEquation( "2x" )").
         equation.setRange( 1, 1, 1 );
         equation.yPlot().forEach(
-            p -> assertEquals( 2, p.getY(), "Y" ) 
+            p -> assertEquals( 2, p.getY() ) 
         );
     }
 
@@ -73,8 +75,25 @@ class Exp4jEquationTest
         {
             Double  val = actMap.get( var );
             assertNotNull( val );
-            assertEquals( val, (double)var.charAt( 0 ) );
+            assertEquals( (double)var.charAt( 0 ), val );
         }
+        
+        // validate expressions
+        equation.setRange( 1, 1, 1 );
+        equation.xyPlot().forEach(
+            p -> {
+                assertEquals( 1, p.getX(), "X" );
+                assertEquals( 2, p.getY(), "Y" );
+            }
+        );
+    }
+
+    @Test
+    void testExp4jEquationNullMap()
+    {
+        equation = new Exp4jEquation( null, "2t" );
+        validateDefaultVariables();
+        validateDefaultRange();
         
         // validate expressions
         equation.setRange( 1, 1, 1 );
@@ -136,14 +155,8 @@ class Exp4jEquationTest
         {
             Double  actVal  = actVars.get( var );
             assertNotNull( actVal );
-            assertEquals( var.charAt( 0 ), actVal );
+            assertEquals( (double)var.charAt( 0 ), actVal );
         }
-    }
-
-    @Test
-    void testParseFunction()
-    {
-//        fail("Not yet implemented");
     }
 
     @Test
@@ -157,11 +170,16 @@ class Exp4jEquationTest
         
         equation.setRange( 1, 1, 1 );
         equation.xyPlot()
-            .forEach( p -> assertEquals( p.getX(), xier ) );
+            .forEach( p -> assertEquals( xier, p.getX() ) );
         
-        // try setting an invalid expression
-        result  = equation.setXExpression( "invalid" );
-        assertFalse( result.isSuccess() );
+        String[]	invalidExprs	= { "invalid", ")(", ";" };
+        for ( String str : invalidExprs )
+        {
+        	// try setting an invalid expression
+	        result  = equation.setXExpression( str );
+	        assertFalse( result.isSuccess() );
+	        assertFalse( result.getMessages().isEmpty() );
+        }
     }
 
     @Test
@@ -185,11 +203,17 @@ class Exp4jEquationTest
         
         equation.setRange( 1, 1, 1 );
         equation.yPlot()
-            .forEach( p -> assertEquals( p.getY(), xier ) );
+            .forEach( p -> assertEquals( xier, p.getY() ) );
         
-        // try setting an invalid expression
-        result  = equation.setYExpression( "invalid" );
-        assertFalse( result.isSuccess() );
+        
+        String[]	invalidExprs	= { "invalid", ")(", ";" };
+        for ( String str : invalidExprs )
+        {
+        	// try setting an invalid expression
+	        result  = equation.setYExpression( str );
+	        assertFalse( result.isSuccess() );
+	        assertFalse( result.getMessages().isEmpty() );
+        }
     }
 
     @Test
@@ -199,6 +223,7 @@ class Exp4jEquationTest
         String  yExpr       = "undeclaredVarName * x";
         Result  result      = equation.setYExpression( yExpr );
         assertFalse( result.isSuccess() );
+        assertFalse( result.getMessages().isEmpty() );
         assertEquals( oldyExpr, equation.getYExpression() );
     }
 
@@ -230,6 +255,11 @@ class Exp4jEquationTest
     {
         String  varName = "varName";
         String  yExpr   = varName + " + x";
+        
+        // set a variable on the equation...
+        // enter a valid y expression including the variable...
+        // remove the variable, causing y-expression to become invalid...
+        // verify that yPlot throws a validation exception
         equation.setVar( varName, 0 );
         equation.setYExpression( yExpr );
         equation.removeVar( varName );
@@ -294,18 +324,38 @@ class Exp4jEquationTest
         String  pName   = "param";
         equation.setParam( pName );
         assertEquals( pName, equation.getParam() );
+        assertTrue( equation.getVar( pName ).isPresent() );
     }
 
     @Test
     void testSetRange()
     {
-        double  start   = -2;
-        double  end     = 2;
-        double  step    = .1;
-        equation.setRange( start, end, step );
-        assertEquals( start, equation.getRangeStart() );
-        assertEquals( end, equation.getRangeEnd() );
-        assertEquals( step, equation.getRangeStep() );
+    	// Some of these ranges are invalid. Nevertheless, setRange
+    	// should silently accept them because range validation
+    	// doesn't take place until plotting is executed.
+    	Range[]	ranges	=
+   		{
+		    new Range( 1, 1, 0 ),
+		    new Range( -1, -1, 0 ),
+		    new Range( 1, 2, 1 ),
+		    new Range( 2, 1, -1 ),
+		    new Range( -1, 1, 1 ),
+		    new Range( 1, -1, -1 ),
+		    new Range( -2, -1, 1 ),
+		    new Range( -1, -2, -1 ),
+		    new Range( 1, 2, -1 ),
+		    new Range( 2, 1, 1 ),
+		    new Range( -1, 1, -1 ),
+		    new Range( 1, -1, 1 ),
+		    new Range( -2, -1, -1 ),
+		    new Range( -1, -2, 1 ),
+		};
+    	
+    	for ( Range range : ranges )
+    	{
+	    	range.set( equation );
+	    	range.validate( equation );
+    	}
     }
 
     @Test
@@ -331,6 +381,55 @@ class Exp4jEquationTest
         equation.setRangeStep( val );
         assertEquals( val, equation.getRangeStep() );
     }
+    
+    @Test
+    public void testValidateRangeGoRight()
+    {
+    	Range[]	goRightRanges	=
+		{
+		    new Range( 1, 2, 1 ),
+		    new Range( 2, 1, -1 ),
+		    new Range( -1, 1, 1 ),
+		    new Range( 1, -1, -1 ),
+		    new Range( -2, -1, 1 ),
+		    new Range( -1, -2, -1 ),
+		};    	
+    	equation.setXExpression( "4" );
+    	equation.setYExpression( "5" );
+    	
+    	for ( Range range : goRightRanges )
+    	{
+	    	range.set( equation );
+	    	assertDoesNotThrow( () -> equation.yPlot(), range.toString() );
+	    	assertDoesNotThrow( () -> equation.xyPlot(), range.toString() );
+    	}
+    }
+    
+    @Test
+    public void testValidateRangeGoWrong()
+    {
+    	Range[]	goRightRanges	=
+		{
+            new Range( 1, 1, 0 ),
+            new Range( -1, -1, 0 ),
+		    new Range( 1, 2, -1 ),
+		    new Range( 2, 1, 1 ),
+		    new Range( -1, 1, -1 ),
+		    new Range( 1, -1, 1 ),
+		    new Range( -2, -1, -1 ),
+		    new Range( -1, -2, 1 ),
+		};    	
+    	equation.setXExpression( "4" );
+    	equation.setYExpression( "5" );
+    	Class<ValidationException>	clazz	= ValidationException.class;
+    	
+    	for ( Range range : goRightRanges )
+    	{
+	    	range.set( equation );
+	    	assertThrows( clazz, () -> equation.yPlot(), range.toString() );
+	    	assertThrows( clazz, () -> equation.xyPlot(), range.toString() );
+    	}
+    }
 
     @ParameterizedTest
     @ValueSource(strings={ "_", "a", "_Ab", "_99", "__a__b__1__0__" } )
@@ -340,7 +439,7 @@ class Exp4jEquationTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings={ "0_ab", "%", "$a", "" } )
+    @ValueSource(strings={ "0_ab", "%", "$a", "", "a-b" } )
     void testIsValidNameFalse( String str )
     {
         assertFalse( equation.isValidName( str ), str );
@@ -419,5 +518,41 @@ class Exp4jEquationTest
         for ( String  var : defVars )
             assertTrue( vars.contains( var ), var );
         assertEquals( "t", equation.getParam() );
+    }
+    
+    private static class Range
+    {
+    	private final double	start;
+    	private final double	end;
+    	private final double	step;
+    	
+		public Range(double start, double end, double step)
+		{
+			super();
+			this.start = start;
+			this.end = end;
+			this.step = step;
+		}
+		
+		public void set( Equation equation )
+		{
+			equation.setRange( start, end, step );
+		}
+		
+		public void validate( Equation equation )
+		{
+	        assertEquals( start, equation.getRangeStart() );
+	        assertEquals( end, equation.getRangeEnd() );
+	        assertEquals( step, equation.getRangeStep() );
+		}
+		
+		public String toString()
+		{
+			StringBuilder	bldr	= new StringBuilder();
+			bldr.append( "start=" ).append( start ).append( "," )
+				.append( "end=" ).append( end ).append( "," )
+				.append( "step=" ).append( step );
+			return bldr.toString();
+		}
     }
 }

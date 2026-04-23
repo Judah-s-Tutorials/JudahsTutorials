@@ -1,7 +1,5 @@
 package com.acmemail.judah.cartesian_plane.sandbox;
 
-import static org.junit.jupiter.api.Assertions.fail;
-
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -46,7 +44,7 @@ public class MemoryInputDemo1
         }
         catch ( IOException exc )
         {
-            fail( "Unexpected I/O error", exc );
+            System.err.println( "Unexpected I/O error" );
         }
     }
     
@@ -64,7 +62,7 @@ public class MemoryInputDemo1
         }
         catch ( IOException exc )
         {
-            fail( "Unexpected I/O error", exc );
+            System.err.println( "Unexpected I/O error" );
         }
         return bytes; 
     }

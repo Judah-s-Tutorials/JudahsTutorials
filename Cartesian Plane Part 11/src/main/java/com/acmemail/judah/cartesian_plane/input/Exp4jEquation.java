@@ -95,7 +95,8 @@ public class Exp4jEquation implements Equation
      */
     public Exp4jEquation( Map<String,Double> vars, String expr )
     {
-        this.vars.putAll( vars );
+    	if ( vars != null )
+    		this.vars.putAll( vars );
         initIntrinsicVariables();
         setXExpression( xExprStr );
         setYExpression( expr );
@@ -223,12 +224,15 @@ public class Exp4jEquation implements Equation
     public Stream<Point2D> yPlot()
     {
         yExpr.setVariables( vars );
-        ValidationResult    result    = yExpr.validate( true );
+        ValidationResult    result    		= yExpr.validate( true );
         if ( !result.isValid() )
         {
             String  message = "Unexpected expression validation failure.";
             throw new ValidationException( message );
         }
+        Optional<String>	isRangeValid	= validateRange();
+        if ( isRangeValid.isPresent() )
+        	throw new ValidationException( isRangeValid.get() );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x += rStep )
                 .mapToObj( d -> {
@@ -257,6 +261,7 @@ public class Exp4jEquation implements Equation
             String  message = "Unexpected x-expression validation failure.";
             throw new ValidationException( message );
         }
+        
         yExpr.setVariables( vars );
         result = yExpr.validate( true );
         if ( !result.isValid() )
@@ -265,6 +270,10 @@ public class Exp4jEquation implements Equation
             throw new ValidationException( message );
         }
         
+        Optional<String>	isRangeValid	= validateRange();
+        if ( isRangeValid.isPresent() )
+        	throw new ValidationException( isRangeValid.get() );
+
         Stream<Point2D> stream  =
         DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t += rStep )
             .mapToObj( t -> { 
@@ -524,15 +533,49 @@ public class Exp4jEquation implements Equation
         }
         catch ( Exception exc )
         {
+        	String	message	= exc.getMessage();
+        	if ( message == null )
+        		message = "no message found";
             List<String>    list    =
                 List.of( 
                     "Unexpected exception",
                     exc.getClass().getName(),
-                    exc.getMessage()
+                    message
                 );
             result = new Result( false, list );
         }
         return result;
+    }
+    
+    @Override
+    public Optional<String> validateRange()
+    {
+    	Optional<String>	result	= Optional.empty();
+    	String	error	= "";
+    	if ( rStep == 0 )
+    	{
+	        error = "Range step may not be 0: ";
+    	}
+    	else if ( rStep < 0 )
+    	{
+    		if ( rStart < rEnd )
+    			error = "Invalid range step: ";
+    	}
+    	else
+    	{
+    		if ( rStart > rEnd )
+        		error = "Range end unreachable from start: ";
+    	}
+    	if ( !error.isEmpty() )
+    	{
+    		StringBuilder	bldr	= new StringBuilder( error );
+    		bldr.append( "start = " ).append( rStart )
+    			.append( ", end = " ).append( rEnd )
+    			.append( ", step = " ).append( rStep );
+    		result = Optional.of( bldr.toString() ); 
+    	}
+
+    	return result;
     }
     
     /**
