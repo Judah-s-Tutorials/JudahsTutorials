@@ -1,10 +1,10 @@
 package com.acmemail.judah.cartesian_plane.graphics_utils;
 
 import java.lang.reflect.InvocationTargetException;
+import org.junit.platform.commons.util.ExceptionUtils;
 
 import javax.swing.SwingUtilities;
 
-import org.junit.platform.commons.util.ExceptionUtils;
 
 public class GUIUtils
 {

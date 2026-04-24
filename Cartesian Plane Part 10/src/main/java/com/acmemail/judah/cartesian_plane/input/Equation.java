@@ -235,7 +235,7 @@ public interface Equation
      * is returned.
      * <ol>
      * <li>Step may never be 0.</li>
-     * <li>If step is positive, start must be less than or equal to end.</li>
+     * <li>If step is positive, start must be less than end.</li>
      * <li>If step is negative, start must be greater than end.</li>
      * </ol>
      * 

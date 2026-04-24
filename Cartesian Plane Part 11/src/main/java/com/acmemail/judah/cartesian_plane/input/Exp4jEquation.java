@@ -559,7 +559,7 @@ public class Exp4jEquation implements Equation
     	else if ( rStep < 0 )
     	{
     		if ( rStart < rEnd )
-    			error = "Invalid range step: ";
+    			error = "Range end unreachable from start: ";
     	}
     	else
     	{
