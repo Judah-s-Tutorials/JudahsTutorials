@@ -159,17 +159,25 @@ public interface Equation
 
     /**
      * Establishes the iteration range for this Equation.
+     * Validation of the range properties does not take place
+     * at the time this method is called.
      * 
      * @param start the start of the iteration range
      * @param end   the end of the iteration range
      * @param step  the increment to use when traversing the iteration range
+     * 
+     * @see #validateRange()
      */
     void setRange(double start, double end, double step);
 
     /**
      * Sets the start of the iteration range.
+     * Validation of the range properties does not take place
+     * at the time this method is called.
      * 
      * @param rangeStart   iteration range start
+     * 
+     * @see #validateRange()
      */
     void setRangeStart(double rangeStart);
 
@@ -181,6 +189,17 @@ public interface Equation
     double getRangeStart();
 
     /**
+     * Sets the end of the iteration range.
+     * Validation of the range properties does not take place
+     * at the time this method is called.
+     * 
+     * @param rangeEnd  iteration range end
+     * 
+     * @see #validateRange()
+     */
+    void setRangeEnd(double rangeEnd);
+
+    /**
      * Returns the end of the iteration range.
      * 
      * @return the end of the iteration range
@@ -188,11 +207,16 @@ public interface Equation
     double getRangeEnd();
 
     /**
-     * Sets the end of the iteration range.
+     * Sets the increment used
+     * to iterate over the encapsulated range.
+     * Validation of the range properties does not take place
+     * at the time this method is called.
      * 
-     * @param rangeEnd  iteration range end
+     * @param rangeStep   iteration range increment
+     * 
+     * @see #validateRange()
      */
-    void setRangeEnd(double rangeEnd);
+    void setRangeStep(double rangeStep);
 
     /**
      * Returns the increment used
@@ -203,12 +227,23 @@ public interface Equation
     double getRangeStep();
 
     /**
-     * Sets the increment used
-     * to iterate over the encapsulated range.
+     * Validate the range properties.
+     * If the range is valid
+     * an empty Optional is returned.
+     * If it's invalid
+     * an Optional containing an explanatory error message
+     * is returned.
+     * <ol>
+     * <li>Step may never be 0.</li>
+     * <li>If step is positive, start must be less than or equal to end.</li>
+     * <li>If step is negative, start must be greater than end.</li>
+     * </ol>
      * 
-     * @param rangeStep   iteration range increment
+     * @return	
+     * 		an empty Optional if the range is valid,
+     * 		otherwise an Optional containing an error message
      */
-    void setRangeStep(double rangeStep);
+    Optional<String> validateRange();
     
     /**
      * Determines if a given string

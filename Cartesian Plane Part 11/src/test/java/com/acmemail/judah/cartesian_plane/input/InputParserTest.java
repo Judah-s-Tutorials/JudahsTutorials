@@ -71,8 +71,9 @@ class InputParserTest
     {
         InputParser parser      = new InputParser();
         Equation    oldVal      = parser.getEquation();
-        parser.parseInput( Command.EQUATION, "" );
+        Result      result      = parser.parseInput( Command.EQUATION, "" );
         Equation    newVal      = parser.getEquation();
+        assertTrue( result.isSuccess() );
         assertNotNull( oldVal );
         assertNotNull( newVal );
         assertNotEquals( oldVal, newVal );        
@@ -294,7 +295,6 @@ class InputParserTest
         List<String>        errors      = result.getMessages();
         assertNotNull( errors );
         assertFalse( errors.isEmpty() );
-        errors.forEach( System.out::println );
     }
 
     @ParameterizedTest
@@ -311,9 +311,9 @@ class InputParserTest
         List<String>        errors      = result.getMessages();
         assertNotNull( errors );
         assertFalse( errors.isEmpty() );
-        errors.forEach( System.out::println );
     }
     
+    @Test
     public void testParseVarsGoodAndBadSpecs()
     {
         String      strVals = "p=10,q=10,%,r=5 5";
@@ -324,7 +324,6 @@ class InputParserTest
         List<String>        errors      = result.getMessages();
         assertNotNull( errors );
         assertFalse( errors.isEmpty() );
-        errors.forEach( System.out::println );
         
         Equation            equation    = parser.getEquation();
         Optional<Double>    pVal        = equation.getVar( "p" );
@@ -364,10 +363,15 @@ class InputParserTest
         ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
         PrintStream             printStream = new PrintStream( baoStream );
         PrintStream             stdOut      = System.out;
-        System.setOut( printStream );
-        
-        parser.parseInput( cmd, arg );
-        System.setOut( stdOut );
+        try
+        {
+            System.setOut( printStream );
+            parser.parseInput( cmd, arg );
+        }
+        finally
+        {
+            System.setOut( stdOut );
+        }
         
         String  str = baoStream.toString().trim();
         return str;

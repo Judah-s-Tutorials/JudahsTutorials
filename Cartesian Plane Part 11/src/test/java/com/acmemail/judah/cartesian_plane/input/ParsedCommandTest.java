@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class ParsedCommandTest
 {
     @Test
-    void test()
+    void testCtorGetters()
     {
         Command command = Command.END;
         String  cmdStr  = "command";
