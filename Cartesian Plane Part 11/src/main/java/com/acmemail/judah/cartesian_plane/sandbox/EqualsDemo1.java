@@ -44,6 +44,5 @@ public class EqualsDemo1
                 result = true;
         }
         return result;
-    }
-    
+    }    
 }

@@ -20,40 +20,57 @@ class EqualsDemo1Test
         assertNotEquals( objA, new Object() );
         assertNotEquals( objA, null );
         assertEquals( objA, objB );
+        assertEquals( objB, objA );
         assertEquals( objA.hashCode(), objB.hashCode() );
         
+        // field alpha
+        
+        objA = new EqualsDemo1( alpha1, beta1 );
         objB = new EqualsDemo1( null, beta1 );
         assertNotEquals( objA, objB );
         assertNotEquals( objB, objA );
+        
         objB = new EqualsDemo1( alpha2, beta1 );
         assertNotEquals( objA, objB );
         assertNotEquals( objB, objA );
-        objB = new EqualsDemo1( alpha1, null );
-        assertNotEquals( objB, objA );
-        assertNotEquals( objA, objB );
-        objB = new EqualsDemo1( alpha1, beta2 );
+        
+        objA = new EqualsDemo1( null, beta1 );
+        objB = new EqualsDemo1( alpha1, beta1 );
         assertNotEquals( objA, objB );
         assertNotEquals( objB, objA );
         
         objA = new EqualsDemo1( null, beta1 );
         objB = new EqualsDemo1( null, beta1 );
         assertEquals( objA, objB );
+        assertEquals( objB, objA );
         assertEquals( objA.hashCode(), objB.hashCode() );
-        objB = new EqualsDemo1( alpha1, beta1 );
+        
+        // field beta
+        
+        objA = new EqualsDemo1( alpha1, beta1 );
+        objB = new EqualsDemo1( alpha1, null );
         assertNotEquals( objA, objB );
         assertNotEquals( objB, objA );
-
+        
+        objB = new EqualsDemo1( alpha1, beta2 );
+        assertNotEquals( objA, objB );
+        assertNotEquals( objB, objA );
+        
+        objA = new EqualsDemo1( alpha1, null );
+        objB = new EqualsDemo1( alpha1, beta2 );
+        assertNotEquals( objA, objB );
+        assertNotEquals( objB, objA );
+        
         objA = new EqualsDemo1( alpha1, null );
         objB = new EqualsDemo1( alpha1, null );
         assertEquals( objA, objB );
+        assertEquals( objB, objA );
         assertEquals( objA.hashCode(), objB.hashCode() );
-        objB = new EqualsDemo1( alpha1, beta1 );
-        assertNotEquals( objA, objB );
-        assertNotEquals( objB, objA );
 
         objA = new EqualsDemo1( null, null );
         objB = new EqualsDemo1( null, null );
         assertEquals( objA, objB );
+        assertEquals( objB, objA );
         assertEquals( objA.hashCode(), objB.hashCode() );
     }
 }

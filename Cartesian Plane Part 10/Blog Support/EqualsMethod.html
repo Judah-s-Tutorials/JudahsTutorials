@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<title>Java equals Method</title>
+</head>
+<body style="max-width:40em;">
+
+<p style="padding-left: 4em; font-family: sans-serif; background-color: #DDDDDD;">
+	<strong>Important note:</strong>
+	This page is about the Java <em>equals(Object)</em>,
+	and we're going to stick to that.
+	But we can't mention <em>equals</em>
+	without referring to the <em>equals and hashCode</em> contract.
+	This states that if you override <em>equals</em> (or <em>hashCode</em>)
+	you <em>must</em> also override <em>hashCode</em> (or <em>equals</em>).
+</p>
+
+<h1>Java equals Method</h1>
+<p>
+	The <em>equals</em> method is declared in the <em>Object</em> class.
+	Functionally, it's not very robust.
+	It looks like this:
+</p>
+<pre style="padding-left: 2em;">
+public boolean equals( Object object )
+{
+    if ( this == object )
+	    return true;
+	else
+	    return false;
+}</pre>
+<p>
+In other words,
+<em>Object.equals(Object)</em>
+judges two objects to be equals
+<em>if they are the same object.</em>
+This is not typically very helpful.
+For example, 
+I can have two <em>different</em> string objects,
+and if they both have the value "cat"
+we would normally consider them equals,
+even if <em>Object.equals(Object)</em> does not.
+</p>
+<p>
+Consider the following class:
+</p>
+</body>
+</html>
