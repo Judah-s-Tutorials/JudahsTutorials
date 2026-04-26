@@ -21,25 +21,31 @@ public class MemoryOutputDemo1
      */
     public static void main(String[] args)
     {
+        PrintStream saveOut     = System.out;
         try (
-            ByteArrayOutputStream outStream   = new ByteArrayOutputStream();
-            PrintStream printStream = new PrintStream( outStream );
+            ByteArrayOutputStream   outStream   = 
+                new ByteArrayOutputStream();
+            PrintStream             printStream = 
+                new PrintStream( outStream );
         )
         {
-            PrintStream             saveOut     = System.out;
             System.setOut( printStream );
             
-            String                  expOutput   = "A very clever message.";
+            String  expOutput   = "A very clever message.";
             System.out.println( expOutput );
-            System.setOut( saveOut );
             
-            String                  actOutput   = outStream.toString();
+            String  actOutput   = outStream.toString();
             System.out.println( "Output: " + actOutput );
         }
         catch ( IOException exc )
         {
-            exc.printStackTrace();
-            System.exit( 1 );
+            // This block shouldn't be necessary, but Eclipse
+            // compiler is inconsistent on whether ByteArrayOutputStream
+            // throws IOException.
+        }
+        finally
+        {
+            System.setOut( saveOut );
         }
     }
 }

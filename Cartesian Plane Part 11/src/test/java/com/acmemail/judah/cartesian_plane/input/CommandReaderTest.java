@@ -395,14 +395,23 @@ class CommandReaderTest
      * @see #ioTest(byte[], IOConsumer)
      * @see #ioTest(List, IOConsumer)
      */
-    private byte[] getByteBuffer( List<String> list )
+    private static byte[] getByteBuffer( List<String> list )
     {
         byte[]  bytes   = null;
-        ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
-        PrintWriter             writer      = new PrintWriter( baoStream );
-        list.forEach( writer::println );
-        writer.flush();
-        bytes = baoStream.toByteArray();
+        try (
+            ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
+            PrintWriter             writer      = new PrintWriter( baoStream );
+        )
+        {
+            list.forEach( writer::println );
+            writer.flush();
+            bytes = baoStream.toByteArray();
+        }
+        catch ( IOException exc )
+        {
+            exc.printStackTrace();
+            System.exit( 1 );
+        }
         return bytes; 
     }
     
@@ -418,13 +427,12 @@ class CommandReaderTest
      * @see #getByteBuffer(List)
      * @see #ioTest(byte[], IOConsumer)
      */
-    private void ioTest( List<String> list, IOConsumer tester )
+    private static void ioTest( List<String> list, IOConsumer tester )
     {
         byte[]  bytes   = getByteBuffer( list );
         ioTest( bytes, tester );
     }
-    
-    
+        
     /**
      * Transforms a byte buffer into an input stream
      * in the form of a BufferedReader.
@@ -441,7 +449,7 @@ class CommandReaderTest
      * @see #getByteBuffer(List)
      * @see #ioTest(List, IOConsumer)
      */
-    private void ioTest( byte[] buff, IOConsumer tester )
+    private static void ioTest( byte[] buff, IOConsumer tester )
     {
         try (
             ByteArrayInputStream baiStream = new ByteArrayInputStream( buff );
