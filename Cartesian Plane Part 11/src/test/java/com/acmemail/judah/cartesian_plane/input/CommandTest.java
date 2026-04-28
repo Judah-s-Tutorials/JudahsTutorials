@@ -10,10 +10,10 @@ import java.util.Arrays;
 
 import org.junit.jupiter.api.Test;
 
-class CommandTest
+public class CommandTest
 {
     @Test
-    void testGetDescription()
+    public void testGetDescription()
     {
         // I'm just going to make sure that the description
         // for each command is present.
@@ -27,7 +27,7 @@ class CommandTest
     }
 
     @Test
-    void testToCommand()
+    public void testToCommand()
     {
         Arrays.stream( Command.values() )
             .forEach( c -> {
@@ -44,14 +44,14 @@ class CommandTest
         assertEquals( Command.NONE, Command.toCommand( "" ) );
         // verify that an unrecognized command maps to INVALID
         assertEquals( Command.INVALID, Command.toCommand( "not-a-command" ) );
-        // verify that passing null garners exception
+        // verify that passing null elicits exception
         Class<IllegalArgumentException> clazz   = 
             IllegalArgumentException.class;
         assertThrows( clazz, () -> Command.toCommand( null ) );
     }
 
     @Test
-    void testUsage()
+    public void testUsage()
     {
         String  usage   = Command.usage();
         assertNotNull( usage );

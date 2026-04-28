@@ -41,8 +41,8 @@ public class MemoryOutputDemo1
         catch ( IOException exc )
         {
             // Technically, this block should never be reached, but
-            // the close methods of ByteArrayOutputStream and
-            // PrintStrean declare "throws IOException."
+            // the close method of the ByteArrayOutputStream 
+            // superclass declares "throws IOException."
             throw new UncheckedIOException( exc );
         }
         finally

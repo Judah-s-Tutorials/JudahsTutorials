@@ -12,11 +12,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class ResultTest
+public class ResultTest
 {
     @ParameterizedTest
     @ValueSource( booleans = { true, false } )
-    void testResultBoolean( boolean testVal )
+    public void testResultBoolean( boolean testVal )
     {
         Result  result  = new Result( testVal );
         assertEquals( testVal, result.isSuccess() );
@@ -25,7 +25,7 @@ class ResultTest
 
     @ParameterizedTest
     @ValueSource( booleans = { true, false } )
-    void testResultBooleanListOfString( boolean testVal )
+    public void testResultBooleanListOfString( boolean testVal )
     {
         final List<String>  list    = List.of( "message 1", "message 2" );
         Result  result  = new Result( testVal, list );
@@ -35,7 +35,7 @@ class ResultTest
 
     @ParameterizedTest
     @ValueSource( booleans = { true, false } )
-    void testResultBooleanListOfString_nullMessages( boolean testVal )
+    public void testResultBooleanListOfString_nullMessages( boolean testVal )
     {
         Result  result  = new Result( testVal, null );
         assertEquals( testVal, result.isSuccess() );
@@ -43,7 +43,7 @@ class ResultTest
     }
 
     @Test
-    void testResultBooleanListOfString_defensiveCopy()
+    public void testResultBooleanListOfString_defensiveCopy()
     {
         List<String>    source      = new ArrayList<>( List.of( "a", "b" ) );
         Result          result      = new Result( true, source );
@@ -54,7 +54,7 @@ class ResultTest
     }
 
     @Test
-    void testGetMessages_unmodifiable()
+    public void testGetMessages_unmodifiable()
     {
         Result  result  = new Result( true, List.of( "a" ) );
         assertThrows(

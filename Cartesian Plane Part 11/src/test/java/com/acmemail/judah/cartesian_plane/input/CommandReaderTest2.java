@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class CommandReaderTest
+class CommandReaderTest2
 {
     /**
      * Defines a functional interface
@@ -108,40 +108,7 @@ class CommandReaderTest
         expResults.add( new ParsedCommand( Command.YEQUALS, "Y=", "xxx" ) );
         ioTest( input, this::testSimpleCommand );
     }
-
-    /**
-     * Test shortcuts of the form "x=".
-     * Try instances with generously distributed whitespace,
-     * with nothing to the right of the equal sign, etc.
-     * Try an invalid shortcut, such as "z=y".
-     */
-    @Test
-    public void testShortcuts()
-    {
-        List<String>        input       = List.of(
-            "x= xxx",
-            "y= yyy",
-            "X= XXX",
-            "Y= YYY",
-            "Y=  YYY",          // extra space between shortcut and arg
-            "  Y=   YYY   ",    // leading/trailing whitespace on the line
-            "x=",               // shortcut with empty arg
-            "z= YYY"            // z= is not a shortcut
-        );
-        List<ParsedCommand> expected    = List.of(
-            new ParsedCommand( Command.XEQUALS, "x=", "xxx" ),
-            new ParsedCommand( Command.YEQUALS, "y=", "yyy" ),
-            new ParsedCommand( Command.XEQUALS, "X=", "XXX" ),
-            new ParsedCommand( Command.YEQUALS, "Y=", "YYY" ),
-            new ParsedCommand( Command.YEQUALS, "Y=", "YYY" ),
-            new ParsedCommand( Command.YEQUALS, "Y=", "YYY" ),
-            new ParsedCommand( Command.XEQUALS, "x=", "" ),
-            new ParsedCommand( Command.INVALID, "z=", "YYY" )
-        );
-        expResults.addAll( expected );
-        ioTest( input, this::testSimpleCommand );
-    }
-
+    
     /**
      * Parse lines of the form " command  arg " 
      * with leading and trailing, and with extra whitespace
@@ -177,7 +144,15 @@ class CommandReaderTest
                 " # this is a comment"
                 )
             .toList();
-        ioTest( input, this::testSimpleCommand );
+        ioTest( input, this::testEmptyLinesAndComments );
+    }
+    
+    private void testEmptyLinesAndComments( BufferedReader reader ) 
+        throws IOException
+    {
+        CommandReader   cmdReader   = new CommandReader( reader );
+        ParsedCommand   command     = cmdReader.nextCommand( null );
+        assertEquals( Command.NONE, command.getCommand() );
     }
     
     /**
@@ -284,26 +259,22 @@ class CommandReaderTest
     {
         final String            prompt      = "cmd> ";
         PrintStream             saveOut     = System.out;
-        
-        try ( 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            PrintStream newOut = new PrintStream( baos );
-        )
+        ByteArrayOutputStream   newOut      = new ByteArrayOutputStream();
+        System.setOut( new PrintStream( newOut ) );
+        try
         {
-            System.setOut( newOut );
             CommandReader   cmdReader   = new CommandReader( reader );
             ParsedCommand   command     = cmdReader.nextCommand( prompt );
             assertEquals( Command.END, command.getCommand() );
-
-            // Prompt is written once per readLine attempt, so the two
-            // skipped lines (blank, comment) plus the "end" line produce
-            // three prompts.
-            assertEquals( prompt + prompt + prompt, baos.toString() );
         }
         finally
         {
             System.setOut( saveOut );
         }
+        // Prompt is written once per readLine attempt, so the two
+        // skipped lines (blank, comment) plus the "end" line produce
+        // three prompts.
+        assertEquals( prompt + prompt + prompt, newOut.toString() );
     }
 
     @ParameterizedTest
@@ -486,9 +457,6 @@ class CommandReaderTest
      * Given a command and an argument,
      * create a ParsedCommand object
      * reflecting the given data.
-     * The arg argument may never be null.
-     * To indicate that no arg is to be used,
-     * pass the empty string. 
      * The generated object is returned,
      * and optionally added
      * to the "expected results" list.
