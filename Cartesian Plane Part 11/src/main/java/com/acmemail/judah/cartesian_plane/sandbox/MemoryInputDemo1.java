@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -13,12 +14,20 @@ import java.util.stream.IntStream;
 /**
  * Application to demonstrate how
  * to designate a memory buffer
- * as in input source.
+ * as an input source.
  * 
  * @author Jack Straub
  */
 public class MemoryInputDemo1
 {
+    /**
+     * Default constructor, not used.
+     */
+    private MemoryInputDemo1()
+    {
+        // not used
+    }
+    
     /**
      * Application entry point.
      * 
@@ -29,8 +38,8 @@ public class MemoryInputDemo1
         List<String>    lines   = 
             IntStream.range( 1, 11 )
                 .mapToObj( i -> "Input line #" + i )
-                .collect( Collectors.toList() );
-        byte[]          byteBuffer      = getByteArray( lines );
+                .toList();
+        byte[]          byteBuffer      = getByteBuffer( lines );
         try(
             ByteArrayInputStream baiStream = 
                 new ByteArrayInputStream( byteBuffer );
@@ -42,12 +51,19 @@ public class MemoryInputDemo1
         }
         catch ( IOException exc )
         {
-            exc.printStackTrace();
-            System.exit( 1 );
+            throw new UncheckedIOException( exc );
         }
     }
     
-    private static byte[] getByteArray( List<String> lines )
+    /**
+     * Write a list of strings to a byte array,
+     * treating each list element as a line of text.
+     * 
+     * @param lines the list to convert
+     * 
+     * @return  the converted byte array
+     */
+    private static byte[] getByteBuffer( List<String> lines )
     {
         ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
         try ( PrintWriter writer = new PrintWriter( baoStream ); )
@@ -59,6 +75,14 @@ public class MemoryInputDemo1
         return bytes; 
     }
     
+    /**
+     * Read all the lines in a given BufferedReader,
+     * and write them to stdout.
+     * 
+     * @param reader    the given BufferedReader
+     * 
+     * @throws IOException  if an I/O error occurs
+     */
     private static void readFromInputBuffer( BufferedReader reader )
         throws IOException
     {

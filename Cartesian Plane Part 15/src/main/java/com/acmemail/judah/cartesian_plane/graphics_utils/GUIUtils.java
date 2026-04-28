@@ -1,7 +1,6 @@
 package com.acmemail.judah.cartesian_plane.graphics_utils;
 
 import java.lang.reflect.InvocationTargetException;
-import org.junit.platform.commons.util.ExceptionUtils;
 
 import javax.swing.SwingUtilities;
 
@@ -29,14 +28,14 @@ public class GUIUtils
         {
             SwingUtilities.invokeAndWait( runner );
         }
-        catch ( InterruptedException | InvocationTargetException exc )
+        catch ( InterruptedException exc )
         {
-            exc.printStackTrace();
-            Throwable   cause   = exc.getCause();
-            if ( cause != null )
-                ExceptionUtils.throwAsUncheckedException( cause );
-            else
-                throw new RuntimeException( exc );
+            Thread.currentThread().interrupt();
+            throw new RuntimeException( exc );
+        }
+        catch ( InvocationTargetException exc )
+        {
+            throw new RuntimeException( exc.getCause() );
         }
     }
 }

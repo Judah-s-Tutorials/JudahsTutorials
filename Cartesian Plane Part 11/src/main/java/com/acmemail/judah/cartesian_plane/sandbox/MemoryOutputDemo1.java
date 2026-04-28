@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 
 /**
  * Application to demonstrate how to redirect stdout
@@ -39,9 +40,10 @@ public class MemoryOutputDemo1
         }
         catch ( IOException exc )
         {
-            // This block shouldn't be necessary, but Eclipse
-            // compiler is inconsistent on whether ByteArrayOutputStream
-            // throws IOException.
+            // Technically, this block should never be reached, but
+            // the close methods of ByteArrayOutputStream and
+            // PrintStrean declare "throws IOException."
+            throw new UncheckedIOException( exc );
         }
         finally
         {

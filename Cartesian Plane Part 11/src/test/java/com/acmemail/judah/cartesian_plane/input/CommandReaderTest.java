@@ -14,7 +14,6 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -49,11 +48,11 @@ class CommandReaderTest
             throws IOException;
     }
     
-    private final String        randStr     =
+    private static final String randStr     =
         "abc def g h ijk l mnopqr st uvw xyz " +
         "ABC DEF G H IJK L MNOPQR ST UVW XYZ";
-    private final int           randStrLen  = randStr.length();
-    private Random              randy;
+    private static final int    randStrLen  = randStr.length();
+    private static Random       randy;
     
     private List<ParsedCommand> expResults;
     private List<ParsedCommand> actResults;
@@ -67,7 +66,7 @@ class CommandReaderTest
     }
     
     /**
-     * Parse lines of the form "command arg" with no extraneous whitespace.
+     * Parse lines of the form "command" with no extraneous whitespace.
      */
     @Test
     public void testSimpleCommandWithoutArg()
@@ -75,13 +74,13 @@ class CommandReaderTest
         List<String>    input   = 
             Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, "", true ) )
-                .map( p -> p.getCommandString() + " " + p.getArgString() )
-                .collect( Collectors.toList() );
+                .map( p -> p.getCommandString() )
+                .toList();
         ioTest( input, this::testSimpleCommand );
     }
     
     /**
-     * Parse lines of the form "command" with no extraneous whitespace.
+     * Parse lines of the form "command arg" with no extraneous whitespace.
      */
     @Test
     public void testSimpleCommandWithArg()
@@ -90,7 +89,7 @@ class CommandReaderTest
             Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> getExpResult( c, getArg(), true ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
-                .collect( Collectors.toList() );
+                .toList();
         ioTest( input, this::testSimpleCommand );
     }
     
@@ -166,7 +165,7 @@ class CommandReaderTest
                     "   " + p.getArgString() +
                     "   "
                 )
-                .collect( Collectors.toList() );
+                .toList();
         ioTest( input, this::testSimpleCommand );
     }
     
@@ -184,7 +183,7 @@ class CommandReaderTest
                 "     #     ",
                 " # this is a comment"
                 )
-            .collect( Collectors.toList() );
+            .toList();
         ioTest( input, this::testEmptyLinesAndComments );
     }
     
@@ -230,7 +229,7 @@ class CommandReaderTest
                 .flatMap( s ->
                     Stream.of( s, "", "#", "  #  ", "$BadCommand" )
                 )
-                .collect( Collectors.toList() );
+                .toList();
         ioTest( input, this::testMixAndMatch );
     }
     
@@ -273,7 +272,7 @@ class CommandReaderTest
                 .flatMap( s ->
                     Stream.of( s, "", "#", "  #  " )
                 )
-                .collect( Collectors.toList() );
+                .toList();
         ioTest( input, this::readStream );
     }
 
@@ -373,7 +372,7 @@ class CommandReaderTest
     private void readStream( BufferedReader reader ) throws IOException
     {
         CommandReader   cmdReader   = new CommandReader( reader );
-        actResults = cmdReader.stream().collect( Collectors.toList() );
+        actResults = cmdReader.stream().toList();
         assertEquals( expResults, actResults );
     }
     
@@ -471,7 +470,7 @@ class CommandReaderTest
      * 
      * @return  string of random alphanumeric characters
      */
-    private String getArg()
+    private static String getArg()
     {
         int     start   = randy.nextInt( randStrLen - 5 );
         int     end     = randy.nextInt( randStrLen - start ) + start + 1;

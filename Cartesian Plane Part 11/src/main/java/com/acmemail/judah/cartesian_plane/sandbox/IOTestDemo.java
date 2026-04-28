@@ -82,6 +82,18 @@ public class IOTestDemo
     }
     
     /**
+     * Simulates reading and executing a list of commands
+     * from a BufferedReader.
+     * 
+     * @param reader    the BufferedReader to read from
+     */
+    private static void executeCommands( BufferedReader reader )
+    {
+        reader.lines()
+            .forEach( c -> System.out.println( "executing " + c ) );
+    }
+    
+    /**
      * Initiates an execution of a method 
      * that simulates filtering a list 
      * for valid commands
@@ -98,18 +110,6 @@ public class IOTestDemo
     }
     
     /**
-     * Simulates reading and executing a list of commands
-     * from a BufferedReader.
-     * 
-     * @param reader    the BufferedReader to read from
-     */
-    private static void executeCommands( BufferedReader reader )
-    {
-        reader.lines()
-            .forEach( c -> System.out.println( "executing " + c ) );
-    }
-    
-    /**
      * Simulates reading, filtering, and executing a list of commands
      * from a BufferedReader.
      * 
@@ -121,24 +121,6 @@ public class IOTestDemo
             .map( Command::toCommand)
             .filter( s -> s != Command.INVALID )
             .forEach( c -> System.out.println( "executing " + c ) );
-    }
-    
-    /**
-     * Generates sample input from a list
-     * in the form of a BufferedReader.
-     * Uses the BufferedReader
-     * to execute a given consumer.
-     * 
-     * @param list      the list to convert to input
-     * @param tester    the given consumer
-     * 
-     * @see #getByteBuffer(List)
-     * @see #ioTest(byte[], IOConsumer)
-     */
-    private static void ioTest( List<String> list, IOConsumer tester )
-    {
-        byte[]  bytes   = getByteBuffer( list );
-        ioTest( bytes, tester );
     }
     
     /**
@@ -176,6 +158,24 @@ public class IOTestDemo
             throw new UncheckedIOException( exc );
         }
         return bytes; 
+    }
+    
+    /**
+     * Generates sample input from a list
+     * in the form of a BufferedReader.
+     * Uses the BufferedReader
+     * to execute a given consumer.
+     * 
+     * @param list      the list to convert to input
+     * @param tester    the given consumer
+     * 
+     * @see #getByteBuffer(List)
+     * @see #ioTest(byte[], IOConsumer)
+     */
+    private static void ioTest( List<String> list, IOConsumer tester )
+    {
+        byte[]  bytes   = getByteBuffer( list );
+        ioTest( bytes, tester );
     }
     
     /**
