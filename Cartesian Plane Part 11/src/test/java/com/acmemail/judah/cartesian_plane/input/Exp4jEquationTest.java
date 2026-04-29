@@ -26,13 +26,13 @@ class Exp4jEquationTest
     private Exp4jEquation   equation;
     
     @BeforeEach
-    void setUp()
+    public void setUp()
     {
         equation = new Exp4jEquation();
     }
 
     @Test
-    void testExp4jEquation()
+    public void testExp4jEquation()
     {
         validateDefaultVariables();
         validateDefaultRange();
@@ -41,7 +41,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testExp4jEquationString()
+    public void testExp4jEquationString()
     {
         equation = new Exp4jEquation( "2x" );
         validateDefaultVariables();
@@ -58,7 +58,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testExp4jEquationMapOfStringDoubleString()
+    public void testExp4jEquationMapOfStringDoubleString()
     {
         Map<String,Double>  mapIn   = new HashMap<>();
         String[]            vars    = { "h", "j", "k", "l" };
@@ -89,7 +89,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testExp4jEquationNullMap()
+    public void testExp4jEquationNullMap()
     {
         equation = new Exp4jEquation( null, "2t" );
         validateDefaultVariables();
@@ -106,7 +106,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testNewEquation()
+    public void testNewEquation()
     {
         equation = (Exp4jEquation)equation.newEquation();
         validateDefaultVariables();
@@ -116,7 +116,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testSetVar()
+    public void testSetVar()
     {
         double  val     = 3.14;
         String  name    = "abc";
@@ -128,7 +128,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testRemoveVar()
+    public void testRemoveVar()
     {
         double  val     = 3.14;
         String  name    = "abc";
@@ -144,7 +144,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testGetVars()
+    public void testGetVars()
     {
         String[]            vars    = { "h", "j", "k", "l" };
         for ( String var : vars )
@@ -160,7 +160,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testSetXExpression()
+    public void testSetXExpression()
     {
         double  xier    = 2;
         String  xExpr   = xier + "t";
@@ -183,7 +183,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testSetXExpressionGoWrong()
+    public void testSetXExpressionGoWrong()
     {
         String  oldXExpr    = equation.getXExpression();
         String  xExpr       = "notAVar * x";
@@ -193,7 +193,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testSetYExpression()
+    public void testSetYExpression()
     {
         double  xier    = 2;
         String  yExpr   = xier + "x";
@@ -217,7 +217,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testSetYExpressionGoWrong()
+    public void testSetYExpressionGoWrong()
     {
         String  oldyExpr    = equation.getYExpression();
         String  yExpr       = "undeclaredVarName * x";
@@ -228,7 +228,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testYPlot()
+    public void testYPlot()
     {
         double  xier    = 2;
         String  yExpr   = xier + "x";
@@ -251,7 +251,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testYPlotGoWrong()
+    public void testYPlotGoWrong()
     {
         String  varName = "varName";
         String  yExpr   = varName + " + x";
@@ -269,7 +269,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testXYPlot()
+    public void testXYPlot()
     {
         double  xXier   = 2;
         double  yXier   = 3;
@@ -295,7 +295,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testXYPlotGoWrong()
+    public void testXYPlotGoWrong()
     {
         String  xVarName    = "xVarName";
         String  yVarName    = "yVarName";
@@ -319,7 +319,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testGetParam()
+    public void testGetParam()
     {
         String  pName   = "param";
         equation.setParam( pName );
@@ -328,7 +328,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testSetRange()
+    public void testSetRange()
     {
     	// Some of these ranges are invalid. Nevertheless, setRange
     	// should silently accept them because range validation
@@ -359,7 +359,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testSetRangeStart()
+    public void testSetRangeStart()
     {
         double  val     = Math.PI;
         equation.setRangeStart( val );
@@ -367,7 +367,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testSetRangeEnd()
+    public void testSetRangeEnd()
     {
         double  val     = Math.PI;
         equation.setRangeEnd( val );
@@ -375,7 +375,7 @@ class Exp4jEquationTest
     }
 
     @Test
-    void testSetRangeStep()
+    public void testSetRangeStep()
     {
         double  val     = Math.PI;
         equation.setRangeStep( val );
@@ -433,34 +433,34 @@ class Exp4jEquationTest
 
     @ParameterizedTest
     @ValueSource(strings={ "_", "a", "_Ab", "_99", "__a__b__1__0__" } )
-    void testIsValidNameTrue( String str )
+    public void testIsValidNameTrue( String str )
     {
         assertTrue( equation.isValidName( str ), str );
     }
 
     @ParameterizedTest
     @ValueSource(strings={ "0_ab", "%", "$a", "", "a-b" } )
-    void testIsValidNameFalse( String str )
+    public void testIsValidNameFalse( String str )
     {
         assertFalse( equation.isValidName( str ), str );
     }
 
     @ParameterizedTest
     @ValueSource(strings={ "0", "0.1", "0.", "-.1", "-1.1", "pi", "cos(pi)" } )
-    void testIsValidValueTrue( String str )
+    public void testIsValidValueTrue( String str )
     {
         assertTrue( equation.isValidValue( str ), str );
     }
 
     @ParameterizedTest
     @ValueSource(strings={ "a", "2x", "x^2", "cos(t)" } )
-    void testIsValidValueFalse( String str )
+    public void testIsValidValueFalse( String str )
     {
         assertFalse( equation.isValidValue( str ), str );
     }
 
     @Test
-    void testGetConstantValuePass()
+    public void testGetConstantValuePass()
     {
         testGetConstantValuePass( "2", 2 );
         testGetConstantValuePass( "-.1", -.1 );
@@ -480,7 +480,7 @@ class Exp4jEquationTest
 
     @ParameterizedTest
     @ValueSource(strings={ "a", "2x", "x^2", "cos(t)" } )
-    void testGetConstantValueFail( String str )
+    public void testGetConstantValueFail( String str )
     {
         Optional<Double>    optional    = equation.evaluate( str );
         assertFalse( optional.isPresent() );
