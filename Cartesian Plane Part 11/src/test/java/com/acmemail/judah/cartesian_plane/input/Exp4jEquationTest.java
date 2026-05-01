@@ -172,13 +172,13 @@ class Exp4jEquationTest
         equation.xyPlot()
             .forEach( p -> assertEquals( xier, p.getX() ) );
         
-        String[]	invalidExprs	= { "invalid", ")(", ";" };
+        String[]    invalidExprs    = { "invalid", ")(", ";" };
         for ( String str : invalidExprs )
         {
-        	// try setting an invalid expression
-	        result  = equation.setXExpression( str );
-	        assertFalse( result.isSuccess() );
-	        assertFalse( result.getMessages().isEmpty() );
+            // try setting an invalid expression
+            result  = equation.setXExpression( str );
+            assertFalse( result.isSuccess() );
+            assertFalse( result.getMessages().isEmpty() );
         }
     }
 
@@ -206,13 +206,13 @@ class Exp4jEquationTest
             .forEach( p -> assertEquals( xier, p.getY() ) );
         
         
-        String[]	invalidExprs	= { "invalid", ")(", ";" };
+        String[]    invalidExprs    = { "invalid", ")(", ";" };
         for ( String str : invalidExprs )
         {
-        	// try setting an invalid expression
-	        result  = equation.setYExpression( str );
-	        assertFalse( result.isSuccess() );
-	        assertFalse( result.getMessages().isEmpty() );
+            // try setting an invalid expression
+            result  = equation.setYExpression( str );
+            assertFalse( result.isSuccess() );
+            assertFalse( result.getMessages().isEmpty() );
         }
     }
 
@@ -330,32 +330,32 @@ class Exp4jEquationTest
     @Test
     public void testSetRange()
     {
-    	// Some of these ranges are invalid. Nevertheless, setRange
-    	// should silently accept them because range validation
-    	// doesn't take place until plotting is executed.
-    	Range[]	ranges	=
-   		{
-		    new Range( 1, 1, 0 ),
-		    new Range( -1, -1, 0 ),
-		    new Range( 1, 2, 1 ),
-		    new Range( 2, 1, -1 ),
-		    new Range( -1, 1, 1 ),
-		    new Range( 1, -1, -1 ),
-		    new Range( -2, -1, 1 ),
-		    new Range( -1, -2, -1 ),
-		    new Range( 1, 2, -1 ),
-		    new Range( 2, 1, 1 ),
-		    new Range( -1, 1, -1 ),
-		    new Range( 1, -1, 1 ),
-		    new Range( -2, -1, -1 ),
-		    new Range( -1, -2, 1 ),
-		};
-    	
-    	for ( Range range : ranges )
-    	{
-	    	range.set( equation );
-	    	range.validate( equation );
-    	}
+        // Some of these ranges are invalid. Nevertheless, setRange
+        // should silently accept them because range validation
+        // doesn't take place until plotting is executed.
+        Range[]    ranges    =
+           {
+            new Range( 1, 1, 0 ),
+            new Range( -1, -1, 0 ),
+            new Range( 1, 2, 1 ),
+            new Range( 2, 1, -1 ),
+            new Range( -1, 1, 1 ),
+            new Range( 1, -1, -1 ),
+            new Range( -2, -1, 1 ),
+            new Range( -1, -2, -1 ),
+            new Range( 1, 2, -1 ),
+            new Range( 2, 1, 1 ),
+            new Range( -1, 1, -1 ),
+            new Range( 1, -1, 1 ),
+            new Range( -2, -1, -1 ),
+            new Range( -1, -2, 1 ),
+        };
+        
+        for ( Range range : ranges )
+        {
+            range.set( equation );
+            range.validate( equation );
+        }
     }
 
     @Test
@@ -385,50 +385,50 @@ class Exp4jEquationTest
     @Test
     public void testValidateRangeGoRight()
     {
-    	Range[]	goRightRanges	=
-		{
-		    new Range( 1, 2, 1 ),
-		    new Range( 2, 1, -1 ),
-		    new Range( -1, 1, 1 ),
-		    new Range( 1, -1, -1 ),
-		    new Range( -2, -1, 1 ),
-		    new Range( -1, -2, -1 ),
-		};    	
-    	equation.setXExpression( "4" );
-    	equation.setYExpression( "5" );
-    	
-    	for ( Range range : goRightRanges )
-    	{
-	    	range.set( equation );
-	    	assertDoesNotThrow( () -> equation.yPlot(), range.toString() );
-	    	assertDoesNotThrow( () -> equation.xyPlot(), range.toString() );
-    	}
+        Range[]    goRightRanges    =
+        {
+            new Range( 1, 2, 1 ),
+            new Range( 2, 1, -1 ),
+            new Range( -1, 1, 1 ),
+            new Range( 1, -1, -1 ),
+            new Range( -2, -1, 1 ),
+            new Range( -1, -2, -1 ),
+        };        
+        equation.setXExpression( "4" );
+        equation.setYExpression( "5" );
+        
+        for ( Range range : goRightRanges )
+        {
+            range.set( equation );
+            assertDoesNotThrow( () -> equation.yPlot(), range.toString() );
+            assertDoesNotThrow( () -> equation.xyPlot(), range.toString() );
+        }
     }
     
     @Test
     public void testValidateRangeGoWrong()
     {
-    	Range[]	goRightRanges	=
-		{
+        Range[]    goRightRanges    =
+        {
             new Range( 1, 1, 0 ),
             new Range( -1, -1, 0 ),
-		    new Range( 1, 2, -1 ),
-		    new Range( 2, 1, 1 ),
-		    new Range( -1, 1, -1 ),
-		    new Range( 1, -1, 1 ),
-		    new Range( -2, -1, -1 ),
-		    new Range( -1, -2, 1 ),
-		};    	
-    	equation.setXExpression( "4" );
-    	equation.setYExpression( "5" );
-    	Class<ValidationException>	clazz	= ValidationException.class;
-    	
-    	for ( Range range : goRightRanges )
-    	{
-	    	range.set( equation );
-	    	assertThrows( clazz, () -> equation.yPlot(), range.toString() );
-	    	assertThrows( clazz, () -> equation.xyPlot(), range.toString() );
-    	}
+            new Range( 1, 2, -1 ),
+            new Range( 2, 1, 1 ),
+            new Range( -1, 1, -1 ),
+            new Range( 1, -1, 1 ),
+            new Range( -2, -1, -1 ),
+            new Range( -1, -2, 1 ),
+        };        
+        equation.setXExpression( "4" );
+        equation.setYExpression( "5" );
+        Class<ValidationException>    clazz    = ValidationException.class;
+        
+        for ( Range range : goRightRanges )
+        {
+            range.set( equation );
+            assertThrows( clazz, () -> equation.yPlot(), range.toString() );
+            assertThrows( clazz, () -> equation.xyPlot(), range.toString() );
+        }
     }
 
     @ParameterizedTest
@@ -522,37 +522,37 @@ class Exp4jEquationTest
     
     private static class Range
     {
-    	private final double	start;
-    	private final double	end;
-    	private final double	step;
-    	
-		public Range(double start, double end, double step)
-		{
-			super();
-			this.start = start;
-			this.end = end;
-			this.step = step;
-		}
-		
-		public void set( Equation equation )
-		{
-			equation.setRange( start, end, step );
-		}
-		
-		public void validate( Equation equation )
-		{
-	        assertEquals( start, equation.getRangeStart() );
-	        assertEquals( end, equation.getRangeEnd() );
-	        assertEquals( step, equation.getRangeStep() );
-		}
-		
-		public String toString()
-		{
-			StringBuilder	bldr	= new StringBuilder();
-			bldr.append( "start=" ).append( start ).append( "," )
-				.append( "end=" ).append( end ).append( "," )
-				.append( "step=" ).append( step );
-			return bldr.toString();
-		}
+        private final double    start;
+        private final double    end;
+        private final double    step;
+        
+        public Range(double start, double end, double step)
+        {
+            super();
+            this.start = start;
+            this.end = end;
+            this.step = step;
+        }
+        
+        public void set( Equation equation )
+        {
+            equation.setRange( start, end, step );
+        }
+        
+        public void validate( Equation equation )
+        {
+            assertEquals( start, equation.getRangeStart() );
+            assertEquals( end, equation.getRangeEnd() );
+            assertEquals( step, equation.getRangeStep() );
+        }
+        
+        public String toString()
+        {
+            StringBuilder    bldr    = new StringBuilder();
+            bldr.append( "start=" ).append( start ).append( "," )
+                .append( "end=" ).append( end ).append( "," )
+                .append( "step=" ).append( step );
+            return bldr.toString();
+        }
     }
 }

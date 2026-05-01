@@ -34,6 +34,17 @@ public class InputParserTest
     {
         assertNotNull( parser.getEquation() );
     }
+
+    @Test
+    public void testInputParserEquation()
+    {
+        Equation    equation    = new Exp4jEquation();
+        InputParser parser      = new InputParser( equation );
+        assertEquals( equation, parser.getEquation() );
+        
+        parser = new InputParser( null );
+        assertNotNull( parser.getEquation() );
+    }
     
     @Test
     public void testIllegalArgumentException()
@@ -60,17 +71,6 @@ public class InputParserTest
         Optional<Double>    optValue        = equation.getVar( argVar );
         assertTrue( optValue.isPresent() );
         assertEquals( argVal, optValue.get() );
-    }
-
-    @Test
-    public void testInputParserEquation()
-    {
-        Equation    equation    = new Exp4jEquation();
-        InputParser parser      = new InputParser( equation );
-        assertEquals( equation, parser.getEquation() );
-        
-        parser = new InputParser( null );
-        assertNotNull( parser.getEquation() );
     }
     
     @ParameterizedTest
@@ -125,7 +125,7 @@ public class InputParserTest
         Equation    equation    = parser.getEquation();
         String      oldVal      = equation.getYExpression();
         String      newVal      = oldVal + "*4";
-        testSetString( Command.XEQUALS, newVal, equation::getYExpression );
+        testSetString( Command.YEQUALS, newVal, equation::getYExpression );
     }
 
     @Test
@@ -146,7 +146,7 @@ public class InputParserTest
     public void testParseInputEND()
     {
         Equation    equation    = parser.getEquation();
-        testSetDouble( Command.STEP, equation::getRangeStep );
+        testSetDouble( Command.END, equation::getRangeEnd );
     }
 
     @ParameterizedTest
@@ -258,6 +258,8 @@ public class InputParserTest
         
         // ... but r should not
         assertFalse( rVal.isPresent() );
+        assertFalse( result.isSuccess() );
+        assertTrue( result.getMessages().size() > 1 );
     }
 
     private void testSetDouble( Command cmd, DoubleSupplier getter  )
