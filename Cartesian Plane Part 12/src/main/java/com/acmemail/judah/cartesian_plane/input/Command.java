@@ -1,11 +1,12 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 /**
  * Encapsulation of commands
  * used to configure and evaluate
- * a Exp4j expressions.
+ * an Exp4j expression.
  * 
  * @author Jack Straub
  * 
@@ -67,7 +68,7 @@ public enum Command
     RPLOT( "Generates a plot of the polar equation r = f(t)" ),
     /** Generates the plot of the polar equation t = f(r). */
     TPLOT( "Generates a plot of the polar equation t = f(r)" ),
-    /** Identifies and empty command string. */
+    /** Identifies an empty command string. */
     NONE( "Identifies an empty command string" ),
     /** Identifies an invalid command. */
     INVALID( "Designates an invalid command." ),
@@ -112,7 +113,7 @@ public enum Command
     /**
      * Compares the value of a given string
      * to the names of the enumerated constants
-     * and returns the first matching constant.
+     * and returns the matching constant.
      * The comparison is case-insensitive.
      * If the given string is empty NONE is returned.
      * If no match is found INVALID is returned.
@@ -122,10 +123,12 @@ public enum Command
      * @return  
      *      the first command whose name
      *      matches the given string
+     *      
+     * @throws NullPointerException if from is null
      */
     public static Command toCommand( String from )
     {
-        String  upperFrom   = from.toUpperCase();
+        String  upperFrom   = from.toUpperCase().trim();
         Command cmd         = NONE;
         if ( !upperFrom.isEmpty() )
             cmd = Arrays.stream( values() )
@@ -149,8 +152,8 @@ public enum Command
             .append( lineSep );
         Arrays.stream( values() )
             .filter( e -> e != INVALID )
-            .filter( e -> e!= NONE )
-            .sorted( (e1,e2) -> e1.name().compareTo( e2.name() ) )
+            .filter( e -> e != NONE )
+            .sorted( Comparator.comparing( Command::name ) )
             .forEach( e -> 
                 bldr.append( "    " )
                     .append( e )

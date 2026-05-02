@@ -1,7 +1,7 @@
 package com.acmemail.judah.cartesian_plane.input;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Describes the result of an operation.
@@ -13,7 +13,7 @@ import java.util.List;
  * 
  * @author Jack Straub
  */
-public class Result
+public final class Result
 {
     private final boolean       success;
     private final List<String>  messages;
@@ -34,19 +34,21 @@ public class Result
      * Constructor.
      * Creates a Result with the given status
      * and list of messages.
-     * The given list
-     * is copied into 
-     * an internally allocated buffer.
+     * Messages are stored in an unmodifiable list.
+     * A null messages argument is translated
+     * to an empty, unmodifiable list.
+     * The messages list may not contain null.
      * 
      * @param success   the given status
      * @param messages  the given list
+     * 
+     * @throws NullPointerException if messages contains a null element
      */
     public Result( boolean success, List<String> messages )
     {
         this.success = success;
-        this.messages = new ArrayList<>();
-        if ( messages != null )
-            this.messages.addAll( messages );
+        this.messages = messages == null ? 
+            List.of() : List.copyOf( messages );
     }
 
     /**
@@ -60,7 +62,7 @@ public class Result
     }
 
     /**
-     * Returns the list of messages
+     * Returns an unmodifiable list of messages
      * associated with this result.
      * 
      * @return the list of messages associated with this result
@@ -68,5 +70,37 @@ public class Result
     public List<String> getMessages()
     {
         return messages;
+    }
+    
+    @Override
+    public int hashCode()
+    {
+        int hash    = Objects.hash( success, messages );
+        return hash;
+    }
+
+    @Override
+    public boolean equals( Object other )
+    {
+        boolean result  = false;
+        if ( this == other )
+            result = true;
+        else if ( other instanceof Result that )
+        {
+            if ( this.success != that.success )
+                result = false;
+            else
+                result = this.messages.equals( that.messages );
+        }
+        return result;
+    }
+    
+    @Override
+    public String toString()
+    {
+        StringBuilder   bldr    = new StringBuilder();
+        bldr.append( "success=" ).append( success )
+            .append( ", messages=" ).append( messages );
+        return bldr.toString();
     }
 }

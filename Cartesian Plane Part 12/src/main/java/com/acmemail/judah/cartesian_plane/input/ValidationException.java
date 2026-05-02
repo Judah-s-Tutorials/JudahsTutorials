@@ -23,9 +23,9 @@ public class ValidationException extends RuntimeException
      * 
      * @param message   message associated with exception
      */
-    public ValidationException(String message)
+    public ValidationException( String message )
     {
-        super(message);
+        super( message );
     }
 
     /**
@@ -33,9 +33,9 @@ public class ValidationException extends RuntimeException
      * 
      * @param cause cause that triggered this exception
      */
-    public ValidationException(Throwable cause)
+    public ValidationException( Throwable cause )
     {
-        super(cause);
+        super( cause );
     }
 
     /**
@@ -46,6 +46,6 @@ public class ValidationException extends RuntimeException
      */
     public ValidationException(String message, Throwable cause)
     {
-        super(message, cause);
+        super( message, cause );
     }
 }

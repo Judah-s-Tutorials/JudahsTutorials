@@ -237,7 +237,7 @@ public class InputParserTest
     @Test
     public void testParseVarsGoodAndBadSpecs()
     {
-        String      strVals = "p=10,q=10,%,r=5 5";
+        String      strVals = "p=10,q=10,%,r=5 5,s=4=5";
         Result      result  = 
             parser.parseInput( Command.SET, strVals );
         assertFalse( result.isSuccess() );
@@ -248,7 +248,7 @@ public class InputParserTest
         Equation            equation    = parser.getEquation();
         Optional<Double>    pVal        = equation.getVar( "p" );
         Optional<Double>    qVal        = equation.getVar( "q" );
-        Optional<Double>    rVal        = equation.getVar( "r" );
+        Optional<Double>    sVal        = equation.getVar( "r" );
         
         // p and q should be stored...
         assertTrue( pVal.isPresent() );
@@ -256,8 +256,8 @@ public class InputParserTest
         assertTrue( qVal.isPresent() );
         assertEquals( 10, qVal.get() );
         
-        // ... but r should not
-        assertFalse( rVal.isPresent() );
+        // ... but s should not
+        assertFalse( sVal.isPresent() );
         assertFalse( result.isSuccess() );
         assertTrue( result.getMessages().size() > 1 );
     }

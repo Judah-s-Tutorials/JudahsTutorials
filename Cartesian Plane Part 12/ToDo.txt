@@ -1,0 +1,6 @@
+Explain records
+
+explain instanceof pattern matching form
+    ... can drop test for other == null
+    
+why make a class final

@@ -42,7 +42,7 @@ public class ValidationExceptionTest
         Exception           cause   = new Exception();
         ValidationException exc     = new ValidationException( str, cause );
         assertEquals( cause, exc.getCause() );
-        assertEquals( str, exc.getMessage() );
+        assertEquals( str, cause.getMessage() );
     }
     
     @Test

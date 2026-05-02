@@ -7,10 +7,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-class ParsedCommandTest
+public class ParsedCommandTest
 {
     @Test
-    void test()
+    public void testCtorGetters()
     {
         Command command = Command.END;
         String  cmdStr  = "command";

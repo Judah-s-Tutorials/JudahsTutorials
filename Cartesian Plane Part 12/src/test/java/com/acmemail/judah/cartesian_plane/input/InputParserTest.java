@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class InputParserTest
+public class InputParserTest
 {
     private InputParser parser;
     
@@ -41,6 +41,9 @@ class InputParserTest
         Equation    equation    = new Exp4jEquation();
         InputParser parser      = new InputParser( equation );
         assertEquals( equation, parser.getEquation() );
+        
+        parser = new InputParser( null );
+        assertNotNull( parser.getEquation() );
     }
     
     @Test
@@ -52,7 +55,7 @@ class InputParserTest
         assertThrows( clazz, () -> 
             parser.parseInput( Command.SET, null ) );
     }
-    
+
     @Test
     public void testParseInputParsedCommand()
     {
@@ -143,16 +146,18 @@ class InputParserTest
     @Test
     public void testParseInputXEQUALS()
     {
-        Equation        equation    = parser.getEquation();
-        String          newVal      = "a + a + a";
+        Equation    equation    = parser.getEquation();
+        String      oldVal      = equation.getXExpression();
+        String      newVal      = oldVal + "*4";
         testSetString( Command.XEQUALS, newVal, equation::getXExpression );
     }
     
     @Test
     public void testParseInputYEQUALS()
     {
-        Equation        equation    = parser.getEquation();
-        String          newVal      = "a + a + a";
+        Equation    equation    = parser.getEquation();
+        String      oldVal      = equation.getYExpression();
+        String      newVal      = oldVal + "*4";
         testSetString( Command.YEQUALS, newVal, equation::getYExpression );
     }
     
@@ -232,7 +237,7 @@ class InputParserTest
         { "%=5", "5=5,6=6", " 5a = 5 , 6b = 6 , ^c  =  7  ,  ^d = 8  ",
           "abc% = 5 , de%f = 6 "
         })
-    void testParseVarsWithBadNames( String str )
+    public void testParseVarsWithBadNames( String str )
     {
         Result      result      = 
             parser.parseInput( Command.SET, str );
@@ -286,6 +291,8 @@ class InputParserTest
         
         // ... but s should not
         assertFalse( sVal.isPresent() );
+        assertFalse( result.isSuccess() );
+        assertTrue( result.getMessages().size() > 1 );
     }
     
     private void testSetDouble( Command cmd, DoubleSupplier getter  )
@@ -337,10 +344,15 @@ class InputParserTest
         ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();
         PrintStream             printStream = new PrintStream( baoStream );
         PrintStream             stdOut      = System.out;
-        System.setOut( printStream );
-        
-        parser.parseInput( cmd, arg );
-        System.setOut( stdOut );
+        try
+        {
+            System.setOut( printStream );
+            parser.parseInput( cmd, arg );
+        }
+        finally
+        {
+            System.setOut( stdOut );
+        }
         
         String  str = baoStream.toString().trim();
         return str;

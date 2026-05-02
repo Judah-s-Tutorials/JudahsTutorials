@@ -56,20 +56,21 @@ public class InputParser
     }
     
     /**
-     * Interprets and executes a command
-     * and associated argument, if any.
-     * For details,
-     * see {@linkplain #parseInput(Command, String)}.
+     * Convenience method that takes a ParsedCommand,
+     * extract its constituent command and argument string,
+     * and feed them to {@link #parseInput(Command, String)};
      * 
-     * @param   pCommand    object encapsulating the command
-     *                      and argument to interpret
-     *                      
-     * @return  Result object describing the outcome of the operation
+     * @param parsedCommand the command to interrogate
+     * 
+     * @return  the result of the operation
+     * 
+     * @see #parseInput(Command, String)
      */
-    public Result parseInput( ParsedCommand pCommand )
+    public Result parseInput( ParsedCommand parsedCommand )
     {
-        Result  result  = 
-            parseInput( pCommand.getCommand(), pCommand.getArgString() );
+        Command command = parsedCommand.getCommand();
+        String  arg     = parsedCommand.getArgString();
+        Result  result  = parseInput( command, arg );
         return result;
     }
     
@@ -151,9 +152,9 @@ public class InputParser
             // ignore these
             break;
         default:
-            String  error   = 
-                "Malfunction: " + "enum constant not recognized";
-            errors.add( error );
+            String  message = 
+                "Malfunction: unrecognized command constant: " + command;
+            errors.add( message );
             break;
         }
         
@@ -217,8 +218,7 @@ public class InputParser
      * @param getter    method to obtain the current value
      *                  of the indicated resource
      */
-    private void 
-    parseExpression( DoubleConsumer setter, Supplier<Object> getter )
+    private void parseExpression( DoubleConsumer setter, Supplier<Object> getter )
     {
         if ( argString.isEmpty() )
             System.out.println( getter.get() );
@@ -298,7 +298,8 @@ public class InputParser
         String[]        parts   = varPair.split( "=" );
         
         // var spec must be either "var" or "var=val" 
-        if ( parts.length > 2 )
+        int partsLen    = parts.length;
+        if ( partsLen < 1 || partsLen > 2 )
         {
             String  err =
                 "\"" + varPair + "\""  

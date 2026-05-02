@@ -88,15 +88,15 @@ public class CommandReader
         {
             if ( prompt != null )
                 System.out.print( prompt );
-            String  line    = reader.readLine();
+            String  line    = filter( reader.readLine() );
             if ( line == null )
                 parsedCommand = new ParsedCommand( Command.NONE, "", "" );
-            else if ( (line = line.trim()).isEmpty() )
-                ;
-            else if ( line.startsWith( "#" ) )
+            else if ( line.isEmpty() )
                 ;
             else 
+            {
                 parsedCommand = parseCommand( line );
+            }
         }
         return parsedCommand;
     }
@@ -134,8 +134,8 @@ public class CommandReader
      */
     public static ParsedCommand parseCommand( String line )
     {
-        ParsedCommand   parsedCommand   = processShortcuts( line );
-        if ( parsedCommand == null )
+        ParsedCommand   parsedCommand   = null;
+        if ( (parsedCommand = processShortcuts( line )) == null )
         {
             int     split   = line.indexOf( ' ' );
             String  cmdStr  = line;
@@ -152,6 +152,33 @@ public class CommandReader
         }
         
         return parsedCommand;
+    }
+    
+    /**
+     * Filter out whitespace and comments
+     * (lines that start with "#").
+     * If input is null, this method returns null.
+     * If, after trimming, line begins with "#"
+     * this method returns an empty string,
+     * else it returns the trimmed string.
+     *  
+     * @param line  the line to test
+     * 
+     * @return true 
+     *      null if the input is null;
+     *      empty string if string consists of whitespace
+     *      or a comment
+     */
+    private static String filter( String line )
+    {
+        String  result  = line;
+        if ( result != null )
+        {
+            result = result.trim();
+            if ( result.startsWith( "#" ) )
+                result =  "";
+        }
+        return result;
     }
     
     /**
