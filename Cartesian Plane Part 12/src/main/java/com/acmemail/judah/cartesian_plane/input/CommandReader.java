@@ -19,14 +19,34 @@ import java.util.stream.Stream;
  * a constant in the Command enum, 
  * and argument may be empty.
  * <p>
- * Two command shortcuts are recognized:
+ * Four command shortcuts are recognized:
  * </p>
  * <ul>
  * <li>"x=argument" is a shortcut for XEQUALS argument</li>
  * <li>"y=argument" is a shortcut for YEQUALS argument</li>
+ * <li>"r=argument" is a shortcut for REQUALS argument</li>
+ * <li>"t=argument" is a shortcut for TEQUALS argument</li>
  * </ul>
+ * <p>
+ * Shortcut processing is case-insensitive;
+ * "x=" and "X=" are equivalent.
+ * </p>
+ * <p>
+ * Note that the input source
+ * belongs to the client,
+ * and it's up to the client
+ * if the source needs to be reset.
+ * The methods {@linkplain #stream()}
+ * and {@linkplain #nextCommand(String)}
+ * read from the same source;
+ * traversal of the source should be restricted
+ * to one of these methods.
+ * </p>
  * 
  * @author Jack Straub
+ * 
+ * @see #stream()
+ * @see #nextCommand(String)
  */
 public class CommandReader
 {
@@ -37,10 +57,6 @@ public class CommandReader
         new Shortcut( "y=", Command.YEQUALS ),
         new Shortcut( "r=", Command.REQUALS ),
         new Shortcut( "t=", Command.TEQUALS ),
-        new Shortcut( "X=", Command.XEQUALS ),
-        new Shortcut( "Y=", Command.YEQUALS ),
-        new Shortcut( "R=", Command.REQUALS ),
-        new Shortcut( "T=", Command.TEQUALS ),
     };
     
     /** Source of the command line input. */
@@ -69,7 +85,15 @@ public class CommandReader
      * (which may be Command.INVALID).
      * The result is stored in a ParsedCommand object
      * and returned to the user.
-     * 
+     * <p>
+     * Note: this method and {@linkplain CommandReader#stream()}
+     * read from the same input source.
+     * It's expected that the input source
+     * will only be traversed once,
+     * so interleaving calls to these two methods
+     * will yield unpredictable results.
+     * </p>
+
      * @param   prompt  
      *      the prompt to display; may be null
      *      in which case no prompt will be displayed
@@ -107,6 +131,14 @@ public class CommandReader
      * Per the specification for parsing input lines,
      * leading and trailing spaces are discarded, and
      * blank lines and comments are skipped.
+     * <p>
+     * Note: this method and {@linkplain CommandReader#nextCommand(String)}
+     * read from the same input source.
+     * It's expected that the input source
+     * will only be traversed once,
+     * so interleaving calls to these two methods
+     * will yield unpredictable results.
+     * </p>
      * 
      * @return  a stream of ParsedCommands
      *          corresponding to lines from the input source
@@ -125,8 +157,10 @@ public class CommandReader
     
     /**
      * Converts a given string to a ParsedCommand.
-     * The input string is assumed to be 
-     * non-null, non-empty and trimmed.
+     * If the given string is null, empty, or blank,
+     * a ParsedCommand wrapping Command.NONE is returned.
+     * Otherwise, if it cannot be matched to a Command constant,
+     * a ParsedCommand wrapping Command.INVALID is returned.
      * 
      * @param   line    the given string
      * 
@@ -134,19 +168,22 @@ public class CommandReader
      */
     public static ParsedCommand parseCommand( String line )
     {
+        String          workLine        = line == null ? "" : line.trim(); 
         ParsedCommand   parsedCommand   = null;
-        if ( (parsedCommand = processShortcuts( line )) == null )
+        if ( (parsedCommand = processShortcuts( workLine )) == null )
         {
-            int     split   = line.indexOf( ' ' );
-            String  cmdStr  = line;
-            String  argStr  = "";
             // If necessary, divide input string into command and argument
-            // (everything after the command, excluding trimmings)
-            if ( split > 0 )
-            {
-                cmdStr = line.substring( 0, split );
-                argStr = line.substring( split + 1 ).trim();
-            }
+            // (everything after the command, excluding trimmings);
+            // "cmd" -> command = cmd, no argument;
+            // "cmd aaa" -> command = cmd, arg = "aaa"
+            // "cmd aaa bbb ccc" -> command = cmd, arg = "aaa bbb ccc"
+            String[]    parts       = workLine.split( "\\s+", 2 );
+            
+            // Note: a split on the empty string yields a one element
+            // array, with "" in [0].
+            int         numParts    = parts.length;
+            String      cmdStr      = parts[0];
+            String      argStr      = numParts < 2  ? "" : parts[1];
             Command command = Command.toCommand( cmdStr );
             parsedCommand = new ParsedCommand( command, cmdStr, argStr );
         }
@@ -164,10 +201,11 @@ public class CommandReader
      *  
      * @param line  the line to test
      * 
-     * @return true 
+     * @return  
      *      null if the input is null;
      *      empty string if string consists of whitespace
-     *      or a comment
+     *      or a comment;
+     *      the trimmed input otherwise
      */
     private static String filter( String line )
     {
@@ -200,17 +238,18 @@ public class CommandReader
         ParsedCommand   parsedCommand   = null;
         Shortcut        shortcut        =
             Arrays.stream( shortcuts )
-                .filter( s -> line.startsWith( s.shortStr ) )
+                .filter( s -> s.matches( line ) )
                 .findFirst()
                     .orElse( null );
         
         if ( shortcut != null )
         {
-            int     shortStrLen = shortcut.shortStr.length();
-            String  arg         = 
+            int     shortStrLen = shortcut.shortStrLen;
+            String  cmdString   = line.substring( 0, shortStrLen );
+            String  argString   = 
                 line.substring( shortStrLen ).trim();
             parsedCommand = 
-                new ParsedCommand( shortcut.cmd, shortcut.shortStr, arg );
+                new ParsedCommand( shortcut.cmd, cmdString, argString );
         }
         
         return parsedCommand;
@@ -229,6 +268,8 @@ public class CommandReader
     {
         /** Short name for command. */
         public final String     shortStr;
+        /** Length of short name for command. */
+        public final int        shortStrLen;
         /** Referenced command. */
         public final Command    cmd;
         
@@ -241,7 +282,26 @@ public class CommandReader
         public Shortcut( String shortcut, Command cmd )
         {
             this.shortStr = shortcut;
+            this.shortStrLen = shortStr.length();
             this.cmd = cmd;
+        }
+        
+        /**
+         * Tests the beginning of a given string
+         * for a case-insensitive match
+         * to the encapsulated shortcut.
+         * 
+         * @param input the given string
+         * 
+         * @return  
+         *      true if the start of input is a case-insensitive match
+         *      for the encapsulated shortcut
+         */
+        public boolean matches( String input )
+        {
+            boolean result  =
+                input.regionMatches( true, 0, shortStr, 0, shortStrLen );
+            return result;
         }
     }
 }

@@ -2,6 +2,7 @@ package com.acmemail.judah.cartesian_plane.input;
 
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Encapsulation of commands
@@ -45,14 +46,18 @@ public enum Command
     ),
     /** Sets the start of the iteration range. */
     START( 
-        "Expression that describes the start value "
-            + "of the iteration range" ),
+        "Describes any well-formed expression that determines"
+         + " the start value of the iteration range" 
+    ),
     /** Sets the end of the iteration range. */
-    END( "Expression that describes the end value in the iteration range" ),
+    END( 
+        "Describes any well-formed expression that determines"
+        + " the end value of the iteration range"
+    ),
     /** Sets the increment value for traversing the iteration range. */
     STEP( 
-        "Expression that describes the increment value "
-            + "for traversing the iteration range"
+        "Describes any well-formed expression that determines"
+        + " the increment value for traversing the iteration range"
     ),
     /** Sets the name of the parameter in a parametric equation. */
     PARAM( "Describes the name of the parameter in a parametric equation" ),
@@ -71,18 +76,15 @@ public enum Command
     /** Identifies an empty command string. */
     NONE( "Identifies an empty command string" ),
     /** Identifies an invalid command. */
-    INVALID( "Designates an invalid command." ),
+    INVALID( "Designates an invalid command" ),
     /** Exit the current operation. */
-    EXIT( 
-        "Application specific; probably "
-        + "\"Exit from the current operation\""
-    ),
+    EXIT( "Exits from the current operation" ),
     /** Select an equation from the EquationMap. */
-    SELECT( "Select an equation from a list" ),
+    SELECT( "Selects an equation from a list" ),
     /** Open a file. */
-    OPEN( "Application specific; probably \"open equation file\""),
+    OPEN( "Opens an equation file" ),
     /** Save a file. */
-    SAVE( "Application specific; probably \"save equation file\"");
+    SAVE( "Saves an equation file" );
     
     /** Line separator for the current platform. */
     private static final String lineSep         = System.lineSeparator();
@@ -115,20 +117,21 @@ public enum Command
      * to the names of the enumerated constants
      * and returns the matching constant.
      * The comparison is case-insensitive.
-     * If the given string is empty NONE is returned.
+     * If the given string is empty or blank NONE is returned.
      * If no match is found INVALID is returned.
      * 
      * @param from  the given string
      * 
      * @return  
-     *      the first command whose name
-     *      matches the given string
+     *      the matching Command, or NONE for empty/blank input, 
+     *      or INVALID if no name matches
      *      
      * @throws NullPointerException if from is null
      */
     public static Command toCommand( String from )
     {
-        String  upperFrom   = from.toUpperCase().trim();
+        String  upperFrom   = 
+            Objects.requireNonNull( from, "from" ).toUpperCase().trim();
         Command cmd         = NONE;
         if ( !upperFrom.isEmpty() )
             cmd = Arrays.stream( values() )

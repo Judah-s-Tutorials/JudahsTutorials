@@ -14,7 +14,7 @@ import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.FileManager;
-import com.acmemail.judah.cartesian_plane.input.InputParser;
+import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
@@ -56,14 +56,14 @@ public class OpenEquationDemo1
     private static void exec( CommandReader commandReader, Equation equation )
         throws IOException
     {
-        InputParser         inputParser     = new InputParser( equation );
+        CommandProcessor         inputParser     = new CommandProcessor( equation );
         ParsedCommand       parsedCommand   = null;
         Command             command         = Command.NONE;
         do
         {
             parsedCommand = commandReader.nextCommand( prompt );
             command = parsedCommand.getCommand();
-            Result  result  = inputParser.parseInput( parsedCommand );
+            Result  result  = inputParser.processCommand( parsedCommand );
             if ( command == Command.INVALID )
                 System.err.println( Command.usage() );
             else if ( !result.isSuccess() )
@@ -98,7 +98,7 @@ public class OpenEquationDemo1
      * 
      * @param parser    the object that encapsulates the equation to plot
      */
-    private static void plotY( InputParser parser )
+    private static void plotY( CommandProcessor parser )
     {
         plane.setStreamSupplier( () ->
             parser.getEquation().yPlot()
@@ -113,7 +113,7 @@ public class OpenEquationDemo1
      * 
      * @param parser    the object that encapsulates the equation to plot
      */
-    private static void plotXY( InputParser parser )
+    private static void plotXY( CommandProcessor parser )
     {
         plane.setStreamSupplier( () ->
             parser.getEquation().xyPlot()

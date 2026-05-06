@@ -3,4 +3,31 @@ Explain records
 explain instanceof pattern matching form
     ... can drop test for other == null
     
-why make a class final
+explain why make a class final
+
+explain Objects.requireNonNull 
+    ... method call optimized away
+    
+Should equalsTest verify non-equality of hashcodes?
+	"However, verifying that non-equal objects have different 
+	hash codes is often considered a "best practice" for 
+	testing the quality of your hashing algorithm, as 
+	frequent collisions can significantly degrade the 
+	performance of hash-based collections like HashMap and
+	HashSet."
+	
+	On testing them: Bloch doesn't devote a full item to 
+	...
+	The practical advice that's grown up around his recommendations:
+	...
+	o Test that equal objects produce equal hash codes (the contract), 
+	  but don't test the converse — unequal objects may share a hash code.
+	...
+	
+	Jan Ouwens EqualsVerifier https://jqno.nl/equalsverifier/
+
+Difference between empty string and blank string
+
+String.regionMatches
+
+Make CommandReader.Shortcut a record

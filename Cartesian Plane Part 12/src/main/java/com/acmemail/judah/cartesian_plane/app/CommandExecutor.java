@@ -14,7 +14,7 @@ import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.FileManager;
-import com.acmemail.judah.cartesian_plane.input.InputParser;
+import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
@@ -34,7 +34,7 @@ public class CommandExecutor
         "CartesianPlane may not be null";
     
     private final CartesianPlane    plane;
-    private InputParser             inputParser;
+    private CommandProcessor             inputParser;
     
     /**
      * Constructor.
@@ -64,14 +64,14 @@ public class CommandExecutor
      */
     public void exec( Supplier<ParsedCommand> reader, Equation equation )
     {
-        inputParser = new InputParser( equation );
+        inputParser = new CommandProcessor( equation );
         ParsedCommand       parsedCommand   = null;
         Command             command         = Command.NONE;
         do
         {
             parsedCommand = reader.get();
             command = parsedCommand.getCommand();
-            Result  result  = inputParser.parseInput( parsedCommand );
+            Result  result  = inputParser.processCommand( parsedCommand );
             if ( command == Command.INVALID )
                 showUsage();
             else if ( !result.isSuccess() )
@@ -137,7 +137,7 @@ public class CommandExecutor
         Equation    equation    = name.isEmpty() ? 
             FileManager.open() : FileManager.open( name );
         if ( equation != null )
-            inputParser = new InputParser( equation );
+            inputParser = new CommandProcessor( equation );
     }
     
     /**

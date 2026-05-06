@@ -215,9 +215,9 @@ public class FileManager
     public static Equation open( BufferedReader bufReader )
         throws IOException
     {
-        InputParser     parser  = new InputParser();
+        CommandProcessor     parser  = new CommandProcessor();
         CommandReader   reader  = new CommandReader( bufReader );
-        reader.stream().forEach( parser::parseInput );
+        reader.stream().forEach( parser::processCommand );
         
         Equation    equation    = parser.getEquation();
         return equation;
