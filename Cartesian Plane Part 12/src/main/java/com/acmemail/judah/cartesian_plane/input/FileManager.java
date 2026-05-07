@@ -247,7 +247,7 @@ public class FileManager
      */
     private static void writeParameterNames( Equation equation )
     {
-        lines.add( "param " + equation.getParam() );
+        lines.add( "param " + equation.getParamName() );
         lines.add( "radius " + equation.getRadiusName() );
         lines.add( "theta " + equation.getThetaName() );
     }

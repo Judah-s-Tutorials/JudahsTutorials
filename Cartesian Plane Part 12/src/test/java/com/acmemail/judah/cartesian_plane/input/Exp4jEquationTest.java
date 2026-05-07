@@ -472,8 +472,8 @@ class Exp4jEquationTest
     public void testGetParam()
     {
         String  pName   = "param";
-        equation.setParam( pName );
-        assertEquals( pName, equation.getParam() );
+        equation.setParamName( pName );
+        assertEquals( pName, equation.getParamName() );
     }
 
     @Test
@@ -600,21 +600,24 @@ class Exp4jEquationTest
     @ValueSource(strings={ "_", "a", "_Ab", "_99", "__a__b__1__0__" } )
     public void testIsValidNameTrue( String str )
     {
-        assertTrue( equation.isValidName( str ), str );
+        Result  result  = equation.validateName( str );
+        assertTrue( result.isSuccess(), str );
     }
 
     @ParameterizedTest
     @ValueSource(strings={ "0_ab", "%", "$a", "", "a-b" } )
     public void testIsValidNameFalse( String str )
     {
-        assertFalse( equation.isValidName( str ), str );
+        Result  result  = equation.validateName( str );
+        assertFalse( result.isSuccess() );
     }
 
     @ParameterizedTest
     @ValueSource(strings={ "0", "0.1", "0.", "-.1", "-1.1", "pi", "cos(pi)" } )
     public void testIsValidValueTrue( String str )
     {
-        assertTrue( equation.isValidValue( str ), str );
+        Result  result  = equation.validateValue( str );
+        assertTrue( result.isSuccess(), str );
     }
 
     @ParameterizedTest
@@ -623,7 +626,8 @@ class Exp4jEquationTest
     {
         // These should all fail because they contain 
         // undeclared variables.
-        assertFalse( equation.isValidValue( str ), str );
+        Result  result  = equation.validateValue( str );
+        assertFalse( result.isSuccess(), str );
     }
 
     @Test
@@ -664,6 +668,14 @@ class Exp4jEquationTest
         assertEquals( expVal, optional.get(), .0001, expr );
     }
     
+    @Test
+    public void testEvaluatNull()
+    {
+        assertThrows( NullPointerException.class,
+            () -> equation.evaluate( null )
+        );
+    }
+    
     private void validateDefaultXExpression()
     {
         equation.setRange( 1, 3, 1 );
@@ -695,7 +707,7 @@ class Exp4jEquationTest
         Set<String> vars    = equation.getVars().keySet();
         for ( String  var : defVars )
             assertTrue( vars.contains( var ), var );
-        assertEquals( "t", equation.getParam() );
+        assertEquals( "t", equation.getParamName() );
     }
     
     private static class Range

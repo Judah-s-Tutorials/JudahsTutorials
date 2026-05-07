@@ -9,22 +9,66 @@ import java.util.stream.Stream;
  * This interface describes the facilities necessary
  * to manage an <em>equation</em>.
  * An <em>equation</em> is a set of resources
- * that define a simple function (<code>y = f(x)</code>)
- * or a parametric equation (<code>(x,y) = f(t)</code>).
+ * that define a simple function (<code>y = f(x)</code>),
+ * a parametric equation (<code>(x,y) = f(t)</code>),
+ * or a polar equation (<code>r = acos(n&Theta;)</code>, 
+ * <code>&Theta; = atan( x/y ))</code>.
  * These resources include:
  * <ul>
  *      <li>
  *          Expressions for the calculation 
  *          of y values in a simple function,
- *          or the calculation of (x,y) values
- *          an a parametric equation;
+ *          (x,y) values in a parametric equation,
+ *          and radius values in a polar equation;
  *      </li>
  *      <li>The declaration of variables used in the expression(s); and</li>
  *      <li>A range for producing a plot.</li>
  * </ul>
  * <p>
- * For archival purposes
- * and equation can optionally have a name.
+ * For archival purposes,
+ * an equation can optionally have a name.
+ * </p>
+ * <p>
+ * Any element of the equation
+ * can be validated before trying to plot it.
+ * Validation facilities include
+ * {@linkplain #validateRange()},
+ * {@linkplain #validateValue(String)},
+ * {@linkplain #validateName(String)}.
+ * If any of these methods fail,
+ * an unsuccessful result
+ * with one or more error messages is returned.
+ * </p>
+ * <p>
+ * The {@linkplain #evaluate(String)} method,
+ * which attempts to derive a value from an expression,
+ * returns a non-empty Optional if the expression
+ * evaluates successfully,
+ * an empty Optional if evaluation fails.
+ * </p>
+ * <p>
+ * Methods that establish expressions,
+ * {@linkplain #setYExpression(String)},
+ * {@linkplain #setXExpression(String)},
+ * {@linkplain #setRExpression(String)},
+ * {@linkplain #setTExpression(String)},
+ * validate the target expression 
+ * before setting it.
+ * If the expression is invalid
+ * the currently set expression is not overwritten,
+ * and an unsuccessful Result
+ * with one or more error messages is returned.
+ * </p>
+ * <p>
+ * Methods that generate streams from equations, 
+ * {@linkplain #yPlot()},
+ * {@linkplain #xyPlot()},
+ * {@linkplain #rPlot()},
+ * {@linkplain #tPlot()},
+ * expect equations to be pre-validated,
+ * and throw a ValidationException
+ * if an invalid component of the equation
+ * is detected.
  * </p>
  *
  * @author Jack Straub
@@ -34,7 +78,8 @@ public interface Equation
     /**
      * Sets the name of this equation.
      * 
-     * @param name  the name of this equation
+     * @param name  the name of this equation;
+     *              must be non-null
      */
     void setName( String name );
     
@@ -55,10 +100,12 @@ public interface Equation
     /**
      * Sets the value of a variable to a given value.
      * 
-     * @param name  the name of the variable
+     * @param name  the name of the variable; must be non-null
      * @param val   the given value
+     * 
+     * @throws NullPointerException if name is null
      */
-    void setVar(String name, double val);
+    void setVar( String name, double val );
 
     /**
      * Removes from the set of variables
@@ -66,9 +113,11 @@ public interface Equation
      * If the name is not found
      * the operation is ignored.
      * 
-     * @param name  the given name
+     * @param name  the given name; must be non-null
+     * 
+     * @throws NullPointerException if name is null
      */
-    void removeVar(String name);
+    void removeVar( String name );
 
     /**
      * Gets an Optional object
@@ -77,14 +126,16 @@ public interface Equation
      * If the name is not found
      * an empty Optional is returned.
      * 
-     * @param name  the given name
+     * @param name  given name; must be non-null
      * 
      * @return  
      *      an Optional object
      *      containing the value of the variable
      *      with the given name
+     * 
+     * @throws NullPointerException if name is null
      */
-    Optional<Double> getVar(String name);
+    Optional<Double> getVar( String name );
 
     /**
      * Returns an unmodifiable map
@@ -96,62 +147,78 @@ public interface Equation
     Map<String,Double> getVars();
 
     /**
-     * Parses the expression used to derive
-     * the x-coordinate of a point 
-     * to the given value.
-     * If a parsing error occurs
-     * a description of the error is returned,
-     * otherwise Result.SUCCESS is returned.
+     * Parses the given expression used to derive
+     * the x-coordinate of a point.
+     * If a parsing error occurs,
+     * a Result object is returned
+     * containing a description of the error,
+     * and a <em>success</em> value of false.
+     * Otherwise the returned Result object
+     * will have a <em>success</em> value of true.
      * 
-     * @param exprStr   the given value
-     * 
-     * @return  the status of the operation
-     */
-    Result setXExpression(String exprStr);
-
-    /**
-     * Parses the expression used to derive
-     * the y-coordinate of a point 
-     * to the given value.
-     * If a parsing error occurs
-     * a description of the error is returned,
-     * otherwise Result.SUCCESS is returned.
-     * 
-     * @param exprStr   the given value
+     * @param exprStr   the given expression, must be non-null
      * 
      * @return  the status of the operation
+     * 
+     * @throws  NullPointerException if exprStr is null
      */
-    Result setYExpression(String exprStr);
+    Result setXExpression( String exprStr );
 
     /**
-     * Parses the expression used to derive
+     * Parses the given expression used to derive
+     * the y-coordinate of a point.
+     * If a parsing error occurs,
+     * a Result object is returned
+     * containing a description of the error,
+     * and a <em>success</em> value of false.
+     * Otherwise the returned Result object
+     * will have a <em>success</em> value of true.
+     * 
+     * @param exprStr   the given expression, must be non-null
+     * 
+     * @return  the status of the operation
+     * 
+     * @throws  NullPointerException if exprStr is null
+     */
+    Result setYExpression( String exprStr );
+
+    /**
+     * Parses the given expression used to derive
      * the theta-coordinate of a point 
-     * in polar coordinates
-     * to the given value.
-     * If a parsing error occurs
-     * a description of the error is returned,
-     * otherwise Result.SUCCESS is returned.
+     * in polar coordinates.
+     * If a parsing error occurs,
+     * a Result object is returned
+     * containing a description of the error,
+     * and a <em>success</em> value of false.
+     * Otherwise the returned Result object
+     * will have a <em>success</em> value of true.
      * 
-     * @param exprStr   the given value
+     * @param exprStr   the given expression, must be non-null
      * 
      * @return  the status of the operation
+     * 
+     * @throws  NullPointerException if exprStr is null
      */
-    Result setTExpression(String exprStr);
+    Result setTExpression( String exprStr );
 
     /**
-     * Parses the expression used to derive
-     * the theta-coordinate of a point 
-     * in polar coordinates
-     * to the given value.
-     * If a parsing error occurs
-     * a description of the error is returned,
-     * otherwise Result.SUCCESS is returned.
+     * Parses the given expression used to derive
+     * the radius-coordinate of a point 
+     * in polar coordinates.
+     * If a parsing error occurs,
+     * a Result object is returned
+     * containing a description of the error,
+     * and a <em>success</em> value of false.
+     * Otherwise the returned Result object
+     * will have a <em>success</em> value of true.
      * 
-     * @param exprStr   the given value
+     * @param exprStr   the given expression, must be non-null
      * 
      * @return  the status of the operation
+     * 
+     * @throws  NullPointerException if exprStr is null
      */
-    Result setRExpression(String exprStr);
+    Result setRExpression( String exprStr );
 
     /**
      * Gets the currently set x-expression.
@@ -184,9 +251,9 @@ public interface Equation
     /**
      * Iterates over the encapsulated range,
      * generating the (x,y) coordinates 
-     * derived from an equation of the form <em>y=f(x)</em>.
+     * derived from an equation of the form <code>y=f(x)</code>.
      * 
-     * @return the (x,y) coordinates derived from a parametric equation
+     * @return a stream of (x,y) coordinates derived from an equation
      * 
      * @throws ValidationException if the equation is invalid
      */
@@ -197,7 +264,9 @@ public interface Equation
      * generating the (x,y) coordinates 
      * derived from a parametric equation.
      * 
-     * @return the (x,y) coordinates derived from a parametric equation
+     * @return 
+     *      a stream of (x,y) coordinates derived 
+     *      from a parametric equation
      * 
      * @throws ValidationException if the equation is invalid
      */
@@ -208,11 +277,11 @@ public interface Equation
      * generating the (x,y) coordinates 
      * derived from an equation
      * expressed in polar coordinates,
-     * r = f(t).
-     * Theta is used
+     * <code>r = f(t)</code>.
+     * <em>Theta</em> is used
      * to traverse the iteration range.
      * 
-     * @return the (x,y) coordinates derived from an equation
+     * @return a stream of (x,y) coordinates derived from an equation
      * 
      * @throws ValidationException if the equation is invalid
      */
@@ -223,8 +292,8 @@ public interface Equation
      * generating the (x,y) coordinates 
      * derived from an equation
      * expressed in polar coordinates,
-     * t = f(r).
-     * Radius is used
+     * <code>t = f(r)</code>.
+     * <em>Radius</em> is used
      * to traverse the iteration range.
      * 
      * @return the (x,y) coordinates derived from an equation
@@ -239,7 +308,7 @@ public interface Equation
      * 
      * @return the name of the parameter
      */
-    String getParam();
+    String getParamName();
 
     /**
      * Sets the name of the parameter
@@ -247,7 +316,7 @@ public interface Equation
      * 
      * @param param the name of the parameter
      */
-    void setParam(String param);
+    void setParamName( String param );
 
     /**
      * Gets the name of the radius variable
@@ -263,7 +332,7 @@ public interface Equation
      * 
      * @param radius the name of the radius
      */
-    void setRadiusName(String radius);
+    void setRadiusName( String radius );
 
     /**
      * Gets the name of the angle variable
@@ -277,9 +346,9 @@ public interface Equation
      * Sets the name of the angle variable
      * in a polar equation.
      * 
-     * @param theta the name of the parameter
+     * @param theta the name of the angle variable
      */
-    void setThetaName(String theta);
+    void setThetaName( String theta );
 
     /**
      * Establishes the iteration range for this Equation.
@@ -292,7 +361,7 @@ public interface Equation
      * 
      * @see #validateRange()
      */
-    void setRange(double start, double end, double step);
+    void setRange( double start, double end, double step );
 
     /**
      * Sets the start of the iteration range.
@@ -303,7 +372,7 @@ public interface Equation
      * 
      * @see #validateRange()
      */
-    void setRangeStart(double rangeStart);
+    void setRangeStart( double rangeStart );
 
     /**
      * Returns the start of the iteration range.
@@ -321,7 +390,7 @@ public interface Equation
      * 
      * @see #validateRange()
      */
-    void setRangeEnd(double rangeEnd);
+    void setRangeEnd( double rangeEnd );
 
     /**
      * Returns the end of the iteration range.
@@ -340,23 +409,24 @@ public interface Equation
      * 
      * @see #validateRange()
      */
-    void setRangeStep(double rangeStep);
+    void setRangeStep( double rangeStep );
 
     /**
      * Returns the increment used
      * to iterate over the encapsulated range.
      * 
-     * @return the start of the iteration range
+     * @return the increment used to iterate over the encapsulated range
      */
     double getRangeStep();
     
     /**
      * Validate the range properties.
      * If the range is valid
-     * an empty Optional is returned.
-     * If it's invalid
-     * an Optional containing an explanatory error message
-     * is returned.
+     * a Result object is returned
+     * with a success status of true.
+     * If it's invalid,
+     * the Result object will contain an error message,
+     * and will have a success status of false.
      * <ol>
      * <li>Step may never be 0.</li>
      * <li>If step is positive, start must be less than or equal to end.</li>
@@ -364,39 +434,46 @@ public interface Equation
      * </ol>
      * 
      * @return	
-     * 		an empty Optional if the range is valid,
-     * 		otherwise an Optional containing an error message
+     * 		successful Result if the range is valid,
+     * 		otherwise an unsuccessful Result containing an error message
      */
-    Optional<String> validateRange();
+    Result validateRange();
     
     /**
      * Determines if a given string
      * is a valid variable name.
-     * Given that underscore is an alphabetic character,
-     * a valid variable name is one that
-     * begins with an alphabetic character,
-     * and whose remaining are characters alphanumeric.
+     * A valid variable name is one 
+     * that is non-null and non-empty,
+     * begins with an underscore or alphabetic character,
+     * and whose remaining characters
+     * may be underscore or alphanumeric.
+     * Returns a successful result if valid,
+     * otherwise an unsuccessful result and error message.
      * 
      * @param name  the given string
      * 
-     * @return  true if the given string is a valid variable name
+     * @return  successful result if valid,
+     *          otherwise an unsuccessful result
+     *          
+     * @see #validateValue(String)
      */
-    boolean isValidName( String name );
+    Result validateName( String name );
 
     
     /**
      * Determines if a given string
      * is a valid double value.
-     * Consider preferring {@linkplain #evaluate(String)}
-     * to this method.
+     * Null and empty strings are considered invalid.
      * 
      * @param valStr  the given string
      * 
-     * @return  true if the given string is a valid double value
+     * @return  successful result if valid,
+     *          otherwise an unsuccessful result
      * 
      * @see #evaluate(String)
+     * @see #validateName(String)
      */
-    boolean isValidValue( String valStr );
+    Result validateValue( String valStr );
     
     /**
      * Parses and evaluates an expression in the context
@@ -404,6 +481,7 @@ public interface Equation
      * Declared variables and functions are recognized;
      * use of undeclared variables or functions
      * will result in evaluation failure.
+     * Null input will result in a NullPointerException.
      * If <em>a</em>, <em>b</em> and <em>theta</em>
      * are declared variables,
      * the following are all considered valid expressions.
@@ -421,14 +499,15 @@ public interface Equation
      * is returned.
      * If evaluation is not successful
      * an empty Optional is returned.
-     * 
      * </p>
      * 
-     * @param exprStr   the expression to evaluate
+     * @param exprStr   the expression to evaluate; must be non-null
      * 
      * @return  
      *      an Optional containing the result of the evaluation,
      *      or an empty Optional if an error occurred
+     *      
+     *  @throws NullPointerException if expStr is null
      */
     Optional<Double> evaluate( String exprStr );
 }

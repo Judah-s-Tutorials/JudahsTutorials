@@ -158,7 +158,7 @@ public class CommandProcessorTest
     {
         Equation        equation    = proc.getEquation();
         String          newVal      = "newParamName";
-        testSetString( Command.PARAM, newVal, equation::getParam );
+        testSetString( Command.PARAM, newVal, equation::getParamName );
     }
 
     @Test

@@ -92,7 +92,7 @@ class FileManagerTest
         testEquation.setYExpression( testYEq );
         testEquation.setRExpression( testREq );
         testEquation.setTExpression( testTEq );
-        testEquation.setParam( testParam );
+        testEquation.setParamName( testParam );
         testEquation.setRadiusName( testRadius );
         testEquation.setThetaName( testTheta );
         
@@ -260,7 +260,7 @@ class FileManagerTest
         assertEquals( testYEq, actVal.getYExpression() );
         assertEquals( testREq, actVal.getRExpression() );
         assertEquals( testTEq, actVal.getTExpression() );
-        assertEquals( testParam, actVal.getParam() );
+        assertEquals( testParam, actVal.getParamName() );
         assertEquals( testRadius, actVal.getRadiusName() );
         assertEquals( testTheta, actVal.getThetaName() );
     }

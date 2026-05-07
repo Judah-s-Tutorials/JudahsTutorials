@@ -35,3 +35,7 @@ Make CommandReader.Shortcut a record
 Context NaN
 explain the difference between d1 == d2
 and Double.compare( d1, d2 ) = 0;
+
+isValidName and isValidValue should return a result
+
+

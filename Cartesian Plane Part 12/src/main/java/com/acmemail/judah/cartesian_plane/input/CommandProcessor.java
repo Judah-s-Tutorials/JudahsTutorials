@@ -228,8 +228,8 @@ public class CommandProcessor
         case PARAM:
             setName( 
                 context,
-                equation::setParam, 
-                equation::getParam
+                equation::setParamName, 
+                equation::getParamName
             );
             break;
         case INVALID:
@@ -408,7 +408,7 @@ public class CommandProcessor
             String  name    = parts[0].trim();
             String  valStr  = partsLen == 1 ? "0" : parts[1].trim();
             
-            if ( !equation.isValidName( name ) )
+            if ( !equation.validateName( name ).isSuccess() )
                 context.formatError( name, invalidName );
             else
             {
@@ -460,7 +460,7 @@ public class CommandProcessor
         String  argString   = context.getArgString();
         if ( argString.isEmpty() )
             System.out.println( getter.get() );
-        else if ( !equation.isValidName( argString ) )
+        else if ( !equation.validateName( argString ).isSuccess() )
             context.formatError( argString, invalidName );
         else
             setter.accept( argString );

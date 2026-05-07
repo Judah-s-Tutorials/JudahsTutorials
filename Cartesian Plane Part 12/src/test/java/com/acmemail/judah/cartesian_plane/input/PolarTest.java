@@ -94,17 +94,12 @@ public class PolarTest
         double  testRadius      = 5;
         double  testTheta       = 6;
         Polar   testPolar       = Polar.of( testRadius, testTheta );
-        int     maxLen          = 4;
-        String  testRadiusStr   = Double.toString( testRadius );
-        if ( testRadiusStr.length() > maxLen )
-            testRadiusStr = testRadiusStr.substring( 0, maxLen );
-        String  testThetaStr    = Double.toString( testTheta );
-        if ( testThetaStr.length() > maxLen )
-            testThetaStr = testThetaStr.substring( 0, maxLen );
         
-        String  testStr = testPolar.toString();
-        assertTrue( testStr.contains( testRadiusStr ), testRadiusStr );
-        assertTrue( testStr.contains( testThetaStr ), testThetaStr );
+        String  testStr         = testPolar.toString();
+        assertTrue( testStr.contains( Double.toString( testRadius ) ) );
+        assertTrue( testStr.contains( Double.toString( testTheta ) ) );
+        assertTrue( testStr.startsWith( "Polar[radius=" ), testStr );
+        assertTrue( testStr.endsWith( " radians]" ), testStr );
     }
 
     @Test
@@ -419,12 +414,10 @@ public class PolarTest
          */
         public XYToPolarChecker( Polar pzed )
         {
-            this.radius = pzed.getRadius();
-            this.theta = pzed.getTheta();
-            double  cosTheta    = Math.cos( theta );
-            double  sinTheta    = Math.sin( theta );
-            this.xco = cosTheta * radius;
-            this.yco = sinTheta * radius;
+            radius = pzed.getRadius();
+            theta = pzed.getTheta();
+            xco = Math.cos( theta ) * radius;
+            yco = Math.sin( theta ) * radius;
         }
         
         /**
