@@ -31,3 +31,7 @@ Difference between empty string and blank string
 String.regionMatches
 
 Make CommandReader.Shortcut a record
+
+Context NaN
+explain the difference between d1 == d2
+and Double.compare( d1, d2 ) = 0;

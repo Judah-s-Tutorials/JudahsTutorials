@@ -5,8 +5,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import javax.swing.JFileChooser;
 
@@ -15,7 +16,7 @@ import javax.swing.JFileChooser;
  * maintains a map of equation names
  * to equations.
  * To create the map
- * invoke the <em>parseEquationFiles( File dir )</em> method
+ * invoke the {@linkplain #parseEquationFiles(File)} method,
  * passing the name of a directory
  * that contains text files
  * with equation configuration data;
@@ -24,7 +25,7 @@ import javax.swing.JFileChooser;
  * which will be ignored.
  * You can also add a single equation 
  * to the map by invoking 
- * <em>parseEquationFile( File file )</em>
+ * @linkplain #parseEquationFile( File file )}
  * and passing the name of a text file
  * that contains equation configuration data.
  * 
@@ -36,7 +37,8 @@ public class EquationMap
     private static final JFileChooser   chooser;
     
     /** Map of names to Equation objects. */
-    private static final Map<String,Equation>   equationMap = new HashMap<>();
+    private static final ConcurrentMap<String,Equation>   equationMap = 
+        new ConcurrentHashMap<>();
     
     static
     {
