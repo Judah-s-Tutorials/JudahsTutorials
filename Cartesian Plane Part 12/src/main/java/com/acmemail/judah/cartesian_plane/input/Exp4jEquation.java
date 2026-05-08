@@ -102,7 +102,7 @@ public class Exp4jEquation implements Equation
      *      the expression associated with the equation;
      *      must be non-null
      *      
-     *  @throws NullPointerException if expr is null
+     * @throws NullPointerException if expr is null
      */
     public Exp4jEquation( String expr )
     {
@@ -201,7 +201,7 @@ public class Exp4jEquation implements Equation
     @Override
     public Result setTExpression( String exprStr )
     {
-        Objects.requireNonNull( exprStr, "exprstr" );
+        Objects.requireNonNull( exprStr, "exprStr" );
         Result    result  = validateExpr( exprStr, e -> tExpr = e );
         if ( result.isSuccess() )
             this.tExprStr = exprStr;
@@ -298,7 +298,7 @@ public class Exp4jEquation implements Equation
         }
         Result  isRangeValid    = validateRange();
         if ( !isRangeValid.isSuccess() )
-            throw new ValidationException( getMessage( isRangeValid) );
+            throw new ValidationException( getMessage( isRangeValid ) );
 
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
@@ -320,7 +320,7 @@ public class Exp4jEquation implements Equation
         }
         Result  isRangeValid    = validateRange();
         if ( !isRangeValid.isSuccess() )
-            throw new ValidationException( getMessage( isRangeValid) );
+            throw new ValidationException( getMessage( isRangeValid ) );
 
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r + rStep )
@@ -637,8 +637,8 @@ public class Exp4jEquation implements Equation
         vars.putIfAbsent( "a",  0. );
         vars.putIfAbsent( "b",  0. );
         vars.putIfAbsent( "c",  0. );
-        vars.putIfAbsent( "t",  0. );
         vars.putIfAbsent( "r",  0. );
+        vars.putIfAbsent( "t",  0. );
     }
     
     /** 
