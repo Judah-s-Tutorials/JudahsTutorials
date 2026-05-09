@@ -75,6 +75,52 @@ import java.util.stream.Stream;
  */
 public interface Equation
 {
+    /** 
+     * A map of all Command enum constants that have default
+     * string values. Includes all expressions,
+     * such as {@code XEQUALS 1},
+     * and special names,
+     * such as {@code PARAM t}, the name of the parameter variable
+     * for use in parametric equations.
+     */
+    Map<Command,String> DEF_STRINGS = Map.of( 
+        Command.XEQUALS, "1",
+        Command.YEQUALS, "1",
+        Command.REQUALS, "1",
+        Command.TEQUALS, "1",
+        Command.PARAM, "t",
+        Command.RADIUS, "r",
+        Command.THETA, "t" 
+    );
+    
+    /**  
+     * A map of all available intrinsic variables and their default
+     * values. An Equation implementation may have more intrinsic
+     * variables, but they must support these.
+     */
+    Map<String,Double>  INTRINSIC_VARIABLES = Map.of(
+        "x", 0d,
+        "y", 0d,
+        "a", 0d,
+        "b", 0d,
+        "c", 0d,
+        "r", 0d,
+        "t", 0d
+    );
+    
+    /**  
+     * A map of all names and their default. 
+     * "Special names" are the names of variables
+     * used in parametric and polar equations.
+     * An Equation implementation may have more special names,
+     * but they must support these.
+     */
+    Map<Command,String>  SPECIAL_NAMES   = Map.of(
+        Command.PARAM, "t",
+        Command.RADIUS, "r",
+        Command.THETA, "t" 
+    );
+    
     /**
      * Sets the name of this equation.
      * 

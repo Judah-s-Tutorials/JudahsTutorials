@@ -25,7 +25,7 @@ import javax.swing.JFileChooser;
  * which will be ignored.
  * You can also add a single equation 
  * to the map by invoking 
- * @linkplain #parseEquationFile( File file )}
+ * {@linkplain #parseEquationFile( File file )}
  * and passing the name of a text file
  * that contains equation configuration data.
  * 

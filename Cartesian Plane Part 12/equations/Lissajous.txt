@@ -1,0 +1,9 @@
+ # Parametric equation: a Lissajous curve
+ # EQUATION lissajous
+ SET a=2, b=3
+ x= 3 * cos(a * t)
+ y= 3 * sin(b * t)
+ START 0
+ END   2 * pi
+ STEP  pi / 200
+ XYPLOT

@@ -13,6 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -197,30 +199,43 @@ public class Exp4jEquationTest
         }
     }
 
-    @Test
-    public void testSetXExpressionGoWrong()
-    {
-        String  oldXExpr    = equation.getXExpression();
-        String  xExpr       = "notAVar * x";
-        Result  result      = equation.setXExpression( xExpr );
-        assertFalse( result.isSuccess() );
-        assertEquals( oldXExpr, equation.getXExpression() );
-    }
-
     @ParameterizedTest
     @ValueSource(strings={ "notAVar * x", "a=%", "a^_", "x +* 3" } )
-    public void testSetExpressionGoWrong( String xExpr)
+    public void testSetExpressionGoWrong( String invExpr)
     {
-        String  oldXExpr    = equation.getXExpression();
-        Result  result      = equation.setXExpression( xExpr );
-        assertFalse( result.isSuccess() );
-        assertEquals( oldXExpr, equation.getXExpression() );
+        testSetExpressionGoWrong( 
+            invExpr, equation::getYExpression, equation::setYExpression
+        );
+        testSetExpressionGoWrong( 
+            invExpr, equation::getXExpression, equation::setXExpression
+        );
+        testSetExpressionGoWrong( 
+            invExpr, equation::getRExpression, equation::setRExpression
+        );
+        testSetExpressionGoWrong( 
+            invExpr, equation::getTExpression, equation::setTExpression
+        );
     }
 
     @Test
-    public void testSetXExpressionNull()
+    public void testSetExpressionNull()
     {
+        assertThrows( NPE_CLASS, () -> equation.setYExpression( null ) );
         assertThrows( NPE_CLASS, () -> equation.setXExpression( null ) );
+        assertThrows( NPE_CLASS, () -> equation.setRExpression( null ) );
+        assertThrows( NPE_CLASS, () -> equation.setTExpression( null ) );
+    }
+    
+    private void testSetExpressionGoWrong( 
+        String invExpr, 
+        Supplier<String> getter,
+        Function<String, Result> setter
+    )
+    {
+        String  oldXExpr    = getter.get();
+        Result  result      = setter.apply( invExpr );
+        assertFalse( result.isSuccess() );
+        assertEquals( oldXExpr, getter.get() );
     }
 
     @Test
@@ -652,6 +667,8 @@ public class Exp4jEquationTest
             range.set( equation );
             assertThrows( clazz, () -> equation.yPlot(), range.toString() );
             assertThrows( clazz, () -> equation.xyPlot(), range.toString() );
+            assertThrows( clazz, () -> equation.rPlot(), range.toString() );
+            assertThrows( clazz, () -> equation.tPlot(), range.toString() );
         }
     }
 

@@ -1,0 +1,216 @@
+ propose a high-level strategy for re-engineering the facilities provided by FileManager
+
+● A three-layer split is the cleanest path. Each layer has a single concern and depends only on the layer below.
+
+  ┌─────────────────────────────────────────────────┐
+  │  Layer C — UI adapter (Swing)                  │
+  │  EquationFileChooser                            │
+  │  • JFileChooser, JOptionPane, dialog flow       │
+  └──────────────────┬──────────────────────────────┘
+                     │ delegates to
+  ┌──────────────────▼──────────────────────────────┐
+  │  Layer B — File I/O                            │
+  │  FileManager  (or rename to EquationFiles)     │
+  │  • File ↔ stream wiring, Result reporting      │
+  │  • throws IOException, returns Result          │
+  └──────────────────┬──────────────────────────────┘
+                     │ uses
+  ┌──────────────────▼──────────────────────────────┐
+  │  Layer A — Format                              │
+  │  EquationWriter / existing CommandReader       │
+  │  • Equation ↔ canonical text                    │
+  │  • No I/O, no UI, no static state               │
+  └─────────────────────────────────────────────────┘
+
+  Layer A — Format
+
+  Pure text emission and consumption. No I/O concerns, no static state.
+
+  Writer side (new): EquationWriter (or static methods on FileManager):
+
+  public static void write( Equation eq, PrintWriter out )
+  {
+      out.println( Command.EQUATION + " " + eq.getName() );
+      out.println( Command.START + " " + format( eq.getRangeStart() ) );
+      // ... using Command enum names and Locale.ROOT formatting
+  }
+
+  private static String format( double d )
+  {
+      // Locale.ROOT so decimal separator is always '.', not the
+      // locale's comma — important since ',' is the SET list separator.
+      return String.format( Locale.ROOT, "%s", d );
+  }
+
+  Key changes from current FileManager:
+  - Build strings from Command enum constants (Command.START.toString() etc.) — never hard-coded "start". If Command
+  values change, the writer follows.
+  - Locale.ROOT for all numeric formatting.
+  - No static lines field — the writer uses local state per call.
+  - Format must match what package-info.java documents (round-trip is a test invariant).
+
+  Reader side: already exists as CommandReader + CommandProcessor. No new code — just a thin orchestrator at Layer B.
+
+  Layer B — File I/O
+
+  Wraps Layer A with file/stream handling. Reports outcomes via Result. Throws only on genuine I/O failures.
+
+  public final class FileManager
+  {
+      private FileManager() {}
+
+      // --- save ---
+      public static void save( File file, Equation eq ) throws IOException
+      {
+          try ( PrintWriter w = new PrintWriter( file ) )
+          {
+              EquationWriter.write( eq, w );
+              if ( w.checkError() )
+                  throw new IOException( "write failure on " + file );
+          }
+      }
+
+      // --- load ---
+      public static Result load( File file, Equation eq ) throws IOException
+      {
+          try ( BufferedReader r = new BufferedReader( new FileReader( file ) ) )
+          {
+              return load( r, eq );
+          }
+      }
+
+      public static Result load( BufferedReader r, Equation eq )
+      {
+          CommandProcessor proc = new CommandProcessor( eq );
+          List<String> errors = new ArrayList<>();
+          new CommandReader( r ).stream().forEach( pc -> {
+              if ( pc.getCommand() == Command.EQUATION )
+                  eq.setName( pc.getArgString() );          // EQUATION goes elsewhere
+              else
+              {
+                  Result result = proc.processCommand( pc );
+                  if ( !result.isSuccess() )
+                      errors.addAll( result.getMessages() );
+              }
+          });
+          return errors.isEmpty()
+              ? new Result( true )
+              : new Result( false, errors );
+      }
+  }
+
+  Key shape changes:
+  - No UI imports. Class is callable from CLI tools, tests, web handlers — anything.
+  - Errors don't disappear. Per-line parse failures land in the returned Result, so callers can decide to log, display,
+  or fail.
+  - Two failure modes are distinct: I/O issues throw IOException; format/parse issues come back in Result.getMessages().
+   Caller never has to ask "did this succeed?" — the type system tells them.
+  - Mutates a caller-supplied Equation. Decouples loading from creation, which lets the GUI side decide what Equation
+  impl to use without changing the loader. (Alternative: return Optional<Equation> and have load build a default
+  Exp4jEquation internally — fine if you'd rather keep the API simpler.)
+
+  Layer C — UI adapter
+
+  Separate class. Owns the JFileChooser, the dialogs, and the cancellation flow. Calls into Layer B for the actual work.
+
+  public final class EquationFileChooser
+  {
+      private final JFileChooser chooser;
+      private final Component    parent;     // injectable for testing/positioning
+
+      public EquationFileChooser( Component parent )
+      {
+          this.parent  = parent;
+          this.chooser = new JFileChooser( new File( System.getProperty( "user.dir" ) ) );
+      }
+
+      public Optional<Equation> openDialog()
+      {
+          if ( chooser.showOpenDialog( parent ) != JFileChooser.APPROVE_OPTION )
+              return Optional.empty();
+          File file = chooser.getSelectedFile();
+          Equation eq = new Exp4jEquation();
+          try
+          {
+              Result result = FileManager.load( file, eq );
+              if ( !result.isSuccess() )
+              {
+                  showError( "Parse errors", result.getMessages() );
+                  return Optional.empty();
+              }
+              return Optional.of( eq );
+          }
+          catch ( IOException exc )
+          {
+              showError( "Read failure", List.of( exc.getMessage() ) );
+              return Optional.empty();
+          }
+      }
+
+      public boolean saveDialog( Equation eq )
+      {
+          if ( chooser.showSaveDialog( parent ) != JFileChooser.APPROVE_OPTION )
+              return false;
+          File file = chooser.getSelectedFile();
+          try
+          {
+              FileManager.save( file, eq );
+              return true;
+          }
+          catch ( IOException exc )
+          {
+              showError( "Write failure", List.of( exc.getMessage() ) );
+              return false;
+          }
+      }
+  }
+
+  Key shape changes:
+  - JFileChooser is instance state, not static. Two windows can open file dialogs against different starting
+  directories.
+  - Parent component is injectable. Dialogs anchor to the right window; tests can pass a hidden frame.
+  - No static initializer that touches Swing — class loads fine in headless environments because Layer B no longer pulls
+   Swing in transitively.
+  - Optional<Equation> and boolean disambiguate the three current null-overload meanings (cancel, I/O error, parse
+  error). Cancel becomes "empty Optional with no dialog"; failures show a dialog and return empty/false.
+
+  Migration path
+
+  You don't have to do this in one shot. A reasonable sequence:
+
+  1. Fix the real bugs in current FileManager first (the swapped JOptionPane arguments, the %f locale issue). One
+  commit, no architecture change. Lowest risk.
+  2. Extract Layer A's writer. Rename the private writeRange/writeVars/etc. into a new class or static methods that take
+   a PrintWriter. Replace the static lines list with a per-call local. Keep FileManager's public API the same. Add a
+  round-trip test (save then load == original).
+  3. Insert Layer B's Result-returning load methods alongside the existing Equation-returning ones. Mark the old ones
+  deprecated. Migrate callers one at a time.
+  4. Extract Layer C into EquationFileChooser. Move all JFileChooser/JOptionPane code there. Now Layer B is UI-free;
+  remove the Swing imports from FileManager.
+  5. Delete the deprecated old API once nothing uses it.
+
+  Each step is independently testable. After step 2 you can write headless tests for the writer; after step 4 you can
+  write headless tests for the loader; only Layer C needs Swing-aware testing.
+
+  What this fixes
+
+  ┌───────────────────────────────────────────────┬─────────────────────────────────────┐
+  │           Concern from prior review           │       Layer that addresses it       │
+  ├───────────────────────────────────────────────┼─────────────────────────────────────┤
+  │ Swing baked into I/O class                    │ C (separates UI)                    │
+  ├───────────────────────────────────────────────┼─────────────────────────────────────┤
+  │ Static mutable state                          │ A (per-call locals)                 │
+  ├───────────────────────────────────────────────┼─────────────────────────────────────┤
+  │ Format strings drift from package-info        │ A (uses Command enum + Locale.ROOT) │
+  ├───────────────────────────────────────────────┼─────────────────────────────────────┤
+  │ Inconsistent error model                      │ B (Result + IOException)            │
+  ├───────────────────────────────────────────────┼─────────────────────────────────────┤
+  │ null overloaded for cancel/error/parse-fail   │ C (Optional + dialog)               │
+  ├───────────────────────────────────────────────┼─────────────────────────────────────┤
+  │ Parse errors silently discarded               │ B (collected into Result)           │
+  ├───────────────────────────────────────────────┼─────────────────────────────────────┤
+  │ Locale-sensitive %f collides with , separator │ A (Locale.ROOT)                     │
+  └───────────────────────────────────────────────┴─────────────────────────────────────┘
+
+  The strategic point: each architectural concern has a clear owner. Right now, FileManager owns all of them, which is
+  why every change risks breaking unrelated callers.
