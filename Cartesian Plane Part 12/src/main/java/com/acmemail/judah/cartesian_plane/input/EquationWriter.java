@@ -14,7 +14,6 @@ import static com.acmemail.judah.cartesian_plane.input.Command.XEQUALS;
 import static com.acmemail.judah.cartesian_plane.input.Command.YEQUALS;
 
 import java.io.PrintWriter;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Supplier;
@@ -26,12 +25,13 @@ import java.util.function.Supplier;
  * and its associated value.
  * The first command is always EQUATION followed by the equation name.
  * Here's an example of the output:
- * <pre style="left-padding:2em;">SET a=2, b=3
- * x= 3 * cos(a * t)
- * y= 3 * sin(b * t)
+ * <pre style="padding-left:2em;"> EQUATION rose
  * START 0
  * END   2 * pi
- * STEP  pi / 200</pre>
+ * STEP  pi / 200
+ * YEQUALS 3 * sin(b * t)
+ * XEQUALS 3 * cos(a * t)
+ * SET a=2.0, b=3.0</pre>
  * <p>
  * Not all data is necessarily written to the output stream.
  * The exceptions are:
@@ -43,6 +43,7 @@ import java.util.function.Supplier;
  *          is only written to the output stream
  *          if it has a non-default value.
  *     </li>
+ *     <li>
  *          The parameter, radius, and angle variable names
  *          (PARAM, RADIUS, THETA)
  *          are only written to the output stream
@@ -54,6 +55,10 @@ import java.util.function.Supplier;
  *          if they have non-default values.
  *     </li>
  * </ul>
+ * <p>
+ * See {@linkplain com.acmemail.judah.cartesian_plane.input}
+ * for additional remarks regarding equation file formatting.
+ * </p>
  * 
  * @author Jack Straub
  * @see Equation
@@ -70,11 +75,19 @@ public final class EquationWriter
         Equation.INTRINSIC_VARIABLES;
     
     /** 
-     * Reference to Equation intrinsic variable map, 
-     * declared here for convenience.
+     * Map of expression and naming commands to string,
+     * such as XEQUALS &rarr; "1", and PARAM &rarr; "t".
      */
     private static final Map<Command,String> stringDefs =
         Equation.DEF_STRINGS;
+    
+    /**
+     * Default constructor; not used.
+     */
+    private EquationWriter()
+    {
+        // not used
+    }
     
     /**
      * Formats an equation as text,
@@ -105,7 +118,7 @@ public final class EquationWriter
         writeUnique( out, YEQUALS, equation::getYExpression );
         writeUnique( out, XEQUALS, equation::getXExpression );
         writeUnique( out, REQUALS, equation::getRExpression );
-        writeUnique( out, TEQUALS, equation::getYExpression );
+        writeUnique( out, TEQUALS, equation::getTExpression );
         writeUnique( out, RADIUS, equation::getRadiusName );
         writeUnique( out, THETA, equation::getThetaName );
         writeUnique( out, PARAM, equation::getParamName );
@@ -142,10 +155,11 @@ public final class EquationWriter
     
     /**
      * Determine if a variable has a unique value, and,
-     * if it does, create a command to the variable's value
+     * if it does, create a command to set the variable's value
      * and write the command to the output stream.
-     * A variable has a unique value if: a) it is an
-     * intrinsic variable; and b) it has a non-default variable.
+     * A variable has a unique value if: 
+     * a) it is not an intrinsic variable; or
+     * b) it is an intrinsic variable with a non-default value.
      * 
      * @param out       the output destination
      * @param name      the name of the variable
@@ -165,24 +179,8 @@ public final class EquationWriter
         }
         if ( unique )
         {
-            String  strValue    = format( value );
+            String  strValue    = Double.toString( value );
             out.println( SET + " " + name + "=" + strValue );
         }
-    }
-    
-    /**
-     * Format a float point value as a string,
-     * using the ROOT locale.
-     * Using the ROOT locale ensures that the period (.)
-     * is used as the decimal separator,
-     * 
-     * @param dNum  the floating point value to format
-     * 
-     * @return  the formatted value
-     */
-    private static String format( double dNum )
-    {
-        String  strNum  = String.format( Locale.ROOT, "%s", dNum );
-        return strNum;
     }
 }

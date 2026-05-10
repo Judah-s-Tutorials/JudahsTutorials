@@ -1,7 +1,7 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import static com.acmemail.judah.cartesian_plane.input.Command.END;
-import static com.acmemail.judah.cartesian_plane.input.Command.INVALID;
+import static com.acmemail.judah.cartesian_plane.input.Command.EQUATION;
 import static com.acmemail.judah.cartesian_plane.input.Command.PARAM;
 import static com.acmemail.judah.cartesian_plane.input.Command.RADIUS;
 import static com.acmemail.judah.cartesian_plane.input.Command.REQUALS;
@@ -16,8 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
+import java.io.StringReader;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -47,7 +49,7 @@ public class EquationWriterTest
         List.of( PARAM, RADIUS, THETA );
     /** Hash of commands representing "special" variable names. */
     private static final Set<Command>   nameCommands =
-        new HashSet<>( exprList );
+        new HashSet<>( nameList );
 
     /** List of commands representing range properties. */
     private static final List<Command>  rangeList =
@@ -55,13 +57,6 @@ public class EquationWriterTest
     /** Hash of commands representing range properties. */
     private static final Set<Command>   rangeCommands =
         new HashSet<>( rangeList );
-    
-    /** 
-     * Map of Command/String defaults; declared here for convenience. 
-     * @see Equation#DEF_STRINGS
-     */
-    private static final Map<Command,String> defStrings =
-        Equation.DEF_STRINGS;
     
     /** 
      * Intrinsic variable map, declared here for convenience.
@@ -81,7 +76,8 @@ public class EquationWriterTest
     {
         outData = new ByteArrayOutputStream();
         writer = new PrintWriter( outData );
-        equation = new Exp4jEquation( equationName );
+        equation = new Exp4jEquation();
+        equation.setName( equationName );
     }
 
     @AfterEach
@@ -98,6 +94,14 @@ public class EquationWriterTest
         Class<NullPointerException> clazz   = NullPointerException.class;
         assertThrows( clazz, () -> EquationWriter.write( null, writer ) );
         assertThrows( clazz, () -> EquationWriter.write( equation, null ) );
+    }
+    
+    @Test
+    public void testEquationNameWritten()
+    {
+        List<String>    output  = getOutput( equation );
+        String          actName = getEquationName( output );
+        assertEquals( equationName, actName );
     }
     
     @Test
@@ -135,7 +139,7 @@ public class EquationWriterTest
     }
     
     @Test
-    public void testAllIntrinsicVariableOverride()
+    public void testAllIntrinsicVariablesOverride()
     {
         Map<String,Double>  expMap  = new HashMap<>();
         intrinsicVars.keySet().stream().forEach( s -> {
@@ -212,17 +216,127 @@ public class EquationWriterTest
     
     @ParameterizedTest
     @MethodSource( "expressionCommandSource" )
-    public void testIntrinsicVariableOverride( Command command )
+    public void testExpressionOverride( Command command )
     {
         CommandProcessor    proc    = new CommandProcessor( equation );
         String              newExpr = "1234";
-        ParsedCommand       parsed  = new 
-            ParsedCommand( command, "", newExpr );
+        ParsedCommand       parsed  = 
+            new ParsedCommand( command, "", newExpr );
         proc.processCommand( parsed );
         List<String>        output  = getOutput( equation );
         Map<Command,String> expMap  = Map.of( command, newExpr );
         Map<Command,String> actMap  = getExprMap( output );
         assertEquals( expMap, actMap, command.toString() );
+    }
+    
+    @Test
+    public void testAllExpressionsOverride()
+    {
+        CommandProcessor    proc    = new CommandProcessor( equation );
+        int                 exprVal = 10;
+        Map<Command,String> expMap  = new HashMap<>();
+        for ( Command cmd : expressionCommands )
+        {
+            String  exprStr = String.valueOf( exprVal++ );
+            ParsedCommand       parsed  = 
+                new ParsedCommand( cmd, "", exprStr );
+            proc.processCommand( parsed );
+            expMap.put( cmd, exprStr );
+        }
+        List<String>        output  = getOutput( equation );
+        Map<Command,String> actMap  = getExprMap( output );
+        assertEquals( expMap, actMap );
+    }
+    
+    @Test
+    public void testDefaultNamesNotPresent()
+    {
+        List<String>        output  = getOutput( equation );
+        Map<Command,String> actMap  = getNameMap( output );
+        assertTrue( actMap.isEmpty() );
+    }
+    
+    @Test
+    public void testAllNamesOverride()
+    {
+        CommandProcessor    proc        = new CommandProcessor( equation );
+        String              baseName    = "base";
+        char                suffix      = 'A';
+        Map<Command,String> expMap  = new HashMap<>();
+        for ( Command cmd : nameCommands )
+        {
+            String          newName = baseName + suffix++;
+            ParsedCommand   parsed  = new ParsedCommand( cmd, "", newName );
+            proc.processCommand( parsed );
+            expMap.put( cmd, newName );
+        }
+        List<String>        output  = getOutput( equation );
+        Map<Command,String> actMap  = getNameMap( output );
+        assertEquals( expMap, actMap );
+    }
+    
+    @ParameterizedTest
+    @MethodSource( "nameCommandSource" )
+    public void testNameOverride( Command command )
+    {
+        CommandProcessor    proc    = new CommandProcessor( equation );
+        String              newName = "test";
+        ParsedCommand       parsed  = new 
+            ParsedCommand( command, "", newName );
+        proc.processCommand( parsed );
+        List<String>        output  = getOutput( equation );
+        Map<Command,String> expMap  = Map.of( command, newName );
+        Map<Command,String> actMap  = getNameMap( output );
+        assertEquals( expMap, actMap, command.toString() );
+    }
+    
+    @Test
+    public void testRoundTrip()
+    {
+        String  expEquationName = "rose";
+        String  expVarName      = "a";
+        double  expVarValue     = 2;
+        String  expYExpression  = "a * x";
+        double  expRangeStart   = 0;
+        double  expRangeEnd     = 10;
+        double  expRangeStep    = 1;
+        
+        equation.setName( expEquationName );
+        equation.setVar( expVarName, expVarValue );
+        equation.setYExpression( expYExpression );
+        equation.setRange( expRangeStart, expRangeEnd, expRangeStep );
+        // Generate output via EquationWriter; take the output,
+        // and feed it back into a BufferedReader.
+        BufferedReader      bufReader   = pipeInput( equation );
+
+        Equation            reloaded    = new Exp4jEquation();
+        CommandProcessor    proc        = new CommandProcessor( reloaded );
+        CommandReader       cmdReader   = new CommandReader( bufReader );
+        cmdReader.stream().forEach( proc::processCommand );
+
+        assertEquals( expEquationName, reloaded.getName() );
+        assertEquals( expYExpression,  reloaded.getYExpression() );
+        Optional<Double>    actVarValue = reloaded.getVar( expVarName );
+        assertEquals( Optional.of( expVarValue ), actVarValue );
+        assertEquals( expRangeStart, reloaded.getRangeStart() );
+        assertEquals( expRangeEnd, reloaded.getRangeEnd() );
+        assertEquals( expRangeStep, reloaded.getRangeStep() );
+    }
+    
+    private static String getEquationName( List<String> output )
+    {
+        String  name    = "";
+        String  line    = 
+            output.stream()
+                .filter( s -> s.startsWith( EQUATION.toString() ) )
+                .findFirst().orElse( null );
+        if ( line != null )
+        {
+            String[]    parts   = line.split( "\\s+", 2 );
+            if ( parts.length > 1 )
+                name = parts[1];
+        }
+        return name;
     }
     
     private static Stream<String> varNameSource()
@@ -235,6 +349,23 @@ public class EquationWriterTest
     {
         Stream<Command> stream  = expressionCommands.stream();
         return stream;
+    }
+    
+    private static Stream<Command> nameCommandSource()
+    {
+        Stream<Command> stream  = nameCommands.stream();
+        return stream;
+    }
+    
+    private BufferedReader pipeInput( Equation equation )
+    {
+        EquationWriter.write( equation, writer );
+        writer.close();
+        
+        String          output  = outData.toString();
+        StringReader    sReader = new StringReader( output );
+        BufferedReader  bReader = new BufferedReader( sReader );
+        return bReader;
     }
     
     private List<String> getOutput( Equation equation )
@@ -263,13 +394,42 @@ public class EquationWriterTest
             lines.stream()
                 .filter( l -> l.startsWith( SET.toString() ) )
                 .map( l -> l.split( "[\\s=]+", 3 ) )
-                .map( a -> { assertEquals( 3, a.length ); return a;} )
                 .collect( 
                     Collectors.toMap( 
                         a -> a[1], 
                         a -> Double.parseDouble( a[2] )
                     )
                 );
+        
+        return map;
+    }
+    
+    /**
+     * Filter a list of strings,
+     * each beginning with a Command 
+     * optionally followed by an argument,
+     * producing a map of variable name -> value pairs
+     * for each SET command.
+     * 
+     * @param lines the list of Command strings
+     * 
+     * @return  the generated map
+     */
+    private static Map<Command,String> getNameMap( List<String> lines )
+    {
+        Map<Command,String>  map = new HashMap<Command, String>();
+        for ( String line : lines )
+        {
+            String[]    parts       = line.split( "\\s+", 2 );
+            int         partsLen    = parts.length;
+            assertTrue( partsLen > 0 );
+            Command     command = Command.toCommand( parts[0] );
+            if (  nameCommands.contains( command ) )
+            {
+                assertEquals( 2, partsLen );
+                map.put( command, parts[1] );
+            }
+        }
         
         return map;
     }
@@ -291,7 +451,7 @@ public class EquationWriterTest
         Map<Command,String>  map = new HashMap<>();
         for ( String line : lines )
         {
-            String[]    parts   = line.split( "\\s+" );
+            String[]    parts   = line.split( "\\s+", 2 );
             Command     command = Command.toCommand( parts[0] );
             if ( expressionCommands.contains( command ) )
             {
@@ -329,20 +489,5 @@ public class EquationWriterTest
             }
         }
         return map;
-    }
-    
-    /**
-     * Verify that every line in a list represents a valid Command enum.
-     * 
-     * @param list  list of lines to verify
-     */
-    private static void isCommandList( List<String> list )
-    {
-        List<String>    invalidList =
-            list.stream()
-                .map( l -> l.split( "\\w", 2 )[0] )
-                .filter( s -> Command.toCommand( s ) == INVALID  )
-                .toList();
-        assertTrue( invalidList.isEmpty(), invalidList.toString() );
     }
 }

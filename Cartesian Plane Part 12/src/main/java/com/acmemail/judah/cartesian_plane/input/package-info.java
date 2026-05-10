@@ -49,8 +49,28 @@
  * START 0
  * END   2 * pi
  * STEP  pi / 200
- * XYPLOT
- * </pre>
+ * XYPLOT</pre>
+ * <p>
+ * The input format allows multiple variables
+ * to be declared with a single SET statement;
+ * it also allows multiple SET statements,
+ * so each of the following examples are equivalent:
+ * </p>
+ * <pre> # Example 1
+ * Equation example1
+ * SET a=2, b=3, c=4, d=5
+ * 
+ * # Example 2
+ * Equation example2
+ * SET a=2, b=3
+ * SET c=4, d=5
+ * 
+ * # Example 3
+ * Equation example2
+ * SET a=2
+ * SET b=3
+ * SET c=4
+ * SET d=5</pre>
  *
  * <h2>Reading and writing</h2>
  * <p>

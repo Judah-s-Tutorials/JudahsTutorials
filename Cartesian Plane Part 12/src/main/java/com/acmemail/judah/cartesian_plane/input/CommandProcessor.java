@@ -130,9 +130,6 @@ public class CommandProcessor
      * and associated argument, if any.
      * The execution of each possible command
      * is described by the {@linkplain Equation} interface.
-     * The EQUATION command is rejected;
-     * this command is processed via 
-     * {@linkplain #newEquation(ParsedCommand)}.
      * A Result object
      * describing the outcome of the operation
      * is returned.
@@ -158,7 +155,9 @@ public class CommandProcessor
         switch ( command )
         {
         case EQUATION:
-            throw new IllegalArgumentException( isEquation );
+            if ( equation != null )
+                equation.setName( context.getArgString() );
+            break;
         case XEQUALS:
             parseArg( 
                 context,

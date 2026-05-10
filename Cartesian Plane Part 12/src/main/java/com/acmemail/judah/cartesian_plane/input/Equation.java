@@ -52,9 +52,10 @@ import java.util.stream.Stream;
  * {@linkplain #setXExpression(String)},
  * {@linkplain #setRExpression(String)},
  * {@linkplain #setTExpression(String)},
- * validate the target expression 
- * before setting it.
- * If the expression is invalid
+ * throw NullPointerExceptions for null input.
+ * They validate the target expression 
+ * before setting it, and,
+ * if it's invalid, 
  * the currently set expression is not overwritten,
  * and an unsuccessful Result
  * with one or more error messages is returned.
@@ -82,6 +83,8 @@ public interface Equation
      * and special names,
      * such as {@code PARAM t}, the name of the parameter variable
      * for use in parametric equations.
+     * An Equation implementation may have more default
+     * command/string pairs, but they must support these.
      */
     Map<Command,String> DEF_STRINGS = Map.of( 
         Command.XEQUALS, "1",
@@ -113,6 +116,8 @@ public interface Equation
      * 
      * @param name  the name of this equation;
      *              must be non-null
+     *              
+     * @throws NullPointerException if name is null
      */
     void setName( String name );
     
@@ -255,6 +260,7 @@ public interface Equation
 
     /**
      * Gets the currently set x-expression.
+     * Never returns null.
      * 
      * @return  the currently set x-expression
      */
@@ -262,6 +268,7 @@ public interface Equation
 
     /**
      * Gets the currently set y-expression.
+     * Never returns null.
      * 
      * @return  the currently set y-expression
      */
@@ -269,6 +276,7 @@ public interface Equation
 
     /**
      * Gets the currently set t-expression.
+     * Never returns null.
      * 
      * @return  the currently set t-expression
      */
@@ -276,6 +284,7 @@ public interface Equation
 
     /**
      * Gets the currently set r-expression.
+     * Never returns null.
      * 
      * @return  the currently set r-expression
      */
@@ -329,7 +338,7 @@ public interface Equation
      * <em>Radius</em> is used
      * to traverse the iteration range.
      * 
-     * @return the (x,y) coordinates derived from an equation
+     * @return a stream of (x,y) coordinates derived from an equation
      * 
      * @throws ValidationException if the equation is invalid
      */
@@ -347,7 +356,9 @@ public interface Equation
      * Sets the name of the parameter
      * in a parametric equation.
      * 
-     * @param param the name of the parameter
+     * @param param the name of the parameter; must not be null
+     * 
+     * @throws NullPointerException if param is null
      */
     void setParamName( String param );
 
@@ -363,7 +374,9 @@ public interface Equation
      * Sets the name of the radius variable
      * used in a polar equation.
      * 
-     * @param radius the name of the radius
+     * @param radius the name of the radius; must not be null
+     * 
+     * @throws NullPointerException if radius is null
      */
     void setRadiusName( String radius );
 
@@ -379,7 +392,9 @@ public interface Equation
      * Sets the name of the angle variable
      * in a polar equation.
      * 
-     * @param theta the name of the angle variable
+     * @param theta the name of the angle variable; must not be null
+     * 
+     * @throws NullPointerException if theta is null
      */
     void setThetaName( String theta );
 
@@ -540,7 +555,7 @@ public interface Equation
      *      an Optional containing the result of the evaluation,
      *      or an empty Optional if an error occurred
      *      
-     *  @throws NullPointerException if expStr is null
+     * @throws NullPointerException if exprStr is null
      */
     Optional<Double> evaluate( String exprStr );
 }
