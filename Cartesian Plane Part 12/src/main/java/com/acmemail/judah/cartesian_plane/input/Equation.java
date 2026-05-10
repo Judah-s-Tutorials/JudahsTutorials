@@ -108,19 +108,6 @@ public interface Equation
         "t", 0d
     );
     
-    /**  
-     * A map of all names and their default. 
-     * "Special names" are the names of variables
-     * used in parametric and polar equations.
-     * An Equation implementation may have more special names,
-     * but they must support these.
-     */
-    Map<Command,String>  SPECIAL_NAMES   = Map.of(
-        Command.PARAM, "t",
-        Command.RADIUS, "r",
-        Command.THETA, "t" 
-    );
-    
     /**
      * Sets the name of this equation.
      * 
