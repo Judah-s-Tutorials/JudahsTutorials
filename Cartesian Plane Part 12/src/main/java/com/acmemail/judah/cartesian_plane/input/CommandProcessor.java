@@ -13,13 +13,11 @@ import java.util.function.Supplier;
 
 /**
  * Interprets and executes a command in the context
- * of an <em>Equation.</em>
+ * of an {@linkplain Equation}.
  * <p>
  * A command processor is bound to a single equation.
  * To process commands for a new equation,
- * construct another CommandProcessor object
- * or pass the EQUATION command
- * to the {@linkplain #newEquation(ParsedCommand)} method.
+ * construct another CommandProcessor object.
  * </p>
  * <p>
  * The following commands are processed elsewhere,
@@ -55,8 +53,6 @@ public class CommandProcessor
     private static final String invalidCmd  = "is not a valid command";
     private static final String notEquation = 
         "can only process EQUATION command";
-    private static final String isEquation  = 
-        "cannot process EQUATION command";
     
     /** Encapsulated Equation. */
     private final Equation      equation;
