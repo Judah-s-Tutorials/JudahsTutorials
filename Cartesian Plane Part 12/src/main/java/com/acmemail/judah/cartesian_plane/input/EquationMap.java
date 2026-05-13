@@ -138,7 +138,7 @@ public class EquationMap
      */
     public static void parseEquationFile( File file )
     {
-        Equation    equation    = FileManager.open( file );
+        Equation    equation    = FileManagerOrig.open( file );
         if ( equation != null )
             equationMap.put( equation.getName(), equation );
     }

@@ -13,7 +13,7 @@ import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.Equation;
-import com.acmemail.judah.cartesian_plane.input.FileManager;
+import com.acmemail.judah.cartesian_plane.input.FileManagerOrig;
 import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
@@ -135,7 +135,7 @@ public class CommandExecutor
     private void open( String name )
     {
         Equation    equation    = name.isEmpty() ? 
-            FileManager.open() : FileManager.open( name );
+            FileManagerOrig.open() : FileManagerOrig.open( name );
         if ( equation != null )
             inputParser = new CommandProcessor( equation );
     }
@@ -154,9 +154,9 @@ public class CommandExecutor
     {
         Equation    equation    = inputParser.getEquation();
         if ( name.isEmpty() )
-            FileManager.save( equation );
+            FileManagerOrig.save( equation );
         else
-            FileManager.save( name, equation);
+            FileManagerOrig.save( name, equation);
     }
     
     /**

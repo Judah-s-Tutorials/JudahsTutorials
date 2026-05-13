@@ -38,4 +38,5 @@ and Double.compare( d1, d2 ) = 0;
 
 isValidName and isValidValue should return a result
 
-
+explain the StandardCharsets.UTF_8 in 
+"new PrintWriter( file, StandardCharsets.UTF_8 ) )"
