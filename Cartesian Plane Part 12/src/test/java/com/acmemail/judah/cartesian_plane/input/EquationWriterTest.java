@@ -2,36 +2,28 @@ package com.acmemail.judah.cartesian_plane.input;
 
 import static com.acmemail.judah.cartesian_plane.input.Command.END;
 import static com.acmemail.judah.cartesian_plane.input.Command.EQUATION;
-import static com.acmemail.judah.cartesian_plane.input.Command.PARAM;
-import static com.acmemail.judah.cartesian_plane.input.Command.RADIUS;
 import static com.acmemail.judah.cartesian_plane.input.Command.REQUALS;
 import static com.acmemail.judah.cartesian_plane.input.Command.SET;
 import static com.acmemail.judah.cartesian_plane.input.Command.START;
 import static com.acmemail.judah.cartesian_plane.input.Command.STEP;
 import static com.acmemail.judah.cartesian_plane.input.Command.TEQUALS;
-import static com.acmemail.judah.cartesian_plane.input.Command.THETA;
 import static com.acmemail.judah.cartesian_plane.input.Command.XEQUALS;
 import static com.acmemail.judah.cartesian_plane.input.Command.YEQUALS;
-import static com.acmemail.judah.cartesian_plane.input.Equation.DEF_STRINGS;
 import static com.acmemail.judah.cartesian_plane.input.Equation.INTRINSIC_VARIABLES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,44 +33,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import util.EquationTestUtil;
+
 public class EquationWriterTest
 {
-    /** Map of expression Commands to their default values. */
-    private static final Map<Command,String> defExpressionMap = Map.of(
-        XEQUALS, DEF_STRINGS.get( XEQUALS ),
-        YEQUALS, DEF_STRINGS.get( YEQUALS ),
-        TEQUALS, DEF_STRINGS.get( TEQUALS ),
-        REQUALS, DEF_STRINGS.get( REQUALS )
-    );
-    /** Hash of Commands representing expressions. */
-    private static final Set<Command>   expressionCommands  =
-        new HashSet<>( defExpressionMap.keySet() );
-    
-    /** Map of name Commands to default values. */
-    private static final Map<Command,String> defNameMap = Map.of(
-        PARAM, DEF_STRINGS.get( PARAM ),
-        RADIUS, DEF_STRINGS.get( RADIUS ),
-        THETA, DEF_STRINGS.get( THETA )
-    );
-    /** Hash of name commands. */
-    private static final Set<Command>   nameCommands =
-        new HashSet<>( defNameMap.keySet() );
-
-    /** Map of range commands to default values. */
-    private static final Map<Command,Double> rangeMap;
-    static
-    {
-        Equation tmp = new Exp4jEquation();
-        rangeMap = Map.of( 
-            START, tmp.getRangeStart(),
-            END,   tmp.getRangeEnd(),
-            STEP,  tmp.getRangeStep()
-        );
-    }
-    /** Hash of commands representing range properties. */
-    private static final Set<Command>   rangeCommands =
-        new HashSet<>( rangeMap.keySet() );
-    
     /** Name of the equation for use during testing. */
     private static final String equationName    = "This Equation";
         
@@ -130,8 +88,8 @@ public class EquationWriterTest
         // make sure we've got the first line containing a command
         String  first   =
             output.stream()
-                // filtering on blank lines and comments should be
-                // unnecessary
+                // defensive: skip blank lines and comment lines in case
+                // the writer is extended to emit them
                 .map( String::trim )
                 .filter( s -> !s.isEmpty() )
                 .filter( s -> !s.startsWith( "#" ) )
@@ -164,7 +122,7 @@ public class EquationWriterTest
     @MethodSource( "varNameSource" )
     public void testIntrinsicVariableOverride( String name )
     {
-        // Override the value of the one of the intrinsic variables and
+        // Override the value of one of the intrinsic variables and
         // verify that it is written to the EquationWriter output.
         Optional<Double>    optVar  = equation.getVar( name );
         // sanity check; intrinsic variable must be present
@@ -295,11 +253,12 @@ public class EquationWriterTest
     public void testAllExpressionsOverride()
     {
         // Verify that all expressions commands with overridden values
-        // are written to the EquationWriter output.
+        // are written to the EquationWriter output. Use CommandProcessor
+        // to control which setter to use with a given command.
         CommandProcessor    proc    = new CommandProcessor( equation );
         int                 exprVal = 10;
         Map<Command,String> expMap  = new HashMap<>();
-        for ( Command cmd : expressionCommands )
+        for ( Command cmd : EquationTestUtil.EXPR_COMMANDS )
         {
             String  exprStr = String.valueOf( exprVal++ );
             ParsedCommand       parsed  = 
@@ -368,12 +327,13 @@ public class EquationWriterTest
     public void testAllNamesOverride()
     {
         // Verify that special names (PARAM, etc.) with overridden values
-        // are written to the EquationWriter output.
+        // are written to the EquationWriter output. Use CommandProcessor 
+        // to control which setter to use with a given command.
         CommandProcessor    proc        = new CommandProcessor( equation );
         String              baseName    = "base";
         char                suffix      = 'A';
         Map<Command,String> expMap  = new HashMap<>();
-        for ( Command cmd : nameCommands )
+        for ( Command cmd : EquationTestUtil.NAME_COMMANDS )
         {
             String          newName = baseName + suffix++;
             ParsedCommand   parsed  = new ParsedCommand( cmd, "", newName );
@@ -392,7 +352,7 @@ public class EquationWriterTest
         // Verify that the reconstituted equation contains
         // the original data.
         Equation            reloaded    = writeAndRereadEquation();
-        verifyReloadedEquation( equation, reloaded );
+        EquationTestUtil.verifyEquation( equation, reloaded );
     }
     
     @Test
@@ -400,10 +360,11 @@ public class EquationWriterTest
     {
         // Write/reread the equation with all expressions overridden.
         // Verify that the reconstituted equation contains the 
-        // overridden data.
+        // overridden data. Use CommandProcessor to control which setter
+        // to use with a given command.
         CommandProcessor    commandProc = new CommandProcessor( equation );
         int                 baseNum     = 101;
-        for ( Command command : expressionCommands )
+        for ( Command command : EquationTestUtil.EXPR_COMMANDS )
         {
             String          expr    = String.valueOf( baseNum++ );
             ParsedCommand   parsed  = new ParsedCommand( command, "", expr );
@@ -411,7 +372,7 @@ public class EquationWriterTest
         }
 
         Equation            reloaded    = writeAndRereadEquation();        
-        verifyReloadedEquation( equation, reloaded );
+        EquationTestUtil.verifyEquation( equation, reloaded );
     }
     
     @Test
@@ -419,18 +380,20 @@ public class EquationWriterTest
     {
         // Write/reread the equation with all range properties overridden.
         // Verify that the reconstituted equation contains the 
-        // overridden data.
+        // overridden data. Use CommandProcessor to control which setter
+        // to use with a given command.
         CommandProcessor    commandProc = new CommandProcessor( equation );
-        for ( Command command : rangeCommands )
+        for ( Command command : EquationTestUtil.RANGE_COMMANDS )
         {
-            double          newVal      = rangeMap.get( command ) + 1;
+            double          newVal      = 
+                EquationTestUtil.getDouble( equation, command ) + 1;
             String          strVal      = String.valueOf( newVal );
             ParsedCommand   parsed      = 
                 new ParsedCommand( command, "", strVal );            
             commandProc.processCommand( parsed );
         }
         Equation            reloaded    = writeAndRereadEquation();        
-        verifyReloadedEquation( equation, reloaded );
+        EquationTestUtil.verifyEquation( equation, reloaded );
     }
     
     @Test
@@ -439,12 +402,14 @@ public class EquationWriterTest
         // Write/reread the equation with all special
         // variable names overridden (e.g. PARAM, RADIUS).
         // Verify that the reconstituted equation contains the 
-        // overridden data.
+        // overridden data. Use CommandProcessor to control which setter
+        // to use with a given command.
         CommandProcessor    commandProc = new CommandProcessor( equation );
         int                 baseChar    = 'a';
-        for ( Command command : nameCommands )
+        for ( Command command : EquationTestUtil.NAME_COMMANDS )
         {
-            String          oldName = DEF_STRINGS.get( command );
+            String          oldName = 
+                EquationTestUtil.getString( equation, command );
             String          suffix  = String.valueOf( (char)(baseChar++) );
             String          newName = oldName + suffix;
             ParsedCommand   parsed  = 
@@ -452,7 +417,7 @@ public class EquationWriterTest
             commandProc.processCommand( parsed );
         }
         Equation            reloaded    = writeAndRereadEquation();    
-        verifyReloadedEquation( equation, reloaded );
+        EquationTestUtil.verifyEquation( equation, reloaded );
     }
     
     @Test
@@ -476,7 +441,7 @@ public class EquationWriterTest
             equation.setVar( var, baseVal++ );
         }
         Equation            reloaded    = writeAndRereadEquation();        
-        verifyReloadedEquation( equation, reloaded );
+        EquationTestUtil.verifyEquation( equation, reloaded );
     }
     
     @Test
@@ -499,7 +464,7 @@ public class EquationWriterTest
         equation.setYExpression( expYExpression );
         equation.setRange( expRangeStart, expRangeEnd, expRangeStep );
         Equation            reloaded    = writeAndRereadEquation();    
-        verifyReloadedEquation( equation, reloaded );
+        EquationTestUtil.verifyEquation( equation, reloaded );
     }
     
     /**
@@ -522,7 +487,8 @@ public class EquationWriterTest
      */
     private static Stream<Command> expressionCommandSource()
     {
-        Stream<Command> stream  = expressionCommands.stream();
+        Stream<Command> stream  = 
+            EquationTestUtil.EXPR_COMMANDS.stream();
         return stream;
     }
     
@@ -534,13 +500,13 @@ public class EquationWriterTest
      */
     private static Stream<Command> nameCommandSource()
     {
-        Stream<Command> stream  = nameCommands.stream();
+        Stream<Command> stream  = EquationTestUtil.NAME_COMMANDS.stream();
         return stream;
     }
     
     /**
      * Write the equation under test, capturing the output;
-     * feed the output back in to the CommanadProcessor to
+     * feed the output back in to the {@link CommandProcessor} to
      * create a new, presumably equivalent, Equation.
      * 
      * @return  the reconstituted equation
@@ -653,36 +619,14 @@ public class EquationWriterTest
         for ( String line : lines )
         {
             String[]    parts       = line.split( "\\s+", 2 );
-            int         partsLen    = parts.length;
-            assertTrue( partsLen > 0 );
             Command     command = Command.toCommand( parts[0] );
-            if (  nameCommands.contains( command ) )
+            if (  EquationTestUtil.NAME_COMMANDS.contains( command ) )
             {
-                assertEquals( 2, partsLen );
+                assertEquals( 2, parts.length );
                 map.put( command, parts[1] );
             }
         }
         
-        return map;
-    }
-    
-    /**
-     * Generate a Command->String map of all special name commands
-     * (PARAM, etc.)
-     * in a given equation.
-     * 
-     * @param equation  the given equation
-     * 
-     * @return  the generated map
-     */
-    private static Map<Command,String> getNameMap( Equation equation )
-    {
-        Map<Command,String> map = new HashMap<>();
-        for ( Command command : nameCommands )
-        {
-            String  val = getString( equation, command );
-            map.put( command, val );
-        }
         return map;
     }
 
@@ -704,32 +648,13 @@ public class EquationWriterTest
         {
             String[]    parts   = line.split( "\\s+", 2 );
             Command     command = Command.toCommand( parts[0] );
-            if ( expressionCommands.contains( command ) )
+            if ( EquationTestUtil.EXPR_COMMANDS.contains( command ) )
             {
                 assertEquals( 2, parts.length );
                 map.put( command, parts[1] );
             }
         }
         
-        return map;
-    }
-    
-    /**
-     * Generate a Command->String map of all expressions
-     * in a given equation.
-     * 
-     * @param equation  the given equation
-     * 
-     * @return  the generated map
-     */
-    private static Map<Command,String> getExprMap( Equation equation )
-    {
-        Map<Command,String> map = new HashMap<>();
-        for ( Command command : expressionCommands )
-        {
-            String  expr    = getString( equation, command );
-            map.put( command, expr );
-        }
         return map;
     }
 
@@ -751,7 +676,7 @@ public class EquationWriterTest
             if ( pair.length == 2 )
             {
                 Command cmd = Command.toCommand( pair[0] );
-                if ( rangeCommands.contains( cmd ) )
+                if ( EquationTestUtil.RANGE_COMMANDS.contains( cmd ) )
                 {
                     double  val = Double.parseDouble( pair[1] );
                     map.put( cmd, val );
@@ -759,94 +684,5 @@ public class EquationWriterTest
             }
         }
         return map;
-    }
-    
-    /**
-     * Generate a Command->String map of all range properties
-     * in a given equation.
-     * 
-     * @param equation  the given equation
-     * 
-     * @return  the generated map
-     */
-    private static Map<Command,Double> getRangeMap( Equation equation )
-    {
-        Map<Command,Double> map = new HashMap<>();
-        for ( Command command : rangeCommands )
-        {
-            double  val = getDouble( equation, command );
-            map.put( command, val );
-        }
-        return map;
-    }
-    
-    /**
-     * Get from an equation the string associated with a given command.
-     * Throws assertion if not found.
-     * 
-     * @param   equation    the equation to interrogate
-     * @param   command     the given command
-     * 
-     * @return the string associated with command
-     */
-    private static String getString( Equation equation, Command command )
-    {
-        String  str = null;
-        switch ( command )
-        {
-        case XEQUALS -> str = equation.getXExpression();
-        case YEQUALS -> str = equation.getYExpression();
-        case REQUALS -> str = equation.getRExpression();
-        case TEQUALS -> str = equation.getTExpression();
-        case PARAM -> str = equation.getParamName();
-        case RADIUS -> str = equation.getRadiusName();
-        case THETA -> str = equation.getThetaName();
-        default -> str = null;
-        }
-        assertNotNull( str );
-        return str;
-    }
-    
-    /**
-     * Get from an equation the value associated with a given command.
-     * Throws assertion if not found.
-     * 
-     * @param   equation    the equation to interrogate
-     * @param   command     the given command
-     * 
-     * @return the value associated with command
-     */
-    private static double getDouble( Equation equation, Command command )
-    {
-        double  actVal  = Double.NEGATIVE_INFINITY;
-        switch ( command )
-        {
-        case START -> actVal = equation.getRangeStart();
-        case END -> actVal = equation.getRangeEnd();
-        case STEP -> actVal = equation.getRangeStep();
-        default -> fail( "unsupported command: " + command );
-        }
-        assertNotEquals( Double.NEGATIVE_INFINITY, actVal );
-        return actVal;
-    }
-    
-    /**
-     * Given an two equations,
-     * one of which was generated from data 
-     * stored in the other,
-     * verify that the two equations
-     * equivalent data.
-     * 
-     * @param orig      the original equation
-     * @param reloaded  the equation generated from the original equation
-     */
-    private static void 
-    verifyReloadedEquation( Equation orig, Equation reloaded )
-    {
-        assertEquals( orig.getName(), reloaded.getName() );
-        assertEquals( getExprMap( orig ), getExprMap( reloaded ) );
-        assertEquals( getNameMap( orig ), getNameMap( reloaded ) );
-        assertEquals( getRangeMap( orig ), getRangeMap( reloaded ) );
-        assertEquals( orig.getVars(), reloaded.getVars() );
     }
 }

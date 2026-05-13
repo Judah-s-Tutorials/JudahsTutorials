@@ -37,16 +37,15 @@ public class FileManager
     }
     
     /**
-     * Prevent this class from being instantiated.
+     * Default constructor; not used.
      */
     private FileManager()
     {
+        // not used
     }
     
     /**
-     * Saves the given equation to a file.
-     * The file is selected by the operator
-     * using a file-selection dialog.
+     * Saves an equation to the given file
      * 
      * @param equation the given equation
      */
