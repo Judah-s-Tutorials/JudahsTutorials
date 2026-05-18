@@ -66,8 +66,7 @@ final public class EquationFileChooser
     public Optional<Equation> openDialog()
     {
         Optional<Equation>  status  = Optional.empty();
-        int                 action  =
-            chooser.showOpenDialog( parent );
+        int                 action  = chooser.showOpenDialog( parent );
         if ( action == JFileChooser.APPROVE_OPTION )
         {
             File        file        = chooser.getSelectedFile();
@@ -105,8 +104,7 @@ final public class EquationFileChooser
     public boolean saveDialog( Equation equation )
     {
         boolean result  = false;
-        int     action  =
-            chooser.showOpenDialog( parent );
+        int     action  = chooser.showSaveDialog( parent );
         if ( action == JFileChooser.APPROVE_OPTION )
         {
             File    file    = chooser.getSelectedFile();

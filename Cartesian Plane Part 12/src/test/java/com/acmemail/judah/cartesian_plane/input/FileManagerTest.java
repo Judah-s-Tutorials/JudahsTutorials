@@ -53,22 +53,25 @@ public class FileManagerTest
     @BeforeAll
     public static void beforeAll() throws IOException
     {
-        adHocOutputFile = File.createTempFile( adHocOutputFileName, null );
-        binaryFile = File.createTempFile( binaryFileName, null );
-        noSuchFile = File.createTempFile( noSuchFileName, null );
-        readOnlyFile = File.createTempFile( readOnlyFileName, null );
-        if ( binaryFile.exists() )
-            binaryFile.delete();
-        if ( noSuchFile.exists() )
-            noSuchFile.delete();
-        if ( readOnlyFile.exists() )
-        {
-            readOnlyFile.setWritable( true );
-            readOnlyFile.delete();
-        }
+        adHocOutputFile = createTempFile( adHocOutputFileName );
+        binaryFile = createTempFile( binaryFileName );
+        noSuchFile = createTempFile( noSuchFileName );
+        readOnlyFile = createTempFile( readOnlyFileName );
         
         writeBinaryFile( binaryFile );
         writeReadOnlyFile( readOnlyFile, List.of( "line1" ) );
+    }
+    
+    private static File createTempFile( String name ) throws IOException
+    {
+        File    file    = File.createTempFile( name, null );
+        file.deleteOnExit();
+        if ( file.exists() )
+        {
+            file.setWritable( true );
+            file.delete();
+        }
+        return file;
     }
     
     @AfterAll
