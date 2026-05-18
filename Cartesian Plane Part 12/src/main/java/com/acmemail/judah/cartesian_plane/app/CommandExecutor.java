@@ -1,6 +1,8 @@
 package com.acmemail.judah.cartesian_plane.app;
 
 import java.awt.geom.Point2D;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -12,9 +14,11 @@ import com.acmemail.judah.cartesian_plane.CartesianPlane;
 import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.input.Command;
-import com.acmemail.judah.cartesian_plane.input.Equation;
-import com.acmemail.judah.cartesian_plane.input.FileManagerOrig;
 import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
+import com.acmemail.judah.cartesian_plane.input.Equation;
+import com.acmemail.judah.cartesian_plane.input.EquationFileChooser;
+import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
+import com.acmemail.judah.cartesian_plane.input.FileManager;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
@@ -134,8 +138,29 @@ public class CommandExecutor
      */
     private void open( String name )
     {
-        Equation    equation    = name.isEmpty() ? 
-            FileManagerOrig.open() : FileManagerOrig.open( name );
+        Equation    equation    = null;
+        if ( name.isBlank() )
+        {
+            EquationFileChooser chooser  = new EquationFileChooser();
+            equation = chooser.openDialog().orElse( null );
+        }
+        else
+        {
+            equation = new Exp4jEquation();
+            File    file    = new File( name );
+            Result  result  = null;
+            try
+            {
+                result  = FileManager.load( file, equation );
+                equation = null;
+                showError( result );
+            }
+            catch ( IOException exc )
+            {
+                equation = null;
+                result = new Result( false, List.of( exc.getMessage() ) );
+            }
+        }
         if ( equation != null )
             inputParser = new CommandProcessor( equation );
     }
@@ -154,9 +179,30 @@ public class CommandExecutor
     {
         Equation    equation    = inputParser.getEquation();
         if ( name.isEmpty() )
-            FileManagerOrig.save( equation );
+        {
+            EquationFileChooser chooser = new EquationFileChooser();
+            boolean             status  = chooser.saveDialog( equation );
+            if ( !status )
+            {
+                String  message = "File not saved: " + name;
+                Result  result  = new Result( false, List.of( message ) );
+                showError( result );
+            }
+        }
         else
-            FileManagerOrig.save( name, equation);
+        {
+            File    file    = new File( name );
+            try
+            {
+                FileManager.save( file, equation );
+            }
+            catch ( IOException exc )
+            {
+                Result  result  = new 
+                    Result( false, List.of( exc.getMessage() ) );
+                showError( result );
+            }
+        }
     }
     
     /**

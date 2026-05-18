@@ -1,6 +1,8 @@
 package com.acmemail.judah.cartesian_plane.input;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -14,10 +16,8 @@ import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
@@ -39,6 +39,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.acmemail.judah.cartesian_plane.test_utils.MessageArchive;
 import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
@@ -46,13 +47,17 @@ import util.EquationTestUtil;
 
 /**
  * This class implements a JUnit test for the EquationFileChooser.
- * Because many tests of the chooser require it to be visible,
- * we address the following issues:
+ * Many tests of the chooser require its dialog to be visible.
+ * Because the dialog is modal the thread that starts it will be blocked.
+ * To handle this, 
+ * most tests employ a subsidiary thread to post the dialog
+ * and wait for it to become visible.
+ * Then the main test thread
+ * completes and dismisses the dialog,
+ * and waits for the subsidiary thread to terminate.
  * 
- * <ol>
- *     <li>
- *     </li>
- * </ol>
+ * @see #startChooserThread(Runnable)
+ * @see #waitForFocus(Component)
  */
 @TestMethodOrder( MethodOrderer.OrderAnnotation.class )
 public class EquationFileChooserTest
@@ -64,7 +69,7 @@ public class EquationFileChooserTest
     private static final long   MAX_FOCUS_WAIT  = 2000; // milliseconds
     /** 
      * The time to wait between checks 
-     * for chooser dialog has acquire focus. 
+     * for the chooser dialog to acquire focus. 
      */
     private static final long   FOCUS_WAIT      = 250;
     /**  
@@ -101,15 +106,37 @@ public class EquationFileChooserTest
     private static final Equation   saveEq    =
         getEquation( saveEqCommands );
     
+    private static final MessageArchive messageArchive  = 
+        new MessageArchive();
+    
     private static final String     noSuchFileName      = "noSuchFile.txt";
     private static final String     binaryFileName      = "binaryFile.bin";
-    private static final String     readOnlyFileName    = "readOnly.txt";
+    private static final String     invalidFileName     = 
+        "no/such/dir/invalid.txt";
+    
+    /** 
+     * This file is used to create an equation file with two parse errors.
+     * It contains an invalid RADIUS name, and an invalid variable
+     * declaration.
+     */
+    private static final String     parseErrorFileName  = "parseError.txt";
+    private static final List<String> parseErrorCommands  = List.of(
+        Command.EQUATION + " parse errors",
+        "# parse error number 1",
+        Command.SET + " x=%",
+        Command.PARAM + " param",
+        "# parse error number 2",
+        Command.RADIUS + " ^r",
+        Command.START + " -1"
+    );
+
 
     private static Path     simpleEqPath;
     private static Path     saveEqPath;
     private static Path     noSuchFilePath;
     private static Path     binaryFilePath;
-    private static Path     readOnlyFilePath;
+    private static Path     invalidFilePath;
+    private static Path     parseErrorPath;
     
 
     private JFrame  parent;
@@ -126,11 +153,11 @@ public class EquationFileChooserTest
         saveEqPath  = tempRoot.resolve( saveEqName );
         noSuchFilePath  = tempRoot.resolve( noSuchFileName );
         binaryFilePath  = tempRoot.resolve( binaryFileName );
-        readOnlyFilePath  = tempRoot.resolve( readOnlyFileName );
+        invalidFilePath  = tempRoot.resolve( invalidFileName );
+        parseErrorPath  = tempRoot.resolve( parseErrorFileName );
         writeFile( simpleEqPath, simpleEqCommands );
+        writeFile( parseErrorPath, parseErrorCommands );
         writeBinaryFile( binaryFilePath );
-        writeFile( readOnlyFilePath, simpleEqCommands );
-        readOnlyFilePath.toFile().setReadOnly();
     }
     
     @BeforeEach
@@ -138,7 +165,9 @@ public class EquationFileChooserTest
     {
         invokeAndWait( () -> parent = makeChooserFramework() );
         invokeAndWait( () -> chooser = new EquationFileChooser( parent ) );
+        messageArchive.clear();
         testEq = null;
+        EquationFileChooser.setMessageConsumer( messageArchive );
     }
 
     @AfterEach
@@ -153,12 +182,49 @@ public class EquationFileChooserTest
         // file to save to
         Files.deleteIfExists( saveEqPath );
     }
+    
+    @Test
+    public void testMessageConsumer()
+    {
+        // get the current message consumer
+        MessageConsumer currConsumer    = 
+            EquationFileChooser.getMessageConsumer();
+        
+        // Use try/finally blocks to ensure that 
+        // currConsumer gets restored
+        try
+        {
+            // set a new consumer
+            MessageConsumer newConsumer     = new MessageArchive();
+            EquationFileChooser.setMessageConsumer( newConsumer );
+            
+            // test the getter; sanity check against current consumer
+            MessageConsumer testConsumer    = 
+                EquationFileChooser.getMessageConsumer();
+            assertEquals( newConsumer, testConsumer );
+            assertNotEquals( newConsumer, currConsumer );
+            
+            // pass null to the setter, restoring the default consumer
+            EquationFileChooser.setMessageConsumer( null );
+            testConsumer = EquationFileChooser.getMessageConsumer();
+            assertNotEquals( newConsumer, testConsumer );
+        }
+        finally
+        {
+            // restore the original consumer, and do final sanity check
+            EquationFileChooser.setMessageConsumer( currConsumer );
+            MessageConsumer testConsumer = 
+                EquationFileChooser.getMessageConsumer();
+            assertEquals( currConsumer, testConsumer );
+        }
+    }
 
     @Test
     public void testEquationFileChooser()
     {
         invokeAndWait( () -> {
-           new EquationFileChooser(); 
+            EquationFileChooser test    = new EquationFileChooser(); 
+            assertNull( test.getParent() );
         });
     }
 
@@ -167,12 +233,12 @@ public class EquationFileChooserTest
     {
         invokeAndWait( () -> {
             EquationFileChooser test    = new EquationFileChooser( null ); 
-            assertNotNull( test );
+            assertNull( test.getParent() );
          });
          invokeAndWait( () -> {
              JFrame  frame   = new JFrame();
              EquationFileChooser test    = new EquationFileChooser( frame ); 
-             assertNotNull( test );
+             assertEquals( frame, test.getParent() );
              frame.dispose();
           });
     }
@@ -206,6 +272,7 @@ public class EquationFileChooserTest
         assertNull( testEq );
         openDismiss( testPath, KeyEvent.VK_ENTER );
         assertNotNull( testEq );
+        assertTrue( messageArchive.isEmpty() );
         EquationTestUtil.verifyEquation( simpleEq, testEq );
     }
 
@@ -219,21 +286,64 @@ public class EquationFileChooserTest
         // change to null.
         testEq = new Exp4jEquation();
         openDismiss( testPath, KeyEvent.VK_ESCAPE );
+        assertTrue( messageArchive.isEmpty() );
         assertNull( testEq );
-    }
-    
-    /**
-     * Post the EquationFileChooser open dialog;
-     * save the result in global variable testEq.
-     */
-    private void openOperation()
-    {
-        Optional<Equation>  optEquation = chooser.openDialog();
-        testEq = optEquation.orElse( null );
     }
 
     @Test
-    public void testSaveDialogApprove()
+    public void testOpenDialogNoSuchFile()
+    {
+        // Start a dialog, enter a path to a non-existent file,
+        // and approve the operation. Verify that no equation 
+        // is loaded.
+        String          testPath        = noSuchFilePath.toString();
+        // this will change if the test succeeds
+        testEq = new Exp4jEquation();
+        openDismiss( testPath, KeyEvent.VK_ENTER );
+        assertNull( testEq );
+        assertFalse( messageArchive.isEmpty() );
+        String  expMessageFragment  = "cannot find the file";
+        String  lastMessage         = messageArchive.getLastMessage();
+        assertTrue( lastMessage.contains( expMessageFragment ) );
+    }
+
+    @Test
+    public void testOpenDialogInvalidFile()
+    {
+        // Start a dialog, enter a path to an invalid file,
+        // and approve the operation. Verify that no equation 
+        // is loaded.
+        String          testPath        = binaryFilePath.toString();
+        // this will change if the test succeeds
+        testEq = new Exp4jEquation();
+        openDismiss( testPath, KeyEvent.VK_ENTER );
+        assertNull( testEq );
+        assertFalse( messageArchive.isEmpty() );
+        String  expMessageFragment  = "valid command";
+        String  lastMessage         = messageArchive.getLastMessage();
+        assertTrue( lastMessage.contains( expMessageFragment ) );
+    }
+
+    @Test
+    public void testOpenDialogParseErrors()
+    {
+        // Start a dialog, enter a path to a readable file
+        // that contains parse errors, and approve the operation.
+        // Verify that no equation is created, and error
+        // messages are posted.
+        String          testPath        = parseErrorPath.toString();
+        // this will change if the test succeeds
+        testEq = new Exp4jEquation();
+        openDismiss( testPath, KeyEvent.VK_ENTER );
+        assertNull( testEq );
+        assertFalse( messageArchive.isEmpty() );
+        String  expMessageFragment  = "not a valid name";
+        String  lastMessage         = messageArchive.getLastMessage();
+        assertTrue( lastMessage.contains( expMessageFragment ) );
+    }
+
+    @Test
+    public void testSaveAndReload()
     {
         // Start a save dialog, enter a path to a valid file, 
         // and approve the operation. Verify that the equation was
@@ -244,10 +354,12 @@ public class EquationFileChooserTest
         saveResult = false;
         saveDismiss( saveEq, testPath, KeyEvent.VK_ENTER );
         assertTrue( saveResult );
+        assertTrue( messageArchive.isEmpty() );
         
         // Re-read saved file to verify save.
         openDismiss( testPath, KeyEvent.VK_ENTER );
         assertNotNull( testEq );
+        assertTrue( messageArchive.isEmpty() );
         EquationTestUtil.verifyEquation( saveEq, testEq );
     }
 
@@ -263,21 +375,36 @@ public class EquationFileChooserTest
         saveResult = true;
         saveDismiss( saveEq, testPath, KeyEvent.VK_ESCAPE );
         assertFalse( saveResult );
+        assertTrue( messageArchive.isEmpty() );
         assertFalse( Files.exists( saveEqPath ) );
     }
 
     @Test
     public void testSaveDialogInvalid()
     {
-        // Start a save dialog, enter a path to a read-only file, 
+        // Start a save dialog, enter a path to an file location, 
         // and approve the operation. Verify that the operation
         // fails.
-        String          testPath        = readOnlyFilePath.toString();
+        String          testPath        = invalidFilePath.toString();
         // Start with saveResult = true. If test succeeds
         // it will change to false.
         saveResult = true;
         saveDismiss( saveEq, testPath, KeyEvent.VK_ENTER );
         assertFalse( saveResult );
+        assertFalse( messageArchive.isEmpty() );
+        String  expMessageFragment  = testPath;
+        String  lastMessage         = messageArchive.getLastMessage();
+        assertTrue( lastMessage.contains( expMessageFragment ) );
+    }
+    
+    /**
+     * Post the EquationFileChooser open dialog;
+     * save the result in global variable testEq.
+     */
+    private void openOperation()
+    {
+        Optional<Equation>  optEquation = chooser.openDialog();
+        testEq = optEquation.orElse( null );
     }
     
     /**
@@ -305,8 +432,7 @@ public class EquationFileChooserTest
         }
     }
 
-    private void 
-    saveDismiss( Equation equation, String testPath, int lastKey )
+    private void saveDismiss( Equation equation, String testPath, int lastKey )
     {
         Thread          thread          = 
             startChooserThread( () -> saveOperation( equation ) );
@@ -350,19 +476,15 @@ public class EquationFileChooserTest
      * The created file will be non-empty;
      * assumptions about the specific content should not be made.
      * 
-     * @param file          file to create
+     * @param path          file to create
      * @throws IOException  if an IO error occurs
      */
     private static void writeBinaryFile( Path path ) throws IOException
     {
-        File    file    = path.toFile();
-        try (
-            FileOutputStream fStream = new FileOutputStream( file );
-            DataOutputStream dStream = new DataOutputStream( fStream );
-        )
+        try ( OutputStream oStream = Files.newOutputStream( path )  )
         {
             for ( int inx = 1 ; inx < 101 ; ++inx )
-                dStream.write( inx );
+                oStream.write( inx );
         }
     }
 
@@ -407,11 +529,11 @@ public class EquationFileChooserTest
      * then return the thread to the caller,
      * leaving the thread running.
      * <p>
-     * If the chooser does not become acquire focus
+     * If the chooser does not acquire focus
      * after {@linkplain #MAX_FOCUS_WAIT} milliseconds,
      * a JUnit failure will be asserted.
      * 
-     * @param runner    the Runnable to be exceuted in a new thread
+     * @param runner    the Runnable to be executed in a new thread
      * 
      * @return  the thread encapsulating runner
      */
@@ -428,6 +550,20 @@ public class EquationFileChooserTest
      * to acquire the keyboard focus.
      * If focus is not acquired after {@linkplain #MAX_FOCUS_WAIT}
      * a failure will be asserted.
+     * <p>
+     * Important note:
+     * this method terminates successfully
+     * when the some component in the target JFileChooser
+     * object receives focus,
+     * but we don't know <em>which</em> component.
+     * Most clients of this method
+     * are going to assume
+     * that the chooser's text field
+     * will have focus, 
+     * which, while likely true, is not guaranteed.
+     * If this test every starts acting flaky
+     * this would be one of the first places
+     * to look.
      * 
      * @param parent    the given parent
      */
@@ -438,7 +574,6 @@ public class EquationFileChooserTest
         long        elapsedTime = 0;
         while ( !focused && elapsedTime < MAX_FOCUS_WAIT )
         {
-            System.out.println( "checking" );
             focused = Arrays.stream( Window.getWindows() )
                 .filter( w -> parent.equals( w.getOwner() ) )
                 .map( w -> w.getFocusOwner() )
@@ -497,8 +632,6 @@ public class EquationFileChooserTest
      * Join a given thread, 
      * waiting a maximum of milliseconds
      * for the thread to complete.
-     * If the timeout expires
-     * a failure is asserted.
      * 
      * @param thread    the given thread
      * @param timeout   the maximum wait time
@@ -511,7 +644,7 @@ public class EquationFileChooserTest
         }
         catch ( InterruptedException exc )
         {
-            fail( "timeout waiting for thread to complete" );
+            Thread.currentThread().interrupt();
         }
     }
 }
