@@ -1,9 +1,7 @@
-package com.acmemail.judah.cartesian_plane.input;
+package com.acmemail.judah.cartesian_plane.math;
 
 import java.awt.geom.Point2D;
 import java.util.Objects;
-
-import com.acmemail.judah.cartesian_plane.math.Complex;
 
 /**
  * An instance of this class
@@ -17,6 +15,10 @@ import com.acmemail.judah.cartesian_plane.math.Complex;
  */
 public final class Polar
 {
+    private static final double TWO_PI          = 2 * Math.PI;
+    private static final String INVALID_RADIUS  = "radius: not a valid value";
+    private static final String INVALID_THETA   = "theta: not a valid value";
+    
     /** The radius of this object. */
     private final double    radius;
     /** The angle of this object. */
@@ -26,15 +28,48 @@ public final class Polar
      * Constructor.
      * Creates a new Polar object
      * from a given radius and angle.
+     * Radius and angle must be
+     * valid, finite quantities.
+     * Internal form will be normalized,
+     * so r >= 0 and 0 <= theta < 2pi;
+     * see {@link #ofRTheta(double, double)}
+     * for details.
      *  
-     * @param radius    the given radius
-     * @param theta     the given angle in radians
+     * @param radiusP    the given radius
+     * @param thetaP     the given angle in radians
+     * 
+     * @throws  
+     *      IllegalArgumentException if radius or theta is not
+     *      a valid, finite double
      */
-    private Polar( double radius, double theta )
+    private Polar( double radiusP, double thetaP )
     {
-        this.radius = radius;
-        this.theta = theta;
+        double  tempR   = radiusP;
+        double  tempTh  = thetaP % TWO_PI;
+        if ( Double.isNaN( radiusP ) || Double.isInfinite( radiusP ) )
+            throw new IllegalArgumentException( INVALID_RADIUS );
+        if ( Double.isNaN( thetaP ) || Double.isInfinite( thetaP ) )
+            throw new IllegalArgumentException( INVALID_THETA );
+        if ( radiusP == 0)
+        {
+            tempR = 0;
+            tempTh = 0;
+        }
+        else
+        {
+            if ( radiusP < 0 )
+            {
+                tempR = -tempR;
+                tempTh += Math.PI;
+            }
+            if ( tempTh < 0 )
+                tempTh += TWO_PI;
+        }
+        
+        radius = tempR;
+        theta = tempTh;
     }
+    
 
     /**
      * Converts this object
@@ -58,7 +93,7 @@ public final class Polar
     public Complex toComplex()
     {
         double[]    values  = toRectangle();
-        Complex     complex   = new Complex( values[0], values[1] );
+        Complex     complex = new Complex( values[0], values[1] );
         return complex;
     }
     
@@ -127,7 +162,7 @@ public final class Polar
      * 
      * @throws NullPointerException if zed is null
      */
-    public static Polar of( Complex zed )
+    public static Polar ofComplex( Complex zed )
     {
         Objects.requireNonNull( zed, "zed" );
         Polar  pzed     = ofXY( zed.re(), zed.im() );
@@ -154,13 +189,44 @@ public final class Polar
     /**
      * Creates a Polar object
      * from a given radius and angle.
+     * Internally, coordinates are normalized
+     * so that radius &ge; 0
+     * and 0 &le; &theta; &lt; 2&pi;.
+     * The normalization algorithm is:
+     * <pre style="padding-left:2em;">
+     * if radius == 0 
+     *     &theta; = 0
+     * else
+     * {
+     *     if radius &lt; 0 :
+     *         radius = -radius, &theta; += &pi;
+     *     &theta; = &theta; % 2&pi;
+     *     if &theta; &lt; 0:
+     *         &theta; += 2&pi;
+     * }</pre>
+     * <p>
+     * Examples:
+     * <ul>
+     *     <li>(0, &pi;) &rarr; (0,0)</li> 
+     *     <li>(2, &pi;/4) &rarr; (2,&pi;/4)</li> 
+     *     <li>(-2, &pi;/4) &rarr; (2,5&pi;/4;)</li> 
+     *     <li>(1, 3&pi;) &rarr; (1,&pi;)</li> 
+     *     <li>(1, -&pi;) &rarr; (1,&pi;)</li> 
+     *     <li>(-1, -&pi;) &rarr; (1,0)</li> 
+     * </ul>
      * 
-     * @param radius    the given radius
+     * @param radius    the given radius;
+     *                  must be a valid, finite value
      * @param theta     the given angle in radians
+     *                  must be a valid, finite value
      * 
      * @return  the created Polar object
+     * 
+     * @throws  
+     *      IllegalArgumentException if radius or theta is not
+     *      a valid, finite double
      */
-    public static Polar of( double radius, double theta )
+    public static Polar ofRTheta( double radius, double theta )
     {
         Polar   pzed    = new Polar( radius, theta );
         return pzed;
@@ -213,7 +279,8 @@ public final class Polar
      */
     public static double thetaOfXY( double xco, double yco )
     {
-        double  theta   = Math.atan2( yco, xco );
+        double  theta   = xco == 0 && yco == 0 ?
+            0 : Math.atan2( yco, xco );
         return theta;
     }
     
@@ -228,8 +295,13 @@ public final class Polar
      */
     private double[] toRectangle()
     {
-        double      xco = radius * Math.cos( theta );
-        double      yco = radius * Math.sin( theta );
+        double      xco     = 0;
+        double      yco     = 0;
+        if ( radius != 0 )
+        {
+            xco = radius * Math.cos( theta );
+            yco = radius * Math.sin( theta );
+        }
         double[]    rect    = new double[] { xco, yco };
         return rect;
     }

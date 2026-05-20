@@ -11,10 +11,10 @@ import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import com.acmemail.judah.cartesian_plane.input.Command;
+import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
 import com.acmemail.judah.cartesian_plane.input.Equation;
-import com.acmemail.judah.cartesian_plane.input.FileManagerOrig;
-import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
+import com.acmemail.judah.cartesian_plane.input.EquationFileChooser;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
@@ -36,7 +36,9 @@ public class OpenEquationDemo1
      */
     public static void main(String[] args)
     {
-        Equation    equation    = FileManagerOrig.open();
+        EquationFileChooser chooser     = new EquationFileChooser();
+        Equation            equation    = 
+            chooser.openDialog().orElse( null );
         Root    root    = new Root( plane );
         root.start();
         try (

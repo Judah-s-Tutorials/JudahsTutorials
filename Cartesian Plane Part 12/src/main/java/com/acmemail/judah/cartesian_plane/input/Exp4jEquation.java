@@ -11,6 +11,8 @@ import java.util.function.Consumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
+import com.acmemail.judah.cartesian_plane.math.Polar;
+
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ValidationResult;
@@ -303,7 +305,7 @@ public class Exp4jEquation implements Equation
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
                 .peek( t -> rExpr.setVariable( theta, t ) )
-                .mapToObj( t -> Polar.of( rExpr.evaluate(), t ) )
+                .mapToObj( t -> Polar.ofRTheta( rExpr.evaluate(), t ) )
                 .map( Polar::toPoint );
         return stream;
     }
@@ -325,7 +327,7 @@ public class Exp4jEquation implements Equation
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r + rStep )
                 .peek( r -> tExpr.setVariable( radius, r ) )
-                .mapToObj( r -> Polar.of( r, tExpr.evaluate() ) )
+                .mapToObj( r -> Polar.ofRTheta( r, tExpr.evaluate() ) )
                 .map( Polar::toPoint );
         return stream;
     }
