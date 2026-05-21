@@ -18,6 +18,10 @@ public final class Polar
     private static final double TWO_PI          = 2 * Math.PI;
     private static final String INVALID_RADIUS  = "radius: not a valid value";
     private static final String INVALID_THETA   = "theta: not a valid value";
+    private static final String INVALID_XCO     = "x-coordinate: not a valid value";
+    private static final String INVALID_YCO     = "y-coordinate: not a valid value";
+    private static final String INVALID_REAL    = "real part: not a valid value";
+    private static final String INVALID_IMAG    = "imag part: not a valid value";
     
     /** The radius of this object. */
     private final double    radius;
@@ -44,28 +48,27 @@ public final class Polar
      */
     private Polar( double radiusP, double thetaP )
     {
-        double  tempR   = radiusP;
-        double  tempTh  = thetaP % TWO_PI;
         if ( Double.isNaN( radiusP ) || Double.isInfinite( radiusP ) )
             throw new IllegalArgumentException( INVALID_RADIUS );
         if ( Double.isNaN( thetaP ) || Double.isInfinite( thetaP ) )
             throw new IllegalArgumentException( INVALID_THETA );
-        if ( radiusP == 0)
+
+        double  tempR   = radiusP;
+        double  tempTh  = thetaP;
+        if ( tempR == 0 )
         {
-            tempR = 0;
             tempTh = 0;
         }
         else
         {
-            if ( radiusP < 0 )
+            if ( tempR < 0 )
             {
                 tempR = -tempR;
                 tempTh += Math.PI;
             }
-            if ( tempTh < 0 )
-                tempTh += TWO_PI;
+            tempTh = ( ( tempTh % TWO_PI ) + TWO_PI ) % TWO_PI;
         }
-        
+
         radius = tempR;
         theta = tempTh;
     }
@@ -148,7 +151,7 @@ public final class Polar
                 Double.compare( this.theta, that.theta ) == 0;
         }
         else
-            ;
+            result = false;
         return result;
     }
 
@@ -161,9 +164,15 @@ public final class Polar
      * @return  the created Polar object
      * 
      * @throws NullPointerException if zed is null
+     * @throws IllegalArgumentException
+     *      if a component of zed is not a valid, finite double
      */
     public static Polar ofComplex( Complex zed )
     {
+        if ( Double.isNaN( zed.re() ) || Double.isInfinite( zed.re() ) )
+            throw new IllegalArgumentException( INVALID_REAL );
+        if ( Double.isNaN( zed.im() ) || Double.isInfinite( zed.im() ) )
+            throw new IllegalArgumentException( INVALID_IMAG );
         Objects.requireNonNull( zed, "zed" );
         Polar  pzed     = ofXY( zed.re(), zed.im() );
         return pzed;
@@ -178,8 +187,10 @@ public final class Polar
      * @return  the created Polar object
      * 
      * @throws NullPointerException if point is null
+     * @throws IllegalArgumentException
+     *      if a component of point is not a valid, finite double
      */
-    public static Polar of( Point2D point )
+    public static Polar ofPoint( Point2D point )
     {
         Objects.requireNonNull( point, "point" );
         Polar  pzed    = ofXY( point.getX(), point.getY() );
@@ -200,9 +211,7 @@ public final class Polar
      * {
      *     if radius &lt; 0 :
      *         radius = -radius, &theta; += &pi;
-     *     &theta; = &theta; % 2&pi;
-     *     if &theta; &lt; 0:
-     *         &theta; += 2&pi;
+     *     &theta; = ( ( &theta; % 2&pi; ) + 2&pi; ) % 2&pi;
      * }</pre>
      * <p>
      * Examples:
@@ -228,6 +237,10 @@ public final class Polar
      */
     public static Polar ofRTheta( double radius, double theta )
     {
+        if ( Double.isNaN( radius ) || Double.isInfinite( radius ) )
+            throw new IllegalArgumentException( INVALID_RADIUS );
+        if ( Double.isNaN( theta ) || Double.isInfinite( theta ) )
+            throw new IllegalArgumentException( INVALID_THETA );
         Polar   pzed    = new Polar( radius, theta );
         return pzed;
     }
@@ -240,6 +253,9 @@ public final class Polar
      * @param yco    the given y-coordinate
      * 
      * @return  the created Polar object
+     * 
+     * @throws IllegalArgumentException
+     *      if xco or yco is not a valid, finite double
      */
     public static Polar ofXY( double xco, double yco )
     {
@@ -255,13 +271,20 @@ public final class Polar
      * given the Cartesian coordinates
      * of a point.
      * 
-     * @param xco    the given x-coordinate
-     * @param yco    the given y-coordinate
+     * @param xco    the given x-coordinate; must be a valid, finite double
+     * @param yco    the given y-coordinate; must be a valid, finite double
      * 
      * @return  the calculated radius
+     * 
+     * @throws IllegalArgumentException
+     *      if xco or yco is not a valid, finite double
      */
     public static double radiusOfXY( double xco, double yco )
     {
+        if ( Double.isNaN( xco ) || Double.isInfinite( xco ) )
+            throw new IllegalArgumentException( INVALID_XCO );
+        if ( Double.isNaN( yco ) || Double.isInfinite( yco ) )
+            throw new IllegalArgumentException( INVALID_YCO );
         double  radius  = Math.hypot( xco, yco );
         return radius;
     }
@@ -271,16 +294,28 @@ public final class Polar
      * in Polar coordinates,
      * given the Cartesian coordinates
      * of a point.
+     * The returned coordinates will be normalized
+     * as discussed {@link #ofRTheta(double, double)};
+     * 0 &le; &theta; &lt; 2&pi;.
      * 
      * @param xco    the given x-coordinate
      * @param yco    the given y-coordinate
      * 
      * @return  the calculated angle
+     * 
+     * @throws IllegalArgumentException
+     *      if xco or yco is not a valid, finite value
      */
     public static double thetaOfXY( double xco, double yco )
     {
+        if ( Double.isNaN( xco ) || Double.isInfinite( xco ) )
+            throw new IllegalArgumentException( INVALID_XCO );
+        if ( Double.isNaN( yco ) || Double.isInfinite( yco ) )
+            throw new IllegalArgumentException( INVALID_YCO );
         double  theta   = xco == 0 && yco == 0 ?
             0 : Math.atan2( yco, xco );
+        if ( theta < 0 )
+            theta += TWO_PI;
         return theta;
     }
     

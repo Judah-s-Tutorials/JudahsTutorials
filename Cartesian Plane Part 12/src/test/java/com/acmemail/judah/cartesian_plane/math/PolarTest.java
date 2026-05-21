@@ -6,7 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.geom.Point2D;
-import java.util.stream.DoubleStream;
+import java.util.Random;
+import java.util.function.BiConsumer;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.MethodOrderer;
@@ -16,32 +18,24 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.acmemail.judah.cartesian_plane.math.Complex;
-import com.acmemail.judah.cartesian_plane.math.Polar;
-
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class PolarTest
 { 
+    private static final    Class<IllegalArgumentException>  illArgClass =
+        IllegalArgumentException.class;
+    private static final    double       NaN     = Double.NaN;
+    private static final    double       NEG_INF = Double.NEGATIVE_INFINITY;
+    private static final    double       POS_INF = Double.POSITIVE_INFINITY;
+    
     // Convenient constants //
-    /** PI*/
+    /** PI */
     private static final double PI      = Math.PI;
     private static final double PI_2    = PI * 2;
     private static final double epsilon = .001;
     /** Square root of 2 */
-    private static double   ROOT2   = Math.sqrt( 2 );
-    /** PI / 4 */
-    private static double   PI_14   = Math.PI / 4;
-    /** PI / 2 */
-    private static double   PI_12   = Math.PI / 2;
-    /** 3PI / 4 */
-    private static double   PI_34   = 3 * Math.PI / 4;
-    /** PI / 4 */
-    private static double   PI_54   = 5 * Math.PI / 4;
-    /** PI / 4 */
-    private static double   PI_32   = 3 * Math.PI / 2;
-    /** PI / 4 */
-    private static double   PI_74   = 7 * Math.PI / 4;
-    
+    private static final double ROOT_2  = Math.sqrt( 2 );
+    private static final Random randy   = new Random( 1 );
+
     /**  
      * To test polar/rectangular conversions, 
      * this class uses the same algorithms as the Polar class.
@@ -63,7 +57,7 @@ public class PolarTest
         ),
         new SanityPair( 
             new Point2D.Double( 1, 1 ), 
-            new PolarPair( ROOT2, PI / 4 )
+            new PolarPair( ROOT_2, PI / 4 )
         ),
         new SanityPair( 
             new Point2D.Double( 0, 1 ), 
@@ -71,7 +65,7 @@ public class PolarTest
         ),
         new SanityPair( 
             new Point2D.Double( -1, 1 ), 
-            new PolarPair( ROOT2, 3 * PI / 4 )
+            new PolarPair( ROOT_2, 3 * PI / 4 )
         ),
         new SanityPair( 
             new Point2D.Double( -1, 0 ), 
@@ -79,7 +73,7 @@ public class PolarTest
         ),
         new SanityPair( 
             new Point2D.Double( -1, -1 ), 
-            new PolarPair( ROOT2, 5 * PI / 4 )
+            new PolarPair( ROOT_2, 5 * PI / 4 )
         ),
         new SanityPair( 
             new Point2D.Double( 0, -1 ), 
@@ -87,7 +81,7 @@ public class PolarTest
         ),
         new SanityPair( 
             new Point2D.Double( 1, -1 ), 
-            new PolarPair( ROOT2, 7 * PI / 4 )
+            new PolarPair( ROOT_2, 7 * PI / 4 )
         ),
     };
     
@@ -118,7 +112,7 @@ public class PolarTest
         double  theta       = 3 * radius;
         double  expTheta    = theta % PI_2;
         Polar   zed         = Polar.ofRTheta( radius, theta );
-        assertEquals( expTheta, zed.getTheta() );
+        assertEquals( expTheta, zed.getTheta(), epsilon );
     }
 
     @Test
@@ -165,20 +159,22 @@ public class PolarTest
     @MethodSource("doublePairProvider")
     public void testToPoint( DoublePair pair )
     {
-        Polar               zed     = pair.getPolar();
-        Point2D             point   = zed.toPoint();
-        XYToPolarChecker    checker = new XYToPolarChecker( zed );
-        checker.confirm( point );
+        Polar               polar       = pair.getPolar();
+        PolarPair           polarPair   = new PolarPair( polar );
+        Point2D             actPoint    = polar.toPoint();
+        Point2D             expPoint    = polarPair.toPoint();
+        confirm( actPoint, expPoint );
     }
 
     @ParameterizedTest
     @MethodSource("doublePairProvider")
     public void testToComplex( DoublePair pair )
     {
-        Polar               pzed    = pair.getPolar();
-        Complex             zed     = pzed.toComplex();
-        XYToPolarChecker    checker = new XYToPolarChecker( zed );
-        checker.confirm( zed );
+        Polar               pzed        = pair.getPolar();
+        PolarPair           polarPair   = new PolarPair( pzed );
+        Complex             actComplex  = pzed.toComplex();
+        Complex             expComplex  = polarPair.toComplex();
+        confirm( expComplex, actComplex );
     }
 
     @Test
@@ -192,7 +188,41 @@ public class PolarTest
     public void testOfPointNPE()
     {
         Point2D point   = null;
-        assertThrows( NullPointerException.class, () -> Polar.of( point ) );
+        assertThrows( NullPointerException.class, () -> Polar.ofPoint( point ) );
+    }
+    
+    @Test
+    public void testOfRThetaIllegalArgumentException()
+    {
+        testIllegalArg( (radius,theta) -> Polar.ofRTheta( radius, theta ) );
+    }
+    
+    @Test
+    public void testThetaOfXYIllegalArgumentException()
+    {
+        testIllegalArg( (xco,yco) -> Polar.thetaOfXY( xco, yco ) );
+    }
+    
+    @Test
+    public void testRadiusOfXYIllegalArgumentException()
+    {
+        testIllegalArg( (xco,yco) -> Polar.radiusOfXY( xco, yco ) );
+    }
+    
+    @Test
+    public void testOfComplexIllegalArgumentException()
+    {
+        testIllegalArg( (real,imag) ->
+            Polar.ofComplex( new Complex( real, imag ) )
+        );
+    }
+    
+    @Test
+    public void testOfPointIllegalArgumentException()
+    {
+        testIllegalArg( (xco,yco) ->
+            Polar.ofPoint( new Point2D.Double( xco, yco ) )
+        );
     }
     
     @ParameterizedTest
@@ -201,44 +231,8 @@ public class PolarTest
     {
         Point2D             point       = pair.getPoint();
         PolarPair           polarPair   = xyToPolar( point );
-        Polar               pzed        = Polar.of( point );
+        Polar               pzed        = Polar.ofPoint( point );
         polarPair.confirm( pzed );
-    }
-    
-    private static PolarPair xyToPolar( Point2D point )
-    {
-        PolarPair polarPair = xyToPolar( point.getX(), point.getY() );
-        return polarPair;
-    }
-    
-    private static PolarPair xyToPolar( DoublePair pair )
-    {
-        PolarPair polarPair = xyToPolar( pair.left, pair.right );
-        return polarPair;
-    }
-    
-    private static PolarPair xyToPolar( double xco, double yco )
-    {
-        double      radius  = xyToRadius( xco, yco );
-        double      theta   = xyToTheta( xco, yco );
-        PolarPair   pair    = new PolarPair( radius, theta );
-        return pair;
-    }
-    
-    private static double xyToRadius( double xco, double yco )
-    {
-        double  radius  = xco == 0 && yco == 0 ? 
-            0 : Math.hypot( xco, yco );
-        return radius;
-    }
-    
-    private static double xyToTheta( double xco, double yco )
-    {
-        double  theta   = xco == 0 && yco == 0 ? 
-            0 : Math.atan2( yco, xco );
-        if ( theta < 0 )
-            theta += 2 * PI;
-        return theta;
     }
     
     @ParameterizedTest
@@ -256,10 +250,65 @@ public class PolarTest
     @MethodSource("doublePairProvider")
     public void testOfComplex( DoublePair pair )
     {
-        Complex             zed     = pair.getComplex();
-        XYToPolarChecker    checker = new XYToPolarChecker( zed );
-        Polar               pzed    = Polar.ofComplex( zed );
-        checker.confirm( pzed );
+        Complex             zed         = pair.getComplex();
+        PolarPair           expPolar    = xyToPolar( zed.re(), zed.im() );
+        Polar               actPolar    = Polar.ofComplex( zed );
+        expPolar.confirm( actPolar );
+    }
+    
+    @Test
+    public void testEdgeCases1()
+    {
+        final double  epsilon = 1.0e-12;
+        final double  tiny    = epsilon / 100;
+        
+        Polar   base    = Polar.ofRTheta( 1, PI_2 - tiny );
+        Point2D point   = base.toPoint();
+        Polar   recon   = Polar.ofPoint( point );
+        assertEquals( PI_2, base.getTheta(), epsilon );
+        confirm( base, recon );
+        
+        base    = Polar.ofRTheta( 1, PI_2 + tiny );
+        point   = base.toPoint();
+        recon   = Polar.ofPoint( point );
+        assertEquals( 0, base.getTheta(), epsilon );
+        confirm( base, recon );
+        
+        base    = Polar.ofRTheta( 1, 0 - tiny );
+        point   = base.toPoint();
+        recon   = Polar.ofPoint( point );
+        assertEquals( PI_2, base.getTheta(), epsilon );
+        confirm( base, recon );
+        
+        base    = Polar.ofRTheta( 1, 0 + tiny );
+        point   = base.toPoint();
+        recon   = Polar.ofPoint( point );
+        assertEquals( 0, base.getTheta(), epsilon );
+        confirm( base, recon );
+        
+        base    = Polar.ofRTheta( 0 - tiny, PI / 2 );
+        point   = base.toPoint();
+        recon   = Polar.ofPoint( point );
+        assertEquals( 3 * PI / 2, base.getTheta(), epsilon );
+        confirm( base, recon );
+        
+        base    = Polar.ofRTheta( 0 + tiny, PI / 2 );
+        point   = base.toPoint();
+        recon   = Polar.ofPoint( point );
+        assertEquals( PI / 2, base.getTheta(), epsilon );
+        confirm( base, recon );
+    }
+    
+    @Test
+    public void testEdgeCases2()
+    {
+        Polar   actPolar    = Polar.ofRTheta( -1, Math.PI );
+        Polar   expPolar    = Polar.ofRTheta( 1, 0 );
+        confirm( actPolar, expPolar );
+        
+        actPolar = Polar.ofRTheta( -1, 3 * Math.PI / 2 );
+        expPolar = Polar.ofRTheta( 1, Math.PI / 2 );
+        confirm( actPolar, expPolar );
     }
     
     /**
@@ -312,57 +361,187 @@ public class PolarTest
         assertNotEquals( polarA, polarB );
         assertNotEquals( polarB, polarA );
         assertNotEquals( polarA.hashCode(), polarB.hashCode() );
+    }
+    
+    /**
+     * Verifies that a given consumer will raise 
+     * an IllegalArgumentException
+     * when presented with NaN or infinite values.
+     * 
+     * @param consumer  the given consumer
+     */
+    private static void 
+    testIllegalArg( BiConsumer<Double,Double> consumer )
+    {
+        assertThrows( illArgClass, () -> consumer.accept( NaN, PI ) );
+        assertThrows( illArgClass, () -> consumer.accept( PI, NaN ) );
+        assertThrows( illArgClass, () -> consumer.accept( NaN, NaN ) );
         
-        // Make sure NaN values work
-        polarA = Polar.ofRTheta( radius1, theta1 );
-        polarB = Polar.ofRTheta( Double.NaN, theta1 );
-        assertNotEquals( polarA, polarB );
-        assertNotEquals( polarB, polarA );
-        assertNotEquals( polarA.hashCode(), polarB.hashCode() );
-        
-        polarA = Polar.ofRTheta( radius1, theta1 );
-        polarB = Polar.ofRTheta( radius1, Double.NaN );
-        assertNotEquals( polarA, polarB );
-        assertNotEquals( polarB, polarA );
-        assertNotEquals( polarA.hashCode(), polarB.hashCode() );
-        
-        polarA = Polar.ofRTheta( Double.NaN, theta1 );
-        polarB = Polar.ofRTheta( Double.NaN, theta1 );
-        assertEquals( polarA, polarB );
-        assertEquals( polarB, polarA );
-        assertEquals( polarA.hashCode(), polarB.hashCode() );
-        
-        polarA = Polar.ofRTheta( radius1, Double.NaN );
-        polarB = Polar.ofRTheta( radius1, Double.NaN );
-        assertEquals( polarA, polarB );
-        assertEquals( polarB, polarA );
-        assertEquals( polarA.hashCode(), polarB.hashCode() );
-        
-        polarA = Polar.ofRTheta( Double.NaN, Double.NaN );
-        polarB = Polar.ofRTheta( Double.NaN, Double.NaN );
-        assertEquals( polarA, polarB );
-        assertEquals( polarB, polarA );
-        assertEquals( polarA.hashCode(), polarB.hashCode() );
+        assertThrows( illArgClass, () -> consumer.accept( NEG_INF, PI ) );
+        assertThrows( illArgClass, () -> consumer.accept( PI, NEG_INF ) );
+        assertThrows( illArgClass, () -> consumer.accept( NEG_INF, NEG_INF ) );
+
+        assertThrows( illArgClass, () -> consumer.accept( POS_INF, PI ) );
+        assertThrows( illArgClass, () -> consumer.accept( PI, POS_INF ) );
+        assertThrows( illArgClass, () -> consumer.accept( POS_INF, POS_INF ) );
     }
     
     /**
      * Generates a stream of DoublePair objects
      * for use in miscellaneous testing.
+     * Approximately one quarter of the stream
+     * will contain values from 
+     * each of the four quadrants of the Cartesian plane.
      * 
      * @return  a stream of DoublePair objects
      */
     private static Stream<DoublePair> doublePairProvider()
     {
-        double          leftBase    = -1;
-        double          rightBase   = -2;
-        double          modMin      = .1;
-        double          modMax      = 4;
-        double          incr        = .1;
-        Stream<DoublePair> stream  = 
-            DoubleStream.iterate( modMin, d -> d < modMax, d -> d + incr )
-            .mapToObj( d -> new DoublePair( leftBase + d, rightBase + d ) );
+        Stream<DoublePair>  quad1   = generator( 0, 10, 0, 10 );
+        Stream<DoublePair>  quad2   = generator( 0, 10, -10, 0 );
+        Stream<DoublePair>  quad3   = generator( -10, 0, -10, 0 );
+        Stream<DoublePair>  quad4   = generator( -10, 0, 0, 10 );
+        Stream<DoublePair>  stream  = Stream.of( quad1, quad2, quad3, quad4 )
+            .flatMap( s -> s);
         return stream;
-            
+    }
+
+    /**
+     * Generates a stream of DoublePairs
+     * where the left values are between
+     * the given minimum and maximum X values,
+     * that the right values are between
+     * the given min and max Y values.
+     * 
+     * @param minX  the given minimum X value
+     * @param maxX  the given maximum X value
+     * @param minY  the given minimum Y value
+     * @param maxY  the given maximum Y value
+     * @return
+     */
+    private static Stream<DoublePair> generator( 
+        double minX, 
+        double maxX, 
+        double minY, 
+        double maxY 
+    )
+    {
+        Stream<DoublePair> stream =
+            IntStream.range( 0, 10 )
+                .mapToObj( 
+                    i -> new DoublePair(
+                            randy.nextDouble( minX, maxX ),  
+                            randy.nextDouble( minY, maxY )
+                        )
+                );
+        return stream;
+    }
+    
+    /**
+     * Derives a PolarPair object
+     * from rectangular x- and y-coordinates.
+     * The contents of the derived object
+     * will be valid, normalized polar coordinates.
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     * 
+     * @return  the computed polar coordinates
+     */
+    private static PolarPair xyToPolar( Point2D point )
+    {
+        PolarPair polarPair = xyToPolar( point.getX(), point.getY() );
+        return polarPair;
+    }
+    
+    /**
+     * Computes the polar coordinates
+     * from rectangular x- and y-coordinate.
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     * 
+     * @return  the computed polar coordinates
+     */
+    private static PolarPair xyToPolar( double xco, double yco )
+    {
+        double      radius  = xyToRadius( xco, yco );
+        double      theta   = xyToTheta( xco, yco );
+        PolarPair   pair    = new PolarPair( radius, theta );
+        return pair;
+    }
+    
+    /**
+     * Computes the radius component of polar coordinates
+     * from rectangular x- and y-coordinate.
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     * 
+     * @return  the computed radius component
+     */
+    private static double xyToRadius( double xco, double yco )
+    {
+        double  radius  = xco == 0 && yco == 0 ? 
+            0 : Math.hypot( xco, yco );
+        return radius;
+    }
+    
+    /**
+     * Computes the angle component of polar coordinates
+     * from rectangular x- and y-coordinate.
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     * 
+     * @return  the computed angle component
+     */
+    private static double xyToTheta( double xco, double yco )
+    {
+        double  theta   = xco == 0 && yco == 0 ? 
+            0 : Math.atan2( yco, xco );
+        if ( theta < 0 )
+            theta += 2 * PI;
+        return theta;
+    }
+    
+    /**
+     * Confirms that two given points
+     * are approximately equal.
+     * 
+     * @param polarA    the first given point
+     * @param polarB    the second given point
+     */
+    private static void confirm( Point2D pointA, Point2D pointB )
+    {
+        assertEquals( pointA.getX(), pointB.getX(), epsilon );
+        assertEquals( pointA.getY(), pointB.getY(), epsilon );
+    }
+    
+    /**
+     * Confirms that two given Complex objects
+     * are approximately equal.
+     * 
+     * @param polarA    the first given Complex object
+     * @param polarB    the second given Complex object
+     */
+    private static void confirm( Complex pointA, Complex pointB )
+    {
+        assertEquals( pointA.re(), pointB.re(), epsilon );
+        assertEquals( pointA.im(), pointB.im(), epsilon );
+    }
+    
+    /**
+     * Confirms that two given Polar objects
+     * are approximately equal.
+     * 
+     * @param polarA    the first given object
+     * @param polarB    the second given object
+     */
+    private static void confirm( Polar polarA, Polar polarB )
+    {
+        assertEquals( polarA.getRadius(), polarB.getRadius(), epsilon );
+        assertEquals( polarA.getTheta(), polarB.getTheta(), epsilon );
     }
     
     /**
@@ -416,151 +595,76 @@ public class PolarTest
         }
     }
     
+    /**
+     * This class represents a pair of values
+     * that are taken to be polar coordinates.
+     * The pair is not authenticated or normalized in any way,
+     * since they may be used in tests
+     * that require the pair to be authenticated or normalized.
+     * In addition,
+     * it has convenience methods for converting the pair
+     * to rectangular coordinates 
+     * without invoking the algorithms in the Polar class.
+     */
     private record PolarPair( double radius, double theta )
     {
+        /**
+         * Non-canonical constructor that imports
+         * a Polar object.
+         * 
+         * @param polar the object to import
+         */
+        public PolarPair( Polar polar )
+        {
+            this( polar.getRadius(), polar.getTheta() );
+        }
+        
+        /**
+         * Confirms that a Polar object
+         * is approximately equal to the coordinates
+         * encapsulated in a PolarPair object.
+         * 
+         * @param polar the Polar object to confirm
+         */
         public void confirm( Polar polar )
         {
             String  note    = polar.toString();
             assertEquals( radius, polar.getRadius(), epsilon, note );
             assertEquals( theta, polar.getTheta(), epsilon, note );
         }
-    }
-    
-    /**
-     * Converts a Point or Complex object
-     * to Polar object or vice versa
-     * (generating the "expected result").
-     * Confirms the expected result
-     * against an actual result.
-     */
-    private static class XYToPolarChecker
-    {
-        private final double        xco;
-        private final double        yco;
-        private final double        radius;
-        private final double        theta;
         
         /**
-         * Converts a given point object
-         * to the radius and angle of the 
-         * equivalent Polar object
-         * and stores the result for later validation.
+         * Computes a Cartesian point
+         * from the encapsulated coordinates.
          * 
-         * @param point the given point object
+         * @return  
+         *      a Cartesian point equivalent to
+         *      the encapsulated Polar coordinates
          */
-        public XYToPolarChecker( Point2D point )
+        public Point2D toPoint()
         {
-            this( point.getX(), point.getY() );
+            double  xco     = radius * Math.cos( theta );
+            double  yco     = radius * Math.sin( theta );
+            Point2D point   = new Point2D.Double( xco, yco );
+            return point;
         }
         
         /**
-         * Converts a given Complex object
-         * to the radius and angle of the 
-         * equivalent Polar object
-         * and stores the result for later validation.
+         * Computes a complex number in normal form
+         * from the encapsulated coordinates.
          * 
-         * @param zed the given Complex object
+         * @return  
+         *      a complex number in normal form equivalent to
+         *      the encapsulated Polar coordinates
          */
-        public XYToPolarChecker( Complex zed )
+        public Complex toComplex()
         {
-            this( zed.re(), zed.im() );
+            Point2D point   = toPoint();
+            double  real    = point.getX();
+            double  imag    = point.getY();
+            Complex complex = new Complex( real, imag );
+            return complex;
         }
-        
-        /**
-         * Converts given x- and y-coordinates
-         * to the radius and angle of the 
-         * equivalent Polar object
-         * and stores the result for later validation.
-         * 
-         * @param xco   the given x-coordinate
-         * @param yco   the given y-coordinate
-         */
-        public XYToPolarChecker( double xco, double yco )
-        {
-            this.xco = xco;
-            this.yco = yco;
-            this.radius = Math.hypot( xco, yco );
-            this.theta = Math.atan2( yco, xco );
-        }
-        
-        /**
-         * Converts a given Polar object
-         * into the x- and y-coordinates
-         * of the equivalent Point or Complex object
-         * and stores the result for later validation.
-         * 
-         * @param pzed  the given Polar object
-         */
-        public XYToPolarChecker( Polar pzed )
-        {
-            radius = pzed.getRadius();
-            theta = pzed.getTheta();
-            xco = Math.cos( theta ) * radius;
-            yco = Math.sin( theta ) * radius;
-        }
-        
-        /**
-         * Confirms that the radius and angle
-         * of a given Polar object
-         * are equivalent to the stored radius and angle.
-         * 
-         * @param pzed  the given Polar object
-         */
-        public void confirm( Polar pzed )
-        {
-            double  actRadius   = pzed.getRadius();
-            double  actTheta    = pzed.getTheta();
-            assertEquals( radius, actRadius, epsilon, "radius" );
-            assertEquals( theta, actTheta, epsilon, "theta" );
-        }
-        
-        /**
-         * Confirms that the x- and y-coordinates
-         * of a given Point object
-         * are equivalent to the stored x- and y-coordinates.
-         * 
-         * @param point the given Point object
-         */
-        public void confirm( Point2D point )
-        {
-            confirm( point.getX(), point.getY() );
-        }
-        
-        
-        /**
-         * Confirms that the real and imaginary parts
-         * of a given Complex object
-         * are equivalent to the stored x- and y-coordinates.
-         * 
-         * @param zed the given Complex object
-         */
-        public void confirm( Complex zed )
-        {
-            confirm( zed.re(), zed.im() );
-        }
-        
-        /**
-         * Confirms that the given x- and y-coordinates
-         * are equivalent to the stored x- and y-coordinates.
-         * 
-         * @param actXco    the given x-coordinate
-         * @param actYco    the given y-coordinate
-         */
-        public void confirm( double actXco, double actYco )
-        {
-            assertEquals( xco, actXco, epsilon, "xco" );
-            assertEquals( yco, actYco, epsilon, "yco" );
-        }
-    }
-    
-    private static void confirmPoints( Point2D pointA, Point2D pointB )
-    {
-        double  xcoA    = pointA.getX();
-        double  ycoA    = pointA.getY();
-        double  xcoB    = pointB.getX();
-        double  ycoB    = pointB.getY();
-        assertEquals( xcoA, xcoB, epsilon );
-        assertEquals( ycoA, ycoB, epsilon );
     }
     
     /**
@@ -578,22 +682,13 @@ public class PolarTest
          * for converting between polar and rectangular coordinates;
          * note that the algorithms for converting between
          * polar and complex are equivalent.
-         * <p>
-         * Uses an XYToPolarChecker to convert this.cartesian
-         * to a Polar object, and confirms that the checker object
-         * matches this.polar.
-         * Then it uses an XYToPolarChecker to convert this.polar
-         * into a point,
-         * and confirms that the checker object matches
-         * this.cartesian.
-         * </p>
          */
         public void confirm()
         {
-            Polar   polarTest       = Polar.of( cartesian );
+            Polar   polarTest       = Polar.ofPoint( cartesian );
             Point2D cartesianTest   = polarTest.toPoint();
             polarPair.confirm( polarTest );
-            confirmPoints( cartesian, cartesianTest );
+            PolarTest.confirm( cartesian, cartesianTest );
         }
 
         @Override
