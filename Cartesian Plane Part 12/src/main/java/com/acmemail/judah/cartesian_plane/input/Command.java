@@ -15,8 +15,8 @@ import java.util.Objects;
  */
 public enum Command
 {
-    /** Creates a new equation. */
-    EQUATION( "Creates a new equation" ),
+    /** Names an equation. */
+    EQUATION( "Names an equation" ),
     /** Establishes the expression for generating an x-coordinate. */
     XEQUALS( 
         "Describes any well-formed expression for the evaluation of \"x\" "

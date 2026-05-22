@@ -91,7 +91,6 @@ public class PolarTest
     {
         for ( SanityPair pair : sanityPairs )
         {
-            System.out.println( pair );
             pair.confirm();
         }
     }
@@ -306,8 +305,20 @@ public class PolarTest
         Polar   expPolar    = Polar.ofRTheta( 1, 0 );
         confirm( actPolar, expPolar );
         
+        actPolar = Polar.ofRTheta( -2, 0 );
+        expPolar = Polar.ofRTheta( 2, Math.PI );
+        confirm( actPolar, expPolar );
+        
+        actPolar = Polar.ofRTheta( -2, -Math.PI );
+        expPolar = Polar.ofRTheta( 2, 0 );
+        confirm( actPolar, expPolar );
+        
         actPolar = Polar.ofRTheta( -1, 3 * Math.PI / 2 );
         expPolar = Polar.ofRTheta( 1, Math.PI / 2 );
+        confirm( actPolar, expPolar );
+        
+        actPolar = Polar.ofRTheta( -1, 0 );
+        expPolar = Polar.ofRTheta( 1, Math.PI );
         confirm( actPolar, expPolar );
     }
     
@@ -391,18 +402,30 @@ public class PolarTest
      * for use in miscellaneous testing.
      * Approximately one quarter of the stream
      * will contain values from 
-     * each of the four quadrants of the Cartesian plane.
+     * each of the four quadrants of the Cartesian plane,
+     * and coincident with the x- and y-axes.
      * 
      * @return  a stream of DoublePair objects
      */
     private static Stream<DoublePair> doublePairProvider()
     {
+        Stream<DoublePair>  xAxis   = Stream.of(
+            new DoublePair( -2, 0 ), new DoublePair( -1, 0 ), 
+            new DoublePair( 0, 0),new DoublePair( 1, 0 ),
+            new DoublePair( 2, 0 )
+        );
+        Stream<DoublePair>  yAxis   = Stream.of(
+            new DoublePair( 0, -2 ), new DoublePair( 0, -1 ), 
+            new DoublePair( 0, 0), new DoublePair( 0, 1 ),
+            new DoublePair( 0, 2 )
+        );
         Stream<DoublePair>  quad1   = generator( 0, 10, 0, 10 );
         Stream<DoublePair>  quad2   = generator( 0, 10, -10, 0 );
         Stream<DoublePair>  quad3   = generator( -10, 0, -10, 0 );
         Stream<DoublePair>  quad4   = generator( -10, 0, 0, 10 );
-        Stream<DoublePair>  stream  = Stream.of( quad1, quad2, quad3, quad4 )
-            .flatMap( s -> s);
+        Stream<DoublePair>  stream  = 
+            Stream.of( xAxis, yAxis, quad1, quad2, quad3, quad4 )
+                .flatMap( s -> s);
         return stream;
     }
 
@@ -417,7 +440,10 @@ public class PolarTest
      * @param maxX  the given maximum X value
      * @param minY  the given minimum Y value
      * @param maxY  the given maximum Y value
-     * @return
+     * 
+     * @return 
+     *      a stream of random x- and y- coordinates
+     *      subject to the given limits
      */
     private static Stream<DoublePair> generator( 
         double minX, 
