@@ -195,7 +195,7 @@ public class Exp4jEquation implements Equation
     {
         Objects.requireNonNull( exprStr, "exprStr" );
         Result    result  = validateExpr( exprStr, e -> xExpr = e );
-        if ( result.isSuccess() )
+        if ( result.success() )
             this.xExprStr = exprStr;
         return result;
     }
@@ -205,7 +205,7 @@ public class Exp4jEquation implements Equation
     {
         Objects.requireNonNull( exprStr, "exprStr" );
         Result    result  = validateExpr( exprStr, e -> tExpr = e );
-        if ( result.isSuccess() )
+        if ( result.success() )
             this.tExprStr = exprStr;
         return result;
     }
@@ -215,7 +215,7 @@ public class Exp4jEquation implements Equation
     {
         Objects.requireNonNull( exprStr, "exprStr" );
         Result    result  = validateExpr( exprStr, e -> rExpr = e );
-        if ( result.isSuccess() )
+        if ( result.success() )
             this.rExprStr = exprStr;
         return result;
     }
@@ -225,7 +225,7 @@ public class Exp4jEquation implements Equation
     {
         Objects.requireNonNull( exprStr, "exprStr" );
         Result    result  = validateExpr( exprStr, e -> yExpr = e );
-        if ( result.isSuccess() )
+        if ( result.success() )
             this.yExprStr = exprStr;
         return result;
     }
@@ -241,7 +241,7 @@ public class Exp4jEquation implements Equation
             throw new ValidationException( message );
         }
         Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.isSuccess() )
+        if ( !isRangeValid.success() )
             throw new ValidationException( getMessage( isRangeValid ) );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x + rStep )
@@ -272,7 +272,7 @@ public class Exp4jEquation implements Equation
         }
         
         Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.isSuccess() )
+        if ( !isRangeValid.success() )
             throw new ValidationException( getMessage( isRangeValid ) );
 
         Stream<Point2D> stream  =
@@ -299,7 +299,7 @@ public class Exp4jEquation implements Equation
             throw new ValidationException( message );
         }
         Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.isSuccess() )
+        if ( !isRangeValid.success() )
             throw new ValidationException( getMessage( isRangeValid ) );
 
         Stream<Point2D> stream  =
@@ -321,7 +321,7 @@ public class Exp4jEquation implements Equation
             throw new ValidationException( message );
         }
         Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.isSuccess() )
+        if ( !isRangeValid.success() )
             throw new ValidationException( getMessage( isRangeValid ) );
 
         Stream<Point2D> stream  =
@@ -671,7 +671,7 @@ public class Exp4jEquation implements Equation
      */
     private static String getMessage( Result result )
     {
-        List<String>    list    = result.getMessages();
+        List<String>    list    = result.messages();
         String          message = list.isEmpty() ? "" : list.get( 0 );
         return message;
     }

@@ -291,6 +291,24 @@ public interface Equation
     String getRExpression();
 
     /**
+     * Gets the name of the parameter
+     * in a parametric equation.
+     * 
+     * @return the name of the parameter
+     */
+    String getParamName();
+
+    /**
+     * Sets the name of the parameter
+     * in a parametric equation.
+     * 
+     * @param param the name of the parameter; must not be null
+     * 
+     * @throws NullPointerException if param is null
+     */
+    void setParamName( String param );
+
+    /**
      * Iterates over the encapsulated range,
      * generating the (x,y) coordinates 
      * derived from an equation of the form <code>y=f(x)</code>.
@@ -343,24 +361,6 @@ public interface Equation
      * @throws ValidationException if the equation is invalid
      */
     Stream<Point2D> tPlot();
-
-    /**
-     * Gets the name of the parameter
-     * in a parametric equation.
-     * 
-     * @return the name of the parameter
-     */
-    String getParamName();
-
-    /**
-     * Sets the name of the parameter
-     * in a parametric equation.
-     * 
-     * @param param the name of the parameter; must not be null
-     * 
-     * @throws NullPointerException if param is null
-     */
-    void setParamName( String param );
 
     /**
      * Gets the name of the radius variable

@@ -1,11 +1,13 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Encapsulation of commands
  * used to configure and evaluate
- * an Exp4j expressions.
+ * an Exp4j expression.
  * 
  * @author Jack Straub
  * 
@@ -67,6 +69,10 @@ public enum Command
     YPLOT( "Generates a plot of the form (x,y) = f(x)" ),
     /** Generates the plot of the parametric equation (x,y)=f(t). */
     XYPLOT( "Generates a plot of the form (x,y) = f(t)" ),
+    /** Generates the plot of the polar equation r = f(t). */
+    RPLOT( "Generates a plot of the polar equation r = f(t)" ),
+    /** Generates the plot of the polar equation t = f(r). */
+    TPLOT( "Generates a plot of the polar equation t = f(r)" ),
     /** Identifies an empty command string. */
     NONE( "Identifies an empty command string" ),
     /** Identifies an invalid command. */
@@ -109,27 +115,27 @@ public enum Command
     /**
      * Compares the value of a given string
      * to the names of the enumerated constants
-     * and returns the first matching constant.
+     * and returns the matching constant.
      * The comparison is case-insensitive.
-     * If the given string is empty NONE is returned.
+     * If the given string is empty or blank NONE is returned.
      * If no match is found INVALID is returned.
      * 
      * @param from  the given string
      * 
      * @return  
-     *      the first command whose name
-     *      matches the given string
+     *      the matching Command, or NONE for empty/blank input, 
+     *      or INVALID if no name matches
      *      
-     * @throws IllegalArgumentException if input is null
+     * @throws NullPointerException if from is null
      */
     public static Command toCommand( String from )
     {
-        if ( from == null )
-            throw new IllegalArgumentException( "input may not be null" );
+        String  upperFrom   = 
+            Objects.requireNonNull( from, "from" ).toUpperCase().trim();
         Command cmd         = NONE;
-        if ( !from.isEmpty() )
+        if ( !upperFrom.isEmpty() )
             cmd = Arrays.stream( values() )
-                .filter( e -> from.equalsIgnoreCase( e.name() ) )
+                .filter( e -> upperFrom.equals( e.name() ) )
                 .findFirst()
                 .orElse( INVALID );
         return cmd;
@@ -150,7 +156,7 @@ public enum Command
         Arrays.stream( values() )
             .filter( e -> e != INVALID )
             .filter( e -> e != NONE )
-            .sorted( (e1,e2) -> e1.name().compareTo( e2.name() ) )
+            .sorted( Comparator.comparing( Command::name ) )
             .forEach( e -> 
                 bldr.append( "    " )
                     .append( e )

@@ -22,8 +22,8 @@ public class ResultTest
     public void testResultBoolean( boolean testVal )
     {
         Result  result  = new Result( testVal );
-        assertEquals( testVal, result.isSuccess() );
-        assertTrue( result.getMessages().isEmpty() );
+        assertEquals( testVal, result.success() );
+        assertTrue( result.messages().isEmpty() );
     }
 
     @ParameterizedTest
@@ -32,8 +32,8 @@ public class ResultTest
     {
         final List<String>  list    = List.of( "message 1", "message 2" );
         Result  result  = new Result( testVal, list );
-        assertEquals( testVal, result.isSuccess() );
-        assertEquals( list, result.getMessages() );
+        assertEquals( testVal, result.success() );
+        assertEquals( list, result.messages() );
     }
 
     @ParameterizedTest
@@ -41,8 +41,8 @@ public class ResultTest
     public void testResultBooleanListOfStringNull( boolean testVal )
     {
         Result          result  = new Result( testVal, null );
-        List<String>    list    = result.getMessages();
-        assertEquals( testVal, result.isSuccess() );
+        List<String>    list    = result.messages();
+        assertEquals( testVal, result.success() );
         assertNotNull( list );
         assertTrue( list.isEmpty() );
         
@@ -57,7 +57,7 @@ public class ResultTest
         List<String>    source      = new ArrayList<>( List.of( "a", "b" ) );
         Result          result      = new Result( true, source );
         source.add( "c" );
-        List<String>    messages    = result.getMessages();
+        List<String>    messages    = result.messages();
         assertEquals( 2, messages.size() );
         assertFalse( messages.contains( "c" ) );
     }
@@ -68,7 +68,7 @@ public class ResultTest
         Result  result  = new Result( true, List.of( "a" ) );
         assertThrows(
             UnsupportedOperationException.class,
-            () -> result.getMessages().add( "x" )
+            () -> result.messages().add( "x" )
         );
     }
     

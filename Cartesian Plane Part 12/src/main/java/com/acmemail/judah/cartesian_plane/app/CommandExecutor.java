@@ -78,7 +78,7 @@ public class CommandExecutor
             Result  result  = inputParser.processCommand( parsedCommand );
             if ( command == Command.INVALID )
                 showUsage();
-            else if ( !result.isSuccess() )
+            else if ( !result.success() )
                 showError( result );
             else if ( command == Command.YPLOT )
                 plot( () -> inputParser.getEquation().yPlot() );
@@ -229,7 +229,7 @@ public class CommandExecutor
      */
     private void showError( Result result )
     {
-        List<String>    list    = result.getMessages();
+        List<String>    list    = result.messages();
         String          message = null;
         
         if ( list.isEmpty() )

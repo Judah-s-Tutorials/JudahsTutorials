@@ -68,7 +68,7 @@ public class OpenEquationDemo1
             Result  result  = inputParser.processCommand( parsedCommand );
             if ( command == Command.INVALID )
                 System.err.println( Command.usage() );
-            else if ( !result.isSuccess() )
+            else if ( !result.success() )
                 printError( result );
             else if ( command == Command.YPLOT )
                 plotY( inputParser );
@@ -88,7 +88,7 @@ public class OpenEquationDemo1
      */
     private static void printError( Result result )
     {
-        List<String>    list    = result.getMessages();
+        List<String>    list    = result.messages();
         if ( list.isEmpty() )
             System.err.println( "input error" );
         else

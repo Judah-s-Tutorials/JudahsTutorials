@@ -104,8 +104,8 @@ final public class EquationFileChooser
             try
             {
                 Result  result  = FileManager.load( file, equation );
-                if ( !result.isSuccess() )
-                    showError( PARSE_ERROR, result.getMessages() );
+                if ( !result.success() )
+                    showError( PARSE_ERROR, result.messages() );
                 else
                     status = Optional.of( equation );
             }

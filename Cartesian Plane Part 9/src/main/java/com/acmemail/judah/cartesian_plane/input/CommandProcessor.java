@@ -107,14 +107,14 @@ public class CommandProcessor
     public CommandProcessor newEquation( ParsedCommand command )
     {
         Objects.requireNonNull( command, "command" );
-        if ( command.getCommand() != Command.EQUATION )
+        if ( command.command() != Command.EQUATION )
         {
-            String  error   = command.getCommand() + ": " + notEquation;
+            String  error   = command.command() + ": " + notEquation;
             throw new IllegalArgumentException( error );
         }
         
         Equation            equation    = this.equation.newEquation();
-        String              name        = command.getArgString().trim();
+        String              name        = command.argString().trim();
         if ( !name.isEmpty() )
             equation.setName( name );
         CommandProcessor    processor   = new CommandProcessor( equation );
@@ -503,7 +503,7 @@ public class CommandProcessor
          */
         public Command getCommand()
         {
-            return parsedCommand.getCommand();
+            return parsedCommand.command();
         }
         
         /**
@@ -517,9 +517,9 @@ public class CommandProcessor
          */
         public String getCommandString()
         {
-            String  commandString   = parsedCommand.getCommandString();
+            String  commandString   = parsedCommand.commandString();
             if ( commandString.trim().isEmpty() )
-                commandString = parsedCommand.getCommand().toString();
+                commandString = parsedCommand.command().toString();
             return commandString;
         }
         
@@ -530,7 +530,7 @@ public class CommandProcessor
          */
         public String getArgString()
         {
-            return parsedCommand.getArgString();
+            return parsedCommand.argString();
         }
         
         /**

@@ -9,6 +9,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,12 +17,13 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-class CommandReaderTest
+public class CommandReaderTest
 {
     /**
      * Defines a functional interface
@@ -40,13 +42,15 @@ class CommandReaderTest
          * Executes a test
          * using a BufferedReader for input.
          * 
-         * @param reader    the BufferedReader representing the intpu
+         * @param reader    the BufferedReader representing the input
          * 
          * @throws IOException  if an I/O error occurs
          */
         public abstract void accept( BufferedReader reader ) 
             throws IOException;
     }
+    
+    private final PrintStream   saveOut     = System.out;
     
     private final String        randStr     =
         "abc def g h ijk l mnopqr st uvw xyz " +
@@ -64,56 +68,51 @@ class CommandReaderTest
         actResults = new ArrayList<>();
     }
     
-    /**
-     * Parse lines of the form "command arg" with no extraneous whitespace.
-     */
-    @Test
-    void testSimpleCommandWithoutArg()
+    @AfterEach
+    public void afterEach()
     {
-        List<String>    input   = 
-            Stream.of( Command.END, Command.EXIT, Command.STEP )
-                .map( c -> getExpResult( c, "", true ) )
-                .map( p -> p.getCommandString() + " " + p.getArgString() )
-                .collect( Collectors.toList() );
-        ioTest( input, this::testSimpleCommandWithoutArg );
-    }
-    
-    private void testSimpleCommandWithoutArg( BufferedReader reader ) throws IOException
-    {
-        CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand( null );
-        while ( command.getCommand() != Command.NONE )
-        {
-            actResults.add( command );
-            command = cmdReader.nextCommand( null );
-        }
-        assertEquals( expResults, actResults );
+        System.setOut( saveOut );
     }
     
     /**
      * Parse lines of the form "command" with no extraneous whitespace.
      */
     @Test
-    public void testSimpleCommandWithArg()
+    public void testSimpleCommandWithoutArg()
     {
         List<String>    input   = 
             Stream.of( Command.END, Command.EXIT, Command.STEP )
-                .map( c -> getExpResult( c, getArg(), true ) )
-                .map( p -> p.getCommandString() + " " + p.getArgString() )
+                .map( c -> addExpResult( c, "" ) )
+                .map( p -> p.getCommandString() )
                 .collect( Collectors.toList() );
-        ioTest( input, this::testSimpleCommandWithArg );
+        ioTest( input, this::testSimpleCommand );
     }
     
-    private void testSimpleCommandWithArg( BufferedReader reader ) throws IOException
+    private void testSimpleCommand( BufferedReader reader ) 
+        throws IOException
     {
-        CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand( null );
+        CommandReader cmdReader = new CommandReader( reader );
+        ParsedCommand command   = cmdReader.nextCommand( null );
         while ( command.getCommand() != Command.NONE )
         {
             actResults.add( command );
             command = cmdReader.nextCommand( null );
         }
         assertEquals( expResults, actResults );
+    }
+    
+    /**
+     * Parse lines of the form "command arg" with no extraneous whitespace.
+     */
+    @Test
+    public void testSimpleCommandWithArg()
+    {
+        List<String>    input   = 
+            Stream.of( Command.END, Command.EXIT, Command.STEP )
+                .map( c -> addExpResult( c, getArg() ) )
+                .map( p -> p.getCommandString() + " " + p.getArgString() )
+                .collect( Collectors.toList() );
+        ioTest( input, this::testSimpleCommand );
     }
     
     /**
@@ -121,30 +120,21 @@ class CommandReaderTest
      * where str is the shortcut for a command.
      */
     @Test
-    public void testShortcutsArg()
+    public void testShortcuts()
     {
         expResults.add( new ParsedCommand( Command.XEQUALS, "x=", "xxx" ) );
         expResults.add( new ParsedCommand( Command.YEQUALS, "y=", "yyy" ) );
+        expResults.add( new ParsedCommand( Command.TEQUALS, "t=", "ttt" ) );
+        expResults.add( new ParsedCommand( Command.REQUALS, "r=", "rrr" ) );
         expResults.add( new ParsedCommand( Command.XEQUALS, "X=", "XXX" ) );
         expResults.add( new ParsedCommand( Command.YEQUALS, "Y=", "YYY" ) );
+        expResults.add( new ParsedCommand( Command.TEQUALS, "T=", "TTT" ) );
+        expResults.add( new ParsedCommand( Command.REQUALS, "R=", "RRR" ) );
         List<String>    input   = 
             expResults.stream()
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
                 .collect( Collectors.toList() );
-        ioTest( input, this::testShortcutsArg );
-    }
-    
-    private void testShortcutsArg( BufferedReader reader )
-        throws IOException
-    {
-        CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand( null );
-        while ( command.getCommand() != Command.NONE )
-        {
-            actResults.add( command );
-            command = cmdReader.nextCommand( null );
-        }
-        assertEquals( expResults, actResults );
+        ioTest( input, this::testSimpleCommand );
     }
     
     /**
@@ -157,27 +147,14 @@ class CommandReaderTest
     {
         List<String>    input   = 
             Stream.of( Command.END, Command.EXIT, Command.STEP )
-                .map( c -> getExpResult( c, getArg(), true ) )
+                .map( c -> addExpResult( c, getArg() ) )
                 .map( p -> 
                     "   " + p.getCommandString() + 
                     "   " + p.getArgString() +
                     "   "
                 )
                 .collect( Collectors.toList() );
-        ioTest( input, this::testLeadingTrailingSpaces );
-    }
-    
-    private void testLeadingTrailingSpaces( BufferedReader reader )
-        throws IOException
-    {
-        CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand command     = cmdReader.nextCommand( null );
-        while ( command.getCommand() != Command.NONE )
-        {
-            actResults.add( command );
-            command = cmdReader.nextCommand( null );
-        }
-        assertEquals( expResults, actResults );
+        ioTest( input, this::testSimpleCommand );
     }
     
     /**
@@ -194,16 +171,15 @@ class CommandReaderTest
                 "#",
                 "     #     "
                 )
-            .collect( Collectors.toList() );
+                .collect( Collectors.toList() );
         ioTest( input, this::testEmptyLinesAndComments );
     }
     
     private void testEmptyLinesAndComments( BufferedReader reader ) throws IOException
     {
-        CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand( null );
-        assert( command.getCommand() == Command.NONE );
-        assertTrue( actResults.isEmpty() );
+        CommandReader   cmdReader   = new CommandReader( reader );
+        ParsedCommand   command     = cmdReader.nextCommand( null );
+        assertEquals( Command.NONE, command.getCommand() );
     }
     
     /**
@@ -215,10 +191,11 @@ class CommandReaderTest
         ioTest( new ArrayList<String>(), this::testEmptyInputStream );
     }
     
-    private void testEmptyInputStream( BufferedReader reader ) throws IOException
+    private void testEmptyInputStream( BufferedReader reader ) 
+        throws IOException
     {
-        CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand( null );
+        CommandReader   cmdReader   = new CommandReader( reader );
+        ParsedCommand   command     = cmdReader.nextCommand( null );
         assertEquals( Command.NONE, command.getCommand() );
     }
     
@@ -232,10 +209,10 @@ class CommandReaderTest
     public void testMixAndMatch()
     {
         // Mix lines representing concrete, valid commands with lines
-        // representing comments, empty lines and in valid arguments.
+        // representing comments, empty lines and invalid commands.
         List<String>    input   = 
             Stream.of( Command.END, Command.EXIT, Command.STEP )
-                .map( c -> getExpResult( c, getArg(), true ) )
+                .map( c -> addExpResult( c, getArg() ) )
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
                 .flatMap( s ->
                     Stream.of( s, "", "#", "  #  ", "$BadCommand" )
@@ -246,8 +223,8 @@ class CommandReaderTest
     
     private void testMixAndMatch( BufferedReader reader ) throws IOException
     {
-        CommandReader cmdReader   = new CommandReader( reader );
-        ParsedCommand       command     = cmdReader.nextCommand( null );
+        CommandReader   cmdReader   = new CommandReader( reader );
+        ParsedCommand   command     = cmdReader.nextCommand( null );
         while ( command.getCommand() != Command.NONE )
         {
             if ( command.getCommand() != Command.INVALID )
@@ -257,6 +234,11 @@ class CommandReaderTest
         assertEquals( expResults, actResults );
     }
 
+    /**
+     * Feed some valid commands to CommandReader
+     * and make sure that the stream method
+     * processes them all.
+     */
     @Test
     public void testStream()
     {
@@ -271,8 +253,6 @@ class CommandReaderTest
         
         // Mix lines representing concrete, valid commands with lines
         // representing comments and empty lines.
-        // Don't add NONE command to input; this is produced automatically
-        // by CommandReader.stream().
         List<String>    input   = 
             expResults.stream()
                 .map( pc -> "  " + pc.getCommandString() + "   " + pc.getArgString() + "   " )
@@ -283,14 +263,54 @@ class CommandReaderTest
         ioTest( input, this::testStream );
     }
 
+    /**
+     * Feed some valid and some invalid commands to
+     * CommandReader, and verify that the stream() method
+     * processes them correctly.
+     */
+    @Test
+    public void testStreamWithInvalidCommands()
+    {
+        expResults =
+            List.of( 
+                new ParsedCommand( Command.END, "end", "endarg" ),
+                new ParsedCommand( Command.INVALID, "eh", "ehArg" ),
+                new ParsedCommand( Command.START, "start", "startarg" ),
+                new ParsedCommand( Command.INVALID, "mmm", "" ),
+                new ParsedCommand( Command.STEP, "step", "steparg" ),
+                new ParsedCommand( Command.EQUATION, "equation", "" ),
+                new ParsedCommand( Command.INVALID, "uhoh", "a" ),
+                new ParsedCommand( Command.YPLOT, "yplot", "" )
+            );
+        
+        // Mix lines representing concrete, valid commands with lines
+        // representing comments and empty lines.
+        List<String>    input   = 
+            expResults.stream()
+                .map( pc -> "  " + pc.getCommandString() + "   " + pc.getArgString() + "   " )
+                .flatMap( s ->
+                    Stream.of( s, "", "#", "  #  " )
+                )
+                .collect( Collectors.toList() );
+        ioTest( input, this::testStream );
+    }
+
+    /**
+     * Feed the CommandReader an empty list of lines to process,
+     * make sure it doesn't break the stream
+     */
     @Test
     public void testEmptyStream()
     {
-        expResults.clear();
-        actResults.clear();
         ioTest( new ArrayList<String>(), this::testStream );
     }
     
+    /**
+     * Test parser with valid commands
+     * that have no intrinsic arguments.
+     * 
+     * @param str   value-source parameter
+     */
     @ParameterizedTest
     @ValueSource( strings = {"END", "SET", "START"} )
     public void testParseCommandStringWithArg( String str )
@@ -306,6 +326,12 @@ class CommandReaderTest
         assertEquals( arg, parsed.getArgString() );
     }
     
+    /**
+     * Test parser with valid commands
+     * of the form "command argument"
+     * 
+     * @param str   value-source parameter
+     */
     @ParameterizedTest
     @ValueSource( strings = {"END", "SET", "START"} )
     public void testParseCommandStringWithoutArg( String str )
@@ -319,6 +345,61 @@ class CommandReaderTest
         assertTrue( parsed.getArgString().isEmpty() );
     }
     
+    /**
+     * Test parser using commands with liberal whitespace,
+     * include whitespace in the argument.
+     */
+    @Test
+    public void testParseCommandStringWithArgWhiteSpace()
+    {
+        // One more test with: a) liberal whitespace including tabs, and
+        // b) an argument containing spaces
+        Command         expCommand      = Command.SET;
+        String          expCommandStr   = expCommand.toString();
+        String          expArg          = "a  b\t\tc";
+        String          line            =
+            "\t\t " + expCommandStr + "\t\t " + expArg + " \t\t";
+        ParsedCommand   parsed      = CommandReader.parseCommand( line );
+
+        assertEquals( expCommand, parsed.getCommand() );
+        assertEquals( expCommandStr, parsed.getCommandString() );
+        assertEquals( expArg, parsed.getArgString() );
+    }
+    
+    /**
+     * Make sure parser returns NONE 
+     * for null and empty lines.
+     */
+    @Test
+    public void testParseCommandStringNone()
+    {
+        // Can't be a parameterized test because @ValueSource
+        // won't allow null.
+        String[]        vals        = 
+        { 
+            null,         // null string
+            "",           // empty string
+            "    ",       // blank string
+        };
+        for ( String line : vals )
+        {
+            String          feedback    = "\"" + line + "\"";
+            ParsedCommand   parsed      = CommandReader.parseCommand( line );
+            assertEquals( Command.NONE, parsed.getCommand(), feedback );
+        }
+    }
+    
+    private void testStream( BufferedReader reader ) throws IOException
+    {
+        CommandReader   cmdReader   = new CommandReader( reader );
+        actResults = cmdReader.stream().collect( Collectors.toList() );
+        assertEquals( expResults, actResults );
+    }
+    
+    /**
+     * Make sure parser returns INVALID 
+     * for unrecognized command strings.
+     */
     @ParameterizedTest
     @ValueSource( strings = {"bad1", "bad2", "bad3"} )
     public void testParseCommandStringInvalidCommand( String commandStr )
@@ -338,14 +419,50 @@ class CommandReaderTest
         assertEquals( Command.INVALID, parsed.getCommand() );
         assertEquals( commandStr, parsed.getCommandString() );
         assertTrue( parsed.getArgString().isEmpty() );
-
     }
     
-    private void testStream( BufferedReader reader ) throws IOException
+    /**
+     * Test nextCommand when it's supposed to print a prompt.
+     */
+    @Test
+    public void testPrompt()
     {
+        Command         command     = Command.START;
+        String          arg         = "argument";
+        List<String>    input       = List.of( command + "  " + arg );
+        ioTest( input, this::testPrompt );
+        ioTest( input, this::testNoPrompt );
+    }
+    
+    private void testPrompt( BufferedReader reader )
+        throws IOException
+    {
+        ByteArrayOutputStream   outStr  = new ByteArrayOutputStream();
+        PrintStream             tempOut = new PrintStream( outStr );
+        System.setOut( tempOut );
+        
+        String          expOut      = "prompt";
         CommandReader   cmdReader   = new CommandReader( reader );
-        actResults = cmdReader.stream().collect( Collectors.toList() );
-        assertEquals( expResults, actResults );
+        cmdReader.nextCommand( expOut );
+        outStr.close();
+        tempOut.close();
+        String          actOut      = outStr.toString();
+        assertEquals( expOut, actOut );
+    }
+    
+    private void testNoPrompt( BufferedReader reader )
+        throws IOException
+    {
+        ByteArrayOutputStream   outStr  = new ByteArrayOutputStream();
+        PrintStream             tempOut = new PrintStream( outStr );
+        System.setOut( tempOut );
+        
+        CommandReader   cmdReader   = new CommandReader( reader );
+        cmdReader.nextCommand( null );
+        outStr.close();
+        tempOut.close();
+        String          actOut      = outStr.toString();
+        assertTrue( actOut.isEmpty() );
     }
     
     /**
@@ -387,25 +504,8 @@ class CommandReaderTest
     
     /**
      * Generates sample input from a list
-     * in the form of a BufferedReader.
-     * Uses the Buffered reader
-     * to execute a given consumer.
-     * 
-     * @param list      the list to convert to input
-     * @param tester    the given consumer
-     * 
-     * @see #getByteBuffer(List)
-     * @see #ioTest(byte[], IOConsumer)
-     */
-    private void ioTest( List<String> list, IOConsumer tester )
-    {
-        byte[]  bytes   = getByteBuffer( list );
-        ioTest( bytes, tester );
-    }
-    
-    
-    /**
-     * Transforms a byte buffer into an input stream
+     * in the form of a byte array.
+     * Transforms a byte array into an input stream
      * in the form of a BufferedReader.
      * The byte buffer is assumed to contain
      * only valid Unicode characters,
@@ -414,14 +514,14 @@ class CommandReaderTest
      * Uses the Buffered reader
      * to execute a given consumer.
      * 
-     * @param buff      the source byte buffer
+     * @param list      list of strings to store in byte buffer
      * @param tester    the given consumer
      * 
      * @see #getByteBuffer(List)
-     * @see #ioTest(List, IOConsumer)
      */
-    private void ioTest( byte[] buff, IOConsumer tester )
+    private void ioTest( List<String> list, IOConsumer tester )
     {
+        byte[]  buff    = getByteBuffer( list );
         try (
             ByteArrayInputStream baiStream = new ByteArrayInputStream( buff );
             InputStreamReader strReader = new InputStreamReader( baiStream );
@@ -454,24 +554,19 @@ class CommandReaderTest
      * Given a command and an argument,
      * create a ParsedCommand object
      * reflecting the given data.
-     * The generated object is returned,
-     * and optionally added
-     * to the "expected results" list.
+     * The generated object is added to the expResults list
+     * and returned.
      * 
      * @param cmd           the given command
      * @param arg           the given argument
-     * @param addToExpList  true to add the generated object
-     *                      to the "expected results" list
      *                      
      * @return  the generated object
      */
-    private ParsedCommand 
-    getExpResult( Command cmd, String arg, boolean addToExpList )
+    private ParsedCommand addExpResult( Command cmd, String arg )
     {
         ParsedCommand   pCmd    =
             new ParsedCommand( cmd, cmd.name(), arg.trim() );
-        if ( addToExpList )
-            expResults.add( pCmd );
+        expResults.add( pCmd );
         return pCmd;
     }
 }

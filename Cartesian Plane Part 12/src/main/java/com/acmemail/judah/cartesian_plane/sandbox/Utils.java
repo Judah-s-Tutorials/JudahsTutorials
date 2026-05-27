@@ -65,12 +65,12 @@ public class Utils
     {
         final String indent  = "        ";
         
-        boolean         success = result.isSuccess();
+        boolean         success = result.success();
         StringBuilder   bldr    = 
             new StringBuilder( success ? "Result" : "Error: " );
         int             type    =
             success ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE;
-        result.getMessages().forEach( m -> 
+        result.messages().forEach( m -> 
             bldr.append( lineSep )
                 .append( indent )
                 .append( m )

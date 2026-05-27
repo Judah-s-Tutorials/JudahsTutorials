@@ -123,8 +123,8 @@ public class FileManager
         CommandReader       commands    = new CommandReader( reader );
         commands.stream().forEach( pc -> {
             Result result = proc.processCommand( pc );
-            if ( !result.isSuccess() )
-                errors.addAll( result.getMessages() );
+            if ( !result.success() )
+                errors.addAll( result.messages() );
         });
         Result              result      = errors.isEmpty() ?
             new Result( true ) : new Result( false, errors );

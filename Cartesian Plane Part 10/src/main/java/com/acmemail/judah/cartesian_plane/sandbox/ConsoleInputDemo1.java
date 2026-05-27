@@ -11,8 +11,8 @@ import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.PlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import com.acmemail.judah.cartesian_plane.input.Command;
+import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
-import com.acmemail.judah.cartesian_plane.input.InputParser;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
@@ -65,24 +65,22 @@ public class ConsoleInputDemo1
     private static void exec( CommandReader commandReader )
         throws IOException
     {
-        InputParser         inputParser     = new InputParser();
+        CommandProcessor    processor       = new CommandProcessor();
         ParsedCommand       parsedCommand   = null;
         Command             command         = Command.NONE;
-        String              arg             = null;
         do
         {
             parsedCommand = commandReader.nextCommand( prompt );
             command = parsedCommand.getCommand();
-            arg = parsedCommand.getArgString();
-            Result  result  = inputParser.parseInput( command, arg  );
+            Result  result  = processor.processCommand( parsedCommand  );
             if ( command == Command.INVALID )
                 System.err.println( Command.usage() );
-            else if ( !result.isSuccess() )
+            else if ( !result.success() )
                 printError( result );
             else if ( command == Command.YPLOT )
-                plotY( inputParser );
+                plotY( processor );
             else if ( command == Command.XYPLOT )
-                plotXY( inputParser );
+                plotXY( processor );
             else
                 ;
         } while ( command != Command.EXIT );
@@ -97,7 +95,7 @@ public class ConsoleInputDemo1
      */
     private static void printError( Result result )
     {
-        List<String>    list    = result.getMessages();
+        List<String>    list    = result.messages();
         if ( list.isEmpty() )
             System.err.println( "input error" );
         else
@@ -107,12 +105,12 @@ public class ConsoleInputDemo1
     /**
      * Generate a plot of the form y = f(x).
      * 
-     * @param parser    the object that encapsulates the equation to plot
+     * @param processor the object that encapsulates the equation to plot
      */
-    private static void plotY( InputParser parser )
+    private static void plotY( CommandProcessor processor )
     {
         plane.setStreamSupplier( () ->
-            parser.getEquation().yPlot()
+            processor.getEquation().yPlot()
             .map( p -> PlotPointCommand.of( p, plane) )
         );
         NotificationManager.INSTANCE
@@ -122,12 +120,12 @@ public class ConsoleInputDemo1
     /**
      * Generate a plot of parametric equation.
      * 
-     * @param parser    the object that encapsulates the equation to plot
+     * @param processor the object that encapsulates the equation to plot
      */
-    private static void plotXY( InputParser parser )
+    private static void plotXY( CommandProcessor processor )
     {
         plane.setStreamSupplier( () ->
-            parser.getEquation().xyPlot()
+            processor.getEquation().xyPlot()
             .map( p -> PlotPointCommand.of( p, plane) )
         );
         NotificationManager.INSTANCE

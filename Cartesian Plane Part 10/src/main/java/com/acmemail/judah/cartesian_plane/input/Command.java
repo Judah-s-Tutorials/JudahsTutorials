@@ -1,11 +1,13 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Objects;
 
 /**
  * Encapsulation of commands
  * used to configure and evaluate
- * an Exp4j expressions.
+ * an Exp4j expression.
  * 
  * @author Jack Straub
  * 
@@ -13,8 +15,8 @@ import java.util.Arrays;
  */
 public enum Command
 {
-    /** Creates a new equation. */
-    EQUATION( "Creates a new equation" ),
+    /** Names an equation. */
+    EQUATION( "Names an equation" ),
     /** Establishes the expression for generating an x-coordinate. */
     XEQUALS( 
         "Describes any well-formed expression for the evaluation of \"x\" "
@@ -25,6 +27,18 @@ public enum Command
         "Describes any well-formed expression for the evaluation of \"y\" "
         + "in the coordinate pair \"(x,y)\""
     ),
+    /** Sets the expression for generating the radius in a polar equation. */
+    REQUALS( 
+        "Describes any well-formed expression "
+        + "for the evaluation of \"radius\" "
+        + "in the polar equation \"r=f(t)\""
+    ),
+    /** Sets the expression for generating the angle in a polar equation. */
+    TEQUALS( 
+        "Describes any well-formed expression "
+        + "for the evaluation of \"theta\" "
+        + "in the polar equation \"t=f(r)\""
+    ),
     /** Declares one or more variables. */
     SET( 
         "Describes a comma-separated list of "
@@ -32,34 +46,45 @@ public enum Command
     ),
     /** Sets the start of the iteration range. */
     START( 
-        "Expression that describes the start value "
-            + "of the iteration range" ),
+        "Describes any well-formed expression that determines"
+         + " the start value of the iteration range" 
+    ),
     /** Sets the end of the iteration range. */
-    END( "Expression that describes the end value in the iteration range" ),
+    END( 
+        "Describes any well-formed expression that determines"
+        + " the end value of the iteration range"
+    ),
     /** Sets the increment value for traversing the iteration range. */
     STEP( 
-        "Expression that describes the increment value "
-            + "for traversing the iteration range"
+        "Describes any well-formed expression that determines"
+        + " the increment value for traversing the iteration range"
     ),
     /** Sets the name of the parameter in a parametric equation. */
     PARAM( "Describes the name of the parameter in a parametric equation" ),
+    /** Sets the name of the angle variable in a polar equation. */
+    THETA( "Describes the name of the angle variable in a polar equation" ),
+    /** Sets the name of the radius variable in a polar equation. */
+    RADIUS( "Describes the name of the radius variable in a polar equation" ),
     /** Generates the plot of the function y=f(x). */
     YPLOT( "Generates a plot of the form (x,y) = f(x)" ),
     /** Generates the plot of the parametric equation (x,y)=f(t). */
     XYPLOT( "Generates a plot of the form (x,y) = f(t)" ),
-    /** Identifies and empty command string. */
+    /** Generates the plot of the polar equation r = f(t). */
+    RPLOT( "Generates a plot of the polar equation r = f(t)" ),
+    /** Generates the plot of the polar equation t = f(r). */
+    TPLOT( "Generates a plot of the polar equation t = f(r)" ),
+    /** Identifies an empty command string. */
     NONE( "Identifies an empty command string" ),
     /** Identifies an invalid command. */
-    INVALID( "Designates an invalid command." ),
+    INVALID( "Designates an invalid command" ),
     /** Exit the current operation. */
-    EXIT( 
-        "Application specific; probably "
-        + "\"Exit from the current operation\""
-    ),
+    EXIT( "Exits from the current operation" ),
+    /** Select an equation from the EquationMap. */
+    SELECT( "Selects an equation from a list" ),
     /** Open a file. */
-    OPEN( "Application specific; probably \"open equation file\""),
+    OPEN( "Opens an equation file" ),
     /** Save a file. */
-    SAVE( "Application specific; probably \"save equation file\"");
+    SAVE( "Saves an equation file" );
     
     /** Line separator for the current platform. */
     private static final String lineSep         = System.lineSeparator();
@@ -90,27 +115,27 @@ public enum Command
     /**
      * Compares the value of a given string
      * to the names of the enumerated constants
-     * and returns the first matching constant.
+     * and returns the matching constant.
      * The comparison is case-insensitive.
-     * If the given string is empty NONE is returned.
+     * If the given string is empty or blank NONE is returned.
      * If no match is found INVALID is returned.
      * 
      * @param from  the given string
      * 
      * @return  
-     *      the first command whose name
-     *      matches the given string
+     *      the matching Command, or NONE for empty/blank input, 
+     *      or INVALID if no name matches
      *      
-     * @throws IllegalArgumentException if input is null
+     * @throws NullPointerException if from is null
      */
     public static Command toCommand( String from )
     {
-        if ( from == null )
-            throw new IllegalArgumentException( "input may not be null" );
+        String  upperFrom   = 
+            Objects.requireNonNull( from, "from" ).toUpperCase().trim();
         Command cmd         = NONE;
-        if ( !from.isEmpty() )
+        if ( !upperFrom.isEmpty() )
             cmd = Arrays.stream( values() )
-                .filter( e -> from.equalsIgnoreCase( e.name() ) )
+                .filter( e -> upperFrom.equals( e.name() ) )
                 .findFirst()
                 .orElse( INVALID );
         return cmd;
@@ -131,7 +156,7 @@ public enum Command
         Arrays.stream( values() )
             .filter( e -> e != INVALID )
             .filter( e -> e != NONE )
-            .sorted( (e1,e2) -> e1.name().compareTo( e2.name() ) )
+            .sorted( Comparator.comparing( Command::name ) )
             .forEach( e -> 
                 bldr.append( "    " )
                     .append( e )

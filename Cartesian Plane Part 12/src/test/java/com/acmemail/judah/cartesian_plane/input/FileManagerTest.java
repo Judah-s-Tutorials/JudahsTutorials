@@ -120,8 +120,8 @@ public class FileManagerTest
         Equation    newEquation = new Exp4jEquation();
         Result      result      = 
             FileManager.load( adHocOutputFile, newEquation );
-        assertTrue( result.isSuccess() );
-        assertTrue( result.getMessages().isEmpty() );
+        assertTrue( result.success() );
+        assertTrue( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( defEquation, newEquation );
     }   
 
@@ -145,8 +145,8 @@ public class FileManagerTest
         Equation    newEquation = new Exp4jEquation();
         Result      result      = 
             FileManager.load( adHocOutputFile, newEquation );
-        assertTrue( result.isSuccess() );
-        assertTrue( result.getMessages().isEmpty() );
+        assertTrue( result.success() );
+        assertTrue( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( defEquation, newEquation );
     }
 
@@ -162,8 +162,8 @@ public class FileManagerTest
         Equation    newEquation = new Exp4jEquation();
         Result      result      = 
             FileManager.load( adHocOutputFile, newEquation );
-        assertTrue( result.isSuccess() );
-        assertTrue( result.getMessages().isEmpty() );
+        assertTrue( result.success() );
+        assertTrue( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( defEquation, newEquation );
     }
 
@@ -187,8 +187,8 @@ public class FileManagerTest
         Equation    newEquation = new Exp4jEquation();
         Result      result      = 
             FileManager.load( adHocOutputFile, newEquation );
-        assertTrue( result.isSuccess() );
-        assertTrue( result.getMessages().isEmpty() );
+        assertTrue( result.success() );
+        assertTrue( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( defEquation, newEquation );
     }
 
@@ -209,8 +209,8 @@ public class FileManagerTest
         Equation    newEquation = new Exp4jEquation();
         Result      result      =
             FileManager.load( adHocOutputFile, newEquation );
-        assertTrue( result.isSuccess() );
-        assertTrue( result.getMessages().isEmpty() );
+        assertTrue( result.success() );
+        assertTrue( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( defEquation, newEquation );
     }
 
@@ -269,8 +269,8 @@ public class FileManagerTest
         Equation    equation    = new Exp4jEquation();
         Result      result      =
             FileManager.load( adHocOutputFile, equation );
-        assertTrue( result.isSuccess() );
-        assertTrue( result.getMessages().isEmpty() );
+        assertTrue( result.success() );
+        assertTrue( result.messages().isEmpty() );
         assertEquals( expName, equation.getName() );
         assertEquals( expYExpr, equation.getYExpression() );
         assertEquals( expVarMap, equation.getVars() );
@@ -305,8 +305,8 @@ public class FileManagerTest
         Equation    actEquation     = new Exp4jEquation();
         Result      result          = 
             FileManager.load( adHocOutputFile, actEquation );
-        assertTrue( result.isSuccess() );
-        assertTrue( result.getMessages().isEmpty() );
+        assertTrue( result.success() );
+        assertTrue( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( expEquation, actEquation );
     }
     
@@ -331,8 +331,8 @@ public class FileManagerTest
         Equation    actEquation     = new Exp4jEquation();
         Result      result          = 
             FileManager.load( adHocOutputFile, actEquation );
-        assertFalse( result.isSuccess() );
-        assertFalse( result.getMessages().isEmpty() );
+        assertFalse( result.success() );
+        assertFalse( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( expEquation, actEquation );
     }
     
@@ -357,8 +357,8 @@ public class FileManagerTest
         Equation    actEquation     = new Exp4jEquation();
         Result      result          = 
             FileManager.load( adHocOutputFile, actEquation );
-        assertFalse( result.isSuccess() );
-        assertFalse( result.getMessages().isEmpty() );
+        assertFalse( result.success() );
+        assertFalse( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( expEquation, actEquation );
     }
     
@@ -398,8 +398,8 @@ public class FileManagerTest
         Equation    actEquation     = new Exp4jEquation();
         Result      result          = 
             FileManager.load( adHocOutputFile, actEquation );
-        assertFalse( result.isSuccess() );
-        assertFalse( result.getMessages().isEmpty() );
+        assertFalse( result.success() );
+        assertFalse( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( expEquation, actEquation );
     }
     
@@ -411,8 +411,8 @@ public class FileManagerTest
         Equation    actEquation     = new Exp4jEquation();
         Result      result          = 
             FileManager.load( binaryFile, actEquation );
-        assertFalse( result.isSuccess() );
-        assertFalse( result.getMessages().isEmpty() );
+        assertFalse( result.success() );
+        assertFalse( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( expEquation, actEquation );
     }
     
@@ -468,8 +468,8 @@ public class FileManagerTest
             Result      result      = 
                 FileManager.load( bReader, newEquation );
             EquationTestUtil.verifyEquation( defEquation, newEquation );
-            assertTrue( result.isSuccess() );
-            assertTrue( result.getMessages().isEmpty() );
+            assertTrue( result.success() );
+            assertTrue( result.messages().isEmpty() );
         }
     }
 
@@ -492,8 +492,8 @@ public class FileManagerTest
         try ( BufferedReader bReader = new BufferedReader( sReader ) )
         {
             Result  result  = FileManager.load( bReader, equation );
-            assertFalse( result.isSuccess() );
-            assertFalse( result.getMessages().isEmpty() );
+            assertFalse( result.success() );
+            assertFalse( result.messages().isEmpty() );
         }
         Optional<Double>    expVarValue = Optional.of( varValue );
         assertEquals( expVarValue, equation.getVar( varName ) );

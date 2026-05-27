@@ -182,7 +182,7 @@ public class Exp4jEquationTest
         double  xier    = 2;
         String  xExpr   = xier + "t";
         Result  result  = equation.setXExpression( xExpr );
-        assertTrue( result.isSuccess() );
+        assertTrue( result.success() );
         assertEquals( xExpr, equation.getXExpression() );
         
         equation.setRange( 1, 1, 1 );
@@ -194,8 +194,8 @@ public class Exp4jEquationTest
         {
             // try setting an invalid expression
             result  = equation.setXExpression( str );
-            assertFalse( result.isSuccess() );
-            assertFalse( result.getMessages().isEmpty() );
+            assertFalse( result.success() );
+            assertFalse( result.messages().isEmpty() );
         }
     }
 
@@ -234,7 +234,7 @@ public class Exp4jEquationTest
     {
         String  oldXExpr    = getter.get();
         Result  result      = setter.apply( invExpr );
-        assertFalse( result.isSuccess() );
+        assertFalse( result.success() );
         assertEquals( oldXExpr, getter.get() );
     }
 
@@ -244,7 +244,7 @@ public class Exp4jEquationTest
         double  xier    = 2;
         String  yExpr   = xier + "x";
         Result  result  = equation.setYExpression( yExpr );
-        assertTrue( result.isSuccess() );
+        assertTrue( result.success() );
         assertEquals( yExpr, equation.getYExpression() );
         
         equation.setRange( 1, 1, 1 );
@@ -257,8 +257,8 @@ public class Exp4jEquationTest
         {
             // try setting an invalid expression
             result  = equation.setYExpression( str );
-            assertFalse( result.isSuccess() );
-            assertFalse( result.getMessages().isEmpty() );
+            assertFalse( result.success() );
+            assertFalse( result.messages().isEmpty() );
         }
     }
 
@@ -268,8 +268,8 @@ public class Exp4jEquationTest
         String  oldyExpr    = equation.getYExpression();
         String  yExpr       = "undeclaredVarName * x";
         Result  result      = equation.setYExpression( yExpr );
-        assertFalse( result.isSuccess() );
-        assertFalse( result.getMessages().isEmpty() );
+        assertFalse( result.success() );
+        assertFalse( result.messages().isEmpty() );
         assertEquals( oldyExpr, equation.getYExpression() );
     }
 
@@ -284,7 +284,7 @@ public class Exp4jEquationTest
     {
         String  rExpr   = "0 + 1";
         Result  result  = equation.setRExpression( rExpr );
-        assertTrue( result.isSuccess() );
+        assertTrue( result.success() );
         assertEquals( rExpr, equation.getRExpression() );
         
         equation.setRange( Math.PI, Math.PI, 1 );
@@ -298,7 +298,7 @@ public class Exp4jEquationTest
         String  oldRExpr    = equation.getRExpression();
         String  rExpr       = "undeclaredVarName * x";
         Result  result      = equation.setRExpression( rExpr );
-        assertFalse( result.isSuccess() );
+        assertFalse( result.success() );
         assertEquals( oldRExpr, equation.getRExpression() );
     }
 
@@ -313,7 +313,7 @@ public class Exp4jEquationTest
     {
         String  tExpr   = "pi";
         Result  result  = equation.setTExpression( tExpr );
-        assertTrue( result.isSuccess() );
+        assertTrue( result.success() );
         assertEquals( tExpr, equation.getTExpression() );
         
         equation.setRange( 1, 1, 1 );
@@ -322,7 +322,7 @@ public class Exp4jEquationTest
         
         // try setting an invalid expression
         result  = equation.setTExpression( "invalid" );
-        assertFalse( result.isSuccess() );
+        assertFalse( result.success() );
     }
 
     @Test
@@ -331,7 +331,7 @@ public class Exp4jEquationTest
         String  oldTExpr    = equation.getTExpression();
         String  tExpr       = "undeclaredVarName * x";
         Result  result      = equation.setTExpression( tExpr );
-        assertFalse( result.isSuccess() );
+        assertFalse( result.success() );
         assertEquals( oldTExpr, equation.getTExpression() );
     }
 
@@ -677,7 +677,7 @@ public class Exp4jEquationTest
     public void testValidateNameTrue( String str )
     {
         Result  result  = equation.validateName( str );
-        assertTrue( result.isSuccess(), str );
+        assertTrue( result.success(), str );
     }
 
     @ParameterizedTest
@@ -685,7 +685,7 @@ public class Exp4jEquationTest
     public void testValidateNameFalse( String str )
     {
         Result  result  = equation.validateName( str );
-        assertFalse( result.isSuccess() );
+        assertFalse( result.success() );
     }
 
     @ParameterizedTest
@@ -693,7 +693,7 @@ public class Exp4jEquationTest
     public void testValidateNameFirstCharFalse( String str )
     {
         Result  result  = equation.validateName( str );
-        assertFalse( result.isSuccess() );
+        assertFalse( result.success() );
     }
 
     @ParameterizedTest
@@ -701,14 +701,14 @@ public class Exp4jEquationTest
     public void testValidateNameSecondCharFalse( String str )
     {
         Result  result  = equation.validateName( str );
-        assertFalse( result.isSuccess() );
+        assertFalse( result.success() );
     }
 
     @Test
     public void testValidateNameNull()
     {
         Result  result  = equation.validateName( null );
-        assertFalse( result.isSuccess() );
+        assertFalse( result.success() );
     }
 
     @ParameterizedTest
@@ -716,7 +716,7 @@ public class Exp4jEquationTest
     public void testValidateValueTrue( String str )
     {
         Result  result  = equation.validateValue( str );
-        assertTrue( result.isSuccess(), str );
+        assertTrue( result.success(), str );
     }
 
     @ParameterizedTest
@@ -726,14 +726,14 @@ public class Exp4jEquationTest
         // These should all fail because they contain 
         // undeclared variables.
         Result  result  = equation.validateValue( str );
-        assertFalse( result.isSuccess(), str );
+        assertFalse( result.success(), str );
     }
 
     @Test
     public void testValidateValueNull()
     {
         Result  result  = equation.validateValue( null );
-        assertFalse( result.isSuccess(), "null" );
+        assertFalse( result.success(), "null" );
     }
 
     @Test

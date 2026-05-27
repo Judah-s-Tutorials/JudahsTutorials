@@ -7,7 +7,7 @@ import java.util.Objects;
  * of parsing a command string.
  * The expectation is that a string such as this
  * has been parsed into a command and an argument:
- * <br><code>&nbsp;&nbsp;&nbsp;&nbsp;y_equals x^2 - 1</code>.
+ * <br><code>&nbsp;&nbsp;&nbsp;&nbsp;yequals x^2 - 1</code>.
  * Exactly how the parsing is performed
  * is up to the user, 
  * however the above line of text 
@@ -16,11 +16,11 @@ import java.util.Objects;
  * 
  * @author Jack Straub
  */
-public class ParsedCommand
+public final class ParsedCommand
 {
-    /** The parsed command, is interpreted by the user. */
+    /** The parsed command. */
     private final Command   command;
-    /** The string that we used to obtain the Command constant. */
+    /** The string that was used to obtain the Command constant. */
     private final String    commandString;
     /** The argument that was parsed from the original command string. */
     private final String    argString;
@@ -29,14 +29,16 @@ public class ParsedCommand
      * Constructor.
      * Any null string will be converted to an empty string.
      * 
-     * @param cmd       enumerated constant associated with this command
+     * @param cmd       enumerated constant associated with this command;
+     *                  may not be null
      * @param cmdStr    the source string for this command
      * @param argStr    the argument string for this command
+     * 
+     * @throws NullPointerException if cmd is null
      */
     public ParsedCommand( Command cmd, String cmdStr, String argStr )
     {
-        super();
-        this.command = cmd;
+        this.command = Objects.requireNonNull( cmd, "Command" );
         this.commandString = cmdStr != null ? cmdStr : "";
         this.argString = argStr != null ? argStr : "";
     }
@@ -77,8 +79,8 @@ public class ParsedCommand
     {
         StringBuilder   bldr    = new StringBuilder();
         bldr.append( "cmd=\"" ).append( command )
-            .append( "\",cmdStr=\"" ).append( commandString )
-            .append( "\",argStr=\"" ).append( argString )
+            .append( "\", cmdStr=\"" ).append( commandString )
+            .append( "\", argStr=\"" ).append( argString )
             .append( "\"" );
         return bldr.toString();
     }
@@ -96,19 +98,14 @@ public class ParsedCommand
         boolean result  = false;
         if ( this == other )
             result = true;
-        else if ( other == null )
-            result = false;
-        else if ( !(other instanceof ParsedCommand ) )
-            result = false;
-        else
+        else if ( other instanceof ParsedCommand that )
         {
-            ParsedCommand   that    = (ParsedCommand)other;
-            if ( getCommand() != that.getCommand() )
+            if ( command != that.command )
                 result = false;
-            else if ( !getCommandString().equals( that.getCommandString() ) )
+            else if ( !commandString.equals( that.commandString ) )
                 result = false;
             else
-                result = getArgString().equals( that.getArgString() );
+                result = argString.equals( that.argString );
         }
         return result;
     }

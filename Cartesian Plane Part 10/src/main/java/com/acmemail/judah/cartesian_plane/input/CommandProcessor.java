@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -280,7 +281,7 @@ public class CommandProcessor
     private void parseArg( 
         Context context,
         Function<String,Result> setter,
-        Supplier<Object> getter
+        Supplier<String> getter
     )
     {   
         String  argString   = context.getArgString();
@@ -312,12 +313,12 @@ public class CommandProcessor
     private void parseExpression( 
         Context context,
         DoubleConsumer setter, 
-        Supplier<Object> getter 
+        DoubleSupplier getter 
     )
     {
         String  argString   = context.getArgString();
         if ( argString.isEmpty() )
-            System.out.println( getter.get() );
+            System.out.println( getter.getAsDouble() );
         else
         {
             Optional<Double>    opt = equation.evaluate( argString );
