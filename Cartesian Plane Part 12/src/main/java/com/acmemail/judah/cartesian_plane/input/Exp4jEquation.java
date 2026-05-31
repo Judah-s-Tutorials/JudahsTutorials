@@ -55,6 +55,10 @@ public class Exp4jEquation implements Equation
         "name must be alphanumeric (may include underscores)";
     private static final String notNumeric              =
         "value is not numeric";
+    private static final String stepMayNotBeZero        =
+        "step value may not be zero";
+    private static final String unreachableFromStart    =
+        "the end value is unreachable from the start value";
     
     private final Map<String,Double>    vars        = new HashMap<>();
     private String                      name        = "";
@@ -231,108 +235,6 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public Stream<Point2D> yPlot()
-    {
-        yExpr.setVariables( vars );
-        ValidationResult    result            = yExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected expression validation failure.";
-            throw new ValidationException( message );
-        }
-        Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.success() )
-            throw new ValidationException( getMessage( isRangeValid ) );
-        Stream<Point2D> stream  =
-            DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x + rStep )
-                .mapToObj( d -> {
-                    yExpr.setVariable( "x", d );
-                    return new Point2D.Double( d, yExpr.evaluate() );
-                });
-        return stream;
-    }
-    
-    @Override
-    public Stream<Point2D> xyPlot()
-    {
-        xExpr.setVariables( vars );
-        ValidationResult    result    = xExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected x-expression validation failure.";
-            throw new ValidationException( message );
-        }
-        
-        yExpr.setVariables( vars );
-        result = yExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected y-expression validation failure.";
-            throw new ValidationException( message );
-        }
-        
-        Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.success() )
-            throw new ValidationException( getMessage( isRangeValid ) );
-
-        Stream<Point2D> stream  =
-            DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
-                .mapToObj( t -> { 
-                    xExpr.setVariable( param, t );
-                    yExpr.setVariable( param, t );
-                    return new Point2D.Double( 
-                        xExpr.evaluate(), 
-                        yExpr.evaluate()
-                    );
-                });
-        return stream;
-    }
-    
-    @Override
-    public Stream<Point2D> rPlot()
-    {
-        rExpr.setVariables( vars );
-        ValidationResult    result    = rExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected r-expression validation failure.";
-            throw new ValidationException( message );
-        }
-        Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.success() )
-            throw new ValidationException( getMessage( isRangeValid ) );
-
-        Stream<Point2D> stream  =
-            DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
-                .peek( t -> rExpr.setVariable( theta, t ) )
-                .mapToObj( t -> Polar.ofRTheta( rExpr.evaluate(), t ) )
-                .map( Polar::toPoint );
-        return stream;
-    }
-    
-    @Override
-    public Stream<Point2D> tPlot()
-    {
-        tExpr.setVariables( vars );
-        ValidationResult    result    = tExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected t-expression validation failure.";
-            throw new ValidationException( message );
-        }
-        Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.success() )
-            throw new ValidationException( getMessage( isRangeValid ) );
-
-        Stream<Point2D> stream  =
-            DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r + rStep )
-                .peek( r -> tExpr.setVariable( radius, r ) )
-                .mapToObj( r -> Polar.ofRTheta( r, tExpr.evaluate() ) )
-                .map( Polar::toPoint );
-        return stream;
-    }
-    
-    @Override
     public String getXExpression()
     {
         return xExprStr;
@@ -477,11 +379,12 @@ public class Exp4jEquation implements Equation
         Optional<Double>    result  = Optional.empty();
         try
         {
-            Expression          expr    =
+            Expression          expr        =
                 new ExpressionBuilder( exprStr )
                     .variables( vars.keySet() )
                     .build();
-            if ( expr.validate( true ).isValid() )
+            ValidationResult    exp4jResult = expr.validate( true );
+            if ( exp4jResult.isValid() )
             {
                 double  val     = expr.evaluate();
                 result = Optional.of(val );
@@ -495,6 +398,108 @@ public class Exp4jEquation implements Equation
         return result;
     }
     
+    @Override
+    public Stream<Point2D> yPlot()
+    {
+        yExpr.setVariables( vars );
+        ValidationResult    result  = yExpr.validate( true );
+        if ( !result.isValid() )
+        {
+            String  message = "Unexpected expression validation failure.";
+            throw new ValidationException( message );
+        }
+        Result  isRangeValid    = validateRange();
+        if ( !isRangeValid.success() )
+            throw new ValidationException( getMessage( isRangeValid ) );
+        Stream<Point2D> stream  =
+            DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x + rStep )
+                .mapToObj( d -> {
+                    yExpr.setVariable( "x", d );
+                    return new Point2D.Double( d, yExpr.evaluate() );
+                });
+        return stream;
+    }
+    
+    @Override
+    public Stream<Point2D> xyPlot()
+    {
+        xExpr.setVariables( vars );
+        ValidationResult    result    = xExpr.validate( true );
+        if ( !result.isValid() )
+        {
+            String  message = "Unexpected x-expression validation failure.";
+            throw new ValidationException( message );
+        }
+        
+        yExpr.setVariables( vars );
+        result = yExpr.validate( true );
+        if ( !result.isValid() )
+        {
+            String  message = "Unexpected y-expression validation failure.";
+            throw new ValidationException( message );
+        }
+        
+        Result  isRangeValid    = validateRange();
+        if ( !isRangeValid.success() )
+            throw new ValidationException( getMessage( isRangeValid ) );
+
+        Stream<Point2D> stream  =
+            DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
+                .mapToObj( t -> { 
+                    xExpr.setVariable( param, t );
+                    yExpr.setVariable( param, t );
+                    return new Point2D.Double( 
+                        xExpr.evaluate(), 
+                        yExpr.evaluate()
+                    );
+                });
+        return stream;
+    }
+    
+    @Override
+    public Stream<Point2D> rPlot()
+    {
+        rExpr.setVariables( vars );
+        ValidationResult    result    = rExpr.validate( true );
+        if ( !result.isValid() )
+        {
+            String  message = "Unexpected r-expression validation failure.";
+            throw new ValidationException( message );
+        }
+        Result  isRangeValid    = validateRange();
+        if ( !isRangeValid.success() )
+            throw new ValidationException( getMessage( isRangeValid ) );
+
+        Stream<Point2D> stream  =
+            DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
+                .peek( t -> rExpr.setVariable( theta, t ) )
+                .mapToObj( t -> Polar.ofRTheta( rExpr.evaluate(), t ) )
+                .map( Polar::toPoint );
+        return stream;
+    }
+    
+    @Override
+    public Stream<Point2D> tPlot()
+    {
+        tExpr.setVariables( vars );
+        ValidationResult    result    = tExpr.validate( true );
+        if ( !result.isValid() )
+        {
+            String  message = "Unexpected t-expression validation failure.";
+            throw new ValidationException( message );
+        }
+        Result  isRangeValid    = validateRange();
+        if ( !isRangeValid.success() )
+            throw new ValidationException( getMessage( isRangeValid ) );
+
+        Stream<Point2D> stream  =
+            DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r + rStep )
+                .peek( r -> tExpr.setVariable( radius, r ) )
+                .mapToObj( r -> Polar.ofRTheta( r, tExpr.evaluate() ) )
+                .map( Polar::toPoint );
+        return stream;
+    }
+
     /**
      * Generate and validate an exp4j Expression
      * from a given string.
@@ -530,12 +535,12 @@ public class Exp4jEquation implements Equation
             Expression expr = new ExpressionBuilder( exprStr )
                 .variables( vars.keySet() )
                 .build();
-            ValidationResult    expr4jResult = expr.validate( false );
-            boolean             validExpr    = expr4jResult.isValid();
+            ValidationResult    exp4jResult = expr.validate( false );
+            boolean             validExpr   = exp4jResult.isValid();
             if ( validExpr )
                 destination.accept( expr );
             
-            result = new Result( validExpr, expr4jResult.getErrors() );
+            result = new Result( validExpr, exp4jResult.getErrors() );
         }
         catch ( Exception exc )
         {
@@ -559,12 +564,12 @@ public class Exp4jEquation implements Equation
         String    error    = "";
         if ( rStep == 0 )
         {
-            error = "Range step may not be 0: ";
+            error = stepMayNotBeZero;
         }
         else if ( rStep < 0 )
         {
             if ( rStart < rEnd )
-                error = "Range end unreachable from start: ";
+                error = unreachableFromStart;
         }
         else
         {
@@ -631,16 +636,14 @@ public class Exp4jEquation implements Equation
      * are set to their default values.
      * 
      * @see Exp4jEquation
+     * @see Equation
+     * @see Equation#INTRINSIC_VARIABLES
      */
     private void initIntrinsicVariables()
     {
-        vars.putIfAbsent( "x",  0. );
-        vars.putIfAbsent( "y",  0. );
-        vars.putIfAbsent( "a",  0. );
-        vars.putIfAbsent( "b",  0. );
-        vars.putIfAbsent( "c",  0. );
-        vars.putIfAbsent( "r",  0. );
-        vars.putIfAbsent( "t",  0. );
+        Equation.INTRINSIC_VARIABLES.entrySet()
+            .forEach( entry -> 
+                vars.putIfAbsent( entry.getKey(), entry.getValue() ) );
     }
     
     /** 

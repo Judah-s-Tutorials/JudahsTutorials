@@ -137,13 +137,23 @@ public interface Equation
     
     /**
      * Sets the value of a variable to a given value.
+     * If the given name is not a valid variable name
+     * an unsuccessful Result will be returned;
+     * the rules for variable name formulation
+     * are implementation dependent.
+     * The given value may or may not be validated
+     * by a given implementation.
+     * If the value validation is performed and fails,
+     * an unsuccessful Result is returned.
      * 
      * @param name  the name of the variable; must be non-null
      * @param val   the given value
      * 
+     * @return  the result of the operation
+     * 
      * @throws NullPointerException if name is null
      */
-    void setVar( String name, double val );
+    Result setVar( String name, double val );
 
     /**
      * Removes from the set of variables
@@ -301,12 +311,16 @@ public interface Equation
     /**
      * Sets the name of the parameter
      * in a parametric equation.
+     * If it's not a valid variable name
+     * an unsuccessful Result is returned.
      * 
      * @param param the name of the parameter; must not be null
      * 
+     * @return  the result of the operation
+     * 
      * @throws NullPointerException if param is null
      */
-    void setParamName( String param );
+    Result setParamName( String param );
 
     /**
      * Iterates over the encapsulated range,
@@ -372,13 +386,17 @@ public interface Equation
 
     /**
      * Sets the name of the radius variable
-     * used in a polar equation.
+     * in a polar equation.
+     * If it's not a valid variable name
+     * an unsuccessful Result is returned.
      * 
      * @param radius the name of the radius; must not be null
      * 
+     * @return  the result of the operation
+     * 
      * @throws NullPointerException if radius is null
      */
-    void setRadiusName( String radius );
+    Result setRadiusName( String radius );
 
     /**
      * Gets the name of the angle variable
@@ -391,12 +409,16 @@ public interface Equation
     /**
      * Sets the name of the angle variable
      * in a polar equation.
+     * If it's not a valid variable name
+     * an unsuccessful Result is returned.
      * 
      * @param theta the name of the angle variable; must not be null
      * 
+     * @return  the result of the operation
+     * 
      * @throws NullPointerException if theta is null
      */
-    void setThetaName( String theta );
+    Result setThetaName( String theta );
 
     /**
      * Establishes the iteration range for this Equation.

@@ -746,6 +746,10 @@ public class Exp4jEquationTest
         testEvaluatePass( "2pi", 2 * Math.PI );
         testEvaluatePass( "sin(pi/2)", 1 );
         testEvaluatePass( "log(e)", 1 );
+        
+        equation.setVar( "a", 1000 );
+        testEvaluatePass( "cbrt(1000)", 10 );
+        testEvaluatePass( "cbrt(a)", 10 );
     }
 
     @ParameterizedTest

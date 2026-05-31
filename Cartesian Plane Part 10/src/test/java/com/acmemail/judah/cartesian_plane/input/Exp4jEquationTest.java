@@ -237,7 +237,7 @@ public class Exp4jEquationTest
         assertFalse( result.success() );
         assertEquals( oldXExpr, getter.get() );
     }
-
+    
     @Test
     public void testSetYExpression()
     {
@@ -369,14 +369,9 @@ public class Exp4jEquationTest
     {
         String  varName = "varName";
         String  yExpr   = varName + " + x";
-        
-        // set a variable on the equation...
-        // enter a valid y expression including the variable...
-        // remove the variable, causing y-expression to become invalid...
-        // verify that yPlot throws a validation exception
         equation.setVar( varName, 0 );
         equation.setYExpression( yExpr );
-        equation.removeVar( varName );
+        equation.setRange( 0, 10, -1 );
         
         assertThrows( VE_CLASS, () -> equation.yPlot() );
     }
@@ -418,14 +413,7 @@ public class Exp4jEquationTest
         equation.setVar( yVarName, 0 );
         equation.setXExpression( xExpr );
         equation.setYExpression( yExpr );
-        
-        // expect x-expression to throw an exception
-        equation.removeVar( xVarName );
-        assertThrows( VE_CLASS, () -> equation.xyPlot() );
-        
-        // expect y-expression to throw an exception
-        equation.setVar( xVarName, 0 );
-        equation.removeVar( yVarName );
+        equation.setRange( 0, 10, -1 );
         assertThrows( VE_CLASS, () -> equation.xyPlot() );
     }
 
@@ -468,8 +456,7 @@ public class Exp4jEquationTest
         String  rExpr   = varName + " + x";
         equation.setVar( varName, 0 );
         equation.setRExpression( rExpr );
-        equation.removeVar( varName );
-        
+        equation.setRange( 0, 10, -1 );
         assertThrows( VE_CLASS, () -> equation.rPlot() );
     }
 
@@ -514,7 +501,7 @@ public class Exp4jEquationTest
         String  tExpr   = varName + " + x";
         equation.setVar( varName, 0 );
         equation.setTExpression( tExpr );
-        equation.removeVar( varName );
+        equation.setRange( 0, 10, -1 );
         
         assertThrows( VE_CLASS, () -> equation.tPlot() );
     }
@@ -705,10 +692,14 @@ public class Exp4jEquationTest
     }
 
     @Test
-    public void testValidateNameNull()
+    public void testValidateNameNullOrBlank()
     {
         Result  result  = equation.validateName( null );
-        assertFalse( result.success() );
+        assertFalse( result.success(), "null" );
+        result  = equation.validateName( "" );
+        assertFalse( result.success(), "empty" );
+        result  = equation.validateName( "   " );
+        assertFalse( result.success(), "blank" );
     }
 
     @ParameterizedTest
@@ -720,13 +711,26 @@ public class Exp4jEquationTest
     }
 
     @ParameterizedTest
-    @ValueSource(strings={ "a", "2x", "x^2", "cos(t)" } )
+    @ValueSource(strings={ "n", "2o", "p^2", "cos(q)" } )
     public void testValidateValueFalse( String str )
     {
         // These should all fail because they contain 
         // undeclared variables.
         Result  result  = equation.validateValue( str );
         assertFalse( result.success(), str );
+    }
+
+    @Test
+    public void testValidateValueFalse()
+    {
+        // These should all fail because the value strings
+        // are null or empty they should not raise an exception.
+        Result  result  = equation.validateValue( null );
+        assertFalse( result.success(), "null" );
+        result  = equation.validateValue( "" );
+        assertFalse( result.success(), "empty string" );
+        result  = equation.validateValue( "   " );
+        assertFalse( result.success(), "blank string" );
     }
 
     @Test
@@ -746,6 +750,14 @@ public class Exp4jEquationTest
         testEvaluatePass( "2pi", 2 * Math.PI );
         testEvaluatePass( "sin(pi/2)", 1 );
         testEvaluatePass( "log(e)", 1 );
+        
+        equation.setVar( "a", 100 );
+        testEvaluatePass( "sqrt(100)", 10 );
+        testEvaluatePass( "sqrt(a)", 10 );
+
+        equation.setVar( "a", 3 );
+        equation.setVar( "b", 4 );
+        testEvaluatePass( "sqrt( pow( a, 2 ) + pow( b, 2 ) )", 5 );
     }
 
     @ParameterizedTest
