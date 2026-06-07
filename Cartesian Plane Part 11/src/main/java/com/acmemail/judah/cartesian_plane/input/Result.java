@@ -1,7 +1,5 @@
 package com.acmemail.judah.cartesian_plane.input;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -10,15 +8,17 @@ import java.util.List;
  * associated with the result;
  * in the case of a successful result,
  * the list will typically be empty.
- * The list will never be null.
- * 
+ * The list will never be null,
+ * and is always unmodifiable.
+ * @param success   the status of this Result
+ * @param messages  the messages associated with this Result;
+ *                  a null value is treated as an empty list,
+ *                  and the list may not contain null elements
+ *
  * @author Jack Straub
  */
-public class Result
+public final record Result( boolean success, List<String> messages )
 {
-    private final boolean       success;
-    private final List<String>  messages;
-    
     /**
      * Constructor.
      * Creates a Result with the given status
@@ -32,44 +32,16 @@ public class Result
     }
     
     /**
-     * Constructor.
+     * Compact constructor.
      * Creates a Result with the given status
      * and list of messages.
-     * The given list
-     * is copied into 
-     * an internally allocated buffer.
+     * Normalizes a null messages list to an empty list,
+     * and otherwise stores a defensive copy
      * 
-     * @param success   the given status
-     * @param messages  the given list
+     * @throws NullPointerException if messages contains a null element
      */
-    public Result( boolean success, List<String> messages )
+    public Result
     {
-        this.success = success;
-        this.messages = new ArrayList<>();
-        if ( messages != null )
-            this.messages.addAll( messages );
-    }
-
-    /**
-     * Returns the status of this Result.
-     * 
-     * @return the status of this Result
-     */
-    public boolean isSuccess()
-    {
-        return success;
-    }
-
-    /**
-     * Returns an unmodifiable list of messages
-     * associated with this result.
-     * 
-     * @return the list of messages associated with this result
-     */
-    public List<String> getMessages()
-    {
-        List<String>    guardedList = 
-            Collections.unmodifiableList( messages );
-        return guardedList;
+        messages = messages == null ? List.of() : List.copyOf( messages );
     }
 }

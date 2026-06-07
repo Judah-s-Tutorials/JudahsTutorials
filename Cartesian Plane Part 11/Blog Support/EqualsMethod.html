@@ -1,26 +1,808 @@
+
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-    <title>Header Not Used</title>
+    <meta charset="UTF-8">
+    <meta name="viewport">
+    <title>Java equals Method</title>
+    <style>
+        table.data-table
+        {
+            margin-left: 4em;
+            border: .2em solid black;
+            border-collapse: collapse;
+        }
+        table.data-table th,
+        table.data-table td
+        {
+            padding: .25em;
+            border: .2em solid black;
+        }
+    </style>
 </head>
-<body style="padding: 1.5em; border-width: .5em; border-collapse:collapse;">
-<table>
+<body style="max-width:40em; padding: 1.5em; font-size: 18px;">
+
+<p style="padding: 1em; font-family: sans-serif; background-color: #DDDDDD;">
+	<strong>Important note:</strong>
+	This page is about the Java <code>equals(Object)</code> method,
+	and we're going to stick to that.
+	But we can't mention <code>equals</code>
+	without referring to the <code>equals</code> and <code>hashCode</code> contract.
+	This states that if you override 
+    either <code>equals</code> or <code>hashCode</code>,
+    you must override the other as well.
+</p>
+
+<h1>Java equals Method</h1>
+<p>
+	The <code>equals</code> method is declared in the <code>Object</code> class.
+	Functionally, it's not very useful.
+	It's equivalent to this:
+</p>
+<pre style="padding-left: 2em;">
+public boolean equals( Object object )
+{
+    if ( this == object )
+        return true;
+    else
+        return false;
+}</pre>
+<p>
+In other words,
+<code>Object.equals(Object)</code>
+judges two objects to be equal
+<em>if they are the same object.</em>
+This is not typically very helpful.
+For example, 
+I can have two <em>different</em> string objects,
+and if they both have the value "cat"
+we would normally consider them equal,
+even if <code>Object.equals(Object)</code> does not.
+</p>
+<p>
+Consider the following class:
+</p>
+<pre style="padding-left: 2em;">
+public class EqualsDemo1
+{
+    private final String    alpha;
+    private final String    beta;
+    
+    public EqualsDemo1( String alpha, String beta )
+    {
+        this.alpha = alpha;
+        this.beta = beta;
+    }
+	...
+}
+</pre>
+<p>
+In the above example,
+let's say that we would like an <code>EqualsDemo1</code> object
+to be equal to another object if:
+</p>
+<ol>
+    <li>The other object is non-null;</li>
+	<li>The other object is type <code>EqualsDemo1</code>;</li>
+	<li>The objects' respective <code>alpha</code> fields are equal; and</li>
+	<li>The objects' respective <code>beta</code> fields are equal.</li>
+</ol>
+<p>
+Of course, now we need to ask
+what it means for the <code>alpha</code> and/or <code>beta</code> fields to be equal?
+The easiest thing is to ask if: <code>this.alpha.equals(otherObject.alpha)</code>.
+Unless <code>this.alpha</code> is null,
+in which case it's equal to <code>otherObject.alpha</code>
+only if <code>otherObject.alpha</code> is also null.
+</p>
+<h2>The equals Contract</h2>
+<p>
+When overriding <code>equals</code>
+you must make sure that your implementation
+meets the following requirements.
+</p>
+<ol>
+<li>
+Your implementation must be <em>reflexive</em>;
+<code>obj.equals(obj)</code> must be true
+for any non-null <code>obj</code>.
+</li>
+<li>
+Your implementation must be <em>symmetric</em>;
+if <code>obj1.equals(obj2)</code> is true,
+<code>obj2.equals(obj1)</code> must be true;
+if <code>obj1.equals(obj2)</code> is false,
+<code>obj2.equals(obj1)</code> must be false.
+</li>
+<li>
+Your implementation must be <em>transitive</em>;
+if <code>obj1.equals(obj2)</code> is true,
+and <code>obj2.equals(obj3)</code> is true,
+then <code>obj1.equals(obj3)</code> must be true.
+</li>
+<li>
+Your implementation must be <em>consistent</em>;
+the result of <code>obj1.equals(obj2)</code> 
+must be the same every time you invoke it
+(assuming no information used in the comparison is modified).
+</li>
+<li>
+Your implementation must handle null;
+the result of <code>obj1.equals(null)</code> 
+must always be false.
+</li>
+</ol>
+<h2>Sample equals Implementations</h2>
+<p>
+Here's a first look at an <code>equals(Object)</code> method;
+it is copied from <code>class EqualsDemo1</code>:
+</p>
+<!-- HTML generated using hilite.me -->
+<div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tr><td><pre style="margin: 0; line-height: 125%;"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36</pre></td><td><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #080; font-weight: bold">public</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">class</span> <span style="color: #B06; font-weight: bold">EqualsDemo1</span>
+{
+<span style="color: #BBB">    </span>...
+<span style="color: #BBB">    </span><span style="color: #555; font-weight: bold">@Override</span>
+<span style="color: #BBB">    </span><span style="color: #080; font-weight: bold">public</span><span style="color: #BBB"> </span><span style="color: #339; font-weight: bold">int</span><span style="color: #BBB"> </span><span style="color: #06B; font-weight: bold">hashCode</span>()
+<span style="color: #BBB">    </span>{
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">return</span><span style="color: #BBB"> </span>Objects.<span style="color: #00C">hash</span>(alpha,<span style="color: #BBB"> </span>beta);
+<span style="color: #BBB">    </span>}
+
+<span style="color: #BBB">    </span><span style="color: #555; font-weight: bold">@Override</span>
+<span style="color: #BBB">    </span><span style="color: #080; font-weight: bold">public</span><span style="color: #BBB"> </span><span style="color: #339; font-weight: bold">boolean</span><span style="color: #BBB"> </span><span style="color: #06B; font-weight: bold">equals</span>(<span style="color: #BBB"> </span>Object<span style="color: #BBB"> </span>other<span style="color: #BBB"> </span>)
+<span style="color: #BBB">    </span>{
+<span style="color: #BBB">        </span><span style="color: #339; font-weight: bold">boolean</span><span style="color: #BBB"> </span>result<span style="color: #BBB">  </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">this</span><span style="color: #BBB"> </span><span style="color: #333">==</span><span style="color: #BBB"> </span>other<span style="color: #BBB">  </span>)
+<span style="color: #BBB">            </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">true</span>;
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(other<span style="color: #BBB"> </span><span style="color: #333">==</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>)
+<span style="color: #BBB">            </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span><span style="color: #333">!</span>(other<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">instanceof</span><span style="color: #BBB"> </span>EqualsDemo1)<span style="color: #BBB"> </span>)
+<span style="color: #BBB">            </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">else</span>
+<span style="color: #BBB">        </span>{
+<span style="color: #BBB">            </span>EqualsDemo1<span style="color: #BBB">  </span>that<span style="color: #BBB">   </span><span style="color: #333">=</span><span style="color: #BBB"> </span>(EqualsDemo1)other<span style="color: #BBB"> </span>;
+<span style="color: #BBB">            </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">this</span>.<span style="color: #00C">alpha</span><span style="color: #BBB"> </span><span style="color: #333">!=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span><span style="color: #333">&amp;&amp;</span><span style="color: #BBB"> </span><span style="color: #333">!</span><span style="color: #080; font-weight: bold">this</span>.<span style="color: #00C">alpha</span>.<span style="color: #00C">equals</span>(<span style="color: #BBB"> </span>that.<span style="color: #00C">alpha</span><span style="color: #BBB"> </span>)<span style="color: #BBB"> </span>)
+<span style="color: #BBB">                </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">            </span><span style="color: #080; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">this</span>.<span style="color: #00C">alpha</span><span style="color: #BBB"> </span><span style="color: #333">==</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB">  </span><span style="color: #333">&amp;&amp;</span><span style="color: #BBB"> </span>that.<span style="color: #00C">alpha</span><span style="color: #BBB"> </span><span style="color: #333">!=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>)
+<span style="color: #BBB">                </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">            </span><span style="color: #080; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">this</span>.<span style="color: #00C">beta</span><span style="color: #BBB"> </span><span style="color: #333">!=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span><span style="color: #333">&amp;&amp;</span><span style="color: #BBB"> </span><span style="color: #333">!</span><span style="color: #080; font-weight: bold">this</span>.<span style="color: #00C">beta</span>.<span style="color: #00C">equals</span>(<span style="color: #BBB"> </span>that.<span style="color: #00C">beta</span><span style="color: #BBB"> </span>)<span style="color: #BBB"> </span>)
+<span style="color: #BBB">                </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">            </span><span style="color: #080; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">this</span>.<span style="color: #00C">beta</span><span style="color: #BBB"> </span><span style="color: #333">==</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span><span style="color: #333">&amp;&amp;</span><span style="color: #BBB"> </span>that.<span style="color: #00C">beta</span><span style="color: #BBB"> </span><span style="color: #333">!=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>)
+<span style="color: #BBB">                </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">            </span><span style="color: #080; font-weight: bold">else</span>
+<span style="color: #BBB">                </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">true</span>;
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">return</span><span style="color: #BBB"> </span>result;
+<span style="color: #BBB">    </span>}<span style="color: #BBB">    </span>
+}
+</pre></td></tr></table></div>
+
+<p>
+Some notes about the above code:
+</p>
+<ul>
+    <li>
+	    Lines 4-8: 
+		Since we're overriding <code>equals</code>
+		we must also override <code>hashCode</code>.
+	</li>
+    <li>
+	    Lines 14-15: 
+		Testing to see if <code>this</code> and <code>other</code>
+		are the same object
+		is not strictly necessary;
+		it's an optimization.
+	</li>
+    <li>
+	    Lines 16-19: 
+		The <code>other</code> object
+		isn't equal to this
+		if it's null,
+		or if it's the wrong class.
+	</li>
+    <li>
+	    Lines 23-24: 
+		if <code>this.alpha</code> isn't null,
+		we can ask if <code>this.alpha.equals(that.alpha)</code>.
+	</li>
+    <li>
+	    Lines 25-26: 
+		if <code>this.alpha</code> is null,
+		we can ask if <code>that.alpha</code> is also null.
+	</li>
+    <li>
+	    Lines 27-30: 
+		go through all the null checking
+		and <code>.equals</code> checking again
+		for the <code>beta</code> field.
+	</li>
+</ul>
+<p>
+A couple of more remarks about the <code>equals</code> method itself.
+You may have noticed that lines 23 through 30
+in the above example are rather painful.
+And for a class that has more than two fields
+it will get very tedious.
+Note also, however, 
+that the pattern is going to be the same
+when testing any pair of non-primitive values.
+The Java utility class <code>Objects</code>
+has an <code>equals(Object,Object)</code> method
+that executes the same testing pattern.
+Lines 23-30 of the above example
+can be changed to lines 14-17 of the sample below.
+</p>
+<p>
+A second modification we can make
+to the the <code>equals</code> method
+comes from a feature introduced in Java 15
+and made permanent in Java 16:
+<a href="https://docs.oracle.com/en/java/javase/17/language/pattern-matching-instanceof.html">
+    Pattern Matching for instanceof.
+</a>
+Using this technique, 
+lines 18-22 of the above
+can be changed to:
+</p>
+<pre style="padding-left: 2em;">else if ( other instanceof EqualsDemo2 <span style="background-color:yellow;">that</span> )
+{
+    if ( !Objects.equals( this.alpha, that.alpha ) )
+        ... </pre>
+<p>
+If the conditional in the first <code>if</code> statement is <code>true</code>,
+the identifier <code>that</code> will be cast to <code>EqualsDemo2</code>
+and will have a scope that extends to the contiguous block of code.
+The modified code,
+taken from <code>EqualsDemo2</code>, is shown below.
+</p>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tr><td><pre style="margin: 0; line-height: 125%;"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24</pre></td><td><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #080; font-weight: bold">public</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">class</span> <span style="color: #B06; font-weight: bold">EqualsDemo2</span>
+{
+<span style="color: #BBB">    </span><span style="color: #888">// ...</span>
+<span style="color: #BBB">    </span><span style="color: #555; font-weight: bold">@Override</span>
+<span style="color: #BBB">    </span><span style="color: #080; font-weight: bold">public</span><span style="color: #BBB"> </span><span style="color: #339; font-weight: bold">boolean</span><span style="color: #BBB"> </span><span style="color: #06B; font-weight: bold">equals</span>(<span style="color: #BBB"> </span>Object<span style="color: #BBB"> </span>other<span style="color: #BBB"> </span>)
+<span style="color: #BBB">    </span>{
+<span style="color: #BBB">        </span><span style="color: #339; font-weight: bold">boolean</span><span style="color: #BBB"> </span>result<span style="color: #BBB">  </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">this</span><span style="color: #BBB"> </span><span style="color: #333">==</span><span style="color: #BBB"> </span>other<span style="color: #BBB">  </span>)
+<span style="color: #BBB">            </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">true</span>;
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(other<span style="color: #BBB"> </span><span style="color: #333">==</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>)
+<span style="color: #BBB">            </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span>other<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">instanceof</span><span style="color: #BBB"> </span>EqualsDemo2<span style="color: #BBB"> </span>that<span style="color: #BBB"> </span>)
+<span style="color: #BBB">        </span>{
+<span style="color: #BBB">            </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span><span style="color: #333">!</span>Objects.<span style="color: #00C">equals</span>(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">this</span>.<span style="color: #00C">alpha</span>,<span style="color: #BBB"> </span>that.<span style="color: #00C">alpha</span><span style="color: #BBB"> </span>)<span style="color: #BBB"> </span>)
+<span style="color: #BBB">                </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">            </span><span style="color: #080; font-weight: bold">else</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">if</span><span style="color: #BBB"> </span>(<span style="color: #BBB"> </span><span style="color: #333">!</span>Objects.<span style="color: #00C">equals</span>(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">this</span>.<span style="color: #00C">beta</span>,<span style="color: #BBB"> </span>that.<span style="color: #00C">beta</span><span style="color: #BBB"> </span>)<span style="color: #BBB"> </span>)
+<span style="color: #BBB">                </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">false</span>;
+<span style="color: #BBB">            </span><span style="color: #080; font-weight: bold">else</span>
+<span style="color: #BBB">                </span>result<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">true</span>;
+<span style="color: #BBB">        </span>}
+<span style="color: #BBB">        </span><span style="color: #080; font-weight: bold">return</span><span style="color: #BBB"> </span>result;
+<span style="color: #BBB">    </span>}
+<span style="color: #BBB">    </span><span style="color: #888">// ...</span>
+}
+</pre></td></tr></table></div>
+
+<h2>JUnit Test for equals</h2>
+<p>
+The test for an <code>equals</code> method
+is tedious.
+Let's write a test for the <code>equals</code> method
+in <code>EqualsDemo1</code>.
+</p>
+<p>
+I will start by declaring two different values
+for each field in the class:
+</p>
+<pre style="padding-left: 2em;">
+@Test
+void testEquals()
+{
+    String      alpha1  = "alpha 1";
+    String      alpha2  = "alpha 2";
+    String      beta1   = "beta 1";
+    String      beta2   = "beta 2";
+    // ...
+}</pre>
+<p>
+Now declare two objects.
+Their initial values should be equal.
+</p>
+<pre style="padding-left: 2em;">
+@Test
+void testEquals()
+{
+    // ...
+    EqualsDemo1 objA    = new EqualsDemo1( alpha1, beta1 );
+    EqualsDemo1 objB    = new EqualsDemo1( alpha1, beta1 );
+    // ...
+}</pre>
+<p>
+Test one object against itself
+and verify that the result is true;
+test the object against an object
+of a different class and verify that the result is false;
+test the object against null and verify that the result is false;
+</p>
+<pre style="padding-left: 2em;">
+@Test
+void testEquals()
+{
+    // ...
+    assertEquals( objA, objA );
+    assertNotEquals( objA, new Object() );
+    assertNotEquals( objA, null );
+    // ...
+}</pre>
+<p>
+Verify that the two objects are equal,
+and that their hashcodes are equal;
+verify symmetry by reversing the order of the test.
+</p>
+<pre style="padding-left: 2em;">
+@Test
+void testEquals()
+{
+    // ...
+    assertEquals( objA, objB );
+    assertEquals( objB, objA );
+    assertEquals( objA.hashCode(), objB.hashCode() );
+    // ...
+}</pre>
+<p>
+Configure the objects as shown
+(the only difference is that
+<code>objB.alpha</code> is null),
+and verify that they are not equal:
+</p>
+<table class="data-table">
 	<tr>
 		<th></th>
-		<th>Prop A</th>
-		<th>Prop B</th>
+		<th>alpha</th>
+		<th>beta</th>
 	</tr>
 	<tr>
-		<td>obj1</td>
-		<td>null</td>
-		<td>5</td>
+		<td>objA</td>
+		<td>alpha1</td>
+		<td>beta1</td>
 	</tr>
 	<tr>
 		<td>objB</td>
-		<td>non-null</td>
-		<td>5</td>
+		<td>null</td>
+		<td>beta1</td>
 	</tr>
 </table>
+<pre style="padding-left: 2em;">
+@Test
+void testEquals()
+{
+    // ...
+    objA = new EqualsDemo1( alpha1, beta1 );
+    objB = new EqualsDemo1( null, beta1 );
+    assertNotEquals( objA, objB );
+    assertNotEquals( objB, objA );
+    // ...
+}</pre>
+<p>
+Configure the objects so that
+their only difference is in the <code>alpha</code> field,
+and verify that they are not equal:
+</p>
+<table class="data-table">
+	<tr>
+		<th></th>
+		<th>alpha</th>
+		<th>beta</th>
+	</tr>
+	<tr>
+		<td>objA</td>
+		<td>alpha1</td>
+		<td>beta1</td>
+	</tr>
+	<tr>
+		<td>objB</td>
+		<td>alpha2</td>
+		<td>beta1</td>
+	</tr>
+</table>
+<pre style="padding-left: 2em;">
+@Test
+void testEquals()
+{
+    // ...
+    objB = new EqualsDemo1( alpha2, beta1 );
+    assertNotEquals( objA, objB );
+    assertNotEquals( objB, objA );
+    // ...
+}</pre>
+<p>
+Now change <code>objA.alpha</code> to null
+and verify that they are not equal:
+</p>
+<table class="data-table">
+	<tr>
+		<th></th>
+		<th>alpha</th>
+		<th>beta</th>
+	</tr>
+	<tr>
+		<td>objA</td>
+		<td>null</td>
+		<td>beta1</td>
+	</tr>
+	<tr>
+		<td>objB</td>
+		<td>alpha2</td>
+		<td>beta1</td>
+	</tr>
+</table>
+<pre style="padding-left: 2em;">
+@Test
+void testEquals()
+{
+    // ...
+    objA = new EqualsDemo1( null, beta1 );
+    assertNotEquals( objA, objB );
+    assertNotEquals( objB, objA );
+    // ...
+}</pre>
+<p>
+Change <code>objB.alpha</code> to <code>null</code>
+and verify that they are equal
+and that their hashcodes are equal:
+</p>
+<table class="data-table">
+	<tr>
+		<th></th>
+		<th>alpha</th>
+		<th>beta</th>
+	</tr>
+	<tr>
+		<td>objA</td>
+		<td>null</td>
+		<td>beta1</td>
+	</tr>
+	<tr>
+		<td>objB</td>
+		<td>null</td>
+		<td>beta1</td>
+	</tr>
+</table>
+<pre style="padding-left: 2em;">
+@Test
+void testEquals()
+{
+    // ...
+    objA = new EqualsDemo1( null, beta1 );
+    objB = new EqualsDemo1( null, beta1 );
+    assertEquals( objA, objB );
+    assertEquals( objB, objA );
+    assertEquals( objA.hashCode(), objB.hashCode() );
+    // ...
+}</pre>
+<p>
+All the tests we did for the alpha field
+now have to be done for the <code>beta</code> field.
+The last test, probably not necessary,
+but for the sake of completeness,
+is to verify that,
+if both fields in both objects are null,
+the objects are equal.
+Here's the complete code for the equals test.
+</p>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tr><td><pre style="margin: 0; line-height: 125%;"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67</pre></td><td><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #555; font-weight: bold">@Test</span>
+<span style="color: #339; font-weight: bold">void</span><span style="color: #BBB"> </span><span style="color: #06B; font-weight: bold">testEquals</span>()
+{
+<span style="color: #BBB">    </span>String<span style="color: #BBB">      </span>alpha1<span style="color: #BBB">  </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;alpha 1&quot;</span>;
+<span style="color: #BBB">    </span>String<span style="color: #BBB">      </span>alpha2<span style="color: #BBB">  </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;alpha 2&quot;</span>;
+<span style="color: #BBB">    </span>String<span style="color: #BBB">      </span>beta1<span style="color: #BBB">   </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;beta 1&quot;</span>;
+<span style="color: #BBB">    </span>String<span style="color: #BBB">      </span>beta2<span style="color: #BBB">   </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;beta 2&quot;</span>;
+<span style="color: #BBB">    </span>EqualsDemo1<span style="color: #BBB"> </span>objA<span style="color: #BBB">    </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>EqualsDemo1<span style="color: #BBB"> </span>objB<span style="color: #BBB">    </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>Object()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span><span style="color: #888">// field alpha</span>
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objA<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha2,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objA<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objA<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span><span style="color: #888">// field beta</span>
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objA<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span>beta2<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objA<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span>beta2<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objA<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+
+<span style="color: #BBB">    </span>objA<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo1(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objB,<span style="color: #BBB"> </span>objA<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+}
+</pre></td></tr></table></div>
+<p>
+A final word about testing <code>equals/hashCode</code>.
+And I have to admit this bothers me a little
+because it goes beyond testing requirements.
+We'll begin with this observation:
+</p>
+<div style="padding-left: 2em; font-family: sans-serif;">
+    <p>
+    It is possible for two unequal objects
+    to have equal hashcodes.
+    Given a large enough data sample,
+    it is even expected.
+    <em>However...</em>
+    </p>
+    <p>
+    ... given the limited data sample
+    in an <code>equals</code> method test
+    if we find unequal objects with equal hashcodes
+    it is likely that there is something wrong
+    with the hash algorithm.
+    </p>
+</div>
+<p>
+Reliable hash algorithms are crucial in many contexts,
+so much so that many programmers choose to verify
+in an <code>equals/hashCode</code> unit test
+that unequal objects have unequal hashcodes.
+I'll finish up this discussion
+with a separate test 
+that includes this validation.
+</p>
+<!-- HTML generated using hilite.me --><div style="background: #ffffff; overflow:auto;width:auto;border:solid gray;border-width:.1em .1em .1em .8em;padding:.2em .6em;"><table><tr><td><pre style="margin: 0; line-height: 125%;"> 1
+ 2
+ 3
+ 4
+ 5
+ 6
+ 7
+ 8
+ 9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46</pre></td><td><pre style="margin: 0; line-height: 125%;"><span></span><span style="color: #555; font-weight: bold">@Test</span>
+<span style="color: #080; font-weight: bold">public</span><span style="color: #BBB"> </span><span style="color: #339; font-weight: bold">void</span><span style="color: #BBB"> </span><span style="color: #06B; font-weight: bold">verifyHash</span>()
+{
+<span style="color: #BBB">    </span><span style="color: #888">// Verify the reliability of the hashCode method.</span>
+<span style="color: #BBB">    </span><span style="color: #888">// Unequal objects are not required to have unequal hashcodes,</span>
+<span style="color: #BBB">    </span><span style="color: #888">// but, in this limited test, if they don&#39;t it may indicate</span>
+<span style="color: #BBB">    </span><span style="color: #888">// a problem with the hash algorithm and should be</span>
+<span style="color: #BBB">    </span><span style="color: #888">// investigated.</span>
+<span style="color: #BBB">    </span>String<span style="color: #BBB">      </span>alpha1<span style="color: #BBB">  </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;alpha 1&quot;</span>;
+<span style="color: #BBB">    </span>String<span style="color: #BBB">      </span>alpha2<span style="color: #BBB">  </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;alpha 2&quot;</span>;
+<span style="color: #BBB">    </span>String<span style="color: #BBB">      </span>beta1<span style="color: #BBB">   </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;beta 1&quot;</span>;
+<span style="color: #BBB">    </span>String<span style="color: #BBB">      </span>beta2<span style="color: #BBB">   </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="background-color: #FFF0F0">&quot;beta 2&quot;</span>;
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>EqualsDemo2<span style="color: #BBB"> </span>objA<span style="color: #BBB">    </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo2(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>EqualsDemo2<span style="color: #BBB"> </span>objB<span style="color: #BBB">    </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo2(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span>beta2<span style="color: #BBB"> </span>);<span style="color: #BBB">        </span>
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo2(<span style="color: #BBB"> </span>alpha2,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objB<span style="color: #BBB"> </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo2(<span style="color: #BBB"> </span>alpha2,<span style="color: #BBB"> </span>beta2<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objB<span style="color: #BBB">    </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo2(<span style="color: #BBB"> </span>alpha1,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);<span style="color: #BBB">        </span>
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objB<span style="color: #BBB">    </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo2(<span style="color: #BBB"> </span>alpha2,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);<span style="color: #BBB">        </span>
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objB<span style="color: #BBB">    </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo2(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>,<span style="color: #BBB"> </span>beta1<span style="color: #BBB"> </span>);<span style="color: #BBB">        </span>
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objB<span style="color: #BBB">    </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo2(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>,<span style="color: #BBB"> </span>beta2<span style="color: #BBB"> </span>);<span style="color: #BBB">        </span>
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>
+<span style="color: #BBB">    </span>objB<span style="color: #BBB">    </span><span style="color: #333">=</span><span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">new</span><span style="color: #BBB"> </span>EqualsDemo2(<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span>,<span style="color: #BBB"> </span><span style="color: #080; font-weight: bold">null</span><span style="color: #BBB"> </span>);<span style="color: #BBB">        </span>
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA,<span style="color: #BBB"> </span>objB<span style="color: #BBB"> </span>);
+<span style="color: #BBB">    </span>assertNotEquals(<span style="color: #BBB"> </span>objA.<span style="color: #00C">hashCode</span>(),<span style="color: #BBB"> </span>objB.<span style="color: #00C">hashCode</span>()<span style="color: #BBB"> </span>);
+}
+</pre></td></tr></table></div>
+
 
 </body>
 </html>

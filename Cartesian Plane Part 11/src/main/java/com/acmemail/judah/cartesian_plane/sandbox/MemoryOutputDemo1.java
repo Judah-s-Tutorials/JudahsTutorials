@@ -3,7 +3,6 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UncheckedIOException;
 
 /**
  * Application to demonstrate how to redirect stdout
@@ -22,31 +21,31 @@ public class MemoryOutputDemo1
      */
     public static void main(String[] args)
     {
-        PrintStream saveOut     = System.out;
+        PrintStream saveOut = System.out;
         try (
-            ByteArrayOutputStream   outStream   = 
-                new ByteArrayOutputStream();
-            PrintStream             printStream = 
-                new PrintStream( outStream );
+            ByteArrayOutputStream outStream   = new ByteArrayOutputStream();
+            PrintStream printStream = new PrintStream( outStream );
         )
         {
             System.setOut( printStream );
             
-            String  expOutput   = "A very clever message.";
+            String      expOutput   = "A very clever message.";
             System.out.println( expOutput );
+            System.setOut( saveOut );
             
-            String  actOutput   = outStream.toString();
+            String      actOutput   = outStream.toString();
             System.out.println( "Output: " + actOutput );
         }
         catch ( IOException exc )
         {
-            // Technically, this block should never be reached, but
-            // the close method of the ByteArrayOutputStream 
-            // superclass declares "throws IOException."
-            throw new UncheckedIOException( exc );
+            exc.printStackTrace();
+            System.exit( 1 );
         }
         finally
         {
+            // We performed this operation in the above try block, but
+            // an exception might have been thrown before we got to
+            // that statement, and it doesn't hurt to do it twice.
             System.setOut( saveOut );
         }
     }

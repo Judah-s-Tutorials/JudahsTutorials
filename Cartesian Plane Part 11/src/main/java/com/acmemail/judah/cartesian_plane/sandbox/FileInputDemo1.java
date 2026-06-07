@@ -11,8 +11,8 @@ import com.acmemail.judah.cartesian_plane.NotificationManager;
 import com.acmemail.judah.cartesian_plane.app.FIUtils;
 import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
+import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
-import com.acmemail.judah.cartesian_plane.input.InputParser;
 
 /**
  * Demonstration of reading equation from a file.
@@ -58,17 +58,23 @@ public class FileInputDemo1
         }
     }
     
+    /**
+     * Utilize CommandReader to read and execute lines
+     * from an equation file.
+     * 
+     * @param commandReader the CommandReader to utilize
+     */
     private static void exec( CommandReader commandReader )
     {
-        InputParser         inputParser     = new InputParser();
+        CommandProcessor    commandProcessor    = new CommandProcessor();
         commandReader.stream()
-            .forEach( inputParser::parseInput );
+            .forEach( commandProcessor::processCommand );
         
         ToPlotPointCommand  toPlotPointCommand =
             FIUtils.toPlotPointCommand( plane );
 
         plane.setStreamSupplier( () ->
-            inputParser.getEquation().xyPlot()
+            commandProcessor.getEquation().xyPlot()
             .map( toPlotPointCommand::of )
         );
         NotificationManager.INSTANCE

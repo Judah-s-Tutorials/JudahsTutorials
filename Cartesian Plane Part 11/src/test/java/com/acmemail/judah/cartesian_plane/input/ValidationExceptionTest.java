@@ -1,8 +1,8 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 
@@ -15,7 +15,8 @@ public class ValidationExceptionTest
     {
         Exception   exc = new ValidationException();
         assertNull( exc.getMessage() );
-        assertNull( exc.getCause() );    }
+        assertNull( exc.getCause() );
+    }
 
     @Test
     public void testValidationExceptionString()
@@ -23,16 +24,16 @@ public class ValidationExceptionTest
         String              str = "this is a message";
         ValidationException exc = new ValidationException( str );
         assertEquals( str, exc.getMessage() );
+        assertNull( exc.getCause() );
     }
 
     @Test
     public void testValidationExceptionThrowable()
     {
-        String              message = "Error message";
-        Exception           cause   = new IOException( message );
+        Exception           cause   = new IOException( "Error message" );
         ValidationException exc     = new ValidationException( cause );
         assertEquals( cause, exc.getCause() );
-        assertEquals( message, cause.getMessage() );
+        assertEquals( cause.toString(), exc.getMessage() );
     }
 
     @Test
@@ -42,14 +43,14 @@ public class ValidationExceptionTest
         Exception           cause   = new Exception();
         ValidationException exc     = new ValidationException( str, cause );
         assertEquals( cause, exc.getCause() );
-        assertEquals( str, cause.getMessage() );
+        assertEquals( str, exc.getMessage() );
     }
     
     @Test
-    public void misc()
+    public void testIsRuntimeException()
     {
         // Verify this exception is unchecked.
         Exception   exc     = new ValidationException();
-        assertTrue( exc instanceof RuntimeException );
+        assertInstanceOf( RuntimeException.class, exc );
     }
 }

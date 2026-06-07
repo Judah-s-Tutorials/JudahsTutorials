@@ -8,6 +8,9 @@ import com.acmemail.judah.cartesian_plane.input.Result;
  * Demonstrates how to display a dialog
  * containing an error message.
  * 
+ * @see Utils#showResultPopup(Result)
+ * @see Utils#showUsageDialog()
+ * 
  * @author Jack Straub
  */
 public class ErrorPopupDemo1

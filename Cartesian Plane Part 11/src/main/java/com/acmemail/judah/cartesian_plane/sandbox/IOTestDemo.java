@@ -21,7 +21,7 @@ import com.acmemail.judah.cartesian_plane.input.Command;
  * <li>
  *     {@linkplain IOConsumer},
  *     a functional interface based on java.util.function.Consumer
- *     with an <em>accept(BufferedReader)</em>
+ *     with an <em>accept(BufferedReader)</em> method
  *     which declares that it throws IOException.
  * </li>
  * <li>

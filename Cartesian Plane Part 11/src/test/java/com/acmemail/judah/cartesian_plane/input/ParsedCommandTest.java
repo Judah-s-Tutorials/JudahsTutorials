@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane.input;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
@@ -10,7 +11,7 @@ import org.junit.jupiter.api.Test;
 public class ParsedCommandTest
 {
     @Test
-    public void testCtorGetters()
+    public void testCtorNonNullArgs()
     {
         Command command = Command.END;
         String  cmdStr  = "command";
@@ -20,13 +21,40 @@ public class ParsedCommandTest
         assertEquals( command, parsedCommand.getCommand() );
         assertEquals( cmdStr, parsedCommand.getCommandString() );
         assertEquals( argStr, parsedCommand.getArgString() );
-        
-        // make sure null values are correctly converted to empty strings
-        parsedCommand   = new ParsedCommand( command, null, null );
+    }
+    
+    @Test
+    public void testCtorNullArgs()
+    {
+        // Null strings must be converted to empty strings
+        Command command = Command.END;
+        String  cmdStr  = "command";
+        String  argStr  = "this is an argument";
+        ParsedCommand   parsedCommand   = 
+            new ParsedCommand( command, null, null );
         assertNotNull( parsedCommand.getCommandString() );
         assertTrue( parsedCommand.getCommandString().isEmpty() );
         assertNotNull( parsedCommand.getArgString() );
         assertTrue( parsedCommand.getArgString().isEmpty() );
+        
+        parsedCommand   = new ParsedCommand( command, cmdStr, null );
+        assertEquals( cmdStr, parsedCommand.getCommandString() );
+        assertNotNull( parsedCommand.getArgString() );
+        assertTrue( parsedCommand.getArgString().isEmpty() );
+        
+        parsedCommand   = new ParsedCommand( command, null, argStr );
+        assertNotNull( parsedCommand.getCommandString() );
+        assertTrue( parsedCommand.getCommandString().isEmpty() );
+        assertEquals( argStr, parsedCommand.getArgString() );
+    }
+    
+    @Test
+    public void testCtorInvalidNullCommand()
+    {
+        // Null not permitted for command argument
+        assertThrows( NullPointerException.class, () -> 
+            new ParsedCommand( null, "", "" )
+        );
     }
     
     @Test
@@ -43,6 +71,21 @@ public class ParsedCommandTest
         assertTrue( str.contains( argStr ) );
     }
     
+    /**
+     * This method asserts that, given the test data,
+     * unequal objects have unequal hashcodes.
+     * THIS IS NOT REQUIRED BY THE JAVA SPECIFICATION.
+     * The justification for testing this is that,
+     * given a small data set,
+     * if unequal objects generate the same hashcodes
+     * there's probably something wrong 
+     * with the hashcode algorithm,
+     * and that could have significant negative effects
+     * on operations that rely on hashing.
+     * (In the context of hash tables, 
+     * for instance,
+     * it would generate a lot of collisions.)
+     */
     @Test
     public void testEqualsHash()
     {
@@ -58,21 +101,43 @@ public class ParsedCommandTest
         
         assertEquals( pCmdA, pCmdA );
         assertNotEquals( pCmdA, new Object() );
-        
         assertNotEquals( pCmdA, null );
+        
         assertEquals( pCmdA, pCmdB );
+        assertEquals( pCmdB, pCmdA );
         assertEquals( pCmdA.hashCode(), pCmdB.hashCode() );
         
         pCmdB = new ParsedCommand( cmd2, cmdStr1, argStr1 );
         assertNotEquals( pCmdA, pCmdB );
         assertNotEquals( pCmdB, pCmdA );
+        assertHashcodeInequality( pCmdA, pCmdB );
         
         pCmdB = new ParsedCommand( cmd1, cmdStr2, argStr1 );
         assertNotEquals( pCmdA, pCmdB );
         assertNotEquals( pCmdB, pCmdA );
+        assertHashcodeInequality( pCmdA, pCmdB );
         
         pCmdB = new ParsedCommand( cmd1, cmdStr1, argStr2 );
         assertNotEquals( pCmdA, pCmdB );
         assertNotEquals( pCmdB, pCmdA );
+        assertHashcodeInequality( pCmdA, pCmdB );
+        
+        // Make sure that objects created from NULL strings and
+        // objects created from empty strings test equal
+        ParsedCommand   withNulls   = new ParsedCommand( cmd1, null, null );
+        ParsedCommand   withEmpties = new ParsedCommand( cmd1, "", "" );
+        assertEquals( withNulls, withEmpties );
+        assertEquals( withNulls.hashCode(), withEmpties.hashCode() );
+    }
+    
+    private static void assertHashcodeInequality( Object objA, Object objB )
+    {
+        final String    equalsMessage   =
+            "Input objects are required to be unequal";
+        final String    hashMessage     =
+            "Unequal objects have equal hashcodes; "
+            + "hash algorithm should be investigated.";
+        assertNotEquals( objA, objB, equalsMessage );
+        assertNotEquals( objA.hashCode(), objB.hashCode(), hashMessage );
     }
 }

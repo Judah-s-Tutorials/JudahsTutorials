@@ -9,8 +9,8 @@ import com.acmemail.judah.cartesian_plane.app.FIUtils;
 import com.acmemail.judah.cartesian_plane.app.FIUtils.ToPlotPointCommand;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import com.acmemail.judah.cartesian_plane.input.Command;
+import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
-import com.acmemail.judah.cartesian_plane.input.InputParser;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
@@ -22,8 +22,8 @@ import com.acmemail.judah.cartesian_plane.input.Result;
  */
 public class DialogInputDemo1
 {
-    private static CartesianPlane       plane;
-    private static final InputParser    inputParser = new InputParser();
+    private static CartesianPlane           plane;
+    private static final CommandProcessor   commandProcessor = new CommandProcessor();
 
     
     /**
@@ -60,9 +60,10 @@ public class DialogInputDemo1
     
     private static void execCommand( ParsedCommand parsedCommand )
     {
-        Result      result  = inputParser.parseInput( parsedCommand );
+        Result      result  = 
+            commandProcessor.processCommand( parsedCommand );
         Command     command = parsedCommand.getCommand();
-        if ( !result.isSuccess() )
+        if ( !result.success() )
             Utils.showResultPopup( result );
         else if ( command == Command.YPLOT )
             plotY();
@@ -96,7 +97,7 @@ public class DialogInputDemo1
             FIUtils.toPlotPointCommand( plane );
 
         plane.setStreamSupplier( () ->
-            inputParser.getEquation().yPlot()
+            commandProcessor.getEquation().yPlot()
             .map( toPlotPointCommand::of )
         );
         NotificationManager.INSTANCE
@@ -109,7 +110,7 @@ public class DialogInputDemo1
             FIUtils.toPlotPointCommand( plane );
 
         plane.setStreamSupplier( () ->
-            inputParser.getEquation().xyPlot()
+            commandProcessor.getEquation().xyPlot()
             .map( toPlotPointCommand::of )
         );
         NotificationManager.INSTANCE

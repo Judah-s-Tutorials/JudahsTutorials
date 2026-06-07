@@ -2,11 +2,25 @@ package com.acmemail.judah.cartesian_plane.sandbox;
 
 import java.util.Objects;
 
+/**
+ * First pass at demonstrating how to write an Equals method.
+ * 
+ * @see EqualsDemo2
+ */
 public class EqualsDemo1
 {
+    /** Demonstration field. */
     private final String    alpha;
+    /** Demonstration field. */
     private final String    beta;
     
+    /**
+     * Constructor.
+     * Initializes a new instance of this class.
+     * 
+     * @param alpha initializer for the final alpha field
+     * @param beta  initializer for the final beta field
+     */
     public EqualsDemo1( String alpha, String beta )
     {
         this.alpha = alpha;
