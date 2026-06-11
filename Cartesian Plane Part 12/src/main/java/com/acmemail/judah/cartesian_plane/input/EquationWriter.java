@@ -47,7 +47,8 @@ import java.util.function.Supplier;
  *          The parameter, radius, and angle variable names
  *          (PARAM, RADIUS, THETA)
  *          are only written to the output stream
- *          if there values are non-default.
+ *          if their values are non-default.
+ *     </li>
  *     <li>
  *          The values of the intrinsic variables
  *          (x, y, t, etc.)

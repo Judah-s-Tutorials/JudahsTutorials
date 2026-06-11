@@ -304,7 +304,6 @@ public class Exp4jEquation implements Equation
     @Override
     public Result setThetaName( String theta )
     {
-        this.theta = theta;
         Objects.requireNonNull( theta, "theta" );
         Result  result  = validateName( theta );
         if ( result.success() )

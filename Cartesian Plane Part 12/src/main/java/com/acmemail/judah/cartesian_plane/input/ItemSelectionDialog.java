@@ -3,12 +3,15 @@ package com.acmemail.judah.cartesian_plane.input;
 import java.awt.BorderLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
+import java.util.Objects;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -38,7 +41,12 @@ public class ItemSelectionDialog
      */
     private final JList<Object>     jList;
 
-    /** Final status of this selection process; OK_STATUS or CANCEL_STATUS. */
+    /**
+     * Final status of this selection process;
+     * OK_STATUS or CANCEL_STATUS.
+     * Initialized to -1; has no meaningful value
+     * until the dialog is first shown.
+     */
     private int closeStatus     = -1;
     
     /**
@@ -48,7 +56,10 @@ public class ItemSelectionDialog
      * to null.
      * 
      * @param title dialog title
-     * @param items items available for selection in the dialog
+     * @param items items available for selection in the dialog;
+     *              must not be null
+     *
+     * @throws NullPointerException if items is null
      */
     public ItemSelectionDialog( String title, Object[] items )
     {
@@ -61,10 +72,14 @@ public class ItemSelectionDialog
      * 
      * @param owner the owner of this dialog
      * @param title dialog title
-     * @param items items available for selection in the dialog
+     * @param items items available for selection in the dialog;
+     *              must not be null
+     *
+     * @throws NullPointerException if items is null
      */
     public ItemSelectionDialog( Window owner, String title, Object[] items )
     {
+        Objects.requireNonNull( items, "items" );
         jList = new JList<>( items );
         if ( items.length > 0 )
             jList.setSelectedIndex( 0 );
@@ -154,19 +169,25 @@ public class ItemSelectionDialog
 
         // Define action
         Action      action      = new AbstractAction() {
+            @Override
             public void actionPerformed( ActionEvent evt ) {
                 setAndClose( CANCEL_STATUS );
             }
         };
         
-        char        esc         = '\u001b';
-        KeyStroke   keyStroke   = KeyStroke.getKeyStroke( esc );
+        KeyStroke   keyStroke   =
+            KeyStroke.getKeyStroke( KeyEvent.VK_ESCAPE, 0 );
         String      key         = "com.acmemail.judah.CancelOnEscape";
-        InputMap    inMap       = jList.getInputMap();
-        ActionMap   actMap      = jList.getActionMap();
+        // Register on the root pane with WHEN_IN_FOCUSED_WINDOW
+        // so that escape cancels the dialog no matter which
+        // component has focus.
+        JRootPane   rootPane    = dialog.getRootPane();
+        InputMap    inMap       =
+            rootPane.getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW );
+        ActionMap   actMap      = rootPane.getActionMap();
         
         // At runtime, Swing detects that the escape key has been pressed...
-        // 'esc' is used as a key to the input map to lookup an object...
+        // the keystroke is used as a key to the input map to lookup an object...
         // ... which is used as key to the action map to lookup an Action...
         // the actionPerformed method of the Action is executed
         actMap.put( key, action );

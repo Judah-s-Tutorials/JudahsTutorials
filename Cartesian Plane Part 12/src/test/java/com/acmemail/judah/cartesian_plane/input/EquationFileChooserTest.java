@@ -553,7 +553,7 @@ public class EquationFileChooserTest
      * <p>
      * Important note:
      * this method terminates successfully
-     * when the some component in the target JFileChooser
+     * when some component in the target JFileChooser
      * object receives focus,
      * but we don't know <em>which</em> component.
      * Most clients of this method
@@ -561,7 +561,7 @@ public class EquationFileChooserTest
      * that the chooser's text field
      * will have focus, 
      * which, while likely true, is not guaranteed.
-     * If this test every starts acting flaky
+     * If this test ever starts acting flaky
      * this would be one of the first places
      * to look.
      * 

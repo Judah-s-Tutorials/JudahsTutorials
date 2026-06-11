@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -151,8 +152,11 @@ public class CommandProcessor
         switch ( command )
         {
         case EQUATION:
-            if ( equation != null )
-                equation.setName( context.getArgString() );
+            parseArg( 
+                context,
+                equation::setName, 
+                equation::getName
+            );
             break;
         case XEQUALS:
             parseArg( 
@@ -280,7 +284,7 @@ public class CommandProcessor
     private void parseArg( 
         Context context,
         Function<String,Result> setter,
-        Supplier<Object> getter
+        Supplier<String> getter
     )
     {   
         String  argString   = context.getArgString();
@@ -312,12 +316,12 @@ public class CommandProcessor
     private void parseExpression( 
         Context context,
         DoubleConsumer setter, 
-        Supplier<Object> getter 
+        DoubleSupplier getter 
     )
     {
         String  argString   = context.getArgString();
         if ( argString.isEmpty() )
-            System.out.println( getter.get() );
+            System.out.println( getter.getAsDouble() );
         else
         {
             Optional<Double>    opt = equation.evaluate( argString );
@@ -541,9 +545,7 @@ public class CommandProcessor
          */
         public void mergeResult( Result result )
         {
-            // Don't add messages unless result is unsuccessful
-            if ( !result.success() )
-                errors.addAll( result.messages() );
+            errors.addAll( result.messages() );
         }
         
         /**

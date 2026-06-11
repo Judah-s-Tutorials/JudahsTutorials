@@ -17,7 +17,7 @@ import java.util.List;
  *
  * @author Jack Straub
  */
-public final record Result( boolean success, List<String> messages )
+public record Result( boolean success, List<String> messages )
 {
     /**
      * Constructor.

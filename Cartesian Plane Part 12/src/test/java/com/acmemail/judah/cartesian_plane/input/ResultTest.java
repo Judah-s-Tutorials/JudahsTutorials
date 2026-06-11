@@ -63,7 +63,7 @@ public class ResultTest
     }
 
     @Test
-    public void testGetMessages_unmodifiable()
+    public void testMessages_unmodifiable()
     {
         Result  result  = new Result( true, List.of( "a" ) );
         assertThrows(

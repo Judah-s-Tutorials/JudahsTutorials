@@ -14,6 +14,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -215,7 +216,7 @@ public class FileManagerTest
     }
 
     @Test
-    public void testSaveToInvalidFile() throws IOException
+    public void testSaveToInvalidFile()
     {
         // Try to save to a read-only file.
         Equation    defEquation = new Exp4jEquation();
@@ -528,14 +529,14 @@ public class FileManagerTest
         throws IOException
     {
         try (
-            FileWriter  fWriter  = new FileWriter( outFile );
+            FileWriter  fWriter  = new FileWriter( outFile, StandardCharsets.UTF_8 );
             PrintWriter pWriter = new PrintWriter( fWriter );
         )
         {
             list.stream().forEach( pWriter::println );
         }
     }
-    
+
     /**
      * Create a file containing binary data.
      * The created file will be non-empty;
@@ -568,13 +569,13 @@ public class FileManagerTest
         throws IOException
     {
         try (
-            FileWriter  fWriter  = new FileWriter( outFile );
+            FileWriter  fWriter  = new FileWriter( outFile, StandardCharsets.UTF_8 );
             PrintWriter pWriter = new PrintWriter( fWriter );
         )
         {
             list.stream().forEach( pWriter::println );
         }
-        
+
         // Note: This means of making a file unwritable is problematic;
         // it may be sensitive to operating environment.
         outFile.setReadOnly();

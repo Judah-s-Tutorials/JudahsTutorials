@@ -52,18 +52,6 @@ public class CommandProcessorTest
     }
     
     @Test
-    public void testParseExceptions()
-    {
-        ParsedCommand   command = getParsedCommand( Command.EQUATION );
-        assertThrows( IllegalArgumentException.class, () -> 
-            proc.processCommand( command )
-        );
-        assertThrows( NullPointerException.class, () -> 
-            proc.processCommand( null )
-        );
-    }
-    
-    @Test
     public void testNewEquationWithoutName()
     {
         Equation            oldEquation = proc.getEquation();
@@ -105,6 +93,14 @@ public class CommandProcessorTest
             proc.newEquation( null )
         );
     }
+    
+    @Test
+    public void testParseExceptions()
+    {
+        assertThrows( NullPointerException.class, () -> 
+            proc.processCommand( null )
+        );
+    }
 
     @ParameterizedTest
     @ValueSource( strings= 
@@ -133,12 +129,20 @@ public class CommandProcessorTest
     }
 
     @Test
+    public void testProcessCommandEQUATION()
+    {
+        Equation    equation    = proc.getEquation();
+        String      newName     = "newName";
+        testSetString( Command.EQUATION, newName, equation::getName );
+    }
+
+
+    @Test
     public void testProcessCommandSTART()
     {
         Equation    equation    = proc.getEquation();
         testSetDouble( Command.START, equation::getRangeStart );
     }
-
     @Test
     public void testProcessCommandEND()
     {
@@ -159,6 +163,7 @@ public class CommandProcessorTest
         Equation        equation    = proc.getEquation();
         String          newVal      = "newParamName";
         testSetString( Command.PARAM, newVal, equation::getParamName );
+        testSetBadString( Command.PARAM, "%", equation::getParamName );
     }
 
     @Test
@@ -167,6 +172,7 @@ public class CommandProcessorTest
         Equation        equation    = proc.getEquation();
         String          newVal      = "newRadiusName";
         testSetString( Command.RADIUS, newVal, equation::getRadiusName );
+        testSetBadString( Command.RADIUS, "%", equation::getRadiusName );
     }
 
     @Test
@@ -175,6 +181,7 @@ public class CommandProcessorTest
         Equation        equation    = proc.getEquation();
         String          newVal      = "newThetaName";
         testSetString( Command.THETA, newVal, equation::getThetaName );
+        testSetBadString( Command.THETA, "%", equation::getThetaName );
     }
 
     @Test
@@ -209,6 +216,30 @@ public class CommandProcessorTest
         Equation        equation    = proc.getEquation();
         String          newVal      = "a + a + a";
         testSetString( Command.TEQUALS, newVal, equation::getTExpression );
+    }
+    
+    @Test
+    public void testNoCommandString()
+    {
+        // If we pass an invalid command in a ParsedCommand object
+        // with no command string, does the error message correctly
+        // reflect the stringified ParsedCommand.Command field?
+        Command         invCommand      = Command.INVALID;
+        String          invCommandStr   = invCommand.toString();
+        ParsedCommand   parsedCommand   = 
+            new ParsedCommand( invCommand, "", "" );
+        Result          result          = 
+            proc.processCommand( parsedCommand );
+        assertFalse( result.success() );
+        List<String>    errors          = result.messages();
+        assertNotNull( errors );
+        assertFalse( errors.isEmpty() );
+        String          error           =
+            errors.stream()
+                .filter( s -> s.startsWith( invCommandStr ) )
+                .findFirst()
+                .orElse( null );
+        assertNotNull( error );
     }
 
     @ParameterizedTest
@@ -286,7 +317,7 @@ public class CommandProcessorTest
     @ParameterizedTest
     @ValueSource( strings= 
         { "p=.", "p=.,q=%", " a = 5..0 , b = ..6 , c  =  %7  ,  d = 8$  ",
-          "abc = 55.x , def = x 6, ghi = 5 5, jkl = 5 6"
+          "abc = 55.x , def = x 6, ghi = 5 5, jkl = 5 6", "M=5 =6", "="
         })
     public void testParseVarsWithBadValues( String argString )
     {
@@ -298,30 +329,6 @@ public class CommandProcessorTest
         List<String>    errors          = result.messages();
         assertNotNull( errors );
         assertFalse( errors.isEmpty() );
-    }
-    
-    @Test
-    public void testNoCommandString()
-    {
-        // If we pass an invalid command in a ParsedCommand object
-        // with no command string, does the error message correctly
-        // reflect the stringified ParsedCommand.Command field?
-        Command         invCommand      = Command.INVALID;
-        String          invCommandStr   = invCommand.toString();
-        ParsedCommand   parsedCommand   = 
-            new ParsedCommand( invCommand, "", "" );
-        Result          result          = 
-            proc.processCommand( parsedCommand );
-        assertFalse( result.success() );
-        List<String>    errors          = result.messages();
-        assertNotNull( errors );
-        assertFalse( errors.isEmpty() );
-        String          error           =
-            errors.stream()
-                .filter( s -> s.startsWith( invCommandStr ) )
-                .findFirst()
-                .orElse( null );
-        assertNotNull( error );
     }
     
     @Test
@@ -356,6 +363,14 @@ public class CommandProcessorTest
         assertTrue( result.messages().size() > 1 );
     }
     
+    @Test
+    public void testS()
+    {
+        ParsedCommand   cmd     = getParsedCommand( Command.SET, "x=5 =6" );
+        Result          result  = proc.processCommand( cmd );
+        System.out.println( result.success() );
+    }
+    
     private void testSetDouble( Command cmd, DoubleSupplier getter  )
     {
         double          oldVal          = getter.getAsDouble();
@@ -376,6 +391,22 @@ public class CommandProcessorTest
         testEmptyArg( cmd, newValStr );
     }
     
+    private void testSetBadString( 
+        Command          cmd,
+        String           badVal, 
+        Supplier<String> getter
+    )
+    {
+        String          oldVal          = getter.get();
+        assertNotEquals( oldVal, badVal );
+        
+        ParsedCommand   parsedCommand   = getParsedCommand( cmd, badVal );
+        Result          result          = 
+            proc.processCommand( parsedCommand );
+        assertFalse( result.success() );
+        assertEquals( oldVal, getter.get() );        
+    }
+    
     private void testSetString( 
         Command          cmd,
         String           newVal, 
@@ -391,21 +422,22 @@ public class CommandProcessorTest
         assertTrue( result.success() );
         assertEquals( newVal, getter.get() );        
         
-        // test invalid input
-        parsedCommand = getParsedCommand( cmd, "%invalid%" );
-        result = proc.processCommand( parsedCommand );
-        assertFalse( result.success() );
-        
-        List<String>    errors  = result.messages();
-        assertNotNull( errors );
-        assertFalse( errors.isEmpty() );
-        
         // test no-arg option
         testEmptyArg( cmd, newVal );
     }
     
-    private void 
-    testEmptyArg( Command cmd, String expOutput )
+    /**
+     * Test a Command with an empty argument.
+     * This is for Commands with two forms: 
+     * provided a non-empty argument
+     * the command sets a field;
+     * given an empty argument
+     * it prints the value of the field.
+     * 
+     * @param cmd       the command to execute without an argument
+     * @param expOutput the expected output from processing the command
+     */
+    private void testEmptyArg( Command cmd, String expOutput )
     {
         String  actOutput   = getStdout( cmd, "" );
         assertEquals( expOutput, actOutput );
@@ -448,6 +480,20 @@ public class CommandProcessorTest
         return parsedCommand;
     }
     
+    /**
+     * This method executes a command
+     * and recovers the output sent to stdout.
+     * It redirects stdout to a memory both,
+     * executes the command,
+     * recovers the output from the memory buffer,
+     * and restores stdout.
+     * The recovered output is returned.
+     * 
+     * @param cmd   the command to execute
+     * @param arg   the argument to attach to the command
+     * 
+     * @return  the output recovered during command processing
+     */
     private String getStdout( Command cmd, String arg )
     {
         ByteArrayOutputStream   baoStream   = new ByteArrayOutputStream();

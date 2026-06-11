@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -34,7 +35,7 @@ public class Exp4jEquationTest
     private Exp4jEquation   equation;
     
     @BeforeEach
-    public void beforeEach() throws Exception
+    public void beforeEach()
     {
         equation = new Exp4jEquation();
     }
@@ -123,7 +124,7 @@ public class Exp4jEquationTest
     }
 
     @Test
-    public void testSetVar()
+    public void testSetGetVar()
     {
         double  val     = 3.14;
         String  name    = "abc";
@@ -182,31 +183,74 @@ public class Exp4jEquationTest
     }
 
     @Test
-    public void testSetXExpression()
+    public void testSetGetXExpression()
     {
         double  xier    = 2;
-        String  xExpr   = xier + "t";
-        Result  result  = equation.setXExpression( xExpr );
-        assertTrue( result.success() );
-        assertEquals( xExpr, equation.getXExpression() );
-        
-        equation.setRange( 1, 1, 1 );
-        equation.xyPlot()
-            .forEach( p -> assertEquals( xier, p.getX() ) );
-        
-        String[]    invalidExprs    = { "invalid", ")(", ";" };
-        for ( String str : invalidExprs )
-        {
-            // try setting an invalid expression
-            result  = equation.setXExpression( str );
-            assertFalse( result.success() );
-            assertFalse( result.messages().isEmpty() );
-        }
+        String  expr    = xier + "t";
+        testSetGetExpression(
+            expr,
+            equation::getXExpression,
+            equation::setXExpression,
+            () -> {
+                equation.setRange( 1, 1, 1 );
+                equation.xyPlot()
+                    .forEach( p -> assertEquals( xier, p.getX() ) );
+            }
+        );
+    }
+
+    @Test
+    public void testSetGetYExpression()
+    {
+        double  xier    = 2;
+        String  expr    = xier + "x";
+        testSetGetExpression(
+            expr,
+            equation::getYExpression,
+            equation::setYExpression,
+            () -> {
+                equation.setRange( 1, 1, 1 );
+                equation.yPlot()
+                    .forEach( p -> assertEquals( xier, p.getY() ) );
+            }
+        );
+    }
+
+    @Test
+    public void testSetGetRExpression()
+    {
+        String  expr    = "0 + 1";
+        testSetGetExpression(
+            expr,
+            equation::getRExpression,
+            equation::setRExpression,
+            () -> {
+                equation.setRange( Math.PI, Math.PI, 1 );
+                equation.rPlot()
+                    .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
+            }
+        );
+    }
+
+    @Test
+    public void testSetGetTExpression()
+    {
+        String  expr    = "pi";
+        testSetGetExpression(
+            expr,
+            equation::getTExpression,
+            equation::setTExpression,
+            () -> {
+                equation.setRange( 1, 1, 1 );
+                equation.tPlot()
+                    .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
+            }
+        );
     }
 
     @ParameterizedTest
     @ValueSource(strings={ "notAVar * x", "a=%", "a^_", "x +* 3" } )
-    public void testSetExpressionGoWrong( String invExpr)
+    public void testSetExpressionGoWrong( String invExpr )
     {
         testSetExpressionGoWrong( 
             invExpr, equation::getYExpression, equation::setYExpression
@@ -228,121 +272,6 @@ public class Exp4jEquationTest
         assertThrows( NPE_CLASS, () -> equation.setYExpression( null ) );
         assertThrows( NPE_CLASS, () -> equation.setXExpression( null ) );
         assertThrows( NPE_CLASS, () -> equation.setRExpression( null ) );
-        assertThrows( NPE_CLASS, () -> equation.setTExpression( null ) );
-    }
-    
-    private void testSetExpressionGoWrong( 
-        String invExpr, 
-        Supplier<String> getter,
-        Function<String, Result> setter
-    )
-    {
-        String  oldXExpr    = getter.get();
-        Result  result      = setter.apply( invExpr );
-        assertFalse( result.success() );
-        assertEquals( oldXExpr, getter.get() );
-    }
-    
-    @Test
-    public void testSetYExpression()
-    {
-        double  xier    = 2;
-        String  yExpr   = xier + "x";
-        Result  result  = equation.setYExpression( yExpr );
-        assertTrue( result.success() );
-        assertEquals( yExpr, equation.getYExpression() );
-        
-        equation.setRange( 1, 1, 1 );
-        equation.yPlot()
-            .forEach( p -> assertEquals( xier, p.getY() ) );
-        
-        
-        String[]    invalidExprs    = { "invalid", ")(", ";" };
-        for ( String str : invalidExprs )
-        {
-            // try setting an invalid expression
-            result  = equation.setYExpression( str );
-            assertFalse( result.success() );
-            assertFalse( result.messages().isEmpty() );
-        }
-    }
-
-    @Test
-    public void testSetYExpressionGoWrong()
-    {
-        String  oldyExpr    = equation.getYExpression();
-        String  yExpr       = "undeclaredVarName * x";
-        Result  result      = equation.setYExpression( yExpr );
-        assertFalse( result.success() );
-        assertFalse( result.messages().isEmpty() );
-        assertEquals( oldyExpr, equation.getYExpression() );
-    }
-
-    @Test
-    public void testSetYExpressionNull()
-    {
-        assertThrows( NPE_CLASS, () -> equation.setYExpression( null ) );
-    }
-
-    @Test
-    public void testSetRExpression()
-    {
-        String  rExpr   = "0 + 1";
-        Result  result  = equation.setRExpression( rExpr );
-        assertTrue( result.success() );
-        assertEquals( rExpr, equation.getRExpression() );
-        
-        equation.setRange( Math.PI, Math.PI, 1 );
-        equation.rPlot()
-            .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
-    }
-
-    @Test
-    public void testSetRExpressionGoWrong()
-    {
-        String  oldRExpr    = equation.getRExpression();
-        String  rExpr       = "undeclaredVarName * x";
-        Result  result      = equation.setRExpression( rExpr );
-        assertFalse( result.success() );
-        assertEquals( oldRExpr, equation.getRExpression() );
-    }
-
-    @Test
-    public void testSetRExpressionNull()
-    {
-        assertThrows( NPE_CLASS, () -> equation.setRExpression( null ) );
-    }
-
-    @Test
-    public void testSetTExpression()
-    {
-        String  tExpr   = "pi";
-        Result  result  = equation.setTExpression( tExpr );
-        assertTrue( result.success() );
-        assertEquals( tExpr, equation.getTExpression() );
-        
-        equation.setRange( 1, 1, 1 );
-        equation.tPlot()
-            .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
-        
-        // try setting an invalid expression
-        result  = equation.setTExpression( "invalid" );
-        assertFalse( result.success() );
-    }
-
-    @Test
-    public void testSetTExpressionGoWrong()
-    {
-        String  oldTExpr    = equation.getTExpression();
-        String  tExpr       = "undeclaredVarName * x";
-        Result  result      = equation.setTExpression( tExpr );
-        assertFalse( result.success() );
-        assertEquals( oldTExpr, equation.getTExpression() );
-    }
-
-    @Test
-    public void testSetTExpressionNull()
-    {
         assertThrows( NPE_CLASS, () -> equation.setTExpression( null ) );
     }
 
@@ -525,79 +454,51 @@ public class Exp4jEquationTest
         assertThrows( VE_CLASS, () -> equation.rPlot() );
         assertThrows( VE_CLASS, () -> equation.tPlot() );
     }
-    
+
     @Test
-    public void testGetName()
+    public void testSetGetEquationName()
     {
-        String  tName   = "testName";
-        equation.setName( tName );
-        assertEquals( tName, equation.getName() );
+        String  str = "Equation Name";
+        testSetGetString( 
+            str, 
+            equation::getName, 
+            equation::setName
+        );
     }
 
     @Test
-    public void testSetParam()
+    public void testSetGetParamName()
     {
-        String  pName   = "param";
-        equation.setParamName( pName );
-        assertEquals( pName, equation.getParamName() );
-        
-        String  invalidName = "2InvalidName";
-        Result  result      = equation.setParamName( invalidName );
-        assertFalse( result.success(), invalidName );
-        assertFalse( result.messages().isEmpty(), invalidName );
-        assertEquals( pName, equation.getParamName() );
+        testSetGetString( 
+            equation::getParamName, 
+            equation::setParamName
+        );
     }
 
     @Test
-    public void testGetParam()
+    public void testSetGetRadiusName()
     {
-        String  pName   = "param";
-        equation.setParamName( pName );
-        assertEquals( pName, equation.getParamName() );
+        testSetGetString( 
+            equation::getRadiusName, 
+            equation::setRadiusName
+        );
     }
 
     @Test
-    public void testSetRadius()
+    public void testSetGetThetaName()
     {
-        String  rName   = "radius";
-        equation.setRadiusName( rName );
-        assertEquals( rName, equation.getRadiusName() );
-        
-        String  invalidName = "2InvalidName";
-        Result  result      = equation.setRadiusName( invalidName );
-        assertFalse( result.success(), invalidName );
-        assertFalse( result.messages().isEmpty(), invalidName );
-        assertEquals( rName, equation.getRadiusName() );
+        testSetGetString( 
+            equation::getThetaName, 
+            equation::setThetaName
+        );
     }
 
     @Test
-    public void testGetRadius()
+    public void testSetGetRangeProperties()
     {
-        String  rName   = "radius";
-        equation.setRadiusName( rName );
-        assertEquals( rName, equation.getRadiusName() );
-    }
-
-    @Test
-    public void testSetTheta()
-    {
-        String  tName   = "theta";
-        equation.setThetaName( tName );
-        assertEquals( tName, equation.getThetaName() );
-        
-        String  invalidName = "2InvalidName";
-        Result  result      = equation.setThetaName( invalidName );
-        assertFalse( result.success(), invalidName );
-        assertFalse( result.messages().isEmpty(), invalidName );
-        assertEquals( invalidName, equation.getThetaName() );
-    }
-
-    @Test
-    public void testGetTheta()
-    {
-        String  tName   = "theta";
-        equation.setThetaName( tName );
-        assertEquals( tName, equation.getThetaName() );
+        testSetGetVal( equation::getRangeEnd, equation::setRangeEnd );
+        testSetGetVal( equation::getRangeStart, equation::setRangeStart );
+        testSetGetVal( equation::getRangeStep, equation::setRangeStep );
     }
 
     @Test
@@ -629,30 +530,6 @@ public class Exp4jEquationTest
             range.set( equation );
             range.validate( equation );
         }
-    }
-
-    @Test
-    public void testSetRangeStart()
-    {
-        double  val     = Math.PI;
-        equation.setRangeStart( val );
-        assertEquals( val, equation.getRangeStart() );
-    }
-
-    @Test
-    public void testSetRangeEnd()
-    {
-        double  val     = Math.PI;
-        equation.setRangeEnd( val );
-        assertEquals( val, equation.getRangeEnd() );
-    }
-
-    @Test
-    public void testSetRangeStep()
-    {
-        double  val     = Math.PI;
-        equation.setRangeStep( val );
-        assertEquals( val, equation.getRangeStep() );
     }
     
     @Test
@@ -788,7 +665,7 @@ public class Exp4jEquationTest
     }
 
     @Test
-    public void testGetConstantValuePass()
+    public void testEvaluatePass()
     {
         testEvaluatePass( "2", 2 );
         testEvaluatePass( "-.1", -.1 );
@@ -819,6 +696,86 @@ public class Exp4jEquationTest
     public void testEvaluateNull()
     {
         assertThrows( NPE_CLASS, () -> equation.evaluate( null ) );
+    }
+
+    private void testSetGetString( 
+        Supplier<String> getter,
+        Function<String, Result> setter
+    )
+    {
+        final String    valStr = "ValidString";
+        final String    invStr = "2InvalidString";
+        testSetGetString( valStr, invStr, getter, setter );
+    }
+
+    private void testSetGetString( 
+        String valStr,
+        String invStr,
+        Supplier<String> getter,
+        Function<String, Result> setter
+    )
+    {
+        testSetGetString( valStr, getter, setter );
+        testSetStringGoWrong( invStr, getter, setter );
+    }
+    
+    private void testSetGetString( 
+        String str, 
+        Supplier<String> getter,
+        Function<String, Result> setter
+    )
+    {
+        Result  result      = setter.apply( str );
+        assertTrue( result.success() );
+        assertEquals( str, getter.get() );
+    }
+    
+    private void testSetStringGoWrong( 
+        String invStr, 
+        Supplier<String> getter,
+        Function<String, Result> setter
+    )
+    {
+        String  oldStr  = getter.get();
+        Result  result  = setter.apply( invStr );
+        assertFalse( result.success() );
+        assertEquals( oldStr, getter.get() );
+    }
+    
+    private void testSetGetVal( 
+        Supplier<Double> getter,
+        Consumer<Double> setter
+    )
+    {
+        double  oldVal  = getter.get();
+        double  newVal  = oldVal + 1;
+        setter.accept( newVal );
+        assertEquals( newVal, getter.get() );
+    }
+    
+    private void testSetGetExpression( 
+        String expr, 
+        Supplier<String> getter,
+        Function<String, Result> setter,
+        Runnable validator
+    )
+    {
+        Result  result  = setter.apply( expr );
+        assertTrue( result.success() );
+        assertTrue( result.messages().isEmpty() );
+        validator.run();
+    }
+    
+    private void testSetExpressionGoWrong( 
+        String invExpr, 
+        Supplier<String> getter,
+        Function<String, Result> setter
+    )
+    {
+        String  oldXExpr    = getter.get();
+        Result  result      = setter.apply( invExpr );
+        assertFalse( result.success() );
+        assertEquals( oldXExpr, getter.get() );
     }
     
     private void testEvaluatePass( String expr, double expVal )
@@ -855,7 +812,7 @@ public class Exp4jEquationTest
     
     private void validateDefaultVariables()
     {
-        final String[]  defVars = { "a", "b", "c", "x", "y", "r", "t" };
+        Set<String> defVars = Equation.INTRINSIC_VARIABLES.keySet();
         Set<String> vars    = equation.getVars().keySet();
         for ( String  var : defVars )
             assertTrue( vars.contains( var ), var );

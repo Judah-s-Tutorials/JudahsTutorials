@@ -30,7 +30,7 @@ public class CommandReaderTest
      * that accepts a command of type BufferedReader
      * and returns nothing.
      * This is essentially a Consumer<BufferedReader>
-     * except that the abstract method, accept
+     * except that the abstract method, accept,
      * may throw an IOException.
      * 
      * @author Jack Straub
@@ -66,6 +66,7 @@ public class CommandReaderTest
     {
         expResults = new ArrayList<>();
         actResults = new ArrayList<>();
+        randy.setSeed( 0 );
     }
     
     @AfterEach
@@ -84,21 +85,8 @@ public class CommandReaderTest
             Stream.of( Command.END, Command.EXIT, Command.STEP )
                 .map( c -> addExpResult( c, "" ) )
                 .map( p -> p.getCommandString() )
-                .collect( Collectors.toList() );
+                .toList();
         ioTest( input, this::testSimpleCommand );
-    }
-    
-    private void testSimpleCommand( BufferedReader reader ) 
-        throws IOException
-    {
-        CommandReader cmdReader = new CommandReader( reader );
-        ParsedCommand command   = cmdReader.nextCommand( null );
-        while ( command.getCommand() != Command.NONE )
-        {
-            actResults.add( command );
-            command = cmdReader.nextCommand( null );
-        }
-        assertEquals( expResults, actResults );
     }
     
     /**
@@ -133,7 +121,7 @@ public class CommandReaderTest
         List<String>    input   = 
             expResults.stream()
                 .map( p -> p.getCommandString() + " " + p.getArgString() )
-                .collect( Collectors.toList() );
+                .toList();
         ioTest( input, this::testSimpleCommand );
     }
     
@@ -153,7 +141,7 @@ public class CommandReaderTest
                     "   " + p.getArgString() +
                     "   "
                 )
-                .collect( Collectors.toList() );
+                .toList();
         ioTest( input, this::testSimpleCommand );
     }
     
@@ -173,6 +161,19 @@ public class CommandReaderTest
                 )
                 .collect( Collectors.toList() );
         ioTest( input, this::testEmptyLinesAndComments );
+    }
+    
+    private void testSimpleCommand( BufferedReader reader ) 
+        throws IOException
+    {
+        CommandReader cmdReader = new CommandReader( reader );
+        ParsedCommand command   = cmdReader.nextCommand( null );
+        while ( command.getCommand() != Command.NONE )
+        {
+            actResults.add( command );
+            command = cmdReader.nextCommand( null );
+        }
+        assertEquals( expResults, actResults );
     }
     
     private void testEmptyLinesAndComments( BufferedReader reader ) throws IOException
@@ -422,7 +423,8 @@ public class CommandReaderTest
     }
     
     /**
-     * Test nextCommand when it's supposed to print a prompt.
+     * Test nextCommand; incorporates tests
+     * with and without prompts.
      */
     @Test
     public void testPrompt()

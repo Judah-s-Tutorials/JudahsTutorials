@@ -18,7 +18,7 @@ import java.util.Objects;
  * 
  * @author Jack Straub
  */
-public class FileManager
+public final class FileManager
 {
     /**
      * Default constructor; not used.

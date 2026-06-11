@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.swing.JFileChooser;
@@ -16,10 +17,12 @@ import javax.swing.JOptionPane;
  * error messages are posted to a {@link MessageConsumer}.
  * By default,
  * the message consumer is a modal dialog.
- * It can be replaced by invoking 
+ * It can be replaced by invoking
  * {@link #setMessageConsumer(MessageConsumer)}.
+ *
+ * @author Jack Straub
  */
-final public class EquationFileChooser
+public final class EquationFileChooser
 {
     /** The error message to post when a parse error is encountered. */
     private static final String PARSE_ERROR     = "Parse Error";
@@ -111,7 +114,10 @@ final public class EquationFileChooser
             }
             catch ( IOException exc )
             {
-                showError( READ_ERROR, List.of( exc.getMessage() ) );
+                String  message = exc.getMessage();
+                if ( message == null )
+                    message = exc.getClass().getName();
+                showError( READ_ERROR, List.of( message ) );
             }
         }
         return status;
@@ -128,15 +134,18 @@ final public class EquationFileChooser
      * {@link MessageConsumer}
      * and false is returned.
      * 
-     * @param equation  the equation to save
-     * 
+     * @param equation  the equation to save; must not be null
+     *
      * @return  true, if the operation completes successfully
-     *      
+     *
+     * @throws NullPointerException if {@code equation} is null
+     *
      * @see MessageConsumer
      * @see #setMessageConsumer
      */
     public boolean saveDialog( Equation equation )
     {
+        Objects.requireNonNull( equation, "equation" );
         boolean result  = false;
         int     action  = chooser.showSaveDialog( parent );
         if ( action == JFileChooser.APPROVE_OPTION )
@@ -149,7 +158,10 @@ final public class EquationFileChooser
             }
             catch ( IOException exc )
             {
-                showError( WRITE_ERROR, List.of( exc.getMessage() ) );
+                String  message = exc.getMessage();
+                if ( message == null )
+                    message = exc.getClass().getName();
+                showError( WRITE_ERROR, List.of( message ) );
             }
         }
         return result;
@@ -196,11 +208,14 @@ final public class EquationFileChooser
     }
 
     /**
-     * Post a modal dialog with the given title
-     * and containing the given messages.
-     * 
+     * Post the given title and messages
+     * to the current MessageConsumer.
+     * By default this displays a modal dialog.
+     *
      * @param title     the given title
      * @param messages  the given messages
+     *
+     * @see #setMessageConsumer(MessageConsumer)
      */
     private void showError( String title, List<String> messages )
     {

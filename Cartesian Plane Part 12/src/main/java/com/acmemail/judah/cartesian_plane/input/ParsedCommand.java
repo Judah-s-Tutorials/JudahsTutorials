@@ -11,7 +11,7 @@ import java.util.Objects;
  * Exactly how the parsing is performed
  * is up to the user, 
  * however the above line of text 
- * will likely be interpreted command = 
+ * will likely be interpreted as command =
  * Command.YEQUALS, and argument = "x^2 - 1".
  * 
  * @author Jack Straub

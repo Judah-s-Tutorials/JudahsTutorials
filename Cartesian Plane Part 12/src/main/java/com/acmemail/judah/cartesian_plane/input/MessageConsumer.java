@@ -4,8 +4,10 @@ import java.awt.Component;
 
 /**
  * Functional interface which defines a message consumer.
- * It is designed to be compatible with 
- * JOptionPane.showMessageDialog( Component, String, String, int ).
+ * It is designed to be compatible with
+ * {@link javax.swing.JOptionPane#showMessageDialog(Component, Object, String, int)}.
+ *
+ * @author Jack Straub
  */
 @FunctionalInterface
 public interface MessageConsumer

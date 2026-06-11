@@ -1,6 +1,7 @@
 package com.acmemail.judah.cartesian_plane.input;
 
 import java.awt.geom.Point2D;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -79,7 +80,7 @@ public class Exp4jEquation implements Equation
     
     /**
      * Default constructor.
-     * Sets the two expressions 
+     * Sets the four expressions 
      * associated with this Equation
      * to the constant expression "1" 
      * (<em>f(x) = 1, f(y) = 1</em>).
@@ -146,10 +147,11 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public void setName( String name )
+    public Result setName( String name )
     {
         Objects.requireNonNull( name, "name" );
         this.name = name;
+        return new Result( true );
     }
     
     @Override
@@ -165,10 +167,13 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public void setVar( String name, double val )
+    public Result setVar( String name, double val )
     {
         Objects.requireNonNull( name, "name" );
-        vars.put( name, val );
+        Result  result  = validateName( name );
+        if ( result.success() )
+            vars.put( name, val );
+        return result;
     }
     
     @Override
@@ -190,7 +195,7 @@ public class Exp4jEquation implements Equation
     @Override
     public Map<String,Double> getVars()
     {
-        Map<String,Double>  varsRet = Map.copyOf( vars );
+        Map<String,Double>  varsRet = Collections.unmodifiableMap( vars );
         return varsRet;
     }
     
@@ -265,9 +270,13 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public void setParamName( String param )
+    public Result setParamName( String param )
     {
-        this.param = param;
+        Objects.requireNonNull( param, "param" );
+        Result  result  = validateName( param );
+        if ( result.success() )
+            this.param = param;
+        return result;
     }
     
     @Override
@@ -277,9 +286,13 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public void setRadiusName( String radius )
+    public Result setRadiusName( String radius )
     {
-        this.radius = radius;
+        Objects.requireNonNull( radius, "radius" );
+        Result  result  = validateName( radius );
+        if ( result.success() )
+            this.radius = radius;
+        return result;
     }
     
     @Override
@@ -289,9 +302,13 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public void setThetaName( String theta )
+    public Result setThetaName( String theta )
     {
-        this.theta = theta;
+        Objects.requireNonNull( theta, "theta" );
+        Result  result  = validateName( theta );
+        if ( result.success() )
+            this.theta = theta;
+        return result;
     }
     
     @Override
@@ -339,6 +356,41 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
+    public Result validateRange()
+    {
+        String    error    = "";
+        if ( rStep == 0 )
+        {
+            error = stepMayNotBeZero;
+        }
+        else if ( rStep < 0 )
+        {
+            if ( rStart < rEnd )
+                error = unreachableFromStart;
+        }
+        else
+        {
+            if ( rStart > rEnd )
+                error = unreachableFromStart;
+        }
+        
+        Result result  = null;
+        if ( error.isEmpty() )
+            result = new Result( true );
+        else
+        {
+            StringBuilder bldr        = new StringBuilder( error );
+            bldr.append( "start = " ).append( rStart )
+                .append( ", end = " ).append( rEnd )
+                .append( ", step = " ).append( rStep );
+            List<String>  messages    = List.of( bldr.toString() );
+            result = new Result( false, messages );
+        }
+
+        return result;
+    }
+
+    @Override
     public Result validateName( String name )
     {
         String  status  = "";
@@ -379,12 +431,12 @@ public class Exp4jEquation implements Equation
         Optional<Double>    result  = Optional.empty();
         try
         {
-            Expression          expr        =
+            Expression          expr    =
                 new ExpressionBuilder( exprStr )
                     .variables( vars.keySet() )
                     .build();
-            ValidationResult    exp4jResult = expr.validate( true );
-            if ( exp4jResult.isValid() )
+            expr.setVariables( vars );
+            if ( expr.validate( true ).isValid() )
             {
                 double  val     = expr.evaluate();
                 result = Optional.of(val );
@@ -401,16 +453,11 @@ public class Exp4jEquation implements Equation
     @Override
     public Stream<Point2D> yPlot()
     {
-        yExpr.setVariables( vars );
-        ValidationResult    result  = yExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected expression validation failure.";
-            throw new ValidationException( message );
-        }
         Result  isRangeValid    = validateRange();
         if ( !isRangeValid.success() )
             throw new ValidationException( getMessage( isRangeValid ) );
+
+        yExpr.setVariables( vars );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, x -> x <= rEnd, x -> x + rStep )
                 .mapToObj( d -> {
@@ -423,26 +470,12 @@ public class Exp4jEquation implements Equation
     @Override
     public Stream<Point2D> xyPlot()
     {
-        xExpr.setVariables( vars );
-        ValidationResult    result    = xExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected x-expression validation failure.";
-            throw new ValidationException( message );
-        }
-        
-        yExpr.setVariables( vars );
-        result = yExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected y-expression validation failure.";
-            throw new ValidationException( message );
-        }
-        
         Result  isRangeValid    = validateRange();
         if ( !isRangeValid.success() )
             throw new ValidationException( getMessage( isRangeValid ) );
 
+        xExpr.setVariables( vars );
+        yExpr.setVariables( vars );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
                 .mapToObj( t -> { 
@@ -459,17 +492,11 @@ public class Exp4jEquation implements Equation
     @Override
     public Stream<Point2D> rPlot()
     {
-        rExpr.setVariables( vars );
-        ValidationResult    result    = rExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected r-expression validation failure.";
-            throw new ValidationException( message );
-        }
         Result  isRangeValid    = validateRange();
         if ( !isRangeValid.success() )
             throw new ValidationException( getMessage( isRangeValid ) );
 
+        rExpr.setVariables( vars );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
                 .peek( t -> rExpr.setVariable( theta, t ) )
@@ -481,17 +508,11 @@ public class Exp4jEquation implements Equation
     @Override
     public Stream<Point2D> tPlot()
     {
-        tExpr.setVariables( vars );
-        ValidationResult    result    = tExpr.validate( true );
-        if ( !result.isValid() )
-        {
-            String  message = "Unexpected t-expression validation failure.";
-            throw new ValidationException( message );
-        }
         Result  isRangeValid    = validateRange();
         if ( !isRangeValid.success() )
             throw new ValidationException( getMessage( isRangeValid ) );
 
+        tExpr.setVariables( vars );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r + rStep )
                 .peek( r -> tExpr.setVariable( radius, r ) )
@@ -535,12 +556,13 @@ public class Exp4jEquation implements Equation
             Expression expr = new ExpressionBuilder( exprStr )
                 .variables( vars.keySet() )
                 .build();
-            ValidationResult    exp4jResult = expr.validate( false );
-            boolean             validExpr   = exp4jResult.isValid();
+            expr.setVariables( vars );
+            ValidationResult    expr4jResult = expr.validate( false );
+            boolean             validExpr    = expr4jResult.isValid();
             if ( validExpr )
                 destination.accept( expr );
             
-            result = new Result( validExpr, exp4jResult.getErrors() );
+            result = new Result( validExpr, expr4jResult.getErrors() );
         }
         catch ( Exception exc )
         {
@@ -555,41 +577,6 @@ public class Exp4jEquation implements Equation
                 );
             result = new Result( false, list );
         }
-        return result;
-    }
-    
-    @Override
-    public Result validateRange()
-    {
-        String    error    = "";
-        if ( rStep == 0 )
-        {
-            error = stepMayNotBeZero;
-        }
-        else if ( rStep < 0 )
-        {
-            if ( rStart < rEnd )
-                error = unreachableFromStart;
-        }
-        else
-        {
-            if ( rStart > rEnd )
-                error = "Range end unreachable from start: ";
-        }
-        
-        Result result  = null;
-        if ( error.isEmpty() )
-            result = new Result( true );
-        else
-        {
-            StringBuilder bldr        = new StringBuilder( error );
-            bldr.append( "start = " ).append( rStart )
-                .append( ", end = " ).append( rEnd )
-                .append( ", step = " ).append( rStep );
-            List<String>  messages    = List.of( bldr.toString() );
-            result = new Result( false, messages );
-        }
-
         return result;
     }
     
@@ -654,7 +641,7 @@ public class Exp4jEquation implements Equation
      */
     private static Result getResult( boolean status, String message )
     {
-        String  workMessage = message == null ? "" : message.trim();
+        String  workMessage = message.trim();// == null ? "" : message.trim();
         Result  result      = workMessage.isEmpty() ?
             new Result( status ) : 
             new Result( status, List.of( workMessage ) );

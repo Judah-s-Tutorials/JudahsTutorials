@@ -54,7 +54,7 @@
  * The input format allows multiple variables
  * to be declared with a single SET statement;
  * it also allows multiple SET statements,
- * so each of the following examples are equivalent:
+ * so the following examples are equivalent:
  * </p>
  * <pre> # Example 1
  * Equation example1
@@ -66,7 +66,7 @@
  * SET c=4, d=5
  * 
  * # Example 3
- * Equation example2
+ * Equation example3
  * SET a=2
  * SET b=3
  * SET c=4
@@ -82,11 +82,22 @@
  * {@link com.acmemail.judah.cartesian_plane.input.Equation} via
  * {@link com.acmemail.judah.cartesian_plane.input.CommandProcessor}.
  * </p>
+ * <p>
+ * At the file level,
+ * {@link com.acmemail.judah.cartesian_plane.input.FileManager}
+ * provides {@code load} and {@code save} operations
+ * that encapsulate this pipeline;
+ * saving is performed via
+ * {@link com.acmemail.judah.cartesian_plane.input.EquationWriter},
+ * which produces output conforming to the format described above.
+ * </p>
  *
  * @author Jack Straub
  *
  * @see com.acmemail.judah.cartesian_plane.input.Command
  * @see com.acmemail.judah.cartesian_plane.input.CommandReader
  * @see com.acmemail.judah.cartesian_plane.input.CommandProcessor
+ * @see com.acmemail.judah.cartesian_plane.input.FileManager
+ * @see com.acmemail.judah.cartesian_plane.input.EquationWriter
  */
 package com.acmemail.judah.cartesian_plane.input;
