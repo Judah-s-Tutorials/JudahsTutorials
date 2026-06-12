@@ -85,7 +85,7 @@ class InputParserExp4jTest
 
     @ParameterizedTest
     @ValueSource( strings= 
-        {"EXIT","NONE","YPLOT","XYPLOT","RPLOT","TPLOT","OPEN","SAVE","LOAD","SELECT"}
+        {"EXIT","NONE","YPLOT","XYPLOT","RPLOT","TPLOT","OPEN","SAVE","SELECT"}
     )
     public void testParseInputNOOP( String strCommand )
     {

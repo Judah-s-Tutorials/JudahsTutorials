@@ -88,8 +88,6 @@ public class CommandExecutor
                 plotT();
             else if ( command == Command.OPEN )
                 open( parsedCommand.getArgString() );
-            else if ( command == Command.LOAD )
-                load( parsedCommand.getArgString() );
             else if ( command == Command.SELECT )
                 select( parsedCommand.getArgString() );
             else
@@ -228,12 +226,7 @@ public class CommandExecutor
         if ( equation != null )
             inputParser = new InputParser( equation );
     }
-    
-    private void load( String fileName )
-    {
-        EquationMap.parseEquationFiles();
-    }
-    
+
     private void select( String name )
     {
         Equation    equation    = EquationMap.getEquation();

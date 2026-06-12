@@ -148,7 +148,6 @@ public class InputParser
         case TPLOT:
         case OPEN:
         case SAVE:
-        case LOAD:
         case SELECT:
             // ignore these
             break;
