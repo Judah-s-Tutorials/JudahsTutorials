@@ -9,17 +9,14 @@ import java.util.stream.Stream;
  * This interface describes the facilities necessary
  * to manage an <em>equation</em>.
  * An <em>equation</em> is a set of resources
- * that define a simple function (<code>y = f(x)</code>),
- * a parametric equation (<code>(x,y) = f(t)</code>),
- * or a polar equation (<code>r = acos(n&Theta;)</code>, 
- * <code>&Theta; = atan( x/y ))</code>.
+ * that define a simple function (<code>y = f(x)</code>)
+ * or a parametric equation (<code>(x,y) = f(t)</code>).
  * These resources include:
  * <ul>
  *      <li>
- *          Expressions for the calculation 
- *          of y values in a simple function,
- *          (x,y) values in a parametric equation,
- *          and radius values in a polar equation;
+ *          Expressions for the calculation
+ *          of y values in a simple function
+ *          and (x,y) values in a parametric equation;
  *      </li>
  *      <li>The declaration of variables used in the expression(s); and</li>
  *      <li>A range for producing a plot.</li>
@@ -50,8 +47,6 @@ import java.util.stream.Stream;
  * Methods that establish expressions,
  * {@linkplain #setYExpression(String)},
  * {@linkplain #setXExpression(String)},
- * {@linkplain #setRExpression(String)},
- * {@linkplain #setTExpression(String)},
  * throw NullPointerExceptions for null input.
  * They validate the target expression 
  * before setting it, and,
@@ -64,8 +59,6 @@ import java.util.stream.Stream;
  * Methods that generate streams from equations, 
  * {@linkplain #yPlot()},
  * {@linkplain #xyPlot()},
- * {@linkplain #rPlot()},
- * {@linkplain #tPlot()},
  * expect equations to be pre-validated,
  * and throw a ValidationException
  * if an invalid component of the equation
@@ -86,14 +79,10 @@ public interface Equation
      * An Equation implementation may have more default
      * command/string pairs, but they must support these.
      */
-    Map<Command,String> DEF_STRINGS = Map.of( 
+    Map<Command,String> DEF_STRINGS = Map.of(
         Command.XEQUALS, "1",
         Command.YEQUALS, "1",
-        Command.REQUALS, "1",
-        Command.TEQUALS, "1",
-        Command.PARAM, "t",
-        Command.RADIUS, "r",
-        Command.THETA, "t" 
+        Command.PARAM, "t"
     );
     
     /**  
@@ -233,44 +222,6 @@ public interface Equation
     Result setYExpression( String exprStr );
 
     /**
-     * Parses the given expression used to derive
-     * the theta-coordinate of a point 
-     * in polar coordinates.
-     * If a parsing error occurs,
-     * a Result object is returned
-     * containing a description of the error,
-     * and a <em>success</em> value of false.
-     * Otherwise the returned Result object
-     * will have a <em>success</em> value of true.
-     * 
-     * @param exprStr   the given expression, must be non-null
-     * 
-     * @return  the status of the operation
-     * 
-     * @throws  NullPointerException if exprStr is null
-     */
-    Result setTExpression( String exprStr );
-
-    /**
-     * Parses the given expression used to derive
-     * the radius-coordinate of a point 
-     * in polar coordinates.
-     * If a parsing error occurs,
-     * a Result object is returned
-     * containing a description of the error,
-     * and a <em>success</em> value of false.
-     * Otherwise the returned Result object
-     * will have a <em>success</em> value of true.
-     * 
-     * @param exprStr   the given expression, must be non-null
-     * 
-     * @return  the status of the operation
-     * 
-     * @throws  NullPointerException if exprStr is null
-     */
-    Result setRExpression( String exprStr );
-
-    /**
      * Gets the currently set x-expression.
      * Never returns null.
      * 
@@ -285,22 +236,6 @@ public interface Equation
      * @return  the currently set y-expression
      */
     String getYExpression();
-
-    /**
-     * Gets the currently set t-expression.
-     * Never returns null.
-     * 
-     * @return  the currently set t-expression
-     */
-    String getTExpression();
-
-    /**
-     * Gets the currently set r-expression.
-     * Never returns null.
-     * 
-     * @return  the currently set r-expression
-     */
-    String getRExpression();
 
     /**
      * Gets the name of the parameter
@@ -347,80 +282,6 @@ public interface Equation
      * @throws ValidationException if the equation is invalid
      */
     Stream<Point2D> xyPlot();
-
-    /**
-     * Iterates over the encapsulated range,
-     * generating the (x,y) coordinates 
-     * derived from an equation
-     * expressed in polar coordinates,
-     * <code>r = f(t)</code>.
-     * <em>Theta</em> is used
-     * to traverse the iteration range.
-     * 
-     * @return a stream of (x,y) coordinates derived from an equation
-     * 
-     * @throws ValidationException if the equation is invalid
-     */
-    Stream<Point2D> rPlot();
-
-    /**
-     * Iterates over the encapsulated range,
-     * generating the (x,y) coordinates 
-     * derived from an equation
-     * expressed in polar coordinates,
-     * <code>t = f(r)</code>.
-     * <em>Radius</em> is used
-     * to traverse the iteration range.
-     * 
-     * @return a stream of (x,y) coordinates derived from an equation
-     * 
-     * @throws ValidationException if the equation is invalid
-     */
-    Stream<Point2D> tPlot();
-
-    /**
-     * Gets the name of the radius variable
-     * used in a polar equation.
-     * 
-     * @return the name of the radius
-     */
-    String getRadiusName();
-
-    /**
-     * Sets the name of the radius variable
-     * in a polar equation.
-     * If it's not a valid variable name
-     * an unsuccessful Result is returned.
-     * 
-     * @param radius the name of the radius; must not be null
-     * 
-     * @return  the result of the operation
-     * 
-     * @throws NullPointerException if radius is null
-     */
-    Result setRadiusName( String radius );
-
-    /**
-     * Gets the name of the angle variable
-     * used in a polar equation.
-     * 
-     * @return the name of the angle variable
-     */
-    String getThetaName();
-
-    /**
-     * Sets the name of the angle variable
-     * in a polar equation.
-     * If it's not a valid variable name
-     * an unsuccessful Result is returned.
-     * 
-     * @param theta the name of the angle variable; must not be null
-     * 
-     * @return  the result of the operation
-     * 
-     * @throws NullPointerException if theta is null
-     */
-    Result setThetaName( String theta );
 
     /**
      * Establishes the iteration range for this Equation.

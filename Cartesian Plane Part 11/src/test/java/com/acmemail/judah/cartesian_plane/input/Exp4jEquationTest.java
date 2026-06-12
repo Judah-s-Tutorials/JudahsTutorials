@@ -18,7 +18,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
-import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -216,38 +215,6 @@ public class Exp4jEquationTest
         );
     }
 
-    @Test
-    public void testSetGetRExpression()
-    {
-        String  expr    = "0 + 1";
-        testSetGetExpression(
-            expr,
-            equation::getRExpression,
-            equation::setRExpression,
-            () -> {
-                equation.setRange( Math.PI, Math.PI, 1 );
-                equation.rPlot()
-                    .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
-            }
-        );
-    }
-
-    @Test
-    public void testSetGetTExpression()
-    {
-        String  expr    = "pi";
-        testSetGetExpression(
-            expr,
-            equation::getTExpression,
-            equation::setTExpression,
-            () -> {
-                equation.setRange( 1, 1, 1 );
-                equation.tPlot()
-                    .forEach( p -> assertEquals( -1, p.getX(), .0001 ) );
-            }
-        );
-    }
-
     @ParameterizedTest
     @ValueSource(strings={ "notAVar * x", "a=%", "a^_", "x +* 3" } )
     public void testSetExpressionGoWrong( String invExpr )
@@ -255,14 +222,8 @@ public class Exp4jEquationTest
         testSetExpressionGoWrong( 
             invExpr, equation::getYExpression, equation::setYExpression
         );
-        testSetExpressionGoWrong( 
+        testSetExpressionGoWrong(
             invExpr, equation::getXExpression, equation::setXExpression
-        );
-        testSetExpressionGoWrong( 
-            invExpr, equation::getRExpression, equation::setRExpression
-        );
-        testSetExpressionGoWrong( 
-            invExpr, equation::getTExpression, equation::setTExpression
         );
     }
 
@@ -271,8 +232,6 @@ public class Exp4jEquationTest
     {
         assertThrows( NPE_CLASS, () -> equation.setYExpression( null ) );
         assertThrows( NPE_CLASS, () -> equation.setXExpression( null ) );
-        assertThrows( NPE_CLASS, () -> equation.setRExpression( null ) );
-        assertThrows( NPE_CLASS, () -> equation.setTExpression( null ) );
     }
 
     @Test
@@ -352,107 +311,14 @@ public class Exp4jEquationTest
     }
 
     @Test
-    public void testRPlot()
-    {
-        // 4 points where unit circle intersects x/y axes
-        List<Point2D>   expPoints   = List.of( 
-            new Point2D.Double( 1, 0 ), 
-            new Point2D.Double( 0, 1 ), 
-            new Point2D.Double( -1, 0 ), 
-            new Point2D.Double( 0, -1 )
-        );
-        
-        equation.setRExpression( "1" );
-        double  start   = 0;
-        double  end     = 3 * Math.PI / 2;
-        double  step    = Math.PI / 2;
-        
-        equation.setRange( start, end, step );
-        List<Point2D>   actPoints   =
-            equation.rPlot()
-            .collect( Collectors.toList() );
-        
-        // Test equality after allowing for rounding errors
-        double  epsilon = .000001;
-        assertEquals( expPoints.size(), actPoints.size() );
-        IntStream.range( 0, 4 ).forEach( i -> {
-            Point2D ePoint  = expPoints.get( i );
-            Point2D aPoint  = actPoints.get( i );
-            assertEquals( ePoint.getX(), aPoint.getX(), epsilon, "" + i );
-            assertEquals( ePoint.getY(), aPoint.getY(), epsilon, "" + i );
-        });
-    }
-
-    @Test
-    public void testRPlotGoWrong()
-    {
-        String  varName = "varName";
-        String  rExpr   = varName + " + x";
-        equation.setVar( varName, 0 );
-        equation.setRExpression( rExpr );
-        equation.setRange( 0, 10, -1 );
-        assertThrows( VE_CLASS, () -> equation.rPlot() );
-    }
-
-    @Test
-    public void testTPlot()
-    {
-        double  theta   = Math.PI / 2;
-        List<Point2D>   expPoints   = 
-            IntStream.range( 0, 4 )
-            .mapToObj( r -> 
-                new Point2D.Double(
-                        r * Math.cos( theta ),
-                        r * Math.sin( theta )
-                ))
-            .collect( Collectors.toList() );
-        
-        equation.setTExpression( "pi / 2" );
-        double  start   = 0;
-        double  end     = 3;
-        double  step    = 1;
-        
-        equation.setRange( start, end, step );
-        List<Point2D>   actPoints   =
-            equation.tPlot()
-            .collect( Collectors.toList() );
-        
-        // Test equality after allowing for rounding errors
-        double  epsilon = .000001;
-        assertEquals( expPoints.size(), actPoints.size() );
-        IntStream.range( 0, 4 ).forEach( i -> {
-            Point2D ePoint  = expPoints.get( i );
-            Point2D aPoint  = actPoints.get( i );
-            assertEquals( ePoint.getX(), aPoint.getX(), epsilon, "" + i );
-            assertEquals( ePoint.getY(), aPoint.getY(), epsilon, "" + i );
-        });
-    }
-
-    @Test
-    public void testTPlotGoWrong()
-    {
-        String  varName = "varName";
-        String  tExpr   = varName + " + x";
-        equation.setVar( varName, 0 );
-        equation.setTExpression( tExpr );
-        equation.setRange( 0, 10, -1 );
-        
-        assertThrows( VE_CLASS, () -> equation.tPlot() );
-    }
-    
-    @Test
     public void testPlotInvalidRange()
     {
         assertDoesNotThrow( () -> equation.yPlot() );
         assertDoesNotThrow( () -> equation.xyPlot() );
-        assertDoesNotThrow( () -> equation.rPlot() );
-        assertDoesNotThrow( () -> equation.tPlot() );
-        
+
         equation.setRange( 1, -1, 1 );
         assertThrows( VE_CLASS, () -> equation.yPlot() );
         assertThrows( VE_CLASS, () -> equation.xyPlot() );
-        assertThrows( VE_CLASS, () -> equation.rPlot() );
-        assertThrows( VE_CLASS, () -> equation.tPlot() );
     }
 
     @Test
@@ -472,24 +338,6 @@ public class Exp4jEquationTest
         testSetGetString( 
             equation::getParamName, 
             equation::setParamName
-        );
-    }
-
-    @Test
-    public void testSetGetRadiusName()
-    {
-        testSetGetString( 
-            equation::getRadiusName, 
-            equation::setRadiusName
-        );
-    }
-
-    @Test
-    public void testSetGetThetaName()
-    {
-        testSetGetString( 
-            equation::getThetaName, 
-            equation::setThetaName
         );
     }
 
@@ -578,8 +426,6 @@ public class Exp4jEquationTest
             range.set( equation );
             assertThrows( clazz, () -> equation.yPlot(), range.toString() );
             assertThrows( clazz, () -> equation.xyPlot(), range.toString() );
-            assertThrows( clazz, () -> equation.rPlot(), range.toString() );
-            assertThrows( clazz, () -> equation.tPlot(), range.toString() );
         }
     }
 

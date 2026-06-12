@@ -12,8 +12,6 @@ import java.util.function.Consumer;
 import java.util.stream.DoubleStream;
 import java.util.stream.Stream;
 
-import com.acmemail.judah.cartesian_plane.math.Polar;
-
 import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
 import net.objecthunter.exp4j.ValidationResult;
@@ -31,11 +29,7 @@ import net.objecthunter.exp4j.ValidationResult;
  * <em>x, y, a, b, c, r</em> and <em>t</em>.
  * The default parameter name
  * for parametric equations is <em>t</em>.
- * The default radius name
- * for polar equations is <em>r</em>.
- * The default angle name
- * for polar equations is <em>t</em>.
- * 
+ *
  * @author Jack Straub
  * 
  * @see Equation
@@ -68,25 +62,19 @@ public class Exp4jEquation implements Equation
     private double                      rStep       = .05;
     private String                      xExprStr    = "1";
     private String                      yExprStr    = "1";
-    private String                      tExprStr    = "1";
-    private String                      rExprStr    = "1";
     private String                      param       = "t";
-    private String                      radius      = "r";
-    private String                      theta       = "t";
     private Expression                  xExpr       = null;
     private Expression                  yExpr       = null;
-    private Expression                  tExpr       = null;
-    private Expression                  rExpr       = null;
     
     /**
      * Default constructor.
-     * Sets the four expressions 
+     * Sets the two expressions
      * associated with this Equation
-     * to the constant expression "1" 
+     * to the constant expression "1"
      * (<em>f(x) = 1, f(y) = 1</em>).
      * A default set of variables
      * is registered; see {@linkplain Exp4jEquation}.
-     * 
+     *
      * @see Exp4jEquation
      */
     public Exp4jEquation()
@@ -94,8 +82,6 @@ public class Exp4jEquation implements Equation
         initIntrinsicVariables();
         setXExpression( xExprStr );
         setYExpression( yExprStr );
-        setTExpression( tExprStr );
-        setRExpression( rExprStr );
     }
     
     /**
@@ -117,10 +103,8 @@ public class Exp4jEquation implements Equation
         initIntrinsicVariables();
         setXExpression( xExprStr );
         setYExpression( expr );
-        setTExpression( tExprStr );
-        setRExpression( rExprStr );
     }
-    
+
     /**
      * Constructor.
      * Establishes the set of variables
@@ -142,8 +126,6 @@ public class Exp4jEquation implements Equation
         initIntrinsicVariables();
         setXExpression( xExprStr );
         setYExpression( expr );
-        setTExpression( tExprStr );
-        setRExpression( rExprStr );
     }
     
     @Override
@@ -210,26 +192,6 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public Result setTExpression( String exprStr )
-    {
-        Objects.requireNonNull( exprStr, "exprStr" );
-        Result    result  = validateExpr( exprStr, e -> tExpr = e );
-        if ( result.success() )
-            this.tExprStr = exprStr;
-        return result;
-    }
-    
-    @Override
-    public Result setRExpression( String exprStr )
-    {
-        Objects.requireNonNull( exprStr, "exprStr" );
-        Result    result  = validateExpr( exprStr, e -> rExpr = e );
-        if ( result.success() )
-            this.rExprStr = exprStr;
-        return result;
-    }
-    
-    @Override
     public Result setYExpression( String exprStr )
     {
         Objects.requireNonNull( exprStr, "exprStr" );
@@ -252,18 +214,6 @@ public class Exp4jEquation implements Equation
     }
     
     @Override
-    public String getTExpression()
-    {
-        return tExprStr;
-    }
-    
-    @Override
-    public String getRExpression()
-    {
-        return rExprStr;
-    }
-    
-    @Override
     public String getParamName()
     {
         return param;
@@ -276,38 +226,6 @@ public class Exp4jEquation implements Equation
         Result  result  = validateName( param );
         if ( result.success() )
             this.param = param;
-        return result;
-    }
-    
-    @Override
-    public String getRadiusName()
-    {
-        return radius;
-    }
-    
-    @Override
-    public Result setRadiusName( String radius )
-    {
-        Objects.requireNonNull( radius, "radius" );
-        Result  result  = validateName( radius );
-        if ( result.success() )
-            this.radius = radius;
-        return result;
-    }
-    
-    @Override
-    public String getThetaName()
-    {
-        return theta;
-    }
-    
-    @Override
-    public Result setThetaName( String theta )
-    {
-        Objects.requireNonNull( theta, "theta" );
-        Result  result  = validateName( theta );
-        if ( result.success() )
-            this.theta = theta;
         return result;
     }
     
@@ -489,38 +407,6 @@ public class Exp4jEquation implements Equation
         return stream;
     }
     
-    @Override
-    public Stream<Point2D> rPlot()
-    {
-        Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.success() )
-            throw new ValidationException( getMessage( isRangeValid ) );
-
-        rExpr.setVariables( vars );
-        Stream<Point2D> stream  =
-            DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
-                .peek( t -> rExpr.setVariable( theta, t ) )
-                .mapToObj( t -> Polar.ofRTheta( rExpr.evaluate(), t ) )
-                .map( Polar::toPoint );
-        return stream;
-    }
-    
-    @Override
-    public Stream<Point2D> tPlot()
-    {
-        Result  isRangeValid    = validateRange();
-        if ( !isRangeValid.success() )
-            throw new ValidationException( getMessage( isRangeValid ) );
-
-        tExpr.setVariables( vars );
-        Stream<Point2D> stream  =
-            DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r + rStep )
-                .peek( r -> tExpr.setVariable( radius, r ) )
-                .mapToObj( r -> Polar.ofRTheta( r, tExpr.evaluate() ) )
-                .map( Polar::toPoint );
-        return stream;
-    }
-
     /**
      * Generate and validate an exp4j Expression
      * from a given string.

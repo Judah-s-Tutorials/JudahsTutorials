@@ -19,13 +19,11 @@ import java.util.stream.Stream;
  * a constant in the Command enum, 
  * and argument may be empty.
  * <p>
- * Four command shortcuts are recognized:
+ * Two command shortcuts are recognized:
  * </p>
  * <ul>
  * <li>"x=argument" is a shortcut for XEQUALS argument</li>
  * <li>"y=argument" is a shortcut for YEQUALS argument</li>
- * <li>"r=argument" is a shortcut for REQUALS argument</li>
- * <li>"t=argument" is a shortcut for TEQUALS argument</li>
  * </ul>
  * <p>
  * Shortcut processing is case-insensitive;
@@ -55,8 +53,6 @@ public class CommandReader
     {
         new Shortcut( "x=", Command.XEQUALS ),
         new Shortcut( "y=", Command.YEQUALS ),
-        new Shortcut( "r=", Command.REQUALS ),
-        new Shortcut( "t=", Command.TEQUALS ),
     };
     
     /** Source of the command line input. */

@@ -104,7 +104,7 @@ public class CommandProcessorTest
 
     @ParameterizedTest
     @ValueSource( strings= 
-        {"EXIT","NONE","YPLOT","XYPLOT","RPLOT","TPLOT","SELECT","OPEN","SAVE" } 
+        {"EXIT","NONE","YPLOT","XYPLOT","SELECT","OPEN","SAVE" }
     )
     public void testProcessCommandNOOP( String strCommand )
     {
@@ -167,24 +167,6 @@ public class CommandProcessorTest
     }
 
     @Test
-    public void testProcessCommandRADIUS()
-    {
-        Equation        equation    = proc.getEquation();
-        String          newVal      = "newRadiusName";
-        testSetString( Command.RADIUS, newVal, equation::getRadiusName );
-        testSetBadString( Command.RADIUS, "%", equation::getRadiusName );
-    }
-
-    @Test
-    public void testProcessCommandTHETA()
-    {
-        Equation        equation    = proc.getEquation();
-        String          newVal      = "newThetaName";
-        testSetString( Command.THETA, newVal, equation::getThetaName );
-        testSetBadString( Command.THETA, "%", equation::getThetaName );
-    }
-
-    @Test
     public void testProcessCommandXEQUALS()
     {
         Equation    equation    = proc.getEquation();
@@ -200,22 +182,6 @@ public class CommandProcessorTest
         String      oldVal      = equation.getYExpression();
         String      newVal      = oldVal + "*4";
         testSetString( Command.YEQUALS, newVal, equation::getYExpression );
-    }
-    
-    @Test
-    public void testProcessCommandREQUALS()
-    {
-        Equation        equation    = proc.getEquation();
-        String          newVal      = "a + a + a";
-        testSetString( Command.REQUALS, newVal, equation::getRExpression );
-    }
-    
-    @Test
-    public void testProcessCommandTEQUALS()
-    {
-        Equation        equation    = proc.getEquation();
-        String          newVal      = "a + a + a";
-        testSetString( Command.TEQUALS, newVal, equation::getTExpression );
     }
     
     @Test

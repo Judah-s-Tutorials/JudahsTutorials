@@ -38,8 +38,6 @@ import java.util.function.Supplier;
  * <ul>
  * <li>YPLOT</li>
  * <li>XYPLOT</li>
- * <li>RPLOT</li>
- * <li>TPLOT</li>
  * <li>SELECT</li>
  * </ul>
  * 
@@ -172,20 +170,6 @@ public class CommandProcessor
                 equation::getYExpression 
             );
             break;
-        case REQUALS:
-            parseArg( 
-                context,
-                equation::setRExpression, 
-                equation::getRExpression
-            );
-            break;
-        case TEQUALS:
-            parseArg( 
-                context,
-                equation::setTExpression, 
-                equation::getTExpression
-            );
-            break;
         case SET:
             parseVars( context );
             break;
@@ -210,20 +194,6 @@ public class CommandProcessor
                 equation::getRangeStep
             );
             break;
-        case RADIUS:
-            setName( 
-                context,
-                equation::setRadiusName, 
-                equation::getRadiusName 
-            );
-            break;
-        case THETA:
-            setName( 
-                context,
-                equation::setThetaName, 
-                equation::getThetaName 
-            );
-            break;
         case PARAM:
             setName( 
                 context,
@@ -238,8 +208,6 @@ public class CommandProcessor
         case NONE:
         case YPLOT:
         case XYPLOT:
-        case RPLOT:
-        case TPLOT:
         case SELECT:
         case OPEN:
         case SAVE:
@@ -437,7 +405,7 @@ public class CommandProcessor
     
     /**
      * Sets one of the parameter names
-     * for a parametric or polar equation 
+     * for a parametric equation
      * to the current argument.
      * If the argument is empty
      * the current name of the parameter

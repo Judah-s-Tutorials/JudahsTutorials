@@ -112,12 +112,8 @@ public class CommandReaderTest
     {
         expResults.add( new ParsedCommand( Command.XEQUALS, "x=", "xxx" ) );
         expResults.add( new ParsedCommand( Command.YEQUALS, "y=", "yyy" ) );
-        expResults.add( new ParsedCommand( Command.TEQUALS, "t=", "ttt" ) );
-        expResults.add( new ParsedCommand( Command.REQUALS, "r=", "rrr" ) );
         expResults.add( new ParsedCommand( Command.XEQUALS, "X=", "XXX" ) );
         expResults.add( new ParsedCommand( Command.YEQUALS, "Y=", "YYY" ) );
-        expResults.add( new ParsedCommand( Command.TEQUALS, "T=", "TTT" ) );
-        expResults.add( new ParsedCommand( Command.REQUALS, "R=", "RRR" ) );
         List<String>    input   = 
             expResults.stream()
                 .map( p -> p.getCommandString() + " " + p.getArgString() )

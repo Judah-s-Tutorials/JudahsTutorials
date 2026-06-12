@@ -27,18 +27,6 @@ public enum Command
         "Describes any well-formed expression for the evaluation of \"y\" "
         + "in the coordinate pair \"(x,y)\""
     ),
-    /** Sets the expression for generating the radius in a polar equation. */
-    REQUALS( 
-        "Describes any well-formed expression "
-        + "for the evaluation of \"radius\" "
-        + "in the polar equation \"r=f(t)\""
-    ),
-    /** Sets the expression for generating the angle in a polar equation. */
-    TEQUALS( 
-        "Describes any well-formed expression "
-        + "for the evaluation of \"theta\" "
-        + "in the polar equation \"t=f(r)\""
-    ),
     /** Declares one or more variables. */
     SET( 
         "Describes a comma-separated list of "
@@ -61,18 +49,10 @@ public enum Command
     ),
     /** Sets the name of the parameter in a parametric equation. */
     PARAM( "Describes the name of the parameter in a parametric equation" ),
-    /** Sets the name of the angle variable in a polar equation. */
-    THETA( "Describes the name of the angle variable in a polar equation" ),
-    /** Sets the name of the radius variable in a polar equation. */
-    RADIUS( "Describes the name of the radius variable in a polar equation" ),
     /** Generates the plot of the function y=f(x). */
     YPLOT( "Generates a plot of the form (x,y) = f(x)" ),
     /** Generates the plot of the parametric equation (x,y)=f(t). */
     XYPLOT( "Generates a plot of the form (x,y) = f(t)" ),
-    /** Generates the plot of the polar equation r = f(t). */
-    RPLOT( "Generates a plot of the polar equation r = f(t)" ),
-    /** Generates the plot of the polar equation t = f(r). */
-    TPLOT( "Generates a plot of the polar equation t = f(r)" ),
     /** Identifies an empty command string. */
     NONE( "Identifies an empty command string" ),
     /** Identifies an invalid command. */
