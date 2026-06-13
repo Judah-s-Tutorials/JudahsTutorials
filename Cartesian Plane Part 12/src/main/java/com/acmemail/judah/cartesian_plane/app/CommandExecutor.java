@@ -239,7 +239,7 @@ public class CommandExecutor
             StringBuilder   bldr    = new StringBuilder();
             list.forEach( s -> bldr.append( s ).append( newl ) );
             int             msgLen  = bldr.length();
-            bldr.delete( msgLen - newlLen, newlLen );
+            bldr.setLength( msgLen - newlLen );
             message = bldr.toString();
         }
         

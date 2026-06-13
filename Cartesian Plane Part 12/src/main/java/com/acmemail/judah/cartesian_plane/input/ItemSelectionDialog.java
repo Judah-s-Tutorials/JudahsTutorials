@@ -44,10 +44,8 @@ public class ItemSelectionDialog
     /**
      * Final status of this selection process;
      * OK_STATUS or CANCEL_STATUS.
-     * Initialized to -1; has no meaningful value
-     * until the dialog is first shown.
      */
-    private int closeStatus     = -1;
+    private int closeStatus;
     
     /**
      * Constructor.
@@ -87,6 +85,7 @@ public class ItemSelectionDialog
         dialog  = new JDialog( owner, title );
         dialog.setModal( true );
         dialog.setContentPane( getContentPane() );
+        installEscapeAction();
         dialog.pack();
     }
     
@@ -99,8 +98,25 @@ public class ItemSelectionDialog
      * the index to the selected item is returned.
      * If no selection is made
      * -1 is returned.
+     * Pressing the cancel button,
+     * the dialog's close button,
+     * or pressing OK without selecting an item
+     * all result in a return value of -1.
      * 
-     * @return  the index to the selected item, or -1 if no selection is made
+     * @return
+     *      the index of the selected item,
+     *      or -1 if the operator cancelled
+     *
+     * @implNote
+     * This method blocks on a modal {@code setVisible(true)} call.
+     * Swing's threading rules call for UI operations to originate
+     * on the event dispatch thread (EDT);
+     * however, because the dialog is modal,
+     * Swing pumps events on the EDT internally
+     * while the caller's thread is blocked,
+     * so this method may also be invoked
+     * from a non-EDT thread
+     * (as is done by the JUnit tests).
      */
     public int show()
     {
@@ -166,7 +182,16 @@ public class ItemSelectionDialog
     {
         JScrollPane pane    = new JScrollPane();
         pane.setViewportView( jList );
-
+        return pane;
+    }
+    
+    /**
+     * Set an action on the dialog's root pane
+     * causing it to cancel the operation
+     * if the operator presses the escape button.
+     */
+    private void installEscapeAction()
+    {
         // Define action
         Action      action      = new AbstractAction() {
             @Override
@@ -192,8 +217,6 @@ public class ItemSelectionDialog
         // the actionPerformed method of the Action is executed
         actMap.put( key, action );
         inMap.put( keyStroke, key );
-
-        return pane;
     }
     
     /**

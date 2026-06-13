@@ -275,7 +275,10 @@ public class Exp4jEquation implements Equation
         Objects.requireNonNull( param, "param" );
         Result  result  = validateName( param );
         if ( result.success() )
+        {
             this.param = param;
+            vars.putIfAbsent( param, 0. );
+        }
         return result;
     }
     
@@ -291,7 +294,11 @@ public class Exp4jEquation implements Equation
         Objects.requireNonNull( radius, "radius" );
         Result  result  = validateName( radius );
         if ( result.success() )
+        {
             this.radius = radius;
+            vars.putIfAbsent( radius, 0. );
+        }
+
         return result;
     }
     
@@ -307,7 +314,10 @@ public class Exp4jEquation implements Equation
         Objects.requireNonNull( theta, "theta" );
         Result  result  = validateName( theta );
         if ( result.success() )
+        {
             this.theta = theta;
+            vars.putIfAbsent( theta, 0. );
+        }
         return result;
     }
     
@@ -499,8 +509,10 @@ public class Exp4jEquation implements Equation
         rExpr.setVariables( vars );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, t -> t <= rEnd, t -> t + rStep )
-                .peek( t -> rExpr.setVariable( theta, t ) )
-                .mapToObj( t -> Polar.ofRTheta( rExpr.evaluate(), t ) )
+                .mapToObj( t -> {
+                    rExpr.setVariable( theta, t );
+                    return Polar.ofRTheta( rExpr.evaluate(), t );
+                })
                 .map( Polar::toPoint );
         return stream;
     }
@@ -515,8 +527,10 @@ public class Exp4jEquation implements Equation
         tExpr.setVariables( vars );
         Stream<Point2D> stream  =
             DoubleStream.iterate( rStart, r -> r <= rEnd, r -> r + rStep )
-                .peek( r -> tExpr.setVariable( radius, r ) )
-                .mapToObj( r -> Polar.ofRTheta( r, tExpr.evaluate() ) )
+                .mapToObj( r -> {
+                    tExpr.setVariable( radius, r );
+                    return Polar.ofRTheta( r, tExpr.evaluate() );
+                })
                 .map( Polar::toPoint );
         return stream;
     }

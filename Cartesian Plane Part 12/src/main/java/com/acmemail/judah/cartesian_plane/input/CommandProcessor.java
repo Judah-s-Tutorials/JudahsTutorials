@@ -224,13 +224,13 @@ public class CommandProcessor
                 equation::getThetaName 
             );
             break;
-        case PARAM:
-            setName( 
-                context,
-                equation::setParamName, 
-                equation::getParamName
-            );
-            break;
+    case PARAM:
+        setName( 
+            context,
+            equation::setParamName, 
+            equation::getParamName
+        );
+        break;
         case INVALID:
             invalidCommand( context );
             break;

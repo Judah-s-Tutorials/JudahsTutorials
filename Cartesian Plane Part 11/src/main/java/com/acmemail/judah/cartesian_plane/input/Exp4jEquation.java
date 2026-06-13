@@ -225,7 +225,10 @@ public class Exp4jEquation implements Equation
         Objects.requireNonNull( param, "param" );
         Result  result  = validateName( param );
         if ( result.success() )
+        {
             this.param = param;
+            vars.putIfAbsent( param, 0. );
+        }
         return result;
     }
     

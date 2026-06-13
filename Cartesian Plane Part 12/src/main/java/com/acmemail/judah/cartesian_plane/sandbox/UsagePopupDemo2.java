@@ -23,16 +23,13 @@ public class UsagePopupDemo2
     /** Start of HTML string; everything up to start of table body. */
     private static final String header  =
         "<html>"
-        +    "<head><title>HTML Usage Demo</title></head>"
-        + "<body>"
         +    "<table>"
         +    "<tbody>";
     
     /** End of HTML string; everything from end of table body. */
     private static final String trailer =
-        "</tbody>"
+        "    </tbody>"
         +    "</table>"
-        + "</body>"
         + "</html>";
         
         
