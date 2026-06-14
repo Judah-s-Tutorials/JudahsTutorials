@@ -122,6 +122,9 @@ public class ItemSelectionDialog
     {
         closeStatus = CANCEL_STATUS;
         dialog.setVisible( true );
+        // Here, we wait for the operator to dismiss the dialog.
+        // The action that dismisses the dialog will set the
+        // value of closeStatus.
         
         int rval    = 
             closeStatus == OK_STATUS ? jList.getSelectedIndex() : -1;

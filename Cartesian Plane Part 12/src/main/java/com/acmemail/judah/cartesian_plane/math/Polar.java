@@ -82,8 +82,9 @@ public final class Polar
      */
     public Point2D toPoint()
     {
-        double[]    values  = toRectangle();
-        Point2D     point   = new Point2D.Double( values[0], values[1] );
+        double      xco     = radius * Math.cos( theta );
+        double      yco     = radius * Math.sin( theta );
+        Point2D     point   = new Point2D.Double( xco, yco );
         return point;
     }
 
@@ -95,8 +96,9 @@ public final class Polar
      */
     public Complex toComplex()
     {
-        double[]    values  = toRectangle();
-        Complex     complex = new Complex( values[0], values[1] );
+        double      real    = radius * Math.cos( theta );
+        double      imag    = radius * Math.sin( theta );
+        Complex     complex = new Complex( real, imag );
         return complex;
     }
     
@@ -317,27 +319,5 @@ public final class Polar
         if ( theta < 0 )
             theta += TWO_PI;
         return theta;
-    }
-    
-    /**
-     * Converts polar form to rectangular form.
-     * Works for Point2D and Complex.
-     * Constructs and returns a double[]
-     * containing (xco, yco) or, equivalently
-     * (real coefficient, imaginary coefficient).
-     * 
-     * @return the constructed double[]
-     */
-    private double[] toRectangle()
-    {
-        double      xco     = 0;
-        double      yco     = 0;
-        if ( radius != 0 )
-        {
-            xco = radius * Math.cos( theta );
-            yco = radius * Math.sin( theta );
-        }
-        double[]    rect    = new double[] { xco, yco };
-        return rect;
     }
 }
