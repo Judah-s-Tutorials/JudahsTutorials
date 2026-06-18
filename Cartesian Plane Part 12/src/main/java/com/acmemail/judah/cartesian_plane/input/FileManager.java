@@ -6,15 +6,15 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 /**
  * Provides methods to save and restore
  * configuration data for equations.
- * Input data is expected to conform to the description on the 
- * {@link com.acmemail.judah.cartesian_plane.input package summary page}.
+ * 
+ * @see com.acmemail.judah.cartesian_plane.input
+ * @see EquationReader
+ * @see EquationWriter
  * 
  * @author Jack Straub
  */
@@ -37,13 +37,13 @@ public final class FileManager
      * @param file      the given file; must not be null
      * @param equation  the equation to save; must not be null
      * 
-     * @throws IOException if an error occurs
+     * @throws IOException if an I/O error occurs
      * @throws NullPointerException if file or equation is null
-     * 
+     *
      * @see EquationWriter#write(Equation, PrintWriter)
      * @see com.acmemail.judah.cartesian_plane.input
      */
-    public static void save( File file, Equation equation ) 
+    public static void save( File file, Equation equation )
         throws IOException
     {
         Objects.requireNonNull( file, "file" );
@@ -76,8 +76,10 @@ public final class FileManager
      * 
      * @throws NullPointerException if file or equation is null
      * @throws IOException  if an I/O error occurs
+     * 
+     * @see EquationReader#load(Equation, BufferedReader)
      */
-    public static Result load( File file, Equation equation ) 
+    public static Result load( File file, Equation equation )
         throws IOException
     {
         Objects.requireNonNull( file, "file" );
@@ -87,47 +89,8 @@ public final class FileManager
             BufferedReader bReader = new BufferedReader( fReader ); 
         )
         {
-            Result  result  = load( bReader, equation );
+            Result  result  = EquationReader.load( equation, bReader );
             return result;
         }
-    }
-    
-    /**
-     * Given a formatted text source wrapped in a BufferedReader,
-     * read data from the source, parse it,
-     * and store the data in the given equation.
-     * The source format is documented on the
-     * {@link com.acmemail.judah.cartesian_plane.input package summary page}.
-     * If an error occurs, a failed {@linkplain Result} is returned
-     * containing the relevant error message(s).
-     * 
-     * @param reader    reader that provides access to the source; 
-     *                  must be non-null
-     * @param equation  the given equation; must be non-null
-     * 
-     * @return  a Result object indicating the status of the operation
-     * 
-     * @throws NullPointerException if reader or equation is null
-     * 
-     * @see com.acmemail.judah.cartesian_plane.input
-     * @see CommandProcessor
-     * @see CommandReader
-     */
-    public static Result load( BufferedReader reader, Equation equation )
-    {
-        Objects.requireNonNull( reader, "reader" );
-        Objects.requireNonNull( equation, "equation" );
-        
-        List<String>        errors      = new ArrayList<>();
-        CommandProcessor    proc        = new CommandProcessor( equation );
-        CommandReader       commands    = new CommandReader( reader );
-        commands.stream().forEach( pc -> {
-            Result result = proc.processCommand( pc );
-            if ( !result.success() )
-                errors.addAll( result.messages() );
-        });
-        Result              result      = errors.isEmpty() ?
-            new Result( true ) : new Result( false, errors );
-        return result;
     }
 }

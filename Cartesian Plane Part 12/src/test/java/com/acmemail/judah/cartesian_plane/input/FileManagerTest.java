@@ -5,21 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -429,76 +425,31 @@ public class FileManagerTest
         EquationTestUtil.verifyEquation( expEquation, actEquation );
     }
 
-    @Test
-    public void testLoadBufferedReaderEquationNPE()
-        throws IOException
-    {
-        Equation        equation    = new Exp4jEquation();
-        try (
-            BufferedReader  bReader     = 
-                new BufferedReader( new StringReader( "" ) );
-        )
-        {
-            assertThrows( NPE_CLASS, () -> 
-                FileManager.load( (BufferedReader)null, equation )
-            );
-            assertThrows( NPE_CLASS, () -> 
-                FileManager.load( bReader, null )
-            );
-        }
-    }
-
-    @Test
-    public void testLoadBufferedReaderEquation() throws IOException
-    {
-        // This is one of only a few test methods that 
-        // apply directly to Load(BufferedReader,Equation).
-        // Everything else is verified through the Load(File,Equation)
-        // test methods.
-        
-        // Save and reload an equation with default values.
-        // Verify that the reloaded equation matches the original
-        Equation    defEquation = new Exp4jEquation();
-        FileManager.save( adHocOutputFile, defEquation );
-        try( 
-            FileReader fReader = new FileReader( adHocOutputFile );
-            BufferedReader bReader = new BufferedReader( fReader );
-        )
-        {
-            Equation    newEquation = new Exp4jEquation();
-            Result      result      = 
-                FileManager.load( bReader, newEquation );
-            EquationTestUtil.verifyEquation( defEquation, newEquation );
-            assertTrue( result.success() );
-            assertTrue( result.messages().isEmpty() );
-        }
-    }
-
-    @Test
-    public void testLoadBufferedReaderEquationMisc() throws IOException
-    {
-        // This is one of only a few test methods that 
-        // apply directly to Load(BufferedReader,Equation).
-        // Everything else is verified through the Load(File,Equation)
-        // test methods.
-        
-        // Test direct call to load(BufferedReader,Equation) that is
-        // partly invalid.
-        String              varName     = "var";
-        double              varValue    = 5.1;
-        String              toParse     = 
-            "# comment\nINVALID\nSET " + varName + "=" + varValue;
-        StringReader        sReader     = new StringReader( toParse );
-        Equation            equation    = new Exp4jEquation();
-        try ( BufferedReader bReader = new BufferedReader( sReader ) )
-        {
-            Result  result  = FileManager.load( bReader, equation );
-            assertFalse( result.success() );
-            assertFalse( result.messages().isEmpty() );
-        }
-        Optional<Double>    expVarValue = Optional.of( varValue );
-        assertEquals( expVarValue, equation.getVar( varName ) );
-    }    
+//    @Test
+//    public void testLoadBufferedReaderEquationMisc() throws IOException
+//    {
+//        // This is one of only a few test methods that 
+//        // apply directly to Load(BufferedReader,Equation).
+//        // Everything else is verified through the Load(File,Equation)
+//        // test methods.
+//        
+//        // Test direct call to load(BufferedReader,Equation) that is
+//        // partly invalid.
+//        String              varName     = "var";
+//        double              varValue    = 5.1;
+//        String              toParse     = 
+//            "# comment\nINVALID\nSET " + varName + "=" + varValue;
+//        StringReader        sReader     = new StringReader( toParse );
+//        Equation            equation    = new Exp4jEquation();
+//        try ( BufferedReader bReader = new BufferedReader( sReader ) )
+//        {
+//            Result  result  = FileManager.load( bReader, equation );
+//            assertFalse( result.success() );
+//            assertFalse( result.messages().isEmpty() );
+//        }
+//        Optional<Double>    expVarValue = Optional.of( varValue );
+//        assertEquals( expVarValue, equation.getVar( varName ) );
+//    }    
     
     /**
      * Add a string to a list, after adding empty and comment lines.

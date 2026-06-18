@@ -219,7 +219,8 @@ public final class EquationFileChooser
      */
     private void showError( String title, List<String> messages )
     {
-        String  message = String.join( "\n", messages );
+        final String    lineSep = System.lineSeparator();
+        String  message = String.join( lineSep, messages );
         messageConsumer.postMessage( 
             parent, 
             message, 
