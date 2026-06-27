@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -19,6 +20,7 @@ import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.EquationFileChooser;
 import com.acmemail.judah.cartesian_plane.input.Exp4jEquation;
 import com.acmemail.judah.cartesian_plane.input.FileManager;
+import com.acmemail.judah.cartesian_plane.input.IEquationFileChooser;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
@@ -34,11 +36,8 @@ public class CommandExecutor
     private static final String errorDialogTitle    = "Parsing Error";
     private static final String newl                = System.lineSeparator();
     private static final int    newlLen             = newl.length();
-    private static final String nullPlaneError      = 
-        "CartesianPlane may not be null";
     
     private final CartesianPlane    plane;
-    private CommandProcessor             inputParser;
     
     /**
      * Constructor.
@@ -46,12 +45,13 @@ public class CommandExecutor
      * for displaying output.
      * 
      * @param plane CartesianPlane for displaying output;
-     *              may not  be null;
+     *              may not  be null
+     *              
+     * @throws NullPointerException if plane is null
      */
     public CommandExecutor( CartesianPlane plane )
     {
-        if ( plane == null )
-            throw new IllegalArgumentException( nullPlaneError );
+        Objects.requireNonNull( plane, "plane" );
         this.plane = plane;
     }
     
@@ -66,32 +66,36 @@ public class CommandExecutor
      * @param reader    the given supplier
      * @param equation  the given equation; may be null
      */
-    public void exec( Supplier<ParsedCommand> reader, Equation equation )
+    public void exec( Supplier<ParsedCommand> reader )
     {
-        inputParser = new CommandProcessor( equation );
+        CommandProcessor    cmdProcessor    = new CommandProcessor( null );
         ParsedCommand       parsedCommand   = null;
+        Command             exit            = Command.EXIT;
         Command             command         = Command.NONE;
         do
         {
             parsedCommand = reader.get();
+            if ( parsedCommand == null )
+                parsedCommand = 
+                    new ParsedCommand( exit, exit.toString(), "" );
             command = parsedCommand.getCommand();
-            Result  result  = inputParser.processCommand( parsedCommand );
+            Result  result  = cmdProcessor.processCommand( parsedCommand );
             if ( command == Command.INVALID )
                 showUsage();
             else if ( !result.success() )
                 showError( result );
             else if ( command == Command.YPLOT )
-                plot( () -> inputParser.getEquation().yPlot() );
+                plot( () -> cmdProcessor.getEquation().yPlot() );
             else if ( command == Command.XYPLOT )
-                plot( () -> inputParser.getEquation().xyPlot() );
+                plot( () -> cmdProcessor.getEquation().xyPlot() );
             else if ( command == Command.RPLOT )
-                plot( () -> inputParser.getEquation().rPlot() );
+                plot( () -> cmdProcessor.getEquation().rPlot() );
             else if ( command == Command.TPLOT )
-                plot( () -> inputParser.getEquation().tPlot() );
+                plot( () -> cmdProcessor.getEquation().tPlot() );
             else if ( command == Command.OPEN )
                 open( parsedCommand.getArgString() );
             else if ( command == Command.SAVE )
-                save( parsedCommand.getArgString() );
+                save( parsedCommand.getArgString(), cmdProcessor.getEquation() );
             else
                 ;
         } while ( command != Command.EXIT );
@@ -114,7 +118,7 @@ public class CommandExecutor
     {
         plane.setStreamSupplier( () ->
             pointStreamSuppier.get()
-            .map( p -> PlotPointCommand.of( p, plane) )
+            .map( p -> PlotPointCommand.of( p, plane ) )
         );
         NotificationManager.INSTANCE
             .propagateNotification( CPConstants.REDRAW_NP );
@@ -126,22 +130,24 @@ public class CommandExecutor
      * If the given name is empty,
      * the operator will be prompted
      * for the file to read.
+     * If the process completes successfully
+     * a CommandProcessor encapsulating the new equation
+     * is returned, otherwise it returns null.
      * 
      * @param name  the given file name;
      *              may be empty, may not be null
      *              
-     * Postcondition: 
-     *     If an equation is successfully derived
-     *     from the input file,
-     *     a new InputParser will be instantiated
-     *     using the derived equation.
+     * @return  
+     *      a new CommandProcessor, 
+     *      or null if the operation fails to complete
      */
-    private void open( String name )
+    private CommandProcessor open( String name )
     {
-        Equation    equation    = null;
+        Equation            equation            = null;
+        CommandProcessor    commandProcessor    = null;
         if ( name.isBlank() )
         {
-            EquationFileChooser chooser  = new EquationFileChooser();
+            IEquationFileChooser chooser  = new EquationFileChooser();
             equation = chooser.openDialog().orElse( null );
         }
         else
@@ -162,7 +168,9 @@ public class CommandExecutor
             }
         }
         if ( equation != null )
-            inputParser = new CommandProcessor( equation );
+            commandProcessor = new CommandProcessor( equation );
+        
+        return commandProcessor;
     }
     
     /**
@@ -175,12 +183,11 @@ public class CommandExecutor
      * @param name  the given file name;
      *              may be empty, may not be null
      */
-    private void save( String name )
+    private void save( String name, Equation equation )
     {
-        Equation    equation    = inputParser.getEquation();
         if ( name.isEmpty() )
         {
-            EquationFileChooser chooser = new EquationFileChooser();
+            IEquationFileChooser chooser = new EquationFileChooser();
             boolean             status  = chooser.saveDialog( equation );
             if ( !status )
             {

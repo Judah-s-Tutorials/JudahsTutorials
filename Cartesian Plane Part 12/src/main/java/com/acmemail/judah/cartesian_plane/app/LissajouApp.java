@@ -40,7 +40,7 @@ public class LissajouApp
         {
             reader  = new CommandReader( bufReader );
             CommandExecutor executor    = new CommandExecutor( plane );
-            executor.exec( LissajouApp::nextCommand, null );
+            executor.exec( LissajouApp::nextCommand );
         }
         catch ( IOException exc )
         {

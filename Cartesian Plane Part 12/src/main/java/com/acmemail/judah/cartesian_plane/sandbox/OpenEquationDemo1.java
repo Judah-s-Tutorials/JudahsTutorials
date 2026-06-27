@@ -15,6 +15,7 @@ import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
 import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.EquationFileChooser;
+import com.acmemail.judah.cartesian_plane.input.IEquationFileChooser;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
@@ -36,7 +37,7 @@ public class OpenEquationDemo1
      */
     public static void main(String[] args)
     {
-        EquationFileChooser chooser     = new EquationFileChooser();
+        IEquationFileChooser chooser     = new EquationFileChooser();
         Equation            equation    = 
             chooser.openDialog().orElse( null );
         Root    root    = new Root( plane );

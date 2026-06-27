@@ -38,7 +38,7 @@ public class ConsoleInputApp
         {
             reader  = new CommandReader( bufReader );
             CommandExecutor executor    = new CommandExecutor( plane );
-            executor.exec( ConsoleInputApp::nextCommand, null );
+            executor.exec( ConsoleInputApp::nextCommand );
         }
         catch ( IOException exc )
         {

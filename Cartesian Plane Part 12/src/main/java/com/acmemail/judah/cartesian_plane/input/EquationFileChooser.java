@@ -22,7 +22,7 @@ import javax.swing.JOptionPane;
  *
  * @author Jack Straub
  */
-public final class EquationFileChooser
+public final class EquationFileChooser implements IEquationFileChooser
 {
     /** The error message to post when a parse error is encountered. */
     private static final String PARSE_ERROR     = "Parse Error";
@@ -53,7 +53,7 @@ public final class EquationFileChooser
         JOptionPane::showMessageDialog;
             
     /** The current message consumer. */
-    private static volatile MessageConsumer messageConsumer = 
+    private volatile MessageConsumer messageConsumer = 
         defaultMessageConsumer;
     
     /**
@@ -96,6 +96,7 @@ public final class EquationFileChooser
      * @see MessageConsumer
      * @see #setMessageConsumer
      */
+    @Override
     public Optional<Equation> openDialog()
     {
         Optional<Equation>  status  = Optional.empty();
@@ -143,6 +144,7 @@ public final class EquationFileChooser
      * @see MessageConsumer
      * @see #setMessageConsumer
      */
+    @Override
     public boolean saveDialog( Equation equation )
     {
         Objects.requireNonNull( equation, "equation" );
@@ -185,7 +187,7 @@ public final class EquationFileChooser
      * 
      * @see #setMessageConsumer(MessageConsumer)
      */
-    public static MessageConsumer getMessageConsumer()
+    public MessageConsumer getMessageConsumer()
     {
         return messageConsumer;
     }
@@ -199,12 +201,10 @@ public final class EquationFileChooser
      * 
      * @see #getMessageConsumer()
      */
-    public static void setMessageConsumer( MessageConsumer consumer )
+    public void setMessageConsumer( MessageConsumer consumer )
     {
-        if ( consumer != null )
-            messageConsumer = consumer;
-        else
-            messageConsumer = defaultMessageConsumer;
+        messageConsumer = consumer != null ? 
+            consumer : defaultMessageConsumer;
     }
 
     /**

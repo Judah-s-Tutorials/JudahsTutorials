@@ -34,7 +34,7 @@ public class DialogInputApp
         root.start();
         
         CommandExecutor executor    = new CommandExecutor( plane );
-        executor.exec( DialogInputApp::getInput, null );
+        executor.exec( DialogInputApp::getInput );
         
         System.exit( 0 );
     }

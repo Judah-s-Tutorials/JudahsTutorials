@@ -141,7 +141,7 @@ public class EquationFileChooserTest
 
     private JFrame  parent;
     
-    private EquationFileChooser chooser;
+    private IEquationFileChooser chooser;
     private volatile Equation   testEq;
     private volatile boolean    saveResult;
     
@@ -167,7 +167,6 @@ public class EquationFileChooserTest
         invokeAndWait( () -> chooser = new EquationFileChooser( parent ) );
         messageArchive.clear();
         testEq = null;
-        EquationFileChooser.setMessageConsumer( messageArchive );
     }
 
     @AfterEach
@@ -187,36 +186,22 @@ public class EquationFileChooserTest
     public void testMessageConsumer()
     {
         // get the current message consumer
-        MessageConsumer currConsumer    = 
-            EquationFileChooser.getMessageConsumer();
+        EquationFileChooser chooser         = new EquationFileChooser();
+        MessageConsumer     currConsumer    = chooser.getMessageConsumer();
         
-        // Use try/finally blocks to ensure that 
-        // currConsumer gets restored
-        try
-        {
-            // set a new consumer
-            MessageConsumer newConsumer     = new MessageArchive();
-            EquationFileChooser.setMessageConsumer( newConsumer );
-            
-            // test the getter; sanity check against current consumer
-            MessageConsumer testConsumer    = 
-                EquationFileChooser.getMessageConsumer();
-            assertEquals( newConsumer, testConsumer );
-            assertNotEquals( newConsumer, currConsumer );
-            
-            // pass null to the setter, restoring the default consumer
-            EquationFileChooser.setMessageConsumer( null );
-            testConsumer = EquationFileChooser.getMessageConsumer();
-            assertNotEquals( newConsumer, testConsumer );
-        }
-        finally
-        {
-            // restore the original consumer, and do final sanity check
-            EquationFileChooser.setMessageConsumer( currConsumer );
-            MessageConsumer testConsumer = 
-                EquationFileChooser.getMessageConsumer();
-            assertEquals( currConsumer, testConsumer );
-        }
+        // set a new consumer
+        MessageConsumer newConsumer         = new MessageArchive();
+        chooser.setMessageConsumer( newConsumer );
+        
+        // test the getter; sanity check against current consumer
+        MessageConsumer testConsumer        = chooser.getMessageConsumer();
+        assertEquals( newConsumer, testConsumer );
+        assertNotEquals( newConsumer, currConsumer );
+        
+        // pass null to the setter, restoring the default consumer
+        chooser.setMessageConsumer( null );
+        testConsumer = chooser.getMessageConsumer();
+        assertNotEquals( newConsumer, testConsumer );
     }
 
     @Test
@@ -382,7 +367,7 @@ public class EquationFileChooserTest
     @Test
     public void testSaveDialogInvalid()
     {
-        // Start a save dialog, enter a path to an file location, 
+        // Start a save dialog, enter a path to a file location, 
         // and approve the operation. Verify that the operation
         // fails.
         String          testPath        = invalidFilePath.toString();
