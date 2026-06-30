@@ -33,7 +33,7 @@ public class DialogInputApp
         Root            root    = new Root( plane );
         root.start();
         
-        CommandExecutor executor    = new CommandExecutor( plane );
+        CommandExecutorV2   executor    = new CommandExecutorV2( plane );
         executor.exec( DialogInputApp::getInput );
         
         System.exit( 0 );

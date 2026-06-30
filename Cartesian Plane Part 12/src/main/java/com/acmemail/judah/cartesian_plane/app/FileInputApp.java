@@ -39,7 +39,7 @@ public class FileInputApp
         )
         {
             reader  = new CommandReader( bufReader );
-            CommandExecutor executor    = new CommandExecutor( plane );
+            CommandExecutorV2   executor    = new CommandExecutorV2( plane );
             executor.exec( FileInputApp::nextCommand );
         }
         catch ( IOException exc )

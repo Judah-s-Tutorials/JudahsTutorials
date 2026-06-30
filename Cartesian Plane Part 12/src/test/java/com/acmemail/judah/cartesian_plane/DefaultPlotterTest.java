@@ -127,6 +127,7 @@ class DefaultPlotterTest
      * PlotPointCommands record their coordinates here for assertion).
      * Both overrides intentionally skip super to avoid Swing side effects.
      */
+    @SuppressWarnings("serial")
     private static class CapturingPlane extends CartesianPlane
     {
         Supplier<Stream<PlotCommand>>   captured;

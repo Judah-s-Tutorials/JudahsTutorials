@@ -461,17 +461,23 @@ public class CommandProcessor
         // spaces permitted: "  var = val ".
         String[]        parts       = varPair.split( "=", -1 );
         int             partsLen    = parts.length;
+        String          name        = parts[0].trim();
         if ( partsLen < 1 || partsLen > 2 )
             context.formatError( varPair, invalidSpec );
+        else if ( partsLen == 1 )
+        {
+                Double  val     = equation.getVar( name ).orElse( null );
+                String  valStr  = val == null ? 
+                    "\"" + name + "\" not found" : val.toString();
+                System.out.println( valStr );
+        }
         else
         {
-            String  name    = parts[0].trim();
-            String  valStr  = partsLen == 1 ? "0" : parts[1].trim();
-
             if ( !equation.validateName( name ).success() )
                 context.formatError( name, invalidName );
             else
             {
+                String              valStr  = parts[1];
                 Optional<Double>    optVal  = equation.evaluate( valStr );
                 optVal.ifPresentOrElse(
                     v -> equation.setVar( name, v ),
