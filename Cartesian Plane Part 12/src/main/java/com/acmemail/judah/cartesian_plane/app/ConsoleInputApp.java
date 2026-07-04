@@ -18,7 +18,6 @@ import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
  */
 public class ConsoleInputApp
 {
-    private static final CartesianPlane plane   = new CartesianPlane();
     private static final String         prompt  = "Enter a command> ";
     private static CommandReader        reader;
     
@@ -29,7 +28,8 @@ public class ConsoleInputApp
      */
     public static void main(String[] args)
     {
-        Root    root    = new Root( plane );
+        CartesianPlane  plane   = new CartesianPlane();
+        Root            root    = new Root( plane );
         root.start();
         try (
             InputStreamReader inReader  = new InputStreamReader( System.in );

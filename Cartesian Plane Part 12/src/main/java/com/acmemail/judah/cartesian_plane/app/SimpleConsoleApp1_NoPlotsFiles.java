@@ -43,8 +43,9 @@ public class SimpleConsoleApp1_NoPlotsFiles
     public static void main(String[] args)
     {
         CommandProcessor    cmdProc     = new CommandProcessor();
-        try ( Reader inReader = new InputStreamReader( System.in );
-            BufferedReader bReader = new BufferedReader( inReader )
+        try ( 
+            Reader inReader = new InputStreamReader( System.in );
+            BufferedReader bReader = new BufferedReader( inReader );
         )
         {
             ParsedCommand   parsedCommand   = getParsedCommand( bReader );

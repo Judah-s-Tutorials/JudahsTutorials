@@ -1,36 +1,30 @@
-package com.acmemail.judah.cartesian_plane.app;
+package com.acmemail.judah.cartesian_plane.sandbox;
 
-import java.awt.geom.Point2D;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import javax.swing.JOptionPane;
 
-import com.acmemail.judah.cartesian_plane.CPConstants;
 import com.acmemail.judah.cartesian_plane.CartesianPlane;
-import com.acmemail.judah.cartesian_plane.NotificationManager;
-import com.acmemail.judah.cartesian_plane.PlotPointCommand;
+import com.acmemail.judah.cartesian_plane.DefaultPlotter;
 import com.acmemail.judah.cartesian_plane.graphics_utils.Root;
 import com.acmemail.judah.cartesian_plane.input.Command;
 import com.acmemail.judah.cartesian_plane.input.CommandProcessor;
 import com.acmemail.judah.cartesian_plane.input.CommandReader;
-import com.acmemail.judah.cartesian_plane.input.Equation;
 import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 import com.acmemail.judah.cartesian_plane.input.Result;
 
 /**
- * This is a refinement of {@link SimpleConsoleApp2_NoPlotsFiles},
- * in which we add logic to support plotting.
+ * This is a sample application
+ * that takes advantage of the plotting facility
+ * in the CommandProcessor class.
  * 
- * @see #plot(Supplier)
+ * @see CommandProcessor
  */
-public class SimpleConsoleApp3_NoFiles2
+public class CommandProcessorPlottingDemo
 {
     private static final String         PROMPT  = "Enter a command: ";
     private static final CartesianPlane plane   = new CartesianPlane();
@@ -39,7 +33,7 @@ public class SimpleConsoleApp3_NoFiles2
     /**
      * Default constructor; not used.
      */
-    public SimpleConsoleApp3_NoFiles2()
+    public CommandProcessorPlottingDemo()
     {
         // not used
     }
@@ -52,8 +46,9 @@ public class SimpleConsoleApp3_NoFiles2
     public static void main(String[] args)
     {
         root.start();
-        CommandProcessor    cmdProc     = new CommandProcessor();
-        Equation            equation    = cmdProc.getEquation();
+        DefaultPlotter      plotter     = new DefaultPlotter( plane );
+        CommandProcessor    cmdProc     = 
+            new CommandProcessor( null, plotter );
         try ( Reader inReader = new InputStreamReader( System.in );
             BufferedReader bReader = new BufferedReader( inReader )
         )
@@ -65,22 +60,9 @@ public class SimpleConsoleApp3_NoFiles2
             {
                 switch ( command )
                 {
-                case YPLOT:
-                    plot( () -> equation.yPlot() );
-                    break;
-                case XYPLOT:
-                    plot( () -> equation.xyPlot() );
-                    break;
-                case RPLOT:
-                    plot( () -> equation.rPlot() );
-                    break;
-                case TPLOT:
-                    plot( () -> equation.tPlot() );
-                    break;
-                case SAVE: 
+                case SAVE:
                 case OPEN:
                     showMessage( parsedCommand, "not implemented" );
-                    break;
                 default:
                     Result  result  = cmdProc.processCommand( parsedCommand );
                     if ( !result.success() )
@@ -97,28 +79,6 @@ public class SimpleConsoleApp3_NoFiles2
             System.exit( 1 );
         }
         System.exit( 0 );
-    }
-
-    /**
-     * Acquires a stream of (x,y) coordinates,
-     * and supplementing the stream 
-     * by mapping each point to a PlotPointCommand.
-     * The modified stream is registered
-     * with the encapsulated CartesianPlane object
-     * as a Stream<PlotCommand> supplier.
-     * After registration it issued a redraw notification,
-     * telling the CartesianPlane to update itself.
-     * 
-     * @param supplier  the supplier of the stream of (x,y) coordinates
-     */
-    private static void plot( Supplier<Stream<Point2D>> supplier )
-    {
-        Objects.requireNonNull( supplier, "supplier" );
-        plane.setStreamSupplier( () ->
-            supplier.get().map( p -> PlotPointCommand.of( p, plane ) )
-        );
-        NotificationManager.INSTANCE
-            .propagateNotification( CPConstants.REDRAW_NP );
     }
     
     /**

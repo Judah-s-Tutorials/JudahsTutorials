@@ -1,16 +1,17 @@
 <!DOCTYPE html>
-<!https://wysiwyghtml.com/>
+<!--https://wysiwyghtml.com/-->
 <html lang="en-US">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport">
     <title>Java Switch Expressions</title>
     <style>
     </style>
 </head>
-<body style="max-width:40em; padding: 1.5em; font-size: 18px;">
+<body>
 
+<div style="font-size: 16px; font-family: sans-serif; max-width:50em; background-color: #9fe3cc; padding: .5em;">
 <h1>Digression: Switch Expressions</h1>
+<p>We're going to start employing&nbsp;<em>switch expressions.</em> For those not familiar with this topic, the following is a brief discussion.</p>
 <p>Standardized in Java 14,&nbsp;<em>Switch Expressions</em> offer an alternative to the traditional&nbsp;<em>switch</em> statement. They employ a lambda-like syntax that eliminates&nbsp;<em>break</em> statements. This discussion assumes familiarity with the traditional switch statement. Here are some additional references:</p>
 <p style="padding-left: 30px; margin-bottom: 0;">Traditional switch statements:</p>
 <ul style="margin-top: 0;">
@@ -21,8 +22,129 @@
 <p style="padding-left: 30px; margin-bottom: 0;">Switch Expressions:</p>
 <ul style="margin-top: 0;">
 <li><a href="https://docs.oracle.com/en/java/javase/17/language/switch-expressions-and-statements.html">Switch Expressions</a>, from the Oracle&nbsp;Java Language Updates</li>
-<li><a href="https://www.baeldung.com/java-switch-pattern-matching">Pattern Matching for Switch</a>, from Baeldung</li>
+<li><a href="https://www.baeldung.com/java-switch-pattern-matching">Pattern Matching for Switch</a>, from Baeldung&nbsp;</li>
 </ul>
+<p>■&nbsp;Cases use arrows, and don't fall through:</p>
+<table style="background-color: #FFFAA0;">
+<tbody>
+<tr>
+<td style="padding-right: 2em; vertical-align: top; border-right: 1px solid black;">
+<p>Traditional Form:</p>
+<pre>switch ( input )<br />{<br />case "January":<br />    System.out.println( "1/Jan" );<br />    break;<br />case "February":<br />    System.out.println( "2/Feb" );<br />    break;<br />default:<br />    System.out.println( "eh?" );<br />}</pre>
+</td>
+<td style="vertical-align: top;">
+<p>Expression Form</p>
+<pre>switch ( input )
+{
+    case "January" -&gt; System.out.println( "1/Jan" );
+    case "February" -&gt; System.out.println( "2/Feb" );
+    default -&gt; System.out.println( "eh?" );
+}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>■ Stack cases using commas:</p>
+<table style="background-color: #FFFAA0;">
+<tbody>
+<tr>
+<td style="padding-right: 2em; vertical-align: top; border-right: 1px solid black;">
+<p>Traditional Form:</p>
+<pre>switch ( input )<br />{<br />case "January":<br />case "February":<br />case "March":<br />    System.out.println( "Q1" );<br />    break;<br />case "April":<br />case "May":<br />case "June":<br />    System.out.println( "Q2" );<br />    break;<br />default:<br />    System.out.println( "eh?" );<br />}</pre>
+</td>
+<td style="vertical-align: top;">
+<p>Expression Form</p>
+<pre>switch ( input )<br />{<br />    case "January", "February", "March" -&gt; <br />        System.out.println( "Q1" );<br />    case "April", "May", "June" -&gt; <br />        System.out.println( "Q2" );<br />    default -&gt; System.out.println( "eh?" );<br />}</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>■ Switch expressions have values:</p>
+<table style="background-color: #FFFAA0;">
+<tbody>
+<tr>
+<td style="padding-right: 2em; vertical-align: top; border-right: 1px solid black;">
+<p>Traditional Form:</p>
+<pre>String result = "";
+switch ( input )
+{
+case "January":
+    result = "1/Jan";
+    break;
+case "February":
+    result = "2/Feb";
+    break;
+default:
+    result = "eh?";
+}
+System.out.println( result );</pre></td>
+<td style="vertical-align: top;">
+<p>Expression Form:</p>
+<pre>String result2 = 
+    switch ( input )
+    {
+        case "January" -> "1/Jan";
+        case "February" -> "2/Feb";
+        default -> "eh?";
+    };
+System.out.println( result2 );</pre>
+</td>
+</tr>
+</tbody>
+</table>
+<p>■ The&nbsp;<em>case</em> expression can be a block; use&nbsp;<em>yield</em> to establish the value of the case:</p>
+<table style="background-color: #FFFAA0;">
+<tbody>
+<tr>
+<td style="padding-right: 2em; vertical-align: top; border-right: 1px solid black;">
+<p>Traditional Form:</p>
+<pre>Point2D point   = null;
+switch ( property )
+{
+case "Polar":
+    double  rad = 5 * theta + 1;
+    Polar   pol = Polar.ofRTheta( rad, theta );
+    point = pol.toPoint();
+    break;
+case "Param":
+    double  xco = 5 * Math.cos( theta );
+    double  yco = 2 * Math.sin( theta );
+    point = new Point2D.Double( xco, yco );
+    break;
+default:
+    point = new Point2D.Double( 0, 0 );
+}
+System.out.println( point );</pre>
+</td>
+<td style="vertical-align: top;">
+<p>Expression Form</p>
+<pre>point = 
+    switch ( property )
+    {
+        case "Polar" -&gt; {
+            double  rad = 5 * theta + 1;
+            Polar   pol = Polar.ofRTheta( rad, theta );
+            point = pol.toPoint();
+            yield point;
+        }
+        case "Param" -&gt; {
+            double  xco = 5 * Math.cos( theta );
+            double  yco = 2 * Math.sin( theta );
+            point = new Point2D.Double( xco, yco );
+            yield point;
+        }
+        default -&gt; {
+            System.err.println( "unsupported" );
+            yield new Point2D.Double( 0, 0 );
+        }
+    };
+System.out.println( point );</pre>
+</td>
+</tr>
+</tbody>
+</table>
 <p>&nbsp;</p>
+</div>
 
 </body>
+</html>
