@@ -62,7 +62,6 @@ public class CommandExecutorV1b
         "Not supported in this version: SAVE";
     private static final String messageDialogTitle  = "Command Message";
     private static final String newl                = System.lineSeparator();
-    private static final int    newlLen             = newl.length();
     
     /**
      * The interface to use to configure the Plotter facility
@@ -217,18 +216,8 @@ public class CommandExecutorV1b
     private void showMessage( Result result )
     {
         List<String>    list    = result.messages();
-        String          message = null;
-        
-        if ( list.isEmpty() )
-            message = "Unrecognized error";
-        else
-        {
-            StringBuilder   bldr    = new StringBuilder();
-            list.forEach( s -> bldr.append( s ).append( newl ) );
-            int             msgLen  = bldr.length();
-            bldr.setLength( msgLen - newlLen );
-            message = bldr.toString();
-        }
+        String          message = list.isEmpty() ?
+            "Unrecognized error" : String.join( newl, list );
         showMessage( message );
     }
 }

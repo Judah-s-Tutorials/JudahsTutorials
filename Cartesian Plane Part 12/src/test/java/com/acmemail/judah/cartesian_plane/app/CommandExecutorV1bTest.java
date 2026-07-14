@@ -47,7 +47,7 @@ class CommandExecutorV1bTest
     }
 
     @Test
-    void testCommandExecutorV1bPlotter()
+    public void testCommandExecutorV1bPlotter()
     {
         Plotter             plotter = s -> noop();
         CommandExecutorV1b  exec    = new CommandExecutorV1b( plotter );
@@ -59,7 +59,7 @@ class CommandExecutorV1bTest
     }
 
     @Test
-    void testCommandExecutorV1bCartesianPlane()
+    public void testCommandExecutorV1bCartesianPlane()
     {
         CommandExecutorV1b  exec    = new CommandExecutorV1b( plane );
         assertNotNull( exec );
@@ -98,7 +98,7 @@ class CommandExecutorV1bTest
         exec( List.of( Command.SAVE.toString() ) );
         assertFalse( messages.isEmpty() );
         String  message = messages.get( 0 ).toUpperCase();
-        assertTrue( message.contains( message ) );
+        assertTrue( message.contains( "SAVE" ) );
     }
 
     @Test
@@ -302,6 +302,5 @@ class CommandExecutorV1bTest
      */
     private static void noop()
     {
-
     }
 }

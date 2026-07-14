@@ -18,8 +18,6 @@ import com.acmemail.judah.cartesian_plane.input.ParsedCommand;
 public class DialogInputApp
 {
     private static final String prompt      = "Enter a Command";
-    
-
     private static final String dialogTitle = "Command Input";
     
     /**

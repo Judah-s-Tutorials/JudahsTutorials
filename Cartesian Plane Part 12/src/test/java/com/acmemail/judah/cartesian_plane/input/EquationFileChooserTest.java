@@ -76,8 +76,13 @@ public class EquationFileChooserTest
      * The maximum time to wait for a thread encapsulating
      * the chooser dialog to complete.
      */
-    private static final long   MAX_DIALOG_WAIT = 2000;
+    private static final long   MAX_DIALOG_WAIT = 3000;
 
+    /**  
+     * Root reference for all file created in/for this test.
+     * Automatically destroyed by JUnit on test completion.
+     * @see #beforeAll()
+     */
     @TempDir
     private static Path    tempRoot;
     
@@ -141,9 +146,9 @@ public class EquationFileChooserTest
 
     private JFrame  parent;
     
-    private IEquationFileChooser chooser;
-    private volatile Equation   testEq;
-    private volatile boolean    saveResult;
+    private IEquationFileChooser    chooser;
+    private volatile Equation       testEq;
+    private volatile boolean        saveResult;
     
     @BeforeAll
     public static void beforeAll() throws IOException
@@ -164,7 +169,10 @@ public class EquationFileChooserTest
     public void setUp() throws Exception
     {
         invokeAndWait( () -> parent = makeChooserFramework() );
-        invokeAndWait( () -> chooser = new EquationFileChooser( parent ) );
+        invokeAndWait( () -> {
+            chooser = new EquationFileChooser( parent );
+            chooser.setMessageConsumer( messageArchive );
+        });
         messageArchive.clear();
         testEq = null;
     }

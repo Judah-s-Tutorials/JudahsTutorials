@@ -12,6 +12,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +23,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import util.EquationTestUtil;
 
@@ -28,70 +31,51 @@ public class FileManagerTest
 {
     private static final Class<NullPointerException>    NPE_CLASS   =
         NullPointerException.class;
-    private static final String testFileID          = "CartesianPlaneTest";
-    private static final String adHocOutputFileName = 
-        testFileID + "_AdHocOutputFile1";
-    private static final String binaryFileName      =
-        testFileID + "_NotATextFile";
-    private static final String noSuchFileName      =
-        testFileID + "_NoSuchFile";
+    private static final String adHocOutputPathName = "AdHocOutputFile1";
+    private static final String binaryPathName      = "NotATextFile";
+    private static final String noSuchPathName      = "NoSuchFile";
     /** 
      * See discussion of read-onlyness at 
      * {@linkplain #writeReadOnlyFile(File, List)}
      */
-    private static final String readOnlyFileName      =
-        testFileID + "_ReadOnlyFile";
-        
-    private static File     adHocOutputFile     = null;
-    private static File     binaryFile          = null;
-    private static File     noSuchFile          = null;
-    private static File     readOnlyFile        = null;
+    private static final String readOnlyPathName    = "ReadOnlyFile";
+
+    /**  
+     * Root reference for all file created in/for this test.
+     * Automatically destroyed by JUnit on test completion.
+     * @see #beforeAll()
+     */
+    @TempDir
+    private static Path    tempRoot;
+
+    private static Path     adHocOutputPath     = null;
+    private static Path     binaryPath          = null;
+    private static Path     noSuchPath          = null;
+    private static Path     readOnlyPath        = null;
         
     @BeforeAll
     public static void beforeAll() throws IOException
     {
-        adHocOutputFile = createTempFile( adHocOutputFileName );
-        binaryFile = createTempFile( binaryFileName );
-        noSuchFile = createTempFile( noSuchFileName );
-        readOnlyFile = createTempFile( readOnlyFileName );
+        adHocOutputPath = tempRoot.resolve( adHocOutputPathName );
+        binaryPath =  tempRoot.resolve( binaryPathName );
+        noSuchPath = tempRoot.resolve( noSuchPathName );
+        readOnlyPath = tempRoot.resolve( readOnlyPathName );
         
-        writeBinaryFile( binaryFile );
-        writeReadOnlyFile( readOnlyFile, List.of( "line1" ) );
-    }
-    
-    private static File createTempFile( String name ) throws IOException
-    {
-        File    file    = File.createTempFile( name, null );
-        file.deleteOnExit();
-        if ( file.exists() )
-        {
-            file.setWritable( true );
-            file.delete();
-        }
-        return file;
+        Files.deleteIfExists( noSuchPath );
+        
+        writeBinaryFile( binaryPath );
+        writeReadOnlyFile( readOnlyPath, List.of( "line1" ) );
     }
     
     @AfterAll
     public static void afterAll()
     {
-        if ( binaryFile.exists() )
-            binaryFile.delete();
-        if ( adHocOutputFile.exists() )
-            adHocOutputFile.delete();
-        if ( noSuchFile.exists() )
-            noSuchFile.delete();
-        if ( readOnlyFile.exists() )
-        {
-            readOnlyFile.setWritable( true );
-            readOnlyFile.delete();
-        }
     }
         
     @BeforeEach
-    public void setUp() throws Exception
+    public void beforeEach() throws Exception
     {
-        if ( adHocOutputFile.exists() )
-            adHocOutputFile.delete();
+        Files.deleteIfExists( adHocOutputPath );
     }
 
     @Test
@@ -112,7 +96,8 @@ public class FileManagerTest
     {
         // Save and reload an equation with default values.
         // Verify that the reloaded equation matches the original
-        Equation    defEquation = new Exp4jEquation();
+        Equation    defEquation     = new Exp4jEquation();
+        File        adHocOutputFile = adHocOutputPath.toFile();
         FileManager.save( adHocOutputFile, defEquation );
         Equation    newEquation = new Exp4jEquation();
         Result      result      = 
@@ -138,6 +123,7 @@ public class FileManagerTest
             proc.processCommand( parsed );
         }
 
+        File        adHocOutputFile = adHocOutputPath.toFile();
         FileManager.save( adHocOutputFile, defEquation );
         Equation    newEquation = new Exp4jEquation();
         Result      result      = 
@@ -155,6 +141,7 @@ public class FileManagerTest
         Equation    defEquation = new Exp4jEquation();
         defEquation.setRange( 100, 200,10 );
 
+        File        adHocOutputFile = adHocOutputPath.toFile();
         FileManager.save( adHocOutputFile, defEquation );
         Equation    newEquation = new Exp4jEquation();
         Result      result      = 
@@ -180,6 +167,7 @@ public class FileManagerTest
             proc.processCommand( parsed );
         }
 
+        File        adHocOutputFile = adHocOutputPath.toFile();
         FileManager.save( adHocOutputFile, defEquation );
         Equation    newEquation = new Exp4jEquation();
         Result      result      = 
@@ -202,6 +190,7 @@ public class FileManagerTest
             defEquation.setVar( name, baseVal++ );
             defEquation.setVar( newName, baseVal++ );
         }
+        File        adHocOutputFile = adHocOutputPath.toFile();
         FileManager.save( adHocOutputFile, defEquation );
         Equation    newEquation = new Exp4jEquation();
         Result      result      =
@@ -217,7 +206,7 @@ public class FileManagerTest
         // Try to save to a read-only file.
         Equation    defEquation = new Exp4jEquation();
         assertThrows( IOException.class, () -> 
-            FileManager.save( readOnlyFile, defEquation )
+            FileManager.save( readOnlyPath.toFile(), defEquation )
         );
     }
 
@@ -261,6 +250,7 @@ public class FileManagerTest
             Command.YEQUALS + " " + expYExpr,
             Command.SET + " " + setArg
         );
+        File        adHocOutputFile = adHocOutputPath.toFile();
         writeFile( adHocOutputFile, lines );
         
         Equation    equation    = new Exp4jEquation();
@@ -297,6 +287,7 @@ public class FileManagerTest
         double      varValue        = .5;
         expEquation.setVar( varName, varValue );
         addPadding( lines, Command.SET + " " + varName + "=" + varValue );
+        File        adHocOutputFile = adHocOutputPath.toFile();
         writeFile( adHocOutputFile, lines );
         
         Equation    actEquation     = new Exp4jEquation();
@@ -323,6 +314,7 @@ public class FileManagerTest
         lines.add( Command.REQUALS + " badVar + 5" );
         lines.add( Command.RADIUS + " %invalidName" );
         lines.add( Command.SET + " x=..35" );
+        File        adHocOutputFile = adHocOutputPath.toFile();
         writeFile( adHocOutputFile, lines );
         
         Equation    actEquation     = new Exp4jEquation();
@@ -349,6 +341,7 @@ public class FileManagerTest
         lines.add( "NOT_AN_ENUM" );
         lines.add( Command.STEP + " " + step );
         expEquation.setRangeStep( step );
+        File        adHocOutputFile = adHocOutputPath.toFile();
         writeFile( adHocOutputFile, lines );
         
         Equation    actEquation     = new Exp4jEquation();
@@ -390,6 +383,7 @@ public class FileManagerTest
         expEquation.setRangeStep( step );
         lines.add( Command.STEP + " " + step );
         
+        File        adHocOutputFile = adHocOutputPath.toFile();
         writeFile( adHocOutputFile, lines );
         
         Equation    actEquation     = new Exp4jEquation();
@@ -407,7 +401,7 @@ public class FileManagerTest
         Equation    expEquation     = new Exp4jEquation();
         Equation    actEquation     = new Exp4jEquation();
         Result      result          = 
-            FileManager.load( binaryFile, actEquation );
+            FileManager.load( binaryPath.toFile(), actEquation );
         assertFalse( result.success() );
         assertFalse( result.messages().isEmpty() );
         EquationTestUtil.verifyEquation( expEquation, actEquation );
@@ -420,7 +414,7 @@ public class FileManagerTest
         Equation    expEquation     = new Exp4jEquation();
         Equation    actEquation     = new Exp4jEquation();
         assertThrows( IOException.class, () -> 
-            FileManager.load( noSuchFile, actEquation )
+            FileManager.load( noSuchPath.toFile(), actEquation )
         );
         EquationTestUtil.verifyEquation( expEquation, actEquation );
     }
@@ -480,7 +474,8 @@ public class FileManagerTest
         throws IOException
     {
         try (
-            FileWriter  fWriter  = new FileWriter( outFile, StandardCharsets.UTF_8 );
+            FileWriter  fWriter = 
+                new FileWriter( outFile, StandardCharsets.UTF_8 );
             PrintWriter pWriter = new PrintWriter( fWriter );
         )
         {
@@ -496,8 +491,9 @@ public class FileManagerTest
      * @param file          file to create
      * @throws IOException  if an IO error occurs
      */
-    private static void writeBinaryFile( File file ) throws IOException
+    private static void writeBinaryFile( Path path ) throws IOException
     {
+        File    file    = path.toFile();
         try (
             FileOutputStream fStream = new FileOutputStream( file );
             DataOutputStream dStream = new DataOutputStream( fStream );
@@ -516,9 +512,10 @@ public class FileManagerTest
      * @param list          the strings to write
      * @throws IOException  if an IO error occurs
      */
-    private static void writeReadOnlyFile( File outFile, List<String> list )
+    private static void writeReadOnlyFile( Path outPath, List<String> list )
         throws IOException
     {
+        File    outFile = outPath.toFile();
         try (
             FileWriter  fWriter  = new FileWriter( outFile, StandardCharsets.UTF_8 );
             PrintWriter pWriter = new PrintWriter( fWriter );

@@ -56,6 +56,10 @@ public final class FileManager
             if ( writer.checkError() )
                 throw new IOException( "write failure on " + file );
         }
+        catch ( IOException exc )
+        {
+            throw new IOException( "write failure on " + file );
+        }
     }
 
     /**

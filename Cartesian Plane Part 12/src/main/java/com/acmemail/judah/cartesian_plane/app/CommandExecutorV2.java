@@ -52,7 +52,6 @@ public class CommandExecutorV2
 {
     private static final String messageDialogTitle  = "Command Message";
     private static final String newl                = System.lineSeparator();
-    private static final int    newlLen             = newl.length();
     
     /**
      * The interface to use to configure the Plotter facility
@@ -250,7 +249,7 @@ public class CommandExecutorV2
         else
         {
             equation = new Exp4jEquation();
-            File        file        = new File( name );
+            File    file    = new File( name );
             try
             {
                 Result  result  = FileManager.load( file, equation );
@@ -282,7 +281,7 @@ public class CommandExecutorV2
      */
     private void save( String name, Equation equation )
     {
-        Objects.requireNonNull( name, "name" );
+        Objects.requireNonNull( equation, "equation" );
         if ( name.isBlank() )
         {
             IEquationFileChooser    fChooser    = getEquationFileChooser();
@@ -328,18 +327,8 @@ public class CommandExecutorV2
     private void showMessage( Result result )
     {
         List<String>    list    = result.messages();
-        String          message = null;
-        
-        if ( list.isEmpty() )
-            message = "Unexpected error; failed Result with no message.";
-        else
-        {
-            StringBuilder   bldr    = new StringBuilder();
-            list.forEach( s -> bldr.append( s ).append( newl ) );
-            int             msgLen  = bldr.length();
-            bldr.setLength( msgLen - newlLen );
-            message = bldr.toString();
-        }
+        String          message = list.isEmpty() ?
+            "Unrecognized error" : String.join( newl, list );
         showMessage( message );
     }
 }
