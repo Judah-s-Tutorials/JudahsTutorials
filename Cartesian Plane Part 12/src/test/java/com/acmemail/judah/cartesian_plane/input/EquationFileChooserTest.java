@@ -39,11 +39,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
 
+import com.acmemail.judah.cartesian_plane.test_util.EquationTestUtil;
 import com.acmemail.judah.cartesian_plane.test_utils.MessageArchive;
 import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
 import com.acmemail.judah.cartesian_plane.test_utils.Utils;
-
-import util.EquationTestUtil;
 
 /**
  * This class implements a JUnit test for the EquationFileChooser.

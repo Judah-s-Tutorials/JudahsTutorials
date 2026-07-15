@@ -1,4 +1,4 @@
-package util;
+package com.acmemail.judah.cartesian_plane.test_util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

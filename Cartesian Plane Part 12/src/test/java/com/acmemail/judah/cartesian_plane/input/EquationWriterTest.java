@@ -33,7 +33,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import util.EquationTestUtil;
+import com.acmemail.judah.cartesian_plane.test_util.EquationTestUtil;
 
 public class EquationWriterTest
 {

@@ -6,7 +6,7 @@ import static com.acmemail.judah.cartesian_plane.LineGenerator.VERTICAL;
 
 import org.junit.jupiter.api.Test;
 
-import util.LineGeneratorTestUtil;
+import com.acmemail.judah.cartesian_plane.test_util.LineGeneratorTestUtil;
 
 class LineGeneratorTest
 {

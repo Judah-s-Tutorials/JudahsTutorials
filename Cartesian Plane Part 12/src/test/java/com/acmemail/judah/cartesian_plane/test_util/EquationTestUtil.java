@@ -1,4 +1,4 @@
-package util;
+package com.acmemail.judah.cartesian_plane.test_util;
 import static com.acmemail.judah.cartesian_plane.input.Command.END;
 import static com.acmemail.judah.cartesian_plane.input.Command.PARAM;
 import static com.acmemail.judah.cartesian_plane.input.Command.RADIUS;

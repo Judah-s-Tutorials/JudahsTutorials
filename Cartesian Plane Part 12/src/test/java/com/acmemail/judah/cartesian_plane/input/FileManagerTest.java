@@ -19,19 +19,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import util.EquationTestUtil;
+import com.acmemail.judah.cartesian_plane.test_util.EquationTestUtil;
 
 public class FileManagerTest
 {
-    private static final Class<NullPointerException>    NPE_CLASS   =
-        NullPointerException.class;
-    private static final String adHocOutputPathName = "AdHocOutputFile1";
+    private static final String adHocOutputPathName = "AdHocFile";
     private static final String binaryPathName      = "NotATextFile";
     private static final String noSuchPathName      = "NoSuchFile";
     /** 
@@ -61,19 +58,12 @@ public class FileManagerTest
         noSuchPath = tempRoot.resolve( noSuchPathName );
         readOnlyPath = tempRoot.resolve( readOnlyPathName );
         
-        Files.deleteIfExists( noSuchPath );
-        
         writeBinaryFile( binaryPath );
         writeReadOnlyFile( readOnlyPath, List.of( "line1" ) );
     }
-    
-    @AfterAll
-    public static void afterAll()
-    {
-    }
         
     @BeforeEach
-    public void beforeEach() throws Exception
+    public void beforeEach() throws IOException
     {
         Files.deleteIfExists( adHocOutputPath );
     }
@@ -83,10 +73,10 @@ public class FileManagerTest
     {
         Equation    equation    = new Exp4jEquation();
         File        file        = new File( "temp" );
-        assertThrows( NPE_CLASS, () -> 
+        assertThrows( NullPointerException.class, () -> 
             FileManager.save( null, equation )
         );
-        assertThrows( NPE_CLASS, () -> 
+        assertThrows( NullPointerException.class, () -> 
             FileManager.save( file, null )
         );
     }
@@ -216,10 +206,10 @@ public class FileManagerTest
         // Verify that FileManager.load... throws NPE when expected
         Equation    equation    = new Exp4jEquation();
         File        file        = new File( "temp" );
-        assertThrows( NPE_CLASS, () -> 
+        assertThrows( NullPointerException.class, () -> 
             FileManager.load( (File)null, equation )
         );
-        assertThrows( NPE_CLASS, () -> 
+        assertThrows( NullPointerException.class, () -> 
             FileManager.load( file, null )
         );
     }
@@ -516,13 +506,7 @@ public class FileManagerTest
         throws IOException
     {
         File    outFile = outPath.toFile();
-        try (
-            FileWriter  fWriter  = new FileWriter( outFile, StandardCharsets.UTF_8 );
-            PrintWriter pWriter = new PrintWriter( fWriter );
-        )
-        {
-            list.stream().forEach( pWriter::println );
-        }
+        writeFile( outFile, list );
 
         // Note: This means of making a file unwritable is problematic;
         // it may be sensitive to operating environment.
