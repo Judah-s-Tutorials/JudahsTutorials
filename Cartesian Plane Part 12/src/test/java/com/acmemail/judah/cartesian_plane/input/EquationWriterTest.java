@@ -11,15 +11,14 @@ import static com.acmemail.judah.cartesian_plane.input.Command.XEQUALS;
 import static com.acmemail.judah.cartesian_plane.input.Command.YEQUALS;
 import static com.acmemail.judah.cartesian_plane.input.Equation.INTRINSIC_VARIABLES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.StringReader;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -39,41 +37,21 @@ public class EquationWriterTest
 {
     /** Name of the equation for use during testing. */
     private static final String equationName    = "This Equation";
-        
-    /** 
-     * Buffer to hold the output of {@linkplain #writer};
-     * initialized in the @BeforeEach method, 
-     * disposed in the @AfterEach method.
-     */
-    private ByteArrayOutputStream   outData;
-    /** 
-     * Writer to be used with Equation.write; initialized in the
-     * @BeforeEach method, disposed in the @AfterEach method.
-     */
-    private PrintWriter             writer;
     /** Equation for testing; initialized in the @BeforeEach method. */
     private Equation                equation;
     
     @BeforeEach
     public void setUp()
     {
-        outData = new ByteArrayOutputStream();
-        writer = new PrintWriter( outData );
         equation = new Exp4jEquation();
         equation.setName( equationName );
-    }
-
-    @AfterEach
-    public void tearDown() throws Exception
-    {
-        writer.close();
-        outData.close();
     }
 
     @Test
     public void testWriteThrowsNPE()
     {
         // Verify that the write method throws NPE for null arguments
+        PrintWriter                 writer  = new PrintWriter( System.out );
         Class<NullPointerException> clazz   = NullPointerException.class;
         assertThrows( clazz, () -> EquationWriter.write( null, writer ) );
         assertThrows( clazz, () -> EquationWriter.write( equation, null ) );
@@ -345,128 +323,6 @@ public class EquationWriterTest
         assertEquals( expMap, actMap );
     }
     
-    @Test
-    public void testRoundTripAllDefaults()
-    {
-        // Write/reread the equation with all defaults intact.
-        // Verify that the reconstituted equation contains
-        // the original data.
-        Equation            reloaded    = writeAndRereadEquation();
-        EquationTestUtil.verifyEquation( equation, reloaded );
-    }
-    
-    @Test
-    public void testRoundTripExpressionOverride()
-    {
-        // Write/reread the equation with all expressions overridden.
-        // Verify that the reconstituted equation contains the 
-        // overridden data. Use CommandProcessor to control which setter
-        // to use with a given command.
-        CommandProcessor    commandProc = new CommandProcessor( equation );
-        int                 baseNum     = 101;
-        for ( Command command : EquationTestUtil.EXPR_COMMANDS )
-        {
-            String          expr    = String.valueOf( baseNum++ );
-            ParsedCommand   parsed  = new ParsedCommand( command, "", expr );
-            commandProc.processCommand( parsed );
-        }
-
-        Equation            reloaded    = writeAndRereadEquation();        
-        EquationTestUtil.verifyEquation( equation, reloaded );
-    }
-    
-    @Test
-    public void testRoundTripRangeOverride()
-    {
-        // Write/reread the equation with all range properties overridden.
-        // Verify that the reconstituted equation contains the 
-        // overridden data. Use CommandProcessor to control which setter
-        // to use with a given command.
-        CommandProcessor    commandProc = new CommandProcessor( equation );
-        for ( Command command : EquationTestUtil.RANGE_COMMANDS )
-        {
-            double          newVal      = 
-                EquationTestUtil.getDouble( equation, command ) + 1;
-            String          strVal      = String.valueOf( newVal );
-            ParsedCommand   parsed      = 
-                new ParsedCommand( command, "", strVal );            
-            commandProc.processCommand( parsed );
-        }
-        Equation            reloaded    = writeAndRereadEquation();        
-        EquationTestUtil.verifyEquation( equation, reloaded );
-    }
-    
-    @Test
-    public void testRoundTripNameOverride()
-    {
-        // Write/reread the equation with all special
-        // variable names overridden (e.g. PARAM, RADIUS).
-        // Verify that the reconstituted equation contains the 
-        // overridden data. Use CommandProcessor to control which setter
-        // to use with a given command.
-        CommandProcessor    commandProc = new CommandProcessor( equation );
-        int                 baseChar    = 'a';
-        for ( Command command : EquationTestUtil.NAME_COMMANDS )
-        {
-            String          oldName = 
-                EquationTestUtil.getString( equation, command );
-            String          suffix  = String.valueOf( (char)(baseChar++) );
-            String          newName = oldName + suffix;
-            ParsedCommand   parsed  = 
-                new ParsedCommand( command, "", newName );            
-            commandProc.processCommand( parsed );
-        }
-        Equation            reloaded    = writeAndRereadEquation();    
-        EquationTestUtil.verifyEquation( equation, reloaded );
-    }
-    
-    @Test
-    public void testRoundTripVariableOverride()
-    {
-        // Write/reread the equation with the values
-        // of all the intrinsic variables overridden;
-        // verify that the reconstituted equation contains
-        // the overridden values.
-        int baseVal = 101;
-        for ( String name : INTRINSIC_VARIABLES.keySet() )
-        {
-            double          newVal  = baseVal++;
-            equation.setVar( name, newVal );
-        }
-        // Add a couple of non-intrinsic variables
-        for ( String var : new String[] { "f", "g" } )
-        {
-            // sanity check; make sure they're really non-intrinsic
-            assertFalse( INTRINSIC_VARIABLES.containsKey( var ) );
-            equation.setVar( var, baseVal++ );
-        }
-        Equation            reloaded    = writeAndRereadEquation();        
-        EquationTestUtil.verifyEquation( equation, reloaded );
-    }
-    
-    @Test
-    public void testRoundTripMixedOverrides()
-    {
-        // Write/reread the equation with the values
-        // of various properties overridden;
-        // verify that the reconstituted equation contains
-        // the overridden values.
-        String  expEquationName = "rose";
-        String  expVarName      = "a";
-        double  expVarValue     = 2;
-        String  expYExpression  = "a * x";
-        double  expRangeStart   = 0;
-        double  expRangeEnd     = 10;
-        double  expRangeStep    = 1;
-        
-        equation.setName( expEquationName );
-        equation.setVar( expVarName, expVarValue );
-        equation.setYExpression( expYExpression );
-        equation.setRange( expRangeStart, expRangeEnd, expRangeStep );
-        Equation            reloaded    = writeAndRereadEquation();    
-        EquationTestUtil.verifyEquation( equation, reloaded );
-    }
-    
     /**
      * Generate a stream of the intrinsic variable names
      * for use in a ParameterizedTest.
@@ -502,30 +358,6 @@ public class EquationWriterTest
     {
         Stream<Command> stream  = EquationTestUtil.NAME_COMMANDS.stream();
         return stream;
-    }
-    
-    /**
-     * Write the equation under test, capturing the output;
-     * feed the output back in to the {@link CommandProcessor} to
-     * create a new, presumably equivalent, Equation.
-     * 
-     * @return  the reconstituted equation
-     */
-    private Equation writeAndRereadEquation()
-    {
-        EquationWriter.write( equation, writer );
-        writer.close();
-        
-        String              output      = outData.toString();
-        StringReader        sReader     = new StringReader( output );
-        BufferedReader      bReader     = new BufferedReader( sReader );
-        
-        Equation            reloaded    = new Exp4jEquation();
-        CommandProcessor    proc        = new CommandProcessor( reloaded );
-        CommandReader       cmdReader   = new CommandReader( bReader );
-        cmdReader.stream().forEach( proc::processCommand );
-
-        return reloaded;
     }
     
     /**
@@ -565,10 +397,20 @@ public class EquationWriterTest
      */
     private List<String> getOutput( Equation equation )
     {
-        EquationWriter.write( equation, writer );
-        writer.close();
-        String          output  = outData.toString();
-        List<String>    lines   = output.lines().toList();
+        List<String>    lines   = null;
+        try ( ByteArrayOutputStream outData = new ByteArrayOutputStream();
+            PrintWriter writer = new PrintWriter( outData );
+        )
+        {
+            EquationWriter.write( equation, writer );
+            writer.close();
+            String  output  = outData.toString();
+            lines = output.lines().toList();
+        }
+        catch ( IOException exc )
+        {
+            fail( "Unexpected I/O failure", exc );
+        }
         return lines;
     }
     

@@ -129,7 +129,7 @@ public class FileManagerTest
         // Save and reload an equation with a modified range.
         // Verify that the reloaded equation matches the original
         Equation    defEquation = new Exp4jEquation();
-        defEquation.setRange( 100, 200,10 );
+        defEquation.setRange( 100, 200, 10 );
 
         File        adHocOutputFile = adHocOutputPath.toFile();
         FileManager.save( adHocOutputFile, defEquation );
@@ -201,7 +201,7 @@ public class FileManagerTest
     }
 
     @Test
-    public void testLoadFileNPE()
+    public void testLoadNPE()
     {
         // Verify that FileManager.load... throws NPE when expected
         Equation    equation    = new Exp4jEquation();
@@ -408,32 +408,6 @@ public class FileManagerTest
         );
         EquationTestUtil.verifyEquation( expEquation, actEquation );
     }
-
-//    @Test
-//    public void testLoadBufferedReaderEquationMisc() throws IOException
-//    {
-//        // This is one of only a few test methods that 
-//        // apply directly to Load(BufferedReader,Equation).
-//        // Everything else is verified through the Load(File,Equation)
-//        // test methods.
-//        
-//        // Test direct call to load(BufferedReader,Equation) that is
-//        // partly invalid.
-//        String              varName     = "var";
-//        double              varValue    = 5.1;
-//        String              toParse     = 
-//            "# comment\nINVALID\nSET " + varName + "=" + varValue;
-//        StringReader        sReader     = new StringReader( toParse );
-//        Equation            equation    = new Exp4jEquation();
-//        try ( BufferedReader bReader = new BufferedReader( sReader ) )
-//        {
-//            Result  result  = FileManager.load( bReader, equation );
-//            assertFalse( result.success() );
-//            assertFalse( result.messages().isEmpty() );
-//        }
-//        Optional<Double>    expVarValue = Optional.of( varValue );
-//        assertEquals( expVarValue, equation.getVar( varName ) );
-//    }    
     
     /**
      * Add a string to a list, after adding empty and comment lines.
