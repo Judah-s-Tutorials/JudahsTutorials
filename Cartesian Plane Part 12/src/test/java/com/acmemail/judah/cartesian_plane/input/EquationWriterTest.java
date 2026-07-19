@@ -9,15 +9,12 @@ import static com.acmemail.judah.cartesian_plane.input.Command.STEP;
 import static com.acmemail.judah.cartesian_plane.input.Command.TEQUALS;
 import static com.acmemail.judah.cartesian_plane.input.Command.XEQUALS;
 import static com.acmemail.judah.cartesian_plane.input.Command.YEQUALS;
-import static com.acmemail.judah.cartesian_plane.input.Equation.INTRINSIC_VARIABLES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.List;
@@ -127,10 +124,10 @@ public class EquationWriterTest
     @Test
     public void testAllIntrinsicVariablesOverride()
     {
-        // Override the values of the all of the intrinsic variables and
+        // Override the values of all of the intrinsic variables and
         // verify that they are written to the EquationWriter output.
         Map<String,Double>  expMap  = new HashMap<>();
-        INTRINSIC_VARIABLES.keySet().stream().forEach( s -> {
+        Equation.INTRINSIC_VARIABLES.keySet().stream().forEach( s -> {
             Optional<Double>    optVar  = equation.getVar( s );
             // intrinsic variable must be present
             assertTrue( optVar.isPresent(), s );
@@ -331,7 +328,8 @@ public class EquationWriterTest
      */
     private static Stream<String> varNameSource()
     {
-        Stream<String>  stream  = INTRINSIC_VARIABLES.keySet().stream();
+        Stream<String>  stream  = 
+            Equation.INTRINSIC_VARIABLES.keySet().stream();
         return stream;
     }
     
@@ -361,6 +359,28 @@ public class EquationWriterTest
     }
     
     /**
+     * Write the given equation,
+     * capturing its output.
+     * Transform the output into a list of individual lines
+     * and return the list.
+     * 
+     * @param equation  the given equation
+     * 
+     * @return  a list of lines captured from EquationWriter.write
+     */
+    private List<String> getOutput( Equation equation )
+    {
+        ByteArrayOutputStream outData = new ByteArrayOutputStream();
+        try ( PrintWriter writer = new PrintWriter( outData ); )
+        {
+            EquationWriter.write( equation, writer );
+        }
+        String          output  = outData.toString();
+        List<String>    lines   = output.lines().toList();
+        return lines;
+    }
+    
+    /**
      * Given the output from EquationWriter.write,
      * find the EQUATION line and parse the equation name.
      * If not found, the empty string is returned.
@@ -386,35 +406,6 @@ public class EquationWriterTest
     }
     
     /**
-     * Write the given equation,
-     * capturing its output.
-     * Transform the output into a list of individual lines
-     * and return the list.
-     * 
-     * @param equation  the given equation
-     * 
-     * @return  a list of lines captured from EquationWriter.write
-     */
-    private List<String> getOutput( Equation equation )
-    {
-        List<String>    lines   = null;
-        try ( ByteArrayOutputStream outData = new ByteArrayOutputStream();
-            PrintWriter writer = new PrintWriter( outData );
-        )
-        {
-            EquationWriter.write( equation, writer );
-            writer.close();
-            String  output  = outData.toString();
-            lines = output.lines().toList();
-        }
-        catch ( IOException exc )
-        {
-            fail( "Unexpected I/O failure", exc );
-        }
-        return lines;
-    }
-    
-    /**
      * Filter a list of strings,
      * each beginning with a Command 
      * optionally followed by an argument,
@@ -427,9 +418,10 @@ public class EquationWriterTest
      */
     private static Map<String,Double> getVarMap( List<String> lines )
     {
-        Map<String,Double>  map = 
+        String              setStr  = SET.toString();
+        Map<String,Double>  map     = 
             lines.stream()
-                .filter( l -> l.startsWith( SET.toString() ) )
+                .filter( l -> l.startsWith( setStr ) )
                 // note: the following expression splits
                 // SET a=1 into [SET][a][1]
                 .map( l -> l.split( "[\\s=]+", 3 ) )
