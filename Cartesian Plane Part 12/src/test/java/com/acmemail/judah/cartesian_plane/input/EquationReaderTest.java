@@ -72,11 +72,11 @@ class EquationReaderTest
     }
     
     @Test
-    public void testDefaults()
+    public void testIntrinsicVariableDefaults()
     {
         List<String>    commands    = List.of( eqCommand );
         Equation        actEquation = loadGoRight( commands );
-        EquationTestUtil.verifyEquation( defEquation, actEquation);
+        assertEquals( defEquation.getVars(), actEquation.getVars() );
     }
     
     @ParameterizedTest
@@ -126,6 +126,18 @@ class EquationReaderTest
         assertEquals( expEquation.getVars(), actEquation.getVars() );
     }
     
+    @Test
+    public void testExpressionDefaults()
+    {
+        List<String>        commands    = List.of( eqCommand );
+        Equation            actEquation = loadGoRight( commands );
+        Map<Command,String> expExprMap  = 
+            EquationTestUtil.getExprMap( defEquation );
+        Map<Command,String> actExprMap  = 
+            EquationTestUtil.getExprMap( actEquation );
+        assertEquals( expExprMap, actExprMap );
+    }
+    
     @ParameterizedTest
     @ValueSource( strings= {"+3+", " + 3 + "} )
     public void testExpressionOverride( String modVal )
@@ -153,6 +165,18 @@ class EquationReaderTest
     }
     
     @Test
+    public void testRangeDefaults()
+    {
+        List<String>        commands    = List.of( eqCommand );
+        Equation            actEquation = loadGoRight( commands );
+        Map<Command,Double> expRangeMap = 
+            EquationTestUtil.getRangeMap( defEquation );
+        Map<Command,Double> actRangeMap = 
+            EquationTestUtil.getRangeMap( actEquation );
+        assertEquals( expRangeMap, actRangeMap );
+    }
+    
+    @Test
     public void testRangeOverride()
     {
         double  expStart    = 211;
@@ -170,6 +194,18 @@ class EquationReaderTest
         assertEquals( expStart, actEquation.getRangeStart() );
         assertEquals( expEnd, actEquation.getRangeEnd() );
         assertEquals( expStep, actEquation.getRangeStep() );
+    }
+    
+    @Test
+    public void testNameDefaults()
+    {
+        List<String>        commands    = List.of( eqCommand );
+        Equation            actEquation = loadGoRight( commands );
+        Map<Command,String> expNameMap = 
+            EquationTestUtil.getNameMap( defEquation );
+        Map<Command,String> actNameMap = 
+            EquationTestUtil.getNameMap( actEquation );
+        assertEquals( expNameMap, actNameMap );
     }
     
     @Test
@@ -235,9 +271,10 @@ class EquationReaderTest
     private static void testIntrinsicVarOverride( List<String> commands )
     {
         Equation            actEquation = loadGoRight( commands );
+        Set<String>         expKeys     = defEquation.getVars().keySet();
         Map<String, Double> actMap      = actEquation.getVars();
         Set<String>         actKeys     = actMap.keySet();
-        assertEquals( defEquation.getVars().keySet(), actKeys );
+        assertEquals( expKeys, actKeys );
         for ( String key : actKeys )
         {
             double  actVal  = actMap.get( key );
