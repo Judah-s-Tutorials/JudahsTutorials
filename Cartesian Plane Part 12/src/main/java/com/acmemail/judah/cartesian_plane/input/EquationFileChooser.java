@@ -73,8 +73,24 @@ public final class EquationFileChooser implements IEquationFileChooser
      */
     public EquationFileChooser( Component parent )
     {
+        this( parent, new JFileChooser( userDir ) );
+    }
+    
+    /**
+     * Package-private constructor for testing purposes only.
+     * Allows a mock JFileChooser to be injected
+     * in place of the default implementation.
+     *
+     * @param parent    the parent to use for the JFileChooser parent; may be null
+     * @param chooser   the JFileChooser to encapsulate; must not be null
+     *
+     * @throws NullPointerException if {@code chooser} is null
+     */
+    EquationFileChooser( Component parent, JFileChooser chooser )
+    {
+        Objects.requireNonNull( chooser, "chooser" );
         this.parent = parent;
-        chooser = new JFileChooser( userDir );
+        this.chooser = chooser;
     }
     
     /**

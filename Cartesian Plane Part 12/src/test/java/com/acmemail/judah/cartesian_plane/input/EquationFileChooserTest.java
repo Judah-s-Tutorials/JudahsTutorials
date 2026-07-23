@@ -3,19 +3,16 @@ package com.acmemail.judah.cartesian_plane.input;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.awt.AWTException;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Window;
-import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -23,26 +20,22 @@ import java.io.StringReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.acmemail.judah.cartesian_plane.test_util.EquationTestUtil;
 import com.acmemail.judah.cartesian_plane.test_utils.MessageArchive;
-import com.acmemail.judah.cartesian_plane.test_utils.RobotAssistant;
-import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 
 /**
  * This class implements a JUnit test for the EquationFileChooser.
@@ -61,22 +54,6 @@ import com.acmemail.judah.cartesian_plane.test_utils.Utils;
 @TestMethodOrder( MethodOrderer.OrderAnnotation.class )
 public class EquationFileChooserTest
 {
-    /** Error message used when an operation times-out. */
-    private static final String DIALOG_TIMEOUT  =
-        "timeout waiting for dialog operation to complete";
-    /** The maximum time to wait for the chooser dialog to be posted. */
-    private static final long   MAX_FOCUS_WAIT  = 2000; // milliseconds
-    /** 
-     * The time to wait between checks 
-     * for the chooser dialog to acquire focus. 
-     */
-    private static final long   FOCUS_WAIT      = 250;
-    /**  
-     * The maximum time to wait for a thread encapsulating
-     * the chooser dialog to complete.
-     */
-    private static final long   MAX_DIALOG_WAIT = 3000;
-
     /**  
      * Root reference for all file created in/for this test.
      * Automatically destroyed by JUnit on test completion.
@@ -84,9 +61,6 @@ public class EquationFileChooserTest
      */
     @TempDir
     private static Path    tempRoot;
-    
-    private static final RobotAssistant robot               = 
-        newRobotAssistant();
     
     private static final String         simpleEqName        = "SimpleEq.txt";
     private static final List<String>   simpleEqCommands    =
@@ -145,14 +119,13 @@ public class EquationFileChooserTest
 
     private JFrame  parent;
     
+    private final MockJFileChooser  mockJFileChooser    = 
+        new MockJFileChooser();
     private IEquationFileChooser    chooser;
-    private volatile Equation       testEq;
-    private volatile boolean        saveResult;
     
     @BeforeAll
     public static void beforeAll() throws IOException
     {
-        assertNotNull( robot );
         simpleEqPath  = tempRoot.resolve( simpleEqName );
         saveEqPath  = tempRoot.resolve( saveEqName );
         noSuchFilePath  = tempRoot.resolve( noSuchFileName );
@@ -169,11 +142,10 @@ public class EquationFileChooserTest
     {
         invokeAndWait( () -> parent = makeChooserFramework() );
         invokeAndWait( () -> {
-            chooser = new EquationFileChooser( parent );
+            chooser = new EquationFileChooser( parent, mockJFileChooser );
             chooser.setMessageConsumer( messageArchive );
         });
         messageArchive.clear();
-        testEq = null;
     }
 
     @AfterEach
@@ -234,24 +206,6 @@ public class EquationFileChooserTest
              frame.dispose();
           });
     }
-    
-    @Test
-    @Order( 1 )
-    public void testOpenDialogTimeoutSanityCheck()
-    {
-        Thread  thread  = startChooserThread( this::openOperation );
-        join( thread, MAX_DIALOG_WAIT );
-        
-        if ( !thread.isAlive() )
-        {
-            String  message =
-                "This test is supposed to confirm that the test "
-                + "will not be compromised if a chooser "
-                + "dialog never completes, leaving the worker thread "
-                + "running, but the worker thread has terminated.";
-            fail( message );
-        }
-    }
 
     @Test
     public void testOpenDialogApprove()
@@ -259,12 +213,12 @@ public class EquationFileChooserTest
         // Start a dialog, enter a path to a valid equation file,
         // and approve the operation. Verify that the equation was
         // successfully loaded.
-        String          testPath        = simpleEqPath.toString();
-        // sanity check
-        assertNull( testEq );
-        openDismiss( testPath, KeyEvent.VK_ENTER );
-        assertNotNull( testEq );
+        mockJFileChooser.setSelectedFile( simpleEqPath.toFile() );
+        mockJFileChooser.approve();
+        Optional<Equation>  optEquation = chooser.openDialog();
+        assertTrue( optEquation.isPresent() );
         assertTrue( messageArchive.isEmpty() );
+        Equation    testEq  = optEquation.get();
         EquationTestUtil.verifyEquation( simpleEq, testEq );
     }
 
@@ -273,13 +227,11 @@ public class EquationFileChooserTest
     {
         // Start a dialog, enter a path to a valid equation file,
         // and cancel the operation. Verify a null equation is returned.
-        String          testPath        = simpleEqPath.toString();
-        // Start with testEq non-null; if test succeeds, it will
-        // change to null.
-        testEq = new Exp4jEquation();
-        openDismiss( testPath, KeyEvent.VK_ESCAPE );
+        mockJFileChooser.setSelectedFile( simpleEqPath.toFile() );
+        mockJFileChooser.cancel();
+        Optional<Equation>  optEquation = chooser.openDialog();
         assertTrue( messageArchive.isEmpty() );
-        assertNull( testEq );
+        assertFalse( optEquation.isPresent() );
     }
 
     @Test
@@ -288,11 +240,10 @@ public class EquationFileChooserTest
         // Start a dialog, enter a path to a non-existent file,
         // and approve the operation. Verify that no equation 
         // is loaded.
-        String          testPath        = noSuchFilePath.toString();
-        // this will change if the test succeeds
-        testEq = new Exp4jEquation();
-        openDismiss( testPath, KeyEvent.VK_ENTER );
-        assertNull( testEq );
+        mockJFileChooser.setSelectedFile( noSuchFilePath.toFile() );
+        mockJFileChooser.approve();
+        Optional<Equation>  optEquation = chooser.openDialog();
+        assertFalse( optEquation.isPresent() );
         assertFalse( messageArchive.isEmpty() );
         String  expMessageFragment  = "cannot find the file";
         String  lastMessage         = messageArchive.getLastMessage();
@@ -305,13 +256,12 @@ public class EquationFileChooserTest
         // Start a dialog, enter a path to an invalid file,
         // and approve the operation. Verify that no equation 
         // is loaded.
-        String          testPath        = binaryFilePath.toString();
-        // this will change if the test succeeds
-        testEq = new Exp4jEquation();
-        openDismiss( testPath, KeyEvent.VK_ENTER );
-        assertNull( testEq );
+        mockJFileChooser.setSelectedFile( binaryFilePath.toFile() );
+        mockJFileChooser.approve();
+        Optional<Equation>  optEquation = chooser.openDialog();
+        assertFalse( optEquation.isPresent() );
         assertFalse( messageArchive.isEmpty() );
-        String  expMessageFragment  = "valid command";
+        String  expMessageFragment  = "INVALID";
         String  lastMessage         = messageArchive.getLastMessage();
         assertTrue( lastMessage.contains( expMessageFragment ) );
     }
@@ -323,11 +273,10 @@ public class EquationFileChooserTest
         // that contains parse errors, and approve the operation.
         // Verify that no equation is created, and error
         // messages are posted.
-        String          testPath        = parseErrorPath.toString();
-        // this will change if the test succeeds
-        testEq = new Exp4jEquation();
-        openDismiss( testPath, KeyEvent.VK_ENTER );
-        assertNull( testEq );
+        mockJFileChooser.setSelectedFile( parseErrorPath.toFile() );
+        mockJFileChooser.approve();
+        Optional<Equation>  optEquation = chooser.openDialog();
+        assertFalse( optEquation.isPresent() );
         assertFalse( messageArchive.isEmpty() );
         String  expMessageFragment  = "not a valid name";
         String  lastMessage         = messageArchive.getLastMessage();
@@ -340,18 +289,17 @@ public class EquationFileChooserTest
         // Start a save dialog, enter a path to a valid file, 
         // and approve the operation. Verify that the equation was
         // successfully saved.
-        String          testPath        = saveEqPath.toString();
-        // Start with saveResult = false. If test succeeds
-        // it will change to true.
-        saveResult = false;
-        saveDismiss( saveEq, testPath, KeyEvent.VK_ENTER );
-        assertTrue( saveResult );
+        mockJFileChooser.setSelectedFile( saveEqPath.toFile() );
+        mockJFileChooser.approve();
+        boolean         result          = chooser.saveDialog( saveEq );
+        assertTrue( result );
         assertTrue( messageArchive.isEmpty() );
         
         // Re-read saved file to verify save.
-        openDismiss( testPath, KeyEvent.VK_ENTER );
-        assertNotNull( testEq );
+        Optional<Equation>  optEquation = chooser.openDialog();
+        assertTrue( optEquation.isPresent() );
         assertTrue( messageArchive.isEmpty() );
+        Equation        testEq          = optEquation.get();
         EquationTestUtil.verifyEquation( saveEq, testEq );
     }
 
@@ -361,12 +309,9 @@ public class EquationFileChooserTest
         // Start a save dialog, enter a path to a valid file, 
         // and cancel the operation. Verify that the operation
         // was canceled.
-        String          testPath        = saveEqPath.toString();
-        // Start with saveResult = true. If test succeeds
-        // it will change to false.
-        saveResult = true;
-        saveDismiss( saveEq, testPath, KeyEvent.VK_ESCAPE );
-        assertFalse( saveResult );
+        mockJFileChooser.cancel();
+        boolean result  = chooser.saveDialog( saveEq );
+        assertFalse( result );
         assertTrue( messageArchive.isEmpty() );
         assertFalse( Files.exists( saveEqPath ) );
     }
@@ -378,66 +323,14 @@ public class EquationFileChooserTest
         // and approve the operation. Verify that the operation
         // fails.
         String          testPath        = invalidFilePath.toString();
-        // Start with saveResult = true. If test succeeds
-        // it will change to false.
-        saveResult = true;
-        saveDismiss( saveEq, testPath, KeyEvent.VK_ENTER );
-        assertFalse( saveResult );
+        mockJFileChooser.setSelectedFile( invalidFilePath.toFile() );
+        mockJFileChooser.approve();
+        boolean         result          = chooser.saveDialog( saveEq );
+        assertFalse( result );
         assertFalse( messageArchive.isEmpty() );
         String  expMessageFragment  = testPath;
         String  lastMessage         = messageArchive.getLastMessage();
         assertTrue( lastMessage.contains( expMessageFragment ) );
-    }
-    
-    /**
-     * Post the EquationFileChooser open dialog;
-     * save the result in global variable testEq.
-     */
-    private void openOperation()
-    {
-        Optional<Equation>  optEquation = chooser.openDialog();
-        testEq = optEquation.orElse( null );
-    }
-    
-    /**
-     * Post the EquationFileChooser save dialog;
-     * save the result in global variable testEq.
-     */
-    private void saveOperation( Equation equation )
-    {
-        saveResult = chooser.saveDialog( equation );
-    }
-
-    private void openDismiss( String testPath, int lastKey )
-    {
-        Thread          thread          = 
-            startChooserThread( this::openOperation );
-        robot.type( testPath, lastKey );
-        join( thread, MAX_DIALOG_WAIT );
-        
-        // The worker thread should be done by now. If not,
-        // the test fails.
-        if ( thread.isAlive() )
-        {
-            thread.interrupt();
-            fail( DIALOG_TIMEOUT );
-        }
-    }
-
-    private void saveDismiss( Equation equation, String testPath, int lastKey )
-    {
-        Thread          thread          = 
-            startChooserThread( () -> saveOperation( equation ) );
-        robot.type( testPath, lastKey );
-        join( thread, MAX_DIALOG_WAIT );
-        
-        // The worker thread should be done by now. If not,
-        // the test fails.
-        if ( thread.isAlive() )
-        {
-            thread.interrupt();
-            fail( DIALOG_TIMEOUT );
-        }
     }
 
     /**
@@ -514,72 +407,6 @@ public class EquationFileChooserTest
     }
     
     /**
-     * Start a new thread with a Runnable
-     * that will start the EquationFileChooser dialog.
-     * Wait for the chooser dialog to become visible
-     * and to acquire the keyboard focus,
-     * then return the thread to the caller,
-     * leaving the thread running.
-     * <p>
-     * If the chooser does not acquire focus
-     * after {@linkplain #MAX_FOCUS_WAIT} milliseconds,
-     * a JUnit failure will be asserted.
-     * 
-     * @param runner    the Runnable to be executed in a new thread
-     * 
-     * @return  the thread encapsulating runner
-     */
-    private Thread startChooserThread( Runnable runner )
-    {
-        Thread  thread  = new Thread( runner );
-        thread.start();
-        waitForFocus( parent );
-        return thread;
-    }
-    
-    /**
-     * Wait for the Window owned by the given parent
-     * to acquire the keyboard focus.
-     * If focus is not acquired after {@linkplain #MAX_FOCUS_WAIT}
-     * a failure will be asserted.
-     * <p>
-     * Important note:
-     * this method terminates successfully
-     * when some component in the target JFileChooser
-     * object receives focus,
-     * but we don't know <em>which</em> component.
-     * Most clients of this method
-     * are going to assume
-     * that the chooser's text field
-     * will have focus, 
-     * which, while likely true, is not guaranteed.
-     * If this test ever starts acting flaky
-     * this would be one of the first places
-     * to look.
-     * 
-     * @param parent    the given parent
-     */
-    private static void waitForFocus( Component parent )
-    {
-        boolean     focused     = false;
-        long        startTime   = System.currentTimeMillis();
-        long        elapsedTime = 0;
-        while ( !focused && elapsedTime < MAX_FOCUS_WAIT )
-        {
-            focused = Arrays.stream( Window.getWindows() )
-                .filter( w -> parent.equals( w.getOwner() ) )
-                .map( w -> w.getFocusOwner() )
-                .filter( Objects::nonNull)
-                .findFirst().isPresent();
-            if ( !focused )
-                Utils.pause( FOCUS_WAIT );
-            elapsedTime = System.currentTimeMillis() - startTime;
-        }
-        if ( !focused )
-            fail( "Chooser dialog failed to acquire focus" );
-    }
-    
-    /**
      * Instantiate a very small JFrame and make it visible. 
      * 
      * @return  instantiated JFrame
@@ -594,49 +421,46 @@ public class EquationFileChooserTest
         return frame;
     }
     
-    /**
-     * Create a new RobotAssistant, 
-     * catching the AWTException if necessary.
-     * If an AWTException is caught, 
-     * null will be returned.
-     * The expectation is that the @BeforeAll method
-     * will assert failure if null is returned,
-     * causing execution of the JUnit test class
-     * to be aborted.
-     * 
-     * @return  a new RobotAssistant, or null if failed
-     */
-    private static RobotAssistant newRobotAssistant()
+    @SuppressWarnings("serial")
+    private static class MockJFileChooser extends JFileChooser
     {
-        RobotAssistant  robot   = null;
-        try
+        private File    selectedFile        = null;
+        private int     saveDialogResult    = 0;
+        private int     openDialogResult    = 0;
+        
+        @Override
+        public int showOpenDialog( Component parent )
         {
-            robot = new RobotAssistant();
+            return openDialogResult;
         }
-        catch ( AWTException exc )
+        
+        @Override
+        public int showSaveDialog( Component parent )
         {
-            // 
+            return saveDialogResult;
         }
-        return robot;
-    }
-    
-    /**
-     * Join a given thread, 
-     * waiting a maximum of milliseconds
-     * for the thread to complete.
-     * 
-     * @param thread    the given thread
-     * @param timeout   the maximum wait time
-     */
-    private void join( Thread thread, long timeout )
-    {
-        try
+        
+        @Override
+        public File getSelectedFile()
         {
-            thread.join( timeout );
+            return selectedFile;
         }
-        catch ( InterruptedException exc )
+
+        public void setSelectedFile(File selectedFile)
         {
-            Thread.currentThread().interrupt();
+            this.selectedFile = selectedFile;
+        }
+        
+        public void approve()
+        {
+            saveDialogResult = JFileChooser.APPROVE_OPTION;
+            openDialogResult = JFileChooser.APPROVE_OPTION;
+        }
+        
+        public void cancel()
+        {
+            saveDialogResult = JFileChooser.CANCEL_OPTION;
+            openDialogResult = JFileChooser.CANCEL_OPTION;
         }
     }
 }

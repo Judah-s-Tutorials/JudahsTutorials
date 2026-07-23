@@ -45,33 +45,6 @@ class EquationReaderTest
     }
     
     @Test
-    public void testEmpty()
-    {
-        List<String>    commands    = new ArrayList<>();
-        Equation        expEquation = new Exp4jEquation();
-        Equation        actEquation = loadGoRight( commands );
-        EquationTestUtil.verifyEquation( expEquation, actEquation );
-    }
-    
-    @Test
-    public void testBlank()
-    {
-        List<String>    commands    = List.of( "   " );
-        Equation        expEquation = new Exp4jEquation();
-        Equation        actEquation = loadGoRight( commands );
-        EquationTestUtil.verifyEquation( expEquation, actEquation );
-    }
-    
-    @Test
-    public void testComment()
-    {
-        List<String>    commands    = List.of( "#comment" );
-        Equation        expEquation = new Exp4jEquation();
-        Equation        actEquation = loadGoRight( commands );
-        EquationTestUtil.verifyEquation( expEquation, actEquation );
-    }
-    
-    @Test
     public void testIntrinsicVariableDefaults()
     {
         List<String>    commands    = List.of( eqCommand );
@@ -226,6 +199,33 @@ class EquationReaderTest
         Map<Command,String> actNames    = 
             EquationTestUtil.getNameMap( actEquation );
         assertEquals( expNames, actNames );
+    }
+    
+    @Test
+    public void testEmpty()
+    {
+        List<String>    commands    = new ArrayList<>();
+        Equation        expEquation = new Exp4jEquation();
+        Equation        actEquation = loadGoRight( commands );
+        EquationTestUtil.verifyEquation( expEquation, actEquation );
+    }
+    
+    @Test
+    public void testBlank()
+    {
+        List<String>    commands    = List.of( "   " );
+        Equation        expEquation = new Exp4jEquation();
+        Equation        actEquation = loadGoRight( commands );
+        EquationTestUtil.verifyEquation( expEquation, actEquation );
+    }
+    
+    @Test
+    public void testComment()
+    {
+        List<String>    commands    = List.of( "#comment" );
+        Equation        expEquation = new Exp4jEquation();
+        Equation        actEquation = loadGoRight( commands );
+        EquationTestUtil.verifyEquation( expEquation, actEquation );
     }
     
     @Test
