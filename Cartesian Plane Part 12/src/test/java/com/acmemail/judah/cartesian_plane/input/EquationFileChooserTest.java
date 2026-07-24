@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -25,6 +24,7 @@ import java.util.Optional;
 
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -117,15 +117,15 @@ public class EquationFileChooserTest
     private static Path     parseErrorPath;
     
 
-    private JFrame  parent;
+    private static JFrame       parent;
     
-    private final MockJFileChooser  mockJFileChooser    = 
-        new MockJFileChooser();
+    private MockJFileChooser    mockJFileChooser;
     private IEquationFileChooser    chooser;
     
     @BeforeAll
     public static void beforeAll() throws IOException
     {
+        invokeAndWait( () -> parent = new JFrame() );
         simpleEqPath  = tempRoot.resolve( simpleEqName );
         saveEqPath  = tempRoot.resolve( saveEqName );
         noSuchFilePath  = tempRoot.resolve( noSuchFileName );
@@ -140,22 +140,17 @@ public class EquationFileChooserTest
     @BeforeEach
     public void setUp() throws Exception
     {
-        invokeAndWait( () -> parent = makeChooserFramework() );
+        messageArchive.clear();
         invokeAndWait( () -> {
+            mockJFileChooser = new MockJFileChooser();
             chooser = new EquationFileChooser( parent, mockJFileChooser );
             chooser.setMessageConsumer( messageArchive );
         });
-        messageArchive.clear();
     }
 
     @AfterEach
     public void tearDown() throws Exception
     {
-        if ( parent != null )
-            invokeAndWait( () -> {
-                parent.setVisible( false );
-                parent.dispose();
-            });
         // assume we always want to start with no default
         // file to save to
         Files.deleteIfExists( saveEqPath );
@@ -200,10 +195,8 @@ public class EquationFileChooserTest
             assertNull( test.getParent() );
          });
          invokeAndWait( () -> {
-             JFrame  frame   = new JFrame();
-             EquationFileChooser test    = new EquationFileChooser( frame ); 
-             assertEquals( frame, test.getParent() );
-             frame.dispose();
+             EquationFileChooser test    = new EquationFileChooser( parent ); 
+             assertEquals( parent, test.getParent() );
           });
     }
 
@@ -214,7 +207,7 @@ public class EquationFileChooserTest
         // and approve the operation. Verify that the equation was
         // successfully loaded.
         mockJFileChooser.setSelectedFile( simpleEqPath.toFile() );
-        mockJFileChooser.approve();
+        mockJFileChooser.approve( true );
         Optional<Equation>  optEquation = chooser.openDialog();
         assertTrue( optEquation.isPresent() );
         assertTrue( messageArchive.isEmpty() );
@@ -228,7 +221,7 @@ public class EquationFileChooserTest
         // Start a dialog, enter a path to a valid equation file,
         // and cancel the operation. Verify a null equation is returned.
         mockJFileChooser.setSelectedFile( simpleEqPath.toFile() );
-        mockJFileChooser.cancel();
+        mockJFileChooser.approve( false );
         Optional<Equation>  optEquation = chooser.openDialog();
         assertTrue( messageArchive.isEmpty() );
         assertFalse( optEquation.isPresent() );
@@ -241,7 +234,7 @@ public class EquationFileChooserTest
         // and approve the operation. Verify that no equation 
         // is loaded.
         mockJFileChooser.setSelectedFile( noSuchFilePath.toFile() );
-        mockJFileChooser.approve();
+        mockJFileChooser.approve( true );
         Optional<Equation>  optEquation = chooser.openDialog();
         assertFalse( optEquation.isPresent() );
         assertFalse( messageArchive.isEmpty() );
@@ -257,7 +250,7 @@ public class EquationFileChooserTest
         // and approve the operation. Verify that no equation 
         // is loaded.
         mockJFileChooser.setSelectedFile( binaryFilePath.toFile() );
-        mockJFileChooser.approve();
+        mockJFileChooser.approve( true );
         Optional<Equation>  optEquation = chooser.openDialog();
         assertFalse( optEquation.isPresent() );
         assertFalse( messageArchive.isEmpty() );
@@ -274,7 +267,7 @@ public class EquationFileChooserTest
         // Verify that no equation is created, and error
         // messages are posted.
         mockJFileChooser.setSelectedFile( parseErrorPath.toFile() );
-        mockJFileChooser.approve();
+        mockJFileChooser.approve( true );
         Optional<Equation>  optEquation = chooser.openDialog();
         assertFalse( optEquation.isPresent() );
         assertFalse( messageArchive.isEmpty() );
@@ -290,7 +283,7 @@ public class EquationFileChooserTest
         // and approve the operation. Verify that the equation was
         // successfully saved.
         mockJFileChooser.setSelectedFile( saveEqPath.toFile() );
-        mockJFileChooser.approve();
+        mockJFileChooser.approve( true );
         boolean         result          = chooser.saveDialog( saveEq );
         assertTrue( result );
         assertTrue( messageArchive.isEmpty() );
@@ -309,7 +302,7 @@ public class EquationFileChooserTest
         // Start a save dialog, enter a path to a valid file, 
         // and cancel the operation. Verify that the operation
         // was canceled.
-        mockJFileChooser.cancel();
+        mockJFileChooser.approve( false );
         boolean result  = chooser.saveDialog( saveEq );
         assertFalse( result );
         assertTrue( messageArchive.isEmpty() );
@@ -324,7 +317,7 @@ public class EquationFileChooserTest
         // fails.
         String          testPath        = invalidFilePath.toString();
         mockJFileChooser.setSelectedFile( invalidFilePath.toFile() );
-        mockJFileChooser.approve();
+        mockJFileChooser.approve( true );
         boolean         result          = chooser.saveDialog( saveEq );
         assertFalse( result );
         assertFalse( messageArchive.isEmpty() );
@@ -341,7 +334,7 @@ public class EquationFileChooserTest
      */
     private static void invokeAndWait( Runnable runner )
     {
-        if ( EventQueue.isDispatchThread() )
+        if ( SwingUtilities.isEventDispatchThread() )
             runner.run();
         else
         {
@@ -406,38 +399,22 @@ public class EquationFileChooserTest
         return equation;
     }
     
-    /**
-     * Instantiate a very small JFrame and make it visible. 
-     * 
-     * @return  instantiated JFrame
-     */
-    private static JFrame makeChooserFramework()
-    {
-        JFrame      frame   = new JFrame( "test component" );
-        Dimension   size    = new Dimension( 10, 10 );
-        frame.getContentPane().setPreferredSize( size );
-        frame.pack();
-        frame.setVisible( true );
-        return frame;
-    }
-    
     @SuppressWarnings("serial")
     private static class MockJFileChooser extends JFileChooser
     {
-        private File    selectedFile        = null;
-        private int     saveDialogResult    = 0;
-        private int     openDialogResult    = 0;
+        private File    selectedFile    = null;
+        private int     expectedResult  = 0;
         
         @Override
         public int showOpenDialog( Component parent )
         {
-            return openDialogResult;
+            return expectedResult;
         }
         
         @Override
         public int showSaveDialog( Component parent )
         {
-            return saveDialogResult;
+            return expectedResult;
         }
         
         @Override
@@ -451,16 +428,10 @@ public class EquationFileChooserTest
             this.selectedFile = selectedFile;
         }
         
-        public void approve()
+        public void approve( boolean result )
         {
-            saveDialogResult = JFileChooser.APPROVE_OPTION;
-            openDialogResult = JFileChooser.APPROVE_OPTION;
-        }
-        
-        public void cancel()
-        {
-            saveDialogResult = JFileChooser.CANCEL_OPTION;
-            openDialogResult = JFileChooser.CANCEL_OPTION;
+            this.expectedResult = result ? 
+                JFileChooser.APPROVE_OPTION : JFileChooser.CANCEL_OPTION;
         }
     }
 }

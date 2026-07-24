@@ -62,4 +62,5 @@ Blog-backups
 # misc
 Weasel.java
 *.claude*
+*.md
 
