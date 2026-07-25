@@ -2,6 +2,11 @@ package com.acmemail.judah.color_primer;
 
 
 import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -19,7 +24,7 @@ import javax.swing.event.ChangeListener;
  * 
  * @author Jack Straub
  */
-public class SpectrumFrame implements Runnable
+public class SpectrumFrame2 implements Runnable
 {
     /** The application frame.  */
     private JFrame  frame       = null;
@@ -34,6 +39,7 @@ public class SpectrumFrame implements Runnable
     private JPanel  contentPane = null;
     /** The window that we will be drawing on. */
     private JPanel  userPanel   = null;
+    private double  barAngle    = 0;
     
     /**
      * Constructor.
@@ -42,7 +48,7 @@ public class SpectrumFrame implements Runnable
      * 					drawing to. Will become a child of the
      * 					content pane.
      */
-    public SpectrumFrame( JPanel userPanel )
+    public SpectrumFrame2( JPanel userPanel )
     {
         this.userPanel = userPanel;
     }
@@ -99,11 +105,15 @@ public class SpectrumFrame implements Runnable
         
         /* Set the range slider at the bottom of the frame. */
         contentPane.add( getSlider(), BorderLayout.SOUTH ); 
+        contentPane.addKeyListener( new KeyMonitor() );
+        contentPane.addMouseListener( new MouseMonitor( contentPane ) );
         frame.setContentPane( contentPane );
         /* Initiate frame sizing, positioning etc. */
         frame.pack();
         /* Make the frame visible. */
         frame.setVisible( true );
+        
+        contentPane.requestFocusInWindow();
     }
     
     public int getHueLowerValue()
@@ -128,6 +138,11 @@ public class SpectrumFrame implements Runnable
     {
         int val = brightSlider.getValue();
         return val;
+    }
+    
+    public double getBarAngle()
+    {
+        return barAngle;
     }
     
     private JPanel getSlider()
@@ -181,5 +196,54 @@ public class SpectrumFrame implements Runnable
         satSlider.addChangeListener( satListener );
         brightSlider.addChangeListener( brightListener );
         return panel;
+    }
+    
+    private class MouseMonitor extends MouseAdapter
+    {
+        private final Component owner;
+        
+        public MouseMonitor( Component owner )
+        {
+            this.owner = owner;
+        }
+        
+        @Override
+        public void mousePressed( MouseEvent evt )
+        {
+            owner.requestFocusInWindow();
+        }
+    }
+    
+    private class KeyMonitor extends KeyAdapter
+    {
+        @Override
+        public void keyPressed( KeyEvent evt )
+        {
+            final double TWO_PI = 2 * Math.PI;
+            final int       UP      = KeyEvent.VK_UP;
+            final int       DOWN    = KeyEvent.VK_DOWN;
+            final int       LEFT    = KeyEvent.VK_LEFT;
+            final int       RIGHT   = KeyEvent.VK_RIGHT;
+            double  incr    = 0;
+            int    keyCode  = evt.getKeyCode();
+            double  defIncr = Math.PI / 16 * .1;
+            if ( keyCode == UP || keyCode == LEFT )
+                incr = defIncr;
+            else if ( keyCode == DOWN || keyCode == RIGHT )
+                incr = -defIncr;
+            else
+                incr = 0;
+            if ( incr != 0 )
+            {
+                barAngle += incr;
+                if ( barAngle < 0 )
+                    barAngle += TWO_PI;
+                else if ( barAngle > TWO_PI )
+                    barAngle -= TWO_PI;
+                else
+                    ;
+                userPanel.repaint();
+            }
+        }
     }
 }

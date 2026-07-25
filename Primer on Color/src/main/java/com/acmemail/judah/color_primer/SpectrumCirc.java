@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Line2D;
-import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
@@ -16,7 +15,6 @@ public class SpectrumCirc extends JPanel
     private static final Color  BROWN       = new Color( 0xDAA06D );
     private static final double BORDER      = 10;
 
-    private Rectangle2D     rect            = new Rectangle2D.Double();
     private int             currWidth;
     private int             currHeight;
     private Graphics2D      gtx;

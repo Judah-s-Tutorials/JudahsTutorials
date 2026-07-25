@@ -84,21 +84,13 @@ public class EquationFileChooserTest
     private static final Equation   saveEq    =
         getEquation( saveEqCommands );
     
-    private static final MessageArchive messageArchive  = 
-        new MessageArchive();
-    
-    private static final String     noSuchFileName      = "noSuchFile.txt";
-    private static final String     binaryFileName      = "binaryFile.bin";
-    private static final String     invalidFileName     = 
-        "no/such/dir/invalid.txt";
-    
     /** 
      * This file is used to create an equation file with two parse errors.
      * It contains an invalid RADIUS name, and an invalid variable
      * declaration.
      */
-    private static final String     parseErrorFileName  = "parseError.txt";
-    private static final List<String> parseErrorCommands  = List.of(
+    private static final String     parseErrorName      = "parseError.txt";
+    private static final List<String> parseErrorCommands    = List.of(
         Command.EQUATION + " parse errors",
         "# parse error number 1",
         Command.SET + " x=%",
@@ -107,7 +99,11 @@ public class EquationFileChooserTest
         Command.RADIUS + " ^r",
         Command.START + " -1"
     );
-
+    
+    private static final String     noSuchFileName      = "noSuchFile.txt";
+    private static final String     binaryFileName      = "binaryFile.bin";
+    private static final String     invalidFileName     = 
+        "no/such/dir/invalid.txt";
 
     private static Path     simpleEqPath;
     private static Path     saveEqPath;
@@ -116,11 +112,12 @@ public class EquationFileChooserTest
     private static Path     invalidFilePath;
     private static Path     parseErrorPath;
     
-
-    private static JFrame       parent;
+    private static final MessageArchive messageArchive  = 
+        new MessageArchive();
+    private static JFrame           parent;
     
-    private MockJFileChooser    mockJFileChooser;
-    private IEquationFileChooser    chooser;
+    private MockJFileChooser        mockJFileChooser;
+    private EquationFileChooser     chooser;
     
     @BeforeAll
     public static void beforeAll() throws IOException
@@ -131,14 +128,14 @@ public class EquationFileChooserTest
         noSuchFilePath  = tempRoot.resolve( noSuchFileName );
         binaryFilePath  = tempRoot.resolve( binaryFileName );
         invalidFilePath  = tempRoot.resolve( invalidFileName );
-        parseErrorPath  = tempRoot.resolve( parseErrorFileName );
+        parseErrorPath  = tempRoot.resolve( parseErrorName );
         writeFile( simpleEqPath, simpleEqCommands );
         writeFile( parseErrorPath, parseErrorCommands );
         writeBinaryFile( binaryFilePath );
     }
     
     @BeforeEach
-    public void setUp() throws Exception
+    public void beforeEach() throws Exception
     {
         messageArchive.clear();
         invokeAndWait( () -> {
@@ -147,9 +144,9 @@ public class EquationFileChooserTest
             chooser.setMessageConsumer( messageArchive );
         });
     }
-
+    
     @AfterEach
-    public void tearDown() throws Exception
+    public void afterEach() throws Exception
     {
         // assume we always want to start with no default
         // file to save to
@@ -312,7 +309,7 @@ public class EquationFileChooserTest
     @Test
     public void testSaveDialogInvalid()
     {
-        // Start a save dialog, enter a path to a file location, 
+        // Start a save dialog, enter a path to an invalid file location, 
         // and approve the operation. Verify that the operation
         // fails.
         String          testPath        = invalidFilePath.toString();
