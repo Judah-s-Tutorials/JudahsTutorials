@@ -3,6 +3,7 @@ package com.acmemail.judah.cartesian_plane.input;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -29,9 +30,7 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.acmemail.judah.cartesian_plane.test_util.EquationTestUtil;
@@ -51,7 +50,6 @@ import com.acmemail.judah.cartesian_plane.test_utils.MessageArchive;
  * @see #startChooserThread(Runnable)
  * @see #waitForFocus(Component)
  */
-@TestMethodOrder( MethodOrderer.OrderAnnotation.class )
 public class EquationFileChooserTest
 {
     /**  
@@ -86,7 +84,7 @@ public class EquationFileChooserTest
     
     /** 
      * This file is used to create an equation file with two parse errors.
-     * It contains an invalid RADIUS name, and an invalid variable
+     * It must contain an invalid RADIUS name, and an invalid variable
      * declaration.
      */
     private static final String     parseErrorName      = "parseError.txt";
@@ -152,28 +150,6 @@ public class EquationFileChooserTest
         // file to save to
         Files.deleteIfExists( saveEqPath );
     }
-    
-    @Test
-    public void testMessageConsumer()
-    {
-        // get the current message consumer
-        EquationFileChooser chooser         = new EquationFileChooser();
-        MessageConsumer     currConsumer    = chooser.getMessageConsumer();
-        
-        // set a new consumer
-        MessageConsumer newConsumer         = new MessageArchive();
-        chooser.setMessageConsumer( newConsumer );
-        
-        // test the getter; sanity check against current consumer
-        MessageConsumer testConsumer        = chooser.getMessageConsumer();
-        assertEquals( newConsumer, testConsumer );
-        assertNotEquals( newConsumer, currConsumer );
-        
-        // pass null to the setter, restoring the default consumer
-        chooser.setMessageConsumer( null );
-        testConsumer = chooser.getMessageConsumer();
-        assertNotEquals( newConsumer, testConsumer );
-    }
 
     @Test
     public void testEquationFileChooser()
@@ -195,6 +171,39 @@ public class EquationFileChooserTest
              EquationFileChooser test    = new EquationFileChooser( parent ); 
              assertEquals( parent, test.getParent() );
           });
+    }
+    
+    @Test
+    public void testMessageConsumer()
+    {
+        // get the current message consumer
+        EquationFileChooser chooser         = 
+            new EquationFileChooser( null, mockJFileChooser );
+        MessageConsumer     currConsumer    = chooser.getMessageConsumer();
+        
+        // set a new consumer
+        chooser.setMessageConsumer( messageArchive );
+        
+        // test the getter; sanity check against current consumer
+        MessageConsumer testConsumer        = chooser.getMessageConsumer();
+        assertEquals( messageArchive, testConsumer );
+        assertNotEquals( messageArchive, currConsumer );
+        
+        // make sure our message consumer is being used
+        mockJFileChooser.approve( true );
+        mockJFileChooser.setSelectedFile( noSuchFilePath.toFile() );
+        Optional<Equation> result = chooser.openDialog();
+        
+        assertTrue( result.isEmpty() );
+        String  message = messageArchive.getLastMessage();
+        assertNotNull( message );
+        assertTrue( message.contains( noSuchFileName ) );
+        
+        // pass null to the setter, restoring the default consumer
+        chooser.setMessageConsumer( null );
+        testConsumer = chooser.getMessageConsumer();
+        assertNotNull( testConsumer );
+        assertNotEquals( messageArchive, testConsumer );
     }
 
     @Test
@@ -235,9 +244,8 @@ public class EquationFileChooserTest
         Optional<Equation>  optEquation = chooser.openDialog();
         assertFalse( optEquation.isPresent() );
         assertFalse( messageArchive.isEmpty() );
-        String  expMessageFragment  = "cannot find the file";
         String  lastMessage         = messageArchive.getLastMessage();
-        assertTrue( lastMessage.contains( expMessageFragment ) );
+        assertTrue( lastMessage.contains( noSuchFileName ) );
     }
 
     @Test
@@ -268,9 +276,9 @@ public class EquationFileChooserTest
         Optional<Equation>  optEquation = chooser.openDialog();
         assertFalse( optEquation.isPresent() );
         assertFalse( messageArchive.isEmpty() );
-        String  expMessageFragment  = "not a valid name";
         String  lastMessage         = messageArchive.getLastMessage();
-        assertTrue( lastMessage.contains( expMessageFragment ) );
+        assertTrue( lastMessage.contains( "not a valid name" ) );
+        assertTrue( lastMessage.contains( "not a valid expression"  ) );
     }
 
     @Test
@@ -318,9 +326,8 @@ public class EquationFileChooserTest
         boolean         result          = chooser.saveDialog( saveEq );
         assertFalse( result );
         assertFalse( messageArchive.isEmpty() );
-        String  expMessageFragment  = testPath;
         String  lastMessage         = messageArchive.getLastMessage();
-        assertTrue( lastMessage.contains( expMessageFragment ) );
+        assertTrue( lastMessage.contains( testPath ) );
     }
 
     /**

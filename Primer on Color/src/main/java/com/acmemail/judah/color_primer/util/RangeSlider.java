@@ -1,4 +1,4 @@
-package com.acmemail.judah.color_primer;
+package com.acmemail.judah.color_primer.util;
 
 import java.awt.Color;
 import java.awt.Graphics;
