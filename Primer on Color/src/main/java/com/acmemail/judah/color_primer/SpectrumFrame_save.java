@@ -2,14 +2,11 @@ package com.acmemail.judah.color_primer;
 
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.function.IntConsumer;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -17,7 +14,6 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeListener;
@@ -30,7 +26,7 @@ import com.acmemail.judah.color_primer.util.RangeSlider;
  * 
  * @author Jack Straub
  */
-public class SpectrumFrame implements Runnable
+public class SpectrumFrame_save implements Runnable
 {
     /** The application frame.  */
     private JFrame  frame       = null;
@@ -54,7 +50,7 @@ public class SpectrumFrame implements Runnable
      * 					drawing to. Will become a child of the
      * 					content pane.
      */
-    public SpectrumFrame( JPanel userPanel )
+    public SpectrumFrame_save( JPanel userPanel )
     {
         this.userPanel = userPanel;
     }
@@ -163,6 +159,8 @@ public class SpectrumFrame implements Runnable
         satSlider.setValue( 100 );
         brightSlider.setValue( 100 );
         JLabel      hueLabel        = new JLabel();
+        JLabel      satLabel        = new JLabel();
+        JLabel      brightLabel     = new JLabel();
         
         JPanel      panel       = new JPanel();
         BoxLayout   layout      = new BoxLayout( panel, BoxLayout.Y_AXIS );
@@ -170,9 +168,12 @@ public class SpectrumFrame implements Runnable
             BorderFactory.createEmptyBorder( 10, 10, 10, 10 );
         panel.setLayout( layout );
         panel.setBorder( border );
-        panel.add( getHuePanel() );
-        panel.add( getSliderPanel( satSlider, satText ) );
-        panel.add( getSliderPanel( brightSlider, brightText ) );
+        panel.add( hueSlider );
+        panel.add( hueLabel );
+        panel.add( satSlider );
+        panel.add( satLabel );
+        panel.add( brightSlider );
+        panel.add( brightLabel );
         
         ChangeListener  hueListener     = e -> {
             String  text    = "" + getHueLowerValue() + degree + " - " 
@@ -180,135 +181,23 @@ public class SpectrumFrame implements Runnable
             hueLabel.setText( hueText + text );
             userPanel.repaint();
         };
-//        hueListener.stateChanged( null );
-//        hueSlider.addChangeListener( hueListener );
-        return panel;
-    }
-    
-    private JPanel getSliderPanel( JSlider slider, String text )
-    {
-        final Color validBG     = Color.WHITE;
-        final Color invalidBG   = Color.RED;
-        JPanel      mainPanel   = new JPanel();
-        BoxLayout   mainLayout  = 
-            new BoxLayout( mainPanel, BoxLayout.Y_AXIS );
-        mainPanel.setLayout( mainLayout );
-        
-        JTextField  textField   = new JTextField( 3 );
-        JLabel      percent     = new JLabel( "%" );
-        JLabel      label       = new JLabel( text );
-        JPanel      labelPanel  = new JPanel();
-        labelPanel.add( label );
-        labelPanel.add( textField );
-        labelPanel.add( percent );
-        
-        textField.setHorizontalAlignment( JTextField.RIGHT );
-        
-        mainPanel.add( slider );
-        mainPanel.add( labelPanel );
-        ChangeListener  sliderListener  = e -> {
-            String  val = "" + slider.getValue();
-            textField.setText( val );
-            textField.setBackground( validBG );
+        ChangeListener  satListener     = e -> {
+            String  text    = "" + satSlider.getValue();
+            satLabel.setText( satText + text );
             userPanel.repaint();
         };
-        slider.addChangeListener( sliderListener );
-        sliderListener.stateChanged( null );
-
-        ActionListener  actionListener  = e -> {
-            int val = getIntValue( textField );
-            if ( val < slider.getMinimum() || val > slider.getMaximum() )
-                textField.setBackground( invalidBG );
-            else
-            {
-                slider.setValue( val );
-                slider.setBackground( validBG );
-            }
-        };
-        textField.addActionListener( actionListener );
-        
-        return mainPanel;
-    }
-    
-    private JPanel getHuePanel()
-    {
-        final String    degree      = "\u00b0";
-        
-        JPanel      mainPanel   = new JPanel();
-        BoxLayout   mainLayout  = 
-            new BoxLayout( mainPanel, BoxLayout.Y_AXIS );
-        mainPanel.setLayout( mainLayout );
-        
-        JTextField  minField    = new JTextField( 3 );
-        JTextField  maxField    = new JTextField( 3 );
-        JLabel      minDegree   = new JLabel( degree );
-        JLabel      minLabel    = new JLabel( "Hue min:" );
-        JLabel      maxDegree   = new JLabel( degree );
-        JLabel      maxLabel    = new JLabel( "Hue max:" );
-        JPanel      labelPanel  = new JPanel();
-        labelPanel.add( minLabel );
-        labelPanel.add( minField );
-        labelPanel.add( minDegree );
-        labelPanel.add( maxLabel );
-        labelPanel.add( maxField );
-        labelPanel.add( maxDegree );
-        
-        minField.setHorizontalAlignment( JTextField.RIGHT );
-        
-        mainPanel.add( hueSlider );
-        mainPanel.add( labelPanel );
-        ChangeListener  hueListener     = e -> {
-            String  minText = "" + getHueLowerValue() + degree;
-            String  maxText = "" + getHueUpperValue() + degree;
-            minField.setText( minText );
-            maxField.setText( maxText );
+        ChangeListener  brightListener  = e -> {
+            String  text    = "" + brightSlider.getValue();
+            brightLabel.setText( brightText + text );
             userPanel.repaint();
         };
-        hueSlider.addChangeListener( hueListener );
         hueListener.stateChanged( null );
-        
-        addHueTextListener( minField, hueSlider::setValue );
-        addHueTextListener( maxField, hueSlider::setUpperValue );
-        
-        return mainPanel;
-    }
-    
-    private void addHueTextListener( JTextField field, IntConsumer setter )
-    {
-        final Color     validBG     = Color.WHITE;
-        final Color     invalidBG   = Color.RED;
-        ActionListener  listener     = e -> {
-            int val = getIntValue( field );
-            int min = hueSlider.getMinimum();
-            int max = hueSlider.getMaximum();
-            if ( val < min || val > max )
-                field.setBackground( invalidBG );
-            else
-            {
-                setter.accept( val );
-                field.setBackground( validBG );
-            }
-        };
-        field.addActionListener( listener );
-    }
-    
-    private int getIntValue( JTextField field )
-    {
-        String  text    = field.getText();
-        int     len     = text.length() - 1;
-        char    last    = text.charAt( len );
-        if ( last == '\u00b0' || last == '%' )
-            text = text.substring( 0, len );
-        System.out.println( text );
-        int val = -1;
-        try
-        {
-            val = Integer.parseInt( text );
-        }
-        catch ( NumberFormatException exc )
-        {
-        }
-        return val;
+        satListener.stateChanged( null );
+        brightListener.stateChanged( null );
+        hueSlider.addChangeListener( hueListener );
+        satSlider.addChangeListener( satListener );
+        brightSlider.addChangeListener( brightListener );
+        return panel;
     }
     
     private class MouseMonitor extends MouseAdapter

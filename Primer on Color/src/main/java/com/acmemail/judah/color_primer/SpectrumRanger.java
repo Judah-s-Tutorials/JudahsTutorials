@@ -16,7 +16,6 @@ import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Map;
 
@@ -33,25 +32,32 @@ public class SpectrumRanger extends JPanel
             KEY_ANTIALIASING, VALUE_ANTIALIAS_ON,
             KEY_RENDERING, VALUE_RENDER_QUALITY
         );
+    private static final int        G_BORDER_WIDTH  = 2;
+    private static final Stroke     G_STROKE        = 
+        new BasicStroke( G_BORDER_WIDTH );
+    private static final Color      G_BORDER_COLOR  = Color.BLACK;
+    private static final double     G_DIAMETER      = 20;
     
-    private static final double     GLOBE_DIAM  = ColorGlobe.getDiameter();
-    private static final double     PADDING     = 10;
-    private static final double     SPACING     = GLOBE_DIAM + PADDING;
+    private static final Color      BAR_COLOR   = Color.BLACK;
+    private static final float      BAR_WIDTH   = 3;
+    private final Stroke            BAR_STROKE  = 
+        new BasicStroke( BAR_WIDTH );
+
+    private static final double     PADDING     = 5;
+    private static final double     SPACING     = G_DIAMETER + PADDING;
     private static final double     TWO_PI      = Math.PI * 2;
     private static final Color      BROWN       = new Color( 0xDAA06D );
-    private static final Stroke     BAR_STROKE  = new BasicStroke( 3f );
-    private static final Color      BAR_COLOR   = Color.BLACK;
-    private static final Ellipse2D  colorGlobe  = new Ellipse2D.Double();
     
     private static final SpectrumRanger spectrum    = 
         new SpectrumRanger( 500 );
     private static final SpectrumFrame  root        = 
         new SpectrumFrame( spectrum );
     
+    private Graphics2D      gtx;
     private int             currWidth;
     private int             currHeight;
-    private Graphics2D      gtx;
     
+    private Ellipse2D       gCircle         = new Ellipse2D.Double();
     private Rectangle2D     refRectInner    = new Rectangle2D.Double();
     private Line2D          bar             = new Line2D.Double();
     private FeedbackRect    feedbackRect    = new FeedbackRect();
@@ -70,7 +76,6 @@ public class SpectrumRanger extends JPanel
     @Override
     public void paintComponent( Graphics graphics )
     {
-        // begin boilerplate
         super.paintComponent( graphics );
         gtx = (Graphics2D)graphics;
         currWidth = getWidth();
@@ -79,19 +84,29 @@ public class SpectrumRanger extends JPanel
         gtx.setColor( BROWN );
         gtx.fillRect( 0, 0, currWidth, currHeight );
         
-        double  diam        = 
+        double  currDiam = 
             Math.min( currWidth - 2 * SPACING, currHeight - 2 * SPACING );
-        refRectInner.setFrame( SPACING, SPACING, diam, diam );
-        double  radius      = diam / 2 - ColorGlobe.getDiameter();
-        double  centerXco   = currWidth / 2.;
-        double  centerYco   = currHeight / 2.;
-        double  incr        = TWO_PI / 5000;
+        refRectInner.setFrame( SPACING, SPACING, currDiam, currDiam );
+        double  radius      = (currDiam - G_DIAMETER) / 2;
+        
+        // If the window gets too small the radius will turn negative.
+        // Complete the paint only if radius is a somewhat reasonable value.
+        if ( radius > 10 )
+            nonDegeneratePaint( radius );
+    }
+    
+    private void nonDegeneratePaint( double radius )
+    {
+        double  centerXco   = refRectInner.getCenterX();
+        double  centerYco   = refRectInner.getCenterY();
         Line2D  line        = new Line2D.Double();
 
         double  start       = Math.toRadians( root.getHueLowerValue() );
         double  end         = Math.toRadians( root.getHueUpperValue() );
         float   sat         = root.getSaturation() / 100f;
         float   bright      = root.getBrightness() / 100f;
+        
+        double  incr        = 1 / (2 * radius);
         for ( double angle = start ; angle < end ; angle += incr  )
         {
             double  xco     = centerXco + radius * Math.cos( angle );
@@ -103,10 +118,14 @@ public class SpectrumRanger extends JPanel
             gtx.draw( line );
         }
         drawBar( feedbackRect );
+        drawGlobe( gtx, bar );
     }
     
     private void drawBar( FeedbackRect feedback )
     {
+        Color   saveColor   = gtx.getColor();
+        Stroke  saveStroke  = gtx.getStroke();
+        
         double  barAngle    = root.getBarAngle();
         double  radius      = refRectInner.getWidth() / 2;
         double  centerXco   = refRectInner.getCenterX();
@@ -118,7 +137,37 @@ public class SpectrumRanger extends JPanel
         gtx.setStroke( BAR_STROKE );
         gtx.draw( bar );
         feedback.draw( gtx, bar );
-//        colorGlobe.draw( gtx, bar );
+
+        gtx.setColor( saveColor );
+        gtx.setStroke( saveStroke );
+    }
+    
+    private void drawGlobe( Graphics2D gtx, Line2D line )
+    {
+        Color   origColor   = gtx.getColor();
+        Stroke  origStroke  = gtx.getStroke();
+        
+        double  xco         = line.getX2() - G_DIAMETER / 2;
+        double  yco         = line.getY2() - G_DIAMETER / 2;
+        gCircle.setFrame( xco, yco, G_DIAMETER, G_DIAMETER );
+        
+        double  angleNorm   = Utils.getAngle( line ) / TWO_PI;
+        Color   hue         = Color.getHSBColor( (float)angleNorm, 1, 1 );
+        gtx.setColor( hue );
+        gtx.fill( gCircle );
+        gtx.setStroke( G_STROKE );
+        gtx.setColor( G_BORDER_COLOR );
+        gtx.draw( gCircle );
+        
+        gtx.setColor( origColor );
+        gtx.setStroke( origStroke );
+    }
+    
+    private int getMinRaysToFill( double radius )
+    {
+        double  circumference   = TWO_PI * radius;
+        int     numRays         = (int)(circumference + 1);
+        return numRays;
     }
     
     private static class FeedbackRect
