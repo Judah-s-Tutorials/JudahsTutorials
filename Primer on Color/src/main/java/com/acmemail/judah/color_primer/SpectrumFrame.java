@@ -3,12 +3,7 @@ package com.acmemail.judah.color_primer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.util.function.IntConsumer;
 
 import javax.swing.BorderFactory;
@@ -25,18 +20,79 @@ import javax.swing.event.ChangeListener;
 import com.acmemail.judah.color_primer.util.RangeSlider;
 
 /**
- * This class encapsulates the frame that is required
- * to assemble the GUI for our project.
+ * Encapsulation of the GUI for the Spectrum project,
+ * in which the visual spectrum is represented as a wheel,
+ * with red at 0&#xB0;/360&#xB0;,
+ * yellow at 60&#xB0;,
+ * green at 120&#xB0;, 
+ * cyan at 180&#xB0;
+ * and magenta at300&#xB0;.
+ * It controls the following properties:
+ * <ol>
+ * <li>
+ * Hue minimum: 
+ * the minimum hue value to display,
+ * stored in degrees.
+ * Valid values are integers between 0 and 360 (inclusive).
+ * </li>
+ * <li>
+ * Hue maximum: 
+ * the maximum hue value to display,
+ * stored in degrees.
+ * Valid values are integers between 0 and 360 (inclusive).
+ * </li>
+ * <li>
+ * Saturation: 
+ * the saturation property to apply to the wheel,
+ * stored as a percent.
+ * Valid values are integers between 0 and 100 (inclusive).
+ * </li>
+ * <li>
+ * Brightness: 
+ * the brightness property to apply to the wheel,
+ * stored as a percent.
+ * Valid values are integers between 0 and 100 (inclusive).
+ * </li>
+ * <li>
+ * Bar angle: 
+ * the angle of a ray drawn from the center of the wheel
+ * to the wheel's edge.
+ * stored in degrees.
+ * Valid values are integers between 0 and 360 (inclusive).
+ * </li>
+ * </ol>
+ * <p>
+ * The operator can control the value
+ * of the hue minimum and maximum
+ * via a range slider or text fields;
+ * the text fields and the range slider 
+ * are synchronized.
+ * Each of the saturation and brightness properties
+ * can be controlled by the operator
+ * via slider or text field;
+ * the slider and text field are synchronized.
+ * <p>
+ * No operator access to the bar angle property
+ * is provided via this class;
+ * see, instead, {@link SpectrumRanger}.
  * 
  * @author Jack Straub
  */
 public class SpectrumFrame implements Runnable
 {
+    /** Unicode value for the degree symbol. */
+    private static final char   DEGREE      = '\u00b0';
+    private static final Color  VALID_BG    = Color.WHITE;
+    private static final Color  INVALID_BG  = Color.RED;
+    
     /** The application frame.  */
     private JFrame  frame       = null;
     
+    /** Control for the hue minimum and maximum values. */
     private final RangeSlider   hueSlider       = new RangeSlider( 0, 360 );
+    /** Control for the saturation value. */
     private final JSlider       satSlider       = new JSlider( 0, 100 );
+    /** Control for the brightness value. */
     private final JSlider       brightSlider    = new JSlider( 0, 100 );
     /** 
      * The frame's content pane. This window will ultimately
@@ -45,8 +101,27 @@ public class SpectrumFrame implements Runnable
     private JPanel  contentPane = null;
     /** The window that we will be drawing on. */
     private JPanel  userPanel   = null;
+    /** The bar angle. */
     private double  barAngle    = 0;
     
+    /////////////////////////////////////////////////////////////////
+    /// Component names to support testing
+    /// 
+    /** Hue slider component name. */
+    public static final String  HUE_SLIDER      = "HueSlider";
+    /** Hue minimum text component name. */
+    public static final String  HUE_MIN         = "HueMin";
+    /** Hue maximum text component name. */
+    public static final String  HUE_MAX         = "HueMax";
+    /** Saturation slider component name. */
+    public static final String  SAT_SLIDER      = "SatSlider";
+    /** Saturation text component name. */
+    public static final String  SAT_TEXT        = "SatText";
+    /** Brightness slider component name. */
+    public static final String  BRIGHT_SLIDER   = "BrightSlider";
+    /** Brightness text component name. */
+    public static final String  BRIGHT_TEXT     = "BrightText";
+
     /**
      * Constructor.
      * 
@@ -65,7 +140,7 @@ public class SpectrumFrame implements Runnable
     public void start()
     {
     	/* 
-    	 * The invokeLater method display the window
+    	 * The invokeLater method displays the window
     	 * and activates the process for managing things
     	 * like button clicks, window resizing and 
     	 * window minimization/maximization.
@@ -96,8 +171,11 @@ public class SpectrumFrame implements Runnable
         
         /* 
          * A layout manager is responsible for fine-tuning the
-         * layout of a panel. For now you should consider this
-         * to be boilerplate for our application. To learn more
+         * layout of a panel. 
+         * This project uses a BorderLayout
+         * with the user display in the center region,
+         * and the GUI controls in the bottom region.
+         * To learn more
          * about layout managers see the Oracle tutorial at
          * https://docs.oracle.com/javase/tutorial/uiswing/layout/index.html.
          * see the JDK documentation.
@@ -105,65 +183,101 @@ public class SpectrumFrame implements Runnable
         BorderLayout    layout  = new BorderLayout();
         contentPane = new JPanel( layout );
         
-        /* Make the Canvas a child of the content pane. */
+        /* Make the panel a child of the content pane. */
         contentPane.add( userPanel, BorderLayout.CENTER );
-        /* Set the content pane in the frame. */
-        
         /* Set the range slider at the bottom of the frame. */
-        contentPane.add( getSlider(), BorderLayout.SOUTH ); 
-        contentPane.addKeyListener( new KeyMonitor() );
-        contentPane.addMouseListener( new MouseMonitor( contentPane ) );
+        contentPane.add( getSliderPanel(), BorderLayout.SOUTH ); 
+        
+        /* Set the content pane in the frame. */
         frame.setContentPane( contentPane );
         /* Initiate frame sizing, positioning etc. */
         frame.pack();
         /* Make the frame visible. */
         frame.setVisible( true );
-        
-        contentPane.requestFocusInWindow();
     }
     
+    /**
+     * Gets the hue minimum value.
+     * 
+     * @return the hue minimum value
+     */
     public int getHueLowerValue()
     {
         int val = hueSlider.getValue();
         return val;
     }
     
+    /**
+     * Gets the hue maximum value.
+     * 
+     * @return the hue maximum value
+     */
     public int getHueUpperValue()
     {
         int val = hueSlider.getUpperValue();
         return val;
     }
     
+    /**
+     * Gets the saturation value.
+     * 
+     * @return the saturation value
+     */
     public int getSaturation()
     {
         int val = satSlider.getValue();
         return val;
     }
     
+    /**
+     * Gets the brightness value.
+     * 
+     * @return the brightness value
+     */
     public int getBrightness()
     {
         int val = brightSlider.getValue();
         return val;
     }
     
+    /**
+     * Sets the bar angle value in degrees.
+     * 
+     * @param degrees   the value to set
+     */
+    public void setBarAngle( double degrees )
+    {
+        barAngle = degrees;
+    }
+    
+    /**
+     * Gets the bar angle value.
+     * 
+     * @return the bar angle value
+     */
     public double getBarAngle()
     {
         return barAngle;
     }
     
-    private JPanel getSlider()
+    /**
+     * Get the panel containing the sliders
+     * and synchronized text fields.
+     * @return
+     */
+    private JPanel getSliderPanel()
     {
-        final char      degree      = '\u00b0';
-        final String    hueText     = "Hue: ";
         final String    satText     = "Saturation: ";
         final String    brightText  = "Brightness: ";
         
         hueSlider.setValue( 90 );
         hueSlider.setUpperValue( 270 );
+        hueSlider.setName( HUE_SLIDER );
         satSlider.setValue( 100 );
+        satSlider.setName( SAT_SLIDER );
         brightSlider.setValue( 100 );
-        JLabel      hueLabel        = new JLabel();
-        
+        brightSlider.setName( BRIGHT_SLIDER );
+
         JPanel      panel       = new JPanel();
         BoxLayout   layout      = new BoxLayout( panel, BoxLayout.Y_AXIS );
         Border      border      =
@@ -171,45 +285,50 @@ public class SpectrumFrame implements Runnable
         panel.setLayout( layout );
         panel.setBorder( border );
         panel.add( getHuePanel() );
-        panel.add( getSliderPanel( satSlider, satText ) );
-        panel.add( getSliderPanel( brightSlider, brightText ) );
-        
-        ChangeListener  hueListener     = e -> {
-            String  text    = "" + getHueLowerValue() + degree + " - " 
-                + getHueUpperValue() + degree;
-            hueLabel.setText( hueText + text );
-            userPanel.repaint();
-        };
-//        hueListener.stateChanged( null );
-//        hueSlider.addChangeListener( hueListener );
+        panel.add( getSliderPanel( satSlider, satText, SAT_TEXT ) );
+        panel.add( getSliderPanel( brightSlider, brightText, BRIGHT_TEXT ) );
         return panel;
     }
     
-    private JPanel getSliderPanel( JSlider slider, String text )
+    /**
+     * Configure a panel containing a slider, text field,
+     * and descriptive label. 
+     * Add event listeners that will:
+     * <ul>
+     * <li>Keep the values of the slider and text field synchronized.</li>
+     * <li>Change the color of text fields with invalid data.</li>
+     * <li>Trigger a user panel repaint when the slider changes.</li>
+     * </ul>
+     * 
+     * @param slider    the slider to add
+     * @param text      the text for the descriptive label
+     * @param textName  the component name of the text field
+     * 
+     * @return  the configured panel
+     */
+    private JPanel 
+    getSliderPanel( JSlider slider, String text, String textName )
     {
-        final Color validBG     = Color.WHITE;
-        final Color invalidBG   = Color.RED;
         JPanel      mainPanel   = new JPanel();
         BoxLayout   mainLayout  = 
             new BoxLayout( mainPanel, BoxLayout.Y_AXIS );
         mainPanel.setLayout( mainLayout );
         
-        JTextField  textField   = new JTextField( 3 );
-        JLabel      percent     = new JLabel( "%" );
+        JTextField  textField   = new JTextField( 4 );
+        textField.setName( textName );
         JLabel      label       = new JLabel( text );
         JPanel      labelPanel  = new JPanel();
         labelPanel.add( label );
         labelPanel.add( textField );
-        labelPanel.add( percent );
         
         textField.setHorizontalAlignment( JTextField.RIGHT );
         
         mainPanel.add( slider );
         mainPanel.add( labelPanel );
         ChangeListener  sliderListener  = e -> {
-            String  val = "" + slider.getValue();
+            String  val = "" + slider.getValue() + "%";
             textField.setText( val );
-            textField.setBackground( validBG );
+            textField.setBackground( VALID_BG );
             userPanel.repaint();
         };
         slider.addChangeListener( sliderListener );
@@ -218,11 +337,12 @@ public class SpectrumFrame implements Runnable
         ActionListener  actionListener  = e -> {
             int val = getIntValue( textField );
             if ( val < slider.getMinimum() || val > slider.getMaximum() )
-                textField.setBackground( invalidBG );
+                textField.setBackground( INVALID_BG );
             else
             {
                 slider.setValue( val );
-                slider.setBackground( validBG );
+                textField.setBackground( VALID_BG );
+                textField.setText( val + "%" );
             }
         };
         textField.addActionListener( actionListener );
@@ -230,10 +350,21 @@ public class SpectrumFrame implements Runnable
         return mainPanel;
     }
     
+    /**
+     * Configure a panel containing the hue slider, 
+     * minimum and maximum text fields,
+     * and descriptive label. 
+     * Add event listeners that will:
+     * <ul>
+     * <li>Keep the values of the slider and text fields synchronized.</li>
+     * <li>Change the color of text fields with invalid data.</li>
+     * <li>Trigger a user panel repaint when the slider changes.</li>
+     * </ul>
+     * 
+     * @return  the configured panel
+     */
     private JPanel getHuePanel()
     {
-        final String    degree      = "\u00b0";
-        
         JPanel      mainPanel   = new JPanel();
         BoxLayout   mainLayout  = 
             new BoxLayout( mainPanel, BoxLayout.Y_AXIS );
@@ -241,25 +372,24 @@ public class SpectrumFrame implements Runnable
         
         JTextField  minField    = new JTextField( 3 );
         JTextField  maxField    = new JTextField( 3 );
-        JLabel      minDegree   = new JLabel( degree );
         JLabel      minLabel    = new JLabel( "Hue min:" );
-        JLabel      maxDegree   = new JLabel( degree );
         JLabel      maxLabel    = new JLabel( "Hue max:" );
         JPanel      labelPanel  = new JPanel();
+
+        minField.setName( HUE_MIN );
+        maxField.setName( HUE_MAX );
         labelPanel.add( minLabel );
         labelPanel.add( minField );
-        labelPanel.add( minDegree );
         labelPanel.add( maxLabel );
         labelPanel.add( maxField );
-        labelPanel.add( maxDegree );
         
         minField.setHorizontalAlignment( JTextField.RIGHT );
         
         mainPanel.add( hueSlider );
         mainPanel.add( labelPanel );
         ChangeListener  hueListener     = e -> {
-            String  minText = "" + getHueLowerValue() + degree;
-            String  maxText = "" + getHueUpperValue() + degree;
+            String  minText = "" + getHueLowerValue() + DEGREE;
+            String  maxText = "" + getHueUpperValue() + DEGREE;
             minField.setText( minText );
             maxField.setText( maxText );
             userPanel.repaint();
@@ -273,30 +403,50 @@ public class SpectrumFrame implements Runnable
         return mainPanel;
     }
     
+    /**
+     * Create an ActionListener for the 
+     * hue minimum and maximum text fields.
+     * 
+     * @param field     the target text field
+     * @param setter    the the setter for the slider component 
+     *                  used to synch with the slider and text field
+     *                  
+     * @see #getSliderPanel()
+     */
     private void addHueTextListener( JTextField field, IntConsumer setter )
     {
-        final Color     validBG     = Color.WHITE;
-        final Color     invalidBG   = Color.RED;
         ActionListener  listener     = e -> {
             int val = getIntValue( field );
             int min = hueSlider.getMinimum();
             int max = hueSlider.getMaximum();
             if ( val < min || val > max )
-                field.setBackground( invalidBG );
+                field.setBackground( INVALID_BG );
             else
             {
                 setter.accept( val );
-                field.setBackground( validBG );
+                field.setBackground( VALID_BG );
             }
         };
         field.addActionListener( listener );
     }
     
+    /**
+     * Get the text from a given text field
+     * and convert it to an int.
+     * The text may optionally end with 
+     * the percent sign or degree symbol
+     * which will be ignored.
+     * -1 is returned if the text cannot be converted.
+     * 
+     * @param field the given text field
+     * 
+     * @return  the converted int; -1 if invalid
+     */
     private int getIntValue( JTextField field )
     {
         String  text    = field.getText();
         int     len     = text.length() - 1;
-        char    last    = text.charAt( len );
+        char    last    = len >= 0 ? text.charAt( len ) : 0;
         if ( last == '\u00b0' || last == '%' )
             text = text.substring( 0, len );
         System.out.println( text );
@@ -309,54 +459,5 @@ public class SpectrumFrame implements Runnable
         {
         }
         return val;
-    }
-    
-    private class MouseMonitor extends MouseAdapter
-    {
-        private final Component owner;
-        
-        public MouseMonitor( Component owner )
-        {
-            this.owner = owner;
-        }
-        
-        @Override
-        public void mousePressed( MouseEvent evt )
-        {
-            owner.requestFocusInWindow();
-        }
-    }
-    
-    private class KeyMonitor extends KeyAdapter
-    {
-        @Override
-        public void keyPressed( KeyEvent evt )
-        {
-            final double TWO_PI = 2 * Math.PI;
-            final int       UP      = KeyEvent.VK_UP;
-            final int       DOWN    = KeyEvent.VK_DOWN;
-            final int       LEFT    = KeyEvent.VK_LEFT;
-            final int       RIGHT   = KeyEvent.VK_RIGHT;
-            double  incr    = 0;
-            int    keyCode  = evt.getKeyCode();
-            double  defIncr = Math.PI / 16 * .1;
-            if ( keyCode == UP || keyCode == LEFT )
-                incr = defIncr;
-            else if ( keyCode == DOWN || keyCode == RIGHT )
-                incr = -defIncr;
-            else
-                incr = 0;
-            if ( incr != 0 )
-            {
-                barAngle += incr;
-                if ( barAngle < 0 )
-                    barAngle += TWO_PI;
-                else if ( barAngle > TWO_PI )
-                    barAngle -= TWO_PI;
-                else
-                    ;
-                userPanel.repaint();
-            }
-        }
     }
 }

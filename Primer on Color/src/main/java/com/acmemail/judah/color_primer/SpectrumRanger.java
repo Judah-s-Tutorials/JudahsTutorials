@@ -11,11 +11,17 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Stroke;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Map;
 
@@ -58,7 +64,7 @@ public class SpectrumRanger extends JPanel
     private int             currHeight;
     
     private Ellipse2D       gCircle         = new Ellipse2D.Double();
-    private Rectangle2D     refRectInner    = new Rectangle2D.Double();
+    private Ellipse2D       refRect         = new Ellipse2D.Double();
     private Line2D          bar             = new Line2D.Double();
     private FeedbackRect    feedbackRect    = new FeedbackRect();
     
@@ -71,6 +77,8 @@ public class SpectrumRanger extends JPanel
     {
         Dimension   dim = new Dimension( diameter, diameter );
         setPreferredSize( dim );
+        addMouseListener( new MouseMonitor() );
+        addKeyListener( new KeyMonitor() );
     }
     
     @Override
@@ -86,7 +94,7 @@ public class SpectrumRanger extends JPanel
         
         double  currDiam = 
             Math.min( currWidth - 2 * SPACING, currHeight - 2 * SPACING );
-        refRectInner.setFrame( SPACING, SPACING, currDiam, currDiam );
+        refRect.setFrame( SPACING, SPACING, currDiam, currDiam );
         double  radius      = (currDiam - G_DIAMETER) / 2;
         
         // If the window gets too small the radius will turn negative.
@@ -97,8 +105,8 @@ public class SpectrumRanger extends JPanel
     
     private void nonDegeneratePaint( double radius )
     {
-        double  centerXco   = refRectInner.getCenterX();
-        double  centerYco   = refRectInner.getCenterY();
+        double  centerXco   = refRect.getCenterX();
+        double  centerYco   = refRect.getCenterY();
         Line2D  line        = new Line2D.Double();
 
         double  start       = Math.toRadians( root.getHueLowerValue() );
@@ -126,10 +134,10 @@ public class SpectrumRanger extends JPanel
         Color   saveColor   = gtx.getColor();
         Stroke  saveStroke  = gtx.getStroke();
         
-        double  barAngle    = root.getBarAngle();
-        double  radius      = refRectInner.getWidth() / 2;
-        double  centerXco   = refRectInner.getCenterX();
-        double  centerYco   = refRectInner.getCenterY();
+        double  barAngle    = Math.toRadians( root.getBarAngle() );
+        double  radius      = refRect.getWidth() / 2;
+        double  centerXco   = refRect.getCenterX();
+        double  centerYco   = refRect.getCenterY();
         double  outerXco    = centerXco + radius * Math.cos( barAngle );
         double  outerYco    = centerYco - radius * Math.sin( barAngle );
         bar.setLine( centerXco, centerYco, outerXco, outerYco );
@@ -161,13 +169,6 @@ public class SpectrumRanger extends JPanel
         
         gtx.setColor( origColor );
         gtx.setStroke( origStroke );
-    }
-    
-    private int getMinRaysToFill( double radius )
-    {
-        double  circumference   = TWO_PI * radius;
-        int     numRays         = (int)(circumference + 1);
-        return numRays;
     }
     
     private static class FeedbackRect
@@ -219,6 +220,67 @@ public class SpectrumRanger extends JPanel
             gtx.draw( rect );
             gtx.setColor( fontColor );
             gtx.drawString( sDegrees, (float)strXco, (float)strYco);
+        }
+    }
+    
+    private class MouseMonitor extends MouseAdapter
+    {
+        @Override
+        public void mousePressed( MouseEvent evt )
+        {
+            spectrum.requestFocusInWindow();
+        }
+        
+        @Override
+        public void mouseClicked( MouseEvent evt )
+        {
+            int     button  = evt.getButton();
+            Point   point   = evt.getPoint();
+            if ( button == MouseEvent.BUTTON1 && refRect.contains( point ) )
+            {
+                double  centerXco   = refRect.getCenterX();
+                double  centerYco   = refRect.getCenterY();
+                Point2D center      = 
+                    new Point2D.Double( centerXco, centerYco );
+                double  radians     = Utils.getAngle( center, point );
+                root.setBarAngle( Math.toDegrees( radians ) );
+                spectrum.repaint();
+            }
+        }
+    }
+    
+    private class KeyMonitor extends KeyAdapter
+    {
+        @Override
+        public void keyPressed( KeyEvent evt )
+        {
+            final int       UP          = KeyEvent.VK_UP;
+            final int       DOWN        = KeyEvent.VK_DOWN;
+            final int       LEFT        = KeyEvent.VK_LEFT;
+            final int       RIGHT       = KeyEvent.VK_RIGHT;
+            final double    DEF_INCR    = 1;
+            
+            double  incr    = 0;
+            int     keyCode = evt.getKeyCode();
+            if ( keyCode == UP || keyCode == LEFT )
+                incr = DEF_INCR;
+            else if ( keyCode == DOWN || keyCode == RIGHT )
+                incr = -DEF_INCR;
+            else
+                incr = 0;
+            if ( incr != 0 )
+            {
+                double  barAngle    = root.getBarAngle();
+                barAngle += incr;
+                if ( barAngle < 0 )
+                    barAngle += 360;
+                else if ( barAngle > 360 )
+                    barAngle -= 360;
+                else
+                    ;
+                root.setBarAngle( barAngle );
+                spectrum.repaint();
+            }
         }
     }
 }
