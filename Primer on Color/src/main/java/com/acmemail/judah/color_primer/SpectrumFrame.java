@@ -107,6 +107,8 @@ public class SpectrumFrame implements Runnable
     /////////////////////////////////////////////////////////////////
     /// Component names to support testing
     /// 
+    /** JFrame component name */
+    public static final String  APP_FRAME       = "ApplicationFrame";
     /** Hue slider component name. */
     public static final String  HUE_SLIDER      = "HueSlider";
     /** Hue minimum text component name. */
@@ -160,6 +162,7 @@ public class SpectrumFrame implements Runnable
     {
     	/* Instantiate the frame. */
         frame = new JFrame( "Graphics Frame" );
+        frame.setName( APP_FRAME );
         
         /* 
          * This will cause your application to be terminated
@@ -449,7 +452,6 @@ public class SpectrumFrame implements Runnable
         char    last    = len >= 0 ? text.charAt( len ) : 0;
         if ( last == '\u00b0' || last == '%' )
             text = text.substring( 0, len );
-        System.out.println( text );
         int val = -1;
         try
         {

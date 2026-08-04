@@ -5,12 +5,15 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import java.awt.Color;
 import java.lang.reflect.InvocationTargetException;
+import java.util.function.IntSupplier;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.acmemail.judah.cartesian_plane.SpectrumFrameTestHelper;
 
@@ -114,32 +117,70 @@ class SpectrumFrameTest
         validateSatVal( SAT_VAL_ALT );
     }
     
-    @ParameterizedTest
-    @ValueSource(strings = { "" + SAT_VAL_ALT, "" + SAT_VAL_ALT + PERCENT } )
-    public void testSatText( String text )
+    /**
+     * Describes a single hue/sat/bright text field for the purposes
+     * of {@link #testTextField(TextFieldConfig, String)}: the
+     * component to drive, its alternate test value, the unit suffix
+     * it accepts, and the getters used to confirm the slider,
+     * property, and text field all agree.
+     */
+    private record TextFieldConfig(
+        String       componentName,
+        int          altValue,
+        char         unit,
+        IntSupplier  sliderGetter,
+        IntSupplier  propertyGetter,
+        IntSupplier  textGetter )
+    {}
+
+    private static Stream<TextFieldConfig> textFieldConfigs()
     {
-        Color   defColor    = 
-            helper.getBackgroundColor (SpectrumFrame.SAT_TEXT );
-        validateSatVal();
-        
-        helper.setText( SpectrumFrame.SAT_TEXT, text );
-        validateSatVal( SAT_VAL_ALT );
-        Color   testColor   =
-            helper.getBackgroundColor (SpectrumFrame.SAT_TEXT );
+        return Stream.of(
+            new TextFieldConfig( SpectrumFrame.HUE_MIN, HUE_MIN_ALT, DEGREE,
+                helper::getHueMinFromSlider, helper::getHueMinProperty,
+                helper::getHueMinFromText ),
+            new TextFieldConfig( SpectrumFrame.HUE_MAX, HUE_MAX_ALT, DEGREE,
+                helper::getHueMaxFromSlider, helper::getHueMaxProperty,
+                helper::getHueMaxFromText ),
+            new TextFieldConfig( SpectrumFrame.SAT_TEXT, SAT_VAL_ALT, PERCENT,
+                helper::getSatFromSlider, helper::getSatProperty,
+                helper::getSatFromText ),
+            new TextFieldConfig( SpectrumFrame.BRIGHT_TEXT, BRIGHT_VAL_ALT, PERCENT,
+                helper::getBrightFromSlider, helper::getBrightProperty,
+                helper::getBrightFromText )
+        );
+    }
+
+    private static Stream<Arguments> textFieldArgs()
+    {
+        return textFieldConfigs().flatMap( cfg -> Stream.of(
+            Arguments.of( cfg, "" + cfg.altValue() ),
+            Arguments.of( cfg, "" + cfg.altValue() + cfg.unit() )
+        ));
+    }
+
+    @ParameterizedTest
+    @MethodSource( "textFieldArgs" )
+    public void testTextField( TextFieldConfig cfg, String text )
+    {
+        Color   defColor    = helper.getBackgroundColor( cfg.componentName() );
+        validateField( cfg );
+
+        helper.setText( cfg.componentName(), text );
+        validateField( cfg, cfg.altValue() );
+        Color   testColor   = helper.getBackgroundColor( cfg.componentName() );
         assertEquals( defColor, testColor );
-        
+
         String  errorText   =   "Q" + text;
-        helper.setText( SpectrumFrame.SAT_TEXT, errorText );
-        assertEquals( SAT_VAL_ALT, helper.getSatFromSlider() );
-        assertEquals( SAT_VAL_ALT, helper.getSatProperty() );
-        testColor   =
-            helper.getBackgroundColor (SpectrumFrame.SAT_TEXT );
+        helper.setText( cfg.componentName(), errorText );
+        assertEquals( cfg.altValue(), cfg.sliderGetter().getAsInt() );
+        assertEquals( cfg.altValue(), cfg.propertyGetter().getAsInt() );
+        testColor   = helper.getBackgroundColor( cfg.componentName() );
         assertNotEquals( defColor, testColor );
-        
-        helper.setText( SpectrumFrame.SAT_TEXT, text );
-        validateSatVal( SAT_VAL_ALT );
-        testColor   =
-            helper.getBackgroundColor (SpectrumFrame.SAT_TEXT );
+
+        helper.setText( cfg.componentName(), text );
+        validateField( cfg, cfg.altValue() );
+        testColor   = helper.getBackgroundColor( cfg.componentName() );
         assertEquals( defColor, testColor );
     }
     
@@ -225,5 +266,22 @@ class SpectrumFrameTest
         assertEquals( expVal, appVal );
         assertEquals( expVal, sliderVal );
         assertEquals( expVal, textVal );
+    }
+
+    private void validateField( TextFieldConfig cfg )
+    {
+        int         appVal      = cfg.propertyGetter().getAsInt();
+        validateField( cfg, appVal );
+    }
+
+    /**
+     * Verify that the given text field's slider value,
+     * text field value, and property getter agree.
+     */
+    private void validateField( TextFieldConfig cfg, int expVal )
+    {
+        assertEquals( expVal, cfg.propertyGetter().getAsInt() );
+        assertEquals( expVal, cfg.sliderGetter().getAsInt() );
+        assertEquals( expVal, cfg.textGetter().getAsInt() );
     }
 }
