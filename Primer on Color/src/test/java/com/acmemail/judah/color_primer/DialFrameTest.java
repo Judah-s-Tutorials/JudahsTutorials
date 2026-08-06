@@ -15,9 +15,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.acmemail.judah.cartesian_plane.SpectrumFrameTestHelper;
+import com.acmemail.judah.cartesian_plane.DialFrameTestHelper;
 
-class SpectrumFrameTest
+class DialFrameTest
 {    
     private static final char   DEGREE      = '\u00b0';
     private static final char   PERCENT     = '%';
@@ -31,8 +31,8 @@ class SpectrumFrameTest
     private static final int    BRIGHT_DEF      = SAT_DEF - 10;
     private static final int    BRIGHT_VAL_ALT  = BRIGHT_DEF - 20;
     
-    private static final SpectrumFrameTestHelper   helper = 
-        new SpectrumFrameTestHelper();
+    private static final DialFrameTestHelper   helper = 
+        new DialFrameTestHelper();
     
     @BeforeAll
     public static void beforeAll()
@@ -117,6 +117,15 @@ class SpectrumFrameTest
         validateSatVal( SAT_VAL_ALT );
     }
     
+    @Test
+    public void testSetBar()
+    {
+        double  currBar = helper.getBarAngle();
+        double  newBar  = currBar == 10 ? 11 : 10;
+        helper.setBarAngle( newBar );
+        assertEquals( newBar, helper.getBarAngle() );
+    }
+    
     /**
      * Describes a single hue/sat/bright text field for the purposes
      * of {@link #testTextField(TextFieldConfig, String)}: the
@@ -136,16 +145,16 @@ class SpectrumFrameTest
     private static Stream<TextFieldConfig> textFieldConfigs()
     {
         return Stream.of(
-            new TextFieldConfig( SpectrumFrame.HUE_MIN, HUE_MIN_ALT, DEGREE,
+            new TextFieldConfig( DialFrame.HUE_MIN, HUE_MIN_ALT, DEGREE,
                 helper::getHueMinFromSlider, helper::getHueMinProperty,
                 helper::getHueMinFromText ),
-            new TextFieldConfig( SpectrumFrame.HUE_MAX, HUE_MAX_ALT, DEGREE,
+            new TextFieldConfig( DialFrame.HUE_MAX, HUE_MAX_ALT, DEGREE,
                 helper::getHueMaxFromSlider, helper::getHueMaxProperty,
                 helper::getHueMaxFromText ),
-            new TextFieldConfig( SpectrumFrame.SAT_TEXT, SAT_VAL_ALT, PERCENT,
+            new TextFieldConfig( DialFrame.SAT_TEXT, SAT_VAL_ALT, PERCENT,
                 helper::getSatFromSlider, helper::getSatProperty,
                 helper::getSatFromText ),
-            new TextFieldConfig( SpectrumFrame.BRIGHT_TEXT, BRIGHT_VAL_ALT, PERCENT,
+            new TextFieldConfig( DialFrame.BRIGHT_TEXT, BRIGHT_VAL_ALT, PERCENT,
                 helper::getBrightFromSlider, helper::getBrightProperty,
                 helper::getBrightFromText )
         );

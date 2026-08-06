@@ -5,6 +5,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.util.function.IntConsumer;
+import java.util.function.IntSupplier;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -74,11 +75,11 @@ import com.acmemail.judah.color_primer.util.RangeSlider;
  * <p>
  * No operator access to the bar angle property
  * is provided via this class;
- * see, instead, {@link SpectrumRanger}.
+ * see, instead, {@link SpectrumDial}.
  * 
  * @author Jack Straub
  */
-public class SpectrumFrame implements Runnable
+public class DialFrame implements Runnable
 {
     /** Unicode value for the degree symbol. */
     private static final char   DEGREE      = '\u00b0';
@@ -131,7 +132,7 @@ public class SpectrumFrame implements Runnable
      * 					drawing to. Will become a child of the
      * 					content pane.
      */
-    public SpectrumFrame( JPanel userPanel )
+    public DialFrame( JPanel userPanel )
     {
         this.userPanel = userPanel;
     }
@@ -400,23 +401,29 @@ public class SpectrumFrame implements Runnable
         hueSlider.addChangeListener( hueListener );
         hueListener.stateChanged( null );
         
-        addHueTextListener( minField, hueSlider::setValue );
-        addHueTextListener( maxField, hueSlider::setUpperValue );
+        addHueTextListener( minField, hueSlider::setValue, hueSlider::getValue );
+        addHueTextListener( maxField, hueSlider::setUpperValue, hueSlider::getUpperValue );
         
         return mainPanel;
     }
     
     /**
-     * Create an ActionListener for the 
+     * Create an ActionListener for the
      * hue minimum and maximum text fields.
-     * 
+     *
      * @param field     the target text field
-     * @param setter    the the setter for the slider component 
+     * @param setter    the the setter for the slider component
      *                  used to synch with the slider and text field
-     *                  
+     * @param getter    the getter for the slider component, used to
+     *                  read back the (possibly clamped) value applied
+     *                  by setter, so the field can always be
+     *                  reformatted to match
+     *
      * @see #getSliderPanel()
      */
-    private void addHueTextListener( JTextField field, IntConsumer setter )
+    private void addHueTextListener(
+        JTextField field, IntConsumer setter, IntSupplier getter
+    )
     {
         ActionListener  listener     = e -> {
             int val = getIntValue( field );
@@ -427,6 +434,7 @@ public class SpectrumFrame implements Runnable
             else
             {
                 setter.accept( val );
+                field.setText( "" + getter.getAsInt() + DEGREE );
                 field.setBackground( VALID_BG );
             }
         };

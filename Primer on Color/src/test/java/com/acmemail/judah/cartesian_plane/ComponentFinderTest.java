@@ -35,8 +35,20 @@ class ComponentFinderTest
         frameNames = new ArrayList<>();
         notFrameNames = new ArrayList<>();
         
-        SwingUtilities.invokeAndWait( () -> frame = init() );
+        invokeAndWait( () -> frame = init() );
         System.out.println( allNames.size() );  
+    }
+    
+    private static void invokeAndWait( Runnable runner )
+    {
+        try
+        {
+            SwingUtilities.invokeAndWait( runner );
+        }
+        catch ( InterruptedException | InvocationTargetException exc )
+        {
+            exc.printStackTrace();
+        }
     }
     
     private JFrame init()
@@ -46,13 +58,17 @@ class ComponentFinderTest
         frameAlt.setName( frameAltName );
         frameNames.add( frameAltName );
         notFrameNames.add( frameAltName + NOT_PRESENT );
-        
+        // Realize the frame (create its native peer) so that
+        // isDisplayable() returns true; ComponentFinder only
+        // searches displayable frames.
+        frameAlt.pack();
+
         JFrame  frame1          = new JFrame();
         String  frameName1      = "JFrame 1";
         frame1.setName( frameName1 );
         frameNames.add( frameName1 );
         notFrameNames.add( frameName1 + NOT_PRESENT );
-        
+
         JPanel  contentPane = new JPanel();
         frame1.setContentPane( contentPane );
         String  name            = "ContentPane";
@@ -61,6 +77,11 @@ class ComponentFinderTest
         JPanel  parent  = contentPane;
         for ( char panelID = '1' ; panelID < '5' ; ++panelID )
             parent = makeTestPanel( parent, panelID );
+
+        // Realize the frame (create its native peer) so that
+        // isDisplayable() returns true; ComponentFinder only
+        // searches displayable frames.
+        frame1.pack();
         return frame1;
     }
     

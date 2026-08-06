@@ -2,7 +2,6 @@ package com.acmemail.judah.color_primer.util;
 
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Frame;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -11,8 +10,22 @@ import java.util.stream.Stream;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
+/**
+ * This class is under development.
+ * It searches an application's GUI component hierarchy
+ * for JComponents matching some criteria,
+ * having a given name, for example.
+ * An instance of this class is tied to a specific JFrame,
+ * but there are many class methods
+ * that can be used to perform more flexible searches.
+ * <p>
+ * At the moment functionality is restricted
+ * to JFrames and JComponents.
+ * JDialogs must be supported in the near future.
+ */
 public class ComponentFinder
 {
+    /** The JFrame tied to an instance of this class. */
     private final JFrame    frame;
     
     public ComponentFinder( JFrame frame )
@@ -20,12 +33,28 @@ public class ComponentFinder
         this.frame = frame;
     }
     
+    /**
+     * Search the encapsulated JFrame for a JComponent
+     * with a given name.
+     * 
+     * @param name  the given name
+     * 
+     * @return  the target JComponent, or null if not found
+     */
     public JComponent getComponentByName( String name )
     {
         JComponent  component   = getComponentByName( frame, name );
         return component;
     }
     
+    /**
+     * Searches all open JFrames and JDialogs
+     * for a JComponent with the given name.
+     * 
+     * @param name  the given name
+     * 
+     * @return    the target JComponent, or null if not found
+     */
     public static JComponent globalGetComponentByName( String name )
     {
         JComponent  component   = getJFrames()
@@ -35,6 +64,13 @@ public class ComponentFinder
         return component;
     }
     
+    /**
+     * Searches for a JFrame with the given name.
+     * 
+     * @param name  the given name
+     * 
+     * @return  the target JFram, or null if not found
+     */
     public static JFrame getJFrameByName( String name )
     {
         Predicate<JFrame>   pred    = f -> name.equals( f.getName() );
@@ -44,6 +80,14 @@ public class ComponentFinder
         return frame;
     }
     
+    /**
+     * Search the given JFrame for a JComponent with the given name.
+     * 
+     * @param frame the given JFrame
+     * @param name  the given name
+     * 
+     * @return  the target JComponent, or null if not found
+     */
     public static JComponent getComponentByName( JFrame frame, String name )
     {
         Container   contentPane = frame.getContentPane();
@@ -53,6 +97,15 @@ public class ComponentFinder
         return component;
     }
     
+    /**
+     * Search the hierarchy of a given JComponent for a JComponent
+     * with the given name.
+     * 
+     * @param jComp the given JComponent
+     * @param name  the given name
+     * 
+     * @return  the target JComponent, or null if not found
+     */
     public static JComponent 
     getComponentByName( JComponent jComp, String name )
     {
@@ -67,6 +120,15 @@ public class ComponentFinder
         return result;
     }
     
+    /**
+     * Search the hierarchy of a given JComponent for a JComponent
+     * that satisfies the given predicate.
+     * 
+     * @param jComp the given JComponent
+     * @param pred  the given predicate
+     * 
+     * @return  the target JComponent, or null if not found
+     */
     public static JComponent 
     getComponent( JComponent jComp, Predicate<JComponent> pred )
     {
@@ -88,10 +150,16 @@ public class ComponentFinder
         return result;
     }
     
+    /**
+     * Get a stream of all JFrames in an application.
+     * 
+     * @return  a stream of all JFrames in an application
+     */
     public static Stream<JFrame> getJFrames()
     {
         Stream<JFrame>  stream  =
             Arrays.stream( JFrame.getFrames() )
+            .filter( w -> w.isDisplayable() )
             .filter( f -> f instanceof JFrame )
             .map( f -> (JFrame)f );
         return stream;

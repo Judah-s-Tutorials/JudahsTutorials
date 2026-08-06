@@ -10,6 +10,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.DoubleConsumer;
+import java.util.function.DoubleSupplier;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
@@ -19,70 +21,119 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import com.acmemail.judah.color_primer.SpectrumFrame;
-import com.acmemail.judah.color_primer.SpectrumRanger;
+import com.acmemail.judah.color_primer.DialFrame;
+import com.acmemail.judah.color_primer.SpectrumDial;
 import com.acmemail.judah.color_primer.util.ComponentFinder;
 import com.acmemail.judah.color_primer.util.RangeSlider;
 
-public class SpectrumFrameTestHelper
+/**
+ * This class serves as an interface to the SpectrumFrame class.
+ * It attempts to resolve all issues
+ * related to Swing threading.
+ * It assumes that all access to a SpectrumFrame
+ * is limited to this class.
+ * It guarantees that all operations
+ * that modify a property or component
+ * of the Spectrum frame 
+ * are executed on the EDT.
+ * Read access to properties/components
+ * are not forced to execute on the EDT,
+ * however all such operations
+ * are restricted to a handful of methods
+ * that can be adapted to use the EDT 
+ * should that become a problem.
+ * 
+ * @see #setInt(int, IntConsumer)
+ * @see #setText(JTextField, String)
+ */
+public class DialFrameTestHelper
 {
+    /** Convenient list of all component names in the SpectrumFrame class. */
     private static final List<String>   compNames   = 
         List.of( 
-            SpectrumFrame.HUE_MAX,
-            SpectrumFrame.HUE_MIN,
-            SpectrumFrame.HUE_SLIDER,
-            SpectrumFrame.BRIGHT_SLIDER,
-            SpectrumFrame.BRIGHT_TEXT,
-            SpectrumFrame.SAT_SLIDER,
-            SpectrumFrame.SAT_TEXT
+            DialFrame.HUE_MAX,
+            DialFrame.HUE_MIN,
+            DialFrame.HUE_SLIDER,
+            DialFrame.BRIGHT_SLIDER,
+            DialFrame.BRIGHT_TEXT,
+            DialFrame.SAT_SLIDER,
+            DialFrame.SAT_TEXT
         );
+    
+    /** Read-only map of component names to components. */
     private final Map<String,JComponent>    compMap;
     
-    private final SpectrumRanger    spectrum;
-    private final SpectrumFrame     root;
+    /** 
+     * The application window that is managed by the SpectrumFrame. 
+     * It is under the control of an instance of this class
+     * because of possible threading issues.
+     */
+    private final SpectrumDial    spectrum;
+    /** The SpectrumFrame being controlled. */
+    private final DialFrame     root;
+    /** The JFrame that encapsulates the SpectrumFrame GUI. */
     private final JFrame            frame;
+    /** 
+     * Used to locate components in the SpectrumFrame's
+     * GUI hierarchy.
+     */
     private final ComponentFinder   finder;
 
-    public SpectrumFrameTestHelper()
+    public DialFrameTestHelper()
     {
-        spectrum = new SpectrumRanger( 500 );
-        root = new SpectrumFrame( spectrum );
+        // Instantiate the application's drawing class. Probably
+        // not on the EDT at the moment, but the class's constructor
+        // is very limited in scope.
+        spectrum = new SpectrumDial( 500 );
+        
+        // Instantiate the SpectrumFrame. There are no threading issues
+        // because the constructor doesn't create any GUI components.
+        root = new DialFrame( spectrum );
+        
+        // Start the application; note that the start method executes
         root.start();
+        
         // root.start() is going to start a task on the EDT.
         // Sleep until that task is finished.
         invokeAndWait( () -> {} );
-        frame = ComponentFinder.getJFrameByName( SpectrumFrame.APP_FRAME );
+        
+        // Get the application GUI's JFrame
+        frame = ComponentFinder.getJFrameByName( DialFrame.APP_FRAME );
         assertNotNull( frame );
+        
+        // Find all the components we need and store them in a map
         finder = new ComponentFinder( frame );
         Map<String,JComponent>    tempMap = new HashMap<>();
         for ( String name : compNames )
             tempMap.put( name, getComponent( name ) );
+        
+        // Make the map read-only.
         compMap = Collections.unmodifiableMap( tempMap );
     }
     
     public int getHueMinFromText()
     {
-        JTextField  textField   = getTextField( SpectrumFrame.HUE_MIN );
+        JTextField  textField   = getTextField( DialFrame.HUE_MIN );
         int         min         = getInt( textField );
         return min;
     }
     
     public void setHueMinText( int min )
     {
-        JTextField  textField   = getTextField( SpectrumFrame.HUE_MIN );
+        JTextField  textField   = getTextField( DialFrame.HUE_MIN );
         setInt( textField, min );
     }
     
     public int getHueMaxFromText()
     {
-        JTextField  textField   = getTextField( SpectrumFrame.HUE_MAX );
+        JTextField  textField   = getTextField( DialFrame.HUE_MAX );
         int         max         = getInt( textField );
         return max;
     }
     
     public void setHueMaxText( int max )
     {
-        JTextField  textField   = getTextField( SpectrumFrame.HUE_MAX );
+        JTextField  textField   = getTextField( DialFrame.HUE_MAX );
         setInt( textField, max ); 
     }
     
@@ -126,27 +177,27 @@ public class SpectrumFrameTestHelper
     
     public int getSatFromText()
     {
-        JTextField  textField   = getTextField( SpectrumFrame.SAT_TEXT );
+        JTextField  textField   = getTextField( DialFrame.SAT_TEXT );
         int         val         = getInt( textField );
         return val;
     }
     
     public void setSatText( int val )
     {
-        JTextField  textField   = getTextField( SpectrumFrame.SAT_TEXT );
+        JTextField  textField   = getTextField( DialFrame.SAT_TEXT );
         setInt( textField, val );
     }
     
     public int getSatFromSlider()
     {
-        JSlider     slider  = getSlider( SpectrumFrame.SAT_SLIDER );
+        JSlider     slider  = getSlider( DialFrame.SAT_SLIDER );
         int         val     = getInt( slider );
         return val;
     }
     
     public void setSatSlider( int val )
     {
-        JSlider     slider  = getSlider( SpectrumFrame.SAT_SLIDER );
+        JSlider     slider  = getSlider( DialFrame.SAT_SLIDER );
         setInt( slider, val );
     }
     
@@ -158,27 +209,27 @@ public class SpectrumFrameTestHelper
 
     public int getBrightFromText()
     {
-        JTextField  textField   = getTextField( SpectrumFrame.BRIGHT_TEXT );
+        JTextField  textField   = getTextField( DialFrame.BRIGHT_TEXT );
         int         val         = getInt( textField );
         return val;
     }
     
     public void setBrightText( int val )
     {
-        JTextField  textField   = getTextField( SpectrumFrame.BRIGHT_TEXT );
+        JTextField  textField   = getTextField( DialFrame.BRIGHT_TEXT );
         setInt( textField, val );
     }
     
     public int getBrightFromSlider()
     {
-        JSlider     slider  = getSlider( SpectrumFrame.BRIGHT_SLIDER );
+        JSlider     slider  = getSlider( DialFrame.BRIGHT_SLIDER );
         int         val     = getInt( slider );
         return val;
     }
     
     public void setBrightSlider( int val )
     {
-        JSlider     slider  = getSlider( SpectrumFrame.BRIGHT_SLIDER );
+        JSlider     slider  = getSlider( DialFrame.BRIGHT_SLIDER );
         setInt( slider, val );
     }    
     
@@ -198,10 +249,18 @@ public class SpectrumFrameTestHelper
     public void setText( String componentName, String text )
     {
         JTextField  textField   = getTextField( componentName );
-        invokeAndWait( () -> {
-            textField.setText( text );
-            textField.postActionEvent();
-        });
+        setText( textField, text );
+    }
+    
+    public double getBarAngle()
+    {
+        double  angle   = getDouble( root::getBarAngle );
+        return angle;
+    }
+    
+    public void setBarAngle( double angle )
+    {
+        setDouble( angle, root::setBarAngle );
     }
     
     private JTextField getTextField( String name )
@@ -222,7 +281,7 @@ public class SpectrumFrameTestHelper
     
     private RangeSlider getRangeSlider()
     {
-        String      name    =  SpectrumFrame.HUE_SLIDER;
+        String      name    =  DialFrame.HUE_SLIDER;
         JComponent  comp    = compMap.get( name );
         assertNotNull( comp );
         assertTrue( comp instanceof RangeSlider, name );
@@ -268,18 +327,28 @@ public class SpectrumFrameTestHelper
     {
         String  text    = String.valueOf( val );
         setText( textField, text );
-        textField.postActionEvent();
-    }    
+    }
     
     private void setInt( JSlider slider, int val )
     {
-        invokeAndWait( () -> slider.setValue( val ) );
+        setInt( val, slider::setValue );
     }    
     
     private void setInt( int val, IntConsumer consumer )
     {
         invokeAndWait( () -> consumer.accept( val ) );
     }    
+    
+    private double getDouble( DoubleSupplier supplier )
+    {
+        double  val = supplier.getAsDouble();
+        return val;
+    }
+    
+    private void setDouble( double val, DoubleConsumer consumer )
+    {
+        invokeAndWait( () -> consumer.accept( val ) );
+    }
     
     private void setText( JTextField textField, String text )
     {

@@ -1,0 +1,48 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ------------------< com.acmemail.judah:PrimerOnColor >------------------
+[INFO] Building Primer on Color 01
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.2.0:clean (default-clean) @ PrimerOnColor ---
+[INFO] Deleting C:\Users\johns\workspaces\JudahsTutorials\Primer on Color\target
+[INFO] 
+[INFO] --- resources:3.4.0:resources (default-resources) @ PrimerOnColor ---
+[INFO] skip non existing resourceDirectory C:\Users\johns\workspaces\JudahsTutorials\Primer on Color\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.6.0:compile (default-compile) @ PrimerOnColor ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 12 source files to C:\Users\johns\workspaces\JudahsTutorials\Primer on Color\target\classes
+[INFO] 
+[INFO] --- resources:3.4.0:testResources (default-testResources) @ PrimerOnColor ---
+[INFO] skip non existing resourceDirectory C:\Users\johns\workspaces\JudahsTutorials\Primer on Color\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.6.0:testCompile (default-testCompile) @ PrimerOnColor ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 6 source files to C:\Users\johns\workspaces\JudahsTutorials\Primer on Color\target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ PrimerOnColor ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.acmemail.judah.cartesian_plane.ComponentFinderTest
+21
+21
+21
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.296 s -- in com.acmemail.judah.cartesian_plane.ComponentFinderTest
+[INFO] Running com.acmemail.judah.color_primer.SpectrumFrameTest
+[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.596 s -- in com.acmemail.judah.color_primer.SpectrumFrameTest
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  4.031 s
+[INFO] Finished at: 2026-08-05T14:15:36-07:00
+[INFO] ------------------------------------------------------------------------
