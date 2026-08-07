@@ -117,15 +117,6 @@ class DialFrameTest
         validateSatVal( SAT_VAL_ALT );
     }
     
-    @Test
-    public void testSetBar()
-    {
-        double  currBar = helper.getBarAngle();
-        double  newBar  = currBar == 10 ? 11 : 10;
-        helper.setBarAngle( newBar );
-        assertEquals( newBar, helper.getBarAngle() );
-    }
-    
     /**
      * Describes a single hue/sat/bright text field for the purposes
      * of {@link #testTextField(TextFieldConfig, String)}: the

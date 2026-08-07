@@ -75,10 +75,11 @@ import com.acmemail.judah.color_primer.util.Utils;
  * A main method starts the application
  * by instantiating the SpectrumDial inside of a DialFrame,
  * which contains GUI controls.
- * The SpectrumDial can be instantiated
- * independently of a DialFrame;
+ * The SpectrumDial cannot be instantiated
+ * independently of the DialFrame,
+ * as it relies on the DialFrame
  */
-public class SpectrumDial extends JPanel
+public class SpectrumDial_save extends JPanel
 {
     private static final long   serialVersionUID = 1L;
     
@@ -103,8 +104,11 @@ public class SpectrumDial extends JPanel
     private static final double     TWO_PI      = Math.PI * 2;
     
     /** The SpectrumDial application. */
-    private static final SpectrumDial dial      = 
-        new SpectrumDial( 500 );
+    private static final SpectrumDial_save dial      = 
+        new SpectrumDial_save( 500 );
+    /** GUI frame for the SpectrunDial application. */
+    private static final DialFrame  root        = null;
+//        new DialFrame( dial );
     
     // These are instance variables so that they don't have to be
     // instantiated every time paint() is invoked; they still need
@@ -137,8 +141,6 @@ public class SpectrumDial extends JPanel
      */
     public static void main( String[] args )
     {
-        /** GUI frame for the SpectrunDial application. */
-        DialFrame   root    = new DialFrame( dial );
         root.start();
     }
     
@@ -151,7 +153,7 @@ public class SpectrumDial extends JPanel
      * 
      * @param diameter  the diameter of the 
      */
-    public SpectrumDial( int diameter )
+    public SpectrumDial_save( int diameter )
     {
         Dimension       dim = new Dimension( diameter, diameter );
         setPreferredSize( dim );

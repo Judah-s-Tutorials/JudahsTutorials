@@ -10,8 +10,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.DoubleConsumer;
-import java.util.function.DoubleSupplier;
 import java.util.function.IntConsumer;
 import java.util.function.IntSupplier;
 
@@ -252,17 +250,6 @@ public class DialFrameTestHelper
         setText( textField, text );
     }
     
-    public double getBarAngle()
-    {
-        double  angle   = getDouble( root::getBarAngle );
-        return angle;
-    }
-    
-    public void setBarAngle( double angle )
-    {
-        setDouble( angle, root::setBarAngle );
-    }
-    
     private JTextField getTextField( String name )
     {
         JComponent  comp    = compMap.get( name );
@@ -338,17 +325,6 @@ public class DialFrameTestHelper
     {
         invokeAndWait( () -> consumer.accept( val ) );
     }    
-    
-    private double getDouble( DoubleSupplier supplier )
-    {
-        double  val = supplier.getAsDouble();
-        return val;
-    }
-    
-    private void setDouble( double val, DoubleConsumer consumer )
-    {
-        invokeAndWait( () -> consumer.accept( val ) );
-    }
     
     private void setText( JTextField textField, String text )
     {

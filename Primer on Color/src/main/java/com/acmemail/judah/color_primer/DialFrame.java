@@ -54,13 +54,6 @@ import com.acmemail.judah.color_primer.util.RangeSlider;
  * stored as a percent.
  * Valid values are integers between 0 and 100 (inclusive).
  * </li>
- * <li>
- * Bar angle: 
- * the angle of a ray drawn from the center of the wheel
- * to the wheel's edge.
- * stored in degrees.
- * Valid values are integers between 0 and 360 (inclusive).
- * </li>
  * </ol>
  * <p>
  * The operator can control the value
@@ -72,10 +65,8 @@ import com.acmemail.judah.color_primer.util.RangeSlider;
  * can be controlled by the operator
  * via slider or text field;
  * the slider and text field are synchronized.
- * <p>
- * No operator access to the bar angle property
- * is provided via this class;
- * see, instead, {@link SpectrumDial}.
+ * 
+ * @see SpectrumDial
  * 
  * @author Jack Straub
  */
@@ -99,11 +90,9 @@ public class DialFrame implements Runnable
      * The frame's content pane. This window will ultimately
      * encapsulate all the components of our project's GUI.
      */
-    private JPanel  contentPane = null;
+    private JPanel          contentPane = null;
     /** The window that we will be drawing on. */
-    private JPanel  userPanel   = null;
-    /** The bar angle. */
-    private double  barAngle    = 0;
+    private SpectrumDial    userPanel   = null;
     
     /////////////////////////////////////////////////////////////////
     /// Component names to support testing
@@ -132,7 +121,7 @@ public class DialFrame implements Runnable
      * 					drawing to. Will become a child of the
      * 					content pane.
      */
-    public DialFrame( JPanel userPanel )
+    public DialFrame( SpectrumDial userPanel )
     {
         this.userPanel = userPanel;
     }
@@ -245,26 +234,6 @@ public class DialFrame implements Runnable
     }
     
     /**
-     * Sets the bar angle value in degrees.
-     * 
-     * @param degrees   the value to set
-     */
-    public void setBarAngle( double degrees )
-    {
-        barAngle = degrees;
-    }
-    
-    /**
-     * Gets the bar angle value.
-     * 
-     * @return the bar angle value
-     */
-    public double getBarAngle()
-    {
-        return barAngle;
-    }
-    
-    /**
      * Get the panel containing the sliders
      * and synchronized text fields.
      * @return
@@ -286,11 +255,26 @@ public class DialFrame implements Runnable
         BoxLayout   layout      = new BoxLayout( panel, BoxLayout.Y_AXIS );
         Border      border      =
             BorderFactory.createEmptyBorder( 10, 10, 10, 10 );
+        JPanel      huePanel    = getHuePanel();
+        JPanel      satPanel    =
+            getSliderPanel( 
+                satSlider, 
+                satText, 
+                SAT_TEXT, 
+                userPanel::setSaturation 
+            );
+        JPanel      brightPanel =
+            getSliderPanel( 
+                brightSlider, 
+                brightText, 
+                BRIGHT_TEXT, 
+                userPanel::setBrightness 
+            );
         panel.setLayout( layout );
         panel.setBorder( border );
-        panel.add( getHuePanel() );
-        panel.add( getSliderPanel( satSlider, satText, SAT_TEXT ) );
-        panel.add( getSliderPanel( brightSlider, brightText, BRIGHT_TEXT ) );
+        panel.add( huePanel );
+        panel.add( satPanel );
+        panel.add( brightPanel );
         return panel;
     }
     
@@ -310,8 +294,12 @@ public class DialFrame implements Runnable
      * 
      * @return  the configured panel
      */
-    private JPanel 
-    getSliderPanel( JSlider slider, String text, String textName )
+    private JPanel getSliderPanel( 
+        JSlider slider, 
+        String text, 
+        String textName,
+        IntConsumer consumer
+    )
     {
         JPanel      mainPanel   = new JPanel();
         BoxLayout   mainLayout  = 
@@ -330,10 +318,12 @@ public class DialFrame implements Runnable
         mainPanel.add( slider );
         mainPanel.add( labelPanel );
         ChangeListener  sliderListener  = e -> {
-            String  val = "" + slider.getValue() + "%";
-            textField.setText( val );
+            int     iVal    = slider.getValue();
+            String  sVal    = "" + iVal + "%";
+            textField.setText( sVal );
             textField.setBackground( VALID_BG );
             userPanel.repaint();
+            consumer.accept( iVal );
         };
         slider.addChangeListener( sliderListener );
         sliderListener.stateChanged( null );
@@ -392,10 +382,14 @@ public class DialFrame implements Runnable
         mainPanel.add( hueSlider );
         mainPanel.add( labelPanel );
         ChangeListener  hueListener     = e -> {
-            String  minText = "" + getHueLowerValue() + DEGREE;
-            String  maxText = "" + getHueUpperValue() + DEGREE;
+            int     minVal  = getHueLowerValue();
+            int     maxVal  = getHueUpperValue();
+            String  minText = "" + minVal + DEGREE;
+            String  maxText = "" + maxVal + DEGREE;
             minField.setText( minText );
             maxField.setText( maxText );
+            userPanel.setHueMin( minVal );
+            userPanel.setHueMax( maxVal );
             userPanel.repaint();
         };
         hueSlider.addChangeListener( hueListener );
