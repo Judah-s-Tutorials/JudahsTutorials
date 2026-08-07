@@ -25,6 +25,11 @@ public class ColorPrimer extends JPanel
     private Font            font;
     private Graphics2D      gtx;
     
+    /**
+     * Application entry point;.
+     * 
+     * @param args  command line arguments, not used.
+     */
     public static void main( String[] args )
     {
         ColorPrimer primer  = new ColorPrimer( 750, 350 );

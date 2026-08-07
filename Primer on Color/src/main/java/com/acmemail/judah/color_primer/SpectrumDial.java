@@ -381,24 +381,26 @@ public class SpectrumDial extends JPanel
      * 
      * @see #draw(Graphics2D, Line2D)
      */
-    private record ColorGlobe()
+    private static class ColorGlobe
     {
         /** Edge width of the color globe. */
         private static final int        BORDER_WIDTH    = 2;
         /** Edge width of the color globe encapsulated as a Stroke. */
-        private static final Stroke     STROKE          = 
+        private static final Stroke     STROKE          =
             new BasicStroke( BORDER_WIDTH );
         /** Edge color of the color globe. */
         private static final Color      BORDER_COLOR    = Color.BLACK;
         /** Diameter of the color globe. */
         private static final double     DIAMETER        = 20;
-        
-        /** 
-         * Pre-compiled instance to encapsulate the color globe; 
+
+        /**
+         * Pre-compiled instance to encapsulate the color globe;
          * reconfigured each time the draw method is invoked.
+         * Instance-level (not static) because each SpectrumDial
+         * instance's globe position is independent of every
+         * other instance's.
          */
-        private static final Ellipse2D   gCircle        = new 
-            Ellipse2D.Double();
+        private final Ellipse2D   gCircle        = new Ellipse2D.Double();
 
         /**
          * Draw the color circle at the end of the bar.
@@ -573,7 +575,7 @@ public class SpectrumDial extends JPanel
         @Override
         public void mousePressed( MouseEvent evt )
         {
-            dial.requestFocusInWindow();
+            requestFocusInWindow();
             if ( colorGlobe.contains( evt.getPoint() ) )
                 gCircleSelected = true;
         }
@@ -592,17 +594,17 @@ public class SpectrumDial extends JPanel
             if ( button == MouseEvent.BUTTON1 && refRect.contains( point ) )
             {
                 barAngle = (int)(getDegreesToPoint( evt ) + .5);
-                dial.repaint();
+                repaint();
             }
         }
-        
+
         @Override
         public void mouseDragged( MouseEvent evt )
         {
             if ( gCircleSelected )
-            {   
+            {
                 barAngle = (int)(getDegreesToPoint( evt ) + .5);
-                dial.repaint();
+                repaint();
             }
         }
     }
@@ -658,7 +660,7 @@ public class SpectrumDial extends JPanel
                 else
                     ;
                 barAngle = (int)(angle + .5);
-                dial.repaint();
+                repaint();
             }
         }
     }
