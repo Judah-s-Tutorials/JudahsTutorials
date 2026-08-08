@@ -250,6 +250,14 @@ public class DialFrameTestHelper
         setText( textField, text );
     }
     
+    /**
+     * Dispose all Windows.
+     */
+    public static void disposeAll()
+    {
+        ComponentFinder.disposeAll();
+    }
+    
     private JTextField getTextField( String name )
     {
         JComponent  comp    = compMap.get( name );

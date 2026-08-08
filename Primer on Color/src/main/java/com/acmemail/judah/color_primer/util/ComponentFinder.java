@@ -2,6 +2,7 @@ package com.acmemail.judah.color_primer.util;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Window;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Predicate;
@@ -163,5 +164,17 @@ public class ComponentFinder
             .filter( f -> f instanceof JFrame )
             .map( f -> (JFrame)f );
         return stream;
+    }
+    
+    /**
+     * Dispose all Windows.
+     */
+    public static void disposeAll()
+    {
+        for ( Window window : Window.getWindows() )
+        {
+            window.setVisible( false );
+            window.dispose();
+        }
     }
 }

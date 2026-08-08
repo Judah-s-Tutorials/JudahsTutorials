@@ -8,6 +8,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.function.IntSupplier;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +52,16 @@ class DialFrameTest
         validateHueMax( HUE_MAX_DEF );
         validateSatVal( SAT_DEF );
         validateBrightVal( BRIGHT_DEF );
+    }
+    
+    /**
+     * Make sure that all Windows created during this test
+     * are disposed before JUnit starts the next test.
+     */
+    @AfterAll
+    public static void afterAll()
+    {
+        DialFrameTestHelper.disposeAll();
     }
 
     @Test

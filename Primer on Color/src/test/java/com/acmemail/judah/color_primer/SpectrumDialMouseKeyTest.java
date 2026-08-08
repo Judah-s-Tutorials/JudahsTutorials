@@ -12,8 +12,11 @@ import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import com.acmemail.judah.color_primer.util.ComponentFinder;
 
 /**
  * Behavioral tests for SpectrumDial's mouse- and keyboard-driven
@@ -22,6 +25,8 @@ import org.junit.jupiter.api.Test;
  * driven by user interaction), so these tests read it back via
  * reflection rather than adding test-only production API.
  *
+ * @author claude.ai
+ *
  * @see SpectrumDialInteractionTest
  */
 class SpectrumDialMouseKeyTest
@@ -29,7 +34,7 @@ class SpectrumDialMouseKeyTest
     private SpectrumDial    dial;
 
     @BeforeEach
-    void setUp() throws InvocationTargetException, InterruptedException
+    public void setUp() throws InvocationTargetException, InterruptedException
     {
         dial = new SpectrumDial( 300 );
         DialFrame   frame   = new DialFrame( dial );
@@ -40,72 +45,82 @@ class SpectrumDialMouseKeyTest
         // and colorGlobe's position are established.
         invokeAndWait( () -> dial.paintImmediately( dial.getBounds() ) );
     }
-
+    
+    /**
+     * Make sure that all Windows created during this test
+     * are disposed before JUnit starts the next test.
+     */
+    @AfterAll
+    public static void afterAll()
+    {
+        ComponentFinder.disposeAll();
+    }
+    
     @Test
-    void clickInsideDialSetsBarAngleToClickedAngle()
+    public void clickInsideDialSetsBarAngleToClickedAngle()
         throws Exception
     {
         // Directly right of center: angle 0 degrees.
         Point   rightOfCenter   = offsetFromCenter( 1, 0 );
         click( rightOfCenter );
-        assertAngleCloseTo( 0, getBarAngle() );
+        assertAngleCloseTo( 0, dial.getBarAngle() );
 
         // Directly above center: angle 90 degrees (Java y grows
         // downward, so "up" is a negative y offset).
         Point   aboveCenter     = offsetFromCenter( 0, -1 );
         click( aboveCenter );
-        assertAngleCloseTo( 90, getBarAngle() );
+        assertAngleCloseTo( 90, dial.getBarAngle() );
     }
 
     @Test
-    void clickOutsideDialDoesNotChangeBarAngle() throws Exception
+    public void clickOutsideDialDoesNotChangeBarAngle() throws Exception
     {
-        int     before  = getBarAngle();
+        int     before  = dial.getBarAngle();
         click( new Point( 1, 1 ) );
-        assertEquals( before, getBarAngle() );
+        assertEquals( before, dial.getBarAngle() );
     }
 
     @Test
-    void upArrowIncrementsBarAngleByOneDegree() throws Exception
+    public void upArrowIncrementsBarAngleByOneDegree() throws Exception
     {
         click( offsetFromCenter( 1, 0 ) );
-        int     before  = getBarAngle();
+        int     before  = dial.getBarAngle();
         pressKey( KeyEvent.VK_UP );
-        assertEquals( before + 1, getBarAngle() );
+        assertEquals( before + 1, dial.getBarAngle() );
     }
 
     @Test
-    void downArrowFromZeroWrapsToThreeFiveNine() throws Exception
+    public void downArrowFromZeroWrapsToThreeFiveNine() throws Exception
     {
-        assertEquals( 0, getBarAngle() );
+        assertEquals( 0, dial.getBarAngle() );
         pressKey( KeyEvent.VK_DOWN );
-        assertEquals( 359, getBarAngle() );
+        assertEquals( 359, dial.getBarAngle() );
     }
 
     @Test
-    void unmappedKeyDoesNotChangeBarAngle() throws Exception
+    public void unmappedKeyDoesNotChangeBarAngle() throws Exception
     {
-        int     before  = getBarAngle();
+        int     before  = dial.getBarAngle();
         pressKey( KeyEvent.VK_ENTER );
-        assertEquals( before, getBarAngle() );
+        assertEquals( before, dial.getBarAngle() );
     }
 
     @Test
-    void draggingWithoutFirstGrabbingGlobeDoesNotChangeBarAngle()
+    public void draggingWithoutFirstGrabbingGlobeDoesNotChangeBarAngle()
         throws Exception
     {
-        int     before  = getBarAngle();
+        int     before  = dial.getBarAngle();
         drag( offsetFromCenter( 0, -1 ) );
-        assertEquals( before, getBarAngle() );
+        assertEquals( before, dial.getBarAngle() );
     }
 
     @Test
-    void draggingGlobeAfterPressingItChangesBarAngle() throws Exception
+    public void draggingGlobeAfterPressingItChangesBarAngle() throws Exception
     {
         Point   globeCenter = getGlobeCenter();
         press( globeCenter );
         drag( offsetFromCenter( 0, -1 ) );
-        assertAngleCloseTo( 90, getBarAngle() );
+        assertAngleCloseTo( 90, dial.getBarAngle() );
     }
 
     /**
@@ -181,13 +196,6 @@ class SpectrumDialMouseKeyTest
             KeyEvent.CHAR_UNDEFINED
         );
         invokeAndWait( () -> dial.dispatchEvent( evt ) );
-    }
-
-    private int getBarAngle() throws Exception
-    {
-        Field   field   = SpectrumDial.class.getDeclaredField( "barAngle" );
-        field.setAccessible( true );
-        return field.getInt( dial );
     }
 
     private Point getGlobeCenter() throws Exception

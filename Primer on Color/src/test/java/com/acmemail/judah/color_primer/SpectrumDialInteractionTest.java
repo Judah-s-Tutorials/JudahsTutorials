@@ -11,7 +11,10 @@ import javax.swing.JComponent;
 import javax.swing.RepaintManager;
 import javax.swing.SwingUtilities;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+
+import com.acmemail.judah.color_primer.util.ComponentFinder;
 
 /**
  * Regression test for a bug in which SpectrumDial's MouseMonitor and
@@ -25,6 +28,16 @@ import org.junit.jupiter.api.Test;
  */
 class SpectrumDialInteractionTest
 {
+    /**
+     * Make sure that all Windows created during this test
+     * are disposed before JUnit starts the next test.
+     */
+    @AfterAll
+    public static void afterAll()
+    {
+        ComponentFinder.disposeAll();
+    }
+    
     @Test
     void mouseClickShouldRepaintTheClickedDial()
         throws InvocationTargetException, InterruptedException

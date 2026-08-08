@@ -52,7 +52,11 @@ class SpectrumDialTest
             new PropertyConfig(
                 "brightness",
                 SpectrumDial::setBrightness,
-                SpectrumDial::getBrightness )
+                SpectrumDial::getBrightness ),
+            new PropertyConfig(
+                "barAngle",
+                SpectrumDial::setBarAngle,
+                SpectrumDial::getBarAngle )
         );
     }
 

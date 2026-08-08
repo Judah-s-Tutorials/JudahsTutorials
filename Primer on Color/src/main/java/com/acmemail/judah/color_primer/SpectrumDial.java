@@ -241,6 +241,26 @@ public class SpectrumDial extends JPanel
     {
         this.brightness = brightness;
     }
+    
+    /**
+     * Gets the bar angle.
+     * 
+     * @return the bar angle
+     */
+    public int getBarAngle()
+    {
+        return barAngle;
+    }
+    
+    /**
+     * Sets the bar angle.
+     * 
+     * @param angle the angle to set
+     */
+    public void setBarAngle( int angle )
+    { 
+        barAngle = angle;
+    }
 
     @Override
     public void paintComponent( Graphics graphics )
