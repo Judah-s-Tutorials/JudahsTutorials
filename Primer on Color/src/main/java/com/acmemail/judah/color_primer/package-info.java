@@ -1,7 +1,7 @@
 /**
- * This module contains classes that were developed for
- * part of the Cartesian Plane project.
- * You can expect least some of these
+ * This module contains classes that were developed for the
+ * <em>Primer on Color</em> lesson.
+ * You can expect some of these
  * to be changed in a future lesson.
  * 
  * Some of the incorporated classes come from the 

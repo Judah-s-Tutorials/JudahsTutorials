@@ -3,22 +3,15 @@ package com.acmemail.judah.color_primer.sandbox;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
 
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.InputMap;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
-import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.border.Border;
-import javax.swing.plaf.basic.BasicSliderUI;
 
 import com.acmemail.judah.color_primer.util.RangeSlider;
 
@@ -30,6 +23,7 @@ public class RangeSliderTester
     private final JSlider           jSlider     = new JSlider( 0, 100 );
     private final JFrame            frame       = new JFrame( TITLE );
     private final JPanel            contentPane = new JPanel();
+    @SuppressWarnings("unused")
     private final RangeSliderTester tester;
 
     public static void main(String[] args)
@@ -69,55 +63,10 @@ public class RangeSliderTester
         rangeSlider.setValue( 90 );
         rangeSlider.setUpperValue( 270 );
         jSlider.setValue( 50 );
-        
-        overrideAction( rangeSlider );
-        
+
         frame.setContentPane( contentPane );
         frame.setLocation( 200, 200 );
         frame.pack();
         frame.setVisible( true );
-    }
-    
-    private static void overrideAction( RangeSlider slider )
-    {
-        final KeyStroke     leftKey         = 
-            KeyStroke.getKeyStroke( KeyEvent.VK_LEFT, 0 );
-        final KeyStroke     kpLeftKey       = 
-            KeyStroke.getKeyStroke( KeyEvent.VK_KP_LEFT, 0 );
-        final String        rangeLeftAction = "rangeLeftAction";
-        final KeyStroke     rightKey    = 
-            KeyStroke.getKeyStroke( KeyEvent.VK_RIGHT, 0 );
-        final KeyStroke     kpRightKey  = 
-            KeyStroke.getKeyStroke( KeyEvent.VK_KP_RIGHT, 0 );
-        final KeyStroke     pageUpKey   = 
-            KeyStroke.getKeyStroke( KeyEvent.VK_PAGE_UP, 0 );
-        final KeyStroke     pageDownKey = 
-            KeyStroke.getKeyStroke( KeyEvent.VK_PAGE_DOWN, 0 );
-        final KeyStroke     homeKey     = 
-            KeyStroke.getKeyStroke( KeyEvent.VK_HOME, 0 );
-        final KeyStroke     endKey      = 
-            KeyStroke.getKeyStroke( KeyEvent.VK_END, 0 );
-        InputMap            inputMap    = slider.getInputMap();
-        ActionMap           actionMap   = slider.getActionMap();
-        
-        System.out.println( leftKey + ": " + inputMap.get(leftKey) );
-        System.out.println( kpLeftKey + ": " + inputMap.get(kpLeftKey) );
-        System.out.println( pageUpKey + ": " + inputMap.get(pageUpKey) );
-        System.out.println( homeKey + ": " + inputMap.get(homeKey) );
-        System.out.println( endKey + ": " + inputMap.get(endKey) );
-        
-        inputMap.put( leftKey, rangeLeftAction );
-        actionMap.put( rangeLeftAction, new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int currVal = slider.getUpperValue();
-                int minVal  = slider.getMinimum();
-                if ( currVal > minVal )
-                {
-                    slider.setUpperValue( currVal - 1 );
-                }
-                slider.setValue( currVal + 10 );
-            }
-        });
     }
 }

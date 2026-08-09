@@ -27,7 +27,7 @@ import com.acmemail.judah.color_primer.util.RangeSlider;
  * yellow at 60&#xB0;,
  * green at 120&#xB0;, 
  * cyan at 180&#xB0;
- * and magenta at300&#xB0;.
+ * and magenta at 300&#xB0;.
  * It controls the following properties:
  * <ol>
  * <li>

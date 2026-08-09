@@ -9,9 +9,23 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
+/**
+ * This application demonstrates how to 
+ * apply alpha values to a color.
+ * It draws some text,
+ * then draws blue rectangles
+ * from the top of the window
+ * to the bottom.
+ * The blue rectangles begin
+ * with full transparency (alpha = 0)
+ * and become decreasingly transparent
+ * until they are not transparent at all
+ * (alhpa = 1).
+ */
 @SuppressWarnings("serial")
 public class ColorPrimer extends JPanel
 {
+    /** The application window's background color. */
     private Color   bgColor             = new Color( .9f, .9f, .9f );
 
     ///////////////////////////////////////////////////////
@@ -20,10 +34,12 @@ public class ColorPrimer extends JPanel
     // paintComponent is invoked.
     //
     ///////////////////////////////////////////////////////
+    /** The current width of the application window. */
     private int             currWidth;
+    /** The current heigt of the application window. */
     private int             currHeight;
+    /** The font to use when drawing strings. */
     private Font            font;
-    private Graphics2D      gtx;
     
     /**
      * Application entry point;.
@@ -37,6 +53,12 @@ public class ColorPrimer extends JPanel
         root.start();
     }
     
+    /**
+     * Constructor.
+     * 
+     * @param width     the desired width of the application window
+     * @param height    the desired height of the application window
+     */
     public ColorPrimer( int width, int height )
     {
         Dimension   dim = new Dimension( width, height );
@@ -60,24 +82,14 @@ public class ColorPrimer extends JPanel
         super.paintComponent( graphics );
         currWidth = getWidth();
         currHeight = getHeight();
-        gtx = (Graphics2D)graphics;
+
+        Graphics2D  gtx = (Graphics2D)graphics;
         gtx.setColor( bgColor );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         // end boilerplate
         
         int         bYco    = 75;
         int         bXco    = 20;
-        
-        // FontMetrics seem to have completely out to lunch.
-        // Eyeball dimensions, and plan on never changing anything.
-        float       rXco        = 10;
-        float       rYco        = 20;
-        float       rWidth      = currWidth - 2 * rXco;
-        float       rHeight     = rYco + 150;
-        Rectangle2D rect        =
-            new Rectangle2D.Float( rXco, rYco, rWidth, rHeight );
-        gtx.setColor( Color.CYAN );
-        gtx.fill( rect );
         
         gtx.setFont( font );
         gtx.setColor( Color.RED );
@@ -86,16 +98,23 @@ public class ColorPrimer extends JPanel
         gtx.drawString( "I am the Walrus!", bXco, bYco + 160 );
         gtx.drawString( "Goo goo g'joob", bXco, bYco + 250 );
         
-        paintTransparentOverlay();
+        paintTransparentOverlay( gtx );
     }
     
-    private void paintTransparentOverlay()
+    /**
+     * Paints a series of decreasingly transparent rectangles
+     * over the application window.
+     * 
+     * @param gtx   the graphics context to draw with
+     */
+    private void paintTransparentOverlay( Graphics2D gtx )
     {
-        int         divisions       = 50;
+        int         divisions       = 200;
         float       rWidth          = currWidth;
-        float       rHeight         = currHeight / divisions;
+        float       rHeight         = (float)currHeight / divisions;
         float       alpha           = 0; // percent
         float       alphaIncr       = 1f / divisions;
+        int         counter         = 1;
         Rectangle2D rect            = new Rectangle2D.Float();
         for ( float yco = 0 ; yco < currHeight - rHeight ; yco += rHeight )
         {
@@ -104,6 +123,11 @@ public class ColorPrimer extends JPanel
             gtx.setColor( color );
             gtx.fill( rect );
             alpha += alphaIncr;
+            if ( alpha > 1 )
+            {
+                System.out.println( counter++ );
+                alpha = 1;
+            }
         }
     }
 }

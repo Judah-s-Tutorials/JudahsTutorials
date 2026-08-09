@@ -1,4 +1,4 @@
-package com.acmemail.judah.color_primer;
+package com.acmemail.judah.color_primer.sandbox;
 
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;

@@ -8,17 +8,30 @@ import java.awt.geom.Line2D;
 
 import javax.swing.JPanel;
 
+/**
+ * Using the HSB color model,
+ * fill a circle with sequential hues
+ * between 0 and 360 degrees.
+ */
 public class SpectrumCirc extends JPanel
 {
+    /** Default serial version UID. */
     private static final long serialVersionUID = 1L;
+    /** Constant to use for 2 * pi. */
     private static final double TWO_PI      = Math.PI * 2;
+    /** The color brown. */
     private static final Color  BROWN       = new Color( 0xDAA06D );
+    /** 
+     * The width of the empty border around the edges of the 
+     * application window.
+     */
     private static final double BORDER      = 10;
-
-    private int             currWidth;
-    private int             currHeight;
-    private Graphics2D      gtx;
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command-line arguments, not used
+     */
     public static void main( String[] args )
     {
         SpectrumCirc    spectrum    = new SpectrumCirc( 500 );
@@ -26,6 +39,12 @@ public class SpectrumCirc extends JPanel
         root.start();
     }
     
+    /**
+     * Constructor.
+     * Sets the preferred size of the application window.
+     * 
+     * @param diameter  the diameter of the circle contained in the window
+     */
     public SpectrumCirc( int diameter )
     {
         Dimension   dim = new Dimension( diameter, diameter );
@@ -37,9 +56,9 @@ public class SpectrumCirc extends JPanel
     {
         // begin boilerplate
         super.paintComponent( graphics );
-        currWidth = getWidth();
-        currHeight = getHeight();
-        gtx = (Graphics2D)graphics;
+        int         currWidth   = getWidth();
+        int         currHeight  = getHeight();
+        Graphics2D  gtx         = (Graphics2D)graphics;
         gtx.setColor( BROWN );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         
@@ -48,7 +67,7 @@ public class SpectrumCirc extends JPanel
         double  radius      = diam / 2;
         double  centerXco   = currWidth / 2.;
         double  centerYco   = currHeight / 2.;
-        double  incr        = TWO_PI / 5000;
+        double  incr        = 1 / (2 * radius);
         Line2D  line        = new Line2D.Double();
         for ( double angle = 0 ; angle < TWO_PI ; angle += incr  )
         {

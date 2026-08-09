@@ -9,17 +9,30 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
+/**
+ * Using the HSB color model,
+ * fill a rectangle with gradually increasing hues
+ * from 0&deg; to 360&deg;
+ */
 public class SpectrumRect extends JPanel
 {
+    /** Default serial version UID. */
     private static final long serialVersionUID = 1L;
+    /** The application window's background color. */
     private static final Color  BROWN       = new Color( 0xA52A2A );
+    /** 
+     * The width of the empty border around the 
+     * edges of the application's window.
+     */
     private static final double BORDER      = 10;
-
-    private Rectangle2D     rect            = new Rectangle2D.Double();
-    private int             currWidth;
-    private int             currHeight;
-    private Graphics2D      gtx;
+    /** Reusable object for encapsulating the color rectangle. */
+    private final Rectangle2D   rect        = new Rectangle2D.Double();
     
+    /**
+     * Application entry point.
+     * 
+     * @param args  command-line arguments, not used
+     */
     public static void main( String[] args )
     {
         SpectrumRect    spectrum    = new SpectrumRect( 1010, 350 );
@@ -27,6 +40,14 @@ public class SpectrumRect extends JPanel
         root.start();
     }
     
+    /**
+     * Constructor.
+     * Initializes the desired dimensions
+     * of the application's window.
+     * 
+     * @param width     desired width
+     * @param height    desired height
+     */
     public SpectrumRect( int width, int height )
     {
         Dimension   dim = new Dimension( width, height );
@@ -38,9 +59,9 @@ public class SpectrumRect extends JPanel
     {
         // begin boilerplate
         super.paintComponent( graphics );
-        currWidth = getWidth();
-        currHeight = getHeight();
-        gtx = (Graphics2D)graphics;
+        int         currWidth   = getWidth();
+        int         currHeight  = getHeight();
+        Graphics2D  gtx         = (Graphics2D)graphics;
         gtx.setColor( BROWN );
         gtx.fillRect( 0,  0, currWidth, currHeight );
         
