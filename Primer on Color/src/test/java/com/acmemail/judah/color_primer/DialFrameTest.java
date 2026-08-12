@@ -127,7 +127,32 @@ class DialFrameTest
         helper.setSatText( SAT_VAL_ALT );
         validateSatVal( SAT_VAL_ALT );
     }
-    
+
+    @ParameterizedTest
+    @MethodSource( "textFieldArgs" )
+    public void testTextField( TextFieldConfig cfg, String text )
+    {
+        Color   defColor    = helper.getBackgroundColor( cfg.componentName() );
+        validateField( cfg );
+
+        helper.setText( cfg.componentName(), text );
+        validateField( cfg, cfg.altValue() );
+        Color   testColor   = helper.getBackgroundColor( cfg.componentName() );
+        assertEquals( defColor, testColor );
+
+        String  errorText   =   "Q" + text;
+        helper.setText( cfg.componentName(), errorText );
+        assertEquals( cfg.altValue(), cfg.sliderGetter().getAsInt() );
+        assertEquals( cfg.altValue(), cfg.propertyGetter().getAsInt() );
+        testColor   = helper.getBackgroundColor( cfg.componentName() );
+        assertNotEquals( defColor, testColor );
+
+        helper.setText( cfg.componentName(), text );
+        validateField( cfg, cfg.altValue() );
+        testColor   = helper.getBackgroundColor( cfg.componentName() );
+        assertEquals( defColor, testColor );
+    }
+
     /**
      * Describes a single hue/sat/bright text field for the purposes
      * of {@link #testTextField(TextFieldConfig, String)}: the
@@ -168,31 +193,6 @@ class DialFrameTest
             Arguments.of( cfg, "" + cfg.altValue() ),
             Arguments.of( cfg, "" + cfg.altValue() + cfg.unit() )
         ));
-    }
-
-    @ParameterizedTest
-    @MethodSource( "textFieldArgs" )
-    public void testTextField( TextFieldConfig cfg, String text )
-    {
-        Color   defColor    = helper.getBackgroundColor( cfg.componentName() );
-        validateField( cfg );
-
-        helper.setText( cfg.componentName(), text );
-        validateField( cfg, cfg.altValue() );
-        Color   testColor   = helper.getBackgroundColor( cfg.componentName() );
-        assertEquals( defColor, testColor );
-
-        String  errorText   =   "Q" + text;
-        helper.setText( cfg.componentName(), errorText );
-        assertEquals( cfg.altValue(), cfg.sliderGetter().getAsInt() );
-        assertEquals( cfg.altValue(), cfg.propertyGetter().getAsInt() );
-        testColor   = helper.getBackgroundColor( cfg.componentName() );
-        assertNotEquals( defColor, testColor );
-
-        helper.setText( cfg.componentName(), text );
-        validateField( cfg, cfg.altValue() );
-        testColor   = helper.getBackgroundColor( cfg.componentName() );
-        assertEquals( defColor, testColor );
     }
     
     private void validateHueMin()

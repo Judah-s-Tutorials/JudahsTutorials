@@ -22,15 +22,25 @@ public class Constants
     /* Default ship lengths. */
     /*************************/
     /** Default length of a battleship. */
-    public static final int     DEF_BATTLESHIP_LEN  = 4;
+    public static final int     DEF_BATTLESHIP_LEN      = 4;
     /** Default length of a carrier. */
-    public static final int     DEF_CARRIER_LEN     = 5;
+    public static final int     DEF_CARRIER_LEN         = 5;
     /** Default length of a cruiser. */
-    public static final int     DEF_CRUISER_LEN     = 3;
+    public static final int     DEF_CRUISER_LEN         = 3;
     /** Default length of a destroyer. */
-    public static final int     DEF_DESTROYER_LEN   = 2;
+    public static final int     DEF_DESTROYER_LEN       = 2;
     /** Default length of a submarine. */
-    public static final int     DEF_SUBMARINE_LEN   = 3;
+    public static final int     DEF_SUBMARINE_LEN       = 3;
+    /** Default breadth of a battleship. */
+    public static final int     DEF_BATTLESHIP_BREADTH  = 1;
+    /** Default breadth of a carrier. */
+    public static final int     DEF_CARRIER_BREADTH     = 1;
+    /** Default breadth of a cruiser. */
+    public static final int     DEF_CRUISER_BREADTH     = 1;
+    /** Default breadth of a destroyer. */
+    public static final int     DEF_DESTROYER_BREADTH   = 1;
+    /** Default breadth of a submarine. */
+    public static final int     DEF_SUBMARINE_BREADTH   = 1;
     
     /*************************/
     /* Default ship names. */

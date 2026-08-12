@@ -1,6 +1,10 @@
-package com.acmemail.judah.battleship;
+package battleship2D;
 import java.awt.Rectangle;
 import java.util.Objects;
+
+import com.acmemail.judah.battleship.GridCoords;
+import com.acmemail.judah.battleship.Orientation;
+import com.acmemail.judah.battleship.ShipType;
 /**
  * An instance of this class encapsulates the properties
  * of a ship in the Battleship game.
@@ -52,7 +56,7 @@ public class Ship2D
      * 
      * @param type          the type of the instantiated Ship
      * @param name          the name of the ship
-     * @param first         the (x,y) coordinates of the instantiated Ship
+     * @param origin         the (x,y) coordinates of the instantiated Ship
      * @param orientation   the orientation of the instantiated Ship
      * 
      * @see Ship2D#Ship(ShipType, GridCoords, Orientation)
@@ -60,16 +64,16 @@ public class Ship2D
     public Ship2D( 
         ShipType2D type, 
         String name, 
-        GridCoords first, 
+        GridCoords origin, 
         Orientation orientation
     )
     {
         super();
         this.type = type;
         this.name = name;
-        this.firstSquare = first;
+        this.firstSquare = origin;
         this.orientation = orientation;
-        this.bounds = type.getBounds( first, orientation );
+        this.bounds = Utils.getBounds( type, origin, orientation );
     }
     
     /**
@@ -130,52 +134,6 @@ public class Ship2D
     }
     
     /**
-     * Gets the smallest x-coordinate
-     * encapsulated by this ship.
-     * 
-     * @return  the smallest x-coordinate encapsulated by this ship
-     */
-    public int getMinX()
-    {
-        return (int)(bounds.getMinX());
-    }
-    
-    /**
-     * Gets the largest x-coordinate
-     * encapsulated by this ship.
-     * 
-     * @return  the largest x-coordinate encapsulated by this ship
-     */
-    public int getMaxX()
-    {
-        int maxXco  = (int)bounds.getMaxX() - 1;
-        return maxXco;
-    }
-    
-    /**
-     * Gets the smallest y-coordinate
-     * encapsulated by this ship.
-     * 
-     * @return  the smallest y-coordinate encapsulated by this ship
-     */
-    public int getMinY()
-    {
-        return (int)bounds.getMinY();
-    }
-    
-    /**
-     * Gets the largest y-coordinate
-     * encapsulated by this ship.
-     * 
-     * @return  the largest x-coordinate encapsulated by this ship
-     */
-    public int getMaxY()
-    {
-        int maxY    = (int)bounds.getMaxY() - 1;
-        return maxY;
-    }
-
-    /**
      * Gets the ship type.
      * 
      * @return the ship type
@@ -192,7 +150,7 @@ public class Ship2D
      */
     public String getTypeName()
     {
-        return type.getTypeName();
+        return type.typeName();
     }
 
     /**
@@ -215,6 +173,16 @@ public class Ship2D
         return orientation;
     }
     
+    /**
+     * Gets the bounds of this ship.
+     * 
+     * @return  the bounds of this ship
+     */
+    public Rectangle getBounds()
+    {
+        return bounds;
+    }
+    
     @Override
     public String toString()
     {
@@ -222,7 +190,7 @@ public class Ship2D
         int             height  = (int)bounds.getHeight();
         StringBuilder   bldr    = new StringBuilder();
         bldr.append( "name=" ).append( name )
-            .append( ",type=" ).append( type )
+            .append( ",type=" ).append( type.typeName() )
             .append( ",start=" ).append( firstSquare )
             .append( ",orient=" ).append( orientation )
             .append( ",width=" ).append( width )
