@@ -2,6 +2,8 @@ package com.acmemail.judah.battleship;
 
 import java.util.Objects;
 
+import com.acmemail.judah.battleship2D.GridCoords;
+
 /**
  * An instance of this class encapsulates the properties
  * of a cell in the grid, including:
@@ -50,7 +52,7 @@ public class Cell
      */
     public int getXco()
     {
-        return coords.getXco();
+        return coords.xco();
     }
     
     /**
@@ -60,7 +62,7 @@ public class Cell
      */
     public int getYco()
     {
-        return coords.getYco();
+        return coords.yco();
     }
     
     /**

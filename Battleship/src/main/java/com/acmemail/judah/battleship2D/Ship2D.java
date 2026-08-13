@@ -1,9 +1,7 @@
-package battleship2D;
+package com.acmemail.judah.battleship2D;
 import java.awt.Rectangle;
 import java.util.Objects;
 
-import com.acmemail.judah.battleship.GridCoords;
-import com.acmemail.judah.battleship.Orientation;
 import com.acmemail.judah.battleship.ShipType;
 /**
  * An instance of this class encapsulates the properties
@@ -54,9 +52,11 @@ public class Ship2D
     /**
      * Constructor.
      * 
-     * @param type          the type of the instantiated Ship
-     * @param name          the name of the ship
-     * @param origin         the (x,y) coordinates of the instantiated Ship
+     * @param type          the type of the instantiated Ship;
+     *                      may not be null
+     * @param name          the name of the ship; may be null
+     * @param origin        the (x,y) coordinates of the instantiated Ship;
+     *                      may not be null
      * @param orientation   the orientation of the instantiated Ship
      * 
      * @see Ship2D#Ship(ShipType, GridCoords, Orientation)
@@ -68,7 +68,8 @@ public class Ship2D
         Orientation orientation
     )
     {
-        super();
+        Objects.requireNonNull( type, "type" );
+        Objects.requireNonNull( origin, "origin" );
         this.type = type;
         this.name = name;
         this.firstSquare = origin;
@@ -99,24 +100,10 @@ public class Ship2D
      */
     public boolean contains( GridCoords pair )
     {
-        int     xco         = pair.getXco();
-        int     yco         = pair.getYco();
+        int     xco         = pair.xco();
+        int     yco         = pair.yco();
         boolean contains    = contains( xco, yco );
         return contains;
-    }
-    
-    /**
-     * Returns true if this ship intersects
-     * the given rectangle in a grid.
-     * 
-     * @param rect  the given rectangle
-     * 
-     * @return  true if this ship intersects the given rectangle
-     */
-    public boolean intersects( Rectangle rect )
-    {
-        boolean     result      = rect.intersects( this.bounds );
-        return result;
     }
     
     /**
@@ -129,7 +116,7 @@ public class Ship2D
      */
     public boolean intersects( Ship2D that )
     {
-        boolean     result  = that.intersects( bounds );
+        boolean     result  = that.bounds.intersects( bounds );
         return result;
     }
     
@@ -183,6 +170,12 @@ public class Ship2D
         return bounds;
     }
     
+    public GridCoords getOrigin()
+    {
+        GridCoords  origin  = new GridCoords( bounds.x, bounds.y );
+        return origin;
+    }
+    
     @Override
     public String toString()
     {
@@ -213,16 +206,13 @@ public class Ship2D
         boolean rcode   = false;
         if ( this == obj )
             rcode = true;
-        else if ( !(obj instanceof Ship2D) )
-            rcode = false;
-        else
+        else if ( obj instanceof Ship2D that )
         {
-            Ship2D    that    = (Ship2D)obj;
-            if ( !this.type.equals( that.type ) )
+            if ( !Objects.equals( this.type, that.type ) )
                 rcode = false;
-            else if ( !this.name.equals( that.name ) )
+            else if ( !Objects.equals( this.name, that.name ) )
                 rcode = false;
-            else if ( !this.firstSquare.equals( that.firstSquare ) )
+            else if ( !Objects.equals( this.firstSquare, that.firstSquare ) )
                 rcode = false;
             else if ( this.orientation != that.orientation )
                 rcode = false;

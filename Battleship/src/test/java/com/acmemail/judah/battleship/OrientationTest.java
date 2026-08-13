@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.battleship2D.Orientation;
+
 class OrientationTest
 {
     @Test

@@ -20,12 +20,12 @@ import javax.swing.JPanel;
 
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Cell;
-import com.acmemail.judah.battleship.Grid;
-import com.acmemail.judah.battleship.GridCoords;
 import com.acmemail.judah.battleship.Label;
-import com.acmemail.judah.battleship.Orientation;
 import com.acmemail.judah.battleship.Ship;
 import com.acmemail.judah.battleship.ShipType;
+import com.acmemail.judah.battleship2D.Grid;
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
 
 public class GraphicalGrid extends JPanel implements Artwork
 {

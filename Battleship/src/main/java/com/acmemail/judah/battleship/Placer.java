@@ -7,6 +7,9 @@ import javax.swing.JOptionPane;
 
 import com.acmemail.judah.battleship.util.JOptionPaneI;
 import com.acmemail.judah.battleship.util.JOptionPaneS;
+import com.acmemail.judah.battleship2D.Grid;
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
 
 /**
  * An instance of this class is used to request a ship configuration

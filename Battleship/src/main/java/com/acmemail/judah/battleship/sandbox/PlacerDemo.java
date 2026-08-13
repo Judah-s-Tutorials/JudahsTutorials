@@ -9,11 +9,11 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.battleship.Fleet;
-import com.acmemail.judah.battleship.Grid;
 import com.acmemail.judah.battleship.Placer;
 import com.acmemail.judah.battleship.Ship;
 import com.acmemail.judah.battleship.ShipType;
 import com.acmemail.judah.battleship.artwork.GraphicalGrid;
+import com.acmemail.judah.battleship2D.Grid;
 
 public class PlacerDemo
 {

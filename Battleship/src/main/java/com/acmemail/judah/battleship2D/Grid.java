@@ -1,12 +1,17 @@
-package com.acmemail.judah.battleship;
+package com.acmemail.judah.battleship2D;
 
-import static com.acmemail.judah.battleship.Constants.KEY_NUM_COLS;
-import static com.acmemail.judah.battleship.Constants.KEY_NUM_ROWS;
+import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_COLS;
+import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_ROWS;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.Cell;
+import com.acmemail.judah.battleship.Fleet;
+import com.acmemail.judah.battleship.Ship;
 
 public class Grid extends HashMap<GridCoords,Cell>
 {
@@ -227,7 +232,7 @@ public class Grid extends HashMap<GridCoords,Cell>
      */
     public static boolean isValidCoord( GridCoords coords )
     {
-        boolean valid   = isValidCoord( coords.getXco(), coords.getYco() );
+        boolean valid   = isValidCoord( coords.xco(), coords.yco() );
         return valid;
     }
     
@@ -286,8 +291,8 @@ public class Grid extends HashMap<GridCoords,Cell>
     public static List<String> evaluateBounds( GridCoords coords )
     {
         List<String>    list    = new ArrayList<>();
-        int             xco     = coords.getXco();
-        int             yco     = coords.getYco();
+        int             xco     = coords.xco();
+        int             yco     = coords.yco();
         if ( xco < 0 || xco >= getNumCols() )
         {
             String  message = "X-coordinates out of bounds: " + xco;

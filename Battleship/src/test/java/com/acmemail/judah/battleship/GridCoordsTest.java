@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.battleship2D.GridCoords;
+
 class GridCoordsTest
 {
     @Test
@@ -14,8 +16,8 @@ class GridCoordsTest
         int         expXco      = 10;
         int         expYco      = expXco + 5;
         GridCoords  coords      = new GridCoords( expXco, expYco );
-        assertEquals( expXco, coords.getXco() );
-        assertEquals( expYco, coords.getYco() );
+        assertEquals( expXco, coords.xco() );
+        assertEquals( expYco, coords.yco() );
     }
 
     @Test

@@ -1,6 +1,6 @@
 package com.acmemail.judah.battleship.artwork;
 
-import com.acmemail.judah.battleship.Grid;
+import com.acmemail.judah.battleship2D.Grid;
 
 public interface Artwork
 {

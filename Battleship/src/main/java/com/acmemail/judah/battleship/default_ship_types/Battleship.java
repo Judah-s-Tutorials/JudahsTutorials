@@ -1,7 +1,7 @@
 package com.acmemail.judah.battleship.default_ship_types;
 
-import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_LEN;
-import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_BATTLESHIP_LEN;
+import static com.acmemail.judah.battleship2D.Constants.DEF_BATTLESHIP_NAME;
 
 import com.acmemail.judah.battleship.ShipType;
 

@@ -5,11 +5,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.acmemail.judah.battleship.Cell;
-import com.acmemail.judah.battleship.GridCoords;
-import com.acmemail.judah.battleship.Orientation;
 import com.acmemail.judah.battleship.Ship;
 import com.acmemail.judah.battleship.ShipType;
 import com.acmemail.judah.battleship.default_ship_types.Battleship;
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
 
 public class UnmodifiableMapDemo
 {

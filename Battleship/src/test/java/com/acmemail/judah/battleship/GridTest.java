@@ -15,6 +15,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.battleship2D.Constants;
+import com.acmemail.judah.battleship2D.Grid;
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
+
 class GridTest
 {
     private static final int    numRows     = Grid.getNumRows();
@@ -269,8 +274,8 @@ class GridTest
         };
         for ( GridCoords coords : invalidCoords )
         {
-            int xco = coords.getXco();
-            int yco = coords.getYco();
+            int xco = coords.xco();
+            int yco = coords.yco();
             assertFalse( Grid.isValidCoord( coords ) );
             assertFalse( Grid.isValidCoord( xco, yco ) );
         }

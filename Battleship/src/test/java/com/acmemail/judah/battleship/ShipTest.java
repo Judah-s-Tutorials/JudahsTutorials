@@ -1,7 +1,7 @@
 package com.acmemail.judah.battleship;
 
-import static com.acmemail.judah.battleship.Orientation.HORIZONTAL;
-import static com.acmemail.judah.battleship.Orientation.VERTICAL;
+import static com.acmemail.judah.battleship2D.Orientation.HORIZONTAL;
+import static com.acmemail.judah.battleship2D.Orientation.VERTICAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import com.acmemail.judah.battleship.default_ship_types.Battleship;
 import com.acmemail.judah.battleship.default_ship_types.Carrier;
 import com.acmemail.judah.battleship.default_ship_types.Cruiser;
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
 
 class ShipTest
 {
@@ -97,8 +99,8 @@ class ShipTest
         assertEquals( expHeight, ship.getHeight() );
         assertNotNull( ship.getName() );
         GridCoords  actCoords    = ship.getFirstSquare();
-        assertEquals( xco, actCoords.getXco() );
-        assertEquals( yco, actCoords.getYco() );
+        assertEquals( xco, actCoords.xco() );
+        assertEquals( yco, actCoords.yco() );
     }
 
     @Test
@@ -210,12 +212,12 @@ class ShipTest
     public void testGetFirstSquare()
     {
         GridCoords   horPair = defHor.getFirstSquare();
-        assertEquals( horPair.getXco(), horStartXco );
-        assertEquals( horPair.getYco(), horStartYco );
+        assertEquals( horPair.xco(), horStartXco );
+        assertEquals( horPair.yco(), horStartYco );
 
         GridCoords   verPair = defVer.getFirstSquare();
-        assertEquals( verPair.getXco(), verStartXco );
-        assertEquals( verPair.getYco(), verStartYco );
+        assertEquals( verPair.xco(), verStartXco );
+        assertEquals( verPair.yco(), verStartYco );
     }
 
     @Test

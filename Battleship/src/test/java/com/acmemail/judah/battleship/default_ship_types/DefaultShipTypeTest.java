@@ -1,15 +1,15 @@
 package com.acmemail.judah.battleship.default_ship_types;
 
-import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_LEN;
-import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_NAME;
-import static com.acmemail.judah.battleship.Constants.DEF_CARRIER_LEN;
-import static com.acmemail.judah.battleship.Constants.DEF_CARRIER_NAME;
-import static com.acmemail.judah.battleship.Constants.DEF_CRUISER_LEN;
-import static com.acmemail.judah.battleship.Constants.DEF_CRUISER_NAME;
-import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_LEN;
-import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_NAME;
-import static com.acmemail.judah.battleship.Constants.DEF_SUBMARINE_LEN;
-import static com.acmemail.judah.battleship.Constants.DEF_SUBMARINE_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_BATTLESHIP_LEN;
+import static com.acmemail.judah.battleship2D.Constants.DEF_BATTLESHIP_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_CARRIER_LEN;
+import static com.acmemail.judah.battleship2D.Constants.DEF_CARRIER_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_CRUISER_LEN;
+import static com.acmemail.judah.battleship2D.Constants.DEF_CRUISER_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_DESTROYER_LEN;
+import static com.acmemail.judah.battleship2D.Constants.DEF_DESTROYER_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_SUBMARINE_LEN;
+import static com.acmemail.judah.battleship2D.Constants.DEF_SUBMARINE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.BeforeAll;

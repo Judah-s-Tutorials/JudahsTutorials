@@ -1,9 +1,14 @@
-package battleship2D;
+package com.acmemail.judah.battleship2D;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
+import com.acmemail.judah.battleship2D.default_ship_types.Carrier;
+import com.acmemail.judah.battleship2D.default_ship_types.Cruiser;
+import com.acmemail.judah.battleship2D.default_ship_types.Destroyer;
+import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
 
 /**
  * Registry of all known {@link ShipType2D} ship types.
@@ -17,6 +22,9 @@ public class ShipTypes
     /** Map of all registered ship types, keyed by type name. */
     private static final Map<String,ShipType2D> allTypes = new HashMap<>();
 
+    /**
+     * Default constructor, not used.
+     */
     private ShipTypes()
     {
     }
@@ -65,10 +73,10 @@ public class ShipTypes
      */
     public static void registerDefaultTypes()
     {
-        Battleship.getType();
-        Carrier.getType();
-        Cruiser.getType();
-        Destroyer.getType();
-        Submarine.getType();
+        register( Battleship.getType() );
+        register( Carrier.getType() );
+        register( Cruiser.getType() );
+        register( Destroyer.getType() );
+        register( Submarine.getType() );
     }
 }

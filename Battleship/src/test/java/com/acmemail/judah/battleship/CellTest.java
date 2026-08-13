@@ -1,7 +1,7 @@
 package com.acmemail.judah.battleship;
 
-import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_NAME;
-import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_BATTLESHIP_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_DESTROYER_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -12,6 +12,8 @@ import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.battleship.default_ship_types.Battleship;
 import com.acmemail.judah.battleship.default_ship_types.Destroyer;
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
 
 class CellTest
 {

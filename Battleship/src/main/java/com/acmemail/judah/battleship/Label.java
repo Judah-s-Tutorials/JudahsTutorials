@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
+import com.acmemail.judah.battleship2D.Grid;
+
 /**
  * This class converts between 0-origin
  * x/y coordinates used as array indexes, 

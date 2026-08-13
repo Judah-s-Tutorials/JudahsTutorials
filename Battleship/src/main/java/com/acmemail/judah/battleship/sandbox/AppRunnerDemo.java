@@ -1,7 +1,7 @@
 package com.acmemail.judah.battleship.sandbox;
 
-import static com.acmemail.judah.battleship.Orientation.HORIZONTAL;
-import static com.acmemail.judah.battleship.Orientation.VERTICAL;
+import static com.acmemail.judah.battleship2D.Orientation.HORIZONTAL;
+import static com.acmemail.judah.battleship2D.Orientation.VERTICAL;
 
 import java.awt.BorderLayout;
 import java.util.List;
@@ -14,13 +14,13 @@ import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Fleet;
-import com.acmemail.judah.battleship.Grid;
-import com.acmemail.judah.battleship.GridCoords;
 import com.acmemail.judah.battleship.Label;
-import com.acmemail.judah.battleship.Orientation;
 import com.acmemail.judah.battleship.Ship;
 import com.acmemail.judah.battleship.ShipType;
 import com.acmemail.judah.battleship.artwork.GraphicalGrid;
+import com.acmemail.judah.battleship2D.Grid;
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
 
 public class AppRunnerDemo
 {

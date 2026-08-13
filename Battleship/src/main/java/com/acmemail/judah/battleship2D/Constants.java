@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship;
+package com.acmemail.judah.battleship2D;
 
 public class Constants
 {

@@ -14,6 +14,9 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
+
 @TestMethodOrder( MethodOrderer.OrderAnnotation.class )
 class FleetTest
 {

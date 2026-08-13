@@ -18,6 +18,9 @@ import org.mockito.ArgumentMatchers;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.acmemail.judah.battleship.util.JOptionPaneI;
+import com.acmemail.judah.battleship2D.Grid;
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
 
 @ExtendWith(MockitoExtension.class)
 class PlacerTest

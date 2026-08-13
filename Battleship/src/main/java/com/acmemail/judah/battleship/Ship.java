@@ -1,9 +1,12 @@
 package com.acmemail.judah.battleship;
-import static com.acmemail.judah.battleship.Orientation.HORIZONTAL;
-import static com.acmemail.judah.battleship.Orientation.VERTICAL;
+import static com.acmemail.judah.battleship2D.Orientation.HORIZONTAL;
+import static com.acmemail.judah.battleship2D.Orientation.VERTICAL;
 
 import java.awt.Rectangle;
 import java.util.Objects;
+
+import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship2D.Orientation;
 /**
  * An instance of this class encapsulates the properties
  * of a ship in the Battleship game.
@@ -97,8 +100,8 @@ public class Ship
      */
     public boolean contains( GridCoords pair )
     {
-        int     xco         = pair.getXco();
-        int     yco         = pair.getYco();
+        int     xco         = pair.xco();
+        int     yco         = pair.yco();
         boolean contains    = contains( xco, yco );
         return contains;
     }
@@ -182,7 +185,7 @@ public class Ship
      */
     public int getMinX()
     {
-        return firstSquare.getXco();
+        return firstSquare.xco();
     }
     
     /**
@@ -207,7 +210,7 @@ public class Ship
      */
     public int getMinY()
     {
-        return firstSquare.getYco();
+        return firstSquare.yco();
     }
     
     /**

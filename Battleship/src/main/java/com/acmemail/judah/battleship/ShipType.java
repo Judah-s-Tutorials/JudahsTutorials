@@ -1,9 +1,9 @@
 package com.acmemail.judah.battleship;
-import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_NAME;
-import static com.acmemail.judah.battleship.Constants.DEF_CARRIER_NAME;
-import static com.acmemail.judah.battleship.Constants.DEF_CRUISER_NAME;
-import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_NAME;
-import static com.acmemail.judah.battleship.Constants.DEF_SUBMARINE_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_BATTLESHIP_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_CARRIER_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_CRUISER_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_DESTROYER_NAME;
+import static com.acmemail.judah.battleship2D.Constants.DEF_SUBMARINE_NAME;
 
 import java.awt.Image;
 import java.util.Collection;

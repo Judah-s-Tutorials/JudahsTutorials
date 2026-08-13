@@ -1,9 +1,9 @@
-package com.acmemail.judah.battleship;
+package com.acmemail.judah.battleship2D;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Image;
 import java.awt.Point;
@@ -17,10 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-
-import battleship2D.Ship2D;
-import battleship2D.ShipType2D;
-import battleship2D.ShipTypes;
 
 class Ship2DTest
 {
@@ -169,16 +165,22 @@ class Ship2DTest
 
     }
 
-    @Test
-    public void testContainsGridCoords()
+    @ParameterizedTest
+    @MethodSource( "allShips" )
+    public void testContainsGridCoordsPos( Ship2D ship )
     {
-        fail("Not yet implemented");
+        getInteriorPoints( ship )
+            .map( p -> new GridCoords( p.x, p.y ) )
+            .forEach( g -> assertTrue( ship.contains( g ) ) );
     }
 
-    @Test
-    public void testIntersectsRectangle()
+    @ParameterizedTest
+    @MethodSource( "allShips" )
+    public void testContainsGridCoordsNeg( Ship2D ship )
     {
-        fail("Not yet implemented");
+        getExteriorPoints( ship )
+            .map( p -> new GridCoords( p.x, p.y ) )
+            .forEach( g -> assertFalse( ship.contains( g ) ) );
     }
 
     @ParameterizedTest
@@ -189,24 +191,6 @@ class Ship2DTest
         testIntersectsURC( ship );
         testIntersectsLLC( ship );
         testIntersectsLRC( ship );
-        System.out.println( ship );
-    }
-    
-    /**
-     * Gets a square ship with the given coordinates
-     * and a horizontal orientation.
-     * 
-     * @param xco   the given x-coordinate
-     * @param yco   the given y-coordinate
-     * 
-     * @return  the instantiated ship
-     */
-    private Ship2D getSquareShip( int xco, int yco )
-    {
-        GridCoords  coords  = new GridCoords( xco, yco );
-        Ship2D      test    = 
-            new Ship2D(TEST_TYPE_SQUARE, coords, Orientation.HORIZONTAL );
-        return test;        
     }
     
     @Test
@@ -226,37 +210,123 @@ class Ship2DTest
     {
         Ship2D      ship            = ship1DH;
         Rectangle   bounds          = ship.getBounds();
-        Point       loc             = bounds.getLocation();
         int         width           = bounds.width;
         int         height          = bounds.height;
         
         String      str             = ship1DH.toString();
         String      nameClause      = "name=" + ship.getName();
         String      typeClause      = "type=" + ship.getTypeName();
-        String      posClause       = "start=" + "(" + loc.x + "," + loc.y + ")";
+        String      posClause       = "start=";
+        String      xcoClause       = "xco=" + bounds.x;
+        String      ycoClause       = "yco=" + bounds.y;
         String      orientClause    = "orient=" + ship.getOrientation();
         String      widthClause     = "width=" + width;
         String      heightClause    = "height=" + height;
         assertTrue( str.contains( nameClause ), nameClause );
         assertTrue( str.contains( typeClause ), typeClause );
         assertTrue( str.contains( posClause ), posClause );
+        assertTrue( str.contains( xcoClause ), xcoClause );
+        assertTrue( str.contains( ycoClause ), ycoClause );
         assertTrue( str.contains( orientClause ), orientClause );
         assertTrue( str.contains( widthClause ), widthClause );
         assertTrue( str.contains( heightClause ), heightClause );
     }
 
     @Test
-    public void testEqualsObject()
+    public void testEqualsHash()
     {
-        fail("Not yet implemented");
-    }
+        // In tests for equality where both objects use firstA, equality
+        // will be determined using identity test for firstA. Introduce
+        // firstA_alt, which is equal but not identical to firstA.
+        ShipType2D  typeA       = TEST_TYPE2D;
+        ShipType2D  typeB       = TEST_TYPE1D;
+        String      nameA       = "nameA";
+        String      nameB       = "nameB";
+        GridCoords  firstA      = new GridCoords( 1, 2 );
+        GridCoords  firstA_Alt  = new GridCoords( 1, 2 );
+        GridCoords  firstB      = new GridCoords( 3, 4 );
+        Orientation orientA     = Orientation.HORIZONTAL;
+        Orientation orientB     = Orientation.VERTICAL;
+        Ship2D      ship1       = null;
+        Ship2D      ship2       = null;
+        
+        ship1 = new Ship2D(typeA, nameA, firstA, orientA );
+        ship2 = new Ship2D(typeA, nameA, firstA, orientA );
+        assertEquals( ship1, ship2 );
+        assertEquals( ship2, ship1 );
+        assertEquals( ship1, ship1 );
+        assertEquals( ship1.hashCode(), ship2.hashCode() );
+        assertNotEquals( ship1, null );
+        assertNotEquals( ship1, new Object() );
+        
+        ship1 = new Ship2D(typeA, nameA, firstA, orientA );
+        ship2 = new Ship2D(typeA, nameA, firstA_Alt, orientA );
+        assertEquals( ship1, ship2 );
+        assertEquals( ship1.hashCode(), ship2.hashCode() );
+        
+        ship1 = new Ship2D(typeA, firstA, orientA );
+        ship2 = new Ship2D(typeA, firstA, orientA );
+        assertEquals( ship1, ship2 );
+        assertEquals( ship1.hashCode(), ship2.hashCode() );
+        
+        ship1 = new Ship2D(typeA, nameA, firstA, orientA );
+        ship2 = new Ship2D(typeA, firstA, orientA );
+        assertNotEquals( ship1, ship2 );
+        
+        ship1 = new Ship2D(typeA, nameA, firstA, orientA );
+        ship2 = new Ship2D(typeB, nameA, firstA, orientA );
+        assertNotEquals( ship1, ship2 );
 
-    @Test
-    public void testHashCode()
-    {
-        fail("Not yet implemented");
+        ship2 = new Ship2D(typeA, nameB, firstA, orientA );
+        assertNotEquals( ship1, ship2 );
+
+        ship2 = new Ship2D(typeA, nameA, firstB, orientA );
+        assertNotEquals( ship1, ship2 );
+
+        ship2 = new Ship2D(typeA, nameA, firstA, orientB );
+        assertNotEquals( ship1, ship2 );
+        
+        ship1 = new Ship2D(typeB, nameA, firstA, orientA );
+        ship2 = new Ship2D(typeB, nameA, firstA, orientA );
+        assertEquals( ship1.hashCode(), ship2.hashCode() );
+        
+        ship1 = new Ship2D(typeB, nameB, firstA, orientA );
+        ship2 = new Ship2D(typeB, nameB, firstA, orientA );
+        assertEquals( ship1.hashCode(), ship2.hashCode() );
+        
+        ship1 = new Ship2D(typeB, nameB, firstB, orientA );
+        ship2 = new Ship2D(typeB, nameB, firstB, orientA );
+        assertEquals( ship1.hashCode(), ship2.hashCode() );
+        
+        ship1 = new Ship2D(typeB, nameB, firstB, orientB );
+        ship2 = new Ship2D(typeB, nameB, firstB, orientB );
+        assertEquals( ship1.hashCode(), ship2.hashCode() );
     }
     
+    /**
+     * Gets a square ship with the given coordinates
+     * and a horizontal orientation.
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     * 
+     * @return  the instantiated ship
+     */
+    private Ship2D getSquareShip( int xco, int yco )
+    {
+        GridCoords  coords  = new GridCoords( xco, yco );
+        Ship2D      test    = 
+            new Ship2D(TEST_TYPE_SQUARE, coords, Orientation.HORIZONTAL );
+        return test;        
+    }
+    
+    /**
+     * Verifies intersects(Ship2D) is true
+     * if a given ship intersects another ship
+     * in its upper-left corner.
+     * 
+     * @param ship  the given ship
+     */
     private void testIntersectsULC( Ship2D ship )
     {
         Corners corners = new Corners( ship );
@@ -273,6 +343,13 @@ class Ship2DTest
         assertFalse( ship.intersects( square ) );
     }
     
+    /**
+     * Verifies intersects(Ship2D) is true
+     * if a given ship intersects another ship
+     * in its upper-right corner.
+     * 
+     * @param ship  the given ship
+     */
     private void testIntersectsURC( Ship2D ship )
     {
         Corners corners = new Corners( ship );
@@ -289,6 +366,13 @@ class Ship2DTest
         assertFalse( ship.intersects( square ) );
     }
     
+    /**
+     * Verifies intersects(Ship2D) is true
+     * if a given ship intersects another ship
+     * in its lower-left corner.
+     * 
+     * @param ship  the given ship
+     */
     private void testIntersectsLLC( Ship2D ship )
     {
         Corners corners = new Corners( ship );
@@ -305,6 +389,13 @@ class Ship2DTest
         assertFalse( ship.intersects( square ) );
     }
     
+    /**
+     * Verifies intersects(Ship2D) is true
+     * if a given ship intersects another ship
+     * in its lower-right corner.
+     * 
+     * @param ship  the given ship
+     */
     private void testIntersectsLRC( Ship2D ship )
     {
         Corners corners = new Corners( ship );
@@ -321,6 +412,11 @@ class Ship2DTest
         assertFalse( ship.intersects( square ) );
     }
 
+    /**
+     * Returns a stream of all test ships.
+     * 
+     * @return a stream of all test ships
+     */
     private static Stream<Ship2D> allShips()
     {
         Stream<Ship2D>  ships   =
@@ -328,6 +424,13 @@ class Ship2DTest
         return ships;
     }
     
+    /**
+     * Returns a stream of all points interior to a given ship.
+     * 
+     * @param ship the given ship
+     * 
+     * @return  a stream of all points interior to a given ship
+     */
     private static Stream<Point> getInteriorPoints( Ship2D ship )
     {
         Rectangle       rect    = ship.getBounds();
@@ -345,36 +448,46 @@ class Ship2DTest
         return stream;
     }
     
+    /**
+     * Returns a stream of the all points
+     * contiguous with, but exterior to,
+     * the border of a given ship.
+     * 
+     * @param ship  the given ship
+     * 
+     * @return  
+     *      a stream of all points immediately exterior to a given ship
+     */
     private static Stream<Point> getExteriorPoints( Ship2D ship )
     {
         Rectangle       rect    = ship.getBounds();
         // the column to the left of the rectangle
         int leftXco     = rect.x - 1;
         // the column to the right of the rectangle
-        int rightXco    = (int)rect.getMaxX() + 1;
+        int rightXco    = (int)rect.getMaxX();
         // the row above the rectangle
         int topYco      = rect.y - 1;
         // the row below the rectangle
-        int bottomYco   = (int)rect.getMaxY() + 1;
-        
+        int bottomYco   = (int)rect.getMaxY();
+
         // the row above the rectangle
-        Stream<Point>   top     = 
-            IntStream.range( leftXco, rightXco )
+        Stream<Point>   top     =
+            IntStream.rangeClosed( leftXco, rightXco )
                 .mapToObj( x -> new Point( x, topYco ) );
-        
+
         // the column left of the rectangle
-        Stream<Point>   left    = 
-            IntStream.range( topYco, bottomYco )
+        Stream<Point>   left    =
+            IntStream.rangeClosed( topYco, bottomYco )
                 .mapToObj( y -> new Point( leftXco, y ) );
-        
-        // the column left of the rectangle
-        Stream<Point>   bottom  = 
-            IntStream.range( leftXco, rightXco )
+
+        // the row below the rectangle
+        Stream<Point>   bottom  =
+            IntStream.rangeClosed( leftXco, rightXco )
                 .mapToObj( x -> new Point( x, bottomYco ) );
-        
-        // the column left of the rectangle
-        Stream<Point>   right   = 
-            IntStream.range( topYco, bottomYco )
+
+        // the column right of the rectangle
+        Stream<Point>   right   =
+            IntStream.rangeClosed( topYco, bottomYco )
                 .mapToObj( y -> new Point( rightXco, y ) );
         
         Stream<Point>   stream  = Stream.concat( top, left );
@@ -384,6 +497,10 @@ class Ship2DTest
         return stream;
     }
 
+    /**
+     * An instance of this class encapsulates
+     * the points at the corners of a ship.
+     */
     private static class Corners
     {
         public final Rectangle  bounds;
@@ -392,6 +509,12 @@ class Ship2DTest
         public final Point      llc;
         public final Point      lrc;
         
+        /**
+         * Get the points at the corners
+         * of a given ship.
+         * 
+         * @param ship  the given ship
+         */
         public Corners( Ship2D ship )
         {
             bounds = ship.getBounds();
@@ -405,6 +528,15 @@ class Ship2DTest
             lrc = new Point( maxX, maxY );
         }
         
+        /**
+         * Calculates the expected corners of a ship
+         * of the given coordinates, type, and orientation.
+         * 
+         * @param minX          the given x-coordinate
+         * @param minY          the given y-coordinate
+         * @param type          the given type
+         * @param orientation   the given orientation
+         */
         public Corners( 
             int minX, 
             int minY, 
@@ -427,6 +559,12 @@ class Ship2DTest
             bounds = new Rectangle( minX, minY, width, height );
         }
         
+        /**
+         * Verifies that this object encapsulates the same corners
+         * as a given Corners object.
+         * 
+         * @param that  the given object
+         */
         public void test( Corners that )
         {
             assertEquals( this.ulc, that.ulc, ulc.toString() );
