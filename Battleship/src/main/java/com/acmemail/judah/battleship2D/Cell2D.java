@@ -10,13 +10,35 @@ public class Cell2D
     
     /**
      * Constructor.
+     * Creates a Cell with the given coordinates
+     * and a null ship.
      * 
-     * @param coords    the coordinates of this cell, may not be null
-     * @param ship      the ship that owns this cell, may be null
+     * @param coords  the given coordinates
+     * 
+     * @throws NullPointerException if coords is null
+     */
+    public Cell2D( GridCoords coords )
+    {
+        Objects.requireNonNull( coords, "coords" );
+        this.coords = coords;
+        this.ship = null;
+    }
+    
+    /**
+     * Constructor.
+     * Creates a Cell with the given coordinates
+     * and ship.
+     * 
+     * @param coords    the given coordinates
+     * @param ship      the given ship
+     * 
+     * @throws NullPointerException if coords is null
+     * @throws NullPointerException if ship is null
      */
     public Cell2D( GridCoords coords, Ship2D ship )
     {
         Objects.requireNonNull( coords, "coords" );
+        Objects.requireNonNull( ship, "ship" );
         this.coords = coords;
         this.ship = ship;
     }
@@ -64,9 +86,16 @@ public class Cell2D
     @Override
     public String toString()
     {
+        String  shipName;
+        if ( ship == null )
+            shipName = "null";
+        else if ( ship.getName() == null )
+            shipName = "<unnamed>";
+        else
+            shipName = ship.getName();
         String	str	=
             "Cell2D [coords=" + coords 
-            + ", ship=" + ship 
+            + ", ship=" + shipName
             + ", splatted=" + splatted 
             + "]";
         return str;

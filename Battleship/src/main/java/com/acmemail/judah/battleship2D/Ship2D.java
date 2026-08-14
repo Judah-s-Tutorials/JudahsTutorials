@@ -170,10 +170,10 @@ public class Ship2D
         return bounds;
     }
     
-    public GridCoords getOrigin()
+    public GridCoords getCoords()
     {
-        GridCoords  origin  = new GridCoords( bounds.x, bounds.y );
-        return origin;
+        GridCoords  coords  = new GridCoords( bounds.x, bounds.y );
+        return coords;
     }
     
     @Override

@@ -9,8 +9,6 @@ import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.Test;
 
-import com.acmemail.judah.battleship2D.ShipType2D;
-
 class ShipType2DTest
 {
     @Test

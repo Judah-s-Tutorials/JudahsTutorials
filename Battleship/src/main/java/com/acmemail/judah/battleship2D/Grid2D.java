@@ -359,7 +359,7 @@ public class Grid2D extends HashMap<GridCoords,Cell2D>
     
     private Cell2D putEmptyCell( GridCoords coords )
     {
-        Cell2D  cell    = new Cell2D( coords, null );
+        Cell2D  cell    = new Cell2D( coords );
         put( cell );
         return cell;
     }
