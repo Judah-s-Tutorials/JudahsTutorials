@@ -2,6 +2,8 @@ package com.acmemail.judah.battleship2D;
 
 import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_COLS;
 import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_ROWS;
+import static com.acmemail.judah.battleship2D.Constants.DEF_NUM_COLS;
+import static com.acmemail.judah.battleship2D.Constants.DEF_NUM_ROWS;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -57,8 +59,6 @@ public class Grid2D
     private static final String OUT_OF_BOUNDS       = "Out of bounds: ";
     
     private static final String DEF_GRID_NAME       = "HOME";
-    private static final int    DEF_NUM_ROWS        = 10;
-    private static final int    DEF_NUM_COLS        = 15;
     private static final int    NUM_ROWS;
     private static final int    NUM_COLS;
     private static final Map<String,Grid2D> allGrids    = new HashMap<>();
@@ -99,6 +99,16 @@ public class Grid2D
             throw new BattleshipException( GRID_EXISTS + name );
         allGrids.put( name, this );
         bounds = new Rectangle( 0, 0, NUM_COLS, NUM_ROWS );
+    }
+    
+    /**
+     * Gets the bounds of this grid.
+     * 
+     * @return the bounds of this grid
+     */
+    public Rectangle getBounds()
+    {
+        return bounds;
     }
     
     /**
@@ -299,7 +309,7 @@ public class Grid2D
     public boolean isSplatted( GridCoords coords )
     {
         Cell2D  cell        = get( coords );
-        boolean splatted    = cell.isSplatted();
+        boolean splatted    = cell == null ? false : cell.isSplatted();
         return splatted;
     }
     

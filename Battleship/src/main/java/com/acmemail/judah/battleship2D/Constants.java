@@ -17,6 +17,10 @@ public class Constants
     public static final String  KEY_NUM_ROWS    = "numRows";
     /** Key to lookup number-of-columns property. */
     public static final String  KEY_NUM_COLS    = "numCols";
+    /** Default number of rows in the grid. */
+    public static final int     DEF_NUM_ROWS    = 10;
+    /** Default number of columns in the grid. */
+    public static final int     DEF_NUM_COLS    = 10;
     
     /*************************/
     /* Default ship lengths. */
@@ -55,6 +59,26 @@ public class Constants
     public static final String  DEF_DESTROYER_NAME   = "Destroyer";
     /** Default NAMEgth of a submarine. */
     public static final String  DEF_SUBMARINE_NAME   = "Submarine";
+    
+    /**************************/
+    /* Convenience utilities. */
+    /**************************/
+    /**
+     * Converts a string to an int.
+     * 
+     * @param strNum    the string to convert
+     * 
+     * @return  the converted int
+     * 
+     * @throws NullPointerException if strNum is null
+     * @throws NumberFormatException if strNum is not a valid integer
+     */
+    public static int getInt( String strNum )
+    {
+        int intNum  = Integer.parseInt( strNum );
+        return intNum;
+    }
+    
 
     /**
      * Constructor; not used.

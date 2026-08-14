@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.acmemail.judah.battleship2DT.test_utils.RectUtils;
+
 class Ship2DTest
 {
     private static final String TEST_TYPE_NAME2D        = "testType2D";
@@ -158,7 +160,7 @@ class Ship2DTest
                 assertTrue( ship.contains( p.x, p.y ), p.toString() )
             );
         
-        getExteriorPoints( ship )
+        getPerimeterPoints( ship )
             .forEach( p -> 
                 assertFalse( ship.contains( p.x, p.y ), p.toString() )
             );
@@ -178,7 +180,7 @@ class Ship2DTest
     @MethodSource( "allShips" )
     public void testContainsGridCoordsNeg( Ship2D ship )
     {
-        getExteriorPoints( ship )
+        getPerimeterPoints( ship )
             .map( p -> new GridCoords( p.x, p.y ) )
             .forEach( g -> assertFalse( ship.contains( g ) ) );
     }
@@ -458,42 +460,10 @@ class Ship2DTest
      * @return  
      *      a stream of all points immediately exterior to a given ship
      */
-    private static Stream<Point> getExteriorPoints( Ship2D ship )
+    private static Stream<Point> getPerimeterPoints( Ship2D ship )
     {
-        Rectangle       rect    = ship.getBounds();
-        // the column to the left of the rectangle
-        int leftXco     = rect.x - 1;
-        // the column to the right of the rectangle
-        int rightXco    = (int)rect.getMaxX();
-        // the row above the rectangle
-        int topYco      = rect.y - 1;
-        // the row below the rectangle
-        int bottomYco   = (int)rect.getMaxY();
-
-        // the row above the rectangle
-        Stream<Point>   top     =
-            IntStream.rangeClosed( leftXco, rightXco )
-                .mapToObj( x -> new Point( x, topYco ) );
-
-        // the column left of the rectangle
-        Stream<Point>   left    =
-            IntStream.rangeClosed( topYco, bottomYco )
-                .mapToObj( y -> new Point( leftXco, y ) );
-
-        // the row below the rectangle
-        Stream<Point>   bottom  =
-            IntStream.rangeClosed( leftXco, rightXco )
-                .mapToObj( x -> new Point( x, bottomYco ) );
-
-        // the column right of the rectangle
-        Stream<Point>   right   =
-            IntStream.rangeClosed( topYco, bottomYco )
-                .mapToObj( y -> new Point( rightXco, y ) );
-        
-        Stream<Point>   stream  = Stream.concat( top, left );
-        stream = Stream.concat( stream, bottom );
-        stream = Stream.concat( stream, right );
-        
+        Rectangle   bounds  = ship.getBounds();
+        Stream<Point>   stream  = RectUtils.getPerimeterPoints( bounds );
         return stream;
     }
 
