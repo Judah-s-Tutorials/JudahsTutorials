@@ -1,6 +1,6 @@
 package com.acmemail.judah.battleship2DT.test_utils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -8,6 +8,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -35,6 +37,41 @@ class RectUtilsTest
     void testGetInteriorPoints()
     {
         fail("Not yet implemented");
+    }
+    
+    @Test
+    public void testDifference()
+    {
+        int         fromXco         = 3;
+        int         fromYco         = 5;
+        int         fromWidth       = 50;
+        int         fromHeight      = 40;
+        Rectangle   subtractFrom    = 
+            new Rectangle( fromXco, fromYco, fromWidth, fromHeight );
+        int         subXco          = fromXco + 2;
+        int         subYco          = fromYco + 2;
+        int         subWidth        = fromWidth - 4;
+        int         subHeight       = fromHeight - 4;
+        // sanity check
+        assertTrue( subXco < fromHeight );
+        assertTrue( subYco < fromWidth );
+        assertTrue( subWidth > 1 );
+        assertTrue( subHeight > 1 );
+        Rectangle   rect            =
+            new Rectangle( subXco, subYco, subWidth, subHeight );
+        
+        Set<Point>  diffSet =
+            RectUtils.difference( subtractFrom, rect )
+            .collect( Collectors.toSet() );
+        
+        RectUtils.getInteriorPoints( subtractFrom )
+            .forEach( p -> {
+                String  comment = p.toString();
+                if ( rect.contains( p ) )
+                    assertFalse( diffSet.contains( p ), comment );
+                else
+                    assertTrue( diffSet.contains( p ), comment );
+            });
     }
 
     @Test
@@ -85,7 +122,11 @@ class RectUtilsTest
     @Test
     void testGetAllValidPoints()
     {
-        fail("Not yet implemented");
+        Rectangle   refRect = new Rectangle( 0, 0, 10, 10 );
+        Rectangle   rect    = 
+            new Rectangle( 0, 0, refRect.width - 2, refRect.height - 2 );
+        RectUtils.getAllValidPoints( refRect, rect )
+            .forEach( System.out::println );
     }
 
 }

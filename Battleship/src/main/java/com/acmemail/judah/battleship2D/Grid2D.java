@@ -352,11 +352,15 @@ public class Grid2D
         return NUM_COLS;
     }
     
+    /**
+     * Gets the home grid. 
+     * Returns null if none
+     * 
+     * @return  the home grid, or null if none
+     */
     public static Grid2D getHomeGrid()
     {
         Grid2D    home    = allGrids.get( DEF_GRID_NAME );
-        if ( home == null )
-            throw new BattleshipException( NO_HOME_GRID );
         return home;
     }
     
