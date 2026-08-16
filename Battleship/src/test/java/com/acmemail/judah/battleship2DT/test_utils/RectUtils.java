@@ -75,7 +75,7 @@ public class RectUtils
      * 
      * @throws NullPointerException if rect is null
      */
-    public static Stream<GridCoords> getAllCoords( Rectangle rect )
+    public static Stream<GridCoords> getInteriorCoords( Rectangle rect )
     {
         Objects.requireNonNull( rect, "rect" );
         

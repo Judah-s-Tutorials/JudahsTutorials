@@ -163,6 +163,23 @@ public class Grid2D
     }
     
     /**
+     * Gets the ship at the given GridCoords.
+     * Returns null if none.
+     * 
+     * @param coords    the given GridCoords
+     * 
+     * @return  the ship at the given coordinates, or null if none
+     * 
+     * @throws NullPointerException if coords is null
+     */
+    public Ship2D getShip( GridCoords coords )
+    {
+        Objects.requireNonNull( coords, "coords" );
+        Ship2D  ship    = getShip( coords.xco(), coords.yco() );
+        return ship;
+    }
+    
+    /**
      * Marks the given coordinates splatted.
      * 
      * @param xco    the given x-coordinate
@@ -278,6 +295,7 @@ public class Grid2D
         if ( intersectsExisting( ship ) )
             throw new BattleshipException( OVERLAPS_SHIP + ship );
         
+        allShips.add( ship );
         getInteriorPoints( ship )
             .map( c -> new Cell2D( c, ship ) )
             .forEach( c -> put( c ) );
