@@ -1,9 +1,9 @@
 package com.acmemail.judah.battleship2D;
 
-import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_COLS;
-import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_ROWS;
 import static com.acmemail.judah.battleship2D.Constants.DEF_NUM_COLS;
 import static com.acmemail.judah.battleship2D.Constants.DEF_NUM_ROWS;
+import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_COLS;
+import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_ROWS;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -51,7 +51,6 @@ import com.acmemail.judah.battleship.BattleshipException;
  */
 public class Grid2D
 {
-    private static final String NO_HOME_GRID        = "Home grid not found.";
     private static final String GRID_EXISTS         = 
         "A grid with this name already exists: ";
     private static final String OVERLAPS_SHIP       = 
@@ -102,6 +101,18 @@ public class Grid2D
     }
     
     /**
+     * Returns a list of all ships in the grid.
+     * The returned list is a copy, not the live list.
+     * 
+     * @return list of all ships in the grid
+     */
+    public List<Ship2D> getAllShips()
+    {
+        List<Ship2D>    list    = new ArrayList<>( allShips );
+        return list;
+    }
+    
+    /**
      * Gets the bounds of this grid.
      * 
      * @return the bounds of this grid
@@ -122,80 +133,20 @@ public class Grid2D
     }
     
     /**
-     * Returns true if the the square if the given coordinates
-     * identify a square that has been splatted.
-     * 
-     * @param xco   the given x-coordinate
-     * @param yco   the given y-coordinate
-     * 
-     * @return  true if the square with the given coordinates
-     *          has been splatted
-     *          
-     * @throws BattleshipException if coordinates are out of bounds
-     */
-    public boolean isSplatted( int xco, int yco )
-    {
-        if ( !contains( xco, yco ) )
-        {
-            String  message = OUT_OF_BOUNDS + "(" + xco + "," + yco + ")";
-            throw new BattleshipException( message );
-        }
-
-        Cell2D  cell        = get( xco, yco );
-        boolean splatted    = cell == null ? false : cell.isSplatted();
-        return splatted;
-    }
-    
-    /**
-     * Gets the ship at the given coordinates.
-     * Returns null if none.
-     * 
-     * @param xco   the x-coordinate
-     * @param yco   the y-coordinate
-     * 
-     * @return  the ship at the given coordinates, or null if none
-     */
-    public Ship2D getShip( int xco, int yco )
-    {
-        Cell2D  cell    = get( xco, yco );
-        Ship2D  ship    = cell == null ? null : cell.getShip();
-        return ship;
-    }
-    
-    /**
      * Gets the ship at the given GridCoords.
      * Returns null if none.
-     * 
+     *
      * @param coords    the given GridCoords
-     * 
+     *
      * @return  the ship at the given coordinates, or null if none
-     * 
+     *
      * @throws NullPointerException if coords is null
      */
     public Ship2D getShip( GridCoords coords )
     {
-        Objects.requireNonNull( coords, "coords" );
-        Ship2D  ship    = getShip( coords.xco(), coords.yco() );
+        Cell2D  cell    = get( coords );
+        Ship2D  ship    = cell == null ? null : cell.getShip();
         return ship;
-    }
-    
-    /**
-     * Marks the given coordinates splatted.
-     * 
-     * @param xco    the given x-coordinate
-     * @param yco    the given y-coordinate
-     * 
-     * @throws BattleshipException if coords fall outside the grid
-     */
-    public void attack( int xco, int yco )
-    {
-        if ( !contains( xco, yco ) )
-        {
-            String  message = OUT_OF_BOUNDS + "(" + xco + "," + yco + ")";
-            throw new BattleshipException( message );
-        }
-        GridCoords  coords  = new GridCoords( xco, yco );
-        attack( coords );
     }
     
     /**
@@ -232,21 +183,7 @@ public class Grid2D
         boolean result  = bounds.contains( coords.xco(), coords.yco() );
         return result;
     }
-    
-    /**
-     * Returns true if the given coordinates
-     * fall within the bounds of the grid.
-     * 
-     * @param xco   the given x-coordinate
-     * @param yco   the given y-coordinate
-     * @return  true if the given coordinates fall within the bounds of the grid
-     */
-    public boolean contains( int xco, int yco )
-    {
-        boolean result  = bounds.contains( xco, yco );
-        return result;
-    }
-    
+
     /**
      * Returns true if the given ship is contained
      * within the bounds of the grid.
@@ -254,9 +191,12 @@ public class Grid2D
      * @param ship  the given ship
      * @return  
      *      true if the given ship is contained within the bounds of the grid
+     *      
+     * @throws NullPointerException if ship is null
      */
     public boolean contains( Ship2D ship )
     {
+        Objects.requireNonNull( ship, "ship" );
         boolean result  = bounds.contains( ship.getBounds() );
         return result;
     }
@@ -268,9 +208,12 @@ public class Grid2D
      * @param ship  the given ship
      * 
      * @return  true if the given ship overlaps an already mapped ship
+     *      
+     * @throws NullPointerException if ship is null
      */
     public boolean intersectsExisting( Ship2D ship )
     {
+        Objects.requireNonNull( ship, "ship" );
         boolean result  = 
             allShips.stream()
             .filter( ship::intersects )
@@ -323,9 +266,12 @@ public class Grid2D
      * @param coords    the given coordinates
      * 
      * @return  true if the cell at the given coordinates has been splatted
+     * 
+     * @throws NullPointerException if coords is null
      */
     public boolean isSplatted( GridCoords coords )
     {
+        Objects.requireNonNull( coords, "coords" );
         Cell2D  cell        = get( coords );
         boolean splatted    = cell == null ? false : cell.isSplatted();
         return splatted;
@@ -388,6 +334,8 @@ public class Grid2D
      * @param name  the given name, may not be null
      * 
      * @return the grid with the given name
+     * 
+     * @throws NullPointerException if name is null
      */
     public static Grid2D getGrid( String name )
     {
@@ -417,13 +365,6 @@ public class Grid2D
         gridMap.clear();
     }
 
-    private Cell2D get( int xco, int yco )
-    {
-        GridCoords  coords  = new GridCoords( xco, yco );
-        Cell2D      cell    = get( coords );
-        return cell;
-    }
-    
     /**
      * Get the cell at the given coordinates.
      * 
@@ -444,6 +385,13 @@ public class Grid2D
         return cell;
     }
     
+    /**
+     * Puts the given cell into the cell map
+     * 
+     * @param cell  the given cell
+     * 
+     * @return  the previous cell at the given coordinates
+     */
     private Cell2D put( Cell2D cell )
     {
         Cell2D  oldVal  = gridMap.put( cell.getCoords(), cell );
@@ -474,6 +422,14 @@ public class Grid2D
         return stream;
     }
     
+    /**
+     * Creates a new cell not associated with a ship,
+     * and adds it to the map at the given coordinates.
+     * 
+     * @param coords    the given coordinates
+     * 
+     * @return  the new, empty cell
+     */
     private Cell2D putEmptyCell( GridCoords coords )
     {
         Cell2D  cell    = new Cell2D( coords );

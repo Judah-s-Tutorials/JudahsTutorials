@@ -3,6 +3,7 @@ package com.acmemail.judah.battleship2DT.test_utils;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -210,5 +211,62 @@ public class RectUtils
         Objects.requireNonNull( rect, "rect" );
         GridCoords  coords  = new GridCoords( rect.x, rect.y );
         return coords;
+    }
+    
+    /**
+     * Return true if the given coordinates are contained
+     * in any Rectangle in a given array of Rectangles.
+     * 
+     * @param coords    the given coordinates
+     * @param rects     the given array
+     * 
+     * @return  true if coords is contained in any element of rects
+     */
+    public static boolean contains( GridCoords coords, Rectangle[] rects )
+    {
+        Point   point   = RectUtils.ofGridCoords( coords );
+        Boolean result  =
+            Arrays.stream( rects )
+                .filter( r -> r.contains( point ) )
+                .findFirst().orElse( null ) != null;
+        return result;
+    }
+    
+    /**
+     * Return true if the given Rectangle is contained
+     * in any Rectangle in a given array of Rectangles.
+     * This tests against individual rectangles in the array,
+     * <em>not</em> their union.
+     * 
+     * @param rect      the given rectangle
+     * @param rects     the given array
+     * 
+     * @return  true if rect is contained in any element of rects
+     */
+    public static boolean contains( Rectangle rect, Rectangle[] rects )
+    {
+        Boolean result  =
+            Arrays.stream( rects )
+                .filter( r -> r.contains( rect ) )
+                .findFirst().orElse( null ) != null;
+        return result;
+    }
+    
+    /**
+     * Return true if the given Rectangle is intersects
+     * in any Rectangle in a given array of Rectangles.
+     * 
+     * @param rect      the given rectangle
+     * @param rects     the given array
+     * 
+     * @return  true if rect is contained in any element of rects
+     */
+    public static boolean intersects( Rectangle rect, Rectangle[] rects )
+    {
+        Boolean result  =
+            Arrays.stream( rects )
+                .filter( r -> r.intersects( rect ) )
+                .findFirst().orElse( null ) != null;
+        return result;
     }
 }

@@ -4,16 +4,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Dimension;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -127,26 +130,26 @@ class Grid2DTest
     }
 
     @Test
-    public void testGetShipIntInt()
+    public void testGetShipGridCoords()
     {
         int         xco         = 3;
         int         yco         = 5;
-        GridCoords  coords      = new GridCoords( xco, yco ); 
-        Ship2D      ship        = 
+        GridCoords  coords      = new GridCoords( xco, yco );
+        Ship2D      ship        =
             new Ship2D( twoDType, coords, Orientation.VERTICAL );
         Grid2D      grid        = new Grid2D();
         Rectangle   gridBounds  = grid.getBounds();
         grid.put( ship );
-        
+
         Rectangle   shipBounds  = ship.getBounds();
         RectUtils.getInteriorCoords( shipBounds )
-            .map( c -> grid.getShip( c.xco(), c.yco() ) )
+            .map( grid::getShip )
             .forEach( s -> assertEquals( ship, s ) );
-        
+
         RectUtils.difference( gridBounds, shipBounds )
             .filter( p -> !shipBounds.contains( p ) )
             .map( RectUtils::coordsOf )
-            .map( c -> grid.getShip( c.xco(), c.yco() ) )
+            .map( grid::getShip )
             .forEach( s -> assertNull( s ) );
     }
 
@@ -154,31 +157,25 @@ class Grid2DTest
     public void testAttackGridCoords()
     {
         Grid2D  grid    = new Grid2D();
-        for ( int yco = 0 ; yco < height ; ++yco )
-            for ( int xco = 0 ; xco < width ; ++xco )
-            {
-                GridCoords  coords  = new GridCoords( xco, yco );
-                assertFalse( grid.isSplatted( coords ) );
-            }
         
-        for ( int yco = 0 ; yco < height ; ++yco )
-        {
-            if ( yco < width )
-            {
-                GridCoords  coords  = new GridCoords( yco, yco );
-                grid.attack( coords );
-            }
-        }
-
-        for ( int yco = 0 ; yco < height ; ++yco )
-            for ( int xco = 0 ; xco < width ; ++xco )
-            {
-                GridCoords  coords  = new GridCoords( xco, yco );
-                if ( yco == xco )
-                    assertTrue( grid.isSplatted( coords ) );
-                else
-                    assertFalse( grid.isSplatted( coords ) );
-            }
+        RectUtils.getInteriorCoords( gridBounds )
+            .forEach( c -> assertFalse( grid.isSplatted( c ) ) );
+    
+        // Attack all the corners of the grid bounds
+        Rectangle[] corners = getCorners( gridBounds, 2, 2, true );
+        Arrays.stream( corners )
+            .forEach( c -> RectUtils.getInteriorCoords( c )
+                .forEach( grid::attack )
+            );
+        
+        RectUtils.getInteriorCoords( gridBounds )
+            .forEach( c -> 
+                assertEquals( 
+                    RectUtils.contains( c, corners ), 
+                    grid.isSplatted( c ), 
+                    c.toString()
+                ) 
+            );
     }
 
     @Test
@@ -186,42 +183,15 @@ class Grid2DTest
     {
         Grid2D      grid        = new Grid2D();
         Rectangle   bounds      = grid.getBounds();
-        Rectangle   superBounds =
-            new Rectangle( 
-                bounds.x - 1, 
-                bounds.y - 1, 
-                bounds.width + 2, 
-                bounds.height + 2 
-            );
+        Rectangle   superBounds = getSuperRect( bounds, 1 );
         RectUtils.getInteriorPoints( superBounds )
             .forEach( point -> {
-                GridCoords  coords  = RectUtils.coordsOf( point );
+                GridCoords  coords      = RectUtils.coordsOf( point );
                 boolean     hasPoint    = bounds.contains( point );
                 boolean     hasCoords   = grid.contains( coords );
-                String      comment = point.toString();
+                String      comment     = coords.toString();
                 assertEquals( hasPoint, hasCoords, comment );
             });
-    }
-
-    @Test
-    public void testContainsIntInt()
-    {
-        Grid2D  grid    = new Grid2D();
-        for ( int yco = 0 ; yco < height ; ++yco )
-            for ( int xco = 0 ; xco < width ; ++xco )
-                assertTrue( grid.contains( xco, yco ) );
-        
-        for ( int xco = -1 ; xco <= width ; ++xco )
-        {
-            assertFalse( grid.contains( xco, -1 ) );
-            assertFalse( grid.contains( xco, height ) );
-        }
-        
-        for ( int yco = -1 ; yco <= height ; ++yco )
-        {
-            assertFalse( grid.contains( -1, yco ) );
-            assertFalse( grid.contains( width, yco ) );
-        }
     }
 
     @ParameterizedTest
@@ -234,6 +204,26 @@ class Grid2DTest
         getAllValidShips( ship ).forEach( 
             s -> assertTrue( grid.contains( s ), s.toString() ) 
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource( "allProtoShips" )
+    public void testContainsShip2DNeg( Ship2D ship )
+    {
+        Grid2D          grid        = new Grid2D();
+        Rectangle       gridBounds  = grid.getBounds();
+        Rectangle       superBounds = getSuperRect( gridBounds, 1 );
+        RectUtils.getInteriorCoords( superBounds )
+            .map( c -> getNewShip( ship, c ) )
+            .forEach( s -> {
+                Rectangle   sBounds = s.getBounds();
+                String      comment = s.toString();
+                assertEquals( 
+                    gridBounds.contains( sBounds ), 
+                    grid.contains( s ), 
+                    comment 
+                );
+            });
     }
 
     @ParameterizedTest
@@ -253,52 +243,52 @@ class Grid2DTest
     @MethodSource( "allProtoShips" )
     public void testIntersectsExisting( Ship2D ship )
     {
-        Grid2D      grid        = new Grid2D();
-        Rectangle   gridBounds  = grid.getBounds();
-        int         squareSide  = squareType.breadth();
-        int         centerXco   = (int)gridBounds.getCenterX();
-        int         centerYco   = (int)gridBounds.getCenterY();
-        
-        // Position two ships, approximately in the center of the grid,
-        // horizontal ship on the left, vertical ship on the right.
-        int         shipYco     = centerYco - squareSide / 2;
-        int         leftXco     = centerXco - squareSide - 2;
-        int         rightXco    = centerXco + 2;
-        GridCoords  leftCoords  = new GridCoords( leftXco, shipYco );
-        GridCoords  rightCoords = new GridCoords( rightXco, shipYco );
-        
-        // Note: ship is square; horizontal/vertical not relevant
-        Ship2D      leftShip    = 
-            new Ship2D( squareType, "square", leftCoords, Orientation.HORIZONTAL );
-        Rectangle   leftBounds  = leftShip.getBounds();
-        Ship2D      rightShip   = 
-            new Ship2D( squareType, rightCoords, Orientation.VERTICAL );
-        Rectangle   rightBounds = rightShip.getBounds();
+        Grid2D          grid        = assembleTwoShipScenario();
+        List<Ship2D>    allShips    = grid.getAllShips();
         // sanity check
-        assertTrue( gridBounds.contains( leftBounds ) );
-        assertTrue( gridBounds.contains( rightBounds ) );
-        assertFalse( leftBounds.intersects( rightBounds ) );
-        assertTrue( grid.contains( leftShip ) );
-        assertTrue( grid.contains( rightShip ) );
-
-        grid.put( leftShip );
-        grid.put( rightShip );
+        assertEquals( 2, allShips.size() );
+        Ship2D          shipA       = allShips.get( 0 );
+        Ship2D          shipB       = allShips.get( 1 );
+        Rectangle       shipABounds = shipA.getBounds();
+        Rectangle       shipBBounds = shipB.getBounds();
         
         Rectangle   shipBounds  = ship.getBounds();
         RectUtils.getAllValidPoints( gridBounds, shipBounds )
             .map( p -> RectUtils.coordsOf( p ) )
             .map( c -> getNewShip( ship, c ) )
-            .filter( s -> !leftBounds.intersects( s.getBounds()) )
-            .filter( s -> !rightBounds.intersects( s.getBounds()) )
+            .filter( s -> !shipABounds.intersects( s.getBounds()) )
+            .filter( s -> !shipBBounds.intersects( s.getBounds()) )
             .forEach( s -> assertFalse( grid.intersectsExisting( s ) ) );
         
         RectUtils.getAllValidPoints( gridBounds, ship.getBounds() )
             .map( p -> RectUtils.coordsOf( p ) )
             .map( c -> getNewShip( ship, c ) )
             .filter( s -> 
-                leftBounds.intersects( s.getBounds() ) || rightBounds.intersects( s.getBounds() )
+                shipABounds.intersects( s.getBounds() ) || 
+                shipBBounds.intersects( s.getBounds() )
             )
             .forEach( s -> assertTrue( grid.intersectsExisting( s ) ) );
+    }
+    
+    @Test
+    public void testGetAllShips()
+    {
+        GridCoords  refCoords   = new GridCoords( 0, 0 );
+        Ship2D      refShip     = 
+            new Ship2D( oneDType, refCoords, Orientation.HORIZONTAL );
+        Set<Ship2D> expShips    = new HashSet<>();
+         
+        Grid2D          grid    = new Grid2D();
+        assertTrue( grid.getAllShips().isEmpty() );
+        IntStream.range( 0, grid.getBounds().height )
+            .mapToObj( i -> new GridCoords( 0, i ) )
+            .map( c -> getNewShip( refShip, c ) )
+            .forEach( s -> {
+                grid.put( s );
+                expShips.add( s );
+                HashSet<Ship2D> actShips    = new HashSet<>( grid.getAllShips() );
+                assertEquals( expShips, actShips );
+            });
     }
 
     @ParameterizedTest
@@ -315,11 +305,47 @@ class Grid2DTest
             .forEach( s -> { 
                 grid.put( s );
                 GridCoords  coords      = s.getCoords();
-                Ship2D      testShip    = 
-                    grid.getShip( coords.xco(), coords.yco() );
+                Ship2D      testShip    = grid.getShip( coords );
                 assertEquals( s, testShip );
                 grid.clear();
             });
+    }
+
+    @Test
+    public void testPutShipGoWrongBounds()
+    {
+        Grid2D          grid        = new Grid2D();
+        Rectangle       gridBounds  = grid.getBounds();
+        GridCoords      refCoords   = new GridCoords( 0, 0 );
+        Ship2D          refShip     = 
+            new Ship2D( squareType, refCoords, Orientation.HORIZONTAL );
+        GridCoords[]    offByOne    = 
+            getCoordsOffByOne( gridBounds, refShip );
+        Arrays.stream( offByOne )
+            .map( c -> getNewShip( refShip, c ) )
+            .forEach( s -> assertThrows( 
+                BattleshipException.class, () -> grid.put( s ) )
+            );
+    }
+
+    @Test
+    public void testPutShipGoWrongIntersection()
+    {
+        Grid2D          grid        = assembleTwoShipScenario();
+        List<Ship2D>    allShips    = grid.getAllShips();
+        Rectangle[]     allBounds   =
+            allShips.stream()
+                .map( Ship2D::getBounds )
+                .toArray( Rectangle[]::new );
+    
+        GridCoords      refCoords   = new GridCoords( 0, 0 );
+        Ship2D          refShip     = 
+            new Ship2D( squareType, refCoords, Orientation.HORIZONTAL );
+        getAllValidShips( refShip )
+            .filter( s -> RectUtils.intersects( s.getBounds(), allBounds ) )
+            .forEach( s -> assertThrows( 
+                BattleshipException.class, () -> grid.put( s ) )
+            );
     }
 
     @Test
@@ -365,6 +391,12 @@ class Grid2DTest
             // Verify that a ship can be added at the vacated coordinates
             grid.put( ship );
         }
+        
+        // trying removing a ship that's not there; should be a noop
+        GridCoords  newCoords   = new GridCoords( 1, 1 );
+        Ship2D      newShip     = 
+            new Ship2D( type, newCoords, Orientation.HORIZONTAL );
+        grid.remove( newShip );
     }
 
     @Test
@@ -388,7 +420,11 @@ class Grid2DTest
         // Make sure rects, and only rects, are seen as splatted
         RectUtils.getInteriorCoords( gridBounds )
             .forEach( c -> 
-                assertEquals( contains( c, corners ), grid.isSplatted( c ) )
+                assertEquals( 
+                    RectUtils.contains( c, corners ),
+                    grid.isSplatted( c ),
+                    c.toString()
+                )
             );
     }
 
@@ -399,8 +435,8 @@ class Grid2DTest
         Grid2D  grid    = new Grid2D();
         getAllValidShips( ship ).forEach( s -> {
             grid.clear();
-            grid.put( ship );
-            testIsSunk( ship, grid );
+            grid.put( s );
+            testIsSunk( s, grid );
         });
     }
 
@@ -470,6 +506,79 @@ class Grid2DTest
         assertEquals( expBounds, actBounds );
     }
     
+    @Test
+    public void testMiscNullPointerExceptions()
+    {
+        Class<NullPointerException> npeClass    = NullPointerException.class;
+        Grid2D  grid    = new Grid2D();
+        
+        assertThrows( npeClass, () -> grid.attack( null ) );
+        assertThrows( npeClass, () -> grid.contains( (GridCoords)null ) );
+        assertThrows( npeClass, () -> grid.contains( (Ship2D)null ) );
+        assertThrows( npeClass, () -> grid.intersectsExisting( null ) );
+        assertThrows( npeClass, () -> grid.put( null ) );
+        assertThrows( npeClass, () -> grid.remove( null ) );
+        assertThrows( npeClass, () -> grid.isSplatted( null ) );
+        assertThrows( npeClass, () -> grid.isSunk( null ) );
+        assertThrows( npeClass, () -> Grid2D.getGrid( null ) );
+    }
+    
+    @Test
+    public void testMiscBattleshipExceptions()
+    {
+        Class<BattleshipException> excClass    = BattleshipException.class;
+        Grid2D      grid    = new Grid2D();
+        Rectangle   bounds  = grid.getBounds();
+        
+        String      testName        = "Test Name";
+        GridCoords  invalidCoords   = 
+            new GridCoords( bounds.width, bounds.height );
+        GridCoords  validCoords     = new GridCoords( 0, 0 );
+        Ship2D      outOfBoundsShip = 
+            new Ship2D( squareType, invalidCoords, Orientation.HORIZONTAL );
+        Ship2D      validShip       = 
+            new Ship2D( squareType, validCoords, Orientation.HORIZONTAL );
+        
+        new Grid2D( testName );
+        assertThrows( excClass, () -> new Grid2D( testName ) );
+        assertThrows( excClass, () -> grid.attack( invalidCoords ) );
+        assertThrows( excClass, () -> grid.put( outOfBoundsShip ) );
+        assertThrows( excClass, () -> grid.getShip( invalidCoords ) );
+        
+        grid.put( validShip );
+        assertThrows( excClass, () -> grid.put( validShip ) );
+        grid.clear();
+        
+    }
+    
+    /**
+     * Given a reference rectangle and increase-by parameter,
+     * create a rectangle that contains the reference rectangle
+     * and includes additional number of rows and columns.
+     * 
+     * @param refRect   reference rectangle
+     * @param increase  given increase-by parameter
+     * 
+     * @return the created rectangle
+     */
+    private static Rectangle getSuperRect( Rectangle refRect, int increase )
+    {
+        Rectangle   rect    =
+            new Rectangle(
+                refRect.x - increase,
+                refRect.y - increase,
+                refRect.width + 2 * increase,
+                refRect.height + 2 * increase
+            );
+        // sanity check
+        assert( rect.x < refRect.x );
+        assert( rect.y < refRect.y );
+        assert( rect.width > refRect.width );
+        assert( rect.height > refRect.height );
+
+        return rect;
+    }
+    
     /**
      * Given a reference rectangle and exclusion parameter,
      * create a rectangle that is contained in the reference rectangle,
@@ -492,8 +601,8 @@ class Grid2DTest
                 refRect.height - 2 * exclude
             );
         // sanity check
-        assert( rect.x < gridBounds.width );
-        assert( rect.y < gridBounds.height );
+        assert( rect.x < refRect.width );
+        assert( rect.y < refRect.height );
         assert( rect.width > 1 );
         assert( rect.height > 1 );
 
@@ -508,6 +617,8 @@ class Grid2DTest
      * 
      * @param ship  the ship to attack
      * @param grid  the grid that the ship lives in
+     * 
+     * @see #testIsSunk(Ship2D)
      */
     private static void testIsSunk( Ship2D ship, Grid2D grid )
     {
@@ -576,21 +687,21 @@ class Grid2DTest
      * Generate a stream of ships for each coordinate of the grid
      * that is valid for the ship.
      * The type and orientation of the ship
-     * is based on the prototype
+     * is based on the reference ship
      * passed by the caller.
      * 
-     * @param protoShip the ship from which to derive type and orientation
+     * @param refShip the given reference ship
      * 
      * @return
      *      a stream of ships for each coordinate of the grid
      *      that is valid for the ship
      */
-    private Stream<Ship2D> getAllValidShips( Ship2D protoShip )
+    private Stream<Ship2D> getAllValidShips( Ship2D refShip )
     {
-        Rectangle   bounds      = protoShip.getBounds();
+        Rectangle   bounds      = refShip.getBounds();
         Dimension   dim         = new Dimension( bounds.width, bounds.height );
-        ShipType2D  type        = protoShip.getType();
-        Orientation orient      = protoShip.getOrientation();
+        ShipType2D  type        = refShip.getType();
+        Orientation orient      = refShip.getOrientation();
         Stream<Ship2D>  stream  = RectUtils.getInteriorCoords( gridBounds )
             .map( c -> new Rectangle( RectUtils.ofGridCoords( c ), dim ) )
             .filter( r -> gridBounds.contains( r ) )
@@ -648,22 +759,92 @@ class Grid2DTest
     }
     
     /**
-     * Return true if the given coordinates are contained
-     * in any Rectangle in a given array of Rectangles.
+     * Given a reference rectangle and a reference ship,
+     * calculate coordinates that would put the ship
+     * outside the reference rectangle by one cell
+     * for each corner of the reference rectangle.
      * 
-     * @param coords    the given coordinates
-     * @param rects     the given array
+     * @param refRect   the given reference rectangle
+     * @param refShip   the given reference ship
      * 
-     * @return  true if coords is contained in any element of rects
+     * @return  
+     *      array of coordinates that would put refShip
+     *      outside of refRect
      */
-    private static boolean contains( GridCoords coords, Rectangle[] rects )
+    private static GridCoords[] getCoordsOffByOne( 
+        Rectangle refRect, 
+        Ship2D refShip
+    )
     {
-        Point   point   = RectUtils.ofGridCoords( coords );
-        Boolean result  =
-            Arrays.stream( rects )
-                .filter( r -> r.contains( point ) )
-                .findFirst().orElse( null ) != null;
-        return result;
+        Rectangle       shipBounds      = refShip.getBounds();
+        int             shipWidth       = shipBounds.width;
+        int             shipHeight      = shipBounds.height;
+        int             refRectMaxXco   = (int)refRect.getMaxX();
+        int             refRectMaxYco   = (int)refRect.getMaxY();
+        int             inRightXco      = refRectMaxXco - shipWidth;
+        int             outRightXco     = inRightXco + 1;
+        int             inBottomYco     = refRectMaxYco - shipHeight;
+        int             outBottomYco    = inBottomYco + 1;
+        GridCoords[]    coords      = 
+        {
+            new GridCoords( refRect.x - 1, refRect.y ),
+            new GridCoords( refRect.x, refRect.y - 1 ),
+            new GridCoords( outRightXco, refRect.y ),
+            new GridCoords( inRightXco, refRect.y - 1 ),
+            new GridCoords( refRect.x - 1, inBottomYco ),
+            new GridCoords( refRect.x, outBottomYco ),
+            new GridCoords( outRightXco, inBottomYco ),
+            new GridCoords( inRightXco, outBottomYco )
+        };
+        // Sanity check
+        Arrays.stream( coords )
+            .map( c -> new Rectangle( c.xco(), c.yco(), shipWidth, shipHeight ) )
+            .forEach( r -> assertFalse( refRect.contains( r ) ) );
+        
+        return coords;
+    }
+    
+    /**
+     * Create a grid and position two ships
+     * at approximately its center.
+     * This can be used by any test
+     * that requires a grid containing multiple ships,
+     * for example testing for intersections.
+     * 
+     * @return  the created grid
+     */
+    private static Grid2D assembleTwoShipScenario()
+    {
+        Grid2D      grid        = new Grid2D();
+        Rectangle   gridBounds  = grid.getBounds();
+        int         squareSide  = squareType.breadth();
+        int         centerXco   = (int)gridBounds.getCenterX();
+        int         centerYco   = (int)gridBounds.getCenterY();
+        
+        int         shipYco     = centerYco - squareSide / 2;
+        int         leftXco     = centerXco - squareSide - 2;
+        int         rightXco    = centerXco + 2;
+        GridCoords  leftCoords  = new GridCoords( leftXco, shipYco );
+        GridCoords  rightCoords = new GridCoords( rightXco, shipYco );
+        
+        // Note: ship is square; horizontal/vertical not relevant
+        Ship2D      leftShip    = 
+            new Ship2D( squareType, leftCoords, Orientation.HORIZONTAL );
+        Rectangle   leftBounds  = leftShip.getBounds();
+        Ship2D      rightShip   = 
+            new Ship2D( squareType, rightCoords, Orientation.VERTICAL );
+        Rectangle   rightBounds = rightShip.getBounds();
+        // sanity check
+        assertTrue( gridBounds.contains( leftBounds ) );
+        assertTrue( gridBounds.contains( rightBounds ) );
+        assertFalse( leftBounds.intersects( rightBounds ) );
+        assertTrue( grid.contains( leftShip ) );
+        assertTrue( grid.contains( rightShip ) );
+
+        grid.put( leftShip );
+        grid.put( rightShip );
+        
+        return grid;
     }
 
     /**
@@ -684,7 +865,8 @@ class Grid2DTest
     {
         Objects.requireNonNull( key, "key" );
         int     val;
-        String  strVal   = System.getProperty( key );
+        String  propName = Constants.NAME_PREFIX + key;
+        String  strVal   = System.getProperty( propName );
         if ( strVal == null )
             val = defVal;
         else
