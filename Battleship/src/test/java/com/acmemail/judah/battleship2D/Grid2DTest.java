@@ -117,7 +117,7 @@ class Grid2DTest
             .forEach( c -> assertFalse( grid.isSplatted( c ) ) );
         
         // Make a rectangle that is a proper subset of the grid bounds
-        Rectangle   rect    = getSubrect( gridBounds, 2 );
+        Rectangle   rect    = RectUtils.getSubrect( gridBounds, 2 );
         RectUtils.getInteriorCoords( rect )
             .forEach( grid::attack );
         
@@ -183,7 +183,7 @@ class Grid2DTest
     {
         Grid2D      grid        = new Grid2D();
         Rectangle   bounds      = grid.getBounds();
-        Rectangle   superBounds = getSuperRect( bounds, 1 );
+        Rectangle   superBounds = RectUtils.getSuperRect( bounds, 1 );
         RectUtils.getInteriorPoints( superBounds )
             .forEach( point -> {
                 GridCoords  coords      = RectUtils.coordsOf( point );
@@ -212,7 +212,7 @@ class Grid2DTest
     {
         Grid2D          grid        = new Grid2D();
         Rectangle       gridBounds  = grid.getBounds();
-        Rectangle       superBounds = getSuperRect( gridBounds, 1 );
+        Rectangle       superBounds = RectUtils.getSuperRect( gridBounds, 1 );
         RectUtils.getInteriorCoords( superBounds )
             .map( c -> getNewShip( ship, c ) )
             .forEach( s -> {
@@ -552,64 +552,6 @@ class Grid2DTest
     }
     
     /**
-     * Given a reference rectangle and increase-by parameter,
-     * create a rectangle that contains the reference rectangle
-     * and includes additional number of rows and columns.
-     * 
-     * @param refRect   reference rectangle
-     * @param increase  given increase-by parameter
-     * 
-     * @return the created rectangle
-     */
-    private static Rectangle getSuperRect( Rectangle refRect, int increase )
-    {
-        Rectangle   rect    =
-            new Rectangle(
-                refRect.x - increase,
-                refRect.y - increase,
-                refRect.width + 2 * increase,
-                refRect.height + 2 * increase
-            );
-        // sanity check
-        assert( rect.x < refRect.x );
-        assert( rect.y < refRect.y );
-        assert( rect.width > refRect.width );
-        assert( rect.height > refRect.height );
-
-        return rect;
-    }
-    
-    /**
-     * Given a reference rectangle and exclusion parameter,
-     * create a rectangle that is contained in the reference rectangle,
-     * and excludes the given number of rows and columns.
-     * Raises an assertion if the new rectangle
-     * does not contain at least one point.
-     * 
-     * @param refRect   reference rectangle
-     * @param exclude   exclusion parameter
-     * 
-     * @return the created rectangle
-     */
-    private static Rectangle getSubrect( Rectangle refRect, int exclude )
-    {
-        Rectangle   rect    =
-            new Rectangle(
-                refRect.x + exclude,
-                refRect.y + exclude,
-                refRect.width - 2 * exclude,
-                refRect.height - 2 * exclude
-            );
-        // sanity check
-        assert( rect.x < refRect.width );
-        assert( rect.y < refRect.height );
-        assert( rect.width > 1 );
-        assert( rect.height > 1 );
-
-        return rect;
-    }
-    
-    /**
      * Attack the cells in a ship until it is sunk.
      * Verify that grid.isSunk() returns false
      * until the last cell is attacked,
@@ -703,7 +645,7 @@ class Grid2DTest
         ShipType2D  type        = refShip.getType();
         Orientation orient      = refShip.getOrientation();
         Stream<Ship2D>  stream  = RectUtils.getInteriorCoords( gridBounds )
-            .map( c -> new Rectangle( RectUtils.ofGridCoords( c ), dim ) )
+            .map( c -> new Rectangle( RectUtils.pointOf( c ), dim ) )
             .filter( r -> gridBounds.contains( r ) )
             .map( r -> RectUtils.coordsOf( r ) )
             .map( c -> new Ship2D( type, c, orient) );
