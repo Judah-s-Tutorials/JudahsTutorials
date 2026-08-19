@@ -2,7 +2,6 @@ package com.acmemail.judah.battleship2D;
 import java.awt.Rectangle;
 import java.util.Objects;
 
-import com.acmemail.judah.battleship.ShipType;
 /**
  * An instance of this class encapsulates the properties
  * of a ship in the Battleship game.

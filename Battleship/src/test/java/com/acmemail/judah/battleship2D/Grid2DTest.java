@@ -26,6 +26,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.Constants;
 import com.acmemail.judah.battleship2DT.test_utils.RectUtils;
 
 class Grid2DTest

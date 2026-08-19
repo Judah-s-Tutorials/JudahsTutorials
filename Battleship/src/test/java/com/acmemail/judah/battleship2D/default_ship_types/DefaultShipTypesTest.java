@@ -1,20 +1,20 @@
 package com.acmemail.judah.battleship2D.default_ship_types;
 
-import static com.acmemail.judah.battleship2D.Constants.DEF_BATTLESHIP_BREADTH;
-import static com.acmemail.judah.battleship2D.Constants.DEF_BATTLESHIP_LEN;
-import static com.acmemail.judah.battleship2D.Constants.DEF_BATTLESHIP_NAME;
-import static com.acmemail.judah.battleship2D.Constants.DEF_CARRIER_BREADTH;
-import static com.acmemail.judah.battleship2D.Constants.DEF_CARRIER_LEN;
-import static com.acmemail.judah.battleship2D.Constants.DEF_CARRIER_NAME;
-import static com.acmemail.judah.battleship2D.Constants.DEF_CRUISER_BREADTH;
-import static com.acmemail.judah.battleship2D.Constants.DEF_CRUISER_LEN;
-import static com.acmemail.judah.battleship2D.Constants.DEF_CRUISER_NAME;
-import static com.acmemail.judah.battleship2D.Constants.DEF_DESTROYER_BREADTH;
-import static com.acmemail.judah.battleship2D.Constants.DEF_DESTROYER_LEN;
-import static com.acmemail.judah.battleship2D.Constants.DEF_DESTROYER_NAME;
-import static com.acmemail.judah.battleship2D.Constants.DEF_SUBMARINE_BREADTH;
-import static com.acmemail.judah.battleship2D.Constants.DEF_SUBMARINE_LEN;
-import static com.acmemail.judah.battleship2D.Constants.DEF_SUBMARINE_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_BREADTH;
+import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_LEN;
+import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_CARRIER_BREADTH;
+import static com.acmemail.judah.battleship.Constants.DEF_CARRIER_LEN;
+import static com.acmemail.judah.battleship.Constants.DEF_CARRIER_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_CRUISER_BREADTH;
+import static com.acmemail.judah.battleship.Constants.DEF_CRUISER_LEN;
+import static com.acmemail.judah.battleship.Constants.DEF_CRUISER_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_BREADTH;
+import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_LEN;
+import static com.acmemail.judah.battleship.Constants.DEF_DESTROYER_NAME;
+import static com.acmemail.judah.battleship.Constants.DEF_SUBMARINE_BREADTH;
+import static com.acmemail.judah.battleship.Constants.DEF_SUBMARINE_LEN;
+import static com.acmemail.judah.battleship.Constants.DEF_SUBMARINE_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.function.Supplier;
@@ -30,7 +30,7 @@ import com.acmemail.judah.battleship2D.ShipType2D;
  * Verifies that each default ship type class
  * (Battleship, Carrier, Cruiser, Destroyer, Submarine)
  * is wired to the correct name, length, and breadth
- * from {@link com.acmemail.judah.battleship2D.Constants}.
+ * from {@link com.acmemail.judah.battleship.Constants}.
  */
 class DefaultShipTypesTest
 {

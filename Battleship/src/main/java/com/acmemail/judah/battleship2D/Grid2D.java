@@ -1,9 +1,12 @@
 package com.acmemail.judah.battleship2D;
 
-import static com.acmemail.judah.battleship2D.Constants.DEF_NUM_COLS;
-import static com.acmemail.judah.battleship2D.Constants.DEF_NUM_ROWS;
-import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_COLS;
-import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_ROWS;
+import static com.acmemail.judah.battleship.Constants.DEF_NUM_COLS;
+import static com.acmemail.judah.battleship.StatusMessages.OUT_OF_BOUNDS;
+import static com.acmemail.judah.battleship.StatusMessages.INTERSECTS_SHIP;
+import static com.acmemail.judah.battleship.StatusMessages.GRID_EXISTS;
+import static com.acmemail.judah.battleship.Constants.DEF_NUM_ROWS;
+import static com.acmemail.judah.battleship.Constants.KEY_NUM_COLS;
+import static com.acmemail.judah.battleship.Constants.KEY_NUM_ROWS;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -15,6 +18,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.Constants;
 
 /**
  * Maintains a map of grid coordinates to cells in a rectangle.
@@ -51,13 +55,7 @@ import com.acmemail.judah.battleship.BattleshipException;
  */
 public class Grid2D
 {
-    private static final String GRID_EXISTS         = 
-        "A grid with this name already exists: ";
-    private static final String OVERLAPS_SHIP       = 
-        "Overlaps existing ship: ";
-    private static final String OUT_OF_BOUNDS       = "Out of bounds: ";
-    
-    private static final String DEF_GRID_NAME       = "HOME";
+    private static final String DEF_GRID_NAME           = "HOME";
     private static final int    NUM_ROWS;
     private static final int    NUM_COLS;
     private static final Map<String,Grid2D> allGrids    = new HashMap<>();
@@ -95,7 +93,7 @@ public class Grid2D
         Objects.requireNonNull( name, "name" );
         this.name = name;
         if ( allGrids.containsKey( name ) )
-            throw new BattleshipException( GRID_EXISTS + name );
+            throw new BattleshipException( GRID_EXISTS + ": " + name );
         allGrids.put( name, this );
         bounds = new Rectangle( 0, 0, NUM_COLS, NUM_ROWS );
     }
@@ -150,6 +148,19 @@ public class Grid2D
     }
     
     /**
+     * Returns true if a given ship has been added to the grid.
+     * 
+     * @param ship  the given ship
+     * 
+     * @return  true if ship has been added to the grid
+     */
+    public boolean isDeployed( Ship2D ship )
+    {
+        boolean isDeployed  = allShips.contains( ship );
+        return isDeployed;
+    }
+    
+    /**
      * Marks the given coordinates splatted.
      * 
      * @param coords    the given coordinates
@@ -160,7 +171,7 @@ public class Grid2D
     {
         Objects.requireNonNull( coords, " coords" );
         if ( !contains( coords ) )
-            throw new BattleshipException( OUT_OF_BOUNDS + coords );
+            throw new BattleshipException( OUT_OF_BOUNDS +  ": " + coords );
         Cell2D  cell    = get( coords );
         if ( cell == null )
             cell = putEmptyCell( coords );
@@ -234,9 +245,9 @@ public class Grid2D
     {
         Objects.requireNonNull( ship, "ship" );
         if ( !contains( ship ) )
-            throw new BattleshipException( OUT_OF_BOUNDS + ship );
+            throw new BattleshipException( OUT_OF_BOUNDS + ": " + ship );
         if ( intersectsExisting( ship ) )
-            throw new BattleshipException( OVERLAPS_SHIP + ship );
+            throw new BattleshipException( INTERSECTS_SHIP + ": " + ship );
         
         allShips.add( ship );
         getInteriorPoints( ship )
@@ -328,6 +339,12 @@ public class Grid2D
         return home;
     }
     
+    public Stream<Cell2D> getCells()
+    {
+        Stream<Cell2D>  stream  = gridMap.values().stream();
+        return stream;
+    }
+    
     /**
      * Gets the grid with the given name.
      * 
@@ -379,7 +396,7 @@ public class Grid2D
         Objects.requireNonNull( coords, "coords" );
         Cell2D  cell    = null;
         if ( !contains( coords ) )
-            throw new BattleshipException( OUT_OF_BOUNDS + coords );
+            throw new BattleshipException( OUT_OF_BOUNDS + ": " + coords );
         cell    = gridMap.get( coords );
 
         return cell;

@@ -1,8 +1,8 @@
 package com.acmemail.judah.battleship;
 
-import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_COLS;
-import static com.acmemail.judah.battleship2D.Constants.KEY_NUM_ROWS;
-import static com.acmemail.judah.battleship2D.Constants.NAME_PREFIX;
+import static com.acmemail.judah.battleship.Constants.KEY_NUM_COLS;
+import static com.acmemail.judah.battleship.Constants.KEY_NUM_ROWS;
+import static com.acmemail.judah.battleship.Constants.NAME_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;

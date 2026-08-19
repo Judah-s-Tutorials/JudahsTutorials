@@ -14,18 +14,16 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
-import java.util.List;
 
 import javax.swing.JPanel;
 
 import com.acmemail.judah.battleship.BattleshipException;
-import com.acmemail.judah.battleship.Cell;
 import com.acmemail.judah.battleship.Label;
-import com.acmemail.judah.battleship.Ship;
-import com.acmemail.judah.battleship.ShipType;
-import com.acmemail.judah.battleship2D.Grid;
+import com.acmemail.judah.battleship2D.Cell2D;
+import com.acmemail.judah.battleship2D.Grid2D;
 import com.acmemail.judah.battleship2D.GridCoords;
 import com.acmemail.judah.battleship2D.Orientation;
+import com.acmemail.judah.battleship2D.Ship2D;
 
 public class GraphicalGrid extends JPanel implements Artwork
 {
@@ -39,29 +37,29 @@ public class GraphicalGrid extends JPanel implements Artwork
     private static final Color  shipColor       = 
         new Color( .75f, .75f, .75f );
     private static final Color  deadColor       = Color.RED;
-    private static final Color  validcolor      = 
+    private static final Color  validColor      = 
         new Color( 0x4d, 0x4d, 0x4d, 0xbf );
     private static final Color  inValidcolor    = 
         new Color( 0xFF, 0x74, 0x74, 0xbf );
     private static final Stroke gridStroke      = new BasicStroke( 1 );
     private static final Stroke shipStroke      = new BasicStroke( 3 );
     
-    private Ship        ghostShip   = null;
+    private Ship2D      ghostShip   = null;
     
-    private Grid        grid        = null;
+    private Grid2D      grid        = null;
     private int         cellSide    = 15;
     private int         labelWidth  = 25;
     private int         labelHeight = 25;
     private int         margin      = 5;
-    private int         numRows     = Grid.getNumRows();
-    private int         numCols     = Grid.getNumCols();
+    private int         numRows     = Grid2D.getNumRows();
+    private int         numCols     = Grid2D.getNumCols();
     
     private int         width;
     private int         height;
     private FontMetrics fontMetrics;
     private Graphics2D  gtx;
     
-    public GraphicalGrid( Grid grid )
+    public GraphicalGrid( Grid2D grid )
     {
         this.grid = grid;
         int         prefWidth   = 
@@ -74,7 +72,7 @@ public class GraphicalGrid extends JPanel implements Artwork
     }
     
     @Override
-    public void update( Grid grid )
+    public void update( Grid2D grid )
     {
         if ( grid != null )
             this.grid = grid;
@@ -86,12 +84,12 @@ public class GraphicalGrid extends JPanel implements Artwork
         repaint();
     }
     
-    public Ship getGhostShip()
+    public Ship2D getGhostShip()
     {
         return ghostShip;
     }
     
-    public void setGhostShip( Ship ship )
+    public void setGhostShip( Ship2D ship )
     {
         ghostShip = ship;
     }
@@ -109,7 +107,7 @@ public class GraphicalGrid extends JPanel implements Artwork
         
         gtx.setFont( font );
         fontMetrics = gtx.getFontMetrics();
-        Collection<Cell>    cells   = grid.values();
+        Collection<Cell2D>  cells   = grid.getCells().toList();
         
         gtx.translate( margin, margin );
         fillCells( cells );
@@ -119,17 +117,18 @@ public class GraphicalGrid extends JPanel implements Artwork
         fillGhostShip();
     }
     
-    private void drawCells( Collection<Cell> cells )
+    private void drawCells( Collection<Cell2D> cells )
     {
         Rectangle2D rect    = new Rectangle2D.Double();
         gtx.setColor( lineColor );
-        for ( Cell cell : cells )
+        for ( Cell2D cell : cells )
         {
-            int     gridXco = cell.getXco();
-            int     gridYco = cell.getYco();
-            int     xco     = gridXco * cellSide + labelWidth;
-            int     yco     = gridYco * cellSide + labelHeight;
-            Stroke  stroke  = cell.hasShip() ? shipStroke : gridStroke;
+            GridCoords  coords  = cell.getCoords();
+            int         gridXco = coords.xco();
+            int         gridYco = coords.yco();
+            int         xco     = gridXco * cellSide + labelWidth;
+            int         yco     = gridYco * cellSide + labelHeight;
+            Stroke      stroke  = cell.getShip() == null ? shipStroke : gridStroke;
             
             rect.setRect( xco, yco, cellSide, cellSide );
             gtx.setStroke( stroke );
@@ -137,26 +136,22 @@ public class GraphicalGrid extends JPanel implements Artwork
         }
     }
     
-    private void fillCells( Collection<Cell> cells )
+    private void fillCells( Collection<Cell2D> cells )
     {
         Rectangle2D rect    = new Rectangle2D.Double();
-        for ( Cell cell : cells )
+        for ( Cell2D cell : cells )
         {
-            int     gridXco = cell.getXco();
-            int     gridYco = cell.getYco();
-            int     xco     = gridXco * cellSide + labelWidth;
-            int     yco     = gridYco * cellSide + labelHeight;
-            Color   color   = bgColor;
+            GridCoords  coords  = cell.getCoords();
+            int         gridXco = coords.xco();
+            int         gridYco = coords.yco();
+            int         xco     = gridXco * cellSide + labelWidth;
+            int         yco     = gridYco * cellSide + labelHeight;
+            Color       color   = bgColor;
             
-            if ( cell.hasShip() )
-            {
-                if ( cell.isSplatted() )
-                    color = deadColor;
-                else
-                    color = shipColor;
-            }
-            else if ( cell.isSplatted() )
-                color = hitColor;
+            if ( cell.isSplatted() )
+                color = deadColor;
+            else
+                color = shipColor;
             rect.setRect( xco, yco, cellSide, cellSide );
             gtx.setColor( color );
             gtx.fill( rect );
@@ -201,10 +196,7 @@ public class GraphicalGrid extends JPanel implements Artwork
         if ( ghostShip != null )
         {
             Rectangle2D     rect    = getGhostRect();
-            List<String>    errors  = Grid.evaluateBounds( ghostShip );
-            Color           color   = 
-                errors.isEmpty() ? validcolor : inValidcolor;
-            gtx.setColor( color );
+            gtx.setColor( validColor );
             gtx.fill( rect );
         }
     }
@@ -214,7 +206,7 @@ public class GraphicalGrid extends JPanel implements Artwork
         Rectangle2D ghostRect   = new Rectangle2D.Double();
         if ( ghostShip != null )
         {
-            Rectangle2D cellRect    = ghostShip.getRect();
+            Rectangle2D cellRect    = ghostShip.getBounds();
             double      xco         = 
                 cellRect.getX() * cellSide + labelWidth;
             double      yco         = 
@@ -227,9 +219,9 @@ public class GraphicalGrid extends JPanel implements Artwork
     }
     
     @SuppressWarnings("unused")
-    private Cell getCell( Point2D point )
+    private Cell2D getCell( Point2D point )
     {
-        Cell    cell    = null;
+        Cell2D  cell    = null;
         double  xco     = point.getX() - margin;
         double  yco     = point.getY() - margin;
         int     col     = (int)(xco / cellSide);
@@ -237,7 +229,8 @@ public class GraphicalGrid extends JPanel implements Artwork
         if ( col >= 0 && col < numCols
             && row >= 0 && row < numRows )
         {
-            cell = new Cell( col, row );
+            GridCoords  coords  = new GridCoords( col, row );
+            cell = new Cell2D( coords );
         }
         return cell;
     }
@@ -255,19 +248,19 @@ public class GraphicalGrid extends JPanel implements Artwork
         @Override
         public void mouseMoved( MouseEvent evt )
         {
-            if ( ghostShip != null )
-            {
-                GridCoords  curr    = getGridCoords( evt.getX(), evt.getY() );
-                if ( !curr.equals( ghostShip.getFirstSquare() ) )
-                {
-                    ShipType    type        = ghostShip.getType();
-                    Orientation orientation = ghostShip.getOrientation();
-                    Ship        ship        = 
-                        new Ship( type, curr, orientation );
-                    setGhostShip( ship );
-                    update();
-                }
-            }
+//            if ( ghostShip != null )
+//            {
+//                GridCoords  curr    = getGridCoords( evt.getX(), evt.getY() );
+//                if ( !curr.equals( ghostShip.getFirstSquare() ) )
+//                {
+//                    ShipType    type        = ghostShip.getType();
+//                    Orientation orientation = ghostShip.getOrientation();
+//                    Ship        ship        = 
+//                        new Ship( type, curr, orientation );
+//                    setGhostShip( ship );
+//                    update();
+//                }
+//            }
         }
         
         private GridCoords getGridCoords( int pixelXco, int pixelYco )

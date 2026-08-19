@@ -1,6 +1,6 @@
 package com.acmemail.judah.battleship.sandbox;
 
-import com.acmemail.judah.battleship2D.Constants;
+import com.acmemail.judah.battleship.Constants;
 
 public class ProperetyNameDemo
 {

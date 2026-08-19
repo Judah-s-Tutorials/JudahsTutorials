@@ -15,12 +15,13 @@ import javax.swing.SwingUtilities;
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Fleet;
 import com.acmemail.judah.battleship.Label;
-import com.acmemail.judah.battleship.Ship;
-import com.acmemail.judah.battleship.ShipType;
 import com.acmemail.judah.battleship.artwork.GraphicalGrid;
-import com.acmemail.judah.battleship2D.Grid;
+import com.acmemail.judah.battleship2D.Grid2D;
 import com.acmemail.judah.battleship2D.GridCoords;
 import com.acmemail.judah.battleship2D.Orientation;
+import com.acmemail.judah.battleship2D.Ship2D;
+import com.acmemail.judah.battleship2D.ShipType2D;
+import com.acmemail.judah.battleship2D.ShipTypes;
 
 public class AdHocApp
 {
@@ -32,18 +33,17 @@ public class AdHocApp
         double  d2  = 0x8e;
         double  d3  = 0x23;
         System.out.printf( "%f, %f, %f%n", d1/255, d2/255, d3/255 );
-        Grid    grid    = Grid.getHomeGrid();
         
-        Ship        ship;
+        Ship2D      ship;
         GridCoords  coords;
-        ShipType.registerDefaultTypes();
-        ShipType    battleship  = ShipType.getShipType( "Battleship" );
-        ShipType    destroyer   = ShipType.getShipType( "Destroyer" );
-        ShipType    submarine   = ShipType.getShipType( "Submarine" );
+        ShipTypes.registerDefaultTypes();
+        ShipType2D  battleship  = ShipTypes.getShipType( "Battleship" );
+        ShipType2D  destroyer   = ShipTypes.getShipType( "Destroyer" );
+        ShipType2D  submarine   = ShipTypes.getShipType( "Submarine" );
         
         coords = new GridCoords( 6, 0 );
-        ship = new Ship( battleship, coords, HORIZONTAL );
-        Fleet.add( ship );
+        ship = new Ship2D( battleship, coords, HORIZONTAL );
+//        Fleet.add( ship );
 //        
 //        coords = new GridCoords( 3, 3 );
 //        ship = new Ship( destroyer, coords, VERTICAL );
@@ -65,7 +65,7 @@ public class AdHocApp
             frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
             JPanel  pane    = new JPanel( new BorderLayout() );
             frame.setContentPane( pane );
-            graphicalGrid = new GraphicalGrid( grid );
+            graphicalGrid = new GraphicalGrid( Grid2D.getHomeGrid() );
             pane.add( graphicalGrid, BorderLayout.CENTER );
             frame.pack();
             frame.setVisible( true );
@@ -91,11 +91,11 @@ public class AdHocApp
                 String      typeToken   = tizer.nextToken();
                 String      rowToken    = tizer.nextToken();
                 String      colToken    = tizer.nextToken();
-                ShipType    shipType    = parseShipType( typeToken );
+                ShipType2D  shipType    = parseShipType( typeToken );
                 int         row         = parseRow( rowToken );
                 int         col         = parseCol( colToken );
                 GridCoords  coords      = null;
-                Ship        ship        = null;
+                Ship2D      ship        = null;
                 
                 if ( shipType == null )
                     ;
@@ -107,8 +107,8 @@ public class AdHocApp
                     ;
                 else if ( (ship = getShip( shipType, coords )) == null )
                     ;
-                else
-                    Fleet.add( ship );
+//                else
+//                    Fleet.add( ship );
             }
         }
     }
@@ -116,18 +116,12 @@ public class AdHocApp
     private static GridCoords getGridCoords( int col, int row )
     {
         GridCoords      coords  = new GridCoords( col, row );
-        List<String>    errors  = Grid.evaluateBounds( coords );
-        if ( errors.size() > 0 )
-        {
-            coords = null;
-            showErrorMessage( "Invalid grid coordinates", errors );
-        }
         return coords;
     }
     
-    private static ShipType parseShipType( String token )
+    private static ShipType2D parseShipType( String token )
     {
-        ShipType    type    = ShipType.getShipType( token );
+        ShipType2D  type    = ShipTypes.getShipType( token );
         if ( type == null )
             showErrorMessage( "Invalid ship type", token );
         return type;
@@ -202,10 +196,10 @@ public class AdHocApp
         Orientation orientation = HORIZONTAL;
         for ( int inx = 0 ; inx < 5 ; ++inx )
         {
-            ShipType    shipType    = ShipType.getShipType( "Carrier" );
+            ShipType2D  shipType    = ShipTypes.getShipType( "Carrier" );
             GridCoords  gridCoords  = new GridCoords( xco, yco );
-            Ship        ship        = 
-                new Ship( shipType, gridCoords, orientation );
+            Ship2D      ship        = 
+                new Ship2D( shipType, gridCoords, orientation );
             orientation = orientation == HORIZONTAL ? VERTICAL : HORIZONTAL; 
             graphicalGrid.setGhostShip( ship );
 //            graphicalGrid.update();
@@ -218,7 +212,7 @@ public class AdHocApp
         }
     }
     
-    private static Ship getShip( ShipType type, GridCoords coords )
+    private static Ship2D getShip( ShipType2D type, GridCoords coords )
     {
         final String    errorMessage    = "Cannot place ship";
         final String    prompt          = "Choose orientation";
@@ -226,7 +220,7 @@ public class AdHocApp
         final int       messageType     = JOptionPane.QUESTION_MESSAGE;
         final int       optionType      = JOptionPane.CANCEL_OPTION;
         Orientation[]   options         = Orientation.values();
-        Ship            ship            = null;
+        Ship2D          ship            = null;
         int             option          = 
             JOptionPane.showOptionDialog(
                 null, 
@@ -241,13 +235,13 @@ public class AdHocApp
         if ( option >= 0 && option < options.length )
         {
             Orientation     orientation = options[option];
-            ship = new Ship( type, coords, orientation );
-            List<String>    errors      = Grid.evaluateBounds(ship);
-            if ( errors.size() > 0 )
-            {
-                ship = null;
-                showErrorMessage( errorMessage, errors);
-            }
+            ship = new Ship2D( type, coords, orientation );
+//            List<String>    errors      = Grid.evaluateBounds(ship);
+//            if ( errors.size() > 0 )
+//            {
+//                ship = null;
+//                showErrorMessage( errorMessage, errors);
+//            }
         }
         return ship;
     }

@@ -1,5 +1,10 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship;
 
+/**
+ * Constants used throughout the Battleship game.
+ * 
+ * @see StatusMessages
+ */
 public class Constants
 {
     /**
@@ -7,11 +12,11 @@ public class Constants
      * is used to make sure property names are unique, for example:
      * <pre>    String propName   = 
      *         Constants.NAME_PREFIX + Constants.KEY_NUM_ROWS;
-     *          String numRowsVal =
+     *          String numRowsVal =</pre>
      */
     public static final String  NAME_PREFIX     = 
         "com.acmemail.judah.battleship.";
-    
+        
     /* Naming convention same as RenderingHints: "KEY_...description */
     /** Key to lookup number-of-rows property. */
     public static final String  KEY_NUM_ROWS    = "numRows";
@@ -59,6 +64,20 @@ public class Constants
     public static final String  DEF_DESTROYER_NAME   = "Destroyer";
     /** Default NAMEgth of a submarine. */
     public static final String  DEF_SUBMARINE_NAME   = "Submarine";
+    
+    /*****************************************
+     * States that the game may occupy;
+     * see {@linkplain Configurator}.
+     *****************************************/
+    /** Setup state see {@linkplain Configurator}. */
+    public static final int    SETUP                = 0;
+    /** Setup state see {@linkplain Configurator}. */
+    public static final int    CONFIG               = SETUP + 1;
+    /** Setup state see {@linkplain Configurator}. */
+    public static final int    CONFIG_COMPLETE      = CONFIG + 1;
+    /** Setup state see {@linkplain Configurator}. */
+    public static final int    GAME_OVER            = CONFIG_COMPLETE + 1;
+    
     
     /**************************/
     /* Convenience utilities. */

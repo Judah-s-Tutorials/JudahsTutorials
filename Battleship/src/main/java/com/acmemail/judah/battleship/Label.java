@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import com.acmemail.judah.battleship2D.Grid;
+import com.acmemail.judah.battleship2D.Grid2D;
 
 /**
  * This class converts between 0-origin
@@ -35,9 +35,9 @@ import com.acmemail.judah.battleship2D.Grid;
 public class Label
 {
     /** The length of a row. */
-    private static final int        rowLen      = Grid.getNumRows();
+    private static final int        rowLen      = Grid2D.getNumRows();
     /** The length of a column. */
-    private static final int        colLen      = Grid.getNumCols();
+    private static final int        colLen      = Grid2D.getNumCols();
     /** The maximum number of digits to represent a row number. */
     private static final int        maxRowDigs;
     /** The maximum number of digits to represent a column number. */
@@ -54,7 +54,7 @@ public class Label
     {
         maxRowDigs  = (int)(log26( rowLen )) + 1;
         maxColDigs = (int)Math.log10( colLen ) + 1;
-        decToStrFmt = "%" + maxColDigs + "d";
+        decToStrFmt = "%" + maxColDigs + "d"; 
         alphaToStrFmt = "%" + maxRowDigs + "s";
     }
     
@@ -114,7 +114,7 @@ public class Label
     public static String[] parseRowCol( String input )
     {
         String[]        result      = { "", "" };
-        StringTokenizer tizer       = new StringTokenizer( input, " ," );
+        StringTokenizer tizer       = new StringTokenizer( input, "\\ ," );
         int             numTokens   = tizer.countTokens();
         if ( numTokens < 1 || numTokens > 2 )
             ;
@@ -210,7 +210,7 @@ public class Label
         }
         catch ( NumberFormatException exc )
         {
-            String  message = "Cannot convert to int: \"" + worker + "\"";
+            String  message = "Cannot convert to int: " + worker;
             throw new BattleshipException( message );
         }
         
@@ -240,7 +240,7 @@ public class Label
     {
         if ( num < 0 )
         {
-            String  fmt     = "Input (%d) must be >= 0";
+            String  fmt     = "Input (%d) must be >= 0"; //$NON-NLS-1$
             String  message = String.format( fmt,  num );
             throw new BattleshipException( message );
         }
@@ -294,7 +294,7 @@ public class Label
             char    letter  = alpha.charAt( inx );
             if ( !Character.isUpperCase( letter) )
             {
-                String  message = "Cannot convert " + worker + " to decimal";
+                String  message = "Cannot convert \"" + worker + "\" to decimal";
                 throw new BattleshipException( message );
             }
             int     value   = letter - 'A' + 1;
@@ -418,7 +418,7 @@ public class Label
     private static boolean 
     validateNumeric( String input, List<String> errors )
     {
-        final String    errorMessage    = "Not a numberic character: ";
+        final String    errorMessage    = "Not a numeric character: ";
         boolean         result          = true;
         for ( char ccc : input.toCharArray() )
         {
