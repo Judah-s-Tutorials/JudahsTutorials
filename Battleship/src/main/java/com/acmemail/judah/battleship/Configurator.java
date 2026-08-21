@@ -41,6 +41,10 @@ package com.acmemail.judah.battleship;
  * <p>
  * Once the game has progressed from one state to the next,
  * the progression cannot be undone.
+ * However the entire class can be reset,
+ * an operation which is mainly useful for testing.
+ * 
+ * @see #reset
  */
 public class Configurator
 {
@@ -131,5 +135,14 @@ public class Configurator
     {
         boolean result  = state == Constants.GAME_OVER;
         return result;
+    }
+    
+    /**
+     * Reset the class to an initial state.
+     * Should only be used for testing.
+     */
+    public static void reset()
+    {
+        state = Constants.SETUP;
     }
 }

@@ -2,8 +2,8 @@ package com.acmemail.judah.battleship;
 
 import static com.acmemail.judah.battleship.StatusMessages.ALREADY_DEPLOYED;
 import static com.acmemail.judah.battleship.StatusMessages.INTERSECTS_SHIP;
-import static com.acmemail.judah.battleship.StatusMessages.MALFUNCTION;
 import static com.acmemail.judah.battleship.StatusMessages.OUT_OF_BOUNDS;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_PROTO_SHIP;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import com.acmemail.judah.battleship2D.Grid2D;
 import com.acmemail.judah.battleship2D.GridCoords;
@@ -38,11 +39,10 @@ public class Fleet
     /** 
      * A list of ships that must be deployed before the game can commence.
      */
-    private final   List<ProtoShip>         toBeDeployed    = new ArrayList<>();
-    private final   Map<ProtoShip, Ship2D>  deployed        = new HashMap<>();
-    private final   Grid2D                  grid            = 
-        Grid2D.getHomeGrid();
-    
+    private final   List<Proto>         toBeDeployed    = new ArrayList<>();
+    private final   Map<Proto, Ship2D>  deployed        = new HashMap<>();
+    private final   Grid2D              grid            = 
+        Grid2D.getHomeGrid();    
     /**
      * Default constructor.
      */
@@ -58,7 +58,7 @@ public class Fleet
      * @param type      the type of the ship; may not be null
      * @param remark    an optional remark; may be null
      * 
-     * @throws NullPointException if type is null
+     * @throws NullPointerException if type is null
      * @throws BattleshipException if the game is not in SETUP
      * 
      * @see Configurator
@@ -67,7 +67,7 @@ public class Fleet
     {
         Objects.requireNonNull( type, "type" );
         throwIfNotSetup();
-        toBeDeployed.add( new ProtoShip( type, remark ) );
+        toBeDeployed.add( new Proto( type, remark ) );
     }
     
     /**
@@ -84,7 +84,7 @@ public class Fleet
      * @param name      the name of the instantiated ship; may be null
      * @param orient    the orientation of the instantiated ship
      * @param ident     
-     *      the {@link ProtoShip} associated with the instantiated ship
+     *      the {@link Proto} associated with the instantiated ship
      * 
      * @return  the instantiated ship
      * 
@@ -103,7 +103,7 @@ public class Fleet
         GridCoords  coords, 
         String      name, 
         Orientation orient,
-        ProtoShip ident
+        Proto ident
     )
     {
         Objects.requireNonNull( coords, "coords" );
@@ -111,18 +111,19 @@ public class Fleet
         Objects.requireNonNull( ident, "ident" );
         throwIfNotConfig();
         if ( !toBeDeployed.contains( ident ) )
-            throw new BattleshipException( StatusMessages.INTERSECTS_SHIP );
-        String  intName = name == null ? "" : name; //$NON-NLS-1$
-        Ship2D  ship    = new Ship2D( ident.type(), intName, coords, orient );
+            throw new BattleshipException( INVALID_PROTO_SHIP );
+        String  intName = name == null ? "" : name;
+        Ship2D  ship    = new Ship2D( ident.getType(), intName, coords, orient );
         return ship;
     }
     
     /**
      * Deploy a ship. 
      * The ship should have been instantiated via
-     * {@linkplain #getShip(GridCoords, String, Orientation, ProtoShip)}.
+     * {@linkplain #getShip(GridCoords, String, Orientation, Proto)}.
      * The operation may fail if:
      * <ul>
+     * </li>The given prototype is invalid.</li>
      * </li>The ship has already been deployed.</li>
      * </li>The bounds of the ship fall outside the grid.</li>
      * </li>The ship overlays a previously deployed ship.</li>
@@ -137,33 +138,24 @@ public class Fleet
      * @return  the status of the operation
      * 
      * @see Result
-     * 
-     * @throws BattleshipException 
-     *      if the ship was previously deployed
-     *      outside of this facility
      */
-    public Result deploy( Ship2D ship, ProtoShip ident )
+    public Result deploy( Ship2D ship, Proto ident )
     {
         Result  result  = new Result();
         Objects.requireNonNull( ship, "ship" );
-        Objects.requireNonNull( ident, "ident" ); //$NON-NLS-1$
+        Objects.requireNonNull( ident, "ident" );
         throwIfNotConfig();
         if ( deployed.containsKey( ident ) )
             result.addMessage( ALREADY_DEPLOYED, false );
+        else if ( !toBeDeployed.contains( ident ) )
+            result.addMessage( INVALID_PROTO_SHIP );
         else if ( !grid.contains( ship ) )
             result.addMessage( OUT_OF_BOUNDS, false );
         else if ( grid.intersectsExisting( ship ) )
             result.addMessage( INTERSECTS_SHIP, false );
         else
         {
-            // One more sanity check: make sure that the ship wasn't added
-            // to the grid outside of this facility. If it was, declare
-            // a malfunction.
-            if ( grid.isDeployed( ship ) )
-            {
-                String  message = MALFUNCTION + ": " + ALREADY_DEPLOYED;
-                throw new BattleshipException( message );
-            }
+            grid.put( ship );
             toBeDeployed.remove( ident );
             deployed.put( ident, ship );
             result.setStatus( true );
@@ -174,7 +166,7 @@ public class Fleet
     /**
      * Deploy a ship. 
      * The ship should have been instantiated via
-     * {@linkplain #getShip(GridCoords, String, Orientation, ProtoShip)}.
+     * {@linkplain #getShip(GridCoords, String, Orientation, Proto)}.
      * The operation may fail if the ship has not been deployed.
      * <p>
      * The status of the operation is returned
@@ -195,7 +187,7 @@ public class Fleet
      *      if the game is not in the CONFIG state
      * 
      */
-    public Result undeploy( ProtoShip ident )
+    public Result undeploy( Proto ident )
     {
         Objects.requireNonNull( ident, "ident" );
         throwIfNotConfig();
@@ -209,6 +201,49 @@ public class Fleet
             toBeDeployed.add( ident );
         }
         return result;
+    }
+    
+    /** 
+     * Find the deployed ship associated with a prototype
+     * and return it.
+     * Returns null if no deployed ship is found.
+     * 
+     * @param proto the prototype associated with the deployed ship
+     * 
+     * @return  the deployed ship of null if not found
+     * 
+     * @throws NullPointerException if proto is null
+     */
+    public Ship2D getDeployedShip( Proto proto )
+    {
+        Objects.requireNonNull( proto, "proto" );
+        Ship2D  ship    = deployed.get( proto );
+        return ship;
+    }
+    
+    /**
+     * Returns an unmodifiable list of all ships that have been deployed.
+     *
+     * @return  an unmodifiable list of all ships that have been deployed
+     */
+    public List<Ship2D> getAllDeployedShips()
+    {
+        List<Ship2D>    list    = List.copyOf( deployed.values() );
+        return list;
+    }
+
+    /**
+     * Returns an unmodifiable list of prototypes
+     * for all ships that have been deployed.
+     *
+     * @return  an unmodifiable list of prototypes
+     *          for all ships that have been deployed
+     */
+    public List<Fleet.Proto> getAllDeployedProtos()
+    {
+        Set<Fleet.Proto>    set     = deployed.keySet();
+        List<Fleet.Proto>   list    = List.copyOf( set );
+        return list;
     }
 
     /**
@@ -251,15 +286,12 @@ public class Fleet
      * While the client cannot modify the list,
      * changes to the list by this facility
      * will be reflected in the client's list.
-     * This operation is only valid
-     * when the game is in the configuration state.
      * 
      * @return  a list of ships that need to be deployed
      */
-    public List<ProtoShip> getToBeDeployed()
+    public List<Proto> getToBeDeployed()
     {
-        throwIfNotSetup();
-        List<ProtoShip> list    = Collections.unmodifiableList( toBeDeployed );
+        List<Proto> list    = Collections.unmodifiableList( toBeDeployed );
         return list;
     }
     
@@ -276,9 +308,27 @@ public class Fleet
     }
     
     /**
-     * Throws an exception if the game is not in the CONFIG state.
+     * Frees all resources associated with this object,
+     * including removing this fleet's ships from the grid.
+     * Note that the grid is a shared resource
+     * that may be associated with other Fleet objects;
+     * only this fleet's own ships are removed from it.
+     * This is mainly a testing aid.
+     * After disposing this object
+     * you should not attempt to reuse it;
+     * instead, create a new object.
+     */
+    public void dispose()
+    {
+        deployed.values().forEach( grid::remove );
+        toBeDeployed.clear();
+        deployed.clear();
+    }
+    
+    /**
+     * Throws an exception if the game is not in the SETUP state.
      * 
-     * @throws BattleshipException if the game is not in the CONFIG state
+     * @throws BattleshipException if the game is not in the SETUP state
      */
     private static void throwIfNotSetup()
     {
@@ -294,10 +344,61 @@ public class Fleet
     private static void throwIfNotConfig()
     {
         if ( !Configurator.isConfig() )
-            throw new BattleshipException( StatusMessages.NOT_SETUP );
+            throw new BattleshipException( StatusMessages.NOT_CONFIG );
     }
     
-    public record ProtoShip( ShipType2D type, String remark )
+    /**
+     * Encapsulates the type of a ship
+     * and a remark associated with it.
+     * The principal purpose of an instance of this type 
+     * is to serve as a token
+     * that can be moved between a list of ships that need to be deployed
+     * and a list of ships that have been deployed.
+     * The only way two instances can be considered equal
+     * is via identity.
+     * <p>
+     * The remark is present for the convenience of the client.
+     * If null is passed for the remark
+     * it is converted to an empty string,
+     * but is otherwise unexamined and uninterpreted by the implementation.
+     */
+    public static class Proto
     {
+        private final ShipType2D    type;
+        private final String        remark;
+        
+        /**
+         * Establish the type and remark associated with this instance.
+         * 
+         * @param type      
+         *      the type encapsulated by this instance; may not be null
+         * @param remark
+         *      the remark encapsulated by this instance; may be null
+         */
+        private Proto( ShipType2D type, String remark )
+        {
+            this.type = type;
+            this.remark = remark == null ? "" : remark;
+        }
+        
+        /**
+         * Gets the type associated with this prototype.
+         * 
+         * @return the type associated with this prototype
+         */
+        public ShipType2D getType()
+        {
+            return type;
+        }
+
+        /**
+         * Gets the type associated with this prototype.
+         * 
+         * @return the remark associated with this prototype
+         */
+        public String getRemark()
+        {
+            return remark;
+        }
     }
 }

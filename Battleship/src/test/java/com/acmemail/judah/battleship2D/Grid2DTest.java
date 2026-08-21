@@ -469,10 +469,7 @@ class Grid2DTest
     public void testGetHomeGrid()
     {
         Grid2D  home    = Grid2D.getHomeGrid();
-        assertNull( home );
-        Grid2D  grid    = new Grid2D();
-        home = Grid2D.getHomeGrid();
-        assertEquals( grid, home );
+        assertNotNull( home );
     }
 
     @Test

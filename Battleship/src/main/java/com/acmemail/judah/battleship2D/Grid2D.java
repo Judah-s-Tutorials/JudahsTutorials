@@ -328,14 +328,16 @@ public class Grid2D
     }
     
     /**
-     * Gets the home grid. 
-     * Returns null if none
+     * Gets the home grid,
+     * instantiating it if necessary.
      * 
-     * @return  the home grid, or null if none
+     * @return  the home grid
      */
     public static Grid2D getHomeGrid()
     {
         Grid2D    home    = allGrids.get( DEF_GRID_NAME );
+        if ( home == null )
+            home = new Grid2D();
         return home;
     }
     
