@@ -32,6 +32,7 @@ import com.acmemail.judah.battleship.Fleet;
 import com.acmemail.judah.battleship.Result;
 import com.acmemail.judah.battleship.StatusMessages;
 import com.acmemail.judah.battleship2D.Grid2D;
+import com.acmemail.judah.battleship2D.Grid2DTestSupport;
 import com.acmemail.judah.battleship2D.GridCoords;
 import com.acmemail.judah.battleship2D.Orientation;
 import com.acmemail.judah.battleship2D.Ship2D;
@@ -53,7 +54,7 @@ class FleetConfigTest
     {
         if ( fleet != null )
             fleet.dispose();
-        homeGrid.clear();
+        Grid2DTestSupport.clear( homeGrid );
         Configurator.reset();
         assertTrue( Configurator.isSetup() );
         fleet = FleetProvisionData.getProvisionedFleet();

@@ -366,19 +366,25 @@ public class Grid2D
     /**
      * Empties all Grid2D maps;
      * empties the collection of Grid2D objects.
+     * Package-private: this is a testing aid only;
+     * see {@code Grid2DTestSupport} for access
+     * from outside this package.
      */
-    public static void reset()
+    static void reset()
     {
         for ( Grid2D grid : allGrids.values() )
             grid.clear();
         allGrids.clear();
     }
-    
+
     /**
      * Clears the encapsulated grid map
      * and the list of registered ships.
+     * Package-private: this is a testing aid only;
+     * see {@code Grid2DTestSupport} for access
+     * from outside this package.
      */
-    public void clear()
+    void clear()
     {
         allShips.clear();
         gridMap.clear();

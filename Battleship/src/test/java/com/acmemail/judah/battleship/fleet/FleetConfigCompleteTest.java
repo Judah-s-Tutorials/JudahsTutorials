@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Fleet;
-import com.acmemail.judah.battleship2D.Grid2D;
+import com.acmemail.judah.battleship2D.Grid2DTestSupport;
 
 class FleetConfigCompleteTest
 {
@@ -25,7 +25,7 @@ class FleetConfigCompleteTest
     @BeforeAll
     public static void beforeAll()
     {
-        Grid2D.reset();
+        Grid2DTestSupport.reset();
         Configurator.reset();
         assertTrue( Configurator.isSetup() );
         fleet = FleetProvisionData.getProvisionedFleet();
