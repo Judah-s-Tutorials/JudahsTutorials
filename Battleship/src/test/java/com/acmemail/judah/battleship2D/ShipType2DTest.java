@@ -3,6 +3,7 @@ package com.acmemail.judah.battleship2D;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -37,5 +38,4 @@ class ShipType2DTest
             new ShipType2D( null, testLength, testBreadth, null )
         );
     }
-
 }

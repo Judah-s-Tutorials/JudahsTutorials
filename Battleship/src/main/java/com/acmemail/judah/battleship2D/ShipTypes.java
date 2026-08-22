@@ -1,7 +1,10 @@
 package com.acmemail.judah.battleship2D;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
@@ -37,9 +40,14 @@ public class ShipTypes
      * @param type  the ship type to register
      *
      * @return  the given ship type, for convenience
+     *      
+     * @throws NullPointerException if type is null
+     * @throws BattleshipException 
+     *      if a type with the given name is already registered
      */
     public static ShipType2D register( ShipType2D type )
     {
+        Objects.requireNonNull( type, "type" );
         String  typeName    = type.typeName();
         if ( allTypes.containsKey( typeName ) )
         {
@@ -51,19 +59,33 @@ public class ShipTypes
     }
 
     /**
-     * Returns the TypeRec object with the given type name.
+     * Returns the registered ShipType2D object with the given type name.
      * Returns null if no corresponding such object is found.
      *
      * @param typeName  the given type name
      *
      * @return
-     *      the TypeRec object that associated with a given type name,
+     *      the registered ShipType2D object with the given type name
      *      or null if none
+     *      
+     * @throws NullPointerException if typeName is null
      */
     public static ShipType2D getShipType( String typeName )
     {
+        Objects.requireNonNull( typeName, "typeName" );
         ShipType2D type    = allTypes.get( typeName );
         return type;
+    }
+    
+    /**
+     * Gets a list of all registered types.
+     * 
+     * @return  a list of all registered types
+     */
+    public static List<ShipType2D> getAllRegisteredShipTypes()
+    {
+        List<ShipType2D>    list    = new ArrayList<>( allTypes.values() );
+        return list;
     }
 
     /**
@@ -82,8 +104,9 @@ public class ShipTypes
     
     /**
      * Removes all registered types from the registry.
+     * This method is provided for testing purposes.
      */
-    public static void reset()
+    static void reset()
     {
         allTypes.clear();
     }
