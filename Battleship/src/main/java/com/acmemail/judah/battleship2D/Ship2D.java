@@ -37,7 +37,12 @@ public class Ship2D
      * @param first         the (x,y) coordinates of the instantiated Ship
      * @param orientation   the orientation of the instantiated Ship
      * 
-     * @see Ship2D#Ship(ShipType, String, GridCoords, Orientation)
+     * @throws NullPointerException if type is null
+     * @throws NullPointerException if origin is null
+     * @throws NullPointerException if orientation is null
+     * 
+     * @see Ship2D#Ship2D(ShipType2D, String, GridCoords, Orientation)
+     * 
      */
     public Ship2D( 
         ShipType2D type, 
@@ -58,7 +63,11 @@ public class Ship2D
      *                      may not be null
      * @param orientation   the orientation of the instantiated Ship
      * 
-     * @see Ship2D#Ship(ShipType, GridCoords, Orientation)
+     * @throws NullPointerException if type is null
+     * @throws NullPointerException if origin is null
+     * @throws NullPointerException if orientation is null
+     * 
+     * @see Ship2D#Ship2D(ShipType2D, GridCoords, Orientation)
      */
     public Ship2D( 
         ShipType2D type, 
@@ -69,6 +78,7 @@ public class Ship2D
     {
         Objects.requireNonNull( type, "type" );
         Objects.requireNonNull( origin, "origin" );
+        Objects.requireNonNull( orientation, "orientation" );
         this.type = type;
         this.name = name;
         this.firstSquare = origin;
@@ -169,10 +179,14 @@ public class Ship2D
         return bounds;
     }
     
+    /**
+     * Returns the coordinates of this ship's first square.
+     * 
+     * @return  the coordinates of this ship's first square
+     */
     public GridCoords getCoords()
     {
-        GridCoords  coords  = new GridCoords( bounds.x, bounds.y );
-        return coords;
+        return firstSquare;
     }
     
     @Override

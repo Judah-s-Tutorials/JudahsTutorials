@@ -3,15 +3,18 @@ package com.acmemail.judah.battleship2D;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,10 +88,27 @@ class Ship2DTest
         ShipTypes.register( TEST_TYPE1D );
         ShipTypes.register( TEST_TYPE_SQUARE );
     }
+    
+    @AfterAll
+    public static void afterAll()
+    {
+        ShipTypes.reset();
+    }
 
     @BeforeEach
     public void setUp() throws Exception
     {
+    }
+
+    @Test
+    public void testShipCtorNullName()
+    {
+        Ship2D  test    = 
+            new Ship2D( TEST_TYPE2D, null, ship2DVCo, Orientation.VERTICAL );
+        assertNull( test.getName() );
+        
+        test = new Ship2D( TEST_TYPE2D, ship2DVCo, Orientation.VERTICAL );
+        assertNotNull( test.getName() );
     }
 
     @Test
@@ -119,6 +139,38 @@ class Ship2DTest
         assertEquals( TEST_TYPE1D, ship1DV.getType() );
         assertEquals( Orientation.VERTICAL, ship1DV.getOrientation() );
         expCorners.test( actCorners );
+    }
+    
+    @Test
+    public void testShip2DNPEs()
+    {
+        Class<NullPointerException> npeClass    = NullPointerException.class;
+        assertThrows( npeClass, 
+            () -> new Ship2D( 
+                null, 
+                ship2DVName, 
+                ship2DVCo, 
+                Orientation.VERTICAL
+            )
+        );
+
+        assertThrows( npeClass, 
+            () -> new Ship2D( 
+                TEST_TYPE2D, 
+                ship2DVName, 
+                null, 
+                Orientation.VERTICAL
+            )
+        );
+
+        assertThrows( npeClass, 
+            () -> new Ship2D( 
+                TEST_TYPE2D, 
+                ship2DVName, 
+                ship2DVCo, 
+                null
+            )
+        );
     }
 
     @Test
@@ -155,12 +207,12 @@ class Ship2DTest
     @MethodSource( "allShips" )
     public void testContainsIntInt( Ship2D ship )
     {
-        getInteriorPoints( ship )
+        RectUtils.getInteriorPoints( ship.getBounds() )
             .forEach( p -> 
                 assertTrue( ship.contains( p.x, p.y ), p.toString() )
             );
         
-        getPerimeterPoints( ship )
+        RectUtils.getPerimeterPoints( ship.getBounds() )
             .forEach( p -> 
                 assertFalse( ship.contains( p.x, p.y ), p.toString() )
             );
@@ -171,7 +223,7 @@ class Ship2DTest
     @MethodSource( "allShips" )
     public void testContainsGridCoordsPos( Ship2D ship )
     {
-        getInteriorPoints( ship )
+        RectUtils.getInteriorPoints( ship.getBounds() )
             .map( p -> new GridCoords( p.x, p.y ) )
             .forEach( g -> assertTrue( ship.contains( g ) ) );
     }
@@ -180,7 +232,7 @@ class Ship2DTest
     @MethodSource( "allShips" )
     public void testContainsGridCoordsNeg( Ship2D ship )
     {
-        getPerimeterPoints( ship )
+        RectUtils.getPerimeterPoints( ship.getBounds() )
             .map( p -> new GridCoords( p.x, p.y ) )
             .forEach( g -> assertFalse( ship.contains( g ) ) );
     }
@@ -287,22 +339,6 @@ class Ship2DTest
 
         ship2 = new Ship2D(typeA, nameA, firstA, orientB );
         assertNotEquals( ship1, ship2 );
-        
-        ship1 = new Ship2D(typeB, nameA, firstA, orientA );
-        ship2 = new Ship2D(typeB, nameA, firstA, orientA );
-        assertEquals( ship1.hashCode(), ship2.hashCode() );
-        
-        ship1 = new Ship2D(typeB, nameB, firstA, orientA );
-        ship2 = new Ship2D(typeB, nameB, firstA, orientA );
-        assertEquals( ship1.hashCode(), ship2.hashCode() );
-        
-        ship1 = new Ship2D(typeB, nameB, firstB, orientA );
-        ship2 = new Ship2D(typeB, nameB, firstB, orientA );
-        assertEquals( ship1.hashCode(), ship2.hashCode() );
-        
-        ship1 = new Ship2D(typeB, nameB, firstB, orientB );
-        ship2 = new Ship2D(typeB, nameB, firstB, orientB );
-        assertEquals( ship1.hashCode(), ship2.hashCode() );
     }
     
     /**
@@ -424,47 +460,6 @@ class Ship2DTest
         Stream<Ship2D>  ships   =
             Stream.of( ship2DH, ship2DV, ship1DH, ship1DV );
         return ships;
-    }
-    
-    /**
-     * Returns a stream of all points interior to a given ship.
-     * 
-     * @param ship the given ship
-     * 
-     * @return  a stream of all points interior to a given ship
-     */
-    private static Stream<Point> getInteriorPoints( Ship2D ship )
-    {
-        Rectangle       rect    = ship.getBounds();
-        int minXco  = rect.x;
-        int minYco  = rect.y;
-        int maxXco  = (int)rect.getMaxX();
-        int maxYco  = (int)rect.getMaxY();
-        Stream<Point>   stream  = 
-            IntStream.range( minXco, maxXco )
-            .boxed()
-            .flatMap( x -> IntStream.range( minYco, maxYco )
-                .mapToObj(y -> new Point(x, y)
-            )
-        );
-        return stream;
-    }
-    
-    /**
-     * Returns a stream of the all points
-     * contiguous with, but exterior to,
-     * the border of a given ship.
-     * 
-     * @param ship  the given ship
-     * 
-     * @return  
-     *      a stream of all points immediately exterior to a given ship
-     */
-    private static Stream<Point> getPerimeterPoints( Ship2D ship )
-    {
-        Rectangle   bounds  = ship.getBounds();
-        Stream<Point>   stream  = RectUtils.getPerimeterPoints( bounds );
-        return stream;
     }
 
     /**

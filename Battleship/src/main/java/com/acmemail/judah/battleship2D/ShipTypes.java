@@ -79,4 +79,12 @@ public class ShipTypes
         register( Destroyer.getType() );
         register( Submarine.getType() );
     }
+    
+    /**
+     * Removes all registered types from the registry.
+     */
+    public static void reset()
+    {
+        allTypes.clear();
+    }
 }

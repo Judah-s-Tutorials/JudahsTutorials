@@ -4,7 +4,6 @@ import static com.acmemail.judah.battleship2D.Orientation.HORIZONTAL;
 import static com.acmemail.judah.battleship2D.Orientation.VERTICAL;
 
 import java.awt.BorderLayout;
-import java.util.List;
 import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
@@ -13,7 +12,6 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.battleship.BattleshipException;
-import com.acmemail.judah.battleship.Fleet;
 import com.acmemail.judah.battleship.Label;
 import com.acmemail.judah.battleship.artwork.GraphicalGrid;
 import com.acmemail.judah.battleship2D.Grid2D;
@@ -166,18 +164,18 @@ public class AdHocApp
             .append( "\"" );
         JOptionPane.showMessageDialog( null, message, title, errorIcon );
     }
-    
-    private static 
-    void showErrorMessage( String message, List<String> errors )
-    {
-        final String    title       = "Parse Error";
-        final int       errorIcon   = JOptionPane.ERROR_MESSAGE;
-        StringBuilder   bldr        = new StringBuilder();
-        bldr.append( message ).append( ": \n" );
-        for ( String error : errors )
-            bldr.append( error ).append( "\n" );
-        JOptionPane.showMessageDialog( null, message, title, errorIcon );
-    }
+//    
+//    private static 
+//    void showErrorMessage( String message, List<String> errors )
+//    {
+//        final String    title       = "Parse Error";
+//        final int       errorIcon   = JOptionPane.ERROR_MESSAGE;
+//        StringBuilder   bldr        = new StringBuilder();
+//        bldr.append( message ).append( ": \n" );
+//        for ( String error : errors )
+//            bldr.append( error ).append( "\n" );
+//        JOptionPane.showMessageDialog( null, message, title, errorIcon );
+//    }
     
     private static String getInput( String prompt, String title )
     {
@@ -214,7 +212,7 @@ public class AdHocApp
     
     private static Ship2D getShip( ShipType2D type, GridCoords coords )
     {
-        final String    errorMessage    = "Cannot place ship";
+//        final String    errorMessage    = "Cannot place ship";
         final String    prompt          = "Choose orientation";
         final String    title           = "Orientation Selection";
         final int       messageType     = JOptionPane.QUESTION_MESSAGE;

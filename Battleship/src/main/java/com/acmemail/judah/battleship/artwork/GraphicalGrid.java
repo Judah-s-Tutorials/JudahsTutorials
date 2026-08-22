@@ -22,7 +22,6 @@ import com.acmemail.judah.battleship.Label;
 import com.acmemail.judah.battleship2D.Cell2D;
 import com.acmemail.judah.battleship2D.Grid2D;
 import com.acmemail.judah.battleship2D.GridCoords;
-import com.acmemail.judah.battleship2D.Orientation;
 import com.acmemail.judah.battleship2D.Ship2D;
 
 public class GraphicalGrid extends JPanel implements Artwork
@@ -33,14 +32,14 @@ public class GraphicalGrid extends JPanel implements Artwork
         Font( Font.SANS_SERIF, Font.PLAIN, 14 );
     private static final Color  bgColor         = new Color( 0xf5f5f5 );
     private static final Color  lineColor       = Color.BLACK;
-    private static final Color  hitColor        = Color.PINK;
+//    private static final Color  hitColor        = Color.PINK;
     private static final Color  shipColor       = 
         new Color( .75f, .75f, .75f );
     private static final Color  deadColor       = Color.RED;
     private static final Color  validColor      = 
         new Color( 0x4d, 0x4d, 0x4d, 0xbf );
-    private static final Color  inValidcolor    = 
-        new Color( 0xFF, 0x74, 0x74, 0xbf );
+//    private static final Color  inValidcolor    = 
+//        new Color( 0xFF, 0x74, 0x74, 0xbf );
     private static final Stroke gridStroke      = new BasicStroke( 1 );
     private static final Stroke shipStroke      = new BasicStroke( 3 );
     
@@ -263,12 +262,12 @@ public class GraphicalGrid extends JPanel implements Artwork
 //            }
         }
         
-        private GridCoords getGridCoords( int pixelXco, int pixelYco )
-        {
-            int         xco     = (pixelXco - margin - labelWidth) / cellSide;
-            int         yco     = (pixelYco - margin - labelHeight) / cellSide;
-            GridCoords  coords  = new GridCoords( xco, yco );
-            return coords;
-        }
+//        private GridCoords getGridCoords( int pixelXco, int pixelYco )
+//        {
+//            int         xco     = (pixelXco - margin - labelWidth) / cellSide;
+//            int         yco     = (pixelYco - margin - labelHeight) / cellSide;
+//            GridCoords  coords  = new GridCoords( xco, yco );
+//            return coords;
+//        }
     }
 }

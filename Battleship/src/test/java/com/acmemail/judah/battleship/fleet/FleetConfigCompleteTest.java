@@ -4,11 +4,8 @@ import static com.acmemail.judah.battleship.fleet.FleetProvisionData.ADHOC_COORD
 import static com.acmemail.judah.battleship.fleet.FleetProvisionData.ADHOC_NAME;
 import static com.acmemail.judah.battleship.fleet.FleetProvisionData.ADHOC_ORIENT;
 import static com.acmemail.judah.battleship.fleet.FleetProvisionData.ADHOC_SHIP1;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
