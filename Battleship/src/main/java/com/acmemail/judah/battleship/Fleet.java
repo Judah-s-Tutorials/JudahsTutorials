@@ -22,7 +22,7 @@ import com.acmemail.judah.battleship2D.ShipType2D;
 /**
  * This class keeps track of all ships
  * that are associated with the home grid.
- * It begins by keep a list of type {@linkPlain ProtoShip}
+ * It begins by keep a list of type {@linkplain Proto}
  * which identifies the type of a ship
  * that must be deployed before the game can start.
  * When a ship identified with a given ProtShip is deployed,
@@ -123,21 +123,25 @@ public class Fleet
      * {@linkplain #getShip(GridCoords, String, Orientation, Proto)}.
      * The operation may fail if:
      * <ul>
-     * </li>The given prototype is invalid.</li>
-     * </li>The ship has already been deployed.</li>
-     * </li>The bounds of the ship fall outside the grid.</li>
-     * </li>The ship overlays a previously deployed ship.</li>
+     * <li>The given prototype is invalid.</li>
+     * <li>The ship has already been deployed.</li>
+     * <li>The bounds of the ship fall outside the grid.</li>
+     * <li>The ship overlays a previously deployed ship.</li>
      * </ul>
      * <p>
      * The status of the operation is returned
      * in a Result object.
-     * 
+     *
      * @param ship  the ship to deploy
      * @param ident the deployment identifier
-     * 
+     *
      * @return  the status of the operation
-     * 
+     *
      * @see Result
+     *
+     * @throws NullPointerException if ship is null
+     * @throws NullPointerException if ident is null
+     * @throws BattleshipException if the game is not in the CONFIG state
      */
     public Result deploy( Ship2D ship, Proto ident )
     {
@@ -164,28 +168,26 @@ public class Fleet
     }
     
     /**
-     * Deploy a ship. 
-     * The ship should have been instantiated via
-     * {@linkplain #getShip(GridCoords, String, Orientation, Proto)}.
-     * The operation may fail if the ship has not been deployed.
+     * Undeploy a ship,
+     * returning its prototype to the to-be-deployed list.
+     * The operation may fail if no ship is currently deployed
+     * under the given identifier.
      * <p>
      * The status of the operation is returned
      * in a Result object.
      * <p>
-     * This operation is only available 
+     * This operation is only available
      * when the game is in the CONFIG state.
-     * 
-     * @param ship  the ship to deploy
+     *
      * @param ident the deployment identifier
-     * 
+     *
      * @return  the status of the operation
-     * 
+     *
      * @see Result
-     * 
+     *
      * @throws NullPointerException if ident is null
-     * @throws BattleshipException 
+     * @throws BattleshipException
      *      if the game is not in the CONFIG state
-     * 
      */
     public Result undeploy( Proto ident )
     {
@@ -199,6 +201,7 @@ public class Fleet
         {
             grid.remove( ship );
             toBeDeployed.add( ident );
+            result.setStatus( true );
         }
         return result;
     }
@@ -239,10 +242,10 @@ public class Fleet
      * @return  an unmodifiable list of prototypes
      *          for all ships that have been deployed
      */
-    public List<Fleet.Proto> getAllDeployedProtos()
+    public List<Proto> getAllDeployedProtos()
     {
-        Set<Fleet.Proto>    set     = deployed.keySet();
-        List<Fleet.Proto>   list    = List.copyOf( set );
+        Set<Proto>    set     = deployed.keySet();
+        List<Proto>   list    = List.copyOf( set );
         return list;
     }
 
@@ -313,6 +316,11 @@ public class Fleet
      * Note that the grid is a shared resource
      * that may be associated with other Fleet objects;
      * only this fleet's own ships are removed from it.
+     * Ships are only removed from the grid
+     * while configuration is still in progress;
+     * once configuration is complete,
+     * the grid's ship layout is permanent,
+     * so only this fleet's own bookkeeping is cleared.
      * This is mainly a testing aid.
      * After disposing this object
      * you should not attempt to reuse it;
@@ -320,7 +328,8 @@ public class Fleet
      */
     public void dispose()
     {
-        deployed.values().forEach( grid::remove );
+        if ( Configurator.getState() <= Constants.CONFIG )
+            deployed.values().forEach( grid::remove );
         toBeDeployed.clear();
         deployed.clear();
     }
@@ -392,8 +401,8 @@ public class Fleet
         }
 
         /**
-         * Gets the type associated with this prototype.
-         * 
+         * Gets the remark associated with this prototype.
+         *
          * @return the remark associated with this prototype
          */
         public String getRemark()
