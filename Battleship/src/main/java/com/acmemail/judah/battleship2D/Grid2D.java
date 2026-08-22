@@ -1,12 +1,12 @@
 package com.acmemail.judah.battleship2D;
 
 import static com.acmemail.judah.battleship.Constants.DEF_NUM_COLS;
-import static com.acmemail.judah.battleship.StatusMessages.OUT_OF_BOUNDS;
-import static com.acmemail.judah.battleship.StatusMessages.INTERSECTS_SHIP;
-import static com.acmemail.judah.battleship.StatusMessages.GRID_EXISTS;
 import static com.acmemail.judah.battleship.Constants.DEF_NUM_ROWS;
 import static com.acmemail.judah.battleship.Constants.KEY_NUM_COLS;
 import static com.acmemail.judah.battleship.Constants.KEY_NUM_ROWS;
+import static com.acmemail.judah.battleship.StatusMessages.GRID_EXISTS;
+import static com.acmemail.judah.battleship.StatusMessages.INTERSECTS_SHIP;
+import static com.acmemail.judah.battleship.StatusMessages.OUT_OF_BOUNDS;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
@@ -18,6 +18,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Constants;
 
 /**
@@ -42,6 +43,18 @@ import com.acmemail.judah.battleship.Constants;
  * the client typically has no need to get a cell from the grid,
  * or add one to it.
  * <p>
+ * Several operations are gated by the game's configuration state,
+ * as tracked by {@link Configurator}.
+ * Ships may only be added ({@link #put(Ship2D)})
+ * or removed ({@link #remove(Ship2D)})
+ * while configuration is in progress;
+ * once configuration is complete,
+ * both operations throw {@link BattleshipException}.
+ * Conversely, a cell may only be marked as attacked
+ * ({@link #attack(GridCoords)})
+ * once configuration is complete;
+ * before that, the operation throws {@link BattleshipException}.
+ * <p>
  * A game typically has two or more grids,
  * the home grid
  * and one grid for each opponent;
@@ -55,7 +68,11 @@ import com.acmemail.judah.battleship.Constants;
  */
 public class Grid2D
 {
-    private static final String DEF_GRID_NAME           = "HOME";
+    private static final String CONFIG_OVER             =
+        Messages.getString("Grid2D.1"); //$NON-NLS-1$
+    private static final String CONFIG_NOT_COMPLETE             =
+        Messages.getString("Grid2D.2"); //$NON-NLS-1$
+    private static final String DEF_GRID_NAME           = "HOME"; //$NON-NLS-1$
     private static final int    NUM_ROWS;
     private static final int    NUM_COLS;
     private static final Map<String,Grid2D> allGrids    = new HashMap<>();
@@ -90,10 +107,10 @@ public class Grid2D
      */
     public Grid2D( String name )
     {
-        Objects.requireNonNull( name, "name" );
+        Objects.requireNonNull( name, "name" ); //$NON-NLS-1$
         this.name = name;
         if ( allGrids.containsKey( name ) )
-            throw new BattleshipException( GRID_EXISTS + ": " + name );
+            throw new BattleshipException( GRID_EXISTS + ": " + name ); //$NON-NLS-1$
         allGrids.put( name, this );
         bounds = new Rectangle( 0, 0, NUM_COLS, NUM_ROWS );
     }
@@ -117,7 +134,8 @@ public class Grid2D
      */
     public Rectangle getBounds()
     {
-        return bounds;
+        Rectangle   copy    = new Rectangle( bounds );
+        return copy;
     }
     
     /**
@@ -153,25 +171,32 @@ public class Grid2D
      * @param ship  the given ship
      * 
      * @return  true if ship has been added to the grid
+     * 
+     * @throws NullPointerException if ship is null
      */
     public boolean isDeployed( Ship2D ship )
     {
+        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
         boolean isDeployed  = allShips.contains( ship );
         return isDeployed;
     }
     
     /**
      * Marks the given coordinates splatted.
+     * This operation is only available after 
+     * configuration is complete.
      * 
      * @param coords    the given coordinates
      * 
      * @throws NullPointerException if coords is null
+     * @throws BattleshipException if configuration stage is complete
      */
     public void attack( GridCoords coords )
     {
-        Objects.requireNonNull( coords, " coords" );
+        Objects.requireNonNull( coords, "coords" ); //$NON-NLS-1$
+        throwIfNotConfigComplete();
         if ( !contains( coords ) )
-            throw new BattleshipException( OUT_OF_BOUNDS +  ": " + coords );
+            throw new BattleshipException( OUT_OF_BOUNDS +  ": " + coords ); //$NON-NLS-1$
         Cell2D  cell    = get( coords );
         if ( cell == null )
             cell = putEmptyCell( coords );
@@ -190,7 +215,7 @@ public class Grid2D
      */
     public boolean contains( GridCoords coords )
     {
-        Objects.requireNonNull( coords, " coords" );
+        Objects.requireNonNull( coords, "coords" );
         boolean result  = bounds.contains( coords.xco(), coords.yco() );
         return result;
     }
@@ -224,30 +249,33 @@ public class Grid2D
      */
     public boolean intersectsExisting( Ship2D ship )
     {
-        Objects.requireNonNull( ship, "ship" );
+        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
         boolean result  = 
             allShips.stream()
-            .filter( ship::intersects )
-            .findFirst().orElse( null ) != null;
+            .anyMatch( ship::intersects );
         return result;
     }
     
     /**
      * Adds the given ship to the map.
+     * This operation is not available
+     * after configuration is complete.
      * 
      * @param ship  the given ship
      * 
      * @throws NullPointerException if ship is null
      * @throws BattleshipException if ship falls outside the grid
      * @throws BattleshipException if ship overlaps an existing ship
+     * @throws BattleshipException if configuration stage is complete
      */
     public void put( Ship2D ship )
     {
-        Objects.requireNonNull( ship, "ship" );
+        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
+        throwIfPastConfig();
         if ( !contains( ship ) )
-            throw new BattleshipException( OUT_OF_BOUNDS + ": " + ship );
+            throw new BattleshipException( OUT_OF_BOUNDS + ": " + ship ); //$NON-NLS-1$
         if ( intersectsExisting( ship ) )
-            throw new BattleshipException( INTERSECTS_SHIP + ": " + ship );
+            throw new BattleshipException( INTERSECTS_SHIP + ": " + ship ); //$NON-NLS-1$
         
         allShips.add( ship );
         getInteriorPoints( ship )
@@ -258,14 +286,18 @@ public class Grid2D
     /**
      * Removes the given ship from the grid.
      * Has no effect if the given ship is not in the grid.
+     * This operation is not available
+     * after configuration is complete.
      * 
-     * @param ship
+     * @param ship  the ship to remove
      * 
      * @throws NullPointerException if ship is null
+     * @throws BattleshipException if configuration stage is complete
      */
     public void remove( Ship2D ship )
     {
-        Objects.requireNonNull( ship, "ship" );
+        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
+        throwIfPastConfig();
         if ( allShips.remove( ship ) )
             getInteriorPoints( ship ).forEach( gridMap::remove );
     }
@@ -282,7 +314,7 @@ public class Grid2D
      */
     public boolean isSplatted( GridCoords coords )
     {
-        Objects.requireNonNull( coords, "coords" );
+        Objects.requireNonNull( coords, "coords" ); //$NON-NLS-1$
         Cell2D  cell        = get( coords );
         boolean splatted    = cell == null ? false : cell.isSplatted();
         return splatted;
@@ -300,12 +332,11 @@ public class Grid2D
      */
     public boolean isSunk( Ship2D ship )
     {
-        Objects.requireNonNull( ship, "ship" );
+        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
         boolean result  = getInteriorPoints( ship )
             .map( this::get )
             .filter( c -> c != null )
-            .filter( c -> !c.isSplatted() )
-            .findFirst().orElse( null ) == null;
+            .allMatch( c -> c.isSplatted() );
         return result;
     }
     
@@ -341,10 +372,18 @@ public class Grid2D
         return home;
     }
     
-    public Stream<Cell2D> getCells()
+    /**
+     * Returns a stream of all cells registered in the grid.
+     * This includes all cells allocated to ships,
+     * and all cells that have been attacked.
+     * Unallocated/unattacked cells will not be present.
+     * 
+     * @return  a stream of all cells registered in the grid
+     */
+    public Stream<Cell2DView> getCells()
     {
-        Stream<Cell2D>  stream  = gridMap.values().stream();
-        return stream;
+        List<Cell2DView>    list    = new ArrayList<>( gridMap.values() );
+        return list.stream();
     }
     
     /**
@@ -358,23 +397,9 @@ public class Grid2D
      */
     public static Grid2D getGrid( String name )
     {
-        Objects.requireNonNull( name, "name" );
+        Objects.requireNonNull( name, "name" ); //$NON-NLS-1$
         Grid2D    grid    = allGrids.get( name );
         return grid;
-    }
-    
-    /**
-     * Empties all Grid2D maps;
-     * empties the collection of Grid2D objects.
-     * Package-private: this is a testing aid only;
-     * see {@code Grid2DTestSupport} for access
-     * from outside this package.
-     */
-    static void reset()
-    {
-        for ( Grid2D grid : allGrids.values() )
-            grid.clear();
-        allGrids.clear();
     }
 
     /**
@@ -401,10 +426,10 @@ public class Grid2D
      */
     private Cell2D get( GridCoords coords )
     {
-        Objects.requireNonNull( coords, "coords" );
+        Objects.requireNonNull( coords, "coords" ); //$NON-NLS-1$
         Cell2D  cell    = null;
         if ( !contains( coords ) )
-            throw new BattleshipException( OUT_OF_BOUNDS + ": " + coords );
+            throw new BattleshipException( OUT_OF_BOUNDS + ": " + coords ); //$NON-NLS-1$
         cell    = gridMap.get( coords );
 
         return cell;
@@ -491,6 +516,32 @@ public class Grid2D
     }
     
     /**
+     * Throws a BattleshipException if the configuration phase
+     * is over.
+     * 
+     * @throws BattleshipException  if the configuration phase is over
+     */
+    private void throwIfPastConfig()
+    {
+        if ( Configurator.getState() > Constants.CONFIG )
+            throw new BattleshipException( CONFIG_OVER );
+            
+    }
+    
+    /**
+     * Throws a BattleshipException if the configuration phase
+     * is over.
+     * 
+     * @throws BattleshipException  if the configuration phase is not over
+     */
+    private void throwIfNotConfigComplete()
+    {
+        if ( Configurator.getState() < Constants.CONFIG_COMPLETE )
+            throw new BattleshipException( CONFIG_NOT_COMPLETE );
+            
+    }
+    
+    /**
      * Parse a string into a positive integer.
      * If the parse fails, -1 is returned.
      * 
@@ -512,5 +563,19 @@ public class Grid2D
         }
         
         return val;
+    }
+    
+    /**
+     * Empties all Grid2D maps;
+     * empties the collection of Grid2D objects.
+     * Package-private: this is a testing aid only;
+     * see {@code Grid2DTestSupport} for access
+     * from outside this package.
+     */
+    static void reset()
+    {
+        for ( Grid2D grid : allGrids.values() )
+            grid.clear();
+        allGrids.clear();
     }
 }

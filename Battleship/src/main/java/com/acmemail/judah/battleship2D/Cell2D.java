@@ -2,7 +2,7 @@ package com.acmemail.judah.battleship2D;
 
 import java.util.Objects;
 
-public class Cell2D
+public class Cell2D implements Cell2DView
 {
     private final   GridCoords  coords;
     private final   Ship2D      ship;

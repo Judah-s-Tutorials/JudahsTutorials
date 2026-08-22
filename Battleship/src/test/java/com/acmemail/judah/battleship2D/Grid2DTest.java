@@ -16,6 +16,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -26,6 +27,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Constants;
 import com.acmemail.judah.battleship2DT.test_utils.RectUtils;
 
@@ -55,6 +57,7 @@ class Grid2DTest
     public void beforeEach()
     {
         Grid2D.reset();
+        setState( Constants.CONFIG );
     }
 
     @Test
@@ -119,6 +122,7 @@ class Grid2DTest
         
         // Make a rectangle that is a proper subset of the grid bounds
         Rectangle   rect    = RectUtils.getSubrect( gridBounds, 2 );
+        setState( Constants.CONFIG_COMPLETE );
         RectUtils.getInteriorCoords( rect )
             .forEach( grid::attack );
         
@@ -163,6 +167,7 @@ class Grid2DTest
             .forEach( c -> assertFalse( grid.isSplatted( c ) ) );
     
         // Attack all the corners of the grid bounds
+        setState( Constants.CONFIG_COMPLETE );
         Rectangle[] corners = getCorners( gridBounds, 2, 2, true );
         Arrays.stream( corners )
             .forEach( c -> RectUtils.getInteriorCoords( c )
@@ -177,6 +182,23 @@ class Grid2DTest
                     c.toString()
                 ) 
             );
+    }
+    
+    @Test
+    public void testConfigCompleteGoWrong()
+    {
+        Grid2D  grid    = new Grid2D();
+        
+        // sanity check
+        setState( Constants.CONFIG_COMPLETE );
+        
+        Class<BattleshipException>  excClass    = BattleshipException.class;
+        GridCoords                  coords      = new GridCoords( 0, 0 );
+        Ship2D                      ship        = 
+            new Ship2D( oneDType, coords, Orientation.HORIZONTAL );
+        
+        assertThrows( excClass, () -> grid.put( ship ) );
+        assertThrows( excClass, () -> grid.remove( ship ) );
     }
 
     @Test
@@ -411,6 +433,7 @@ class Grid2DTest
             .forEach( c -> assertFalse( grid.isSplatted( c ) ) );
         
         // Splat all the corners of the grid bounds
+        setState( Constants.CONFIG_COMPLETE );
         Rectangle[] corners = getCorners( gridBounds, 2, 2, true );
         for ( Rectangle corner : corners )
         {
@@ -435,6 +458,7 @@ class Grid2DTest
     {
         Grid2D  grid    = new Grid2D();
         getAllValidShips( ship ).forEach( s -> {
+            setState( Constants.CONFIG );
             grid.clear();
             grid.put( s );
             testIsSunk( s, grid );
@@ -546,7 +570,45 @@ class Grid2DTest
         grid.put( validShip );
         assertThrows( excClass, () -> grid.put( validShip ) );
         grid.clear();
+    }
+    
+    @Test
+    public void testGetCells()
+    {
+        Grid2D  grid    = new Grid2D();
+        Set<Cell2DView> actSet  = grid.getCells().collect( Collectors.toSet() );
+        assertTrue( actSet.isEmpty() );
         
+        int         xco         = 0;
+        int         yco         = 5;
+        GridCoords  coords      = new GridCoords( xco, yco );
+        Ship2D      ship        =
+            new Ship2D( twoDType, coords, Orientation.VERTICAL );
+        grid.put( ship );
+        
+        Set<Cell2DView> expSet  = 
+            RectUtils.getInteriorCoords( ship.getBounds() )
+                .map( c -> new Cell2D( c, ship ) )
+                .collect( Collectors.toSet() );
+        actSet = grid.getCells().collect( Collectors.toSet() );
+        assertEquals( expSet, actSet );
+        
+        Rectangle   bounds  = ship.getBounds();
+        int         width   = bounds.width;
+        GridCoords  coordsA = new GridCoords( bounds.x + width, bounds.y );
+        GridCoords  coordsB = new GridCoords( bounds.x + width + 1, bounds.y );
+        Cell2D      cellA   = new Cell2D( coordsA );
+        Cell2D      cellB   = new Cell2D( coordsB );
+        cellA.setSplatted();
+        cellB.setSplatted();
+        expSet.add( cellA );
+        expSet.add( cellB );
+        
+        setState( Constants.CONFIG_COMPLETE );
+        grid.attack( coordsA );
+        grid.attack( coordsB );
+        actSet = grid.getCells().collect( Collectors.toSet() );
+        assertEquals( expSet, actSet );
     }
     
     /**
@@ -566,6 +628,8 @@ class Grid2DTest
         List<GridCoords>    list    = 
             RectUtils.getInteriorCoords( bounds ).toList();
         int                 lastInx = list.size() - 1;
+        
+        setState( Constants.CONFIG_COMPLETE );
         for ( int inx = 0 ; inx < lastInx ; ++inx )
         {
             GridCoords  coords  = list.get( inx );
@@ -812,5 +876,16 @@ class Grid2DTest
         else
             val = Integer.parseInt( strVal );
         return val;
+    }
+    
+    private static void setState( int state )
+    {
+        Configurator.reset();
+        int currState;
+        while ( (currState = Configurator.getState()) < state )
+        {
+            assertTrue( currState < Constants.GAME_OVER );
+            Configurator.nextState();
+        }
     }
 }

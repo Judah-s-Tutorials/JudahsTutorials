@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Label;
 import com.acmemail.judah.battleship2D.Cell2D;
+import com.acmemail.judah.battleship2D.Cell2DView;
 import com.acmemail.judah.battleship2D.Grid2D;
 import com.acmemail.judah.battleship2D.GridCoords;
 import com.acmemail.judah.battleship2D.Ship2D;
@@ -106,7 +107,7 @@ public class GraphicalGrid extends JPanel implements Artwork
         
         gtx.setFont( font );
         fontMetrics = gtx.getFontMetrics();
-        Collection<Cell2D>  cells   = grid.getCells().toList();
+        Collection<Cell2DView>  cells   = grid.getCells().toList();
         
         gtx.translate( margin, margin );
         fillCells( cells );
@@ -116,11 +117,11 @@ public class GraphicalGrid extends JPanel implements Artwork
         fillGhostShip();
     }
     
-    private void drawCells( Collection<Cell2D> cells )
+    private void drawCells( Collection<Cell2DView> cells )
     {
         Rectangle2D rect    = new Rectangle2D.Double();
         gtx.setColor( lineColor );
-        for ( Cell2D cell : cells )
+        for ( Cell2DView cell : cells )
         {
             GridCoords  coords  = cell.getCoords();
             int         gridXco = coords.xco();
@@ -135,10 +136,10 @@ public class GraphicalGrid extends JPanel implements Artwork
         }
     }
     
-    private void fillCells( Collection<Cell2D> cells )
+    private void fillCells( Collection<Cell2DView> cells )
     {
         Rectangle2D rect    = new Rectangle2D.Double();
-        for ( Cell2D cell : cells )
+        for ( Cell2DView cell : cells )
         {
             GridCoords  coords  = cell.getCoords();
             int         gridXco = coords.xco();

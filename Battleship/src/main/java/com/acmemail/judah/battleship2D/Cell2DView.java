@@ -1,0 +1,8 @@
+package com.acmemail.judah.battleship2D;
+
+public interface Cell2DView
+{
+    boolean isSplatted();
+    GridCoords getCoords();
+    Ship2D getShip();
+}
