@@ -38,7 +38,7 @@ public class Ship2D
      * @param orientation   the orientation of the instantiated Ship
      * 
      * @throws NullPointerException if type is null
-     * @throws NullPointerException if origin is null
+     * @throws NullPointerException if first is null
      * @throws NullPointerException if orientation is null
      * 
      * @see Ship2D#Ship2D(ShipType2D, String, GridCoords, Orientation)
@@ -59,12 +59,12 @@ public class Ship2D
      * @param type          the type of the instantiated Ship;
      *                      may not be null
      * @param name          the name of the ship; may be null
-     * @param origin        the (x,y) coordinates of the instantiated Ship;
+     * @param first         the (x,y) coordinates of the instantiated Ship;
      *                      may not be null
      * @param orientation   the orientation of the instantiated Ship
      * 
      * @throws NullPointerException if type is null
-     * @throws NullPointerException if origin is null
+     * @throws NullPointerException if first is null
      * @throws NullPointerException if orientation is null
      * 
      * @see Ship2D#Ship2D(ShipType2D, GridCoords, Orientation)
@@ -72,18 +72,18 @@ public class Ship2D
     public Ship2D( 
         ShipType2D type, 
         String name, 
-        GridCoords origin, 
+        GridCoords first, 
         Orientation orientation
     )
     {
         Objects.requireNonNull( type, "type" );
-        Objects.requireNonNull( origin, "origin" );
+        Objects.requireNonNull( first, "first" );
         Objects.requireNonNull( orientation, "orientation" );
         this.type = type;
         this.name = name;
-        this.firstSquare = origin;
+        this.firstSquare = first;
         this.orientation = orientation;
-        this.bounds = Utils.getBounds( type, origin, orientation );
+        this.bounds = Utils.getBounds( type, first, orientation );
     }
     
     /**
@@ -106,9 +106,12 @@ public class Ship2D
      * @param pair  the given (x,y) coordinates
      * 
      * @return  true if this ship occupies the given (x,y) coordinates
+     * 
+     * @throws NullPointerException if pair is null
      */
     public boolean contains( GridCoords pair )
     {
+        Objects.requireNonNull( pair, "pair" );
         int     xco         = pair.xco();
         int     yco         = pair.yco();
         boolean contains    = contains( xco, yco );
@@ -122,10 +125,13 @@ public class Ship2D
      * @param ship  the given ship
      * 
      * @return  true if this ship intersects the given ship
+     * 
+     * @throws NullPointerException if ship is null
      */
-    public boolean intersects( Ship2D that )
+    public boolean intersects( Ship2D ship )
     {
-        boolean     result  = that.bounds.intersects( bounds );
+        Objects.requireNonNull( ship, "ship" );
+        boolean     result  = ship.bounds.intersects( bounds );
         return result;
     }
     
@@ -176,7 +182,8 @@ public class Ship2D
      */
     public Rectangle getBounds()
     {
-        return bounds;
+        Rectangle   copy    = new Rectangle( bounds );
+        return copy;
     }
     
     /**

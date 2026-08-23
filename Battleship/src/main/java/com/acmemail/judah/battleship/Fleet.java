@@ -32,7 +32,10 @@ import com.acmemail.judah.battleship2D.ShipType2D;
  * the ship can be removed from deployed status
  * and its ProtoShip identifier returned
  * to the to-be-deployed list.
- * The client can
+ * The client can verify the validity
+ * of a ship before deployment
+ * by calling {@link #intersectsAnother(Ship2D)}
+ * and {@link #isInBounds(Ship2D).
  */
 public class Fleet
 {
