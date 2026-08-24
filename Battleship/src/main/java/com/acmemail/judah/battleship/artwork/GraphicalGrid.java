@@ -10,7 +10,6 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Collection;
@@ -18,7 +17,6 @@ import java.util.Collection;
 import javax.swing.JPanel;
 
 import com.acmemail.judah.battleship.BattleshipException;
-import com.acmemail.judah.battleship.Label;
 import com.acmemail.judah.battleship2D.Cell2D;
 import com.acmemail.judah.battleship2D.Cell2DView;
 import com.acmemail.judah.battleship2D.Grid2D;
@@ -160,35 +158,35 @@ public class GraphicalGrid extends JPanel implements Artwork
     
     private void drawRowLabels()
     {
-        for ( int row = 0 ; row < numRows ; ++row )
-        {
-            String  label           = Label.decimalToAlpha( row );
-            int     yco             = (row + 1) * cellSide + labelHeight;
-            int     width           = fontMetrics.stringWidth( label );
-            int     strXco          = labelWidth - width - 3;
-            int     strYco          = yco - 3;
-            gtx.drawString( label, strXco, strYco );
-            gtx.drawLine( 0, yco, labelWidth, yco );
-        }
+//        for ( int row = 0 ; row < numRows ; ++row )
+//        {
+//            String  label           = Label_orig.decimalToAlpha( row );
+//            int     yco             = (row + 1) * cellSide + labelHeight;
+//            int     width           = fontMetrics.stringWidth( label );
+//            int     strXco          = labelWidth - width - 3;
+//            int     strYco          = yco - 3;
+//            gtx.drawString( label, strXco, strYco );
+//            gtx.drawLine( 0, yco, labelWidth, yco );
+//        }
     }
     
     private void drawColLabels()
     {
-        AffineTransform origTransform   = gtx.getTransform();
-        int yco = labelHeight;
-        for ( int col = 0 ; col < numCols ; ++col )
-        {
-            String  label           = Label.intToString( col );
-            int     xco             = col * cellSide + labelWidth;
-            int     width           = fontMetrics.stringWidth( label );
-            int     strXco          = xco + 3;// + cellSide / 2;
-            int     strYco          = yco - width - 3;
-            gtx.translate( strXco, strYco );
-            gtx.rotate( Math.PI / 2 );
-            gtx.drawString( label, 0, 0 );
-            gtx.setTransform( origTransform );
-            gtx.drawLine( xco + cellSide, 0, xco + cellSide, yco );
-        }
+//        AffineTransform origTransform   = gtx.getTransform();
+//        int yco = labelHeight;
+//        for ( int col = 0 ; col < numCols ; ++col )
+//        {
+//            String  label           = Label_orig.intToString( col );
+//            int     xco             = col * cellSide + labelWidth;
+//            int     width           = fontMetrics.stringWidth( label );
+//            int     strXco          = xco + 3;// + cellSide / 2;
+//            int     strYco          = yco - width - 3;
+//            gtx.translate( strXco, strYco );
+//            gtx.rotate( Math.PI / 2 );
+//            gtx.drawString( label, 0, 0 );
+//            gtx.setTransform( origTransform );
+//            gtx.drawLine( xco + cellSide, 0, xco + cellSide, yco );
+//        }
     }
     
     private void fillGhostShip()

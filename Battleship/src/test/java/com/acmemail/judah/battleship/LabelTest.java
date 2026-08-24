@@ -1,208 +1,254 @@
 package com.acmemail.judah.battleship;
 
-import static com.acmemail.judah.battleship.Constants.KEY_NUM_COLS;
-import static com.acmemail.judah.battleship.Constants.KEY_NUM_ROWS;
-import static com.acmemail.judah.battleship.Constants.NAME_PREFIX;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.List;
+import java.util.Locale;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+
+import com.acmemail.judah.battleship2D.GridCoords;
 
 class LabelTest
 {
-    private static final Class<BattleshipException> battleshipExc   =
-        BattleshipException.class;
-    private static final Class<NullPointerException> nullPointerExc  =  
-        NullPointerException.class;
+    private static final TestData[] goRightData =
+    {
+        new TestData( "A10", "A10", "A", 0, "10", 9 ),
+        new TestData( "A   10", "A10", "A", 0, "10", 9 ),
+        new TestData( "A,10", "A10", "A", 0, "10", 9 ),
+        new TestData( "A , 10", "A10", "A", 0, "10", 9 ),
+        new TestData( " \tA \t, 10  ", "A10", "A", 0, "10", 9 ),
+        new TestData( "Z100", "Z100", "Z", 25, "100", 99 ),
+        new TestData( "AA100", "AA100", "AA", 26, "100", 99 ),
+        new TestData( "AB100", "AB100", "AB", 27, "100", 99 ),
+        new TestData( "AZ100", "AZ100", "AZ", 51, "100", 99 ),
+    };
     
-    @BeforeAll
-    public static void beforeAll()
-    {
-        // ... Set up the number of rows so that alphabetic labels will be
-        // right-justified in a 3-space field.
-        // ... Set up the number of columns so that alphabetic labels 
-        // will be right-justified in a 2-space field.
-        final String    keyNumRows     = NAME_PREFIX + KEY_NUM_ROWS;
-        final String    keyNumCols     = NAME_PREFIX + KEY_NUM_COLS;
-        System.setProperty( keyNumCols, "110" );
-        System.setProperty( keyNumRows, "40" );
-    }
-    
+    private static final String[]   goWrongData =
+    { 
+        "10",    "A",      "A z 10", "A 9 10", "A A10", 
+        "A10 1", "A A 10", "A 10 1", "A%10",   "%A10",
+        "AAAAAA10", "A9999999999", "A0"
+    };
+
     @Test
-    public void testParseRowColGoRight()
+    public void testLabelGridCoordsGoRight()
     {
-        testParseRowColGoRight( "A,1", "A", "1" );
-        testParseRowColGoRight( "A 1", "A", "1" );
-        testParseRowColGoRight( "A  ,,  1", "A", "1" );
-        testParseRowColGoRight( "A1", "A", "1" );
-        testParseRowColGoRight( "ABC123", "ABC", "123" );
+        for ( TestData data : goRightData )
+            confirmGridCoords( data );
     }
+
     @Test
-    public void testParseRowColGoWrong()
+    public void testLabelGridCoordsGoWrong()
     {
-        testParseRowColGoWrong( "A" );
-        testParseRowColGoWrong( "ABC" );
-        testParseRowColGoWrong( "1" );
-        testParseRowColGoWrong( "123" );
-        testParseRowColGoWrong( "A 1 1" );
-        testParseRowColGoWrong( "" );
+        GridCoords  coords  = new GridCoords( -1, 0 );
+        Label       label   = new Label( coords );
+        assertFalse( label.isStatus() );
+        assertEquals( StatusMessages.INVALID_COL, label.getMessage() );
         
-        assertThrows( nullPointerExc, () -> Label.parseRowCol( null ) );
+        coords  = new GridCoords( 0, -1 );
+        label   = new Label( coords );
+        assertFalse( label.isStatus() );
+        assertEquals( StatusMessages.INVALID_ROW, label.getMessage() );
+        
+        coords  = new GridCoords( -1, -1 );
+        label   = new Label( coords );
+        assertFalse( label.isStatus() );
     }
 
     @Test
-    public void testIntToString()
+    public void testLabelGridCoordsNPE()
     {
-        int     oneDigitIndex       = 5;
-        String  expOneDigitLabel    = "  " + (oneDigitIndex + 1);
-        int     twoDigitIndex       = 55;
-        String  expTwoDigitLabel    = " " + (twoDigitIndex + 1);
-        int     threeDigitIndex     = 100;
-        String  expThreeDigitLabel  = "" + (threeDigitIndex + 1);
-
-        String  actOneDigitLabel    = Label.intToString( oneDigitIndex );
-        assertEquals( expOneDigitLabel, actOneDigitLabel );
-
-        String  actTwoDigitLabel    = Label.intToString( twoDigitIndex );
-        assertEquals( expTwoDigitLabel, actTwoDigitLabel );
-
-        String  actThreeDigitLabel    = Label.intToString( threeDigitIndex );
-        assertEquals( expThreeDigitLabel, actThreeDigitLabel );
-        
-        assertThrows( battleshipExc, () -> Label.intToString( -1 ) );
+        assertThrows( 
+            NullPointerException.class, 
+            () -> new Label( (GridCoords)null )
+        );
     }
 
     @Test
-    public void testColStrToInt()
+    public void testLabelIntIntGoRight()
     {
-        int     actIndex0   = Label.colStrToInt( "1" );
-        assertEquals( 0, actIndex0 );
-        int     actIndex1   = Label.colStrToInt( "2" );
-        assertEquals( 1, actIndex1 );
-        int     actIndex25  = Label.colStrToInt( "26" );
-        assertEquals( 25, actIndex25 );
-        int     actIndex30  = Label.colStrToInt( "31" );
-        assertEquals( 30, actIndex30 );
-        
-        assertThrows( nullPointerExc, () -> Label.colStrToInt( null ) );
-        assertThrows( battleshipExc, () -> Label.colStrToInt( "" ) );
-        assertThrows( battleshipExc, () -> Label.colStrToInt( "a" ) );
-        assertThrows( battleshipExc, () -> Label.colStrToInt( "0" ) );
+        for ( TestData data : goRightData )
+            confirmIntInt( data );
     }
 
     @Test
-    public void testDecimalToAlpha()
+    public void testLabelIntIntGoWrong()
     {
-        String  actAlpha0   = Label.decimalToAlpha( 0 );
-        assertEquals( " A", actAlpha0 );
-
-        String  actAlpha25   = Label.decimalToAlpha( 25 );
-        assertEquals( " Z", actAlpha25 );
-
-        String  actAlpha26   = Label.decimalToAlpha( 26 );
-        assertEquals( "AA", actAlpha26 );
-
-        String  actAlpha30   = Label.decimalToAlpha( 30 );
-        assertEquals( "AE", actAlpha30 );
+        Label   label   = new Label( -1, 0 );
+        assertFalse( label.isStatus() );
+        assertEquals( StatusMessages.INVALID_COL, label.getMessage() );
         
-        assertThrows( battleshipExc, () -> Label.decimalToAlpha( -1 ) );
+        label   = new Label( 0, -1 );
+        assertFalse( label.isStatus() );
+        assertEquals( StatusMessages.INVALID_ROW, label.getMessage() );
+        
+        label   = new Label( -1, -1 );
+        assertFalse( label.isStatus() );
     }
 
     @Test
-    public void testAlphaToDecimal()
+    public void testLabelStringGoRight()
     {
-        int index0  = Label.alphaToDecimal( "A" );
-        assertEquals( 0, index0 );
+        for ( TestData data : goRightData )
+            confirmString( data );
         
-        int index1  = Label.alphaToDecimal( "B" );
-        assertEquals( 1, index1 );
+        // The original test data uses capital letters for row IDs;
+        // try them again with lower-case letters.
+        for ( TestData data : goRightData )
+        {
+            String      input       = data.input().toLowerCase( Locale.ROOT );
+            TestData    lowerData   =
+                new TestData(
+                    input,
+                    data.label(),
+                    data.rowStr(),
+                    data.yco(),
+                    data.colStr(),
+                    data.xco()
+                );
+            confirmString( lowerData);
+        }
         
-        int index25 = Label.alphaToDecimal( "Z" );
-        assertEquals( 25, index25 );
-        
-        int index26 = Label.alphaToDecimal( "AA" );
-        assertEquals( 26, index26 );
-        
-        int index30 = Label.alphaToDecimal( "AE" );
-        assertEquals( 30, index30 );
-        
-        assertThrows( battleshipExc, () -> Label.alphaToDecimal( "a" ) );
-        assertThrows( battleshipExc, () -> Label.alphaToDecimal( "" ) );
-        assertThrows( nullPointerExc, () -> Label.alphaToDecimal( null ) );
-    }
+        // Specific tests for row and column string lengths.
+        Label   label   = new Label( "AAAAA10" );
+        assertTrue( label.isStatus() );
+        label   = new Label( "A123456789" );
+        assertTrue( label.isStatus() );
 
-    @Test
-    public void testValidateRowStrGoRight()
-    {
-        testValidateRowStrGoRight( "A" );
-        testValidateRowStrGoRight( "AAA" );
-    }
-
-    @Test
-    public void testValidateRowStrGoWrong()
-    {
-        testValidateRowStrGoWrong( "1" );
-        testValidateRowStrGoWrong( "" );
-        testValidateRowStrGoWrong( null );
-    }
-
-    @Test
-    public void testValidateColStrGoRight()
-    {
-        testValidateColStrGoRight( "1" );
-        testValidateColStrGoRight( "111" );
-    }
-
-    @Test
-    public void testValidateColStrGoWrong()
-    {
-        testValidateColStrGoWrong( "0" );
-        testValidateColStrGoWrong( "A" );
-        testValidateColStrGoWrong( "" );
-        testValidateColStrGoWrong( null );
     }
     
-    private static void 
-    testParseRowColGoRight( String toParse, String expRow, String expCol )
+    @Test
+    public void testLabelStringGoWrong()
     {
-        String[]    result  = Label.parseRowCol( toParse );
-        assertEquals( 2, result.length );
-        assertEquals( expRow, result[0] );
-        assertEquals( expCol, result[1] );
+        for ( String input : goWrongData )
+        {
+            Label   label   = new Label( input );
+            assertFalse( label.isStatus() );
+            assertEquals( StatusMessages.PARSE_FAILED, label.getMessage() );
+        }
+    }
+
+    @Test
+    public void testLabelStringTurkishLocale()
+    {
+        Locale  origLocale  = Locale.getDefault();
+        try
+        {
+            Locale.setDefault( new Locale( "tr", "TR" ) );
+            Label   label   = new Label( "i10" );
+            assertTrue( label.isStatus() );
+            assertEquals( "I", label.getRowStr() );
+        }
+        finally
+        {
+            Locale.setDefault( origLocale );
+        }
+    }
+
+    @Test
+    public void testLabelStringNPE()
+    {
+        assertThrows( 
+            NullPointerException.class, 
+            () -> new Label( (String)null )
+        );
     }
     
-    private static void testParseRowColGoWrong( String toParse )
+    /**
+     * Given test data that is assumed sound,
+     * create a Label from the encapsulated input
+     * and confirm the label was created correctly.
+     * 
+     * @param data  the given test data
+     */
+    private static void confirmString( TestData data )
     {
-        String[]    strArr  = Label.parseRowCol( toParse );
-        assertEquals( 2, strArr.length );
-        assertTrue( strArr[0].isEmpty() || strArr[1].isEmpty() );
+        Label   label       = new Label( data.input() );
+        confirm( data, label );
     }
     
-    private static void testValidateColStrGoRight( String colStr )
+    /**
+     * Given test data that is assumed sound,
+     * create a Label from the encapsulated x- and y-coordinates
+     * and confirm the label was created correctly.
+     * 
+     * @param data  the given test data
+     */
+    private static void confirmIntInt( TestData data )
     {
-        List<String>    list    = Label.validateColStr( colStr );
-        assertEquals( 0, list.size() );
+        Label   label       = new Label( data.xco(), data.yco() );
+        confirm( data, label );
+    }
+        
+    /**
+     * Given test data that is assumed sound,
+     * create a GridCoords object
+     * from the encapsulated x- and y-coordinates;
+     * use the GridCoords object to instantiate a label
+     * and confirm the label was created correctly.
+     * 
+     * @param data  the given test data
+     */
+    private static void confirmGridCoords( TestData data )
+    {
+        GridCoords  coords  = new GridCoords( data.xco(), data.yco() );
+        Label       label   = new Label( coords );
+        confirm( data, label );
     }
     
-    private static void testValidateColStrGoWrong( String colStr )
+    /**
+     * Given test data containing expected values,
+     * and a label containing actual values,
+     * confirm that the actual values are equal
+     * to the expected values.
+     * 
+     * @param data  the given test data
+     * @param label the given label
+     */
+    private static void confirm( TestData data, Label label )
     {
-        List<String>    list    = Label.validateColStr( colStr );
-        assertTrue( list.size() > 0 );
+        assertEquals( data.label(), label.getLabel(), "label" );
+        assertEquals( data.rowStr(), label.getRowStr(), "rowStr" );
+        assertEquals( data.yco(), label.getYco(), "yco" );
+        assertEquals( data.colStr(), label.getColStr(), "colStr" );
+        assertEquals( data.xco(), label.getXco(), "xco" );
+        GridCoords  coords  = new GridCoords( data.xco(), data.yco() );
+        assertEquals( coords, label.getGridCoords() );
+        assertTrue( label.isStatus() );
+        
+        String  str = label.toString();
+        String  expCoords   = "(" + data.xco() + "," + data.yco();
+        assertTrue( str.contains( data.label() ) );
+        assertTrue( str.contains( expCoords ) );
     }
-    
-    private static void testValidateRowStrGoRight( String RowStr )
+
+    /**
+     * Encapsulate the data expected
+     * to be contained in a Label object.
+     * 
+     * @param   input   the input to the Label(String) constructor
+     * @param   label   the expected value of the label field
+     * @param   rowStr  
+     *      the expected value of the 1-origin, alphabetic row identifier 
+     * @param   yco     
+     *      the expected value of the 0-origin, numeric row identifier 
+     * @param   colStr  
+     *      the expected value of the 1-origin, alphanumeric column identifier 
+     * @param   xco     
+     *      the expected value of the 0-origin, numeric column identifier 
+     */
+    private record TestData(
+        String  input,
+        String  label,
+        String  rowStr,
+        int     yco,
+        String  colStr,
+        int     xco
+    )
     {
-        List<String>    list    = Label.validateRowStr( RowStr );
-        assertEquals( 0, list.size() );
-    }
-    
-    private static void testValidateRowStrGoWrong( String RowStr )
-    {
-        List<String>    list    = Label.validateRowStr( RowStr );
-        assertTrue( list.size() > 0 );
+        
     }
 }

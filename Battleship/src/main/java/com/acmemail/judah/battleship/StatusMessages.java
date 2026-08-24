@@ -25,4 +25,12 @@ public class StatusMessages
         Messages.getString("StatusMessages.8"); //$NON-NLS-1$
     public static final String  NOT_DEPLOYED        =
         Messages.getString("StatusMessages.9"); //$NON-NLS-1$
+    public static final String  PARSE_FAILED        =
+        Messages.getString("StatusMessages.10"); //$NON-NLS-1$
+    public static final String  SUCCESS             =
+        Messages.getString("StatusMessages.11"); //$NON-NLS-1$
+    public static final String  INVALID_COL         =
+        Messages.getString("StatusMessages.12"); //$NON-NLS-1$
+    public static final String  INVALID_ROW         =
+        Messages.getString("StatusMessages.13"); //$NON-NLS-1$
 }

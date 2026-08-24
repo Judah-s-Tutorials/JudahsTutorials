@@ -1,14 +1,14 @@
 package com.acmemail.judah.battleship;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
-
-import com.acmemail.judah.battleship2D.Grid2D;
+import com.acmemail.judah.battleship2D.GridCoords;
 
 /**
  * This class converts between 0-origin
- * x/y coordinates used as array indexes, 
+ * x- and y- coordinates used as array indexes, 
  * and 1-origin row/column strings used by the operator.
  * For example,
  * the operator recognizes row numbers
@@ -20,503 +20,343 @@ import com.acmemail.judah.battleship2D.Grid2D;
  * "A"&#x2192;0, "B"&#x2192;1, ..., "Z"&#x2192;25, "AA"&#x2192;26, etc.
  * Likewise, the operator sees columns represented as numeric strings
  * beginning with 1. 
- * When converted to x-coordinates, we get "1"&#x2194;0, "2"&#x2194;1, etc.
- * When x- and y-coordinates are converted to row/column strings,
- * the strings are left-padded with spaces
- * in an effort to generate right-justified labels.
- * For example, if we have a grid with up to 100 rows/columns,
- * y-coordinate 0 &#x2192; row "&nbsp;&nbsp;A"
- * and y-coordinate 26 &#x2192; row "&nbsp;AA";
- * x-coordinate 0 &#x2192; column "&nbsp;&nbsp;1"
- * and x-coordinate 30 &#x2192; column "&nbsp;31."
+ * When converted to x-coordinates, we get "1"&#x2192;0, "2"&#x2192;1, etc.
+ * <p>
+ * The label supplied by the client
+ * may use a sticky format
+ * where the column identifier immediately follows the row identifier,
+ * for example, "B9."
+ * The format used may separate the row and column with whitespace ("B 9")
+ * and/or a comma ("B,9", "B, 9").
+ * The column identifier must follow the row identifier.
+ * Whitespace at the beginning and end of the label is ignored.
  * 
  * @author Jack
  */
 public class Label
 {
-    /** The length of a row. */
-    private static final int        rowLen      = Grid2D.getNumRows();
-    /** The length of a column. */
-    private static final int        colLen      = Grid2D.getNumCols();
-    /** The maximum number of digits to represent a row number. */
-    private static final int        maxRowDigs;
-    /** The maximum number of digits to represent a column number. */
-    private static final int        maxColDigs;
-    /** Format string to convert a decimal number to a string. */
-    private static final String     decToStrFmt;
-    /** 
-     * Format string to convert an alpha number (A=1,...,Z=25,AA=26, etc.)
-     * to a string.
-     */
-    private static final String     alphaToStrFmt;
+    private static final String     regexStr    = 
+        "^\\s*([a-zA-Z]+)[\\s,]*(\\d+)\\s*$";
+    private static final Pattern    regexPat    = Pattern.compile( regexStr );
     
-    static
-    {
-        maxRowDigs  = (int)(log26( rowLen )) + 1;
-        maxColDigs = (int)Math.log10( colLen ) + 1;
-        decToStrFmt = "%" + maxColDigs + "d"; 
-        alphaToStrFmt = "%" + maxRowDigs + "s";
-    }
+    /** The complete alphanumeric label, e.g. "A10". */
+    private String  label;
+    /** The 1-origin alphanumeric row ID, e.g. "A". */
+    private String  rowStr;
+    /** The 0-origin numeric row ID. */
+    private int     yco;
+    /** The 1-origin alphanumeric column ID, e.g. "10". */
+    private String  colStr;
+    /** The 0-origin numeric column ID. */
+    private int     xco;
+    /** Message describing operation outcome. */
+    private String  message = StatusMessages.PARSE_FAILED;
+    /** True if the operation completes successfully. */
+    private boolean status  = false;
     
     /**
-     * Default constructor; not used.
-     */
-    private Label()
-    {
-    }
-    
-    /**
-     * Operator input is split into a String array
-     * containing row and column coordinates.
-     * Input format can be a row and column separated 
-     * by spaces and/or commas ("B,10") or,
-     * as in traditional Battleship,
-     * glued together("B10").
-     * If glued together,
-     * the row coordinate ends,
-     * and the column coordinate begins,
-     * with the first digit.
-     * The output is an array of two strings.
-     * If the input can be divided into two tokens,
-     * the first (presumably the row coordinate)
-     * is returned in the first element of the array,
-     * and the second is returned in the second element of the array.
-     * If the input cannot be divided
-     * into exactly two tokens,
-     * one or both elements of the result array
-     * will be the empty string.
-     * No further validation is performed on the input.
-     * Examples:
-     * <ul>
-     * <li>"B10" &#x2192; {"B","10"}</li>
-     * <li>"B,10" &#x2192; {"B","10"}</li>
-     * <li>"B   10" &#x2192; {"B","10"}</li>
-     * <li>"B, 10" &#x2192; {"B","10"}</li>
-     * <li>"q5"  &#x2192; {"q","5"}</li>
-     * <li>"ABC"  &#x2192; {"ABC",""}</li>
-     * <li>"10"  &#x2192; {"","10"}</li>
-     * </ul>
-     * <p>
-     * If the output consists of at least one empty string,
-     * you must assume that the input was invalid.
-     * However, if two non-empty strings are returned,
-     * there is no guarantee that either 
-     * is a valid row or column,
-     * as in the case of "q1A", 
-     * which will yield {"q","1A"},
-     * and "5, b", which will yield {"5","b"}.
-     *
-     * @param input the input to parse
+     * Encapsulates the given 0-origin numeric grid coordinates,
+     * while converting them to 1-origin alphanumeric coordinates.
+     * The operation can silently fail;
+     * the client should explicitly consult the status 
+     * after the operation completes.
      * 
-     * @return  an array of two strings containing the result
-     *          of dividing the input into two tokens
+     * @param coords    the given grid coordinates
+     * 
+     * @throws NullPointerException if coords is null
      */
-    public static String[] parseRowCol( String input )
+    public Label( GridCoords coords )
     {
-        String[]        result      = { "", "" };
-        StringTokenizer tizer       = new StringTokenizer( input, "\\ ," );
-        int             numTokens   = tizer.countTokens();
-        if ( numTokens < 1 || numTokens > 2 )
-            ;
-        else if ( numTokens == 2 )
+        this(
+            Objects.requireNonNull( coords, "coords" ).xco(),
+            coords.yco()
+        );
+    }
+    
+    /**
+     * Encapsulates the given 0-origin numeric coordinates,
+     * while converting them to 1-origin alphanumeric coordinates.
+     * The operation can silently fail;
+     * the client should explicitly consult the status 
+     * after the operation completes.
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     */
+    public Label( int xco, int yco )
+    {
+        try
         {
-            result[0] = tizer.nextToken();
-            result[1] = tizer.nextToken();
+            this.xco = xco;
+            this.colStr = convertToColStr( xco );
+            this.yco = yco;
+            this.rowStr = convertToRowStr( yco );
+            status = true;
+            message = StatusMessages.SUCCESS;
+            label = rowStr + colStr;
         }
-        else
+        catch ( IllegalArgumentException exc )
         {
-            boolean split   = false;
-            int     len     = input.length();
-            for ( int inx = 0 ; inx < len && !split ; ++inx )
+            status = false;
+            message = exc.getMessage();
+        }
+    }
+    
+    /**
+     * Validate a 1-origin alphanumeric label such as "B10."
+     * Separated it into its row and column parts,
+     * and calculate the corresponding 0-origin
+     * x- and y-coordinates.
+     * Additional details about the format of the input string
+     * can be found in the {@linkplain Label} class documentation.
+     * 
+     * @param toParse   the label to parse
+     * 
+     * @throws NullPointerException if toParse is null
+     * 
+     * @see Label
+     */
+    public Label( String toParse )
+    {
+        Objects.requireNonNull( toParse, "toParse" );
+        this.label = toParse;
+        Matcher matcher = regexPat.matcher( toParse );
+        if ( matcher.find() )
+        {
+            // Note: toUpperCase gives different results in some locales;
+            // force it to use the root locale instead of the default.
+            rowStr = matcher.group( 1 ).toUpperCase( Locale.ROOT );
+            colStr = matcher.group( 2 );
+            if ( parseRow() && parseCol() )
             {
-                char    ccc = input.charAt( inx );
-                if ( Character.isDigit( ccc ) )
-                {
-                    split = true;
-                    result[0] = input.substring( 0, inx );
-                    result[1] = input.substring( inx );
-                }
+                label = rowStr + colStr;
+                status = true;
+                message = StatusMessages.SUCCESS;
             }
         }
-        return result;
+    }
+
+    /**
+     * Gets the 1-origin alpha-numeric label.
+     * @return the the 1-origin alpha-numeric label
+     */
+    public String getLabel()
+    {
+        return label;
+    }
+
+    /**
+     * Gets the 1-origin alpha-numeric column ID.
+     * @return the the 1-origin alpha-numeric column ID
+     */
+    public String getColStr()
+    {
+        return colStr;
+    }
+
+    /**
+     * Gets the 0-origin x-coordinate (the numeric column ID).
+     * @return the 0-origin x-coordinate
+     */
+    public int getXco()
+    {
+        return xco;
+    }
+
+    /**
+     * Gets the 1-origin alpha-numeric row ID.
+     * @return the 1-origin alpha-numeric row ID
+     */
+    public String getRowStr()
+    {
+        return rowStr;
+    }
+
+    /**
+     * Gets the 0-origin y-coordinate (the numeric row ID).
+     * @return the 0-origin y-coordinate
+     */
+    public int getYco()
+    {
+        return yco;
+    }
+
+    /**
+     * Gets the 0-origin x- and y-coordinates encapsulated
+     * in a GridCoords object.
+     * 
+     * @return the 0-origin y-coordinate
+     */
+    public GridCoords getGridCoords()
+    {
+        GridCoords  coords  = new GridCoords( xco, yco );
+        return coords;
+    }
+
+    /**
+     * Returns the message associated with this operation.
+     * 
+     * @return the message associated with this operation
+     */
+    public String getMessage()
+    {
+        return message;
+    }
+
+    /**
+     * Returns the status of this operation.
+     * 
+     * @return the status of this operation
+     */
+    public boolean isStatus()
+    {
+        return status;
     }
     
-    /**
-     * Convert a given integer column index (0-origin)
-     * to a right-justified, 1-origin string.
-     * For example, if a grid has 40 columns:
-     * <ul style="font-family: monospace;">
-     * <li>0 &#x2192; &nbsp;"&nbsp;1"</li>
-     * <li>8 &#x2192; &nbsp;"&nbsp;9"</li>
-     * <li>9 &#x2192; &nbsp;"10"</li>
-     * <li>10 &#x2192; "11"</li>
-     * </ul>
-     * @param num   the given integer
-     * 
-     * @return the converted string
-     */
-    public static String intToString( int num )
+    @Override
+    public String toString()
     {
-        if ( num < 0 )
-        {
-            String  fmt     = "Input (%d) must be >= 0";
-            String  message = String.format( fmt,  num );
-            throw new BattleshipException( message );
-        }
-        String  str = String.format( decToStrFmt, num + 1 );
+        String  str = 
+            String.format( "%s: (%d,%d)", label, xco, yco );
         return str;
     }
     
     /**
-     * Convert a 1-origin column number represented as a string
-     * to a 0-origin integer index. 
-     * For example:
-     * <ul style="font-family: monospace;">
-     * <li>&nbsp;"&nbsp;1" &#x2192; 0</li>
-     * <li>&nbsp;"&nbsp;9" &#x2192; 8</li>
-     * <li>&nbsp;"10" &#x2192; 9</li>
-     * <li>&nbsp;"11" &#x2192; 10</li>
-     * </ul>
-     * 
-     * @param str   column number represented as a 1-origin string
-     * 
-     * @return the converted, 0-origin integer index
-     * 
-     * @throws  NullPointerException if the input is null
-     * @throws  BattleshipException 
-     *          if the input string cannot be converted
-     */
-    public static int colStrToInt( String str )
-    {
-        int     result  = 0;
-        String  worker  = str.trim();
-        if ( worker.isEmpty() )
-        {
-            String  message = "Cannot convert empty string to int";
-            throw new BattleshipException( message );
-        }
-        
-        try
-        {
-            result = Integer.parseInt( worker );
-            if ( result < 1 )
-            {
-                String  message = "Not a valid column number: " + worker;
-                throw new BattleshipException( message );
-            }
-            // String column numbers start at 1; integer column numbers
-            // start at 0;
-            --result;
-        }
-        catch ( NumberFormatException exc )
-        {
-            String  message = "Cannot convert to int: " + worker;
-            throw new BattleshipException( message );
-        }
-        
-        return result;
-    }
-    
-    /**
-     * Convert a 0-origin, integer row index
-     * to a 1-origin, right-justified string, 
-     * where A=1, ... Z=26, etc.  
-     * For example, if a grid has a maximum of 40 rows:
-     * <ul style="font-family: monospace;">
-     * <li>0 &#x2192; &nbsp;"&nbsp;A"</li>
-     * <li>8 &#x2192; &nbsp;"&nbsp;I"</li>
-     * <li>26 &#x2192; &nbsp;"&nbsp;Z"</li>
-     * <li>27 &#x2192; &nbsp;"AA"
-     * <li>28 &#x2192; &nbsp;"AB"
-     * </ul>
-     * 
-     * @param num   the 0-origin row index
-     * 
-     * @return the converted, 1-origin string
-     * 
-     * @throws BattleshipException if input is less than 0
-     */
-    public static String decimalToAlpha( int num )
-    {
-        if ( num < 0 )
-        {
-            String  fmt     = "Input (%d) must be >= 0"; //$NON-NLS-1$
-            String  message = String.format( fmt,  num );
-            throw new BattleshipException( message );
-        }
-        int             worker  = num + 1;
-        StringBuilder   bldr    = new StringBuilder();
-        while ( worker > 0 )
-        {
-            int     digit   = (worker - 1) % 26;
-            char    letter  = (char)('A' + digit);
-            bldr.insert( 0, letter );
-            worker = (worker - 1) / 26;
-        }
-        String  padded  = String.format( alphaToStrFmt, bldr );
-        return padded;
-    }
-    
-    /**
-     * Convert a 1-origin, alpha row number (A=1, B=2, etc.)
-     * represented as a string to a 0-origin integer index. 
-     * For example:
-     * <ul style="font-family: monospace;">
-     * <li>&nbsp;"&nbsp;A" &#x2192; 0</li>
-     * <li>&nbsp;"&nbsp;I" &#x2192; 8</li>
-     * <li>&nbsp;"&nbsp;Z" &#x2192; 26 </li>
-     * <li>&nbsp;"AB" &#x2192; 28 </li>
-     * </ul>
-     * 
-     * @param alpha row number represented as a 1-origin, 
-     *              alphabetic string
-     * 
-     * @return the converted, 0-origin integer
-     * 
-     * @throws  NullPointerException 
-     *          if the input string is null
-     * 
-     * @throws  BattleshipException 
-     *          if the input string cannot be converted as expected
-     */
-    public static int alphaToDecimal( String alpha )
-    {
-        String  worker  = alpha.trim();
-        if ( worker.isEmpty() )
-        {
-            String  message = "Cannot convert empty string to decimal";
-            throw new BattleshipException( message );
-        }
-        int     len     = alpha.length();
-        int     num     = 0;
-        for ( int inx = 0 ; inx < len ; ++inx )
-        {
-            char    letter  = alpha.charAt( inx );
-            if ( !Character.isUpperCase( letter) )
-            {
-                String  message = "Cannot convert \"" + worker + "\" to decimal";
-                throw new BattleshipException( message );
-            }
-            int     value   = letter - 'A' + 1;
-            num = num * 26 + value;
-        }
-        --num;
-        return num;
-    }
-    
-    /**
-     * Verify that a given string can be converted to an 
-     * alphabetic row number.
-     * Alphabetic row numbers begin at 'A'
-     * and only contain uppercase characters.
-     * A list of errors is returned;
-     * if no errors are found, the list will be empty.
-     * 
-     * @param strRow    the given string
-     * 
-     * @return  A list of error messages; empty if no errors are found
-     */
-    public static List<String> validateRowStr( String strRow )
-    {
-        List<String>    errors  = new ArrayList<>();
-        if ( !validateNonNull( strRow, errors ) )
-            ;
-        else if ( !validateNonEmpty( strRow, errors ) )
-            ;
-        else if ( !validateAlpha( strRow, errors ) )
-            ;
-        else
-            ;
-        return errors;
-    }
-        
-    /**
-     * Verify that a given string can be converted to a 
-     * numeric column index.
-     * Column numbers begin at '1'
-     * and only contain numeric characters.
-     * A list of errors is returned;
-     * if no errors are found, the list will be empty.
-     * 
-     * @param strCol    the given string
-     * 
-     * @return  A list of error messages; empty if no errors are found
-     */
-    public static List<String> validateColStr( String strCol )
-    {
-        List<String>    errors  = new ArrayList<>();
-        if ( !validateNonNull( strCol, errors ) )
-            ;
-        else if ( !validateNonEmpty( strCol, errors ) )
-            ;
-        else if ( !validateNumeric( strCol, errors ) )
-            ;
-        else if ( !validateOneOrigin( strCol, errors ) )
-            ;
-        else
-            ;
-        return errors;
-    }
-    
-    /**
-     * Verify that an input string is not null.
-     * If the test fails, an error message is added to the given list 
-     * of error messages.
-     * 
-     * @param input     the input to test
-     * @param errors    the given list of error messages
-     * 
-     * @return  true if the test succeeds
-     */
-    private static boolean 
-    validateNonNull( String input, List<String> errors )
-    {
-        final String    error   = "Input may not be null";
-        boolean result  = input != null;
-        if ( !result )
-            errors.add( error );
-        return result;
-    }
-    
-    /**
-     * Verify that an input string is not empty.
-     * If the test fails, an error message is added to the given list 
-     * of error messages.
+     * Convert the 1-origin rowStr field into a 0-origin y-coordinate.
+     * To prevent overflow,
+     * the operation explicitly fails
+     * if the length of the rowStr field
+     * is greater than 5.
      * <p>
-     * Precondition: input is not null
-     * 
-     * @param input     the input to test
-     * @param errors    the given list of error messages
-     * 
-     * @return  true if the test succeeds
+     * Precondition: the rowStr field has been properly initialized
+     * <p>
+     * Postcondition: 
+     *      If the operation is successful,
+     *      the yco field is initialized to the result
+     *      
+     * @return  true if the operation completes successfully
      */
-    private static boolean 
-    validateNonEmpty(String input, List<String> errors )
+    private boolean parseRow()
     {
-        final String    error   = "Input may not be empty";
-        boolean         result  = !input.isEmpty();
-        if ( !result )
-            errors.add( error );
-        return result;
-    }
-    
-    /**
-     * Verify that an input string 
-     * consists solely of numeric characters (0-9).
-     * If the test fails, an error message is added to the given list 
-     * of error messages.
-     * <p>
-     * Precondition: input is not null
-     * <p>
-     * Precondition: input is not empty
-     * 
-     * @param input     the input to test
-     * @param errors    the given list of error messages
-     * 
-     * @return  true if the test succeeds
-     */
-    private static boolean 
-    validateNumeric( String input, List<String> errors )
-    {
-        final String    errorMessage    = "Not a numeric character: ";
-        boolean         result          = true;
-        for ( char ccc : input.toCharArray() )
-        {
-            if ( ccc < '0' || ccc > '9' )
-            {
-                errors.add( errorMessage + ccc );
-                result = false;
-            }
-        }
-        return result;
-    }
-    
-    /**
-     * Verify that an input string 
-     * consists solely of uppercase characters (A-Z).
-     * If the test fails, an error message is added to the given list 
-     * of error messages.
-     * <p>
-     * Precondition: input is not null
-     * <p>
-     * Precondition: input is not empty
-     * 
-     * @param input     the input to test
-     * @param errors    the given list of error messages
-     * 
-     * @return  true if the test succeeds
-     */
-    private static boolean 
-    validateAlpha( String input, List<String> errors )
-    {
-        final String    errorMessage    = "Not an alphabetic character: ";
-        boolean         result          = true;
-        for ( char ccc : input.toCharArray() )
-        {
-            if ( !Character.isUpperCase( ccc ) )
-            {
-                errors.add( errorMessage + ccc );
-                result = false;
-            }
-        }
-        return result;
-    }
-    
-    /**
-     * Verify that a numeric input string 
-     * can be converted to an integer &#x2265; 1.
-     * If the test fails, an error message is added to the given list 
-     * of error messages.
-     * <p>
-     * Precondition: input is a valid numeric string
-     * 
-     * @param input     the input to test
-     * @param errors    the given list of error messages
-     * 
-     * @return  true if the test succeeds
-     */
-    private static boolean 
-    validateOneOrigin( String input, List<String> errors )
-    {
-        final String    errorMessage    = "Input must be greater than 0: ";
-        int             intNum          = Integer.parseInt( input );
-        boolean         result          = intNum > 0;
-        if ( !result )
-        {
-            errors.add( errorMessage + input );
+        boolean result  = true;
+        int     len     = rowStr.length();
+        if ( len > 5 )
             result = false;
+        else
+        {
+            int     accum   = 0;
+            for ( int inx = 0 ; inx < len && result ; ++inx )
+            {
+                char    end = rowStr.charAt( inx );
+                int     num = end - 'A';
+                if ( num < 0 || num > 25 )
+                    result = false;
+                else
+                    accum = 26 * accum + num + 1;
+            }
+            if ( result )
+                yco = accum - 1;
         }
         return result;
     }
     
     /**
-     * Given a decimal integer,
-     * calculate its logarithm in base 26
-     * (log<sub>26</sub>(num)).
-     * This tells us how many places are required
-     * to count up to <em>num</em> in base 26, where 
-     * 'A' = 0 and 'Z' = 25.
-     * Example 1:
-     * <pre style="padding-left:2em;"> // A grid has 10 rows, labeled A-J.
-     * // To determine how much space to allocate for the labels,
-     * // calculate the maximum number of characters to be used in 
-     * // a label:
-     * //     (int)(log26(10) + 1) = (int)(.7067 + 1) = 10</pre>
+     * Convert the 1-origin colStr field into a 0-origin x-coordinate.
+     * To prevent overflow,
+     * the operation explicitly fails
+     * if the length of the colStr field exceeds 9.
      * <p>
-     * Example 2:
-     * <pre style="padding-left:2em;"> // A grid has 40 rows, labeled A-AT.
-     * // To determine how much space to allocate for the labels,
-     * // calculate the maximum number of characters needed for
-     * // a label:
-     * //     (int)(log26(40) + 1) = (int)(1.132 + 1) = 2</pre>
-     * 
-     * @param num   the given decimal number
-     * 
-     * @return log<sub>26</sub>(num)
+     * Precondition: the colStr field has been properly initialized
+     * <p>
+     * Postcondition: 
+     *      If the operation is successful,
+     *      the xco field is initialized to the result
+     *      
+     * @return  true if the operation completes successfully
      */
-    private static double log26( int num )
+    private boolean parseCol()
     {
-        double  log26   = Math.log10( num ) / Math.log10( 26 );
-        return log26;
+        boolean result  = true;
+        int     num     = -1;
+        if ( colStr.length() > 9 )
+            result = false;
+        else
+        {
+            try
+            {
+                num = Integer.parseInt( colStr );
+                if ( num == 0 )
+                    result = false;
+                else
+                    xco = num - 1;
+            }
+            catch ( NumberFormatException exc )
+            {
+                result = false;
+            }
+        }
+        return result;
+    }
+    
+    /**
+     * Converts a 0-origin numeric column ID into a 1-origin 
+     * alphanumeric column ID.
+     * 
+     * @param   xco the numeric column ID to convert
+     *      
+     * @return  the converted string
+     * 
+     * @throws IllegalArgumentException if the input is less than zero
+     */
+    private static String convertToColStr( int xco )
+    {
+        if ( xco < 0 )
+        {
+            throw new IllegalArgumentException( StatusMessages.INVALID_COL );
+        }
+        return String.valueOf( xco + 1 );
+    }
+    
+    /**
+     * Converts a 0-origin numeric row ID into a 1-origin 
+     * alphanumeric row ID.
+     * 
+     * @param   yco the numeric row ID to convert
+     *      
+     * @return  the converted string
+     * 
+     * @throws IllegalArgumentException if the input is less than zero
+     */
+    private static String convertToRowStr( int yco )
+    {
+        if ( yco < 0 )
+        {
+            throw new IllegalArgumentException( StatusMessages.INVALID_ROW );
+        }
+
+        String          alphaID = "";
+        StringBuilder   bldr = new StringBuilder();
+        
+        // Convert the 0-origin index 1-origin
+        int num = yco + 1;
+
+        while (num > 0)
+        {
+            // Divide by 26 and get the remainder
+            int remainder = (num - 1) % 26;
+            
+            // Convert the remainder to the alpha
+            char ccc = (char) ('A' + remainder);
+            bldr.append(ccc);
+            
+            // Move to the next digit position
+            num = (num - 1) / 26;
+        }
+
+        // The characters were calculated from right to left; 
+        // reverse the result
+        alphaID = bldr.reverse().toString();
+
+        return alphaID;
     }
 }
