@@ -4,7 +4,6 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
@@ -54,7 +53,7 @@ public class GraphicalGrid extends JPanel implements Artwork
     
     private int         width;
     private int         height;
-    private FontMetrics fontMetrics;
+//    private FontMetrics fontMetrics;
     private Graphics2D  gtx;
     
     public GraphicalGrid( Grid2D grid )
@@ -104,7 +103,7 @@ public class GraphicalGrid extends JPanel implements Artwork
         gtx.fillRect( 0,  0,  width, height );
         
         gtx.setFont( font );
-        fontMetrics = gtx.getFontMetrics();
+//        fontMetrics = gtx.getFontMetrics();
         Collection<Cell2DView>  cells   = grid.getCells().toList();
         
         gtx.translate( margin, margin );

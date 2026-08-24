@@ -137,7 +137,7 @@ class LabelTest
         Locale  origLocale  = Locale.getDefault();
         try
         {
-            Locale.setDefault( new Locale( "tr", "TR" ) );
+            Locale.setDefault( Locale.of( "tr", "TR" ) );
             Label   label   = new Label( "i10" );
             assertTrue( label.isStatus() );
             assertEquals( "I", label.getRowStr() );
