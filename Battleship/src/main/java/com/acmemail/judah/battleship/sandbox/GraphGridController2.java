@@ -6,7 +6,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
@@ -16,12 +15,8 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.border.Border;
 
 import com.acmemail.judah.battleship.Configurator;
@@ -38,17 +33,16 @@ import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
 import com.acmemail.judah.battleship2D.default_ship_types.Destroyer;
 import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
 
-public class GraphGridController
+public class GraphGridController2
 {
     private static GridFrame    gridFrame;
-    private static Parent       controller; 
+    private static Controller   controller; 
 
     public static void main(String[] args)
     {
         Grid2D  grid    = new Grid2D();
-        Grid2D  grid2   = new Grid2D( "Opponent" );
-        gridFrame = GridFrame.getFrame( () -> new Parent() );
-        controller = (Parent)gridFrame.getClient();
+        gridFrame = GridFrame.getFrame( () -> new Parent( grid ) );
+        controller = (Controller)gridFrame.getClient();
 
         ShipTypes.registerDefaultTypes();
         Fleet   fleet   = new Fleet();
@@ -95,82 +89,31 @@ public class GraphGridController
         System.exit( 1 );
     }
     
+    @SuppressWarnings("serial")
     public static class Parent extends JPanel
+    {
+        public Parent( Grid2D grid )
+        {
+            add( new Controller( grid ) );
+        }
+    }
+    
+    @SuppressWarnings("serial")
+    public static class Controller extends JPanel
     {
         private final int       border1Width    = 5;
         private final int       border2Width    = 5;
         private final Color     border2Color    = Color.BLUE;
+        private final int       borderWidth     = border1Width + border2Width;
+//        private final int       borderWidthX2   = 2 * borderWidth;
         
-        public Parent()
-        {
-            setLayout( new GridLayout( 1, 2 ) );
-            Grid2D  home    = Grid2D.getHomeGrid();
-            add( getTitleComponent( home ) );
-            for ( Grid2D grid : Grid2D.getAllGrids() )
-            {
-                if ( grid != home )
-                    add( getTitleComponent( grid ) );
-            }
-        }
-    
-        private JPanel getBorderPanel()
-        {
-            JPanel  panel   = new JPanel();
-            Border  outerBorder = 
-                BorderFactory.createEmptyBorder( 
-                    border1Width, 
-                    border1Width, 
-                    border1Width, 
-                    border1Width 
-                );
-            Border  innerBorder =
-                BorderFactory.createLineBorder( border2Color, border2Width );
-            Border  border      =
-                BorderFactory.createCompoundBorder( innerBorder, outerBorder );
-            panel.setBorder( border );
-            return panel;
-        }
-
-        private JComponent getTitleComponent( Grid2D grid)
-        {
-            // Title and controller should live inside the border
-            // The border should be inside a scroll pane
-            // The border component should never be resized
-            JPanel  borderPanel = getBorderPanel();
-            BoxLayout   layout = new BoxLayout( borderPanel, BoxLayout.Y_AXIS );
-            borderPanel.setLayout( layout );
-
-            borderPanel.add( getTitle( grid.getName() ) );
-            borderPanel.add( new Controller( grid ) );
-            
-            // The dummy panel is to prevent the border panel from being resized
-            JPanel  dummyPanel  = new JPanel();
-            dummyPanel.add( borderPanel );
-            JScrollPane pane    = new JScrollPane( dummyPanel );
-
-            return pane;
-        }
-    }
-
-    private static JLabel   getTitle( String name )
-    {
-        String  titleText   =
-            "<HTML><BODY style='font-size: 150%;'>"
-            + name 
-            + "</BODY></HTML>";
-        JLabel  title   = new JLabel( titleText );
-        return title;
-    }
-
-    public static class Controller extends JPanel
-    {
-        private final Font      labelFont;
         private final Color     bgColor     = Color.LIGHT_GRAY;
         private final Color     shipColor   = Color.DARK_GRAY;
         private final Color     gridColor   = Color.BLACK;
         private final Color     splatColor  = Color.RED;
         private final Color     labelColor  = Color.BLACK;
         private final int       cellSide    = 20;
+        private final int       padding     = 0;
         private final Grid2D    grid;
         private final int       numRows;
         private final int       numCols;
@@ -183,15 +126,25 @@ public class GraphGridController
         {
             this.grid = grid;
             
-            labelFont   = new Font( Font.MONOSPACED, Font.BOLD, 12 );
-            labelBounds = getMaxLabelBounds( labelFont, getFontMetrics( labelFont ) );
+            Border  outerBorder = 
+                BorderFactory.createEmptyBorder( 
+                    border1Width, 
+                    border1Width, 
+                    border1Width, 
+                    border1Width 
+                );
+            Border  innerBorder =
+                BorderFactory.createLineBorder( border2Color, border2Width );
+            Border  border      =
+                BorderFactory.createCompoundBorder( innerBorder, outerBorder );
+            setBorder( border );
             
             numRows = Grid2D.getNumRows();
             numCols = Grid2D.getNumCols();
             int     gridWidth   = numCols * cellSide;
             int     gridHeight  = numRows * cellSide;
-            int     winWidth    = gridWidth + labelBounds.width;
-            int     winHeight   = gridHeight + labelBounds.height;
+            int     winWidth    = 2 * (borderWidth + padding) + gridWidth;
+            int     winHeight   = 2 * (borderWidth + padding) + gridHeight;
             gridBounds = new Rectangle( 0, 0, gridWidth, gridHeight );
 
             Dimension   dim     = new Dimension( winWidth, winHeight );
@@ -199,15 +152,20 @@ public class GraphGridController
         }
         
         @Override
-        public void paintComponent( Graphics graphics )
+        public void paint( Graphics graphics )
         {
-            super.paintComponent( graphics );
+            super.paint( graphics );
             Graphics2D  gtx         = (Graphics2D)graphics;
-            int         winWidth    = getWidth();
-            int         winHeight   = getHeight();
+//            int         winWidth    = getWidth();
+//            int         winHeight   = getHeight();
             gtx.setColor( bgColor );
-            gtx.fillRect( 0, 0, winWidth, winHeight );
-            gtx.setFont( labelFont );
+            gtx.fillRect( borderWidth, borderWidth, gridBounds.width, gridBounds.height );
+            
+            Font        font        = gtx.getFont();
+            int         size        = font.getSize();
+            Font        fixedFont   =
+                new Font( Font.MONOSPACED, Font.BOLD, size );
+            gtx.setFont( fixedFont );
             
             paintShips( gtx );
             paintGridLines( gtx );
@@ -219,7 +177,7 @@ public class GraphGridController
         {
             Color           saveColor       = gtx.getColor();
             AffineTransform saveTransform   = gtx.getTransform();
-            int             translate       = labelBounds.width;
+            int             translate       = padding + labelBounds.width;
             gtx.translate( translate, translate );
             
             gtx.setColor( shipColor );
@@ -241,7 +199,7 @@ public class GraphGridController
         {
             Color           saveColor       = gtx.getColor();
             AffineTransform saveTransform   = gtx.getTransform();
-            int             translate       = labelBounds.width;
+            int             translate       = padding + labelBounds.width;
             gtx.translate( translate, translate );
             gtx.setColor( gridColor );
 
@@ -262,7 +220,7 @@ public class GraphGridController
         {
             Color           saveColor       = gtx.getColor();
             AffineTransform saveTransform   = gtx.getTransform();
-            int             translate       = labelBounds.width;
+            int             translate       = padding + labelBounds.width;
             gtx.translate( translate, translate );
             gtx.setColor( splatColor );
 
@@ -286,7 +244,7 @@ public class GraphGridController
         {
             Color           saveColor       = gtx.getColor();
             AffineTransform saveTransform   = gtx.getTransform();
-            int             translate       = labelBounds.width;
+            int             translate       = padding + labelBounds.width;
             gtx.translate( translate, translate );
             gtx.setColor( labelColor );
 
@@ -335,6 +293,15 @@ public class GraphGridController
             
             gtx.setTransform( saveTransform );
             gtx.setColor( saveColor );
+        }
+        
+        @Override
+        public void addNotify()
+        {
+            super.addNotify();
+            Font        font        = getFont();
+            FontMetrics fontMetrics = getFontMetrics( font );
+            labelBounds = getMaxLabelBounds( font, fontMetrics );
         }
         
         private static Dimension getMaxLabelBounds( 

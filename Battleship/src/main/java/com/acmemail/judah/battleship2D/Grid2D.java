@@ -107,12 +107,18 @@ public class Grid2D
      */
     public Grid2D( String name )
     {
-        Objects.requireNonNull( name, "name" ); //$NON-NLS-1$
+        Objects.requireNonNull( name, "name" );
         this.name = name;
         if ( allGrids.containsKey( name ) )
             throw new BattleshipException( GRID_EXISTS + ": " + name ); //$NON-NLS-1$
         allGrids.put( name, this );
         bounds = new Rectangle( 0, 0, NUM_COLS, NUM_ROWS );
+    }
+    
+    public static List<Grid2D> getAllGrids()
+    {
+        List<Grid2D>    list    = new ArrayList( allGrids.values() );
+        return list;
     }
     
     /**
