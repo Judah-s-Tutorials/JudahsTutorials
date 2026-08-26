@@ -33,4 +33,26 @@ public class StatusMessages
         Messages.getString("StatusMessages.12"); //$NON-NLS-1$
     public static final String  INVALID_ROW         =
         Messages.getString("StatusMessages.13"); //$NON-NLS-1$
+    public static final String  FILE_NOT_FOUND      =
+        Messages.getString("StatusMessages.14"); //$NON-NLS-1$
+    public static final String  INVALID_DIM_SPEC    =
+        Messages.getString("StatusMessages.15"); //$NON-NLS-1$
+    public static final String  INVALID_ROW_COUNT   =
+        Messages.getString("StatusMessages.16"); //$NON-NLS-1$
+    public static final String  INVALID_COL_COUNT   =
+        Messages.getString("StatusMessages.17"); //$NON-NLS-1$
+    public static final String  INVALID_TYPE        =
+        "Invalid type";
+    public static final String  INVALID_BREADTH     =
+        "Invalid breadth";
+    public static final String  INVALID_LENGTH      =
+        "Invalid length";
+    public static final String  INVALID_P_RECORD    =
+        "Invalid provisioning record";
+    public static final String  DUP_SHIP_TYPE       =
+        "Duplicate ship type";
+    public static final String  SHIP_TYPE_NOT_FOUND =
+        "Ship type not found";
+    public static final String  INVALID_P_COMMAND =
+        "Invalid provisioning command";
 }
