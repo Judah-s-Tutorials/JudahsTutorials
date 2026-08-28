@@ -1,14 +1,15 @@
 package com.acmemail.judah.battleship;
 
 import static com.acmemail.judah.battleship.StatusMessages.DUP_SHIP_TYPE;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_BREADTH;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COL_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_LENGTH;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_RECORD;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ROW_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_TYPE;
 import static com.acmemail.judah.battleship.StatusMessages.SHIP_TYPE_NOT_FOUND;
-import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_COMMAND;
 
 import java.io.File;
 import java.io.FileReader;
@@ -18,6 +19,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
@@ -32,8 +34,81 @@ import com.acmemail.judah.battleship2D.default_ship_types.Cruiser;
 import com.acmemail.judah.battleship2D.default_ship_types.Destroyer;
 import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
 
-public class TextProvisioner
+/**
+ * An instance of this class
+ * is used to parse commands represented
+ * as lines of comma-separated-values (CSVs).
+ * Each command begins with a directive
+ * followed by one or more arguments separated by commas.
+ * The directive is case-insensitive,
+ * but other arguments are not.
+ * Blank lines and empty whitespace is ignored.
+ * Comments, lines beginning with a pound sign (#)
+ * are ignored.
+ * The recognized directives are:
+ * <ul>
+ * <li>
+ *      dim:<br>
+ *      Configures the number of rows and columns in the game grid.
+ *      The directive must be followed by two arguments
+ *      representing the number of rows and columns,
+ *      each of which must be greater-than or equal-to 1.
+ *      Example, create a grid of 20 rows and 30 columns:<br>
+ *      <pre>    dim,20, 30</pre>
+ * </li>
+ * <li>
+ *      type:<br>
+ *      Declare the type of a ship to be registered
+ *      before the game begins.
+ *      it has two forms:
+ *      <ul>
+ *      <li>
+ *          The directive followed by the literal "default,"
+ *          which causes all default ships (Battleship, Submarine, etc.}
+ *          to be registered.
+ *          Example:<br>
+ *          <pre>    type,default</pre>
+ *      </li>
+ *      <li>
+ *          The directive followed by the name of the type,
+ *          the name of the type,
+ *          and its length and breadth.
+ *          Names are case-sensitive;
+ *          duplicate type registration is not allowed.
+ *          Example, 
+ *          create a type with the name "SuperCarrier",
+ *          a length of 12 and a breadth of 3:<br>
+ *          <pre>    type,SuperCarrier,12,3</pre>
+ *      </li>
+ *      </ul>
+ * </li>
+ * <li>
+ *      deploy:<br>
+ *      Declare the type of a ship
+ *      that must be deployed
+ *      prior to the start of the game.
+ *      The same type of ship
+ *      may be deployed multiple times;
+ *      the type of a ship must be registered
+ *      before it can be deployed.
+ *      Example, designate a 
+ *      Carrier, two Destroyers, and a Submarine to deploy:<br>
+<pre>    deploy,Carrier
+    deploy,Destroyer
+    deploy,Destroyer
+    deploy,Submarine</pre>
+ * </li>
+ * </ul>
+ * 
+ * @author Jack
+ */
+public class TextProvisioner implements Provisioner
 {
+    /** 
+     * Formatter for CSV parser.
+     * @see #addRec(String)
+     * @see #csvRec(Reader)
+     */
     private static final CSVFormat  csvFormat  = 
         CSVFormat.DEFAULT.builder()
             .setCommentMarker( '#' )
@@ -41,11 +116,23 @@ public class TextProvisioner
             .setQuote( '"' )
             .get();
     
+    /** List of ships types to register at the start of the game. */
     private final List<ShipType2D>  toRegister  = new ArrayList<>();
+    /** List of ships types to deploy at the start of the game. */
     private final List<ShipType2D>  toDeploy    = new ArrayList<>();
+    /** 
+     * List of errors discovered during parsing. 
+     * @see #resetSuccess()
+     */
     private final List<String>      errors      = new ArrayList<>();
+    /** 
+     * The status of the parsing operation. 
+     * @see #resetSuccess()
+     */
     private boolean                 success     = true;
+    /** Number of grid rows configured during parsing; null if none. */
     private Integer                 rows        = null;
+    /** Number of grid columns configured during parsing; null if none. */
     private Integer                 cols        = null;
     
     /**
@@ -97,7 +184,7 @@ public class TextProvisioner
      * @throws IOException  if an IOException occurs
      * @throws NullPointerException if reader is null
      */
-    public TextProvisioner( Reader reader )
+    private TextProvisioner( Reader reader )
         throws IOException
     {
         Objects.requireNonNull( reader, "reader" );
@@ -137,9 +224,14 @@ public class TextProvisioner
     }
     
     /**
-     * Instantiates and returns an object of this class.
+     * Instantiates and returns an object of this class
+     * initialized with data provided by a given Reader.
+     * 
+     * @param reader    the given Reader
      * 
      * @return  an object of this class
+     * 
+     * @throws IOException if an I/O error occurs
      */
     public static TextProvisioner ofReader( Reader reader )
         throws IOException
@@ -167,8 +259,9 @@ public class TextProvisioner
         Deque<String>   errStack    = new ArrayDeque<>();
         try ( CSVParser parser = CSVParser.parse( strRec, csvFormat ); )
         {
-            CSVRecord record = parser.getRecords().get( 0 );
-            processCSVRec( record );
+            Iterator<CSVRecord>  iter   = parser.iterator();
+            if ( iter.hasNext() )
+                processCSVRec( iter.next() );
         }
         catch ( IOException exc )
         {
@@ -176,6 +269,7 @@ public class TextProvisioner
                 formatErrorMessage( INVALID_P_RECORD, strRec );
             errStack.push( error );
         }
+        processErrStack( null, errStack );
     }
     
     /**
@@ -188,24 +282,14 @@ public class TextProvisioner
         errors.clear();
     }
 
-    /**
-     * Gets an unmodifiable wrapper
-     * around the list of types that must be registered.
-     * 
-     * @return the list of types that must be registered
-     */
+    @Override
     public List<ShipType2D> getToRegister()
     {
         List<ShipType2D>    list    = Collections.unmodifiableList( toRegister );
         return list;
     }
 
-    /**
-     * Gets an unmodifiable wrapper
-     * around the list of ships that must be deployed.
-     * 
-     * @return the list of ships that must be deployed
-     */
+    @Override
     public List<ShipType2D> getToDeploy()
     {
         List<ShipType2D>    list    = Collections.unmodifiableList( toDeploy );
@@ -246,28 +330,14 @@ public class TextProvisioner
         return success;
     }
 
-    /**
-     * Gets the number of grid rows
-     * currently provisioned via this object.
-     * Null if provisioning of the property
-     * has not been processed.
-     * 
-     * @return number of grid rows provisioned, null if none
-     */
+    @Override
     public Integer getRows()
     {
         return rows;
     }
 
 
-    /**
-     * Gets the number of grid columns
-     * currently provisioned via this object.
-     * Null if provisioning of the property
-     * has not been processed.
-     * 
-     * @return number of grid columns provisioned, null if none
-     */
+    @Override
     public Integer getCols()
     {
         return cols;
@@ -276,7 +346,7 @@ public class TextProvisioner
     /**
      * Extracts and returns a list of CSV records
      * from the strings in the given file.
-     * See {@ink #csvRec(Reader)} for additional details.
+     * See {@link #csvRec(Reader)} for additional details.
      * 
      * @param file  the given file
      * 
@@ -345,6 +415,7 @@ public class TextProvisioner
         case "DIM" -> dim( rec );
         case "TYPE" -> type( rec );
         case "DEPLOY" -> deploy( rec );
+        case "" -> noop( rec );
         default -> invalidRec( rec );
         }
     }
@@ -359,7 +430,7 @@ public class TextProvisioner
     {
         Deque<String>   errStack    = new ArrayDeque<>();
         String          errMessage  =
-            formatErrorMessage( INVALID_P_COMMAND, rec.get( 1 ) );
+            formatErrorMessage( INVALID_P_COMMAND, rec.get( 0 ) );
         errStack.push( errMessage );
         processErrStack( rec, errStack );
     }
@@ -377,19 +448,20 @@ public class TextProvisioner
     private void dim( CSVRecord rec )
     {
         Deque<String>   errStack    = new ArrayDeque<>();
-        if ( rec.size() != 3 )
+        int             recSize     = rec.size();
+        if ( recSize != 3 )
         {
-            success = false;
+            String  errMessage  = 
+                formatErrorMessage( INVALID_ARG_COUNT, recSize );
+            errStack.push( errMessage );
         }
         else
         {
             String  strRows     = rec.get( 1 );
-            int     testRows    = 
-                getPositiveInt( strRows );
+            int     testRows    = getPositiveInt( strRows );
             
             String  strCols     = rec.get( 2 );
-            int     testCols    = 
-                getPositiveInt( strCols );
+            int     testCols    = getPositiveInt( strCols );
 
             if ( testRows < 1 )
             {
@@ -406,6 +478,8 @@ public class TextProvisioner
                     formatErrorMessage( INVALID_COL_COUNT, strCols );
                 errStack.push( errMessage );
             }
+            else
+                cols = testCols;
         }
         
         processErrStack( rec, errStack );
@@ -416,14 +490,13 @@ public class TextProvisioner
      * (a command describing the type of a ship;
      * see {@link ShipType2D}.
      * <p>
-     * <ol>
-     * Postcondition:
+     * Postconditions:
      * <ol>
      * <li>
      * If the record contains two values,
      * and the second contains the token "default,"
      * all the default ship types
-     * are added to the list of ship types to be registered.<\
+     * are added to the list of ship types to be registered.
      * </li>
      * <li>
      * If the record contains four values,
@@ -435,7 +508,7 @@ public class TextProvisioner
      * </li>
      * </ol>
      * 
-     * @param rec
+     * @param rec   the given record
      */
     private void type( CSVRecord rec )
     {
@@ -449,13 +522,7 @@ public class TextProvisioner
                 errStack.push( formatErrorMessage( INVALID_TYPE, type ) );
             }
             else
-            {
-                toRegister.add( Battleship.getType() );
-                toRegister.add( Carrier.getType() );
-                toRegister.add( Cruiser.getType() );
-                toRegister.add( Destroyer.getType() );
-                toRegister.add( Submarine.getType() );
-            }
+                registerDefaultTypes( errStack );
         }
         else if ( valCount == 4 )
         {
@@ -476,17 +543,63 @@ public class TextProvisioner
                 ShipType2D  shipType    = 
                     new ShipType2D( type, intLength, intBreadth, null );
                 if ( getShipType( shipType ) != null )
-                    errStack.push( formatErrorMessage( DUP_SHIP_TYPE, strLen ) );
+                    errStack.push( 
+                        formatErrorMessage( DUP_SHIP_TYPE, shipType.typeName()
+                        ) 
+                    );
                 else
                     toRegister.add( shipType );
             }
         }
         else
         {
-            String  invType = formatErrorMessage( INVALID_TYPE, rec.get( 0 ) );
+            String  invType = 
+                formatErrorMessage( INVALID_ARG_COUNT, valCount);
             errStack.push( invType );
         }
         processErrStack( rec, errStack );
+    }
+    
+    /**
+     * This method simplifies the deeply nested logic in 
+     * {@link #type(CSVRecord).
+     * It registers every default that is not already registered.
+     * If the type is already registered,
+     * it pushes a "duplicate type" error message
+     * onto the error stack provided by the caller.
+     * 
+     * @param errStack  the error stack provided by the caller
+     */
+    private void registerDefaultTypes( Deque<String> errStack )
+    {
+        ShipType2D[]    defaultTypes    =
+        {
+            Battleship.getType(),
+            Carrier.getType(),
+            Cruiser.getType(),
+            Destroyer.getType(),
+            Submarine.getType(),
+        };
+        for ( ShipType2D defType : defaultTypes )
+        {
+            if ( toRegister.contains( defType ) )
+            {
+                String  err = 
+                    formatErrorMessage( DUP_SHIP_TYPE, defType.typeName() );
+                errStack.push( err ); 
+            }
+            else
+                toRegister.add( defType );
+        }
+    }
+
+    /**
+     * Ignore the given record.
+     * 
+     * @param rec   the given record
+     */
+    private void noop( CSVRecord rec )
+    {
     }
     
     /**
@@ -509,7 +622,8 @@ public class TextProvisioner
         if ( valCount != 2 )
         {
             String  errCount    = "field count = " + valCount;
-            String  message     = formatErrorMessage( INVALID_TYPE, errCount );
+            String  message     = 
+                formatErrorMessage( INVALID_ARG_COUNT, errCount );
             errStack.push( message );
         }
         else
@@ -528,7 +642,7 @@ public class TextProvisioner
     }
     
     /**
-     * Parse a string containing an integer &gte; 1.
+     * Parse a string containing an integer &ge; 1.
      * If successful, the parsed integer is returned,
      * otherwise -1 is returned.
      *  
@@ -563,7 +677,7 @@ public class TextProvisioner
      * 
      * @return  the formatted error message
      */
-    private static String formatErrorMessage( String message, String val )
+    private static String formatErrorMessage( String message, Object val )
     {
         StringBuilder   bldr    = 
             new StringBuilder( message );
@@ -594,7 +708,8 @@ public class TextProvisioner
         if ( !stack.isEmpty() )
         {
             success = false;
-            errors.add( invalidRecMessage( rec ) );
+            if ( rec != null )
+                errors.add( invalidRecMessage( rec ) );
             while ( !stack.isEmpty() )
                 errors.add( stack.pop() );
         }
@@ -658,7 +773,7 @@ public class TextProvisioner
      * the object with the given name. 
      * Null is returned if not found.
      * 
-     * @param shipType  the given ship type
+     * @param name  the given name
      * 
      * @return  the ShipType2D object, or null if not found
      */

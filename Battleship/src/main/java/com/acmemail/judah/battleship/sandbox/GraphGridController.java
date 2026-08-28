@@ -6,8 +6,12 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.Rectangle;
+import java.awt.Toolkit;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
@@ -46,7 +50,12 @@ public class GraphGridController
     public static void main(String[] args)
     {
         Grid2D  grid    = new Grid2D();
-        Grid2D  grid2   = new Grid2D( "Opponent" );
+        Grid2D  grid2   = new Grid2D( "Opponent 1" );
+        Grid2D  grid3   = new Grid2D( "Opponent 2" );
+        Grid2D  grid4   = new Grid2D( "Opponent 3" );
+        Grid2D  grid5   = new Grid2D( "Opponent 4" );
+        Grid2D  grid6   = new Grid2D( "Opponent 5" );
+        Grid2D  grid7   = new Grid2D( "Opponent 6" );
         gridFrame = GridFrame.getFrame( () -> new Parent() );
         controller = (Parent)gridFrame.getClient();
 
@@ -103,14 +112,55 @@ public class GraphGridController
         
         public Parent()
         {
-            setLayout( new GridLayout( 1, 2 ) );
             Grid2D  home    = Grid2D.getHomeGrid();
+            setGUILayout();
+            setMaxDimensions();
             add( getTitleComponent( home ) );
             for ( Grid2D grid : Grid2D.getAllGrids() )
             {
                 if ( grid != home )
                     add( getTitleComponent( grid ) );
             }
+        }
+        
+        private void setGUILayout()
+        {
+            List<Grid2D>    allGrids    = Grid2D.getAllGrids();
+            int             gridCount   = allGrids.size();
+            int             guiLayoutNumRows;
+            int             guiLayoutNumCols;
+            if ( gridCount <= 3 )
+            {
+                guiLayoutNumRows = 1;
+                guiLayoutNumCols = gridCount;
+            }
+            else if ( gridCount == 4 )
+            {
+                guiLayoutNumRows = 2;
+                guiLayoutNumCols = 2;
+            }
+            else
+            {
+                guiLayoutNumRows = (int)Math.ceil( gridCount  / 3.);
+                guiLayoutNumCols = 3;
+            }
+
+            setLayout( new GridLayout( guiLayoutNumRows, guiLayoutNumCols ) );
+        }
+        
+        private void setMaxDimensions()
+        {
+            GraphicsConfiguration config    = 
+                GraphicsEnvironment.getLocalGraphicsEnvironment()
+                    .getDefaultScreenDevice()
+                    .getDefaultConfiguration();
+            Insets      insets = 
+                Toolkit.getDefaultToolkit().getScreenInsets( config );
+            Rectangle   bounds = config.getBounds();
+            
+            int maxWidth    = bounds.width - insets.left - insets.right;
+            int maxHeight   = bounds.height - insets.top - insets.bottom;
+            setMaximumSize( new Dimension( maxWidth, maxHeight ) );
         }
     
         private JPanel getBorderPanel()

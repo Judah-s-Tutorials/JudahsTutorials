@@ -42,17 +42,19 @@ public class StatusMessages
     public static final String  INVALID_COL_COUNT   =
         Messages.getString("StatusMessages.17"); //$NON-NLS-1$
     public static final String  INVALID_TYPE        =
-        "Invalid type";
+        Messages.getString("StatusMessages.18"); //$NON-NLS-1$
     public static final String  INVALID_BREADTH     =
-        "Invalid breadth";
+        Messages.getString("StatusMessages.19"); //$NON-NLS-1$
     public static final String  INVALID_LENGTH      =
-        "Invalid length";
+        Messages.getString("StatusMessages.20"); //$NON-NLS-1$
     public static final String  INVALID_P_RECORD    =
-        "Invalid provisioning record";
+        Messages.getString("StatusMessages.21"); //$NON-NLS-1$
     public static final String  DUP_SHIP_TYPE       =
-        "Duplicate ship type";
+        Messages.getString("StatusMessages.22"); //$NON-NLS-1$
     public static final String  SHIP_TYPE_NOT_FOUND =
-        "Ship type not found";
-    public static final String  INVALID_P_COMMAND =
-        "Invalid provisioning command";
+        Messages.getString("StatusMessages.23"); //$NON-NLS-1$
+    public static final String  INVALID_P_COMMAND   =
+        Messages.getString("StatusMessages.24"); //$NON-NLS-1$
+    public static final String  INVALID_ARG_COUNT   =
+        Messages.getString("StatusMessages.25"); //$NON-NLS-1$
 }
