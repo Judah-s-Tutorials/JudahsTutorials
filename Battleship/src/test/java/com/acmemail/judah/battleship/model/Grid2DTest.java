@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -103,6 +104,40 @@ class Grid2DTest
     }
 
     @Test
+    public void testGetAllGrids()
+    {
+        String[]        names   = { "Name 1", "Name 2", "Name3" };
+        Set<Grid2D>     expSet  = new HashSet<>();
+        Set<Grid2D>     actSet  = new HashSet<>( Grid2D.getAllGrids() );
+        assertEquals( expSet, actSet );
+        
+        Grid2D          home    = new Grid2D();
+        expSet.add( home );
+        actSet = new HashSet<>( Grid2D.getAllGrids() );
+        assertEquals( expSet, actSet );
+        
+        for ( String name : names )
+        {
+            Grid2D  grid    = new Grid2D( name );
+            expSet.add( grid );
+            actSet = new HashSet<>( Grid2D.getAllGrids() );
+            assertEquals( expSet, actSet );
+        }
+    }
+
+    @Test
+    public void testIsDeployedShip2D()
+    {
+        Grid2D      grid    = new Grid2D();
+        GridCoords  coords  = new GridCoords( 0, 0 );
+        Ship2D      ship    = new Ship2D( twoDType, coords, Orientation.VERTICAL );
+        assertFalse( grid.isDeployed( ship ) );
+        grid.put( ship );
+        assertTrue( grid.isDeployed( ship ) );
+        assertThrows( NullPointerException.class, () -> grid.put( null ) );
+    }
+
+    @Test
     public void testGetName()
     {
         String  name1   = "Name 1";
@@ -111,6 +146,77 @@ class Grid2DTest
         assertEquals( name1, grid1.getName() );
     }
 
+    @Test
+    public void testOpponentGoRight()
+    {
+        Grid2D      grid        = new Grid2D();
+        Rectangle   gridBounds  = grid.getBounds();
+        int         xco         = (int)gridBounds.getCenterX();
+        int         yco         = (int)gridBounds.getCenterY();
+        GridCoords  coords      = new GridCoords( xco, yco );
+        assertFalse( grid.isOpponent( xco, yco ) );
+        assertFalse( grid.isOpponent( coords ) );
+        grid.setOpponent( xco, yco );
+        assertTrue( grid.isOpponent( xco, yco ) );
+        assertTrue( grid.isOpponent( coords ) );
+
+        grid.clear();
+        assertFalse( grid.isOpponent( xco, yco ) );
+        assertFalse( grid.isOpponent( coords ) );
+        grid.setOpponent( coords );
+        assertTrue( grid.isOpponent( xco, yco ) );
+        assertTrue( grid.isOpponent( coords ) );
+
+        // Above tests applying setOpponent to nonexistent cells;
+        // catch the case where the cell already exists.
+        grid.setOpponent( coords );
+    }
+
+    @Test
+    public void testOpponentGoWrong()
+    {
+        Grid2D      grid        = new Grid2D();
+        Rectangle   gridBounds  = grid.getBounds();
+        int         badXco0     = gridBounds.x - 1;
+        int         badXco1     = gridBounds.width;
+        int         badYco0     = gridBounds.y - 1;
+        int         badYco1     = gridBounds.height;        
+        Point[]     badPoints   =
+        {
+            new Point( badXco0, 0 ),
+            new Point( badXco1, 0 ),
+            new Point( 0, badYco0 ),
+            new Point( 0, badYco1 ),
+        };
+        
+        for ( Point point : badPoints )
+        {
+            int         xco     = point.x;
+            int         yco     = point.y;
+            GridCoords  coords  = new GridCoords( xco, yco );
+            assertThrows( BattleshipException.class, 
+                () -> grid.setOpponent( xco, yco )
+            );
+            assertThrows( BattleshipException.class, 
+                () -> grid.setOpponent( coords )
+            );
+
+            assertThrows( BattleshipException.class, 
+                () -> grid.isOpponent( xco, yco )
+            );
+            assertThrows( BattleshipException.class, 
+                () -> grid.isOpponent( coords )
+            );
+
+            assertThrows( NullPointerException.class, 
+                () -> grid.setOpponent( null )
+            );
+            assertThrows( NullPointerException.class, 
+                () -> grid.isOpponent( null )
+            );
+        }
+    }
+    
     @Test
     public void testIsSplattedIntInt()
     {
@@ -199,6 +305,7 @@ class Grid2DTest
         
         assertThrows( excClass, () -> grid.put( ship ) );
         assertThrows( excClass, () -> grid.remove( ship ) );
+        assertThrows( excClass, () -> grid.attack( new GridCoords( -1, -1 ) ) );
     }
 
     @Test
@@ -486,6 +593,48 @@ class Grid2DTest
                 Constants.DEF_NUM_COLS
             );
         int actNumCols  = Grid2D.getNumCols();
+        assertEquals( expNumCols, actNumCols );
+    }
+
+    @Test
+    public void testGetNumRowsNumColsExtended()
+    {
+        String  emptyStr    = "";
+        String  badStr      = "not a number";
+        int     expNumRows  = Constants.DEF_NUM_ROWS;
+        int     expNumCols  = Constants.DEF_NUM_COLS;
+        int     actNumRows  = Grid2D.getNumRows();
+        int     actNumCols  = Grid2D.getNumCols();
+
+        assertEquals( expNumRows, actNumRows );
+        assertEquals( expNumCols, actNumCols );
+        
+        Grid2D.reinitDimensions( null, null );
+        actNumRows  = Grid2D.getNumRows();
+        actNumCols  = Grid2D.getNumCols();
+        assertEquals( expNumRows, actNumRows );
+        assertEquals( expNumCols, actNumCols );
+        
+        Grid2D.reinitDimensions( emptyStr, emptyStr );
+        actNumRows  = Grid2D.getNumRows();
+        actNumCols  = Grid2D.getNumCols();
+        assertEquals( expNumRows, actNumRows );
+        assertEquals( expNumCols, actNumCols );
+        
+        Grid2D.reinitDimensions( badStr, badStr );
+        actNumRows  = Grid2D.getNumRows();
+        actNumCols  = Grid2D.getNumCols();
+        assertEquals( expNumRows, actNumRows );
+        assertEquals( expNumCols, actNumCols );
+        
+        expNumRows *= 2;
+        expNumCols = expNumRows + 10;
+        String  numRowsStr  = String.valueOf( expNumRows );
+        String  numColsStr  = String.valueOf( expNumCols );
+        Grid2D.reinitDimensions( numRowsStr, numColsStr );
+        actNumRows  = Grid2D.getNumRows();
+        actNumCols  = Grid2D.getNumCols();
+        assertEquals( expNumRows, actNumRows );
         assertEquals( expNumCols, actNumCols );
     }
 

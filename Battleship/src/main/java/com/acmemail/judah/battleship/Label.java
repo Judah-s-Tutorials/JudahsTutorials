@@ -4,7 +4,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship.model.GridCoords;
 
 /**
  * This class converts between 0-origin

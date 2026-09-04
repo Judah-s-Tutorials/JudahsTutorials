@@ -4,8 +4,8 @@ import static com.acmemail.judah.battleship.fleet.FleetProvisionData.ADHOC_COORD
 import static com.acmemail.judah.battleship.fleet.FleetProvisionData.ADHOC_NAME;
 import static com.acmemail.judah.battleship.fleet.FleetProvisionData.ADHOC_ORIENT;
 import static com.acmemail.judah.battleship.fleet.FleetProvisionData.TYPE3X1;
-import static com.acmemail.judah.battleship2D.Orientation.HORIZONTAL;
-import static com.acmemail.judah.battleship2D.Orientation.VERTICAL;
+import static com.acmemail.judah.battleship.model.Orientation.HORIZONTAL;
+import static com.acmemail.judah.battleship.model.Orientation.VERTICAL;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -31,12 +31,12 @@ import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Fleet;
 import com.acmemail.judah.battleship.Result;
 import com.acmemail.judah.battleship.StatusMessages;
-import com.acmemail.judah.battleship2D.Grid2D;
-import com.acmemail.judah.battleship2D.Grid2DTestSupport;
-import com.acmemail.judah.battleship2D.GridCoords;
-import com.acmemail.judah.battleship2D.Orientation;
-import com.acmemail.judah.battleship2D.Ship2D;
-import com.acmemail.judah.battleship2D.ShipType2D;
+import com.acmemail.judah.battleship.model.Grid2D;
+import com.acmemail.judah.battleship.model.Grid2DTestSupport;
+import com.acmemail.judah.battleship.model.GridCoords;
+import com.acmemail.judah.battleship.model.Orientation;
+import com.acmemail.judah.battleship.model.Ship2D;
+import com.acmemail.judah.battleship.model.ShipType2D;
 
 class FleetConfigTest
 {

@@ -9,7 +9,6 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
-import java.awt.Shape;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -26,10 +25,10 @@ import java.util.stream.IntStream;
 import javax.swing.JPanel;
 
 import com.acmemail.judah.battleship.Label;
-import com.acmemail.judah.battleship2D.Cell2DView;
-import com.acmemail.judah.battleship2D.Grid2D;
-import com.acmemail.judah.battleship2D.GridCoords;
-import com.acmemail.judah.battleship2D.Ship2D;
+import com.acmemail.judah.battleship.model.Cell2DView;
+import com.acmemail.judah.battleship.model.Grid2D;
+import com.acmemail.judah.battleship.model.GridCoords;
+import com.acmemail.judah.battleship.model.Ship2D;
 
 /**
  * This class manages a graphical implementation
@@ -400,12 +399,9 @@ public class GridWindow extends JPanel
         .filter( c -> c.getShip() != null )
             .map ( Cell2DView::getCoords )
             .forEach( gc -> {
-                Shape   clipSave = gtx.getClip();
-                int xco = gc.xco();
-                int yco = gc.yco();
-                gtx.setClip( xco, yco, cellSide, cellSide );
-                gtx.drawImage( splat, gc.xco(), gc.yco(), this );
-                gtx.setClip( clipSave );
+                int xco = gc.xco() * cellSide;
+                int yco = gc.yco() * cellSide;
+                gtx.drawImage( splat, xco, yco, this );
             });
 
         gtx.setTransform( saveTransform );
@@ -677,7 +673,7 @@ public class GridWindow extends JPanel
             GridCoords  coords  = null;
             int     mouseXco    = evt.getX();
             int     mouseYco    = evt.getY();
-            if ( gridBounds.contains( mouseXco, mouseYco ) )
+            if ( getScaledGridBounds().contains( mouseXco, mouseYco ) )
             {
                 coords = deriveCellCoords( mouseXco, mouseYco );
                 dispatch = true;
@@ -696,24 +692,47 @@ public class GridWindow extends JPanel
         /**
          * Translates the pixel coordinates of a mouse click
          * into cell coordinates.
-         * 
+         *
          * @param mouseXco  the x-coordinate of the mouse click
          * @param mouseYco  the y-coordinate of the mouse click
-         * 
+         *
          * @return  the translated coordinates
          */
         private GridCoords deriveCellCoords( int mouseXco, int mouseYco )
         {
-            int         scaledCellSide      = 
+            int         scaledCellSide      =
                 (int)Math.round( cellSide * scaleFactor );
-            int         scaledLabelFactor   = 
+            int         scaledLabelFactor   =
                 (int)Math.round( labelBounds.width * scaleFactor );
-            int         cellXco             = 
+            int         cellXco             =
                 (mouseXco - scaledLabelFactor) / scaledCellSide;
-            int         cellYco             = 
+            int         cellYco             =
                 (mouseYco - scaledLabelFactor) / scaledCellSide;
             GridCoords  coords  = new GridCoords( cellXco, cellYco );
             return coords;
+        }
+
+        /**
+         * Gets the bounds of the grid, exclusive of row/column labels,
+         * adjusted to reflect the current scale factor.
+         * Mouse events are reported in physical (scaled) pixel coordinates,
+         * so the unscaled {@link GridWindow#gridBounds} can't be used
+         * directly for hit-testing.
+         *
+         * @return  the scaled bounds of the grid
+         */
+        private Rectangle getScaledGridBounds()
+        {
+            int         scaledLabelFactor   =
+                (int)Math.round( labelBounds.width * scaleFactor );
+            int         scaledWidth         =
+                (int)Math.round( gridBounds.width * scaleFactor );
+            int         scaledHeight        =
+                (int)Math.round( gridBounds.height * scaleFactor );
+            Rectangle   bounds              = new Rectangle(
+                scaledLabelFactor, scaledLabelFactor, scaledWidth, scaledHeight
+            );
+            return bounds;
         }
     }
 }

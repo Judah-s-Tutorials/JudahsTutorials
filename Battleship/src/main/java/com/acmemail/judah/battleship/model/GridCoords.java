@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
 
 /**
  * Encapsulation of the x- and y- coordinates of a cell in the grid.

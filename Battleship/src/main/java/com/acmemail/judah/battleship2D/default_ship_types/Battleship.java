@@ -1,7 +1,7 @@
 package com.acmemail.judah.battleship2D.default_ship_types;
 
 import com.acmemail.judah.battleship.Constants;
-import com.acmemail.judah.battleship2D.ShipType2D;
+import com.acmemail.judah.battleship.model.ShipType2D;
 
 /**
  * Encapsulates the battleship default ship type.

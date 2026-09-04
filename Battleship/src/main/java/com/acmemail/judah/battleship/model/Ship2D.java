@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
 import java.awt.Rectangle;
 import java.util.Objects;
 

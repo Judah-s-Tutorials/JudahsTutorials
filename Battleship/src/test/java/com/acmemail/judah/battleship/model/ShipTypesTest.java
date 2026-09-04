@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.model.ShipType2D;
+import com.acmemail.judah.battleship.model.ShipTypes;
 import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
 import com.acmemail.judah.battleship2D.default_ship_types.Carrier;
 import com.acmemail.judah.battleship2D.default_ship_types.Cruiser;

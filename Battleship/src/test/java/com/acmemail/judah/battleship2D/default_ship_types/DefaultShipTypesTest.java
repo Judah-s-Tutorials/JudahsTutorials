@@ -24,7 +24,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.acmemail.judah.battleship2D.ShipType2D;
+import com.acmemail.judah.battleship.model.ShipType2D;
 
 /**
  * Verifies that each default ship type class

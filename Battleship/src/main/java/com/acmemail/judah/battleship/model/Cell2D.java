@@ -1,12 +1,17 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
 
 import java.util.Objects;
 
 public class Cell2D implements Cell2DView
 {
+    /** X and y-coordinates of this cell. */
     private final   GridCoords  coords;
+    /** The ship that occupies this cell; null if none or unknown. */
     private final   Ship2D      ship;
+    /** Indicates that this cell has been attacked. */
     private boolean splatted    = false;
+    /** This cell belongs to the enemy.  */
+    private boolean isOpponent       = false;
     
     /**
      * Constructor.
@@ -51,6 +56,25 @@ public class Cell2D implements Cell2DView
     public boolean isSplatted()
     {
         return splatted;
+    }
+
+    /**
+     * Returns true if this cell has been discovered
+     * to be occupied by an opponent's ship.
+     * 
+     * @return true if this cell is splatted
+     */
+    public boolean isOpponent()
+    {
+        return isOpponent;
+    }
+    
+    /**
+     * Mark this cell as belonging to an opponent.
+     */
+    public void setOpponent()
+    {
+        isOpponent = true;
     }
 
     /**

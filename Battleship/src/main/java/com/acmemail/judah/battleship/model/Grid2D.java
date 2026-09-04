@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
 
 import static com.acmemail.judah.battleship.Constants.DEF_NUM_COLS;
 import static com.acmemail.judah.battleship.Constants.DEF_NUM_ROWS;
@@ -27,7 +27,7 @@ import com.acmemail.judah.battleship.Constants;
  * and whether or not the cell has been attacked.
  * If a cell does not exist for a location, 
  * then that location does not contain a ship,
- * and has not been attack.
+ * and has not been attacked.
  * A client can perform the following common operations:
  * <ol>
  * <li>Ask for the ship at some given coordinates.</li>
@@ -37,6 +37,8 @@ import com.acmemail.judah.battleship.Constants;
  * <li>Add a ship to the grid.</li>
  * <li>Remove a ship from the grid.</li>
  * <li>Mark a cell as attacked.</li>
+ * <li>Ask if a cell is known to belong to an opponent.</li>
+ * <li>Mark a cell as belonging to an opponent.</li>
  * </ol>
  * <p>
  * By design,
@@ -69,13 +71,19 @@ import com.acmemail.judah.battleship.Constants;
 public class Grid2D
 {
     private static final String CONFIG_OVER             =
-        Messages.getString("Grid2D.1"); //$NON-NLS-1$
+        Messages.getString("Grid2D.1"); 
     private static final String CONFIG_NOT_COMPLETE             =
-        Messages.getString("Grid2D.2"); //$NON-NLS-1$
-    private static final String DEF_GRID_NAME           = "HOME"; //$NON-NLS-1$
-    private static final int    NUM_ROWS;
-    private static final int    NUM_COLS;
+        Messages.getString("Grid2D.2"); 
+    private static final String DEF_GRID_NAME           = "HOME"; 
     private static final Map<String,Grid2D> allGrids    = new HashMap<>();
+
+    /** 
+     * This field is effectively final, but, for testing purposes,
+     * it's not declared final. There should be no way for a non-test
+     * client to set this variable directly.
+     */
+    private static int          NUM_ROWS;
+    private static int          NUM_COLS;
     
     private final HashMap<GridCoords,Cell2D>    gridMap = new HashMap<>();
     private final List<Ship2D>  allShips    = new ArrayList<>();
@@ -110,14 +118,19 @@ public class Grid2D
         Objects.requireNonNull( name, "name" );
         this.name = name;
         if ( allGrids.containsKey( name ) )
-            throw new BattleshipException( GRID_EXISTS + ": " + name ); //$NON-NLS-1$
+            throw new BattleshipException( GRID_EXISTS + ": " + name ); 
         allGrids.put( name, this );
         bounds = new Rectangle( 0, 0, NUM_COLS, NUM_ROWS );
     }
     
+    /**
+     * Return a list of all grids that have been instantiated.
+     * 
+     * @return  a list of all grids that have been instantiated
+     */
     public static List<Grid2D> getAllGrids()
     {
-        List<Grid2D>    list    = new ArrayList( allGrids.values() );
+        List<Grid2D>    list    = new ArrayList<>( allGrids.values() );
         return list;
     }
     
@@ -182,7 +195,7 @@ public class Grid2D
      */
     public boolean isDeployed( Ship2D ship )
     {
-        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
+        Objects.requireNonNull( ship, "ship" ); 
         boolean isDeployed  = allShips.contains( ship );
         return isDeployed;
     }
@@ -196,17 +209,86 @@ public class Grid2D
      * 
      * @throws NullPointerException if coords is null
      * @throws BattleshipException if configuration stage is complete
+     * @throws BattleshipException if coords is out of bounds
      */
     public void attack( GridCoords coords )
     {
-        Objects.requireNonNull( coords, "coords" ); //$NON-NLS-1$
+        Objects.requireNonNull( coords, "coords" ); 
         throwIfNotConfigComplete();
         if ( !contains( coords ) )
-            throw new BattleshipException( OUT_OF_BOUNDS +  ": " + coords ); //$NON-NLS-1$
+            throw new BattleshipException( OUT_OF_BOUNDS +  ": " + coords );
         Cell2D  cell    = get( coords );
         if ( cell == null )
             cell = putEmptyCell( coords );
         cell.setSplatted();
+    }
+    
+    /**
+     * Mark a cell as belonging to an opponent.
+     * 
+     * @param coords    the coordinates of the cell to mark
+     * 
+     * @throws NullPointerException if coords is null
+     * @throws BattleshipException if coords is out of bounds
+     */
+    public void setOpponent( GridCoords coords )
+    {
+        Objects.requireNonNull( coords, "coords" );
+        if ( !contains( coords ) )
+            throw new BattleshipException( OUT_OF_BOUNDS +  ": " + coords );
+        Cell2D  cell    = get( coords );
+        if ( cell == null )
+            cell = putEmptyCell( coords );
+        cell.setOpponent();
+    }
+    
+    /**
+     * Mark the cell at the given coordinates 
+     * as belonging to an opponent.
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     * 
+     * @throws BattleshipException if coordinates are out of bounds
+     */
+    public void setOpponent( int xco, int yco )
+    {
+        GridCoords  coords  = new GridCoords( xco, yco );
+        setOpponent( coords );
+    }
+    
+    /**
+     * Ask if a cell is known to belong to an opponent
+     * 
+     * @param coords    the coordinates of the cell to interrogate
+     * 
+     * @throws NullPointerException if coords is null
+     * @throws BattleshipException if coords is out of bounds
+     */
+    public boolean isOpponent( GridCoords coords )
+    {
+        Objects.requireNonNull( coords, "coords" );
+        if ( !contains( coords ) )
+            throw new BattleshipException( OUT_OF_BOUNDS +  ": " + coords );
+        Cell2D  cell        = get( coords );
+        boolean isOpponent  = cell == null ? false : cell.isOpponent();
+        return isOpponent;
+    }
+    
+    /**
+     * Ask if the cell at the given coordinates
+     * is known to belong to an opponent
+     * 
+     * @param xco   the given x-coordinate
+     * @param yco   the given y-coordinate
+     * 
+     * @throws BattleshipException if coordinates are out of bounds
+     */
+    public boolean isOpponent( int xco, int yco )
+    {
+        GridCoords  coords      = new GridCoords( xco, yco );
+        boolean     isOpponent  = isOpponent( coords );
+        return isOpponent;
     }
     
     /**
@@ -255,10 +337,10 @@ public class Grid2D
      */
     public boolean intersectsExisting( Ship2D ship )
     {
-        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
+        Objects.requireNonNull( ship, "ship" ); 
         boolean result  = 
             allShips.stream()
-            .anyMatch( ship::intersects );
+                .anyMatch( ship::intersects );
         return result;
     }
     
@@ -276,12 +358,12 @@ public class Grid2D
      */
     public void put( Ship2D ship )
     {
-        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
+        Objects.requireNonNull( ship, "ship" ); 
         throwIfPastConfig();
         if ( !contains( ship ) )
-            throw new BattleshipException( OUT_OF_BOUNDS + ": " + ship ); //$NON-NLS-1$
+            throw new BattleshipException( OUT_OF_BOUNDS + ": " + ship ); 
         if ( intersectsExisting( ship ) )
-            throw new BattleshipException( INTERSECTS_SHIP + ": " + ship ); //$NON-NLS-1$
+            throw new BattleshipException( INTERSECTS_SHIP + ": " + ship ); 
         
         allShips.add( ship );
         getInteriorPoints( ship )
@@ -302,7 +384,7 @@ public class Grid2D
      */
     public void remove( Ship2D ship )
     {
-        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
+        Objects.requireNonNull( ship, "ship" ); 
         throwIfPastConfig();
         if ( allShips.remove( ship ) )
             getInteriorPoints( ship ).forEach( gridMap::remove );
@@ -320,7 +402,7 @@ public class Grid2D
      */
     public boolean isSplatted( GridCoords coords )
     {
-        Objects.requireNonNull( coords, "coords" ); //$NON-NLS-1$
+        Objects.requireNonNull( coords, "coords" ); 
         Cell2D  cell        = get( coords );
         boolean splatted    = cell == null ? false : cell.isSplatted();
         return splatted;
@@ -338,10 +420,9 @@ public class Grid2D
      */
     public boolean isSunk( Ship2D ship )
     {
-        Objects.requireNonNull( ship, "ship" ); //$NON-NLS-1$
+        Objects.requireNonNull( ship, "ship" ); 
         boolean result  = getInteriorPoints( ship )
             .map( this::get )
-            .filter( c -> c != null )
             .allMatch( c -> c.isSplatted() );
         return result;
     }
@@ -403,9 +484,52 @@ public class Grid2D
      */
     public static Grid2D getGrid( String name )
     {
-        Objects.requireNonNull( name, "name" ); //$NON-NLS-1$
+        Objects.requireNonNull( name, "name" ); 
         Grid2D    grid    = allGrids.get( name );
         return grid;
+    }
+    
+    /**
+     * Reevaluate the num-rows, num-cols initialization.
+     * Package-private: this is a testing aid only.
+     * The caller passes strings for setting 
+     * the num-rows and num-cols properties.
+     * If null values are passed,
+     * the properties are removed,
+     * otherwise the properties are set without validation,
+     * then the num-rows, num-cols properties are reinitialized.
+     * The original values of the properties
+     * are restored immediately after reinitialization.
+     * 
+     * @param strRows   exp number of rows; may be null
+     * @param strCols   exp number of columns; may be null
+     */
+    static void reinitDimensions( String strRows, String strCols )
+    {
+        String  rowsProp    = Constants.NAME_PREFIX + KEY_NUM_ROWS;
+        String  colsProp    = Constants.NAME_PREFIX + KEY_NUM_COLS;
+        String  saveRows    = System.getProperty( rowsProp );
+        String  saveCols    = System.getProperty( colsProp );
+        
+        if ( strRows == null )
+            System.clearProperty( rowsProp );
+        else
+            System.setProperty( rowsProp, strRows );
+        if ( strCols == null )
+            System.clearProperty( colsProp );
+        else
+            System.setProperty( colsProp, strCols );
+        NUM_ROWS = parseIntProperty( KEY_NUM_ROWS, DEF_NUM_ROWS );
+        NUM_COLS = parseIntProperty( KEY_NUM_COLS, DEF_NUM_COLS );
+        
+        if ( saveRows == null )
+            System.clearProperty( rowsProp );
+        else
+            System.setProperty( rowsProp, saveRows );
+        if ( saveCols == null )
+            System.clearProperty( colsProp );
+        else
+            System.setProperty( colsProp, saveCols );
     }
 
     /**
@@ -432,10 +556,10 @@ public class Grid2D
      */
     private Cell2D get( GridCoords coords )
     {
-        Objects.requireNonNull( coords, "coords" ); //$NON-NLS-1$
+        Objects.requireNonNull( coords, "coords" ); 
         Cell2D  cell    = null;
         if ( !contains( coords ) )
-            throw new BattleshipException( OUT_OF_BOUNDS + ": " + coords ); //$NON-NLS-1$
+            throw new BattleshipException( OUT_OF_BOUNDS + ": " + coords ); 
         cell    = gridMap.get( coords );
 
         return cell;

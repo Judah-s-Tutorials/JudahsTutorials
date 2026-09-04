@@ -4,7 +4,7 @@ import java.awt.event.MouseEvent;
 import java.util.Objects;
 
 import com.acmemail.judah.battleship.Label;
-import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship.model.GridCoords;
 
 /**
  * Encapsulates a mouse-related event

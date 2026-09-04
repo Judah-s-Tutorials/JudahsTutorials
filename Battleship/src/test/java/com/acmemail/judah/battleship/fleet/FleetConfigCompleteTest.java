@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Fleet;
-import com.acmemail.judah.battleship2D.Grid2DTestSupport;
+import com.acmemail.judah.battleship.model.Grid2DTestSupport;
 
 class FleetConfigCompleteTest
 {

@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -9,6 +9,8 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.Test;
+
+import com.acmemail.judah.battleship.model.ShipType2D;
 
 class ShipType2DTest
 {

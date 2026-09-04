@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-import com.acmemail.judah.battleship2D.ShipType2D;
+import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
 import com.acmemail.judah.battleship2D.default_ship_types.Carrier;
 import com.acmemail.judah.battleship2D.default_ship_types.Cruiser;

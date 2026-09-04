@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship.sandbox;
+package com.acmemail.judah.battleship.artwork.awt.sandbox;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -9,12 +9,13 @@ import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Fleet;
 import com.acmemail.judah.battleship.Result;
 import com.acmemail.judah.battleship.artwork.awt.GridFrame;
+import com.acmemail.judah.battleship.artwork.awt.GridWindow;
 import com.acmemail.judah.battleship.artwork.awt.GridWindowParent;
-import com.acmemail.judah.battleship2D.Grid2D;
-import com.acmemail.judah.battleship2D.GridCoords;
-import com.acmemail.judah.battleship2D.Orientation;
-import com.acmemail.judah.battleship2D.Ship2D;
-import com.acmemail.judah.battleship2D.ShipTypes;
+import com.acmemail.judah.battleship.model.Grid2D;
+import com.acmemail.judah.battleship.model.GridCoords;
+import com.acmemail.judah.battleship.model.Orientation;
+import com.acmemail.judah.battleship.model.Ship2D;
+import com.acmemail.judah.battleship.model.ShipTypes;
 import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
 import com.acmemail.judah.battleship2D.default_ship_types.Destroyer;
 import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
@@ -23,6 +24,7 @@ public class GraphGridController
 {
     private static GridFrame        gridFrame;
     private static GridWindowParent parent; 
+    private static GridWindow       homeGridWindow;
 
     public static void main(String[] args)
     {
@@ -32,6 +34,8 @@ public class GraphGridController
             .forEach( Grid2D::new );
         gridFrame = GridFrame.getFrame( () -> new GridWindowParent() );
         parent = (GridWindowParent)gridFrame.getClient();
+        homeGridWindow = parent.getGridWindow( grid.getName() );
+        homeGridWindow.addCellListener( System.out::println );
 
         ShipTypes.registerDefaultTypes();
         Fleet   fleet   = new Fleet();
@@ -68,6 +72,7 @@ public class GraphGridController
         grid.attack( new GridCoords( 1, 2 ) );
         grid.attack( new GridCoords( 5, 3 ) );
         grid.attack( new GridCoords( 2, 8 ) );
+        grid.attack( new GridCoords( 4, 4 ) );
         parent.repaint();
     }
     

@@ -27,7 +27,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
-import com.acmemail.judah.battleship2D.ShipType2D;
+import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
 import com.acmemail.judah.battleship2D.default_ship_types.Carrier;
 import com.acmemail.judah.battleship2D.default_ship_types.Cruiser;

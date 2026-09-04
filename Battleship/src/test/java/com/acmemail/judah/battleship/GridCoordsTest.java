@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship.model.GridCoords;
 
 class GridCoordsTest
 {

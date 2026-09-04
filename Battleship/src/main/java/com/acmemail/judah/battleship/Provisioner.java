@@ -2,7 +2,7 @@ package com.acmemail.judah.battleship;
 
 import java.util.List;
 
-import com.acmemail.judah.battleship2D.ShipType2D;
+import com.acmemail.judah.battleship.model.ShipType2D;
 
 /**
  * Implementing classes act as a source for provisioning data,

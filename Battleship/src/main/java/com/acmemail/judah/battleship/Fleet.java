@@ -13,11 +13,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.acmemail.judah.battleship2D.Grid2D;
-import com.acmemail.judah.battleship2D.GridCoords;
-import com.acmemail.judah.battleship2D.Orientation;
-import com.acmemail.judah.battleship2D.Ship2D;
-import com.acmemail.judah.battleship2D.ShipType2D;
+import com.acmemail.judah.battleship.model.Grid2D;
+import com.acmemail.judah.battleship.model.GridCoords;
+import com.acmemail.judah.battleship.model.Orientation;
+import com.acmemail.judah.battleship.model.Ship2D;
+import com.acmemail.judah.battleship.model.ShipType2D;
 
 /**
  * This class keeps track of all ships

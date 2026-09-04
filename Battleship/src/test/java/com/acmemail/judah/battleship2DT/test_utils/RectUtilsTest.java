@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship.model.GridCoords;
 
 class RectUtilsTest
 {

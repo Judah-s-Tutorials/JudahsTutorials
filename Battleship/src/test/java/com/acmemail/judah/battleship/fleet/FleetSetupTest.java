@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Test;
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Fleet;
-import com.acmemail.judah.battleship2D.Orientation;
-import com.acmemail.judah.battleship2D.ShipType2D;
+import com.acmemail.judah.battleship.model.Orientation;
+import com.acmemail.judah.battleship.model.ShipType2D;
 
 class FleetSetupTest
 {

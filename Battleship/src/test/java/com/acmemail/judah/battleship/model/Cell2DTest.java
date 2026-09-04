@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,6 +72,15 @@ class Cell2DTest
         cellShip.setSplatted();
         assertTrue( cellNoShip.isSplatted() );
         assertTrue( cellShip.isSplatted() );
+    }
+    
+    @Test
+    public void testIsOpponent()
+    {
+        Cell2D  cell    = new Cell2D( defCoords );
+        assertFalse( cell.isOpponent() );
+        cell.setOpponent();
+        assertTrue( cell.isOpponent() );
     }
 
     @Test

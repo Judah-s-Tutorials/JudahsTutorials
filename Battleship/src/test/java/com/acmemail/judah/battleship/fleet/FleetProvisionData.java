@@ -7,11 +7,11 @@ import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Fleet;
 import com.acmemail.judah.battleship.Result;
 import com.acmemail.judah.battleship.StatusMessages;
-import com.acmemail.judah.battleship2D.GridCoords;
-import com.acmemail.judah.battleship2D.Orientation;
-import com.acmemail.judah.battleship2D.Ship2D;
-import com.acmemail.judah.battleship2D.ShipType2D;
-import com.acmemail.judah.battleship2D.ShipTypes;
+import com.acmemail.judah.battleship.model.GridCoords;
+import com.acmemail.judah.battleship.model.Orientation;
+import com.acmemail.judah.battleship.model.Ship2D;
+import com.acmemail.judah.battleship.model.ShipType2D;
+import com.acmemail.judah.battleship.model.ShipTypes;
 
 class FleetProvisionData
 {

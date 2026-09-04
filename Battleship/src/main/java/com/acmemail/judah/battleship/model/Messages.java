@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
 
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;

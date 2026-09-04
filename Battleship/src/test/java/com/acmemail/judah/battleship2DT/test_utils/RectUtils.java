@@ -8,7 +8,7 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import com.acmemail.judah.battleship2D.GridCoords;
+import com.acmemail.judah.battleship.model.GridCoords;
 
 /**
  * Set of utilities for performing operations on Rectangles.

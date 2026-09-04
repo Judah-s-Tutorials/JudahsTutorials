@@ -1,4 +1,6 @@
-package com.acmemail.judah.battleship2D;
+package com.acmemail.judah.battleship.model;
+
+import com.acmemail.judah.battleship.model.Grid2D;
 
 /**
  * Test-only bridge exposing Grid2D's package-private
