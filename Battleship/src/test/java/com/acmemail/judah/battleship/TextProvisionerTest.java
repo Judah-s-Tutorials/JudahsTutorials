@@ -259,7 +259,6 @@ class TextProvisionerTest
     public void testTypeGoWrongDefDup()
     {
         TextProvisioner provisioner = TextProvisioner.of();
-        ShipType2D      type        = battleshipType;
         
         // First time should work, second time should fail with many dupes
         provisioner.addRec( "type,default" );

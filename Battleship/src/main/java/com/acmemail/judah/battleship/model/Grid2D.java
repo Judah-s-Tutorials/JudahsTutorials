@@ -20,13 +20,14 @@ import java.util.stream.Stream;
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Constants;
+import com.acmemail.judah.battleship.Messages;
 
 /**
  * Maintains a map of grid coordinates to cells in a rectangle.
  * Each cell indicates which ship occupies it, if any,
  * and whether or not the cell has been attacked.
  * If a cell does not exist for a location, 
- * then that location does not contain a ship,
+ * then that location does not contain a known ship,
  * and has not been attacked.
  * A client can perform the following common operations:
  * <ol>
@@ -70,24 +71,45 @@ import com.acmemail.judah.battleship.Constants;
  */
 public class Grid2D
 {
+    /** 
+     * Error message indicating that an operation has been failed
+     * because the configuration phase of this application is finished.
+     */
     private static final String CONFIG_OVER             =
-        Messages.getString("Grid2D.1"); 
-    private static final String CONFIG_NOT_COMPLETE             =
-        Messages.getString("Grid2D.2"); 
-    private static final String DEF_GRID_NAME           = "HOME"; 
+        Messages.getString("StatusMessages.6"); 
+    /** 
+     * Error message indicating that an operation has been failed
+     * because the configuration phase of this application is in progress.
+     */
+    private static final String CONFIG_NOT_COMPLETE     =
+        Messages.getString("StatusMessages.7"); 
+    /** The home grid name. */
+    private static final String HOME_GRID_NAME          = Constants.HOME_GRID;
+    /** Map of all instantiated grids, using the grid name as the key. */
     private static final Map<String,Grid2D> allGrids    = new HashMap<>();
 
     /** 
+     * Number of rows in the grids for this application.
      * This field is effectively final, but, for testing purposes,
      * it's not declared final. There should be no way for a non-test
      * client to set this variable directly.
      */
     private static int          NUM_ROWS;
+    /** 
+     * Number of columns in the grids for this application.
+     * This field is effectively final, but, for testing purposes,
+     * it's not declared final. There should be no way for a non-test
+     * client to set this variable directly.
+     */
     private static int          NUM_COLS;
     
+    /** A map of all non-default cells in the map. */
     private final HashMap<GridCoords,Cell2D>    gridMap = new HashMap<>();
+    /** List of all ships know to be present in the grid. */
     private final List<Ship2D>  allShips    = new ArrayList<>();
+    /** The name of this grid. */
     private final String        name;
+    /** The bounds of this grid, in cells. */
     private final Rectangle     bounds;
     
     static
@@ -101,7 +123,7 @@ public class Grid2D
      */
     public Grid2D()
     {
-        this( DEF_GRID_NAME );
+        this( HOME_GRID_NAME );
     }
     
     /**
@@ -262,6 +284,8 @@ public class Grid2D
      * 
      * @param coords    the coordinates of the cell to interrogate
      * 
+     * @return  true, if this cell is known to belong to an opponent
+     * 
      * @throws NullPointerException if coords is null
      * @throws BattleshipException if coords is out of bounds
      */
@@ -281,6 +305,8 @@ public class Grid2D
      * 
      * @param xco   the given x-coordinate
      * @param yco   the given y-coordinate
+     * 
+     * @return  true, if this cell is known to belong to an opponent
      * 
      * @throws BattleshipException if coordinates are out of bounds
      */
@@ -453,7 +479,7 @@ public class Grid2D
      */
     public static Grid2D getHomeGrid()
     {
-        Grid2D    home    = allGrids.get( DEF_GRID_NAME );
+        Grid2D    home    = allGrids.get( HOME_GRID_NAME );
         if ( home == null )
             home = new Grid2D();
         return home;

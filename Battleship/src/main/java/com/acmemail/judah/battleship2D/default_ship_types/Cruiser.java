@@ -9,6 +9,7 @@ import com.acmemail.judah.battleship.model.ShipType2D;
 
 public class Cruiser
 {
+    /** This ship type. */
     private static final ShipType2D  type    =
         new ShipType2D(
             Constants.DEF_CRUISER_NAME,
@@ -17,6 +18,19 @@ public class Cruiser
             null
         );
 
+    /**
+     * Default constructor; not used.
+     */
+    private Cruiser()
+    {
+        // not used
+    }
+    
+    /**
+     * Gets this ship type.
+     * 
+     * @return this ship type
+     */
     public static ShipType2D getType()
     {
         return type;

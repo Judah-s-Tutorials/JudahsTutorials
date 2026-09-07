@@ -2,10 +2,13 @@ package com.acmemail.judah.battleship.artwork.awt;
 
 import java.awt.Container;
 import java.lang.reflect.InvocationTargetException;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
+
+import com.acmemail.judah.battleship.BattleshipException;
 
 /**
  * Encapsulate an application frame
@@ -66,9 +69,14 @@ public class GridFrame
      * @param supplier  supplier of the application's main window
      * 
      * @return  the instantiated {@code GridFrame}
+     * 
+     * @throws NullPointerException if supplier is null
+     * @throws BattleshipException 
+     *      if an error occurs while executing on the EDT
      */
     public static GridFrame getFrame( Supplier<Container> supplier )
     {
+        Objects.requireNonNull( supplier, "supplier" );
         GridFrame[] gridFrame   = new GridFrame[1];
         if ( SwingUtilities.isEventDispatchThread() )
             gridFrame[0] = new GridFrame( supplier );
@@ -82,8 +90,8 @@ public class GridFrame
             }
             catch ( InvocationTargetException | InterruptedException exc )
             {
-                exc.printStackTrace();
-                System.exit( 1 );
+                String  msg = "Unexpected exception on EDT";
+                throw new BattleshipException( msg, exc );
             }
         }
         return gridFrame[0];

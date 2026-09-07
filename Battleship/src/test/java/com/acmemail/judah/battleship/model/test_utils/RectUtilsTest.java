@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2DT.test_utils;
+package com.acmemail.judah.battleship.model.test_utils;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

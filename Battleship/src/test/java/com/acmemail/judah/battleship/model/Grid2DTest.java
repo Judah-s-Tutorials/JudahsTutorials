@@ -30,7 +30,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Constants;
-import com.acmemail.judah.battleship2DT.test_utils.RectUtils;
+import com.acmemail.judah.battleship.model.test_utils.RectUtils;
 
 class Grid2DTest
 {
@@ -636,6 +636,39 @@ class Grid2DTest
         actNumCols  = Grid2D.getNumCols();
         assertEquals( expNumRows, actNumRows );
         assertEquals( expNumCols, actNumCols );
+        
+        // Complete test coverage of reinitDimensions itself
+        String  rowsName = Constants.NAME_PREFIX + Constants.KEY_NUM_ROWS;
+        String  colsName = Constants.NAME_PREFIX + Constants.KEY_NUM_COLS;
+        
+        // Start with null properties, call reinitDimensions with non-null
+        // values, verify that properties are correctly returned to null
+        // on completion.
+        System.clearProperty( rowsName );
+        System.clearProperty( colsName );
+        Grid2D.reinitDimensions( numRowsStr, numColsStr );
+        actNumRows  = Grid2D.getNumRows();
+        actNumCols  = Grid2D.getNumCols();
+        assertEquals( expNumRows, actNumRows );
+        assertEquals( expNumCols, actNumCols );
+        assertNull( System.getProperty( rowsName ) );
+        assertNull( System.getProperty( colsName ) );
+        
+        // Start with explicit property values, call reinitDimensions with 
+        // non values, verify that explicit property values are correctly reset
+        // on completion.
+        String  rowsProp        = "101";
+        String  colsProp        = "102";
+        System.setProperty( rowsName, rowsProp );
+        System.setProperty( colsName, colsProp );
+        Grid2D.reinitDimensions( null, null );
+        actNumRows  = Grid2D.getNumRows();
+        actNumCols  = Grid2D.getNumCols();
+        assertEquals( Constants.DEF_NUM_ROWS, actNumRows );
+        assertEquals( Constants.DEF_NUM_COLS, actNumCols );
+        assertEquals( rowsProp, System.getProperty( rowsName ) );
+        assertEquals( colsProp, System.getProperty( colsName ) );
+
     }
 
     @Test

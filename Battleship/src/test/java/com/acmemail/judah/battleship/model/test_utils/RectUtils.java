@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2DT.test_utils;
+package com.acmemail.judah.battleship.model.test_utils;
 
 import java.awt.Dimension;
 import java.awt.Point;

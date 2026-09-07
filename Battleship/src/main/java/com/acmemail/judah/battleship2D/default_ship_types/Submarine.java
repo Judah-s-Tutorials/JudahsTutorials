@@ -6,9 +6,9 @@ import com.acmemail.judah.battleship.model.ShipType2D;
 /**
  * Encapsulates the submarine default ship type.
  */
-
 public class Submarine
 {
+    /** This ship type. */
     private static final ShipType2D  type    =
         new ShipType2D(
             Constants.DEF_SUBMARINE_NAME,
@@ -17,6 +17,19 @@ public class Submarine
             null
         );
 
+    /**
+     * Default constructor; not used.
+     */
+    private Submarine()
+    {
+        // not used
+    }    
+
+    /**
+     * Gets this ship type.
+     * 
+     * @return this ship type
+     */
     public static ShipType2D getType()
     {
         return type;

@@ -2,6 +2,16 @@ package com.acmemail.judah.battleship.model;
 
 import java.util.Objects;
 
+/**
+ * Encapsulates the properties of a logical cell in the grid.
+ * These include:
+ * <ul>
+ * <li>The cell's Cartesian coordinates.</li>
+ * <li>The ID of the ship that owns this cell, if known.</li>
+ * <li>An indication of whether this cell has been attacked.</li>
+ * <li>An indication that this cell belongs to an opponent's ship.</li>
+ * </ul>
+ */
 public class Cell2D implements Cell2DView
 {
     /** X and y-coordinates of this cell. */

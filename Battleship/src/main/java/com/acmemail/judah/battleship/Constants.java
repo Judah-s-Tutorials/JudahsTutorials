@@ -26,6 +26,8 @@ public class Constants
     public static final int     DEF_NUM_ROWS    = 10;
     /** Default number of columns in the grid. */
     public static final int     DEF_NUM_COLS    = 10;
+    /** The default name of the home grid. */
+    public static final String  HOME_GRID       = "HOME";
     
     /*************************/
     /* Default ship lengths. */

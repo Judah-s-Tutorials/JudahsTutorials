@@ -3,14 +3,11 @@ package com.acmemail.judah.battleship.model;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.Test;
-
-import com.acmemail.judah.battleship.model.ShipType2D;
 
 class ShipType2DTest
 {

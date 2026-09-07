@@ -21,12 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.acmemail.judah.battleship.model.GridCoords;
-import com.acmemail.judah.battleship.model.Orientation;
-import com.acmemail.judah.battleship.model.Ship2D;
-import com.acmemail.judah.battleship.model.ShipType2D;
-import com.acmemail.judah.battleship.model.ShipTypes;
-import com.acmemail.judah.battleship2DT.test_utils.RectUtils;
+import com.acmemail.judah.battleship.model.test_utils.RectUtils;
 
 class Ship2DTest
 {
@@ -254,6 +249,13 @@ class Ship2DTest
     
     @Test
     public void testGetTypeName()
+    {
+        assertEquals( ship2DHCo, ship2DH.getCoords() );
+        assertEquals( ship2DVCo, ship2DV.getCoords() );
+    }
+    
+    @Test
+    public void testGetCoords()
     {
         assertEquals( TEST_TYPE_NAME2D, ship2DH.getTypeName() );
     }

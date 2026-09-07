@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D.default_ship_types;
+package com.acmemail.judah.battleship.default_ship_types;
 
 import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_BREADTH;
 import static com.acmemail.judah.battleship.Constants.DEF_BATTLESHIP_LEN;
@@ -25,6 +25,11 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.acmemail.judah.battleship.model.ShipType2D;
+import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
+import com.acmemail.judah.battleship2D.default_ship_types.Carrier;
+import com.acmemail.judah.battleship2D.default_ship_types.Cruiser;
+import com.acmemail.judah.battleship2D.default_ship_types.Destroyer;
+import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
 
 /**
  * Verifies that each default ship type class
