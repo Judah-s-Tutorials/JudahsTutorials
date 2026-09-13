@@ -44,4 +44,16 @@ public class Grid2DTestSupport
     {
         grid.clear();
     }
+    
+    /**
+     * Invokes the package-private reinitDimensions method
+     * in Grid2D.
+     * 
+     * @param strRows   the number of rows to reinit to
+     * @param strCols   the number of columns to reinit to
+     */
+    public static void reinitDimensions( String strRows, String strCols )
+    {
+        Grid2D.reinitDimensions( strRows, strCols );
+    }
 }

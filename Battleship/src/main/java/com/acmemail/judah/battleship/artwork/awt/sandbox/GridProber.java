@@ -6,10 +6,14 @@ import static com.acmemail.judah.battleship.Constants.KEY_NUM_ROWS;
 import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.IntStream;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Constants;
@@ -71,21 +75,49 @@ public class GridProber
     private static final int    EXP_NUM_COLS    = 10;
     private static final int    EXP_NUM_ROWS    = 15;
     
+    private static JFrame       dummyFrame;
+    private static GridWindow   window;
+    private static Dimension    gridWindowSize;
+    
     public static void main( String[] args )
     {
         initGrid2D();
         Grid2D          grid        = new Grid2D();
-        GridWindow      window      = new GridWindow( grid );
-        Dimension       dim         = window.getPreferredSize();
+        initGridwindow( grid );
+        
         int             type        = BufferedImage.TYPE_INT_ARGB;
         BufferedImage   image       = new 
-            BufferedImage( dim.width, dim.height, type );
+            BufferedImage( gridWindowSize.width, gridWindowSize.height, type );
         window.paintComponent( image.getGraphics() );
         GridProperties  props   = new GridProperties( image, grid );
         System.out.println( props.gridBounds );
         verifyHorizontalGridlines( props );
         verifyVerticalGridlines( props );
         verifyCellInterior( props );
+        dummyFrame.dispose();
+    }
+    
+    private static void initGridwindow( Grid2D grid )
+    {
+        invokeAndWait( () -> {
+            window = new GridWindow( grid );
+            dummyFrame = new JFrame();
+            dummyFrame.setContentPane( window );
+            dummyFrame.pack();
+            gridWindowSize = window.getPreferredSize();
+        });
+    }
+    
+    private static void invokeAndWait( Runnable runner )
+    {
+        try
+        {
+            SwingUtilities.invokeAndWait( () -> runner.run() );
+        }
+        catch ( InterruptedException | InvocationTargetException exc )
+        {
+            throw new BattleshipException( "unexpect exception", exc );
+        }
     }
     
     private static void initGrid2D()

@@ -20,6 +20,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
 import javax.swing.JPanel;
@@ -140,9 +141,12 @@ public class GridWindow extends JPanel
      * Fully configures this window.
      * 
      * @param grid  the logical grid that controls this window
+     * 
+     * @throws NullPointerException if grid is null
      */
     public GridWindow( Grid2D grid )
     {
+        Objects.requireNonNull( grid, "grid" );
         this.grid = grid;
         
         // Get the splat image. This task is delegated to a helper method
@@ -268,6 +272,64 @@ public class GridWindow extends JPanel
     public void deselect( Rectangle rect )
     {
         select ( () -> selectedCells.remove( rect ) );
+    }
+    
+    /**
+     * Sets the scale factor using the given value.
+     * The actual scale factor will be forced
+     * into the range [minScaleFactor,maxScaleFactor].
+     * The initial value of this property is 1.
+     * 
+     * @param newScale  the given value
+     */
+    public void setScale( double newScale )
+    {
+        if ( newScale > maxScale )
+            scaleFactor = maxScale;
+        else if ( newScale < minScale )
+            scaleFactor = minScale;
+        else
+            scaleFactor = newScale;
+    }
+    
+    /**
+     * Gets the current scale factor.
+     * 
+     * @return  the current scale factor
+     */
+    public double getScale()
+    {
+        return scaleFactor;
+    }
+    
+    /**
+     * Gets the minimum scale factor.
+     * 
+     * @return  the minimum scale factor
+     */
+    public double getMinScale()
+    {
+        return minScale;
+    }
+    
+    /**
+     * Gets the maximum scale factor.
+     * 
+     * @return  the maximum scale factor
+     */
+    public double getMaxScale()
+    {
+        return maxScale;
+    }
+    
+    /**
+     * Gets the logical grid encapsulated in this object.
+     * 
+     * @return  the logical grid encapsulated in this object
+     */
+    public Grid2D getGrid()
+    {
+        return grid;
     }
     
     @Override

@@ -1,7 +1,6 @@
 package com.acmemail.judah.battleship.artwork.awt;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Color;
 import java.awt.Graphics2D;

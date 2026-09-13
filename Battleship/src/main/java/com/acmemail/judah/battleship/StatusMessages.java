@@ -57,4 +57,6 @@ public class StatusMessages
         Messages.getString("StatusMessages.24"); //$NON-NLS-1$
     public static final String  INVALID_ARG_COUNT   =
         Messages.getString("StatusMessages.25"); //$NON-NLS-1$
+    public static final String  NOT_REALIZED        =
+        Messages.getString("StatusMessages.26"); //$NON-NLS-1$
 }
