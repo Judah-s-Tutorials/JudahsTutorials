@@ -27,7 +27,6 @@ public class TestUtils
         try
         {
             SwingUtilities.invokeAndWait( () -> runner.run() );
-            System.out.println( "done" );
         }
         catch ( InterruptedException | InvocationTargetException exc )
         {

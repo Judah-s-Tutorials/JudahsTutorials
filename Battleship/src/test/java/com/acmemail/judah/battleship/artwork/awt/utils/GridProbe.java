@@ -7,12 +7,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 import javax.swing.JFrame;
 
@@ -189,6 +191,86 @@ public class GridProbe
     public int getGridLineWidth()
     {
         return gridLineWidth;
+    }
+    
+    public Point validateHorizontalGridLines()
+    {
+        Point   result  = 
+            IntStream.range( 0, gridBounds.height )
+                .filter( i -> i % cellSide == 0 )
+                .map( i -> i + gridBounds.y )
+                .filter( y -> !isHorizontalGridLine( y ) )
+                .mapToObj( y -> new Point( gridBounds.x, y ) )
+                .findFirst().orElse( null );
+        return result;
+    }
+    
+    private boolean isHorizontalGridLine( int yco )
+    {
+        int     xcoStart    = gridBounds.x;
+        int     xcoEnd      = xcoStart + gridBounds.width;
+        boolean result      =
+            !IntStream.range( xcoStart, xcoEnd )
+                .map( xco -> image.getRGB( xco, yco ) )
+                .anyMatch( color -> color != gridlineColor );
+        return result;
+    }
+    
+    public Rectangle getCellBounds( int xco, int yco )
+    {
+        if ( xco >= Grid2D.getNumCols() )
+            throw new IndexOutOfBoundsException( "xco: " + xco );
+        if ( xco >= Grid2D.getNumRows() )
+            throw new IndexOutOfBoundsException( "yco: " + yco );
+        xco = gridBounds.x + xco * cellSide;
+        yco = gridBounds.y + yco * cellSide;
+        Rectangle   rect    = new Rectangle( xco, yco, cellSide, cellSide );
+        return rect;
+    }
+    
+    public Point validateVerticalGridLines()
+    {
+        Point   result  = 
+            IntStream.range( 0, gridBounds.height )
+                .filter( i -> i % cellSide == 0 )
+                .map( i -> i + gridBounds.x )
+                .filter( x -> !isVerticalGridLine( x ) )
+                .mapToObj( x -> new Point( x, gridBounds.y ) )
+                .findFirst().orElse( null );
+        return result;
+    }
+    
+    private boolean isVerticalGridLine( int xco )
+    {
+        int     ycoStart    = gridBounds.y;
+        int     ycoEnd      = ycoStart + gridBounds.height;
+        boolean result      =
+            !IntStream.range( ycoStart, ycoEnd )
+                .map( yco -> image.getRGB( xco, yco ) )
+                .anyMatch( color -> color != gridlineColor );
+        return result;
+    }
+    
+    public Point validateCellInterior()
+    {
+        Point   point   = null;
+        int     minXco  = gridBounds.x + cellSide / 2;
+        int     maxXco  = (int)gridBounds.getMaxX();
+        int     minYco  = gridBounds.y + cellSide / 2;
+        int     maxYco  = (int)gridBounds.getMaxY();
+        
+        int     yco     = minYco;
+        for ( ; yco < maxYco && point == null ; yco += cellSide )
+        {
+            int xco     = minXco;
+            for ( ; xco < maxXco && point == null ; xco += cellSide )
+            {
+                int color   = image.getRGB( xco, yco );
+                if ( color != backgroundColor )
+                    point = new Point( xco, yco );
+            }
+        }
+        return point;
     }
 
     /**

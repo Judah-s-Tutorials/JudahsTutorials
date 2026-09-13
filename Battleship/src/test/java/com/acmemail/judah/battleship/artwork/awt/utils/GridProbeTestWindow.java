@@ -22,9 +22,10 @@ import com.acmemail.judah.battleship.model.Grid2D;
  * It makes the same kind of physical grid that GridWindow does
  * but eliminates the labels,
  * and exposes all its properties,
- * background color, grid color cell side length, etc.
+ * background color, grid color cell side length, etc.,
  * so that the properties derived by the GridProbe class
- * can ba validated against actual values. To use it:
+ * can be validated against actual values.
+ * To use it:
  * <ol>
  *      <li>
  *      Configure the number of rows and columns
@@ -43,7 +44,7 @@ import com.acmemail.judah.battleship.model.Grid2D;
  *      </li>
  * </ol>
  */
-@SuppressWarnings("serial")
+@SuppressWarnings({ "serial" })
 class GridProbeTestWindow extends GridWindow
 {
     /** 
@@ -72,7 +73,8 @@ class GridProbeTestWindow extends GridWindow
     /**
      * Constructor.
      * Instantiates a GridProbeTestWindow encapsulating
-     * the given logical grid. You may specify null for the logical grid
+     * the given logical grid. 
+     * You may specify null for the logical grid
      * in which case the home grid will be used.
      * If non-null, the frame argument
      * represents the root of the window hierarchy

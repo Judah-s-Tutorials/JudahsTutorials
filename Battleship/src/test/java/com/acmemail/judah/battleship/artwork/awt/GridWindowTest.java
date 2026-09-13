@@ -1,23 +1,30 @@
 package com.acmemail.judah.battleship.artwork.awt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.awt.Component;
 import java.awt.Dimension;
-import java.lang.reflect.InvocationTargetException;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.util.Arrays;
 
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.artwork.awt.utils.GridProbe;
+import com.acmemail.judah.battleship.artwork.awt.utils.TestUtils;
 import com.acmemail.judah.battleship.model.Grid2D;
 import com.acmemail.judah.battleship.model.Grid2DTestSupport;
+import com.acmemail.judah.battleship.model.GridCoords;
 
 class GridWindowTest
 {
@@ -50,19 +57,90 @@ class GridWindowTest
     @Test
     void testGridWindow()
     {
-        fail("Not yet implemented");
+        GridProbe   probe   = defGridWindow.getProbe();
+        Point       point   = probe.validateHorizontalGridLines();
+        assertNull( point );
+        point = probe.validateHorizontalGridLines();
+        assertNull( point );
+        point = probe.validateCellInterior();
+        assertNull( point );
     }
 
     @Test
     void testAddCellListener()
     {
-        fail("Not yet implemented");
+        int         numRows = Grid2D.getNumRows();
+        int         numCols = Grid2D.getNumCols();
+        GridWindow  grid    = defGridWindow.getGridWindow();
+        boolean[][] result  = new boolean[numRows][numCols];
+        Arrays.stream( result ).forEach( a -> Arrays.fill( a, false ) );
+        grid.addCellListener( e -> {
+            GridCoords  coords  = e.coords();
+            result[coords.xco()][coords.yco()] = true;
+        });
+        
+        GridProbe   probe   = defGridWindow.getProbe();
+        for ( int row = 0 ; row < numRows ; ++row )
+            for ( int col = 0 ; col < numCols ; ++col )
+            {
+                Rectangle   rect    = probe.getCellBounds( col, row );
+                int         xco     = (int)rect.getCenterX();
+                int         yco     = (int)rect.getCenterY();
+                MouseEvent  mEvt    = getMouseClickEvent( xco, yco );
+                assertFalse( result[col][row] );
+                TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+                assertTrue( result[col][row] );
+            }
     }
 
     @Test
     void testRemoveCellListener()
     {
-        fail("Not yet implemented");
+        GridProbe       probe   = defGridWindow.getProbe();
+        Rectangle       rect    = probe.getCellBounds( 0, 0 );
+        int             xco     = (int)rect.getCenterX();
+        int             yco     = (int)rect.getCenterY();
+        MouseEvent      mEvt    = getMouseClickEvent( xco, yco );
+
+        boolean[]       result  = { false, false };
+        CellListener    list0   = e -> result[0] = true;
+        CellListener    list1   = e -> result[1] = true;
+        GridWindow      grid    = defGridWindow.getGridWindow();
+        
+        grid.addCellListener( list0 );
+        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        assertTrue( result[0] );
+        assertFalse( result[1] );
+        
+        result[0] = false;
+        result[1] = false;
+        grid.addCellListener( list1 );
+        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        assertTrue( result[0] );
+        assertTrue( result[1] );
+        
+        result[0] = false;
+        result[1] = false;
+        grid.removeCellListener( list1 );
+        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        assertTrue( result[0] );
+        assertFalse( result[1] );
+        
+        result[0] = false;
+        result[1] = false;
+        grid.removeCellListener( list0 );
+        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        assertFalse( result[0] );
+        assertFalse( result[1] );
+        
+        // Cover the branches in removeCellListener
+        // where we try to remove a listener that isn't there.
+        result[0] = false;
+        result[1] = false;
+        grid.removeCellListener( list0 );
+        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        assertFalse( result[0] );
+        assertFalse( result[1] );
     }
 
     @Test
@@ -128,29 +206,28 @@ class GridWindowTest
         assertEquals( maxScale, window.getScale() );
     }
     
-//    private static void initGridwindow( Grid2D grid )
-//    {
-//    }
-    
-    /**
-     * Executes the given Runnable on the EDT.
-     * 
-     * @param runner    the given Runnable
-     * 
-     * @throws BattleshipException if the operation on the EDT fails
-     */
-    private static void invokeAndWait( Runnable runner )
+    private MouseEvent getMouseClickEvent( int xco, int yco )
     {
-        try
-        {
-            SwingUtilities.invokeAndWait( () -> runner.run() );
-        }
-        catch ( InterruptedException | InvocationTargetException exc )
-        {
-            throw new BattleshipException( "unexpect exception", exc );
-        }
+        MouseEvent  clickEvent  = 
+            getMouseClickEvent( defGridWindow.getGridWindow(), xco, yco );
+        return clickEvent;
     }
     
+    private MouseEvent getMouseClickEvent( Component source, int xco, int yco )
+    {
+        MouseEvent clickEvent = new MouseEvent(
+            source,                         // Source component
+            MouseEvent.MOUSE_CLICKED,       // Event type
+            System.currentTimeMillis(),     // Timestamp
+            0,                              // Modifiers
+            xco, yco,                       // X and Y coordinates
+            1,                              // Click count
+            false,                          // Popup trigger
+            MouseEvent.BUTTON1              // Mouse button (Left click)
+        );
+        return clickEvent;
+    }
+
     /**
      * Instantiates, configures, and provides access to a GridWindow.
      * Where necessary, operations are performed on the EDT.
@@ -164,9 +241,8 @@ class GridWindowTest
         private final GridWindow    gridWindow;
         /** The grid encapsulated in the GridWindow. */
         private final Grid2D        grid;
-        
-        /** Used ad hoc in functional interface implementations. */
-        private static volatile Object temp;
+        /** Probe to characterize encapsulated GridWindow. */
+        private GridProbe           probe;
         
         /**
          * Constructor.
@@ -184,7 +260,6 @@ class GridWindowTest
             dummyFrame.setContentPane( gridWindow );
             dummyFrame.pack();
         }
-        
         
         /**
          * Instantiates a GridWindowProps incorporating 
@@ -209,10 +284,11 @@ class GridWindowTest
          * 
          * @return  the instantiated GridWindowProps object
          */
-        public static synchronized GridWindowProps getInstance( Grid2D grid )
+        public static GridWindowProps getInstance( Grid2D grid )
         {
-            invokeAndWait( () -> temp = new GridWindowProps( grid ) );
-            return (GridWindowProps)temp;
+            GridWindowProps windowProps =
+                TestUtils.invokeAndWaitGet( () -> new GridWindowProps( grid ) );
+            return windowProps;
         }
         
         /**
@@ -220,10 +296,13 @@ class GridWindowTest
          * 
          * @return  the GridWindow's preferred size
          */
-        public synchronized Dimension getPreferredSize()
+        public Dimension getPreferredSize()
         {
-            invokeAndWait( () -> temp = gridWindow.getPreferredSize() );
-            return (Dimension)temp;
+            Dimension   size    = 
+                TestUtils.invokeAndWaitGet( () -> 
+                    gridWindow.getPreferredSize() 
+                );
+            return size;
         }
         
         /**
@@ -231,7 +310,7 @@ class GridWindowTest
          */
         public void dispose()
         {
-            invokeAndWait( () -> dummyFrame.dispose() );
+            TestUtils.invokeAndWait( () -> dummyFrame.dispose() );
         }
         
         /**
@@ -264,5 +343,16 @@ class GridWindowTest
             return grid;
         }
 
+        /**
+         * Gets a GridProbe describing the encapsulated GridWindow.
+         * 
+         * @return a GridProbe describing the encapsulated GridWindow
+         */
+        public GridProbe getProbe()
+        {
+            if ( probe == null )
+                probe = GridProbe.getProbe( gridWindow );
+            return probe;
+        }
     }
 }
