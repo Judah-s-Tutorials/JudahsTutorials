@@ -216,15 +216,15 @@ public class GridProbe
         return result;
     }
     
-    public Rectangle getCellBounds( int xco, int yco )
+    public Rectangle getCellBounds( int col, int row )
     {
-        if ( xco >= Grid2D.getNumCols() )
-            throw new IndexOutOfBoundsException( "xco: " + xco );
-        if ( xco >= Grid2D.getNumRows() )
-            throw new IndexOutOfBoundsException( "yco: " + yco );
-        xco = gridBounds.x + xco * cellSide;
-        yco = gridBounds.y + yco * cellSide;
-        Rectangle   rect    = new Rectangle( xco, yco, cellSide, cellSide );
+        if ( col >= Grid2D.getNumCols() )
+            throw new IndexOutOfBoundsException( "xco: " + col );
+        if ( row >= Grid2D.getNumRows() )
+            throw new IndexOutOfBoundsException( "yco: " + row );
+        col = gridBounds.x + col * cellSide;
+        row = gridBounds.y + row * cellSide;
+        Rectangle   rect    = new Rectangle( col, row, cellSide, cellSide );
         return rect;
     }
     

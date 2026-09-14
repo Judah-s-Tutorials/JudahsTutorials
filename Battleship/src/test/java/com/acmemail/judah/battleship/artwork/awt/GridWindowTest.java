@@ -8,10 +8,14 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -20,19 +24,35 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.artwork.awt.utils.GridProbe;
 import com.acmemail.judah.battleship.artwork.awt.utils.TestUtils;
 import com.acmemail.judah.battleship.model.Grid2D;
 import com.acmemail.judah.battleship.model.Grid2DTestSupport;
 import com.acmemail.judah.battleship.model.GridCoords;
+import com.acmemail.judah.battleship.model.Orientation;
+import com.acmemail.judah.battleship.model.Ship2D;
+import com.acmemail.judah.battleship.model.ShipType2D;
+import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
 
 class GridWindowTest
 {
+    /** Number of rows in Grid2D; should be different from TEST_COLS. */
+    private static final int    TEST_ROWS   = 10;
+    /** Number of columns in Grid2D; should be different from TEST_COLS. */
+    private static final int    TEST_COLS   = 15;
+    
+    private static int          selectColor;
+    private static int          shipColor;
+    private static int          splatColor;
+    
     private GridWindowProps defGridWindow;
     
     @BeforeAll
     public static void beforeAll()
     {
+        Grid2DTestSupport.setGridBounds( TEST_ROWS, TEST_COLS );
+        getMiscColors();
     }
 
     @BeforeEach
@@ -55,7 +75,7 @@ class GridWindowTest
     }
 
     @Test
-    void testGridWindow()
+    public void testGridWindow()
     {
         GridProbe   probe   = defGridWindow.getProbe();
         Point       point   = probe.validateHorizontalGridLines();
@@ -67,7 +87,7 @@ class GridWindowTest
     }
 
     @Test
-    void testAddCellListener()
+    public void testAddCellListener()
     {
         int         numRows = Grid2D.getNumRows();
         int         numCols = Grid2D.getNumCols();
@@ -76,7 +96,7 @@ class GridWindowTest
         Arrays.stream( result ).forEach( a -> Arrays.fill( a, false ) );
         grid.addCellListener( e -> {
             GridCoords  coords  = e.coords();
-            result[coords.xco()][coords.yco()] = true;
+            result[coords.yco()][coords.xco()] = true;
         });
         
         GridProbe   probe   = defGridWindow.getProbe();
@@ -87,14 +107,14 @@ class GridWindowTest
                 int         xco     = (int)rect.getCenterX();
                 int         yco     = (int)rect.getCenterY();
                 MouseEvent  mEvt    = getMouseClickEvent( xco, yco );
-                assertFalse( result[col][row] );
+                assertFalse( result[row][col] );
                 TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
-                assertTrue( result[col][row] );
+                assertTrue( result[row][col] );
             }
     }
 
     @Test
-    void testRemoveCellListener()
+    public void testRemoveCellListener()
     {
         GridProbe       probe   = defGridWindow.getProbe();
         Rectangle       rect    = probe.getCellBounds( 0, 0 );
@@ -144,43 +164,84 @@ class GridWindowTest
     }
 
     @Test
-    void testDispatchEventCellEvent()
+    public void testDispatchEventCellEvent()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testSelect()
+    public void testSelect()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testSelectGridCoords()
+    public void testSelectGridCoords()
+    {
+        int         bgColor     = defGridWindow.getProbe().getBackgroundColor();
+        GridWindow  window      = defGridWindow.getGridWindow();
+        int[][]     expRaster   = defGridWindow.getCellRaster();
+        // Sanity check
+        for ( int[] row : expRaster )
+            for ( int cellColor : row )
+                assertEquals( bgColor, cellColor );
+        for ( int row = 0 ; row < expRaster.length ; ++row )
+            for ( int col = 0 ; col < expRaster[row].length ; ++col)
+            {
+                expRaster[row][col]     = selectColor;
+                GridCoords  coords      = new GridCoords( col, row );
+                window.select( coords );
+                int[][]     actRaster   = defGridWindow.getCellRaster();
+                assertArrEquals( expRaster, actRaster );
+            }
+    }
+    
+    private static void assertArrEquals( int[][] arr1, int[][] arr2 )
+    {
+        assertEquals( arr1.length, arr2.length, "rows" );
+        for ( int row = 0 ; row < arr1.length ; ++row )
+        {
+            assertEquals( arr1[row].length, arr2[row].length );
+            for ( int col = 0 ; col < arr1[row].length ; ++col )
+            {
+                String  comment =
+                    String.format( "[%d][%d]", row, col );
+                assertEquals( arr1[row][col], arr2[row][col], comment );
+            }
+        }
+    }
+    
+    void printArr( int[][] arr )
+    {
+        for ( int[] row : arr )
+        {
+            for ( int col : row )
+                System.out.print( col + " " );
+            System.out.println();
+        }
+        System.out.println();
+    }
+
+    @Test
+    public void testDeselectGridCoords()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testDeselectGridCoords()
+    public void testSelectRectangle()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testSelectRectangle()
+    public void testDeselectRectangle()
     {
         fail("Not yet implemented");
     }
 
     @Test
-    void testDeselectRectangle()
-    {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    void testSetScale()
+    public void testSetScale()
     {
         GridWindow  window      = defGridWindow.getGridWindow();
         double      maxScale    = window.getMaxScale();
@@ -213,7 +274,9 @@ class GridWindowTest
         return clickEvent;
     }
     
-    private MouseEvent getMouseClickEvent( Component source, int xco, int yco )
+    private static MouseEvent getMouseClickEvent( 
+        Component source, int xco, int yco 
+    )
     {
         MouseEvent clickEvent = new MouseEvent(
             source,                         // Source component
@@ -227,13 +290,73 @@ class GridWindowTest
         );
         return clickEvent;
     }
+    
+    /**
+     * Configures the GridWindow select, ship, and splat colors.
+     * This entails manipulating the logical grid;
+     * upon completion of the task,
+     * the Grid2D framework will be reset.
+     * <p>
+     * Postcondition:
+     * selectColor, shipColor, and splatColor fields initialized,
+     * Grid2D reset.
+     */
+    private static void getMiscColors()
+    {
+        // must be in config mode to add/remove ships
+        Configurator.reset();
+        Configurator.nextState();
+        assertTrue( Configurator.isConfig() );
+        
+        GridWindowProps props       = GridWindowProps.getInstance();
+        GridProbe       probe       = props.getProbe();
+        GridWindow      gridWindow  = props.getGridWindow();
+        Grid2D          logicalGrid = props.getGrid();
+        ShipType2D      shipType    = Submarine.getType();
+        GridCoords      coords      = new GridCoords( 0, 0 );
+        Ship2D          ship        = 
+            new Ship2D( shipType, coords, Orientation.HORIZONTAL );
+        
+        List<Integer>   allColors   = 
+            new ArrayList<>( 
+                List.of( probe.getBackgroundColor(), probe.getGridlineColor() )
+            );
+        gridWindow.select( coords );
+        int             color       = props.getCellColor( coords );
+        assertFalse( allColors.contains( color ) );
+        selectColor = color;
+        allColors.add( color );
+        
+        gridWindow.select();
+        logicalGrid.put( ship );
+        color = props.getCellColor( coords );
+        assertFalse( allColors.contains( color ) );
+        shipColor = color;
+        allColors.add( shipColor );
+        
+        logicalGrid.remove( ship );
+        color = props.getCellColor( coords );
+        assertEquals( color, probe.getBackgroundColor() );
+        
+        // Must be in game state to attack a cell
+        Configurator.nextState();
+        assertTrue( Configurator.isConfigComplete() );
+        logicalGrid.attack( coords );
+        color = props.getCellColor( coords );
+        assertFalse( allColors.contains( color ) );
+        splatColor = color;
+        allColors.add( splatColor );
+        
+        Grid2DTestSupport.reset();
+        props.dispose();
+    }
 
     /**
      * Instantiates, configures, and provides access to a GridWindow.
      * Where necessary, operations are performed on the EDT.
      */
     private static class GridWindowProps
-    {
+    {   
         /** Application frame in which to embed the encapsulated GridWindow. */
         private final JFrame        dummyFrame;
         
@@ -263,16 +386,14 @@ class GridWindowTest
         
         /**
          * Instantiates a GridWindowProps incorporating 
-         * an internally allocated Grid2D.
+         * the grid allocated by {@link Grid2D#getHomeGrid()}.
          * Instantiation explicitly occurs on the EDT.
-         * 
-         * @param grid  the given grid
          * 
          * @return  the instantiated GridWindowProps object
          */
         public static GridWindowProps getInstance()
         {
-            GridWindowProps props   = getInstance( new Grid2D() );
+            GridWindowProps props   = getInstance( Grid2D.getHomeGrid() );
             return props;
         }
         
@@ -353,6 +474,136 @@ class GridWindowTest
             if ( probe == null )
                 probe = GridProbe.getProbe( gridWindow );
             return probe;
+        }
+        
+        /**
+         * Gets a fresh snapshot of the encapsulated grid,
+         * and returns the color of the cell
+         * at the given coordinates.
+         * 
+         * @param coords   the given coordinates
+         *  
+         * @return  the current color of the cell at the given coordinates
+         */
+        public int getCellColor( GridCoords coords )
+        {
+            int color   = getCellColor( coords.xco(), coords.yco() );
+            return color;
+        }
+        
+        /**
+         * Gets a fresh snapshot of the encapsulated grid,
+         * and returns the color of the cell
+         * at the given coordinates.
+         *
+         * @param col   the given column-coordinate
+         * @param row   the given row-coordinate
+         *  
+         * @return  the current color of the cell at the given coordinates
+         */
+        public int getCellColor( int col, int row )
+        {
+            getProbe();
+            int[][]     raster      = getRaster();
+            Rectangle   rect        = probe.getCellBounds( col, row );
+            int         centerXco   = (int)rect.getCenterX();
+            int         centerYco   = (int)rect.getCenterY();
+            int         color       = raster[centerXco][centerYco];
+            return color;
+        }
+        
+        public int[][] getCellRaster()
+        {
+            getProbe();
+            int     rows    = Grid2D.getNumRows();
+            int     cols    = Grid2D.getNumCols();
+            int[][] raster  = getRaster();
+            int[][] cells   = new int[rows][cols];
+            for ( int row = 0 ; row < rows ; ++row )
+                for ( int col = 0 ; col < cols ; ++col )
+                {
+                    Rectangle   rect        = probe.getCellBounds( col, row );
+                    int         centerXco   = (int)rect.getCenterX();
+                    int         centerYco   = (int)rect.getCenterY();
+                    int         color       = raster[centerYco][centerXco];
+                    cells[row][col] = color;
+                }
+            return cells;
+        }
+        
+        /**
+         * Create a fresh image using the encapsulated GridWindow.
+         * Return a raster of the image
+         * represented as a 2-dimensional array of integers.
+         * 
+         * @return a raster of a freshly drawn GridWindow image
+         */
+        public int[][] getRaster()
+        {
+            BufferedImage   image   = getImage( gridWindow );
+            
+            // There are more efficient ways to do this but I opted
+            // for straightforward.
+            int     height  = image.getHeight();
+            int     width   = image.getWidth();
+            int[][] raster  = new int[height][width];
+            for ( int row = 0 ; row < raster.length ; ++row )
+                for ( int col = 0 ; col < raster[row].length ; ++col )
+                    raster[row][col] = image.getRGB( col, row );
+            return raster;
+        }
+
+        /**
+         * Create a snapshot image of the given GridWindow.
+         * 
+         * @param window
+         * @return  a snapshot image of the given GridWindow
+         */
+        private static BufferedImage getImage( GridWindow window )
+        {
+            Dimension       dim         = window.getPreferredSize();
+            int             type        = BufferedImage.TYPE_INT_ARGB;
+            BufferedImage   image       = 
+                new BufferedImage( dim.width, dim.height, type );
+            Graphics        gtx         = image.getGraphics();
+            window.paintComponent( gtx );
+            return image;
+        }
+    }
+    
+    private static class ImageManager
+    {
+        private final GridProbe     probe;
+        private final GridWindow    gridWindow;
+        
+        public ImageManager( GridWindowProps props )
+        {
+            probe = props.getProbe();
+            gridWindow = props.getGridWindow();
+        }
+        
+        public int[][] getSnapshot()
+        {
+            BufferedImage   image   = getImage( gridWindow );
+            
+            // There are more efficient ways to do this but I opted
+            // for straightforward.
+            int[][] raster  = new int[image.getWidth()][image.getHeight()];
+            for ( int yco = 0 ; yco < raster.length ; ++yco )
+                for ( int xco = 0 ; xco < raster[yco].length ; ++xco )
+                    raster[xco][yco] = image.getRGB( xco, yco );
+            return raster;
+        }
+
+        private static BufferedImage getImage( GridWindow window )
+        {
+            Dimension       dim         = window.getPreferredSize();
+            int             type        = BufferedImage.TYPE_INT_ARGB;
+            BufferedImage   image       = 
+                new BufferedImage( dim.width, dim.height, type );
+            Graphics        gtx         = image.getGraphics();
+            window.paintComponent( gtx );
+            return image;
         }
     }
 }
