@@ -307,7 +307,7 @@ public class GridWindow extends JPanel
      * 
      * @return  the minimum scale factor
      */
-    public double getMinScale()
+    public static double getMinScale()
     {
         return minScale;
     }
@@ -317,7 +317,7 @@ public class GridWindow extends JPanel
      * 
      * @return  the maximum scale factor
      */
-    public double getMaxScale()
+    public static double getMaxScale()
     {
         return maxScale;
     }
@@ -485,9 +485,11 @@ public class GridWindow extends JPanel
         
         selectedCells.stream()
             .forEach( r -> {
-                int xco = r.x * cellSide;
-                int yco = r.y * cellSide;
-                gtx.fillRect( xco, yco, cellSide, cellSide );
+                int xco     = r.x * cellSide;
+                int yco     = r.y * cellSide;
+                int width   = cellSide * r.width;
+                int height  = cellSide * r.height;
+                gtx.fillRect( xco, yco, width, height );
             });
 
         gtx.setTransform( saveTransform );
@@ -659,8 +661,6 @@ public class GridWindow extends JPanel
                     repaint();
                 }
             }
-            else
-                System.out.println( "not ^" );
         }
         
         /**
@@ -710,7 +710,30 @@ public class GridWindow extends JPanel
             return result;
         }
     }
-    
+
+    /**
+     * Gets the bounds of the grid, exclusive of row/column labels,
+     * adjusted to reflect the current scale factor.
+     * Mouse events are reported in physical (scaled) pixel coordinates,
+     * so the unscaled {@link GridWindow#gridBounds} can't be used
+     * directly for hit-testing.
+     *
+     * @return  the scaled bounds of the grid
+     */
+    Rectangle getScaledGridBounds()
+    {
+        int         scaledLabelFactor   =
+            (int)Math.round( labelBounds.width * scaleFactor );
+        int         scaledWidth         =
+            (int)Math.round( gridBounds.width * scaleFactor );
+        int         scaledHeight        =
+            (int)Math.round( gridBounds.height * scaleFactor );
+        Rectangle   bounds              = new Rectangle(
+            scaledLabelFactor, scaledLabelFactor, scaledWidth, scaledHeight
+        );
+        return bounds;
+    }
+
     /**
      * An instance of this class
      * listens for mouse events in the grid window.
@@ -772,29 +795,6 @@ public class GridWindow extends JPanel
                 (mouseYco - scaledLabelFactor) / scaledCellSide;
             GridCoords  coords  = new GridCoords( cellXco, cellYco );
             return coords;
-        }
-
-        /**
-         * Gets the bounds of the grid, exclusive of row/column labels,
-         * adjusted to reflect the current scale factor.
-         * Mouse events are reported in physical (scaled) pixel coordinates,
-         * so the unscaled {@link GridWindow#gridBounds} can't be used
-         * directly for hit-testing.
-         *
-         * @return  the scaled bounds of the grid
-         */
-        private Rectangle getScaledGridBounds()
-        {
-            int         scaledLabelFactor   =
-                (int)Math.round( labelBounds.width * scaleFactor );
-            int         scaledWidth         =
-                (int)Math.round( gridBounds.width * scaleFactor );
-            int         scaledHeight        =
-                (int)Math.round( gridBounds.height * scaleFactor );
-            Rectangle   bounds              = new Rectangle(
-                scaledLabelFactor, scaledLabelFactor, scaledWidth, scaledHeight
-            );
-            return bounds;
         }
     }
 }

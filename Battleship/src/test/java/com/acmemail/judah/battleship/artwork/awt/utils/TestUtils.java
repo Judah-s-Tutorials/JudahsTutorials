@@ -24,14 +24,19 @@ public class TestUtils
     public static void invokeAndWait( Runnable runner )
     {
         Objects.requireNonNull( runner, "runner" );
-        try
+        if ( SwingUtilities.isEventDispatchThread() )
+            runner.run();
+        else
         {
-            SwingUtilities.invokeAndWait( () -> runner.run() );
-        }
-        catch ( InterruptedException | InvocationTargetException exc )
-        {
-            System.out.println( exc.getMessage() );
-            throw new BattleshipException( "unexpected exception", exc );
+            try
+            {
+                SwingUtilities.invokeAndWait( () -> runner.run() );
+            }
+            catch ( InterruptedException | InvocationTargetException exc )
+            {
+                exc.printStackTrace();
+                throw new BattleshipException( "unexpected exception", exc );
+            }
         }
     }
     
@@ -78,7 +83,6 @@ public class TestUtils
             while ( parent != null && !(parent instanceof Window ))
                 parent = parent.getParent();
             return (Window)parent;
-            
         };
         
         Window[]    result  = new Window[1];

@@ -4,25 +4,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.swing.JFrame;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.artwork.awt.utils.GridProbe;
@@ -73,6 +71,41 @@ class GridWindowTest
             defGridWindow = null;
         }
     }
+    
+    @ParameterizedTest
+    @ValueSource( doubles = { 2.0, .5 } )
+    public void testScaledSelection2( double scale )
+    {
+        // beforeEach runs before each parameterized test, so
+        // there is no need to save and restore scale
+        defGridWindow.setScale( scale );
+        
+        int         numRows     = Grid2D.getNumRows();
+        int         numCols     = Grid2D.getNumCols();
+        int         centerRow   = numRows / 2;
+        int         centerCol   = numCols / 2;
+        // sanity check
+        assertTrue( centerRow > 1 );
+        assertTrue( centerRow < numRows - 1 );
+        assertTrue( centerCol > 1 );
+        assertTrue( centerCol < numCols - 1 );
+
+        List<GridCoords>    expResults  = 
+            IntStream.rangeClosed( centerRow - 1, centerRow + 1 )
+                .boxed()
+                .flatMap( r -> IntStream.rangeClosed( centerCol - 1, centerCol + 1)
+                    .mapToObj( c -> new GridCoords( c, r ) )
+                )
+                .toList();
+        List<GridCoords>    actResults   = new ArrayList<>();
+        
+        CellListener    cellListener    = ce -> actResults.add( ce.coords() );
+        defGridWindow.addCellListener( cellListener );
+        expResults.stream()
+            .map( defGridWindow::getMouseClickEvent )
+            .forEach( defGridWindow::dispatchEvent );
+        assertEquals( expResults, actResults );
+    }
 
     @Test
     public void testGridWindow()
@@ -80,7 +113,7 @@ class GridWindowTest
         GridProbe   probe   = defGridWindow.getProbe();
         Point       point   = probe.validateHorizontalGridLines();
         assertNull( point );
-        point = probe.validateHorizontalGridLines();
+        point = probe.validateVerticalGridLines();
         assertNull( point );
         point = probe.validateCellInterior();
         assertNull( point );
@@ -91,24 +124,20 @@ class GridWindowTest
     {
         int         numRows = Grid2D.getNumRows();
         int         numCols = Grid2D.getNumCols();
-        GridWindow  grid    = defGridWindow.getGridWindow();
         boolean[][] result  = new boolean[numRows][numCols];
         Arrays.stream( result ).forEach( a -> Arrays.fill( a, false ) );
-        grid.addCellListener( e -> {
+        defGridWindow.addCellListener( e -> {
             GridCoords  coords  = e.coords();
             result[coords.yco()][coords.xco()] = true;
         });
         
-        GridProbe   probe   = defGridWindow.getProbe();
         for ( int row = 0 ; row < numRows ; ++row )
             for ( int col = 0 ; col < numCols ; ++col )
             {
-                Rectangle   rect    = probe.getCellBounds( col, row );
-                int         xco     = (int)rect.getCenterX();
-                int         yco     = (int)rect.getCenterY();
-                MouseEvent  mEvt    = getMouseClickEvent( xco, yco );
+                GridCoords  coords  = new GridCoords( col, row );
+                MouseEvent  mEvt    = defGridWindow.getMouseClickEvent( coords );
                 assertFalse( result[row][col] );
-                TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+                defGridWindow.dispatchEvent( mEvt );
                 assertTrue( result[row][col] );
             }
     }
@@ -116,40 +145,36 @@ class GridWindowTest
     @Test
     public void testRemoveCellListener()
     {
-        GridProbe       probe   = defGridWindow.getProbe();
-        Rectangle       rect    = probe.getCellBounds( 0, 0 );
-        int             xco     = (int)rect.getCenterX();
-        int             yco     = (int)rect.getCenterY();
-        MouseEvent      mEvt    = getMouseClickEvent( xco, yco );
+        GridCoords      coords  = new GridCoords( 0, 0 );
+        MouseEvent      mEvt    = defGridWindow.getMouseClickEvent( coords );
 
         boolean[]       result  = { false, false };
         CellListener    list0   = e -> result[0] = true;
         CellListener    list1   = e -> result[1] = true;
-        GridWindow      grid    = defGridWindow.getGridWindow();
         
-        grid.addCellListener( list0 );
-        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        defGridWindow.addCellListener( list0 );
+        defGridWindow.dispatchEvent( mEvt );
         assertTrue( result[0] );
         assertFalse( result[1] );
         
         result[0] = false;
         result[1] = false;
-        grid.addCellListener( list1 );
-        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        defGridWindow.addCellListener( list1 );
+        defGridWindow.dispatchEvent( mEvt );
         assertTrue( result[0] );
         assertTrue( result[1] );
         
         result[0] = false;
         result[1] = false;
-        grid.removeCellListener( list1 );
-        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        defGridWindow.removeCellListener( list1 );
+        defGridWindow.dispatchEvent( mEvt );
         assertTrue( result[0] );
         assertFalse( result[1] );
         
         result[0] = false;
         result[1] = false;
-        grid.removeCellListener( list0 );
-        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        defGridWindow.removeCellListener( list0 );
+        defGridWindow.dispatchEvent( mEvt );
         assertFalse( result[0] );
         assertFalse( result[1] );
         
@@ -157,8 +182,8 @@ class GridWindowTest
         // where we try to remove a listener that isn't there.
         result[0] = false;
         result[1] = false;
-        grid.removeCellListener( list0 );
-        TestUtils.invokeAndWait( () -> grid.dispatchEvent( mEvt ) );
+        defGridWindow.removeCellListener( list0 );
+        defGridWindow.dispatchEvent( mEvt );
         assertFalse( result[0] );
         assertFalse( result[1] );
     }
@@ -166,87 +191,125 @@ class GridWindowTest
     @Test
     public void testDispatchEventCellEvent()
     {
-        fail("Not yet implemented");
+        boolean[]       actResult   = { false, false, false };
+        CellListener    list0       = e -> actResult[0] = true;
+        CellListener    list1       = e -> actResult[1] = true;
+        CellListener    list2       = e -> actResult[2] = true;
+        
+        boolean[]       expResult   = new boolean[] { true, false, false };
+        dispatchCellEvent( expResult, actResult, list0, null );
+        
+        expResult = new boolean[] { true, true, false };
+        dispatchCellEvent( expResult, actResult, list1, null );
+        
+        expResult = new boolean[] { true, true, true };
+        dispatchCellEvent( expResult, actResult, list2, null );
+        
+        expResult   = new boolean[] { false, true, true };
+        dispatchCellEvent( expResult, actResult, null, list0 );
+        
+        expResult   = new boolean[] { false, false, true };
+        dispatchCellEvent( expResult, actResult, null, list1 );
+        
+        expResult   = new boolean[] { false, false, false };
+        dispatchCellEvent( expResult, actResult, null, list2 );
     }
 
     @Test
     public void testSelect()
     {
-        fail("Not yet implemented");
+        int         bgColor     = defGridWindow.getBackgroundColor();
+        int[][]     initRaster  = defGridWindow.getCellRaster();
+        for ( int[] row : initRaster )
+            for ( int cellColor : row )
+                assertEquals( bgColor, cellColor );
+        
+        for ( int row = 0 ; row < initRaster.length ; ++row )
+            for ( int col = 0 ; col < initRaster[row].length ; ++col)
+            {
+                GridCoords  coords      = new GridCoords( col, row );
+                select( defGridWindow, coords );
+            }
+        
+        defGridWindow.getGridWindow().select();
+        int[][]     finalRaster = defGridWindow.getCellRaster();
+        assertArrEquals( initRaster, finalRaster );
     }
 
     @Test
     public void testSelectGridCoords()
     {
-        int         bgColor     = defGridWindow.getProbe().getBackgroundColor();
-        GridWindow  window      = defGridWindow.getGridWindow();
-        int[][]     expRaster   = defGridWindow.getCellRaster();
         // Sanity check
+        int         bgColor     = defGridWindow.getBackgroundColor();
+        int[][]     expRaster   = defGridWindow.getCellRaster();
         for ( int[] row : expRaster )
             for ( int cellColor : row )
                 assertEquals( bgColor, cellColor );
+        
         for ( int row = 0 ; row < expRaster.length ; ++row )
             for ( int col = 0 ; col < expRaster[row].length ; ++col)
             {
-                expRaster[row][col]     = selectColor;
                 GridCoords  coords      = new GridCoords( col, row );
-                window.select( coords );
-                int[][]     actRaster   = defGridWindow.getCellRaster();
-                assertArrEquals( expRaster, actRaster );
+                select( defGridWindow, coords );
             }
-    }
-    
-    private static void assertArrEquals( int[][] arr1, int[][] arr2 )
-    {
-        assertEquals( arr1.length, arr2.length, "rows" );
-        for ( int row = 0 ; row < arr1.length ; ++row )
-        {
-            assertEquals( arr1[row].length, arr2[row].length );
-            for ( int col = 0 ; col < arr1[row].length ; ++col )
-            {
-                String  comment =
-                    String.format( "[%d][%d]", row, col );
-                assertEquals( arr1[row][col], arr2[row][col], comment );
-            }
-        }
-    }
-    
-    void printArr( int[][] arr )
-    {
-        for ( int[] row : arr )
-        {
-            for ( int col : row )
-                System.out.print( col + " " );
-            System.out.println();
-        }
-        System.out.println();
     }
 
     @Test
     public void testDeselectGridCoords()
     {
-        fail("Not yet implemented");
+        int         bgColor     = defGridWindow.getBackgroundColor();
+        int[][]     expRaster   = defGridWindow.getCellRaster();
+        // Sanity check
+        for ( int[] row : expRaster )
+            for ( int cellColor : row )
+                assertEquals( bgColor, cellColor );
+        
+        int             min         = 
+            Math.min( expRaster.length, expRaster[0].length );
+        GridCoords[]    allCoords   = 
+            IntStream.range( 0, min )
+                .mapToObj( i -> new GridCoords( i, i ) )
+                .toArray( GridCoords[]::new );
+        Arrays.stream( allCoords )
+            .forEach( gc -> select( defGridWindow, gc ) );
+        
+        Arrays.stream( allCoords )
+            .forEach( gc -> deselect( defGridWindow, gc ) );
     }
 
     @Test
     public void testSelectRectangle()
     {
-        fail("Not yet implemented");
-    }
-
-    @Test
-    public void testDeselectRectangle()
-    {
-        fail("Not yet implemented");
+        int         rows    = Grid2D.getNumRows();
+        int         cols    = Grid2D.getNumCols();
+        int         yco0    = 0;
+        int         xco0    = 0;
+        Rectangle   rect0   = new Rectangle( xco0, yco0, 1, 1 );
+        int         yco1    = yco0 + rect0.height;
+        int         xco1    = xco0 + 1;
+        Rectangle   rect1   = new Rectangle( xco1, yco1, 2, 2 );
+        int         yco2    = yco1 + rect1.height;
+        int         xco2    = xco1 + 1;
+        Rectangle   rect2   = new Rectangle( xco2, yco2, 3, 3 );
+        // sanity check
+        assertTrue( rect2.x + rect2.width < cols );
+        assertTrue( rect2.y + rect2.height < rows );
+        
+        select( defGridWindow, rect0 );
+        select( defGridWindow, rect1 );
+        select( defGridWindow, rect2 );
+        
+        deselect( defGridWindow, rect0 );
+        deselect( defGridWindow, rect1 );
+        deselect( defGridWindow, rect2 );
     }
 
     @Test
     public void testSetScale()
     {
-        GridWindow  window      = defGridWindow.getGridWindow();
-        double      maxScale    = window.getMaxScale();
-        double      minScale    = window.getMinScale();
-        assertEquals( 1, window.getScale() );
+        double      maxScale    = GridWindow.getMaxScale();
+        double      minScale    = GridWindow.getMinScale();
+        assertEquals( 1, defGridWindow.getScale() );
         assertTrue( maxScale > 1 );
         assertTrue( minScale < 1 );
         
@@ -256,39 +319,350 @@ class GridWindowTest
         assertTrue( expValSmall > minScale );
         assertTrue( expValLarge < maxScale );
         
-        window.setScale( expValSmall );
-        assertEquals( expValSmall, window.getScale() );
-        window.setScale( expValLarge );
-        assertEquals( expValLarge, window.getScale() );
+        defGridWindow.setScale( expValSmall );
+        assertEquals( expValSmall, defGridWindow.getScale() );
+        defGridWindow.setScale( expValLarge );
+        assertEquals( expValLarge, defGridWindow.getScale() );
         
-        window.setScale( minScale - .1 );
-        assertEquals( minScale, window.getScale() );
-        window.setScale( maxScale + .1 );
-        assertEquals( maxScale, window.getScale() );
+        defGridWindow.setScale( minScale - .1 );
+        assertEquals( minScale, defGridWindow.getScale() );
+        defGridWindow.setScale( maxScale + .1 );
+        assertEquals( maxScale, defGridWindow.getScale() );
     }
     
-    private MouseEvent getMouseClickEvent( int xco, int yco )
+    @Test
+    public void testSplats()
     {
-        MouseEvent  clickEvent  = 
-            getMouseClickEvent( defGridWindow.getGridWindow(), xco, yco );
-        return clickEvent;
+        Configurator.reset();
+        Configurator.nextState();
+        assertTrue( Configurator.isConfig() );
+        
+        ShipType2D  shipType    = new ShipType2D( "testType", 4, 2, null );
+        GridCoords  coords      = new GridCoords( 3, 2 );
+        Ship2D      ship        = 
+            new Ship2D( shipType, coords, Orientation.HORIZONTAL );
+        Grid2D      grid2D      = defGridWindow.getGrid();
+        grid2D.put( ship );
+        
+        // get the raster with the ship already displayed
+        int[][]     expRaster   = defGridWindow.getCellRaster();
+        Rectangle   shipBounds  = ship.getBounds();
+        
+        // attack cells starting in last row of ship, and ending
+        // first row after ship
+        int         startRow    = shipBounds.y + shipBounds.height - 1;
+        int         endRow      = startRow + 1;
+        // attack cells starting in the second column of the ship,
+        // and ending in the first column after the ship
+        int         startCol    = shipBounds.x + 1;
+        int         endCol      = startCol + shipBounds.width;
+        // sanity check
+        GridCoords  upperLeft   = new GridCoords( startCol, startRow );
+        GridCoords  lowerRight  = new GridCoords( endCol, endRow );
+        assertTrue( grid2D.contains( upperLeft ) );
+        assertTrue( grid2D.contains( lowerRight ) );
+        
+        Configurator.nextState();
+        assertTrue( Configurator.isConfigComplete() );
+        IntStream.rangeClosed( startRow, endRow )
+            .boxed()
+            .forEach( row -> IntStream.rangeClosed( startCol, endCol )
+            .boxed()
+                .map( col -> new GridCoords( col, row ) )
+                .forEach( gc -> {
+                    grid2D.attack( gc );
+                    expRaster[gc.yco()][gc.xco()] = splatColor;
+                })
+            );
+        
+        int[][]     actRaster   = defGridWindow.getCellRaster();
+        assertArrEquals( expRaster, actRaster );
     }
     
-    private static MouseEvent getMouseClickEvent( 
-        Component source, int xco, int yco 
+    @Test
+    public void clickOutOfGrid()
+    {
+        Rectangle   gridBounds  = defGridWindow.getGridBounds();
+        int         firstXco    = gridBounds.x;
+        int         lastXco     = (int)gridBounds.getMaxX();
+        int         firstYco    = gridBounds.y;
+        int         lastYco     = (int)gridBounds.getMaxY();
+        
+        List<Point> cornerPoints    =
+            List.of( 
+                new Point( firstXco, firstYco ),
+                new Point( lastXco - 1, firstYco ),
+                new Point( firstXco, lastYco - 1 ),
+                new Point( lastXco - 1, lastYco - 1 )
+            );
+        List<Point> externalPoints  =
+            List.of( 
+                new Point( firstXco - 1, firstYco ),
+                new Point( lastXco + 1, firstYco ),
+                new Point( firstXco, lastYco + 1 ),
+                new Point( lastXco, lastYco + 1 )
+            );
+        
+        boolean[]       result      = { false };
+        CellListener    listener    = c -> result[0] = true;
+        defGridWindow.addCellListener( listener );
+        
+        // sanity check... all mouse events hit
+        cornerPoints.stream()
+            .map( defGridWindow::getMouseClickEvent )
+            .forEach( me -> {
+                result[0] = false;
+                defGridWindow.dispatchEvent( me );
+                assertTrue( result[0], me.getPoint().toString() );
+            });
+        
+        // all mouse events miss
+        result[0] = false;
+        externalPoints.stream()
+            .map( defGridWindow::getMouseClickEvent )
+            .forEach( me -> {
+                defGridWindow.dispatchEvent( me );
+                assertFalse( result[0], me.getPoint().toString()  );
+            });
+    }
+    
+    @Test
+    public void testKeyEvents()
+    {
+        int         plusCode        = KeyEvent.VK_EQUALS;
+        char        plusChar        = '=';
+        int         minusCode       = KeyEvent.VK_MINUS;
+        char        minusChar       = '-';
+        int         zeroCode        = KeyEvent.VK_0;
+        char        zeroChar        = '0';
+        int         aCode           = KeyEvent.VK_A;
+        char        aChar           = 'a';
+        
+        KeyEvent    plusEvent       = 
+            getKeyDownEvent( defGridWindow, false, plusCode, plusChar );
+        KeyEvent    minusEvent      = 
+            getKeyDownEvent( defGridWindow, false, minusCode, minusChar );
+        KeyEvent    zeroEvent       = 
+            getKeyDownEvent( defGridWindow, false, zeroCode, zeroChar );
+        KeyEvent    aEvent          = 
+            getKeyDownEvent( defGridWindow, false, aCode, aChar );
+        
+        KeyEvent    ctrlPlusEvent   = 
+            getKeyDownEvent( defGridWindow, true, plusCode, plusChar );
+        KeyEvent    ctrlMinusEvent  = 
+            getKeyDownEvent( defGridWindow, true, minusCode, minusChar );
+        KeyEvent    ctrlZeroEvent   = 
+            getKeyDownEvent( defGridWindow, true, zeroCode, zeroChar );
+        KeyEvent    ctrlAEvent      = 
+            getKeyDownEvent( defGridWindow, true, aCode, aChar );
+        
+        // to get KeyEvents a component must be visible and have the focus
+        defGridWindow.setVisible( true );
+        assertTrue( defGridWindow.requestFocus() );
+
+        // these events don't change the scale
+        assertEquals( 1.0, defGridWindow.getScale() );
+        defGridWindow.dispatchEvent( plusEvent );
+        assertEquals( 1.0, defGridWindow.getScale() );
+        defGridWindow.dispatchEvent( minusEvent );
+        assertEquals( 1.0, defGridWindow.getScale() );
+        
+        defGridWindow.setScale( .5 );
+        defGridWindow.dispatchEvent( zeroEvent );
+        assertEquals( .5, defGridWindow.getScale() );
+
+        defGridWindow.dispatchEvent( aEvent );
+        assertEquals( .5, defGridWindow.getScale() );
+        defGridWindow.dispatchEvent( ctrlAEvent );
+        assertEquals( .5, defGridWindow.getScale() );
+        
+        // these events change the scale
+        defGridWindow.dispatchEvent( ctrlZeroEvent );
+        assertEquals( 1.0, defGridWindow.getScale() );
+        
+        defGridWindow.dispatchEvent( ctrlPlusEvent );
+        assertTrue( defGridWindow.getScale() > 1.0 );
+        
+        defGridWindow.dispatchEvent( ctrlMinusEvent );
+        assertEquals( 1.0, defGridWindow.getScale() );
+        
+        defGridWindow.dispatchEvent( ctrlMinusEvent );
+        assertTrue( defGridWindow.getScale() < 1.0 );
+    }
+    
+    /**
+     * Select the given coordinates in the GridWindow
+     * of the given {@link GridWindowProps}.
+     * Verify that the selection took place as expected.
+     * Operations are executed on the EDT as necessary.
+     * 
+     * @param props     the given GridWindowProps
+     * @param coords    the given coordinates
+     */
+    private static void select( GridWindowProps props, GridCoords coords )
+    {
+        int[][]     expRaster   = props.getCellRaster();
+        GridWindow  gridWindow  = props.getGridWindow();
+        int         col         = coords.xco();
+        int         row         = coords.yco();
+        TestUtils.invokeAndWait( () -> {
+            gridWindow.select( coords );
+            expRaster[row][col] = selectColor;
+        });
+        int[][]     actRaster   = props.getCellRaster();
+        assertArrEquals( expRaster, actRaster );
+    }
+    
+    /**
+     * Deselect the given coordinates in the GridWindow
+     * of the given {@link GridWindowProps}.
+     * Verify that deselection takes place as expected.
+     * Operations are executed on the EDT as necessary.
+     * 
+     * @param props     the given GridWindowProps
+     * @param coords    the given coordinates
+     */
+    private static void deselect( GridWindowProps props, GridCoords coords )
+    {
+        int         bgColor     = props.getBackgroundColor();
+        int[][]     expRaster   = props.getCellRaster();
+        int         col         = coords.xco();
+        int         row         = coords.yco();
+        props.deselect( coords );
+        expRaster[row][col] = bgColor;
+        int[][]     actRaster   = props.getCellRaster();
+        assertArrEquals( expRaster, actRaster );
+    }
+    
+    /**
+     * Select the given rectangle in the GridWindow
+     * of the given {@link GridWindowProps}.
+     * Verify that the selection took place as expected.
+     * Operations are executed on the EDT as necessary.
+     * 
+     * @param props   the given GridWindowProps
+     * @param rect    the given rectangle
+     */
+    private static void select( GridWindowProps props, Rectangle rect )
+    {
+        int[][]     expRaster   = props.getCellRaster();
+        int         col         = rect.x;
+        int         row         = rect.y;
+        IntStream.range( row, row + rect.height )
+            .forEach( r -> 
+                IntStream.range( col, col + rect.width )
+                    .forEach(c -> expRaster[r][c] = selectColor )
+            );
+ 
+        props.select( rect );
+        int[][]     actRaster   = props.getCellRaster();
+        assertArrEquals( expRaster, actRaster );
+    }
+    
+    /**
+     * Deselect the given rectangle in the GridWindow
+     * of the given {@link GridWindowProps}.
+     * Verify that the deselection took place as expected.
+     * Operations are executed on the EDT as necessary.
+     * 
+     * @param props   the given GridWindowProps
+     * @param rect    the given rectangle
+     */
+    private static void deselect( GridWindowProps props, Rectangle rect )
+    {
+        int         bgColor     = props.getBackgroundColor();
+        int[][]     expRaster   = props.getCellRaster();
+        int         col         = rect.x;
+        int         row         = rect.y;
+        IntStream.range( row, row + rect.height )
+            .forEach( r -> 
+                IntStream.range( col, col + rect.width )
+                    .forEach(c -> expRaster[r][c] = bgColor )
+            );
+ 
+        props.deselect( rect );
+        int[][]     actRaster   = props.getCellRaster();
+        assertArrEquals( expRaster, actRaster );
+    }
+    
+    /**
+     * Dispatch a CellEvent and validate the result.
+     * This is a helper method for {@link #testDispatchEventCellEvent()}.
+     * The caller passes an expected result array,
+     * and an array to hold an actual result.
+     * Optionally,
+     * the caller passes a CellListener to add,
+     * and/or a CellListener to remove,
+     * which are configured prior to dispatching the CellEvent;
+     * the expectation is that a listener added to the GridWindow
+     * will set a value in the actual result array.
+     * The actual result array is reset,
+     * the CellEvent is dispatched,
+     * and the expected result is compared to the actual result.
+     * 
+     * @param expResult the expected result array
+     * @param actResult the actual result array
+     * @param toAdd     a listener to add; may be null
+     * @param toRemove  a listener to remove; may be null
+     */
+    private void dispatchCellEvent( 
+        boolean[]       expResult, 
+        boolean[]       actResult,
+        CellListener    toAdd,
+        CellListener    toRemove
     )
     {
-        MouseEvent clickEvent = new MouseEvent(
-            source,                         // Source component
-            MouseEvent.MOUSE_CLICKED,       // Event type
-            System.currentTimeMillis(),     // Timestamp
-            0,                              // Modifiers
-            xco, yco,                       // X and Y coordinates
-            1,                              // Click count
-            false,                          // Popup trigger
-            MouseEvent.BUTTON1              // Mouse button (Left click)
-        );
-        return clickEvent;
+        GridCoords  coords  = new GridCoords( 0, 0 );
+        MouseEvent  mEvent  = defGridWindow.getMouseClickEvent( coords );
+        CellEvent   event   = new CellEvent( coords, mEvent );
+        Arrays.fill( actResult, false );
+        if ( toAdd != null )
+            defGridWindow.addCellListener( toAdd );
+        if ( toRemove != null )
+            defGridWindow.removeCellListener( toRemove );
+        defGridWindow.dispatchCellEvent( event );
+        assertTrue( Arrays.equals( expResult, actResult ) );
+    }
+    
+    private static KeyEvent getKeyDownEvent( 
+        GridWindowProps props,
+        boolean isCtrl,
+        int keyCode,
+        char keyChar
+    )
+    {
+        int mask    =  isCtrl ? InputEvent.CTRL_DOWN_MASK : 0;
+        KeyEvent    event   =
+            new KeyEvent(
+                props.getGridWindow(),
+                KeyEvent.KEY_PRESSED,
+                System.currentTimeMillis(),
+                mask,
+                keyCode,
+                keyChar
+            );
+        return event;
+    }
+
+    /**
+     * Assert that two given 2D arrays are equal.
+     *  
+     * @param arr1  the first given array
+     * @param arr2  the second given array
+     */
+    private static void assertArrEquals( int[][] arr1, int[][] arr2 )
+    {
+        assertEquals( arr1.length, arr2.length, "rows" );
+        for ( int row = 0 ; row < arr1.length ; ++row )
+        {
+            assertEquals( arr1[row].length, arr2[row].length, "cols" );
+            for ( int col = 0 ; col < arr1[row].length ; ++col )
+            {
+                String  comment =
+                    String.format( "[%d][%d]", row, col );
+                assertEquals( arr1[row][col], arr2[row][col], comment );
+            }
+        }
     }
     
     /**
@@ -309,8 +683,6 @@ class GridWindowTest
         assertTrue( Configurator.isConfig() );
         
         GridWindowProps props       = GridWindowProps.getInstance();
-        GridProbe       probe       = props.getProbe();
-        GridWindow      gridWindow  = props.getGridWindow();
         Grid2D          logicalGrid = props.getGrid();
         ShipType2D      shipType    = Submarine.getType();
         GridCoords      coords      = new GridCoords( 0, 0 );
@@ -319,15 +691,15 @@ class GridWindowTest
         
         List<Integer>   allColors   = 
             new ArrayList<>( 
-                List.of( probe.getBackgroundColor(), probe.getGridlineColor() )
+                List.of( props.getBackgroundColor(), props.getGridlineColor() )
             );
-        gridWindow.select( coords );
+        props.select( coords );
         int             color       = props.getCellColor( coords );
         assertFalse( allColors.contains( color ) );
         selectColor = color;
         allColors.add( color );
         
-        gridWindow.select();
+        props.select();
         logicalGrid.put( ship );
         color = props.getCellColor( coords );
         assertFalse( allColors.contains( color ) );
@@ -336,7 +708,7 @@ class GridWindowTest
         
         logicalGrid.remove( ship );
         color = props.getCellColor( coords );
-        assertEquals( color, probe.getBackgroundColor() );
+        assertEquals( color, props.getBackgroundColor() );
         
         // Must be in game state to attack a cell
         Configurator.nextState();
@@ -349,261 +721,5 @@ class GridWindowTest
         
         Grid2DTestSupport.reset();
         props.dispose();
-    }
-
-    /**
-     * Instantiates, configures, and provides access to a GridWindow.
-     * Where necessary, operations are performed on the EDT.
-     */
-    private static class GridWindowProps
-    {   
-        /** Application frame in which to embed the encapsulated GridWindow. */
-        private final JFrame        dummyFrame;
-        
-        /** The encapsulated GridWindow. */
-        private final GridWindow    gridWindow;
-        /** The grid encapsulated in the GridWindow. */
-        private final Grid2D        grid;
-        /** Probe to characterize encapsulated GridWindow. */
-        private GridProbe           probe;
-        
-        /**
-         * Constructor.
-         * Must be invoked on the EDT.
-         * 
-         * @param grid  
-         *      the Grid2D to needed to instantiate
-         *      the encapsulated GridWindow.
-         */
-        private GridWindowProps( Grid2D grid )
-        {
-            this.grid = grid;
-            gridWindow = new GridWindow( grid );
-            dummyFrame = new JFrame();
-            dummyFrame.setContentPane( gridWindow );
-            dummyFrame.pack();
-        }
-        
-        /**
-         * Instantiates a GridWindowProps incorporating 
-         * the grid allocated by {@link Grid2D#getHomeGrid()}.
-         * Instantiation explicitly occurs on the EDT.
-         * 
-         * @return  the instantiated GridWindowProps object
-         */
-        public static GridWindowProps getInstance()
-        {
-            GridWindowProps props   = getInstance( Grid2D.getHomeGrid() );
-            return props;
-        }
-        
-        /**
-         * Instantiates a GridWindowProps incorporating the given Grid2D.
-         * Instantiation explicitly occurs on the EDT.
-         * 
-         * @param grid  the given grid
-         * 
-         * @return  the instantiated GridWindowProps object
-         */
-        public static GridWindowProps getInstance( Grid2D grid )
-        {
-            GridWindowProps windowProps =
-                TestUtils.invokeAndWaitGet( () -> new GridWindowProps( grid ) );
-            return windowProps;
-        }
-        
-        /**
-         * Gets the GridWindow's preferred size.
-         * 
-         * @return  the GridWindow's preferred size
-         */
-        public Dimension getPreferredSize()
-        {
-            Dimension   size    = 
-                TestUtils.invokeAndWaitGet( () -> 
-                    gridWindow.getPreferredSize() 
-                );
-            return size;
-        }
-        
-        /**
-         * Disposes all internally held resources.
-         */
-        public void dispose()
-        {
-            TestUtils.invokeAndWait( () -> dummyFrame.dispose() );
-        }
-        
-        /**
-         * Gets the frame that hosts the GridWindow
-         * 
-         * @return the dummyFrame
-         */
-        public JFrame getFrame()
-        {
-            return dummyFrame;
-        }
-
-        /**
-         * Gets the GridWindow
-         * 
-         * @return the gridWindow
-         */
-        public GridWindow getGridWindow()
-        {
-            return gridWindow;
-        }
-
-        /**
-         * Gets the Grid2D encapsulated in the GridWindow.
-         * 
-         * @return the grid encapsulated in the GridWindow
-         */
-        public Grid2D getGrid()
-        {
-            return grid;
-        }
-
-        /**
-         * Gets a GridProbe describing the encapsulated GridWindow.
-         * 
-         * @return a GridProbe describing the encapsulated GridWindow
-         */
-        public GridProbe getProbe()
-        {
-            if ( probe == null )
-                probe = GridProbe.getProbe( gridWindow );
-            return probe;
-        }
-        
-        /**
-         * Gets a fresh snapshot of the encapsulated grid,
-         * and returns the color of the cell
-         * at the given coordinates.
-         * 
-         * @param coords   the given coordinates
-         *  
-         * @return  the current color of the cell at the given coordinates
-         */
-        public int getCellColor( GridCoords coords )
-        {
-            int color   = getCellColor( coords.xco(), coords.yco() );
-            return color;
-        }
-        
-        /**
-         * Gets a fresh snapshot of the encapsulated grid,
-         * and returns the color of the cell
-         * at the given coordinates.
-         *
-         * @param col   the given column-coordinate
-         * @param row   the given row-coordinate
-         *  
-         * @return  the current color of the cell at the given coordinates
-         */
-        public int getCellColor( int col, int row )
-        {
-            getProbe();
-            int[][]     raster      = getRaster();
-            Rectangle   rect        = probe.getCellBounds( col, row );
-            int         centerXco   = (int)rect.getCenterX();
-            int         centerYco   = (int)rect.getCenterY();
-            int         color       = raster[centerXco][centerYco];
-            return color;
-        }
-        
-        public int[][] getCellRaster()
-        {
-            getProbe();
-            int     rows    = Grid2D.getNumRows();
-            int     cols    = Grid2D.getNumCols();
-            int[][] raster  = getRaster();
-            int[][] cells   = new int[rows][cols];
-            for ( int row = 0 ; row < rows ; ++row )
-                for ( int col = 0 ; col < cols ; ++col )
-                {
-                    Rectangle   rect        = probe.getCellBounds( col, row );
-                    int         centerXco   = (int)rect.getCenterX();
-                    int         centerYco   = (int)rect.getCenterY();
-                    int         color       = raster[centerYco][centerXco];
-                    cells[row][col] = color;
-                }
-            return cells;
-        }
-        
-        /**
-         * Create a fresh image using the encapsulated GridWindow.
-         * Return a raster of the image
-         * represented as a 2-dimensional array of integers.
-         * 
-         * @return a raster of a freshly drawn GridWindow image
-         */
-        public int[][] getRaster()
-        {
-            BufferedImage   image   = getImage( gridWindow );
-            
-            // There are more efficient ways to do this but I opted
-            // for straightforward.
-            int     height  = image.getHeight();
-            int     width   = image.getWidth();
-            int[][] raster  = new int[height][width];
-            for ( int row = 0 ; row < raster.length ; ++row )
-                for ( int col = 0 ; col < raster[row].length ; ++col )
-                    raster[row][col] = image.getRGB( col, row );
-            return raster;
-        }
-
-        /**
-         * Create a snapshot image of the given GridWindow.
-         * 
-         * @param window
-         * @return  a snapshot image of the given GridWindow
-         */
-        private static BufferedImage getImage( GridWindow window )
-        {
-            Dimension       dim         = window.getPreferredSize();
-            int             type        = BufferedImage.TYPE_INT_ARGB;
-            BufferedImage   image       = 
-                new BufferedImage( dim.width, dim.height, type );
-            Graphics        gtx         = image.getGraphics();
-            window.paintComponent( gtx );
-            return image;
-        }
-    }
-    
-    private static class ImageManager
-    {
-        private final GridProbe     probe;
-        private final GridWindow    gridWindow;
-        
-        public ImageManager( GridWindowProps props )
-        {
-            probe = props.getProbe();
-            gridWindow = props.getGridWindow();
-        }
-        
-        public int[][] getSnapshot()
-        {
-            BufferedImage   image   = getImage( gridWindow );
-            
-            // There are more efficient ways to do this but I opted
-            // for straightforward.
-            int[][] raster  = new int[image.getWidth()][image.getHeight()];
-            for ( int yco = 0 ; yco < raster.length ; ++yco )
-                for ( int xco = 0 ; xco < raster[yco].length ; ++xco )
-                    raster[xco][yco] = image.getRGB( xco, yco );
-            return raster;
-        }
-
-        private static BufferedImage getImage( GridWindow window )
-        {
-            Dimension       dim         = window.getPreferredSize();
-            int             type        = BufferedImage.TYPE_INT_ARGB;
-            BufferedImage   image       = 
-                new BufferedImage( dim.width, dim.height, type );
-            Graphics        gtx         = image.getGraphics();
-            window.paintComponent( gtx );
-            return image;
-        }
     }
 }

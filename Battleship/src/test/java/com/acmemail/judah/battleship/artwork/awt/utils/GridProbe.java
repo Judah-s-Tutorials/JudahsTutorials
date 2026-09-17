@@ -21,6 +21,7 @@ import javax.swing.JFrame;
 import com.acmemail.judah.battleship.StatusMessages;
 import com.acmemail.judah.battleship.artwork.awt.GridWindow;
 import com.acmemail.judah.battleship.model.Grid2D;
+import com.acmemail.judah.battleship.model.GridCoords;
 
 /**
  * An instance of this class
@@ -214,6 +215,12 @@ public class GridProbe
                 .map( xco -> image.getRGB( xco, yco ) )
                 .anyMatch( color -> color != gridlineColor );
         return result;
+    }
+    
+    public Rectangle getCellBounds( GridCoords coords )
+    {
+        Rectangle   rect    = getCellBounds( coords.xco(), coords.yco() );
+        return rect;
     }
     
     public Rectangle getCellBounds( int col, int row )
