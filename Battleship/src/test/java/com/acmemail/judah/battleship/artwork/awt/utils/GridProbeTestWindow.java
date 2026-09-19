@@ -35,7 +35,7 @@ import com.acmemail.judah.battleship.model.Grid2D;
  *      </li>
  *      <li>
  *      Instantiate an realize a GridProbeTest window.
- *      The {@link #getRealizedTestWindow(Grid2D) 
+ *      The {@link #getRealizedTestWindow(Grid2D)}
  *      can do this for you.
  *      </li>
  *      <li>

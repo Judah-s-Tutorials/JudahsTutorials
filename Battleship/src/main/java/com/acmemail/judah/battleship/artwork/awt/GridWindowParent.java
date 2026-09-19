@@ -63,6 +63,7 @@ public class GridWindowParent extends JPanel
     private final Border    selectedBorder  =
         BorderFactory.createLineBorder( Color.YELLOW, innerWidth );
     
+    /** The map of logical grid names to physical GridWindows. */
     private final Map<String,GridWindow>    gridMap = new HashMap<>();
 
     /** The currently selected GridWindow, null if none. */

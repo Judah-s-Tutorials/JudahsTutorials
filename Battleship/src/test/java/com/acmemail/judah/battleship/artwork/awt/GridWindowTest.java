@@ -40,10 +40,18 @@ class GridWindowTest
     /** Number of columns in Grid2D; should be different from TEST_COLS. */
     private static final int    TEST_COLS   = 15;
     
+    /** The color the GridWindow uses to paint selected cells. */
     private static int          selectColor;
+    /** The color the GridWindow uses to paint ships. */
     private static int          shipColor;
+    /** The color the GridWindow uses to paint splatted cells. */
     private static int          splatColor;
     
+    /** 
+     * The default GridWindow and its properties for ad hoc use by test
+     * methods; create fresh for each test in the before-each method,
+     * disposed in the after-each method.
+     */
     private GridWindowProps defGridWindow;
     
     @BeforeAll
@@ -439,22 +447,22 @@ class GridWindowTest
         char        aChar           = 'a';
         
         KeyEvent    plusEvent       = 
-            getKeyDownEvent( defGridWindow, false, plusCode, plusChar );
+            getKeyPressedEvent( defGridWindow, false, plusCode, plusChar );
         KeyEvent    minusEvent      = 
-            getKeyDownEvent( defGridWindow, false, minusCode, minusChar );
+            getKeyPressedEvent( defGridWindow, false, minusCode, minusChar );
         KeyEvent    zeroEvent       = 
-            getKeyDownEvent( defGridWindow, false, zeroCode, zeroChar );
+            getKeyPressedEvent( defGridWindow, false, zeroCode, zeroChar );
         KeyEvent    aEvent          = 
-            getKeyDownEvent( defGridWindow, false, aCode, aChar );
+            getKeyPressedEvent( defGridWindow, false, aCode, aChar );
         
         KeyEvent    ctrlPlusEvent   = 
-            getKeyDownEvent( defGridWindow, true, plusCode, plusChar );
+            getKeyPressedEvent( defGridWindow, true, plusCode, plusChar );
         KeyEvent    ctrlMinusEvent  = 
-            getKeyDownEvent( defGridWindow, true, minusCode, minusChar );
+            getKeyPressedEvent( defGridWindow, true, minusCode, minusChar );
         KeyEvent    ctrlZeroEvent   = 
-            getKeyDownEvent( defGridWindow, true, zeroCode, zeroChar );
+            getKeyPressedEvent( defGridWindow, true, zeroCode, zeroChar );
         KeyEvent    ctrlAEvent      = 
-            getKeyDownEvent( defGridWindow, true, aCode, aChar );
+            getKeyPressedEvent( defGridWindow, true, aCode, aChar );
         
         // to get KeyEvents a component must be visible and have the focus
         defGridWindow.setVisible( true );
@@ -624,7 +632,17 @@ class GridWindowTest
         assertTrue( Arrays.equals( expResult, actResult ) );
     }
     
-    private static KeyEvent getKeyDownEvent( 
+    /**
+     * Constructs a KeyEvent encoding key-pressed event.
+     * 
+     * @param props     the properties object containing the event source
+     * @param isCtrl    true if the control-down mask is to be set
+     * @param keyCode   the key-code to encapsulate
+     * @param keyChar   the key-char to encapsulated
+     * 
+     * @return  the constructed key event
+     */
+    private static KeyEvent getKeyPressedEvent( 
         GridWindowProps props,
         boolean isCtrl,
         int keyCode,

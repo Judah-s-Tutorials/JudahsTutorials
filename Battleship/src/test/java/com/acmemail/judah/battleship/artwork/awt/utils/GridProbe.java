@@ -21,7 +21,6 @@ import javax.swing.JFrame;
 import com.acmemail.judah.battleship.StatusMessages;
 import com.acmemail.judah.battleship.artwork.awt.GridWindow;
 import com.acmemail.judah.battleship.model.Grid2D;
-import com.acmemail.judah.battleship.model.GridCoords;
 
 /**
  * An instance of this class
@@ -70,11 +69,23 @@ public class GridProbe
      * stored as a separate field for convenience.
      */
     private final Grid2D        logicalGrid;
+    /** The bounds of the grid contained in the encapsulated GridWindow. */
     private final Rectangle     gridBounds      = new Rectangle();
+    /** The image created from the encapsulated GridWindow. */
     private final BufferedImage image;
+    /** The discovered background color of the encapsulated GridWindow. */
     private final int           backgroundColor;
+    /** The discovered gridline color of the encapsulated GridWindow. */
     private final int           gridlineColor;
+    /** 
+     * The discovered cell-side length 
+     * of the grid in the encapsulated GridWindow.
+     */
     private final int           cellSide;
+    /** 
+     * The discovered width 
+     * of a gridline in the encapsulated GridWindow.
+     */
     private final int           gridLineWidth;
     
     /**
@@ -193,48 +204,26 @@ public class GridProbe
     {
         return gridLineWidth;
     }
-    
-    public Point validateHorizontalGridLines()
+
+    /**
+     * Disposes of any resources allocated to this object.
+     */
+    public void dispose()
     {
-        Point   result  = 
-            IntStream.range( 0, gridBounds.height )
-                .filter( i -> i % cellSide == 0 )
-                .map( i -> i + gridBounds.y )
-                .filter( y -> !isHorizontalGridLine( y ) )
-                .mapToObj( y -> new Point( gridBounds.x, y ) )
-                .findFirst().orElse( null );
-        return result;
+        appRoot.dispose();
     }
     
-    private boolean isHorizontalGridLine( int yco )
-    {
-        int     xcoStart    = gridBounds.x;
-        int     xcoEnd      = xcoStart + gridBounds.width;
-        boolean result      =
-            !IntStream.range( xcoStart, xcoEnd )
-                .map( xco -> image.getRGB( xco, yco ) )
-                .anyMatch( color -> color != gridlineColor );
-        return result;
-    }
-    
-    public Rectangle getCellBounds( GridCoords coords )
-    {
-        Rectangle   rect    = getCellBounds( coords.xco(), coords.yco() );
-        return rect;
-    }
-    
-    public Rectangle getCellBounds( int col, int row )
-    {
-        if ( col >= Grid2D.getNumCols() )
-            throw new IndexOutOfBoundsException( "xco: " + col );
-        if ( row >= Grid2D.getNumRows() )
-            throw new IndexOutOfBoundsException( "yco: " + row );
-        col = gridBounds.x + col * cellSide;
-        row = gridBounds.y + row * cellSide;
-        Rectangle   rect    = new Rectangle( col, row, cellSide, cellSide );
-        return rect;
-    }
-    
+    /**
+     * Verifies that vertical gridlines are drawn 
+     * at every cell boundary.
+     * If verified, returns null,
+     * otherwise the coordinates of the first pixel
+     * found not to be part of a gridline is returned.
+     * 
+     * @return  
+     *      null if all vertical gridlines are correctly positioned,
+     *      otherwise the coordinates of the first incorrect pixel
+     */
     public Point validateVerticalGridLines()
     {
         Point   result  = 
@@ -247,17 +236,42 @@ public class GridProbe
         return result;
     }
     
-    private boolean isVerticalGridLine( int xco )
+    
+    /**
+     * Verifies that horizontal gridlines are drawn 
+     * at every cell boundary.
+     * If verified, returns null,
+     * otherwise the coordinates of the first pixel
+     * found not to be part of a gridline is returned.
+     * 
+     * @return  
+     *      null if all horizontal gridlines are correctly positioned,
+     *      otherwise the coordinates of the first incorrect pixel
+     */
+    public Point validateHorizontalGridLines()
     {
-        int     ycoStart    = gridBounds.y;
-        int     ycoEnd      = ycoStart + gridBounds.height;
-        boolean result      =
-            !IntStream.range( ycoStart, ycoEnd )
-                .map( yco -> image.getRGB( xco, yco ) )
-                .anyMatch( color -> color != gridlineColor );
+        Point   result  = 
+            IntStream.range( 0, gridBounds.height )
+                .filter( i -> i % cellSide == 0 )
+                .map( i -> i + gridBounds.y )
+                .filter( y -> !isHorizontalGridLine( y ) )
+                .mapToObj( y -> new Point( gridBounds.x, y ) )
+                .findFirst().orElse( null );
         return result;
     }
-    
+
+    /**
+     * Verifies that the pixel at the center
+     * of every expected cell location
+     * is drawn in the background color.
+     * If verified, returns null,
+     * otherwise the coordinates of the first incorrect pixel
+     * are returned.
+     * 
+     * @return  
+     *      null if a all cell interiors are found where expected,
+     *      otherwise the coordinates of the first incorrect pixel
+     */
     public Point validateCellInterior()
     {
         Point   point   = null;
@@ -360,6 +374,9 @@ public class GridProbe
      * Raises an assertion if the first such row
      * isn't found before reaching
      * the vertical center of the image.
+     * 
+     * @param   pad 
+     *      the scratch pad containing property values so far discovered
      */
     private void probeTopMargin( ScratchPad pad )
     {
@@ -432,7 +449,7 @@ public class GridProbe
      * in the vertical center,
      * from the rightmost gridline 
      * to the horizontal center of the window.
-     * Each row of pixels will have one of two patterns:<pr>
+     * Each row of pixels will have one of two patterns:<pre>
      *     ...gggggggggggggggggggggg
      *     ... g   g   g   g   g   g
      * </pre>
@@ -542,13 +559,49 @@ public class GridProbe
     }
     
     /**
-     * Disposes of any resources allocated to this object.
+     * Returns true if a vertical gridline
+     * is discovered to be drawn
+     * at the given x-coordinate.
+     * 
+     * @param xco   the given x-coordinated
+     * 
+     * @return  
+     *      true if a vertical gridline is drawn
+     *      at the given x-coordinate
      */
-    public void dispose()
+    private boolean isVerticalGridLine( int xco )
     {
-        appRoot.dispose();
+        int     ycoStart    = gridBounds.y;
+        int     ycoEnd      = ycoStart + gridBounds.height;
+        boolean result      =
+            !IntStream.range( ycoStart, ycoEnd )
+                .map( yco -> image.getRGB( xco, yco ) )
+                .anyMatch( color -> color != gridlineColor );
+        return result;
     }
-    
+
+    /**
+     * Returns true if a horizontal gridline
+     * is discovered to be drawn
+     * at the given y-coordinate.
+     * 
+     * @param yco   the given y-coordinated
+     * 
+     * @return  
+     *      true if a horizontal gridline is drawn
+     *      at the given y-coordinate
+     */
+    private boolean isHorizontalGridLine( int yco )
+    {
+        int     xcoStart    = gridBounds.x;
+        int     xcoEnd      = xcoStart + gridBounds.width;
+        boolean result      =
+            !IntStream.range( xcoStart, xcoEnd )
+                .map( xco -> image.getRGB( xco, yco ) )
+                .anyMatch( color -> color != gridlineColor );
+        return result;
+    }
+
     /**
      * Temporary to keep track of GridWindow properties
      * as they are discovered.
@@ -559,25 +612,51 @@ public class GridProbe
      */
     private static class ScratchPad
     {
+        /** The bounds of the grid in the GridWindow. */
         public Rectangle        bounds      = new Rectangle();
+        /** Image of the GridWindow. */
         public BufferedImage    image;
+        /** Rightmost x-coordinate of the grid in the GridWindow. */
         public int              lastXco;
+        /** Topmost y-coordinate of the grid in the GridWindow. */
         public int              firstYco;
+        /** Number of columns in the logical grid tied to the GridWindow. */
         public int              logicalGridCols;
+        /** Number of rows in the logical grid tied to the GridWindow. */
         public int              logicalGridRows;
+        /** The width of the image captured from the GridWindow. */
         public int              imageWidth;
+        /** The height of the image captured from the GridWindow. */
         public int              imageHeight;
+        /** The presumed background color of the GridWindow.. */
         public int              backgroundColor;
+        /** The presumed gridline color of the GridWindow.. */
         public int              gridlineColor;
+        /** The presumed width of a gridline in the GridWindow.. */
         public int              gridLineWidth;
+        /** 
+         * An estimated upper bound on length of the side of a cell
+         * in the GridWindow's grid.
+         */
         public int              maxCellSide;
+        /** 
+         * The presumed length of the side of a cell
+         * in the GridWindow's grid.
+         */
         public int              cellSide;
+        
+        /**
+         * Default constructor.
+         */
+        public ScratchPad()
+        {
+        }
     }
     
     /**
      * Characterize the color and length
      * of a sequential series of pixels
-     * all having the same color.
+     * all of the same color.
      * 
      * @param   color   the color of the pixels in the series
      * @param   count   the number of pixels in the series

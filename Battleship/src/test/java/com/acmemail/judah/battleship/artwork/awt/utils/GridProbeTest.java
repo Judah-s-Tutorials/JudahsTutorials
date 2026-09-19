@@ -3,6 +3,7 @@ package com.acmemail.judah.battleship.artwork.awt.utils;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -157,6 +158,14 @@ class GridProbeTest
         testDispose( testWindow );
         testWindow = GridProbeTestWindow.getRealizedTestWindow( null );
         testDispose( testWindow );
+    }
+    
+    @Test
+    public void testGridValidation()
+    {
+        assertNull( defGridProbe.validateVerticalGridLines() );
+        assertNull( defGridProbe.validateHorizontalGridLines() );
+        assertNull( defGridProbe.validateCellInterior() );
     }
     
     /**

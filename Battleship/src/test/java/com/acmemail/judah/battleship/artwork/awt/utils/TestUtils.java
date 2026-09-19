@@ -10,8 +10,20 @@ import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.battleship.BattleshipException;
 
+/**
+ * This is a utility class
+ * with support for the test classes
+ * in the artwork.awt package.
+ */
 public class TestUtils
 {
+    /**
+     * Default constructor, not used.
+     */
+    private TestUtils()
+    {
+        // not used
+    }
     
     /**
      * Execute a task in the context of the EDT.
