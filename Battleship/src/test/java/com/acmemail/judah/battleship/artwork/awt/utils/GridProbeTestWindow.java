@@ -95,7 +95,7 @@ class GridProbeTestWindow extends GridWindow
         this.frame = frame;
         
         int     numCols     = Grid2D.getNumCols();
-        int     numRows     = Grid2D.getNumCols();
+        int     numRows     = Grid2D.getNumRows();
         int     gridWidth   = numCols * cellSide;
         int     gridHeight  = numRows * cellSide;
         bounds.setRect( padding, padding, gridWidth, gridHeight );

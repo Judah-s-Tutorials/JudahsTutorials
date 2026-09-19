@@ -1,8 +1,5 @@
 package com.acmemail.judah.battleship.model;
 
-import static com.acmemail.judah.battleship.Constants.KEY_NUM_COLS;
-import static com.acmemail.judah.battleship.Constants.KEY_NUM_ROWS;
-
 import com.acmemail.judah.battleship.Constants;
 
 /**
@@ -77,8 +74,10 @@ public class Grid2DTestSupport
     {
         String  strRows     = String.valueOf( numRows );
         String  strCols     = String.valueOf( numCols );
-        String  rowsProp    = Constants.NAME_PREFIX + KEY_NUM_ROWS;
-        String  colsProp    = Constants.NAME_PREFIX + KEY_NUM_COLS;
+        String  rowsProp    = 
+            Constants.NAME_PREFIX + Constants.KEY_NUM_ROWS;
+        String  colsProp    = 
+            Constants.NAME_PREFIX + Constants.KEY_NUM_COLS;
         System.setProperty( rowsProp, strRows );
         System.setProperty( colsProp, strCols );
         reset();

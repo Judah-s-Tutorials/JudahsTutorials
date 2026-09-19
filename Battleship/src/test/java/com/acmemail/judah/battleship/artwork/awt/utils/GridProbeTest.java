@@ -13,7 +13,7 @@ import java.awt.Window;
 import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,27 +24,31 @@ import com.acmemail.judah.battleship.model.Grid2DTestSupport;
 
 class GridProbeTest
 {
-    private static final GridProbeTestWindow    defTestWindow   =
-        GridProbeTestWindow.getRealizedTestWindow( null );
-    private static final GridProbe              defGridProbe    =
-        GridProbe.getProbe( defTestWindow );
+    private GridProbeTestWindow defTestWindow;
+    private GridProbe           defGridProbe;
     
-    @BeforeAll
-    public static void beforeAll()
+    @BeforeEach
+    public void beforeEach()
     {
         Grid2DTestSupport.reset();
         Grid2DTestSupport.reinitDimensions( "10", "15" );
+        defTestWindow = GridProbeTestWindow.getRealizedTestWindow( null );
+        defGridProbe = GridProbe.getProbe( defTestWindow );
+    }
+    
+    @AfterEach
+    public void afterEach()
+    {
+        if ( defTestWindow != null )
+            defTestWindow.dispose();
+        if ( defGridProbe != null )
+            defGridProbe.dispose();
     }
     
     @AfterAll
-    static void tearDownAfterClass() throws Exception
+    static void afterAll() throws Exception
     {
-        defGridProbe.dispose();
-    }
-
-    @BeforeEach
-    public void setUp() throws Exception
-    {
+        Grid2DTestSupport.reset();
     }
 
     @Test
@@ -95,7 +99,6 @@ class GridProbeTest
     public void testGetGrid()
     {
         Grid2D  actGrid = defGridProbe.getGrid();
-        System.out.println( actGrid.getName() );
         assertEquals( actGrid.getName(), Constants.HOME_GRID );
     }
 

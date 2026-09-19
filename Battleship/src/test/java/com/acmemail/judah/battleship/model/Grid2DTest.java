@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,12 @@ class Grid2DTest
         ShipTypes.register( squareType );
         ShipTypes.register( twoDType );
         ShipTypes.register( oneDType );
+    }
+    
+    @AfterAll
+    public static void afterAll()
+    {
+        Grid2D.reset();
     }
     
     @BeforeEach
@@ -601,6 +608,7 @@ class Grid2DTest
     {
         String  emptyStr    = "";
         String  badStr      = "not a number";
+        Grid2D.reinitDimensions( null, null );
         int     expNumRows  = Constants.DEF_NUM_ROWS;
         int     expNumCols  = Constants.DEF_NUM_COLS;
         int     actNumRows  = Grid2D.getNumRows();

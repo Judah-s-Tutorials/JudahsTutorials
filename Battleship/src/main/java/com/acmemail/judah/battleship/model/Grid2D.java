@@ -94,14 +94,14 @@ public class Grid2D
      * it's not declared final. There should be no way for a non-test
      * client to set this variable directly.
      */
-    private static int          NUM_ROWS;
+    private static int          numRows;
     /** 
      * Number of columns in the grids for this application.
      * This field is effectively final, but, for testing purposes,
      * it's not declared final. There should be no way for a non-test
      * client to set this variable directly.
      */
-    private static int          NUM_COLS;
+    private static int          numCols;
     
     /** A map of all non-default cells in the map. */
     private final HashMap<GridCoords,Cell2D>    gridMap = new HashMap<>();
@@ -114,8 +114,7 @@ public class Grid2D
     
     static
     {
-        NUM_ROWS = parseIntProperty( KEY_NUM_ROWS, DEF_NUM_ROWS );
-        NUM_COLS = parseIntProperty( KEY_NUM_COLS, DEF_NUM_COLS );
+        initRowCols();
     }
     
     /**
@@ -142,7 +141,7 @@ public class Grid2D
         if ( allGrids.containsKey( name ) )
             throw new BattleshipException( GRID_EXISTS + ": " + name ); 
         allGrids.put( name, this );
-        bounds = new Rectangle( 0, 0, NUM_COLS, NUM_ROWS );
+        bounds = new Rectangle( 0, 0, numCols, numRows );
     }
     
     /**
@@ -459,7 +458,7 @@ public class Grid2D
      */
     public static int getNumRows()
     {
-        return NUM_ROWS;
+        return numRows;
     }
 
     /**
@@ -468,7 +467,7 @@ public class Grid2D
      */
     public static int getNumCols()
     {
-        return NUM_COLS;
+        return numCols;
     }
     
     /**
@@ -545,8 +544,8 @@ public class Grid2D
             System.clearProperty( colsProp );
         else
             System.setProperty( colsProp, strCols );
-        NUM_ROWS = parseIntProperty( KEY_NUM_ROWS, DEF_NUM_ROWS );
-        NUM_COLS = parseIntProperty( KEY_NUM_COLS, DEF_NUM_COLS );
+        numRows = parseIntProperty( KEY_NUM_ROWS, DEF_NUM_ROWS );
+        numCols = parseIntProperty( KEY_NUM_COLS, DEF_NUM_COLS );
         
         if ( saveRows == null )
             System.clearProperty( rowsProp );
@@ -733,5 +732,16 @@ public class Grid2D
         for ( Grid2D grid : allGrids.values() )
             grid.clear();
         allGrids.clear();
+        initRowCols();
+    }
+    
+    /**
+     * Restore numRows/numCols to their original values.
+     * This feature is necessary to support testing
+     */
+    private static void initRowCols()
+    {
+        numRows = parseIntProperty( KEY_NUM_ROWS, DEF_NUM_ROWS );
+        numCols = parseIntProperty( KEY_NUM_COLS, DEF_NUM_COLS );
     }
 }

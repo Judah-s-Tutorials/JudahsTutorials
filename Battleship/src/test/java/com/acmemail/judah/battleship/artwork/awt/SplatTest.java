@@ -60,12 +60,10 @@ class SplatTest
         int             width       = bufImage.getWidth( null );
         int             height      = bufImage.getHeight( null );
         int             numPixels   = width * height;
-        System.out.printf( "%08x%n", iColor );
         boolean         contains    =
             IntStream.range( 0, numPixels )
                 .boxed()
                 .map( i -> bufImage.getRGB( i % width, i / height ) )
-                .peek( i -> System.out.printf( "%08x%n", i ) )
                 .filter( i -> i == iColor )
                 .findAny().isPresent();
         return contains;
