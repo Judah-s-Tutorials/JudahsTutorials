@@ -145,14 +145,15 @@ public class GridProbe
     }
 
     /**
-     * Gets the bounds of the physical grid
+     * Gets a copy the bounds of the physical grid
      * in the encapsulated GridWindow.
      * 
      * @return the the bounds of the physical grid
      */
     public Rectangle getGridBounds()
     {
-        return gridBounds;
+        Rectangle   copyBounds  = new Rectangle( gridBounds );
+        return copyBounds;
     }
 
     /**
@@ -227,7 +228,7 @@ public class GridProbe
     public Point validateVerticalGridLines()
     {
         Point   result  = 
-            IntStream.range( 0, gridBounds.height )
+            IntStream.range( 0, gridBounds.width )
                 .filter( i -> i % cellSide == 0 )
                 .map( i -> i + gridBounds.x )
                 .filter( x -> !isVerticalGridLine( x ) )
@@ -392,7 +393,7 @@ public class GridProbe
             int color   = pad.image.getRGB( midXco, yco );
             for ( xco = midXco ; xco < maxXco && color == glColor ; ++xco )
                 color = pad.image.getRGB( xco, yco );
-            if ( xco == maxXco )
+            if ( xco == maxXco && color == glColor )
                 topYco = yco;
         }
         if ( yco == midYco )
