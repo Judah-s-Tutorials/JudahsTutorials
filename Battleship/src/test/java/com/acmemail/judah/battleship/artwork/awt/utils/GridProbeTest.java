@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.Window;
 import java.awt.image.BufferedImage;
 
@@ -16,6 +18,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import com.acmemail.judah.battleship.Constants;
 import com.acmemail.judah.battleship.artwork.awt.GridWindow;
@@ -32,6 +36,7 @@ class GridProbeTest
     {
         Grid2DTestSupport.reset();
         Grid2DTestSupport.reinitDimensions( "10", "15" );
+        GridProbeTestWindow.resetAllNegativeTestFlags();
         defTestWindow = GridProbeTestWindow.getRealizedTestWindow( null );
         defGridProbe = GridProbe.getProbe( defTestWindow );
     }
@@ -49,6 +54,7 @@ class GridProbeTest
     static void afterAll() throws Exception
     {
         Grid2DTestSupport.reset();
+        GridProbeTestWindow.resetAllNegativeTestFlags();
     }
 
     @Test
@@ -171,6 +177,25 @@ class GridProbeTest
         assertNull( defGridProbe.validateCellInterior() );
     }
     
+    @ParameterizedTest
+    @EnumSource( NegativeValidation.class )
+    public void testValidationGoWrong( NegativeValidation test )
+    {
+        test.setup();
+        
+        GridProbeTestWindow window  = 
+            GridProbeTestWindow.getRealizedTestWindow( null );
+        GridProbe           probe   = GridProbe.getProbe( window );
+        Rectangle           bounds  = window.getNegativeCellTestBounds();
+        
+        Point               point   = test.exec( probe );
+        window.dispose();
+        probe.dispose();
+        
+        assertNotNull( point );
+        test.validate( bounds, point );
+    }
+    
     /**
      * Gets a GridProbe encapsulating the given test window,
      * call GridProbe.dispose,
@@ -201,5 +226,48 @@ class GridProbeTest
         Window  window  = TestUtils.getAppRoot( component );
         assertNotNull( window );
         return window;
+    }
+    
+    private enum NegativeValidation
+    {
+        VERTICAL_GRIDLINE
+        {
+            void setup() { 
+                GridProbeTestWindow.setVerticalGridlineNegativeTest( true );
+            }
+            Point exec( GridProbe probe ) {
+                return probe.validateVerticalGridLines();
+            }
+            void validate( Rectangle rect, Point point ) {
+                assertEquals( rect.x, point.x );
+            }
+        },
+        HORIZONTAL_GRIDLINE
+        {
+            void setup() { 
+                GridProbeTestWindow.setHorizontalGridlineNegativeTest( true );
+            }
+            Point exec( GridProbe probe ) {
+                return probe.validateHorizontalGridLines();
+            }
+            void validate( Rectangle rect, Point point ) {
+                assertEquals( rect.y, point.y );
+            }
+        },
+        CELL_INTERIOR
+        {
+            void setup() { 
+                GridProbeTestWindow.setCellInteriorNegativeTest( true );
+            }
+            Point exec( GridProbe probe ) {
+                return probe.validateCellInterior();
+            }
+            void validate( Rectangle rect, Point point ) {
+                assertTrue( rect.contains( point ) );
+            }
+        };
+        abstract void setup();
+        abstract Point exec( GridProbe probe );
+        abstract void validate( Rectangle rect, Point point);
     }
 }

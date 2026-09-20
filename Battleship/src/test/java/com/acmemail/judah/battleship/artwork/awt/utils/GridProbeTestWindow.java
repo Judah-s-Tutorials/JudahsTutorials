@@ -16,10 +16,11 @@ import javax.swing.SwingUtilities;
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.artwork.awt.GridWindow;
 import com.acmemail.judah.battleship.model.Grid2D;
+import com.acmemail.judah.battleship.model.GridCoords;
 
 /**
  * This class was designed to facilitate testing of the GridProbe class.
- * It makes the same kind of physical grid that GridWindow does
+ * It makes the same kind of physical grid that the GridWindow does
  * but eliminates the labels,
  * and exposes all its properties,
  * background color, grid color cell side length, etc.,
@@ -70,6 +71,11 @@ class GridProbeTestWindow extends GridWindow
      */
     private final JFrame    frame;
     
+    private static boolean      horizontalGridlineNegativeTest   = false;
+    private static boolean      verticalGridlineNegativeTest     = false;
+    private static boolean      cellInteriorNegativeTest         = false;
+    private final  GridCoords   negativeCellTestCoords;
+    
     /**
      * Constructor.
      * Instantiates a GridProbeTestWindow encapsulating
@@ -103,6 +109,10 @@ class GridProbeTestWindow extends GridWindow
         int     prefWidth   = gridWidth + 2 * padding;
         int     prefHeight  = gridHeight + 2 * padding;
         setPreferredSize( new Dimension( prefWidth, prefHeight ) );
+        
+        int     negTestRow  = numRows / 2;
+        int     negTestCol  = (int)(Math.min( 1, numRows ) );
+        negativeCellTestCoords = new GridCoords( negTestCol, negTestRow );
     }
     
     /**
@@ -208,6 +218,112 @@ class GridProbeTestWindow extends GridWindow
         return grid2D;
     }
 
+    /**
+     *  Gets the value of the
+     *  horizontal-gridline negative test flag.
+     *  
+     * @return the value of the horizontal-gridline negative test flag
+     */
+    public static boolean isHorizontalGridlineNegativeTest()
+    {
+        return horizontalGridlineNegativeTest;
+    }
+
+    /**
+     *  Sets the value of the
+     *  horizontal-gridline negative test flag.
+     *  
+     * @param flag 
+     *      the new value of the horizontal-gridline negative test flag
+     */
+    public static void setHorizontalGridlineNegativeTest( boolean flag )
+    {
+        GridProbeTestWindow.horizontalGridlineNegativeTest = flag;
+    }
+
+    /**
+     *  Gets the value of the
+     *  vertical-gridline negative test flag.
+     *  
+     * @return the value of the vertical-gridline negative test flag
+     */
+    public static boolean isVerticalGridlineNegativeTest()
+    {
+        return verticalGridlineNegativeTest;
+    }
+
+    /**
+     *  Sets the value of the
+     *  vertical-gridline negative test flag.
+     *  
+     * @param flag 
+     *      the new value of the vertical-gridline negative test flag
+     */
+    public static void setVerticalGridlineNegativeTest( boolean flag )
+    {
+        GridProbeTestWindow.verticalGridlineNegativeTest = flag;
+    }
+
+    /**
+     *  Gets the value of the
+     *  cell-interior negative test flag.
+     *  
+     * @return the value of the cell-interior negative test flag
+     */
+    public static boolean isCellInteriorNegativeTest()
+    {
+        return cellInteriorNegativeTest;
+    }
+
+    /**
+     *  Sets the value of the
+     *  cell-interior negative test flag.
+     *  
+     * @param flag 
+     *      the new value of the cell-interior negative test flag
+     */
+    public static void setCellInteriorNegativeTest( boolean flag )
+    {
+        GridProbeTestWindow.cellInteriorNegativeTest = flag;
+    }
+    
+    /**
+     * Sets all the negative test flags to false.
+     */
+    public static void resetAllNegativeTestFlags()
+    {
+        horizontalGridlineNegativeTest = false;
+        verticalGridlineNegativeTest = false;
+        cellInteriorNegativeTest = false;
+    }
+    
+    /**
+     * Gets the coordinates of the cell
+     * used for negative testing.
+     * 
+     * @return  the coordinates of the cell used for negative testing
+     */
+    public GridCoords getNegativeCellTestCoords()
+    {
+        return negativeCellTestCoords;
+    }
+    
+    /**
+     * Gets the bounds of the cell
+     * used for negative testing.
+     * 
+     * @return  the bounds of the cell used for negative testing
+     */
+    public Rectangle getNegativeCellTestBounds()
+    {
+        int         col     = negativeCellTestCoords.xco();
+        int         row     = negativeCellTestCoords.yco();
+        int         xco     = bounds.x + cellSide * col;
+        int         yco     = bounds.y + cellSide * row;
+        Rectangle   bounds  = new Rectangle( xco, yco, cellSide, cellSide );
+        return bounds;
+    }
+
     @Override
     public void paintComponent( Graphics graphics )
     {
@@ -234,5 +350,34 @@ class GridProbeTestWindow extends GridWindow
             .mapToObj( yco -> new Line2D.Double( 0, yco, maxXco, yco ) )
             .forEach( gtx::draw );
         gtx.setTransform( saveTransform );
+        
+        configureNegativeTests( gtx );
+    }
+    
+    private void configureNegativeTests( Graphics2D gtx )
+    {
+        Color       saveColor   = gtx.getColor();
+        Rectangle   rect        = getNegativeCellTestBounds();
+        int         xco1        = rect.x;
+        int         xco2        = rect.x + rect.width;
+        int         yco1        = rect.y;
+        int         yco2        = rect.y + rect.height;
+        if ( isHorizontalGridlineNegativeTest() )
+        {
+            gtx.setColor( backgroundColor );
+            gtx.drawLine( xco1, yco1, xco2, yco1 );
+        }
+        if ( isVerticalGridlineNegativeTest() )
+        {
+            gtx.setColor( backgroundColor );
+            gtx.drawLine( xco1, yco1, xco1, yco2 );
+        }
+        if ( isCellInteriorNegativeTest() )
+        {
+            gtx.setColor( gridlineColor );
+            gtx.fill( rect );;
+        }
+        
+        gtx.setColor( saveColor );
     }
 }

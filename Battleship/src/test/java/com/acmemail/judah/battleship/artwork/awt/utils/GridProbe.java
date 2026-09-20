@@ -305,18 +305,11 @@ public class GridProbe
      * @param window    the given GridWindow
      * 
      * @throws NullPointerException if window is null
-     * @throws IllegalArgumentException if window is not fully realized
      */
     private GridProbe( GridWindow window )
     {
         Objects.requireNonNull( window, "window" );
         this.appRoot = TestUtils.getAppRoot( window );
-        if ( 
-            appRoot == null 
-            || window.getWidth() <= 0 
-            || window.getHeight() <= 0
-        )
-            throw new IllegalArgumentException( StatusMessages.NOT_REALIZED );
         this.gridWindow = window;
         this.logicalGrid = window.getGrid();
         
