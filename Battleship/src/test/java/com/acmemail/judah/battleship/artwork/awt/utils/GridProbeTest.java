@@ -16,6 +16,7 @@ import java.awt.image.BufferedImage;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -28,14 +29,33 @@ import com.acmemail.judah.battleship.model.Grid2DTestSupport;
 
 class GridProbeTest
 {
+    private static final int    iNumTestRows    = 10;
+    private static final int    iNumTestCols    = 15;
+    private static final String strNumTestRows  = String.valueOf( iNumTestRows );
+    private static final String strNumTestCols  = String.valueOf( iNumTestCols );
+    private static Grid2DTestSupport.GridDimension  origDim;
+    
     private GridProbeTestWindow defTestWindow;
     private GridProbe           defGridProbe;
+    
+    @BeforeAll
+    public static void beforeAll()
+    {
+        origDim = Grid2DTestSupport.setGridBounds( iNumTestRows, iNumTestCols );
+    }
+    
+    @AfterAll
+    static void afterAll() throws Exception
+    {
+        GridProbeTestWindow.resetAllNegativeTestFlags();
+        Grid2DTestSupport.resetGridBounds( origDim );
+    }
     
     @BeforeEach
     public void beforeEach()
     {
         Grid2DTestSupport.reset();
-        Grid2DTestSupport.reinitDimensions( "10", "15" );
+        Grid2DTestSupport.reinitDimensions( strNumTestRows, strNumTestCols );
         GridProbeTestWindow.resetAllNegativeTestFlags();
         defTestWindow = GridProbeTestWindow.getRealizedTestWindow( null );
         defGridProbe = GridProbe.getProbe( defTestWindow );
@@ -48,13 +68,6 @@ class GridProbeTest
             defTestWindow.dispose();
         if ( defGridProbe != null )
             defGridProbe.dispose();
-    }
-    
-    @AfterAll
-    static void afterAll() throws Exception
-    {
-        Grid2DTestSupport.reset();
-        GridProbeTestWindow.resetAllNegativeTestFlags();
     }
 
     @Test

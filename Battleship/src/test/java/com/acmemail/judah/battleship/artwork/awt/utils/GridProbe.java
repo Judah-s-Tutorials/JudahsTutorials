@@ -18,7 +18,6 @@ import java.util.stream.IntStream;
 
 import javax.swing.JFrame;
 
-import com.acmemail.judah.battleship.StatusMessages;
 import com.acmemail.judah.battleship.artwork.awt.GridWindow;
 import com.acmemail.judah.battleship.model.Grid2D;
 

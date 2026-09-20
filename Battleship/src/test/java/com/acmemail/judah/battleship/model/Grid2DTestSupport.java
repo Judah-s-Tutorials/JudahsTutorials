@@ -1,5 +1,7 @@
 package com.acmemail.judah.battleship.model;
 
+import java.util.Objects;
+
 import com.acmemail.judah.battleship.Constants;
 
 /**
@@ -60,8 +62,13 @@ public class Grid2DTestSupport
     }
     
     /**
-     * Sets the number of rows and columns to the given values,
+     * Set the KEY_NUM_ROWS and KEY_NUM_COLS properties
+     * to the given values,
      * then resets the Grid2D framework.
+     * The original property values are returned as an opaque
+     * {@link GridDimension} token; the client should not attempt
+     * to interpret it, only pass it to {@link #resetGridBounds(GridDimension)}
+     * once the caller no longer needs the given dimensions in effect.
      * <p>
      * Postcondition:
      * New number of rows and columns established,
@@ -70,16 +77,78 @@ public class Grid2DTestSupport
      * @param numRows   the given number of rows
      * @param numCols   the given number of columns
      */
-    public static void setGridBounds( int numRows, int numCols )
+    public static GridDimension setGridBounds( int numRows, int numCols )
     {
-        String  strRows     = String.valueOf( numRows );
-        String  strCols     = String.valueOf( numCols );
+        String          strRows     = String.valueOf( numRows );
+        String          strCols     = String.valueOf( numCols );
+        String          rowsProp    = 
+            Constants.NAME_PREFIX + Constants.KEY_NUM_ROWS;
+        String          colsProp    = 
+            Constants.NAME_PREFIX + Constants.KEY_NUM_COLS;
+        GridDimension   origProps   = 
+            new GridDimension(
+                System.getProperty( rowsProp ),
+                System.getProperty( colsProp )
+            );
+        System.setProperty( rowsProp, strRows );
+        System.setProperty( colsProp, strCols );
+        reset();
+        return origProps;
+    }
+    
+    /**
+     * Restores the KEY_NUM_ROWS and KEY_NUM_COLS properties
+     * to the values captured in the given token,
+     * then resets the Grid2D framework.
+     *
+     * @param origProps
+     *      the token returned by a prior call
+     *      to {@link #setGridBounds(int, int)}
+     */
+    public static void resetGridBounds( GridDimension origProps )
+    {
+        Objects.requireNonNull( origProps, "origProps" );
         String  rowsProp    = 
             Constants.NAME_PREFIX + Constants.KEY_NUM_ROWS;
         String  colsProp    = 
             Constants.NAME_PREFIX + Constants.KEY_NUM_COLS;
-        System.setProperty( rowsProp, strRows );
-        System.setProperty( colsProp, strCols );
+        
+        if ( origProps.rows == null )
+            System.clearProperty( rowsProp );
+        else
+            System.setProperty( rowsProp, origProps.rows );
+        
+        if ( origProps.cols == null )
+            System.clearProperty( colsProp );
+        else
+            System.setProperty( colsProp, origProps.cols );
         reset();
+    }
+    
+    /**
+     * Encapsulation of the row and column dimensions of a grid.
+     * Intended for saving and restoring property values.
+     * The content of an object of this type
+     * is only accessible to the containing class.
+     */
+    public static class GridDimension
+    {
+        /** Number of grid rows. */
+        private final String    rows;
+        /** Number of grid columns. */
+        private final String    cols;
+        
+        /**
+         * Constructor.
+         * Establishes the row and column dimensions of a grid.
+         * 
+         * @param rows  number of grid rows
+         * @param cols  number of grid columns
+         */
+        private GridDimension( String rows, String cols )
+        {
+            this.rows = rows;
+            this.cols = cols;
+        }
     }
 }
