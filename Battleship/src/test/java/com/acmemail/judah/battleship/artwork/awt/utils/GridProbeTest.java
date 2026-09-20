@@ -33,22 +33,24 @@ class GridProbeTest
     private static final int    iNumTestCols    = 15;
     private static final String strNumTestRows  = String.valueOf( iNumTestRows );
     private static final String strNumTestCols  = String.valueOf( iNumTestCols );
-    private static Grid2DTestSupport.GridDimension  origDim;
-    
+    /** Establishes/restores this class's grid dimensions. */
+    private static final Grid2DTestSupport.GridBoundsFixture  gridBounds  =
+        new Grid2DTestSupport.GridBoundsFixture();
+
     private GridProbeTestWindow defTestWindow;
     private GridProbe           defGridProbe;
-    
+
     @BeforeAll
     public static void beforeAll()
     {
-        origDim = Grid2DTestSupport.setGridBounds( iNumTestRows, iNumTestCols );
+        gridBounds.establish( iNumTestRows, iNumTestCols );
     }
-    
+
     @AfterAll
     static void afterAll() throws Exception
     {
         GridProbeTestWindow.resetAllNegativeTestFlags();
-        Grid2DTestSupport.resetGridBounds( origDim );
+        gridBounds.restore();
     }
     
     @BeforeEach

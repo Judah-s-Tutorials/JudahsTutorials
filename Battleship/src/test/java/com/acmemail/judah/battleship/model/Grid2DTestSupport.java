@@ -1,7 +1,5 @@
 package com.acmemail.judah.battleship.model;
 
-import java.util.Objects;
-
 import com.acmemail.judah.battleship.Constants;
 
 /**
@@ -101,27 +99,29 @@ public class Grid2DTestSupport
      * to the values captured in the given token,
      * then resets the Grid2D framework.
      *
-     * @param origProps
+     * @param workingProps
      *      the token returned by a prior call
      *      to {@link #setGridBounds(int, int)}
      */
     public static void resetGridBounds( GridDimension origProps )
     {
-        Objects.requireNonNull( origProps, "origProps" );
+        GridDimension   workingProps    = 
+            origProps != null ? origProps : new GridDimension( null, null );
+        
         String  rowsProp    = 
             Constants.NAME_PREFIX + Constants.KEY_NUM_ROWS;
         String  colsProp    = 
             Constants.NAME_PREFIX + Constants.KEY_NUM_COLS;
         
-        if ( origProps.rows == null )
+        if ( workingProps.rows == null )
             System.clearProperty( rowsProp );
         else
-            System.setProperty( rowsProp, origProps.rows );
+            System.setProperty( rowsProp, workingProps.rows );
         
-        if ( origProps.cols == null )
+        if ( workingProps.cols == null )
             System.clearProperty( colsProp );
         else
-            System.setProperty( colsProp, origProps.cols );
+            System.setProperty( colsProp, workingProps.cols );
         reset();
     }
     
@@ -137,11 +137,11 @@ public class Grid2DTestSupport
         private final String    rows;
         /** Number of grid columns. */
         private final String    cols;
-        
+
         /**
          * Constructor.
          * Establishes the row and column dimensions of a grid.
-         * 
+         *
          * @param rows  number of grid rows
          * @param cols  number of grid columns
          */
@@ -149,6 +149,49 @@ public class Grid2DTestSupport
         {
             this.rows = rows;
             this.cols = cols;
+        }
+    }
+
+    /**
+     * Bundles a {@link #setGridBounds(int, int)}/
+     * {@link #resetGridBounds(GridDimension)} pair
+     * into a single reusable object,
+     * so a test class need only declare one field
+     * and call {@link #establish(int, int)}/{@link #restore()}
+     * from its own {@code @BeforeAll}/{@code @AfterAll} methods,
+     * instead of separately tracking the returned
+     * {@link GridDimension} token itself.
+     */
+    public static class GridBoundsFixture
+    {
+        /**
+         * The dimensions in effect before {@link #establish(int, int)}
+         * was called; null until then.
+         */
+        private GridDimension   origDim;
+
+        /**
+         * Sets the number of rows and columns to the given values,
+         * remembering the dimensions previously in effect
+         * so they can later be restored via {@link #restore()}.
+         *
+         * @param numRows   the given number of rows
+         * @param numCols   the given number of columns
+         */
+        public void establish( int numRows, int numCols )
+        {
+            origDim = setGridBounds( numRows, numCols );
+        }
+
+        /**
+         * Restores the dimensions in effect
+         * before {@link #establish(int, int)} was called.
+         * Safe to call even if {@link #establish(int, int)}
+         * was never called, or failed before completing.
+         */
+        public void restore()
+        {
+            resetGridBounds( origDim );
         }
     }
 }

@@ -47,8 +47,9 @@ class GridWindowTest
     private static int          shipColor;
     /** The color the GridWindow uses to paint splatted cells. */
     private static int          splatColor;
-    /** The dimensions in effect before this class set its own. */
-    private static Grid2DTestSupport.GridDimension  origDim;
+    /** Establishes/restores this class's grid dimensions. */
+    private static final Grid2DTestSupport.GridBoundsFixture  gridBounds  =
+        new Grid2DTestSupport.GridBoundsFixture();
 
     /**
      * The default GridWindow and its properties for ad hoc use by test
@@ -60,14 +61,15 @@ class GridWindowTest
     @BeforeAll
     public static void beforeAll()
     {
-        origDim = Grid2DTestSupport.setGridBounds( TEST_ROWS, TEST_COLS );
+        gridBounds.establish( TEST_ROWS, TEST_COLS );
         getMiscColors();
     }
 
     @AfterAll
     public static void afterAll()
     {
-        Grid2DTestSupport.resetGridBounds( origDim );
+        gridBounds.restore();
+        Configurator.reset();
     }
 
     @BeforeEach
