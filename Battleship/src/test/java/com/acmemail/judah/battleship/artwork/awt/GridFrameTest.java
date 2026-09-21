@@ -59,8 +59,22 @@ class GridFrameTest
         assertThrows( 
             BattleshipException.class, () -> GridFrame.getFrame( supplier ) 
         );
-        assertThrows( 
-            NullPointerException.class, () -> GridFrame.getFrame( null ) 
+        assertThrows(
+            NullPointerException.class, () -> GridFrame.getFrame( null )
+        );
+    }
+
+    @Test
+    void testGetFrameEDTGoWrong()
+        throws InterruptedException, InvocationTargetException
+    {
+        Supplier<Container> supplier    = () -> {
+            throw new IllegalStateException( "testing" );
+        };
+        SwingUtilities.invokeAndWait( () ->
+            assertThrows(
+                BattleshipException.class, () -> GridFrame.getFrame( supplier )
+            )
         );
     }
 
@@ -83,7 +97,7 @@ class GridFrameTest
         JFrame  jFrame  = getParentFrame( client );
         assertTrue( jFrame.isVisible() );
     }
-
+    
     /**
      * Get the JFrame in a Component's Component hierarchy.
      * Raises an assertion if none found.

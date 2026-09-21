@@ -23,6 +23,8 @@ public class GridFrame
     private static final String title   = "Grid Frame";
     /** The frame component. */
     private final JFrame        frame;
+    /** The client component. */
+    private final Container     client;
     
     /**
      * Constructor.
@@ -36,9 +38,9 @@ public class GridFrame
     private GridFrame( Supplier<Container> supplier )
     {
         frame   = new JFrame( title );
-        frame.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
+        frame.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
         
-        Container   client = supplier.get();
+        client = supplier.get();
         frame.setContentPane( client );
         frame.pack();
         frame.setVisible( true );
@@ -52,7 +54,6 @@ public class GridFrame
      */
     public Container getClient()
     {
-        Container   client  = frame.getContentPane();
         return client;
     }
     
@@ -78,21 +79,25 @@ public class GridFrame
     {
         Objects.requireNonNull( supplier, "supplier" );
         GridFrame[] gridFrame   = new GridFrame[1];
-        if ( SwingUtilities.isEventDispatchThread() )
-            gridFrame[0] = new GridFrame( supplier );
-        else
+        try
         {
-            try
-            {
+            if ( SwingUtilities.isEventDispatchThread() )
+                gridFrame[0] = new GridFrame( supplier );
+            else
                 SwingUtilities.invokeAndWait( () -> 
                     gridFrame[0] = new GridFrame( supplier )
-                );
-            }
-            catch ( InvocationTargetException | InterruptedException exc )
-            {
-                String  msg = "Unexpected exception on EDT";
-                throw new BattleshipException( msg, exc );
-            }
+            );
+        }
+        catch ( 
+            InvocationTargetException 
+            | InterruptedException 
+            | RuntimeException exc
+        )
+        {
+            if ( exc instanceof InterruptedException )
+                Thread.currentThread().interrupt();
+            String  msg = "Unexpected exception on EDT";
+            throw new BattleshipException( msg, exc );
         }
         return gridFrame[0];
     }
