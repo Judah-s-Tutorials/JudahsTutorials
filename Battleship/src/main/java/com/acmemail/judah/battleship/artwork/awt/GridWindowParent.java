@@ -39,29 +39,47 @@ public class GridWindowParent extends JPanel
     /** Default serial version UID. */
     private static final long serialVersionUID = 1L;
     
-    /** The width of the outer border that encloses a GridWindow. */
-    private final int       outerWidth      = 5;
-    /** The width of the inner border that encloses a GridWindow. */
-    private final int       innerWidth      = 5;
-    /** The color of the inner border that encloses a GridWindow. */
-    private final Color     border2Color    = Color.BLUE;
-    /** The outer border that encloses a GridWindow. */
-    private final Border    outerBorder     = 
+    /** The width of the line border that encloses an unselected GridWindow. */
+    private static final int       unselLineWidth       = 1;
+    /** The padding for the border an unselected GridWindow. */
+    private static final int       unselPaddingWidth    = 4;
+    /** The color of the border that encloses an unselected GridWindow. */
+    private static final Color     unselColor           = Color.BLUE;
+    /** The line border that encloses an unselected GridWindow */
+    private static final Border    unselLineBorder      =
+        BorderFactory.createLineBorder( unselColor, unselLineWidth );
+    /** The padding for the border that encloses an unselected GridWindow */
+    private static final Border    unselPadding         =
         BorderFactory.createEmptyBorder( 
-            outerWidth, 
-            outerWidth, 
-            outerWidth, 
-            outerWidth 
+            unselPaddingWidth,
+            unselPaddingWidth,
+            unselPaddingWidth,
+            unselPaddingWidth
         );
-    /** The inner border that encloses a GridWindow. */
-    private final Border    innerBorder     =
-        BorderFactory.createLineBorder( border2Color, innerWidth );
-    /** The compound border that encloses a GridWindow. */
-    private final Border    gridWindowBorder    =
-        BorderFactory.createCompoundBorder( innerBorder, outerBorder );
-    /** The border that encloses a GridWindow in the selected state. */
-    private final Border    selectedBorder  =
-        BorderFactory.createLineBorder( Color.YELLOW, innerWidth );
+    /** The border of an unselected GridWindow. */
+    private static final Border    unselBorder         =
+        BorderFactory.createCompoundBorder( unselLineBorder, unselPadding );
+
+    /** The width of the line border that encloses a selected GridWindow. */
+    private static final int       selLineWidth     = unselPaddingWidth;
+    /** The padding for the border a selected GridWindow. */
+    private static final int       selPaddingWidth  = unselLineWidth;
+    /** The color of the border that encloses a selected GridWindow. */
+    private static final Color     selColor         = new Color( 178, 34, 34 );
+    /** The line border that encloses a selected GridWindow */
+    private static final Border    selLineBorder    =
+        BorderFactory.createLineBorder( selColor, selLineWidth );
+    /** The padding for the border that encloses a selected GridWindow */
+    private static final Border    selPadding       =
+        BorderFactory.createEmptyBorder( 
+            selPaddingWidth,
+            selPaddingWidth,
+            selPaddingWidth,
+            selPaddingWidth
+        );
+    /** The border of a selected GridWindow. */
+    private static final Border    selBorder        =
+        BorderFactory.createCompoundBorder( selLineBorder, selPadding );
     
     /** The map of logical grid names to physical GridWindows. */
     private final Map<String,GridWindow>    gridMap = new HashMap<>();
@@ -178,7 +196,7 @@ public class GridWindowParent extends JPanel
     private JPanel getBorderPanel()
     {
         JPanel  panel   = new JPanel();
-        panel.setBorder( gridWindowBorder );
+        panel.setBorder( unselBorder );
         return panel;
     }
 
@@ -267,7 +285,7 @@ public class GridWindowParent extends JPanel
             selectedWindow.setBorder( selectedWindowBorder );
 
         selectedWindowBorder = window.getBorder();
-        window.setBorder( selectedBorder );
+        window.setBorder( selBorder );
         selectedWindow = window;
         repaint();
     }
