@@ -14,10 +14,10 @@ import com.acmemail.judah.battleship.model.GridCoords;
  * and the coordinates of the cell
  * to which the event applies.
  * 
- * @param   mouseEvent
- *          the unmodified {@code mouseEvent} that triggered this event
  * @param   coords
  *          the coordinates of the cell to which the mouse event applies
+ * @param   mouseEvent
+ *          the unmodified {@code mouseEvent} that triggered this event
  */
 public record CellEvent( GridCoords coords, MouseEvent mouseEvent )
 {
