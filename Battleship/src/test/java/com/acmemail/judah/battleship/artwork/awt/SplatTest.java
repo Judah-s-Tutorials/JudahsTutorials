@@ -1,11 +1,13 @@
 package com.acmemail.judah.battleship.artwork.awt;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.util.function.Consumer;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
@@ -35,6 +37,37 @@ class SplatTest
         Image           image   = splat.getImage();
         validateImage( params, image );
     }
+    
+    @Test
+    public void testSetParamsGoWrong()
+    {
+        changeOneParam( p -> p.backgroundColor = null );
+        changeOneParam( p -> p.fillColor = null );
+        changeOneParam( p -> p.edgeColor = null );
+        
+        changeOneParam( p -> p.crownRadius = 0 );
+        changeOneParam( p -> p.crownRadius = -1 );
+        
+        changeOneParam( p -> p.innerRadiusPC = 0 );
+        changeOneParam( p -> p.innerRadiusPC = -.5 );
+        changeOneParam( p -> p.innerRadiusPC = 1 );
+        changeOneParam( p -> p.innerRadiusPC = 1.5 );
+        
+        changeOneParam( p -> p.numSides = 0 );
+        changeOneParam( p -> p.numSides = -1 );
+        changeOneParam( p -> p.numSides = 1 );
+
+    }
+    
+    private static void changeOneParam( Consumer<Splat.Params> exec )
+    {
+        Splat           splat   = new Splat();
+        Splat.Params    params  = splat.getParams();
+        exec.accept( params );
+        assertThrows( IllegalArgumentException.class, () -> 
+            splat.setParams( params ) 
+        );
+    }
 
     private static void validateImage( Splat.Params expParams, Image image )
     {
@@ -49,8 +82,8 @@ class SplatTest
     
     private static void assertApproximatelyEqual( int exp, int act )
     {
-        assertTrue( act >= exp - 1 );
-        assertTrue( act <= exp + 1 );
+        assertTrue( act >= exp - 2 );
+        assertTrue( act <= exp + 2 );
     }
     
     private static boolean contains( Image image, Color color )

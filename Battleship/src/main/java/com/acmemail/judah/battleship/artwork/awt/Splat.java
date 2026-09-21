@@ -1,10 +1,14 @@
 package com.acmemail.judah.battleship.artwork.awt;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.Stroke;
 import java.awt.geom.Path2D;
 import java.awt.image.BufferedImage;
+import java.util.Objects;
+import java.util.function.BooleanSupplier;
 
 /**
  * <img 
@@ -117,6 +121,8 @@ public class Splat
     private static final double TWO_PI             = 2 * Math.PI;
     /** The type of the image of the splat. */
     private static final int    imageType   = BufferedImage.TYPE_INT_ARGB;
+    /** Width of the stroke used to draw the splat's edge. */
+    private static final double EDGE_WIDTH = 1.0;
     
     /** Background color; the color of the rectangle the splat is drawn on. */
     private Color       backgroundColor = new Color( 0x00_FF_FF_FF, true );
@@ -152,9 +158,14 @@ public class Splat
      * Set the parameters used to draw this splat.
      * 
      * @param params    the parameters used to draw this splat
+     * 
+     * @throws NullPointerException if params is null
+     * @throws IllegalArgumentException if a parameter is not within tolerance
      */
     public void setParams( Params params )
     {
+        Objects.requireNonNull( params, "params" );
+        params.validate();
         this.backgroundColor = params.backgroundColor;
         this.fillColor = params.fillColor;
         this.edgeColor = params.edgeColor;
@@ -170,14 +181,15 @@ public class Splat
      */
     public Image getImage()
     {
-        double          innerRadius = crownRadius * innerRadiusPC;
-        double          center      = crownRadius;
-        double          extAngle    = TWO_PI / numSides;
-        double          theta       = 0;
-        Path2D          splat       = new Path2D.Double();
+        double  innerRadius = crownRadius * innerRadiusPC;
+        double  margin      = Math.ceil( EDGE_WIDTH / 2.0 );
+        double  center      = crownRadius + margin;
+        double  extAngle    = TWO_PI / numSides;
+        double  theta       = 0;
+        Path2D  splat       = new Path2D.Double();
         
         splat.moveTo( center + innerRadius, center );
-        for ( int inx = 0 ; inx <= numSides ; ++inx )
+        for ( int inx = 0 ; inx < numSides ; ++inx )
         {
             // Path is already positioned at one end of a side of the polygon;
             // calculate the position of the other end.
@@ -198,10 +210,14 @@ public class Splat
             
             theta = theta2;
         }
-        int             side    = 2 * (int)Math.ceil( crownRadius );
+        splat.closePath();
+        
+        int             side    = 2 * (int)Math.ceil( center );
         BufferedImage   image   = new BufferedImage( side, side, imageType );
         Graphics2D      gtx     = image.createGraphics();
         
+        Stroke          stroke  = new BasicStroke( (float)EDGE_WIDTH );
+        gtx.setStroke( stroke );
         gtx.setColor( backgroundColor );
         gtx.fillRect( 0, 0, side, side );
         gtx.setColor( fillColor );
@@ -209,6 +225,7 @@ public class Splat
         gtx.setColor( edgeColor );
         gtx.draw( splat );
         
+        gtx.dispose();
         return image;
     }
     
@@ -237,5 +254,66 @@ public class Splat
         public double      innerRadiusPC   = Splat.this.innerRadiusPC;
         /** Number of sides in the polygon inscribed in the inner circle. */
         public int         numSides        = Splat.this.numSides;
+        
+        /**
+         * Verifies that the given parameters
+         * are within tolerance.
+         * 
+         * @throws IllegalArgumentException if a parameter is not within tolerance
+         */
+        public void validate()
+        {
+            validate(
+                () -> backgroundColor != null,
+                "background color",
+                "may not be null"
+            );
+            validate(
+                () -> fillColor != null,
+                "fill color",
+                "may not be null"
+            );
+            validate(
+                () -> edgeColor != null,
+                "edge color",
+                "may not be null"
+            );
+            validate(
+                () -> crownRadius > 0,
+                "crown radius",
+                "must be greater than 0"
+            );
+            validate(
+                () -> innerRadiusPC > 0 && innerRadiusPC < 1,
+                "inner radius percent",
+                "must be between 0 < percent < 1"
+            );
+            validate(
+                () -> numSides > 2,
+                "number of sides",
+                "must be greater than 2"
+            );
+        }
+        
+        /**
+         * Verifies a field against a given predicate, 
+         * and throws an exception if it fails.
+         * 
+         * @param checker   given predicate
+         * @param field     field name
+         * @param message   description of error
+         */
+        private static void validate( 
+            BooleanSupplier checker, 
+            String field, 
+            String message
+        )
+        {
+            if ( !checker.getAsBoolean() )
+            {
+                String  msg = field + ": " + message;
+                throw new IllegalArgumentException( msg );
+            }
+        }
     }
 }
