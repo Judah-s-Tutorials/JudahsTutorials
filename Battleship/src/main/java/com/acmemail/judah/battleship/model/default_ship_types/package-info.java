@@ -3,4 +3,4 @@
  * At this time, 
  * the default ship types are those included in the classic game.
  */
-package com.acmemail.judah.battleship2D.default_ship_types;
+package com.acmemail.judah.battleship.model.default_ship_types;

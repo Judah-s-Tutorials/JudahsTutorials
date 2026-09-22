@@ -18,9 +18,9 @@ import com.acmemail.judah.battleship.model.GridCoords;
 import com.acmemail.judah.battleship.model.Orientation;
 import com.acmemail.judah.battleship.model.Ship2D;
 import com.acmemail.judah.battleship.model.ShipTypes;
-import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
-import com.acmemail.judah.battleship2D.default_ship_types.Destroyer;
-import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
+import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
+import com.acmemail.judah.battleship.model.default_ship_types.Destroyer;
+import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
 
 public class GraphGridController
 {

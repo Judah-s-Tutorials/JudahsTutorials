@@ -5,7 +5,7 @@ import com.acmemail.judah.battleship.Constants;
 /**
  * Test-only bridge exposing Grid2D's package-private
  * {@code reset()} and {@code clear()} operations
- * to test code outside the {@code battleship2D} package.
+ * to test code outside the {@code battleship.model} package.
  * This class lives in the test source tree only,
  * so it is never present on a production classpath;
  * test code in this same package

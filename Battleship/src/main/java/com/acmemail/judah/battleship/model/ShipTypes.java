@@ -7,11 +7,11 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.acmemail.judah.battleship.BattleshipException;
-import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
-import com.acmemail.judah.battleship2D.default_ship_types.Carrier;
-import com.acmemail.judah.battleship2D.default_ship_types.Cruiser;
-import com.acmemail.judah.battleship2D.default_ship_types.Destroyer;
-import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
+import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
+import com.acmemail.judah.battleship.model.default_ship_types.Carrier;
+import com.acmemail.judah.battleship.model.default_ship_types.Cruiser;
+import com.acmemail.judah.battleship.model.default_ship_types.Destroyer;
+import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
 
 /**
  * Registry of all known {@link ShipType2D} ship types.

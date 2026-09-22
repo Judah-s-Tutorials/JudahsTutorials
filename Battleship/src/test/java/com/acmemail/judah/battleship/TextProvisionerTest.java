@@ -34,11 +34,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import com.acmemail.judah.battleship.model.ShipType2D;
-import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
-import com.acmemail.judah.battleship2D.default_ship_types.Carrier;
-import com.acmemail.judah.battleship2D.default_ship_types.Cruiser;
-import com.acmemail.judah.battleship2D.default_ship_types.Destroyer;
-import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
+import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
+import com.acmemail.judah.battleship.model.default_ship_types.Carrier;
+import com.acmemail.judah.battleship.model.default_ship_types.Cruiser;
+import com.acmemail.judah.battleship.model.default_ship_types.Destroyer;
+import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
 
 class TextProvisionerTest
 {

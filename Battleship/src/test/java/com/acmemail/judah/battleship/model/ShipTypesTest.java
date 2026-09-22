@@ -10,11 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.battleship.BattleshipException;
-import com.acmemail.judah.battleship2D.default_ship_types.Battleship;
-import com.acmemail.judah.battleship2D.default_ship_types.Carrier;
-import com.acmemail.judah.battleship2D.default_ship_types.Cruiser;
-import com.acmemail.judah.battleship2D.default_ship_types.Destroyer;
-import com.acmemail.judah.battleship2D.default_ship_types.Submarine;
+import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
+import com.acmemail.judah.battleship.model.default_ship_types.Carrier;
+import com.acmemail.judah.battleship.model.default_ship_types.Cruiser;
+import com.acmemail.judah.battleship.model.default_ship_types.Destroyer;
+import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
 
 class ShipTypesTest
 {

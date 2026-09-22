@@ -1,4 +1,4 @@
-package com.acmemail.judah.battleship2D.default_ship_types;
+package com.acmemail.judah.battleship.model.default_ship_types;
 
 import com.acmemail.judah.battleship.Constants;
 import com.acmemail.judah.battleship.model.ShipType2D;
