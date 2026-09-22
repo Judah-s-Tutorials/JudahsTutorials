@@ -1,9 +1,11 @@
 package com.acmemail.judah.battleship.artwork.awt.sandbox;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.stream.IntStream;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Fleet;
@@ -32,10 +34,12 @@ public class GraphGridController
         IntStream.range( 1, 2 )
             .mapToObj( i -> "Opponent " + i )
             .forEach( Grid2D::new );
-        gridFrame = GridFrame.getFrame( () -> new GridWindowParent() );
-        parent = (GridWindowParent)gridFrame.getClient();
-        homeGridWindow = parent.getGridWindow( grid.getName() );
-        homeGridWindow.addCellListener( System.out::println );
+        invokeAndWait( () -> {
+            gridFrame = GridFrame.getFrame( () -> new GridWindowParent() );
+            parent = (GridWindowParent)gridFrame.getClient();
+            homeGridWindow = parent.getGridWindow( grid.getName() );
+            homeGridWindow.addCellListener( System.out::println );
+        });
 
         ShipTypes.registerDefaultTypes();
         Fleet   fleet   = new Fleet();
@@ -81,5 +85,18 @@ public class GraphGridController
         String  messages    = String.join( "\n", result.getMessages() );
         JOptionPane.showMessageDialog( null, messages );
         System.exit( 1 );
+    }
+    
+    private static void invokeAndWait( Runnable runner )
+    {
+        try
+        {
+            SwingUtilities.invokeAndWait( runner );
+        }
+        catch ( InterruptedException | InvocationTargetException exc )
+        {
+            exc.printStackTrace();
+            System.exit( 1 );
+        }
     }
 }

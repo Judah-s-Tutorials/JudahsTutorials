@@ -21,7 +21,7 @@ public class Cell2D implements Cell2DView
     /** Indicates that this cell has been attacked. */
     private boolean splatted    = false;
     /** This cell belongs to the enemy.  */
-    private boolean isOpponent       = false;
+    private boolean isOpponent  = false;
     
     /**
      * Constructor.

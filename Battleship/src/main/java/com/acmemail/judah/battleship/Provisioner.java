@@ -6,7 +6,7 @@ import com.acmemail.judah.battleship.model.ShipType2D;
 
 /**
  * Implementing classes act as a source for provisioning data,
- * such as grid dimension
+ * such as grid dimension,
  * what ship types to declare,
  * and which to deploy.
  */
