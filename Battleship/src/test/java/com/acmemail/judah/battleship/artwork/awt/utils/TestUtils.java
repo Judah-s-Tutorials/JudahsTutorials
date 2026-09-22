@@ -36,19 +36,22 @@ public class TestUtils
     public static void invokeAndWait( Runnable runner )
     {
         Objects.requireNonNull( runner, "runner" );
-        if ( SwingUtilities.isEventDispatchThread() )
-            runner.run();
-        else
+        try
         {
-            try
-            {
+            if ( SwingUtilities.isEventDispatchThread() )
+                runner.run();
+            else
                 SwingUtilities.invokeAndWait( () -> runner.run() );
-            }
-            catch ( InterruptedException | InvocationTargetException exc )
-            {
-                exc.printStackTrace();
-                throw new BattleshipException( "unexpected exception", exc );
-            }
+        }
+        catch ( 
+            InterruptedException 
+            | InvocationTargetException 
+            | RuntimeException exc )
+        {
+            if ( exc instanceof InterruptedException )
+                Thread.currentThread().interrupt();
+            exc.printStackTrace();
+            throw new BattleshipException( "unexpected exception", exc );
         }
     }
     
@@ -97,11 +100,6 @@ public class TestUtils
             return (Window)parent;
         };
         
-        Window[]    result  = new Window[1];
-        if ( SwingUtilities.isEventDispatchThread() )
-            result[0] = supplier.get();
-        else
-            TestUtils.invokeAndWait( () -> result[0] = supplier.get() );
-        return result[0]; 
+        return invokeAndWaitGet( supplier );
     }
 }

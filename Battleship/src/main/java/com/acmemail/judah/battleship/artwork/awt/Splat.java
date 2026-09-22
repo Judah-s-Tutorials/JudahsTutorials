@@ -182,8 +182,7 @@ public class Splat
     public Image getImage()
     {
         double  innerRadius = crownRadius * innerRadiusPC;
-        double  margin      = Math.ceil( EDGE_WIDTH / 2.0 );
-        double  center      = crownRadius + margin;
+        double  center      = getCenter( crownRadius );
         double  extAngle    = TWO_PI / numSides;
         double  theta       = 0;
         Path2D  splat       = new Path2D.Double();
@@ -228,7 +227,29 @@ public class Splat
         gtx.dispose();
         return image;
     }
-    
+
+    /**
+     * Computes the coordinate, in both dimensions,
+     * of the center of the image needed to hold
+     * a splat with the given crown radius,
+     * accounting for the margin needed
+     * to keep the edge stroke from being clipped
+     * at the image's bounds.
+     * Package-private; exposed for testing.
+     *
+     * @param crownRadius   the given crown radius
+     *
+     * @return
+     *      the coordinate of the center of the image needed
+     *      for a splat with the given crown radius
+     */
+    static double getCenter( double crownRadius )
+    {
+        double  margin  = Math.ceil( EDGE_WIDTH / 2.0 );
+        double  center  = crownRadius + margin;
+        return center;
+    }
+
     /**
      * Encapsulation of parameters used to draw the splat.
      */

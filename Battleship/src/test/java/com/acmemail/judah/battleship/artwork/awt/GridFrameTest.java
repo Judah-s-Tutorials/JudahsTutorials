@@ -18,6 +18,7 @@ import javax.swing.SwingUtilities;
 import org.junit.jupiter.api.Test;
 
 import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.artwork.awt.utils.TestUtils;
 
 /**
  * 
@@ -66,12 +67,11 @@ class GridFrameTest
 
     @Test
     void testGetFrameEDTGoWrong()
-        throws InterruptedException, InvocationTargetException
     {
         Supplier<Container> supplier    = () -> {
             throw new IllegalStateException( "testing" );
         };
-        SwingUtilities.invokeAndWait( () ->
+        TestUtils.invokeAndWait( () ->
             assertThrows(
                 BattleshipException.class, () -> GridFrame.getFrame( supplier )
             )
@@ -97,7 +97,7 @@ class GridFrameTest
         JFrame  jFrame  = getParentFrame( client );
         assertTrue( jFrame.isVisible() );
     }
-    
+
     /**
      * Get the JFrame in a Component's Component hierarchy.
      * Raises an assertion if none found.

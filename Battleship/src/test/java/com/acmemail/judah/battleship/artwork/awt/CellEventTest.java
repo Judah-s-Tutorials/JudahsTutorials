@@ -18,10 +18,16 @@ class CellEventTest
     @Test
     public void testCellEvent()
     {
-        GridCoords      nonNullCoords   = new GridCoords( 10, 10 );
-        Component       source          = new JPanel();
-        MouseEvent      nonNullEvent    = 
+        GridCoords  nonNullCoords   = new GridCoords( 10, 10 );
+        Component   source          = new JPanel();
+        MouseEvent  nonNullEvent    = 
             new MouseEvent( source, 0, 0, 0, 0, 0, 0, false );
+        
+        CellEvent   event           = 
+            new CellEvent( nonNullCoords, nonNullEvent );
+        assertEquals( nonNullCoords, event.coords() );
+        assertEquals( nonNullEvent, event.mouseEvent() );
+        
         assertThrows( NullPointerException.class, () -> 
             new CellEvent( null, nonNullEvent )
         );

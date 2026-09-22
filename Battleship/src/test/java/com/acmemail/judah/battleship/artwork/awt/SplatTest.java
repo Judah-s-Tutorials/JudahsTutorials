@@ -1,5 +1,6 @@
 package com.acmemail.judah.battleship.artwork.awt;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -73,19 +74,14 @@ class SplatTest
     {
         int     width   = image.getWidth( null );
         int     height  = image.getHeight( null );
-        int     expSize = (int)Math.round( expParams.crownRadius * 2 );
-        assertApproximatelyEqual( expSize, width );
-        assertApproximatelyEqual( expSize, height );
+        double  center  = Splat.getCenter( expParams.crownRadius );
+        int     expSize = 2 * (int)Math.ceil( center );
+        assertEquals( expSize, width );
+        assertEquals( expSize, height );
         assertTrue( contains( image, expParams.edgeColor ) );
         assertTrue( contains( image, expParams.fillColor ) );
     }
-    
-    private static void assertApproximatelyEqual( int exp, int act )
-    {
-        assertTrue( act >= exp - 2 );
-        assertTrue( act <= exp + 2 );
-    }
-    
+
     private static boolean contains( Image image, Color color )
     {
         int             iColor      = color.getRGB();
@@ -95,8 +91,7 @@ class SplatTest
         int             numPixels   = width * height;
         boolean         contains    =
             IntStream.range( 0, numPixels )
-                .boxed()
-                .map( i -> bufImage.getRGB( i % width, i / height ) )
+                .map( i -> bufImage.getRGB( i % width, i / width ) )
                 .filter( i -> i == iColor )
                 .findAny().isPresent();
         return contains;
@@ -110,6 +105,7 @@ class SplatTest
         BufferedImage   bufImage    = new BufferedImage( width, height, type );
         Graphics2D      gtx         = bufImage.createGraphics();
         gtx.drawImage( image, 0, 0, null );
+        gtx.dispose();
         return bufImage;
     }
 }
