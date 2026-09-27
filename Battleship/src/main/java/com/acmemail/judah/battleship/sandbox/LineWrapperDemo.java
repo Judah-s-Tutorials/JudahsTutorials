@@ -1,5 +1,6 @@
 package com.acmemail.judah.battleship.sandbox;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -15,7 +16,9 @@ public class LineWrapperDemo
                 () -> twoStanzas(),
                 () -> oneLongParagraph(),
                 () -> twoLongParagraphs(),
-                () -> longWords()
+                () -> longWords(),
+                () -> emptyLineList(),
+                () -> multipleListItemsIn()
             );
         allDemos.forEach(s -> {
             System.out.println( "********** Begin" );
@@ -46,6 +49,33 @@ public class LineWrapperDemo
         return result;
     }
     
+    private static String multipleListItemsIn()
+    {
+        String          graph1  =
+            "When in the Course of human events, it becomes "
+            + "necessary for one people to dissolve the political bands which"
+            + " have connected them with another, and to assume among the "
+            + "powers of the earth, the separate and equal station to which the "
+            + "Laws of Nature and of Nature's God entitle them, a decent "
+            + "   respect to the opinions of mankind requires that they should"
+            + " declare    the causes which impel them to the separation.";
+        String          graph2  =
+            "We hold these truths to be self-evident, that all men are created "
+            + "equal, that they are endowed by their Creator with certain "
+            + "unalienable Rights, that among these are Life, Liberty and the "
+            + "pursuit of Happiness.";
+
+        List<String>    lines   = List.of( graph1, "", graph2 );
+        LineWrapper     wrapper     = new LineWrapper( 40, lines );
+
+        List<String>    brokenList  = wrapper.getWrappedList();
+        brokenList.stream()
+            .map( s -> "\"" + s + "\",")
+            .forEach( System.out::println );
+        String          result  = doWrap( 40, lines );
+        return result;
+    }
+    
     private static String oneLongParagraph()
     {
         String          graph   =
@@ -60,6 +90,7 @@ public class LineWrapperDemo
             + " declare    the causes which impel them to the separation.";
             
         List<String>    lines   = List.of( graph );
+ 
         String          result  = doWrap( 40, lines );
         return result;
     }
@@ -95,7 +126,6 @@ public class LineWrapperDemo
         return result;
     }
     
-    
     private static String longWords()
     {
         String          longWord        =
@@ -121,6 +151,17 @@ public class LineWrapperDemo
         return result;
     }
 
+    private static String emptyLineList()
+    {
+        List<String>    allLines    = new ArrayList<>();
+        allLines.add( "Result of passing an empty list of lines" );
+        allLines.add( "####### result follows #######" );
+        LineWrapper     wrapper     = new LineWrapper( 10, new ArrayList<>() );
+        allLines.addAll( wrapper.getWrappedList() );
+        allLines.add( "####### end result #######" );
+        String          rVal        = String.join( LINE_SEP, allLines );
+        return rVal;
+    }
     
     private static String doWrap( int lineLen, List<String> lines )
     {
