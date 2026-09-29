@@ -18,7 +18,8 @@ public class LineWrapperDemo
                 () -> twoLongParagraphs(),
                 () -> longWords(),
                 () -> emptyLineList(),
-                () -> multipleListItemsIn()
+                () -> multipleListItemsIn(),
+                () -> indentedParagraphs()
             );
         allDemos.forEach(s -> {
             System.out.println( "********** Begin" );
@@ -121,6 +122,44 @@ public class LineWrapperDemo
                 graph1,
                 "",
                 graph2
+            );
+        String          result      = doWrap( 40, lines );
+        return result;
+    }
+    
+    private static String indentedParagraphs()
+    {
+        String          graph1  =
+            "There is no strife, no prejudice, no national conflict in outer"
+            + " space as yet. Its hazards are hostile to us all. Its conquest"
+            + " deserves the best of all mankind, and its opportunity for "
+            + "peaceful cooperation may never come again. But why, some say, "
+            + "the moon? Why choose this as our goal? And they may well ask"
+            + " why climb the highest mountain? Why, 35 years ago, fly the "
+            + "Atlantic? Why does Rice play Texas?";
+        String          graph2  =
+            "\tWe choose to go to the moon. We choose to go to the moon in this"
+            + " decade and do the other things, not because they are easy, but"
+            + " because they are hard, because that goal will serve to organize "
+            + "and measure the best of our energies and skills, because that"
+            + " challenge is one that we are willing to accept, one we are "
+            + "unwilling to postpone, and one which we intend to win, and the "
+            + "others, too."; 
+        String          graph3  =
+            "\t\tIt is for these reasons that I regard the decision last year to "
+            + "shift our efforts in space from low to high gear as among the "
+            + "most important decisions that will be made during my incumbency "
+            + "in the office of the presidency. ";
+            
+        List<String>    lines   =
+            List.of( 
+                "Indented paragraphs",
+                "",
+                graph1,
+                "",
+                graph2,
+                "",
+                graph3
             );
         String          result      = doWrap( 40, lines );
         return result;

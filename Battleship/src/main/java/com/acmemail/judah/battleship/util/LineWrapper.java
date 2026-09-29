@@ -200,11 +200,11 @@ public class LineWrapper
      */
     private void processString( String str, String tabStr )
     {
-        String[]        words       = str.split( "\\s+" );
+        String[]        tokens      = str.split( "\\s+" );
         StringBuilder   currLine    = tabStr.length() < lineLen ?
             new StringBuilder( tabStr ) :
             new StringBuilder( tabStr.substring( 0, lineLen ) );
-        for ( String word : words )
+        for ( String word : tokens )
         {
             String  workWord    = word;
             if ( workWord.length() > lineLen )
@@ -213,6 +213,7 @@ public class LineWrapper
                 {
                     wrappedList.add( currLine.toString() );
                     currLine.setLength( 0 );
+                    currLine.append( tabStr );
                 }
                 workWord = splitLongWord( workWord );
             }
@@ -227,6 +228,7 @@ public class LineWrapper
                 {
                     wrappedList.add( currLine.toString() );
                     currLine.setLength( 0 );
+                    currLine.append( tabStr );
                 }
                 currLine.append( workWord );
             }

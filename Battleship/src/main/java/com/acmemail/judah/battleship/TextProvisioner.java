@@ -131,9 +131,9 @@ public class TextProvisioner implements Provisioner
      */
     private boolean                 success     = true;
     /** Number of grid rows configured during parsing; null if none. */
-    private Integer                 rows        = null;
+    private Integer                 rows        = 10;
     /** Number of grid columns configured during parsing; null if none. */
-    private Integer                 cols        = null;
+    private Integer                 cols        = 1;
     
     /**
      * Default constructor.

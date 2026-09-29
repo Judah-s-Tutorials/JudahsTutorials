@@ -63,7 +63,26 @@
             <artifactId>commons-csv</artifactId>
             <version>1.14.1</version>
             <scope>compile</scope>
-        </dependency>    </dependencies>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.15.0</version>
+        </dependency>
+        <!-- Inscriptis HTML to text conversion library -->
+        <dependency>
+            <groupId>ch.x28.inscriptis</groupId>
+            <artifactId>inscriptis</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!-- jsoup Java HTML parser library -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>1.23.2</version>
+        </dependency>    
+    </dependencies>
     <build>
         <resources>
             <resource>
