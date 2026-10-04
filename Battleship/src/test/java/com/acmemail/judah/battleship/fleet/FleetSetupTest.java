@@ -43,7 +43,7 @@ class FleetSetupTest
     public void testAddToBeDeployed()
     {
         List<ShipType2D>        expToBeDeployed = new ArrayList<>();
-        List<Fleet.Proto>   actToBeDeployed = fleet.getToBeDeployed();
+        List<Fleet.Proto>   actToBeDeployed = fleet.getToBeDeployedProtos();
         assertTrue( actToBeDeployed.isEmpty() );
         
         int                     count           = 1;
@@ -69,7 +69,7 @@ class FleetSetupTest
         // Need to add ships to be deployed before executing this test;
         // see testAddToBeDeployed
         fleet = FleetProvisionData.getProvisionedFleet();
-        List<Fleet.Proto>   protoShips  = fleet.getToBeDeployed();
+        List<Fleet.Proto>   protoShips  = fleet.getToBeDeployedProtos();
         assertFalse( protoShips.isEmpty() );
         Fleet.Proto         ident       = protoShips.get( 0 );
         Class<BattleshipException>  exc = BattleshipException.class;

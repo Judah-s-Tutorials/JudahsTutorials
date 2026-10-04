@@ -72,6 +72,16 @@ public class SetupPhase
         + "deployed vertically, it will have a width of 3 "
         + "and a height of 12.",
         
+        "\t-- add: "
+        + "This command adds the name of an opponent "
+        + "to the game."
+        + "Names are case-sensitive, "
+        + "and may not contain spaces, e.g.:",
+        
+        "\t\tplayer,Albert",
+        "\t\tplayer,Marie-Curie",
+        "\t\tSir-Isaac-Newton",
+        
         "\t-- ?, h, help: show this help message",
         "\t-- u, update: display the updated configuration",
         "\t-- done: mark setup complete",
@@ -91,24 +101,6 @@ public class SetupPhase
         setup.exec();
         if ( setup.isQuit() )
             System.out.println( "quitting" );
-
-//        LineWrapper     wrapper     = new LineWrapper( lineLen, list );
-//        List<String>    wrappedList = wrapper.getWrappedList();
-//        System.out.println( String.join( lineSep, wrappedList ) );
-//        
-//        setup.execCommand( "dim,50,40" );
-//        setup.execCommand( "type,default" );
-//        setup.execCommand( "type,SuperCarrier,12,3" );
-//        setup.execCommand( "type,DeepDive,10,2" );
-//        setup.showUpdatedConfig();
-//        
-//        setup.execCommand( "deploy,Battleship" );
-//        setup.execCommand( "deploy,SuperCarrier" );
-//        setup.execCommand( "deploy,Destroyer" );
-//        setup.execCommand( "deploy,Destroyer" );
-//        setup.execCommand( "deploy,Submarine" );
-//        setup.execCommand( "deploy,DeepDive" );
-//        setup.showUpdatedConfig();
     }
     
     public SetupPhase()
@@ -189,7 +181,7 @@ public class SetupPhase
         case "?", "H", "HELP"  -> showHelp();
         case "U", "UPDATE" -> showUpdate();
         case "DONE" -> setupComplete = true;
-        case "QUIT" -> setupComplete = true;
+        case "Q, QUIT" -> quit = true;
         default -> provisioner.addRec( command );
         }
         System.out.print( command + ": " );
@@ -210,8 +202,18 @@ public class SetupPhase
     private void showUpdate()
     {
         System.out.printf( "%nCURRENT CONFIGURATION%n" );
+        showPlayers();
         showDimensions();
         showShipTable();
+        System.out.println();
+    }
+    
+    private void showPlayers()
+    {
+        List<String>    players = provisioner.getPlayers();
+        System.out.println( "Players");
+        System.out.println( "=======");
+        players.forEach( System.out::println );
         System.out.println();
     }
     

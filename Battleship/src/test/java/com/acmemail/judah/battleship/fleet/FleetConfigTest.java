@@ -65,7 +65,7 @@ class FleetConfigTest
     @Test
     public void testGetShipGoRight()
     {
-        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployed();
+        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployedProtos();
         Fleet.Proto         proto           = toBeDeployed.get( 0 );
         assertNotNull( proto );
         Ship2D          ship    = 
@@ -88,7 +88,7 @@ class FleetConfigTest
         final Class<NullPointerException>   npeClass    = 
             NullPointerException.class;
         
-        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployed();
+        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployedProtos();
         Fleet.Proto         proto           = toBeDeployed.get( 0 );
         assertNotNull( proto );
         
@@ -137,7 +137,7 @@ class FleetConfigTest
     @Test
     public void testDeployGoWrongOOB()
     {
-        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployed();
+        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployedProtos();
         assertFalse( toBeDeployed.isEmpty() );
         Fleet.Proto         proto           = toBeDeployed.get( 0 );
         assertNotNull( proto );
@@ -174,7 +174,7 @@ class FleetConfigTest
     @Test
     public void testDeployGoWrongIntersection()
     {
-        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployed();
+        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployedProtos();
         assertFalse( toBeDeployed.isEmpty() );
         Fleet.Proto         refProto        = toBeDeployed.get( 0 );
         assertNotNull( refProto );
@@ -237,7 +237,7 @@ class FleetConfigTest
     {
         Class<NullPointerException> npeClass    = NullPointerException.class;
 
-        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployed();
+        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployedProtos();
         assertFalse( toBeDeployed.isEmpty() );
         Fleet.Proto         refProto        = toBeDeployed.get( 0 );
         assertNotNull( refProto );
@@ -261,7 +261,7 @@ class FleetConfigTest
         Ship2D          shipB    = 
             deployShip( coordsB, ADHOC_NAME, HORIZONTAL, protoB );
         
-        List<Fleet.Proto>   allPrototypes   = fleet.getToBeDeployed();
+        List<Fleet.Proto>   allPrototypes   = fleet.getToBeDeployedProtos();
         List<Ship2D>        allShips        = homeGrid.getAllShips();
         assertTrue( allShips.contains( shipA ) );
         assertFalse( allPrototypes.contains( protoA ) );
@@ -387,7 +387,7 @@ class FleetConfigTest
     @Test
     public void testGetToBeDeployed()
     {
-        List<Fleet.Proto>   protoShips  = fleet.getToBeDeployed();
+        List<Fleet.Proto>   protoShips  = fleet.getToBeDeployedProtos();
         int                 yco         = 0;
         while ( !protoShips.isEmpty() )
         {
@@ -397,7 +397,7 @@ class FleetConfigTest
             int         beforeSize  = protoShips.size();
             Ship2D      ship        =
                 deployShip( coords, ADHOC_NAME, HORIZONTAL, nextProto );
-            protoShips = fleet.getToBeDeployed();
+            protoShips = fleet.getToBeDeployedProtos();
             int         afterSize   = protoShips.size();
             assertFalse( protoShips.contains( nextProto ) );
             assertEquals( beforeSize - 1, afterSize );
@@ -411,7 +411,7 @@ class FleetConfigTest
     {
         // Need to add ships to be deployed before executing this test;
         // see testAddToBeDeployed
-        List<Fleet.Proto>   protoShips  = fleet.getToBeDeployed();
+        List<Fleet.Proto>   protoShips  = fleet.getToBeDeployedProtos();
         assertFalse( protoShips.isEmpty() );
         Class<BattleshipException>  exc = BattleshipException.class;
         assertThrows( exc, () -> 
@@ -423,19 +423,19 @@ class FleetConfigTest
     public void testGetAllDeployedProtos()
     {
         List<Fleet.Proto>   workingList =
-            new ArrayList<>( fleet.getToBeDeployed() );
+            new ArrayList<>( fleet.getToBeDeployedProtos() );
         int                 nextYco     = 0;
 
         assertTrue( fleet.getAllDeployedProtos().isEmpty() );
         for ( Fleet.Proto proto : workingList )
         {
-            assertTrue( fleet.getToBeDeployed().contains( proto ) );
+            assertTrue( fleet.getToBeDeployedProtos().contains( proto ) );
             assertFalse( fleet.getAllDeployedProtos().contains( proto ) );
             assertNull( fleet.getDeployedShip( proto ) );
             GridCoords  coords  = new GridCoords( 0, nextYco );
             Ship2D  ship    =
                 deployShip( coords, ADHOC_NAME, HORIZONTAL, proto );
-            assertFalse( fleet.getToBeDeployed().contains( proto ) );
+            assertFalse( fleet.getToBeDeployedProtos().contains( proto ) );
             assertTrue( fleet.getAllDeployedProtos().contains( proto ) );
             nextYco += ship.getBounds().height;
             assertEquals( ship, fleet.getDeployedShip( proto ) );
@@ -446,7 +446,7 @@ class FleetConfigTest
     public void testGetAllDeployedShips()
     {
         List<Fleet.Proto>   workingList =
-            new ArrayList<>( fleet.getToBeDeployed() );
+            new ArrayList<>( fleet.getToBeDeployedProtos() );
         Set<Ship2D>         expShips    = new HashSet<>();
         int                 nextYco     = 0;
 
@@ -489,7 +489,7 @@ class FleetConfigTest
     private Fleet.Proto getProtoForType( ShipType2D type )
     {
         Fleet.Proto proto   =
-            fleet.getToBeDeployed().stream()
+            fleet.getToBeDeployedProtos().stream()
                 .filter( p -> p.getType().equals( type ) )
                 .findFirst()
                 .orElseThrow();
@@ -588,7 +588,7 @@ class FleetConfigTest
         Fleet.Proto proto
     )
     {
-        List<Fleet.Proto>   protoShips  = fleet.getToBeDeployed();
+        List<Fleet.Proto>   protoShips  = fleet.getToBeDeployedProtos();
         // sanity check
         assertTrue( protoShips.contains( proto ) );
         Ship2D  ship    = fleet.getShip( coords, name, orient, proto );
@@ -613,7 +613,7 @@ class FleetConfigTest
      */
     private Fleet.Proto getNextToBeDeployed()
     {
-        List<Fleet.Proto>   list    = fleet.getToBeDeployed();
+        List<Fleet.Proto>   list    = fleet.getToBeDeployedProtos();
         assertFalse( list.isEmpty() );
         Fleet.Proto         proto   = list.get( 0 );
         return proto;

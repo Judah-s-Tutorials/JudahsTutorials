@@ -47,5 +47,13 @@ public interface Provisioner
      * @return the list of types that must be registered
      */
     public List<ShipType2D> getToRegister();
+    
+    /**
+     * Gets an unmodifiable wrapper
+     * around the list of opponents in this game.
+     * 
+     * @return the list of opponents in this game
+     */
+    public List<String> getPlayers();
 }
 

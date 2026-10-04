@@ -1,5 +1,6 @@
 package com.acmemail.judah.battleship;
 
+import static com.acmemail.judah.battleship.StatusMessages.DUP_PLAYER;
 import static com.acmemail.judah.battleship.StatusMessages.DUP_SHIP_TYPE;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_BREADTH;
@@ -9,6 +10,7 @@ import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_RECORD;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ROW_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_TYPE;
+import static com.acmemail.judah.battleship.StatusMessages.PLAYER_NOT_FOUND;
 import static com.acmemail.judah.battleship.StatusMessages.SHIP_TYPE_NOT_FOUND;
 
 import java.io.File;
@@ -83,6 +85,14 @@ import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
  *      </ul>
  * </li>
  * <li>
+ *      rem, remove-type:<br>
+ *      Removes a given type 
+ *      from the list of types to be registered.
+ *      Example, remove the type with the name "SuperCarrier":<br>
+ *      <pre>    remove-type,SuperCarrier
+    rem,SuperCarrier</pre>
+ * </li>
+ * <li>
  *      deploy:<br>
  *      Declare the type of a ship
  *      that must be deployed
@@ -97,6 +107,31 @@ import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
     deploy,Destroyer
     deploy,Destroyer
     deploy,Submarine</pre>
+ * </li>
+ * <li>
+ *      und, undeploy:<br>
+ *      Removes a given type 
+ *      from the list of types to be deploy.
+ *      Example, undo the deployment 
+ *      of the type with the name "SuperCarrier":<br>
+ *      <pre>    undeploy,SuperCarrier
+    und,SuperCarrier</pre>
+ * </li>
+ * <li>
+ *      add, add-player:<br>
+ *      Adds an opponent to the list of players.
+ *      Opponent names are case sensitive
+ *      and may not contain spaces;
+ *      other printable characters are allowed:<br>
+<pre>    add,Marie
+    add-player,Sir-Roger-Penrose</pre>
+ * </li>
+ * <li>
+ *      sub, subtract-player:<br>
+ *      Removes a name 
+ *      from the list opponent names:
+<pre>    rem-player,Marie
+    remove-player,Sir-Roger-Penrose</pre>
  * </li>
  * </ul>
  * 
@@ -120,6 +155,8 @@ public class TextProvisioner implements Provisioner
     private final List<ShipType2D>  toRegister  = new ArrayList<>();
     /** List of ships types to deploy at the start of the game. */
     private final List<ShipType2D>  toDeploy    = new ArrayList<>();
+    /** List of ships types to deploy at the start of the game. */
+    private final List<String>      players     = new ArrayList<>();
     /** 
      * List of errors discovered during parsing. 
      * @see #resetSuccess()
@@ -219,7 +256,7 @@ public class TextProvisioner implements Provisioner
      */
     public static TextProvisioner of()
     {
-        TextProvisioner provisioner = new TextProvisioner();
+         TextProvisioner provisioner = new TextProvisioner();
         return provisioner;
     }
     
@@ -296,6 +333,13 @@ public class TextProvisioner implements Provisioner
         return list;
     }
 
+    @Override
+    public List<String> getPlayers()
+    {
+        List<String>    list    = Collections.unmodifiableList( players );
+        return list;
+    }
+
     /**
      * Gets a copy of the current list of errors
      * accumulated in this object.
@@ -335,7 +379,6 @@ public class TextProvisioner implements Provisioner
     {
         return rows;
     }
-
 
     @Override
     public Integer getCols()
@@ -414,7 +457,11 @@ public class TextProvisioner implements Provisioner
         {
         case "DIM" -> dim( rec );
         case "TYPE" -> type( rec );
+        case "REM", "REMOVE-TYPE" -> removeType( rec );
         case "DEPLOY" -> deploy( rec );
+        case "UND", "UNDEPLOY" -> undeploy( rec );
+        case "ADD", "ADD-PLAYER" -> addPlayer( rec );
+        case "SUB", "SUBTRACT-PLAYER" -> subtractPlayer( rec );
         case "" -> noop( rec );
         default -> invalidRec( rec );
         }
@@ -504,7 +551,7 @@ public class TextProvisioner implements Provisioner
      * a single ShipType2D object is instantiated
      * and added to the list of ships types to be registered.
      * A ship type with the given name
-     * must no already be in the list.
+     * must not already be in the list.
      * </li>
      * </ol>
      * 
@@ -561,8 +608,92 @@ public class TextProvisioner implements Provisioner
     }
     
     /**
+     * Process a CSV record containing a REMOVE-TYPE command
+     * (a command to reverse a previous TYPE command;
+     * see {@link #type(CSVRecord)}).
+     * <p>
+     * Postcondition:
+     * if the list of types to be registered
+     * contains a type with the given name,
+     * it is removed from the list.
+     * If the type exists in the list more than once
+     * only the first instance is removed.
+     * 
+     * @param rec   the given record
+     */
+    private void removeType( CSVRecord rec )
+    {
+        Deque<String>   errStack    = new ArrayDeque<>();
+        int             recSize     = rec.size();
+        if ( recSize != 2 )
+        {
+            String  errMessage  = 
+                formatErrorMessage( INVALID_ARG_COUNT, recSize );
+            errStack.push( errMessage );
+        }
+        else
+        {
+            String      strType = rec.get( 1 );
+            ShipType2D  type    = getShipType( strType );
+            if ( type == null )
+            {
+                String  errMessage  = 
+                    formatErrorMessage( SHIP_TYPE_NOT_FOUND, type );
+                errStack.push( errMessage );
+            }
+            else
+                toRegister.remove( type );
+        }
+        processErrStack( rec, errStack );
+    }
+    
+    /**
+     * Process a CSV record containing an UNDEPLOY command
+     * (a command to reverse a previous DEPLOY command;
+     * see {@link #deploy(CSVRecord)}).
+     * <p>
+     * Postcondition:
+     * if the list of types to be deployed
+     * contains a type with the given name,
+     * it is removed from the list.
+     * 
+     * @param rec   the given record
+     */
+    private void undeploy( CSVRecord rec )
+    {
+        Deque<String>   errStack    = new ArrayDeque<>();
+        int             recSize     = rec.size();
+        if ( recSize != 2 )
+        {
+            String  errMessage  = 
+                formatErrorMessage( INVALID_ARG_COUNT, recSize );
+            errStack.push( errMessage );
+        }
+        else
+        {
+            String      strType = rec.get( 1 );
+            ShipType2D  type    = getShipType( strType );
+            if ( type == null )
+            {
+                String  errMessage  = 
+                    formatErrorMessage( SHIP_TYPE_NOT_FOUND, type );
+                errStack.push( errMessage );
+            }
+            else if ( !toDeploy.contains( type ) )
+            {
+                String  errMessage  = 
+                    formatErrorMessage( SHIP_TYPE_NOT_FOUND, type );
+                errStack.push( errMessage );
+            }
+            else
+                toDeploy.remove( type );
+        }
+        processErrStack( rec, errStack );
+    }
+    
+    /**
      * This method simplifies the deeply nested logic in 
-     * {@link #type(CSVRecord).
+     * {@link #type(CSVRecord)}.
      * It registers every default that is not already registered.
      * If the type is already registered,
      * it pushes a "duplicate type" error message
@@ -641,6 +772,81 @@ public class TextProvisioner implements Provisioner
         processErrStack( rec, errStack );
     }
     
+    /**
+     * Process a CSV record containing an ADD command
+     * (a command that adds
+     * the name of an opponent
+     * to the list of players).
+     * The name is case-sensitive,
+     * and may not contain spaces.
+     * <p>
+     * Postcondition:
+     * If the processing completes successfully,
+     * the name of the opponent
+     * is added to the list of players.
+     * 
+     * @param rec   the CSV record to process
+     */
+    private void addPlayer( CSVRecord rec )
+    {
+        Deque<String>   errStack    = new ArrayDeque<>();
+        int     valCount    = rec.size();
+        if ( valCount != 2 )
+        {
+            String  errCount    = "field count = " + valCount;
+            String  message     = 
+                formatErrorMessage( INVALID_ARG_COUNT, errCount );
+            errStack.push( message );
+        }
+        else
+        {
+            String      name    = rec.get( 1 );
+            if ( players.contains( name ) )
+            {
+                String  message = formatErrorMessage( DUP_PLAYER, name );
+                errStack.push( message );
+            }
+            else
+                players.add( name );
+        }
+        processErrStack( rec, errStack );
+    }
+    
+    /**
+     * Process a CSV record containing an UNDEPLOY command
+     * (a command to reverse a previous DEPLOY command;
+     * see {@link #deploy(CSVRecord)}).
+     * <p>
+     * Postcondition:
+     * if the list of types to be deployed
+     * contains a type with the given name,
+     * it is removed from the list.
+     * 
+     * @param rec   the given record
+     */
+    private void subtractPlayer( CSVRecord rec )
+    {
+        Deque<String>   errStack    = new ArrayDeque<>();
+        int             recSize     = rec.size();
+        if ( recSize != 2 )
+        {
+            String  errMessage  = 
+                formatErrorMessage( INVALID_ARG_COUNT, recSize );
+            errStack.push( errMessage );
+        }
+        else
+        {
+            String  player      = rec.get( 1 );
+            if ( !players.remove( player ) )
+            {
+                String  errMessage  = 
+                    formatErrorMessage( PLAYER_NOT_FOUND, player );
+                errStack.push( errMessage );
+            }
+        }
+        processErrStack( rec, errStack );
+    }
+
     /**
      * Parse a string containing an integer &ge; 1.
      * If successful, the parsed integer is returned,

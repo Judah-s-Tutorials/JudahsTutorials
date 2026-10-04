@@ -59,4 +59,22 @@ public class StatusMessages
         Messages.getString("StatusMessages.25"); //$NON-NLS-1$
     public static final String  NOT_REALIZED        =
         Messages.getString("StatusMessages.26"); //$NON-NLS-1$
+    public static final String  MAX_COLS_EXCEEDED   =
+        "Max columns exceeded";
+    public static final String  MAX_ROWS_EXCEEDED   =
+        "Max columns exceeded";
+    public static final String  INVALID_C_COMMAND   =
+        "Invalid configuration command";
+    public static final String  INVALID_REC_NUM     =
+        "Invalid record number";
+    public static final String  INVALID_COORDINATES =
+        "Invalid grid coordinates";
+    public static final String  INVALID_ORIENTATION =
+        "Invalid orientation";
+    public static final String  DUP_PLAYER          =
+        "Duplicate player";
+    public static final String  PLAYER_NOT_FOUND    =
+        "Player not found";
+    public static final String  NOT_ALL_DEPLOYED    =
+        "Not all ships have been deployed";
 }

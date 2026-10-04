@@ -79,7 +79,7 @@ public class Fleet
      * are given by the caller.
      * The type of the ship is taken from {@code ident},
      * which must be a value provided in the list
-     * returned by {@linkplain #getToBeDeployed()}.
+     * returned by {@linkplain #getToBeDeployedProtos()}.
      * No additional validation of the instantiated ship is performed.
      * This operation is only available in game state CONFIG.
      * 
@@ -106,7 +106,7 @@ public class Fleet
         GridCoords  coords, 
         String      name, 
         Orientation orient,
-        Proto ident
+        Proto       ident
     )
     {
         Objects.requireNonNull( coords, "coords" );
@@ -295,7 +295,7 @@ public class Fleet
      * 
      * @return  a list of ships that need to be deployed
      */
-    public List<Proto> getToBeDeployed()
+    public List<Proto> getToBeDeployedProtos()
     {
         List<Proto> list    = Collections.unmodifiableList( toBeDeployed );
         return list;

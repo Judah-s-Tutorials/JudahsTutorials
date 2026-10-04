@@ -25,4 +25,10 @@ public interface Cell2DView
      * @return  the ship that owns this cell; null if unknown
      */
     Ship2D getShip();
+    /**
+     * Indicates whether this cell belongs to an opponent.
+     * 
+     * @return  true if this cell belongs to an opponent
+     */
+    boolean isOpponent();
 }

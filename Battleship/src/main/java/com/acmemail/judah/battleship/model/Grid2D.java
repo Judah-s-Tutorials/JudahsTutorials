@@ -485,6 +485,24 @@ public class Grid2D
     }
     
     /**
+     * Get the cell at the given coordinates.
+     * 
+     * @param coords    the given coordinates
+     * 
+     * @return  the cell at the given coordinates
+     * 
+     * @throws NullPointerException if coords is null
+     * @throws BattleshipException if coords is out of bounds.
+     */
+    public Cell2DView getCellView( GridCoords coords )
+    {
+        Cell2DView  cell    = get( coords );
+        if ( cell == null )
+            cell = new Cell2D( coords );
+        return cell;
+    }
+    
+    /**
      * Returns a stream of all cells registered in the grid.
      * This includes all cells allocated to ships,
      * and all cells that have been attacked.
@@ -578,6 +596,7 @@ public class Grid2D
      * @return  the cell at the given coordinates
      * 
      * @throws NullPointerException if coords is null
+     * @throws BattleshipException if coords is out of bounds.
      */
     private Cell2D get( GridCoords coords )
     {
@@ -729,10 +748,22 @@ public class Grid2D
      */
     static void reset()
     {
+        resetCommon();
+        initRowCols();
+    }
+    
+    public static void reset( int rows, int cols )
+    {
+        resetCommon();
+        numRows = rows;
+        numCols = cols;
+    }
+    
+    private static void resetCommon()
+    {
         for ( Grid2D grid : allGrids.values() )
             grid.clear();
         allGrids.clear();
-        initRowCols();
     }
     
     /**

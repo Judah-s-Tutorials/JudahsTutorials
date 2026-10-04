@@ -49,7 +49,7 @@ public class GraphGridController
         
         Configurator.nextState();
         
-        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployed();
+        List<Fleet.Proto>   toBeDeployed    = fleet.getToBeDeployedProtos();
         Fleet.Proto         proto           = toBeDeployed.get( 0 );
         GridCoords          coords          = new GridCoords( 0, 0 );
         Ship2D              ship            =

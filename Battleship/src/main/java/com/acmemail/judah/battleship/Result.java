@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class Result
 {
-    private boolean         status  = false;
+    private boolean         status      = false;
     private List<String>    messages    = new ArrayList<>();
     
     /**

@@ -59,7 +59,7 @@ class FleetProvisionData
         final Orientation horizontal    = Orientation.HORIZONTAL;
         
         List<Fleet.Proto>   workingList = 
-            new ArrayList<>( fleet.getToBeDeployed() );
+            new ArrayList<>( fleet.getToBeDeployedProtos() );
         int                 nextYco     = 0;
         for ( Fleet.Proto proto : workingList )
         {
