@@ -1,12 +1,15 @@
 package com.acmemail.judah.battleship;
 
+import static com.acmemail.judah.battleship.StatusMessages.DUP_PLAYER;
 import static com.acmemail.judah.battleship.StatusMessages.DUP_SHIP_TYPE;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_BREADTH;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COL_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_LENGTH;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_RECORD;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ROW_COUNT;
+import static com.acmemail.judah.battleship.StatusMessages.PLAYER_NOT_FOUND;
 import static com.acmemail.judah.battleship.StatusMessages.SHIP_TYPE_NOT_FOUND;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,6 +35,8 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
@@ -246,7 +251,7 @@ class TextProvisionerTest
         
         List<String>    errors  = provisioner.getErrors();
         String          error   =
-            getContainingString( errors,  INVALID_P_RECORD );
+            getContainingString( errors, INVALID_P_RECORD );
         assertNotNull( error );
         assertContains( error, "type" );
         
@@ -286,6 +291,70 @@ class TextProvisionerTest
         }
     }
     
+    @ParameterizedTest
+    @ValueSource( strings={"REM,", "rem,", "remove,", "remove-type,"} )
+    public void testRemoveTypeSimple( String command)
+    {
+        ShipType2D      testType    = battleshipType;
+        String          typeName    = testType.typeName();
+        String          removeStr   = command + typeName;
+        TextProvisioner provisioner = TextProvisioner.of();
+        
+        provisioner.addRec( "type,default" );
+        // sanity check
+        assertTrue( provisioner.getToRegister().contains( testType ) );
+        provisioner.addRec( removeStr );
+        assertFalse( provisioner.getToRegister().contains( testType ) );
+    }
+    
+    @Test
+    public void testRemoveTypeWhenDeployed()
+    {
+        ShipType2D      testType    = battleshipType;
+        String          typeName    = testType.typeName();
+        String          removeStr   = "remove," + typeName;
+        String          deployStr   = "deploy," + typeName;
+        TextProvisioner provisioner = TextProvisioner.of();
+        
+        provisioner.addRec( "type,default" );
+        // sanity check
+        assertTrue( provisioner.getToRegister().contains( testType ) );
+        assertFalse( provisioner.getToDeploy().contains( testType ) );
+        
+        // deploy the test type twice, then sanity check
+        provisioner.addRec( deployStr );
+        provisioner.addRec( deployStr );
+        long    count   = provisioner.getToDeploy().stream()
+            .filter( t -> t.typeName().equals( typeName ) )
+            .count();
+        assertEquals( 2, count );
+
+        provisioner.addRec( removeStr );
+        assertFalse( provisioner.getToRegister().contains( testType ) );
+        assertFalse( provisioner.getToDeploy().contains( testType ) );
+    }
+    
+    @Test
+    public void testRemoveTypeGoWrongNotFound()
+    {
+        TextProvisioner     provisioner = TextProvisioner.of();
+        String              testName    = "notRegistered";
+        provisioner.addRec( "remove," + testName );
+        List<String>    errors  = provisioner.getErrors();
+        assertNotNull( getContainingString( errors, SHIP_TYPE_NOT_FOUND ) );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings = { "REMOVE", "REMOVE,arg1,arg2" } )
+    public void testRemoveTypeGoWrongArgCount( String badRemRec )
+    {
+        TextProvisioner provisioner = TextProvisioner.of();
+        provisioner.addRec( badRemRec );
+        List<String>    errors  = provisioner.getErrors();
+        assertFalse( errors.isEmpty() );
+        assertNotNull( getContainingString( errors, INVALID_ARG_COUNT ) );
+    }
+    
     @Test
     public void testDeployGoRight()
     {
@@ -318,6 +387,70 @@ class TextProvisionerTest
         testCommandGoWrong( "deploy", "deploy" );
         String  text    = listToBasicString( "deploy", "name", "arg" );
         testCommandGoWrong( text, "deploy" );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings = { "UND,", "und,", "Undeploy," } )
+    public void testUndeploy( String command )
+    {
+        TextProvisioner     provisioner = TextProvisioner.of();
+        provisioner.addRec( "type,default" );
+        deployAll( provisioner, allDefaultTypes );
+        
+        List<ShipType2D>    expList     = new ArrayList<>( allDefaultTypes );
+        assertEquivalent( expList, provisioner.getToDeploy() );
+        
+        for ( ShipType2D type : allDefaultTypes )
+        {
+            provisioner.addRec( command + type.typeName() );
+            expList.remove( type );
+            assertEquivalent( expList, provisioner.getToDeploy() );
+            assertTrue( provisioner.getErrors().isEmpty() );
+        }
+    }
+    
+    @Test
+    public void testUndeployGoWrongNotFound()
+    {
+        TextProvisioner     provisioner = TextProvisioner.of();
+        provisioner.addRec( "type,default" );
+        List<ShipType2D>    expList     = new ArrayList<>( allDefaultTypes );
+        assertEquivalent( expList, provisioner.getToRegister() );
+        deployAll( provisioner, expList );
+        assertEquivalent( expList, provisioner.getToDeploy() );
+        
+        ShipType2D          testType    = expList.get( 0 );
+        String              testName    = testType.typeName();
+        provisioner.addRec( "undeploy," + testName );
+        expList.remove( testType );
+        assertEquivalent( expList, provisioner.getToDeploy() );
+        assertTrue( provisioner.getErrors().isEmpty() );
+        
+        provisioner.addRec( "undeploy," + testName );
+        assertEquivalent( expList, provisioner.getToDeploy() );
+        List<String>    errors  = provisioner.getErrors();
+        assertNotNull( getContainingString( errors, SHIP_TYPE_NOT_FOUND ) );
+    }
+    
+    @Test
+    public void testUndeployGoWrongNotRegistered()
+    {
+        TextProvisioner     provisioner = TextProvisioner.of();
+        String              testName    = "notRegistered";
+        provisioner.addRec( "undeploy," + testName );
+        List<String>    errors  = provisioner.getErrors();
+        assertNotNull( getContainingString( errors, SHIP_TYPE_NOT_FOUND ) );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings = { "UNDEPLOY", "UNDEPLOY,arg1,arg2" } )
+    public void testUndeployGoWrongArgCount( String badUndRec )
+    {
+        TextProvisioner provisioner = TextProvisioner.of();
+        provisioner.addRec( badUndRec );
+        List<String>    errors  = provisioner.getErrors();
+        assertFalse( errors.isEmpty() );
+        assertNotNull( getContainingString( errors, INVALID_ARG_COUNT ) );
     }
 
     @Test
@@ -525,6 +658,111 @@ class TextProvisionerTest
         assertTrue( provisioner.getErrors().isEmpty() );
         provisioner.addRec( "arg" );
         assertFalse( provisioner.getErrors().isEmpty() );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings = { "ADD", "add", "Add-Player" } )
+    public void testAddPlayer( String command )
+    {
+        String[]        names       = { "sam", "georgia", "gabe" };
+        List<String>    expPlayers  = new ArrayList<>();
+        TextProvisioner provisioner = TextProvisioner.of();
+        assertTrue( provisioner.getPlayers().isEmpty() );
+        for ( String name : names )
+        {
+            provisioner.addRec( command + "," + name );
+            expPlayers.add( name );
+            List<String>    actPlayers  = provisioner.getPlayers();
+            assertEquals( expPlayers, actPlayers, name );
+            assertTrue( provisioner.getErrors().isEmpty() );
+        }
+    }
+
+    @Test
+    public void testAddPlayerGoWrong()
+    {
+        String          name        = "gorilla";
+        String          addRec      = "add," + name;
+        List<String>    expPlayers  = List.of( name );
+        TextProvisioner provisioner = TextProvisioner.of();
+        assertTrue( provisioner.getPlayers().isEmpty() );
+        
+        provisioner.addRec( addRec );
+        assertEquals( expPlayers, provisioner.getPlayers() );
+        assertTrue( provisioner.getErrors().isEmpty() );
+        
+        provisioner.addRec( addRec );
+        assertEquals( expPlayers, provisioner.getPlayers() );
+        List<String>    errors  = provisioner.getErrors();
+        assertFalse( errors.isEmpty() );
+        assertNotNull( getContainingString( errors, DUP_PLAYER ) );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings = { "ADD", "ADD,arg1,arg2" } )
+    public void testAddPlayerGoWrongArgCount( String badAddRec )
+    {
+        TextProvisioner provisioner = TextProvisioner.of();
+        assertTrue( provisioner.getPlayers().isEmpty() );
+        
+        provisioner.addRec( badAddRec );
+        List<String>    errors  = provisioner.getErrors();
+        assertFalse( errors.isEmpty() );
+        assertNotNull( getContainingString( errors, INVALID_ARG_COUNT ) );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings = { "SUB", "sub", "Subtract-Player" } )
+    public void testSubtractPlayer( String command )
+    {
+        String          add         = "add,";
+        String[]        names       = { "sam", "georgia", "gabe" };
+        List<String>    expPlayers  = new ArrayList<>();
+        TextProvisioner provisioner = TextProvisioner.of();
+        assertTrue( provisioner.getPlayers().isEmpty() );
+        
+        Arrays.stream(names ).forEach( expPlayers::add );
+        Arrays.stream( names )
+            .map( add::concat )
+            .forEach( provisioner::addRec );
+        assertEquals( expPlayers, provisioner.getPlayers() );
+        
+        for ( String name : names )
+        {
+            provisioner.addRec( command + "," + name );
+            expPlayers.remove( name );
+            List<String>    actPlayers  = provisioner.getPlayers();
+            assertEquals( expPlayers, actPlayers, name );
+            assertTrue( provisioner.getErrors().isEmpty() );
+        }
+    }
+
+    @Test
+    public void testSubtractPlayerGoWrong()
+    {
+        String          name        = "gorilla";
+        String          subRec      = "sub," + name;
+        TextProvisioner provisioner = TextProvisioner.of();
+        assertTrue( provisioner.getPlayers().isEmpty() );
+        
+        provisioner.addRec( subRec );
+        assertTrue( provisioner.getPlayers().isEmpty() );
+        List<String>    errors  = provisioner.getErrors();
+        assertFalse( errors.isEmpty() );
+        assertNotNull( getContainingString( errors, PLAYER_NOT_FOUND ) );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings = { "SUB", "SUB,arg1,arg2" } )
+    public void testSubtractPlayerGoWrongArgCount( String badSubRec )
+    {
+        TextProvisioner provisioner = TextProvisioner.of();
+        assertTrue( provisioner.getPlayers().isEmpty() );
+        
+        provisioner.addRec( badSubRec );
+        List<String>    errors  = provisioner.getErrors();
+        assertFalse( errors.isEmpty() );
+        assertNotNull( getContainingString( errors, INVALID_ARG_COUNT ) );
     }
 
     @Test
@@ -989,6 +1227,18 @@ class TextProvisionerTest
     }
     
     /**
+     * Verify that two given lists contains the same elements.
+     * 
+     * @param listA the first given list
+     * @param listB the second given list
+     */
+    private static void assertEquivalent( List<?> listA, List<?> listB )
+    {
+        assertEquals( listA.size(), listB.size() );
+        listA.forEach( i -> assertTrue( listB.contains( i  ) ) );
+    }
+    
+    /**
      * Given list of strings and a target string,
      * return the first string from the list
      * that contains the target string.
@@ -1114,5 +1364,16 @@ class TextProvisionerTest
             assertEquals( rows, actData.getRows() );
             assertEquals( cols, actData.getCols() );
         }
+    }
+    
+    private static void deployAll( 
+        TextProvisioner prov, 
+        Collection<ShipType2D> toDeploy 
+    )
+    {
+        toDeploy.stream()
+            .map( t -> t.typeName() )
+            .map( n -> "deploy," + n )
+            .forEach( prov::addRec );
     }
 }

@@ -85,7 +85,7 @@ import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
  *      </ul>
  * </li>
  * <li>
- *      rem, remove-type:<br>
+ *      rem, remove, remove-type:<br>
  *      Removes a given type 
  *      from the list of types to be registered.
  *      Example, remove the type with the name "SuperCarrier":<br>
@@ -168,9 +168,9 @@ public class TextProvisioner implements Provisioner
      */
     private boolean                 success     = true;
     /** Number of grid rows configured during parsing; null if none. */
-    private Integer                 rows        = 10;
+    private Integer                 rows        = null;
     /** Number of grid columns configured during parsing; null if none. */
-    private Integer                 cols        = 1;
+    private Integer                 cols        = null;
     
     /**
      * Default constructor.
@@ -457,7 +457,7 @@ public class TextProvisioner implements Provisioner
         {
         case "DIM" -> dim( rec );
         case "TYPE" -> type( rec );
-        case "REM", "REMOVE-TYPE" -> removeType( rec );
+        case "REM", "REMOVE", "REMOVE-TYPE" -> removeType( rec );
         case "DEPLOY" -> deploy( rec );
         case "UND", "UNDEPLOY" -> undeploy( rec );
         case "ADD", "ADD-PLAYER" -> addPlayer( rec );
@@ -616,8 +616,9 @@ public class TextProvisioner implements Provisioner
      * if the list of types to be registered
      * contains a type with the given name,
      * it is removed from the list.
-     * If the type exists in the list more than once
-     * only the first instance is removed.
+     * Any record in the to-deploy list
+     * matching this type
+     * is removed.
      * 
      * @param rec   the given record
      */
@@ -642,7 +643,11 @@ public class TextProvisioner implements Provisioner
                 errStack.push( errMessage );
             }
             else
+            {
+                while ( toDeploy.remove( type ) )
+                    ;
                 toRegister.remove( type );
+            }
         }
         processErrStack( rec, errStack );
     }

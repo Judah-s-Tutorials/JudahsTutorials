@@ -6,11 +6,13 @@ import static com.acmemail.judah.battleship.StatusMessages.INVALID_C_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ORIENTATION;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_REC_NUM;
 import static com.acmemail.judah.battleship.StatusMessages.NOT_ALL_DEPLOYED;
+import static com.acmemail.judah.battleship.util.StdOutputUtils.printOut;
+import static com.acmemail.judah.battleship.util.StdOutputUtils.writeErr;
+import static com.acmemail.judah.battleship.util.StdOutputUtils.writeOut;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -409,36 +411,6 @@ public class ConfigPhase
         }
         lines.add( "" );
         writeOut( lines );
-    }
-    
-    private static void writeOut( String line )
-    {
-        writeOut( List.of( line ) );
-    }
-    
-    private static void writeOut( List<String> lines )
-    {
-        writeLines( System.out, lines );
-    }
-    
-    private static void writeErr( List<String> lines )
-    {
-        writeLines( System.err, lines );
-    }
-    
-    private static synchronized void writeLines( 
-        PrintStream str, 
-        List<String> lines 
-    )
-    {
-        lines.forEach( str::println );
-        str.flush();
-    }
-    
-    private static synchronized void printOut( String line )
-    {
-        System.out.print( line );
-        System.out.flush();
     }
     
     private String getToDeployStr( int inx, Proto proto )

@@ -3,17 +3,23 @@ package com.acmemail.judah.battleship.ui.text;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.TextProvisioner;
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.util.LineWrapper;
+import static com.acmemail.judah.battleship.StatusMessages.SETUP_TEXT_PROMPT;
+import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
 
 public class SetupPhase
 {
+    /** Maximum line length for printing help message. */
     private static final int        lineLen     = 60;
-    private static final String     lineSep     = System.lineSeparator();
+    /** Paragraphs in help message. */
     private static final String[]   graphs      =   { 
         "This is the setup phase of the game. "
         + "In phase you can set the dimensions of the game grid, "
@@ -88,70 +94,122 @@ public class SetupPhase
         "\t-- q, quit: exit from this application",
         "==================================="
     };
+    /** List of paragraphs in help message; to be formatted for printing. */
     private static final List<String>   list    = List.of( graphs );
     
+    /** The Provisioner populated during this phase. */
     private final   TextProvisioner provisioner;
+    /** True, when the client says "no more provisioning to do." */
     private boolean setupComplete;
+    /** True, if the client says "abandon; exit to desktop." */
     private boolean quit;
-    private BufferedReader  consoleReader;
-    
-    public static void main( String[] args )
-    {
-        SetupPhase  setup   = new SetupPhase();
-        setup.exec();
-        if ( setup.isQuit() )
-            System.out.println( "quitting" );
-    }
-    
+    /** 
+     * When true, tells the UI to skip the confirmation step
+     * ("are you sure?")
+     * for commands like QUIT.
+     */
+    private boolean really;
+    /** For reading operator input. */
+    private final   BufferedReader  consoleReader;
+    /** Destination for status and error output; defaults to stdout. */
+    private final   PrintStream     outStream;
+
+    /**
+     * Default constructor.
+     * Forces a TextProvisioner to be instantiated internally,
+     * and reads/writes via stdin/stdout.
+     */
     public SetupPhase()
     {
-        this( null );
+        this( null, null, null );
     }
-    
+
+    /**
+     * Constructor.
+     * Reads/writes via stdin/stdout.
+     *
+     * @param provisioner   TextProvisioner to be used internally; may be null
+     */
     public SetupPhase( TextProvisioner provisioner )
+    {
+        this( provisioner, null, null );
+    }
+
+    /**
+     * Constructor.
+     * Allows the operator-input source and the output destination
+     * to be supplied by the caller, for example by a test driver.
+     * Any argument may be null,
+     * in which case the corresponding default
+     * ({@code provisioner}: a new TextProvisioner;
+     * {@code reader}: stdin;
+     * {@code outStream}: stdout)
+     * is used instead.
+     *
+     * @param provisioner   TextProvisioner to be used internally; may be null
+     * @param reader        source of operator input; may be null
+     * @param outStream     destination for status and error output; may be null
+     */
+    public SetupPhase(
+        TextProvisioner provisioner,
+        Reader          reader,
+        PrintStream     outStream
+    )
     {
         this.provisioner = provisioner != null ?
             provisioner : TextProvisioner.of();
+        Reader  actReader   = reader != null ?
+            reader : new InputStreamReader( System.in );
+        this.consoleReader  = actReader instanceof BufferedReader buffered ?
+            buffered : new BufferedReader( actReader );
+        this.outStream  = outStream != null ? outStream : System.out;
     }
     
+    /**
+     * Public entry point for starting operator-input-processing loop.
+     */
     public void exec()
     {
         showHelp();
         execLoop();
     }
     
+    /**
+     * Returns true if the operator has issued a quit command.
+     * 
+     * @return  true if the operator has issued a quit command
+     */
     public boolean isQuit()
     {
         return quit;
     }
     
+    /**
+     * Operator-input-processing loop.
+     */
     private void execLoop()
     {
-        final String    prompt  = "Enter a command (? for help): ";
+        final String    prompt  = SETUP_TEXT_PROMPT;
         setupComplete = false;
         quit = false;
-        try ( 
-            InputStreamReader inStream  = new InputStreamReader( System.in );
-            BufferedReader    bufStream = new BufferedReader( inStream ); 
-        )
+        try
         {
-            consoleReader = bufStream;
             while ( !setupComplete )
             {
-                System.out.print( prompt );
-                String  command = bufStream.readLine();
+                printOut( prompt );
+                String  command = consoleReader.readLine();
                 execCommand( command );
                 if ( quit )
                 {
-                    if ( areYouSure( "Quit" ) )
+                    if ( really || areYouSure( "Quit" ) )
                         setupComplete = true;
                     else
                         quit = false;
                 }
                 else if ( setupComplete )
                 {
-                    if ( areYouSure( "Setup complete" ) )
-                        setupComplete = true;
+                    if ( !really )
+                        setupComplete = areYouSure( "Setup complete" );
                 }
             }
         }
@@ -162,16 +220,46 @@ public class SetupPhase
         }
     }
     
+    /**
+     * Prompt the operator with a yes/no "are you sure" message.
+     * Read and interpret the operator's response:
+     * return true if the string entered by the operator
+     * starts with 'Y' or 'y,'
+     * return false for anything else.
+     * 
+     * @param prompt    message to print before "are you sure?"
+     * 
+     * @return  true, if the operator replies "yes"
+     * 
+     * @throws IOException  
+     *      if an I/O error occurs when reading the operator's response
+     */
     private boolean areYouSure( String prompt ) throws IOException
     {
-        final String    areYouSure  = "are you sure? (y/n) ";
-        String  fullPrompt  = prompt + "; " + areYouSure;
-        System.out.print( fullPrompt );
+        String  fullPrompt  = prompt + "; " + ARE_YOU_SURE;
+        printOut( fullPrompt );
         String  reply       = consoleReader.readLine().trim().toUpperCase();
         boolean result      = reply.charAt( 0 ) == 'Y';
         return result;
     }
     
+    /**
+     * Execute the command entered by the operator.
+     * <p>
+     * Postconditions:
+     * <ol>
+     * <li>
+     *      After processing the command,
+     *      the command and the status of processing it
+     *      are written to stdout.
+     * </li>
+     * <li>
+     *      Error messages resulting from command processing
+     *      are written to stderr.
+     * </li>
+     * </ol>
+     * @param command
+     */
     private void execCommand( String command )
     {
         String  workCommand = command.trim().toUpperCase();
@@ -181,54 +269,97 @@ public class SetupPhase
         case "?", "H", "HELP"  -> showHelp();
         case "U", "UPDATE" -> showUpdate();
         case "DONE" -> setupComplete = true;
-        case "Q, QUIT" -> quit = true;
+        case "D!", "DONE!" -> really = setupComplete = true;
+        case "Q", "QUIT" -> quit = true;
+        case "Q!", "QUIT!" -> quit = really = true;
         default -> provisioner.addRec( command );
         }
-        System.out.print( command + ": " );
-        String          status  = provisioner.isSuccess() ? 
+        printOut( command + ": " );
+        String          status  = provisioner.isSuccess() ?
             "success" : "failure";
-        List<String>    errors  = provisioner.getErrors();
-        System.out.println( status );
-        errors.forEach( s -> System.out.println( "    " + s ) );
+        List<String>    errors  =
+            provisioner.getErrors().stream().map( "    "::concat ).toList();
+        writeOut( status );
+        writeOut( errors );
     }
-    
+
+    /**
+     * Write the help message to stdout.
+     */
     private void showHelp()
     {
         LineWrapper     wrapper     = new LineWrapper( lineLen, list );
         List<String>    wrappedList = wrapper.getWrappedList();
-        System.out.println( String.join( lineSep, wrappedList ) );
-    }
-    
-    private void showUpdate()
-    {
-        System.out.printf( "%nCURRENT CONFIGURATION%n" );
-        showPlayers();
-        showDimensions();
-        showShipTable();
-        System.out.println();
-    }
-    
-    private void showPlayers()
-    {
-        List<String>    players = provisioner.getPlayers();
-        System.out.println( "Players");
-        System.out.println( "=======");
-        players.forEach( System.out::println );
-        System.out.println();
-    }
-    
-    private void showDimensions()
-    {
-        final String    fmt     = "Grid: %d rows, %d columns";
-        int         rows        = provisioner.getRows();
-        int         cols        = provisioner.getCols();
-        String      gridStr     = String.format( fmt, rows, cols );
-        System.out.println( gridStr );
+        writeOut( wrappedList );
     }
 
-    private void showShipTable()
+    /**
+     * Write the updated configuration to stdout.
+     */
+    private void showUpdate()
+    {
+        List<String>    lines   = new ArrayList<>();
+        lines.add( "%nCURRENT CONFIGURATION%n" );
+        lines.addAll( showPlayers() );
+        lines.addAll( showDimensions() );
+        lines.addAll( showShipTable() );
+        lines.add( "" );
+        writeOut( lines );
+    }
+    
+    /**
+     * Assemble the lines of a report
+     * that lists all players
+     * currently registered for the game.
+     * 
+     * @return  
+     *      a list containing the lines in the report
+     *      of all players registered for the game
+     */
+    private List<String> showPlayers()
+    {
+        List<String>    output  = new ArrayList<>();
+        List<String>    players = provisioner.getPlayers();
+        output.add( "Players");
+        output.add( "=======");
+        output.addAll( players );
+        output.add( "" );
+        return output;
+    }
+    
+    /**
+     * Assemble the lines of a report
+     * that shows the dimensions of the game grid.
+     * 
+     * @return  
+     *      a list containing the lines in a report
+     *      showing the grid dimensions
+     */
+    private List<String> showDimensions()
+    {
+        final String    fmt     = "Grid: %d rows, %d columns";
+        List<String>    output  = new ArrayList<>();
+        Integer         rows    = provisioner.getRows();
+        Integer         cols    = provisioner.getCols();
+        String          gridStr = String.format( fmt, rows, cols );
+        output.add( gridStr );
+        return output;
+    }
+
+    /**
+     * Assemble the lines of a report
+     * that shows all the ships
+     * registered for this game
+     * and those marked for deployment.
+     * 
+     * @return  
+     *      a list containing the lines in a report
+     *      showing the ships registered for this game
+     */
+    private List<String> showShipTable()
     {
         final String    fmt         = "%-20s %-20s";
+        List<String>    output      = new ArrayList<>();
         final String    regHeading  = "To Register";
         final String    depHeading  = "To Deploy";
         final String    underScore  = "===============";
@@ -242,20 +373,31 @@ public class SetupPhase
         List<ShipType2D>    toDeploy    = provisioner.getToDeploy();
         int                 depCount    = toDeploy.size();
         int                 numLines    = Math.max( regCount, depCount );
-        System.out.println( heading1 );
-        System.out.println( heading2 );
+        output.add( heading1 );
+        output.add( heading2 );
         for ( int inx = 0 ; inx < numLines ; ++inx )
         {
             String  regString   = inx < regCount ?
                 getConfigStr( toRegister.get( inx ) ) : ""; 
             String  depString   = inx < depCount ?
                 getConfigStr( toDeploy.get( inx ) ) : ""; 
-            String  output      = String.format( fmt, regString, depString );
-            System.out.println( output );
+            String  outStr      = String.format( fmt, regString, depString );
+            output.add( outStr );
         }
-        System.out.println();
+        output.add( "" );
+        return output;
     }
     
+    /**
+     * Format a string describing the name
+     * and dimensions of a given ship type.
+     * 
+     * @param type  the given ship type
+     * 
+     * @return  
+     *      a string describing the name and dimensions
+     *      of a given ship type
+     */
     private static String getConfigStr( ShipType2D type )
     {
         final String  fmt       = "%s, %dX%d";
@@ -264,5 +406,43 @@ public class SetupPhase
         int     breadth     = type.breadth();
         String  configStr   = String.format( fmt, name, length, breadth );
         return configStr;
+    }
+
+    /**
+     * Write a single string to this instance's output stream
+     * <em>without</em> a line separator,
+     * and flush the stream before returning.
+     *
+     * @param line  the string to write
+     */
+    private void printOut( String line )
+    {
+        outStream.print( line );
+        outStream.flush();
+    }
+
+    /**
+     * Write a single string followed by a line-separator
+     * to this instance's output stream,
+     * and flush the stream before returning.
+     *
+     * @param line  the string to write
+     */
+    private void writeOut( String line )
+    {
+        writeOut( List.of( line ) );
+    }
+
+    /**
+     * Write each string in a list to this instance's output stream.
+     * Each string is written on a separate line;
+     * the stream is flushed before returning.
+     *
+     * @param lines the strings to write
+     */
+    private void writeOut( List<String> lines )
+    {
+        lines.forEach( outStream::println );
+        outStream.flush();
     }
 }
