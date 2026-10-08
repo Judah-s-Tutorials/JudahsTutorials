@@ -79,8 +79,10 @@ public class StatusMessages
         "Not all ships have been deployed";
     public static final String  SETUP_TEXT_PROMPT   =
         "Enter a command (? for help): ";
-    public static final String  CONFIG_TEXT_PROMPT   =
+    public static final String  CONFIG_TEXT_PROMPT  =
         "Enter a command (? for help): ";
     public static final String  ARE_YOU_SURE        =
         "are you sure? (y/n) ";
+    public static final String  FAILURE             =
+        "failure";
 }

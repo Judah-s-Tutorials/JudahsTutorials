@@ -1,7 +1,10 @@
 package com.acmemail.judah.battleship.ui.text;
 
 import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
+import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.SETUP_TEXT_PROMPT;
+import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,7 +15,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -59,7 +61,7 @@ class SetupPhaseTest
         assertTrue( contains( feedback, SETUP_TEXT_PROMPT ) );
         assertTrue( contains( feedback, ARE_YOU_SURE ) );
         assertTrue( contains( feedback, "done" ) );
-        assertTrue( contains( feedback, "success" ) );
+        assertTrue( contains( feedback, SUCCESS ) );
         assertTrue( contains( feedback, "Setup complete" ) );
     }
 
@@ -73,6 +75,77 @@ class SetupPhaseTest
     public void testIsQuit()
     {
         fail("Not yet implemented");
+    }
+    
+    @Test
+    public void testDone()
+    {
+        String              done        = "done";
+        String              defTypes    = "type,default";
+        List<String>        commands    =
+            List.of( 
+                done,
+                "n",
+                defTypes,
+                done,
+                "y"
+            );
+        RoundTripResult     result      = 
+            execRoundTrip( null, commands, false );
+        TextProvisioner     provisioner = result.provisioner();
+        List<String>        feedback    = result.feedback();
+        feedback.forEach( System.out::println );
+        RoundTripParser     parser      = new RoundTripParser( feedback );
+        assertEquals( 3, parser.buckets.size() );
+        assertFalse( provisioner.getToRegister().isEmpty() );
+        assertFalse( result.setup().isQuit() );
+    }
+    
+    @Test
+    public void testQuit()
+    {
+        String              quit        = "quit";
+        String              defTypes    = "type,default";
+        List<String>        commands    =
+            List.of( 
+                quit,
+                "n",
+                defTypes,
+                quit,
+                "y"
+            );
+        RoundTripResult     result      = 
+            execRoundTrip( null, commands, false );
+        TextProvisioner     provisioner = result.provisioner();
+        List<String>        feedback    = result.feedback();
+        feedback.forEach( System.out::println );
+        RoundTripParser     parser      = new RoundTripParser( feedback );
+        assertEquals( 3, parser.buckets.size() );
+        assertFalse( provisioner.getToRegister().isEmpty() );
+        assertTrue( result.setup().isQuit() );
+    }
+    
+    @Test
+    public void testDimGoRight()
+    {
+        int                 expRows     = 13;
+        int                 expCols     = 17;
+        String              command     = "dim," + expRows + "," + expCols;
+        List<String>        commands    =
+            List.of( 
+                command,
+                "done",
+                "y"
+            );
+        RoundTripResult     result      = 
+            execRoundTrip( null, commands, false );
+        TextProvisioner     provisioner = result.provisioner();
+        List<String>        feedback    = result.feedback();
+
+        assertEquals( expRows, provisioner.getRows() );
+        assertEquals( expCols, provisioner.getCols() );
+        assertFalse( result.setup().isQuit() );
+        assertTrue( contains( feedback, SUCCESS ) );
     }
     
     @Test
@@ -93,19 +166,13 @@ class SetupPhaseTest
             execRoundTrip( null, commands, false );
         TextProvisioner     provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
-        feedback.forEach( System.out::println );
 
         assertEquals( expRows, provisioner.getRows() );
         assertEquals( expCols, provisioner.getCols() );
-        
-        RoundTripParser parser  = new RoundTripParser( feedback );
-        System.out.println();
-//        assertFalse( result.setup().isQuit() );
-//        assertTrue( contains( feedback, SETUP_TEXT_PROMPT ) );
-//        assertTrue( contains( feedback, ARE_YOU_SURE ) );
-//        assertTrue( contains( feedback, "done" ) );
-//        assertTrue( contains( feedback, "success" ) );
-//        assertTrue( contains( feedback, "Setup complete" ) );
+        assertFalse( result.setup().isQuit() );
+        assertTrue( contains( feedback, INVALID_ARG_COUNT ) );
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, SUCCESS ) );
     }
     
     private static boolean contains( List<String> source, String target )
@@ -116,11 +183,6 @@ class SetupPhaseTest
                 .findAny()
                 .isPresent();
         return contains;
-    }
-
-    private static RoundTripResult execRoundTrip( List<String> toClient )
-    {
-        return execRoundTrip( null, toClient, true );
     }
     
     private static RoundTripResult execRoundTrip( 
@@ -157,6 +219,7 @@ class SetupPhaseTest
     
     private class RoundTripParser
     {
+        @SuppressWarnings("unused")
         public final    List<String>          prolog;
         public final    List<CommandBucket>   buckets = new ArrayList<>();
         
@@ -164,19 +227,29 @@ class SetupPhaseTest
         {
             int     feedbackSize    = feedback.size();
             int     promptLen       = SETUP_TEXT_PROMPT.length();
-            int[]   prompts         = 
+            int     firstPrompt     =
                 IntStream.range( 0, feedbackSize )
                     .filter( i -> 
                         feedback.get( i ).startsWith( SETUP_TEXT_PROMPT )
                     )
+                    .findFirst().orElse( feedbackSize );
+            
+            prolog = feedback.subList( 0, firstPrompt );
+            List<String>    commands        = 
+                feedback.subList( firstPrompt, feedbackSize );
+            int             commandsSize    = commands.size();
+            int[]   prompts         = 
+                IntStream.range( 0, commandsSize )
+                    .filter( i -> 
+                        commands.get( i ).startsWith( SETUP_TEXT_PROMPT )
+                    )
                     .toArray();
-            prolog = prompts.length == 0 ? 
-                feedback : feedback.subList( 0, prompts[0] );
+
             for ( int inx = 0 ; inx < prompts.length ; ++inx )
             {
                 int             promptInx   = prompts[inx];
                 int             end         = inx < prompts.length - 1 ? 
-                    prompts[inx + 1] : feedbackSize;
+                    prompts[inx + 1] : commandsSize;
                 String          firstLine   = feedback.get( promptInx );
                 String          prompt      = 
                     firstLine.substring( 0, promptLen );

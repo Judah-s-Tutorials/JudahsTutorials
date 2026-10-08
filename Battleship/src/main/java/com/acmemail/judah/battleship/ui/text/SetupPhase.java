@@ -13,7 +13,9 @@ import com.acmemail.judah.battleship.TextProvisioner;
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.util.LineWrapper;
 import static com.acmemail.judah.battleship.StatusMessages.SETUP_TEXT_PROMPT;
+import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
 import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
+import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
 
 public class SetupPhase
 {
@@ -240,6 +242,8 @@ public class SetupPhase
         printOut( fullPrompt );
         String  reply       = consoleReader.readLine().trim().toUpperCase();
         boolean result      = reply.charAt( 0 ) == 'Y';
+        String  status      = result ? "yes" : "no";
+        writeOut( status );
         return result;
     }
     
@@ -276,7 +280,7 @@ public class SetupPhase
         }
         printOut( command + ": " );
         String          status  = provisioner.isSuccess() ?
-            "success" : "failure";
+            SUCCESS : FAILURE;
         List<String>    errors  =
             provisioner.getErrors().stream().map( "    "::concat ).toList();
         writeOut( status );
