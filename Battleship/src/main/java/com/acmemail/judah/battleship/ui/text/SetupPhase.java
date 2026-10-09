@@ -67,7 +67,7 @@ public class SetupPhase
         "\t\t-- 'type,name,length,breadth' ",
         "\twhere:",
         "\t\t--'name' is the name of the type of a ship. "
-        + "names are case-sensitive, "
+        + "Names are case-sensitive, "
         + "and must be unique",
         "\t\t--'length' is the length of the ship, "
         + "and 'breadth' is its breadth. ",
