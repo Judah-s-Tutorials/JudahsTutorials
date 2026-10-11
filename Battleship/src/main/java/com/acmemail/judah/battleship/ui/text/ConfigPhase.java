@@ -6,16 +6,14 @@ import static com.acmemail.judah.battleship.StatusMessages.INVALID_C_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ORIENTATION;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_REC_NUM;
 import static com.acmemail.judah.battleship.StatusMessages.NOT_ALL_DEPLOYED;
-import static com.acmemail.judah.battleship.util.StdOutputUtils.printOut;
-import static com.acmemail.judah.battleship.util.StdOutputUtils.writeErr;
-import static com.acmemail.judah.battleship.util.StdOutputUtils.writeOut;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
@@ -38,11 +36,9 @@ public class ConfigPhase
     private static final int        lineLen     = 60;
     private static final String[]   graphs      =   { 
         "This is the game's configuration phase. "
-        + "In this phase you configure and deploy your fleet. "
-        + "specify the names of the players "
-        + "design a type of ship, "
-        + "and establish the types of the ships "
-        + "that must be deployed by each player. "
+        + "In this phase you configure and deploy your fleet, "
+        + "specifying the home square "
+        + "and orientation of each ship. "
         + "Each task is performed by "
         + "entering a comma-separated list of a command "
         + "and its arguments, "
@@ -50,58 +46,77 @@ public class ConfigPhase
         + "For example, the command: ",
         
         "",
-        "\tdim,20,30",
+        "\tdeploy,1,a1,vertical",
         "",
         
-        "Establishes a grid with 20 rows and 30 columns. "
+        "Positions the first ship in the to-deploy list "
+        + "in the upper-left corner of the grid "
+        + "with a vertical orientation. "
         + "Commands are case-insensitive "
         + "and tolerant of whitespace, "
         + "so the following are equivalent commands: ",
         
         "",
-        "\tdim,20,30",
-        "\tDIM,20,30",
-        "\tDIM , 20 , 30",
+        "\tdeploy,1,a1,vertical",
+        "\tDEPLOY,1,a1,vertical",
+        "\tdeploy , 1 , a1 , vertical",
         
         "Allowable commands are: ",
         "\t-- ?, h, help: show this message",
-        "\t-- done: designate the setup phase as complete",
-        "\t-- quit: discards all work, terminates the application",
-        "\t-- dim,rows,cols: "
-        + "where 'rows' is a decimal integer "
-        + "specifying the number of rows in the game grid, "
-        + "and 'cols' is the number of columns.",
+        "\t-- done: designate the configuration phase as complete; "
+        + "the command will fail if not all ships in the to-deploy list "
+        + "have been deployed; "
+        + "the operator will be prompted "
+        + "with an \"are you sure\" message. ",
+        
+        "\t-- done!: same as \"done,\" "
+        + "but skips the \"are you sure\" prompt.",
+        
+        "\t-- q,quit: discards all work, terminates the application; "
+        + "the operator will be prompted with an \"are you sure\" message. ",
+        "\t-- q!,quit!: same as \"quit,\", "
+        + "but skips the \"are you sure\" prompt. ",
+        
+        "\t--dep,deploy: "
+        + "removes the designated ship "
+        + "from the to-be-deployed list "
+        + "and adds it to the deployed list. "
+        + "The arguments are: ",
+        
+        "\t\tdeploy, ship-number, cell-ID, orientation",
+        "\tWhere:",
+        
+        "\t\t-- deploy is the literal command",
+        "\t\t-- ship-number is the number of the ship in the to-deploy list",
+        "\t\t-- cell-ID is the row:column ID if the deployed ship's "
+        + "home cell, for example A1",
+        "\t\t-- orientation is either \"horizontal\" "
+        + "or \"vertical.\" "
+        + "any argument beginning with 'h' "
+        + "will be taken for \"horizontal,\" "
+        + "and any argument beginning with 'v' " 
+        + "will be taken for \"vertical.\" ",
+        
+        "\t-- und,undeploy: "
+        + "removes the designated ship "
+        + "from the deployed list "
+        + "and returns it to the to-be-deployed list. "
+        + "The arguments are: ",
+        
+        "\t\tdeploy, ship-number",
+        "\tWhere:",
+        
+        "\t\t-- undeploy is the literal command",
+        "\t\t-- ship-number is the number of the ship in the deployed list",
         
         "\t-- show, show-grid: "
-        + "show a representation of the grid "
-        + "as currently configured",
+        + "display a textual a representation of the physical grid "
+        + "as currently configured. ",
         
-        "\t-- type: "
-        + "This command registers the type of a ship. "
-        + "It has two forms:",
+        "\t-- upd, update: "
+        + "display the current disposition "
+        + "of the to-be-deployed and deployed lists. ",
         
-        "\t\t-- 'type,default' "
-        + "registers all the traditional ship types ",
-        "\t\t-- 'type,name,length,breadth' ",
-        "\twhere:",
-        "\t\t--'name' is the name of the type of a ship. "
-        + "names are case-sensitive, "
-        + "and must be unique",
-        "\t\t--'length' is the length of the ship, "
-        + "and 'breadth' is its breadth. ",
-        "\tThe command: ",
-        "\t\ttype,SuperCarrier,12,3",
-        "\tcreates a type of ship named 'SuperCarrier' "
-        + "with a length of 12 and a breadth of 3. "
-        + "A ship of this type deployed horizontally "
-        + "will have a width of 12 and a height of 3; "
-        + "deployed vertically, it will have a width of 3 "
-        + "and a height of 12.",
-        
-        "\t-- ?, h, help: show this help message",
-        "\t-- u, update: display the updated configuration",
-        "\t-- done: mark setup complete",
-        "\t-- q, quit: exit from this application",
         "==================================="
     };
     private static final List<String>   list    = List.of( graphs );
@@ -112,12 +127,52 @@ public class ConfigPhase
     private boolean configComplete;
     private boolean quit;
     private boolean really;
-    private BufferedReader  consoleReader;
+    private final BufferedReader  consoleReader;
+    /** Destination for status and error output; defaults to stdout. */
+    private final   PrintStream     outStream;
     
     public ConfigPhase( TextProvisioner provisioner )
     {
-        Objects.requireNonNull( provisioner, "provisioner" );
-        this.provisioner = provisioner;
+//        Objects.requireNonNull( provisioner, "provisioner" );
+//        this.provisioner = provisioner;
+//        textGrid = new BasicTextGrid( Grid2D.getHomeGrid() );
+//        fleet = new Fleet();
+//        provisioner.getToDeploy().forEach( 
+//            t -> fleet.addToBeDeployed( t, null ) 
+//        );
+//        Configurator.nextState();
+        this( provisioner, null, null );
+    }
+
+    /**
+     * Constructor.
+     * Allows the operator-input source and the output destination
+     * to be supplied by the caller, for example by a test driver.
+     * Any argument may be null,
+     * in which case the corresponding default
+     * ({@code provisioner}: a new TextProvisioner;
+     * {@code reader}: stdin;
+     * {@code outStream}: stdout)
+     * is used instead.
+     *
+     * @param provisioner   TextProvisioner to be used internally; may be null
+     * @param reader        source of operator input; may be null
+     * @param outStream     destination for status and error output; may be null
+     */
+    public ConfigPhase(
+        TextProvisioner provisioner,
+        Reader          reader,
+        PrintStream     outStream
+    )
+    {
+        this.provisioner = provisioner != null ?
+            provisioner : TextProvisioner.of();
+        Reader  actReader   = reader != null ?
+            reader : new InputStreamReader( System.in );
+        this.consoleReader  = actReader instanceof BufferedReader buffered ?
+            buffered : new BufferedReader( actReader );
+        this.outStream  = outStream != null ? outStream : System.out;
+        
         textGrid = new BasicTextGrid( Grid2D.getHomeGrid() );
         fleet = new Fleet();
         provisioner.getToDeploy().forEach( 
@@ -125,33 +180,16 @@ public class ConfigPhase
         );
         Configurator.nextState();
     }
-    
+
     public void exec()
     {
         showHelp();
-        exec( this::execLoop );
+        execLoop();
     }
     
     public boolean isQuit()
     {
         return quit;
-    }
-    
-    private void exec( Runnable runner )
-    {
-        try ( 
-            InputStreamReader inStream  = new InputStreamReader( System.in );
-            BufferedReader    bufStream = new BufferedReader( inStream ); 
-        )
-        {
-            consoleReader = bufStream;
-            runner.run();
-        }
-        catch ( IOException exc )
-        {
-            exc.printStackTrace();
-            throw new BattleshipException( exc );
-        }
     }
     
     private void execLoop()
@@ -196,9 +234,10 @@ public class ConfigPhase
         case "SHOW", "SHOW-GRID" -> showGrid();
         case "Q", "QUIT" -> quit = true;
         case "Q!", "QUIT!" -> quit = really = true;
+        case "DONE" -> done( command, result, false );
+        case "DONE!" -> done( command, result, true );
         case "DEPLOY" -> deploy( command, result );
         case "UND", "UNDEPLOY" -> undeploy( command, result );
-        case "DONE" -> done( command, result );
         case "" -> noop();
         default -> result.addMessage( INVALID_C_COMMAND, false );
         }
@@ -208,7 +247,7 @@ public class ConfigPhase
         writeOut( status );
         List<String>    errLines    = 
             errors.stream().map( "    "::concat ).toList();
-        writeErr( errLines );
+        writeOut( errLines );
     }
     
     private void deploy( String command, Result result )
@@ -244,15 +283,19 @@ public class ConfigPhase
         }
     }
     
-    private void done( String command, Result result )
+    private void done( String command, Result result, boolean really )
     {
         // deploy,num,coords,orientation[,remark]
         List<Proto>         toDeploy    = fleet.getToBeDeployedProtos();
         if ( toDeploy.size() != 0  )
             result.addMessage( NOT_ALL_DEPLOYED, false );
         else 
+        {
             configComplete = true;
-    }    
+            this.really = really;
+        }
+    }
+    
     private void undeploy( String command, Result result )
     {
         // undeploy,num
@@ -439,5 +482,43 @@ public class ConfigPhase
         String      configStr   = 
             String.format( fmt, inx, name, length, breadth, labelStr, orient );
         return configStr;
+    }
+
+    /**
+     * Write a single string to this instance's output stream
+     * <em>without</em> a line separator,
+     * and flush the stream before returning.
+     *
+     * @param line  the string to write
+     */
+    private void printOut( String line )
+    {
+        outStream.print( line );
+        outStream.flush();
+    }
+
+    /**
+     * Write a single string followed by a line-separator
+     * to this instance's output stream,
+     * and flush the stream before returning.
+     *
+     * @param line  the string to write
+     */
+    private void writeOut( String line )
+    {
+        writeOut( List.of( line ) );
+    }
+
+    /**
+     * Write each string in a list to this instance's output stream.
+     * Each string is written on a separate line;
+     * the stream is flushed before returning.
+     *
+     * @param lines the strings to write
+     */
+    private void writeOut( List<String> lines )
+    {
+        lines.forEach( outStream::println );
+        outStream.flush();
     }
 }

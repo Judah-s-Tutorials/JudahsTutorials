@@ -6,6 +6,7 @@ import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_BREADTH;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COL_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_LENGTH;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_NAME;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_RECORD;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ROW_COUNT;
@@ -806,7 +807,12 @@ public class TextProvisioner implements Provisioner
         else
         {
             String      name    = rec.get( 1 );
-            if ( players.contains( name ) )
+            if ( name.isEmpty() )
+            {
+                String  message = formatErrorMessage( INVALID_NAME, name );
+                errStack.push( message );
+            }
+            else if ( players.contains( name ) )
             {
                 String  message = formatErrorMessage( DUP_PLAYER, name );
                 errStack.push( message );

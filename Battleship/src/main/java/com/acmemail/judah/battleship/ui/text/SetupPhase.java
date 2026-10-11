@@ -16,6 +16,7 @@ import static com.acmemail.judah.battleship.StatusMessages.SETUP_TEXT_PROMPT;
 import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
 import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
 import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
+import static com.acmemail.judah.battleship.StatusMessages.PLAYERS;
 
 public class SetupPhase
 {
@@ -52,7 +53,7 @@ public class SetupPhase
         "Allowable commands are: ",
         "\t-- ?, h, help: show this message",
         "\t-- done: designate the setup phase as complete",
-        "\t-- quit: discards all work, terminated the application",
+        "\t-- quit: discards all work, terminates the application",
         "\t-- dim,rows,cols: "
         + "where 'rows' is a decmimal integer "
         + "specifying the number of rows in the game grid, "
@@ -90,7 +91,6 @@ public class SetupPhase
         "\t\tplayer,Marie-Curie",
         "\t\tSir-Isaac-Newton",
         
-        "\t-- ?, h, help: show this help message",
         "\t-- u, update: display the updated configuration",
         "\t-- done: mark setup complete",
         "\t-- q, quit: exit from this application",
@@ -184,6 +184,16 @@ public class SetupPhase
     public boolean isQuit()
     {
         return quit;
+    }
+    
+    /**
+     * Gets the TextProvisioner encapsulated in this object.
+     * 
+     * @return  the TextProvisioner encapsulated in this object
+     */
+    public TextProvisioner getProvisioner()
+    {
+        return provisioner;
     }
     
     /**
@@ -324,7 +334,7 @@ public class SetupPhase
     {
         List<String>    output  = new ArrayList<>();
         List<String>    players = provisioner.getPlayers();
-        output.add( "Players");
+        output.add( PLAYERS );
         output.add( "=======");
         output.addAll( players );
         output.add( "" );

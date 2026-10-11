@@ -60,29 +60,33 @@ public class StatusMessages
     public static final String  NOT_REALIZED        =
         Messages.getString("StatusMessages.26"); //$NON-NLS-1$
     public static final String  MAX_COLS_EXCEEDED   =
-        "Max columns exceeded";
+        Messages.getString("StatusMessages.27"); //$NON-NLS-1$
     public static final String  MAX_ROWS_EXCEEDED   =
-        "Max columns exceeded";
+        Messages.getString("StatusMessages.28"); //$NON-NLS-1$
     public static final String  INVALID_C_COMMAND   =
-        "Invalid configuration command";
+        Messages.getString("StatusMessages.29"); //$NON-NLS-1$
     public static final String  INVALID_REC_NUM     =
-        "Invalid record number";
+        Messages.getString("StatusMessages.30"); //$NON-NLS-1$
     public static final String  INVALID_COORDINATES =
-        "Invalid grid coordinates";
+        Messages.getString("StatusMessages.31"); //$NON-NLS-1$
     public static final String  INVALID_ORIENTATION =
-        "Invalid orientation";
+        Messages.getString("StatusMessages.32"); //$NON-NLS-1$
     public static final String  DUP_PLAYER          =
-        "Duplicate player";
+        Messages.getString("StatusMessages.33"); //$NON-NLS-1$
     public static final String  PLAYER_NOT_FOUND    =
-        "Player not found";
+        Messages.getString("StatusMessages.34"); //$NON-NLS-1$
     public static final String  NOT_ALL_DEPLOYED    =
-        "Not all ships have been deployed";
+        Messages.getString("StatusMessages.35"); //$NON-NLS-1$
     public static final String  SETUP_TEXT_PROMPT   =
-        "Enter a command (? for help): ";
+        Messages.getString("StatusMessages.36"); //$NON-NLS-1$
     public static final String  CONFIG_TEXT_PROMPT  =
-        "Enter a command (? for help): ";
+        Messages.getString("StatusMessages.37"); //$NON-NLS-1$
     public static final String  ARE_YOU_SURE        =
-        "are you sure? (y/n) ";
+        Messages.getString("StatusMessages.38"); //$NON-NLS-1$
     public static final String  FAILURE             =
-        "failure";
+        Messages.getString("StatusMessages.39"); //$NON-NLS-1$
+    public static final String  PLAYERS             =
+        Messages.getString("StatusMessages.40"); //$NON-NLS-1$
+    public static final String  INVALID_NAME        =
+        Messages.getString("StatusMessages.41"); //$NON-NLS-1$
 }

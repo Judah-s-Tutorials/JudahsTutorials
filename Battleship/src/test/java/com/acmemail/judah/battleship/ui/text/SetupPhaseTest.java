@@ -3,10 +3,14 @@ package com.acmemail.judah.battleship.ui.text;
 import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
 import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
+import static com.acmemail.judah.battleship.StatusMessages.PLAYERS;
 import static com.acmemail.judah.battleship.StatusMessages.SETUP_TEXT_PROMPT;
 import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -16,13 +20,15 @@ import java.io.PrintStream;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.function.IntPredicate;
 import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.battleship.TextProvisioner;
 import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
@@ -46,17 +52,30 @@ class SetupPhaseTest
     public void beforeEach() throws IOException
     {
     }
-
+    
     @Test
     public void testSetupPhase()
     {
-        fail("Not yet implemented");
+        SetupPhase  setupPhase  = new SetupPhase();
+        assertNotNull( setupPhase.getProvisioner() );
+        assertFalse( setupPhase.isQuit() );
     }
 
     @Test
     public void testSetupPhaseTextProvisioner()
     {
-        fail("Not yet implemented");
+        TextProvisioner provisioner = TextProvisioner.of();
+        int             expRows     = 13;
+        int             expCols     = 17;
+        String          dimCommand  = "dim," + expRows + "," + expCols;
+        List<String>    commands    =
+            List.of( dimCommand, "done", "y" );
+        RoundTripResult result      = execRoundTrip( provisioner, commands );
+        assertTrue( contains( result.feedback, SUCCESS ) );
+        
+        assertEquals( expRows, provisioner.getRows() );
+        assertEquals( expCols, provisioner.getCols() );
+
     }
 
     @Test
@@ -67,8 +86,7 @@ class SetupPhaseTest
         String              dimCommand  = "dim," + expRows + "," + expCols;
         List<String>        commands    =
             List.of( dimCommand, "done", "y" );
-        RoundTripResult     result      = 
-            execRoundTrip( null, commands, false );
+        RoundTripResult     result      = execRoundTrip( null, commands );
         TextProvisioner     provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
         
@@ -81,17 +99,33 @@ class SetupPhaseTest
         assertTrue( contains( feedback, SUCCESS ) );
         assertTrue( contains( feedback, "Setup complete" ) );
     }
-
-    @Test
-    public void testExec()
+    
+    @ParameterizedTest
+    @ValueSource( strings= {"?","h","help" })
+    public void testHelp( String command )
     {
-        fail("Not yet implemented");
+        List<String>        commands        = List.of( command, "d!" );
+        RoundTripResult     result          = execRoundTrip( null, commands );
+        List<String>        rawFeedback     = result.feedback();
+        RoundTripParser     rtParser        = new RoundTripParser( rawFeedback );
+        int                 helpSize        = rtParser.prolog.size();
+        int                 feedbackSize    = rtParser.feedback.size();
+        
+        // Prolog contains the help message; feedback should contain help
+        // message, plus a few lines for command feedback.
+        assertTrue( feedbackSize > helpSize );
     }
 
     @Test
     public void testIsQuit()
     {
-        fail("Not yet implemented");
+        RoundTripResult     result      = 
+            execRoundTrip( null, List.of( "q!" ) );
+        assertTrue( result.setup().isQuit() );
+     
+        result      = 
+            execRoundTrip( null, List.of( "d!" ) );
+        assertFalse( result.setup().isQuit() );
     }
     
     @Test
@@ -107,8 +141,7 @@ class SetupPhaseTest
                 done,
                 "y"
             );
-        RoundTripResult     result      = 
-            execRoundTrip( null, commands, false );
+        RoundTripResult     result      = execRoundTrip( null, commands );
         TextProvisioner     provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
         RoundTripParser     parser      = new RoundTripParser( feedback );
@@ -117,6 +150,15 @@ class SetupPhaseTest
         assertFalse( result.setup().isQuit() );
     }
     
+    @Test
+    public void testGetProvisioner()
+    {
+        TextProvisioner provisioner = TextProvisioner.of();
+        SetupPhase      setupPhase  = new SetupPhase( provisioner );
+        assertNotNull( setupPhase.getProvisioner() );
+        assertSame( provisioner, setupPhase.getProvisioner() );
+    }
+
     @Test
     public void testQuit()
     {
@@ -130,8 +172,7 @@ class SetupPhaseTest
                 quit,
                 "y"
             );
-        RoundTripResult     result      = 
-            execRoundTrip( null, commands, false );
+        RoundTripResult     result      = execRoundTrip( null, commands );
         TextProvisioner     provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
         RoundTripParser     parser      = new RoundTripParser( feedback );
@@ -152,8 +193,7 @@ class SetupPhaseTest
                 "done",
                 "y"
             );
-        RoundTripResult     result      = 
-            execRoundTrip( null, commands, false );
+        RoundTripResult     result      = execRoundTrip( null, commands );
         TextProvisioner     provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
 
@@ -177,8 +217,7 @@ class SetupPhaseTest
                 "done",
                 "y"
             );
-        RoundTripResult     result      = 
-            execRoundTrip( null, commands, false );
+        RoundTripResult     result      = execRoundTrip( null, commands );
         TextProvisioner     provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
 
@@ -193,10 +232,11 @@ class SetupPhaseTest
     @Test
     public void testUpdateBothEmpty()
     {
-        List<String>    commands    = List.of( "update", "done", "y" );
-        RoundTripResult     result      = 
-            execRoundTrip( null, commands, false );
-        List<String>        feedback    = result.feedback();
+        List<String>        commands    = List.of( "update", "done", "y" );
+        RoundTripResult     result      = execRoundTrip( null, commands );
+        List<String>        rawFeedback = result.feedback();
+        RoundTripParser     rtParser    = new RoundTripParser( rawFeedback );
+        List<String>        feedback    = rtParser.feedback;
         UpdateParser        parser      = new UpdateParser( feedback );
         assertTrue( parser.getToRegister().isEmpty() );
         assertTrue( parser.getToDeploy().isEmpty() );
@@ -207,8 +247,7 @@ class SetupPhaseTest
     {
         List<String>    commands    = 
             List.of( "type,default", "update", "done", "y" );
-        RoundTripResult     result      = 
-            execRoundTrip( null, commands, false );
+        RoundTripResult     result      = execRoundTrip( null, commands );
         List<String>        feedback    = result.feedback();
         UpdateParser        parser      = new UpdateParser( feedback );
         List<String>        toRegister  = parser.getToRegister();
@@ -226,9 +265,10 @@ class SetupPhaseTest
         commands.add( "type,default" );
         ships.forEach( s -> commands.add( "deploy," + s ) );
         commands.addAll( List.of( "update", "done", "y" ) );
-        RoundTripResult     result      = 
-            execRoundTrip( null, commands, false );
-        List<String>        feedback    = result.feedback();
+        RoundTripResult     result      = execRoundTrip( null, commands );
+        List<String>        rawFeedback = result.feedback();
+        RoundTripParser     rtParser    = new RoundTripParser( rawFeedback );
+        List<String>        feedback    = rtParser.feedback;
         UpdateParser        parser      = new UpdateParser( feedback );
         List<String>        toRegister  = parser.getToRegister();
         List<String>        toDeploy    = parser.getToDeploy();
@@ -247,9 +287,11 @@ class SetupPhaseTest
         allDefaultTypeNames.forEach( s -> commands.add( "deploy," + s ) );
         addShips.forEach( s -> commands.add( "deploy," + s ) );
         commands.addAll( List.of( "update", "done", "y" ) );
-        RoundTripResult result      = 
-            execRoundTrip( null, commands, false );
-        List<String>    feedback    = result.feedback();
+        RoundTripResult result      = execRoundTrip( null, commands );
+        List<String>        rawFeedback = result.feedback();
+        RoundTripParser     rtParser    = new RoundTripParser( rawFeedback );
+        List<String>        feedback    = rtParser.feedback;
+
         UpdateParser    parser      = new UpdateParser( feedback );
         List<String>    toRegister  = parser.getToRegister();
         List<String>    toDeploy    = parser.getToDeploy();
@@ -260,6 +302,47 @@ class SetupPhaseTest
         assertEquals( expDepSize, toDeploy.size() );
         assertTrue( containsAll( allDefaultTypeNames, toRegister ) );
         assertTrue( containsAll( allDefaultTypeNames, toDeploy ) );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings = {"", "player1","player1,player2,player3"} )
+    public void testAddPlayer( String list )
+    {
+        List<String>    suffix      = List.of( "update", "done!" );
+        List<String>    commands    = new ArrayList<>();
+        List<String>    expList     = new ArrayList<>();
+        String[]        allPlayers  = list.split( "," );
+        for ( String player : allPlayers )
+        {
+            if ( !player.isBlank() )
+            {
+                commands.add( "add," + player );
+                expList.add( player );
+            }
+        }
+        commands.addAll( suffix );
+        RoundTripResult     result      = execRoundTrip( null, commands );
+        RoundTripParser     rtParser    = 
+            new RoundTripParser( result.feedback() );
+        UpdateParser        parser      = new UpdateParser( rtParser.feedback );
+        TextProvisioner     provisioner = result.provisioner();
+        
+        assertEquals( expList, parser.getPlayers() );
+        assertEquals( expList, provisioner.getPlayers() );
+    }
+    
+    @Test
+    public void addTestPlayerInvalidName()
+    {
+        List<String>        commands    = List.of( "add," + "", "done!" );
+        RoundTripResult     result      = execRoundTrip( null, commands );
+        TextProvisioner     provisioner = result.provisioner();
+        List<String>        feedback    = result.feedback();
+        SetupPhase          setup       = result.setup();
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, INVALID_NAME ) );
+        assertTrue( provisioner.getPlayers().isEmpty() );
+        assertFalse( setup.isQuit() );
     }
     
     private static boolean containsAll( 
@@ -287,14 +370,11 @@ class SetupPhaseTest
     
     private static RoundTripResult execRoundTrip( 
         TextProvisioner provisioner,
-        List<String> toSetup, 
-        boolean addQuit
+        List<String> toSetup
     )
     {
         String                  script      = 
             String.join( "\n", toSetup ) + "\n";
-        if ( addQuit )
-            script += "q\ny\n";
         StringReader            reader      = new StringReader( script );
         ByteArrayOutputStream   fromSetup   = new ByteArrayOutputStream();
         PrintStream             outStream   = new PrintStream( fromSetup );
@@ -319,29 +399,28 @@ class SetupPhaseTest
     
     private class RoundTripParser
     {
-        @SuppressWarnings("unused")
-        public final    List<String>          prolog;
-        public final    List<CommandBucket>   buckets = new ArrayList<>();
+        public final List<String>           prolog;
+        public final List<String>           feedback; 
+        public final List<CommandBucket>    buckets = new ArrayList<>();
         
-        public RoundTripParser( List<String> feedback )
+        public RoundTripParser( List<String> rawFeedback )
         {
-            int     feedbackSize    = feedback.size();
+            int     rawFeedbackSize = rawFeedback.size();
             int     promptLen       = SETUP_TEXT_PROMPT.length();
             int     firstPrompt     =
+                IntStream.range( 0, rawFeedbackSize )
+                    .filter( i -> 
+                        rawFeedback.get( i ).startsWith( SETUP_TEXT_PROMPT )
+                    )
+                    .findFirst().orElse( rawFeedbackSize );
+            
+            prolog = rawFeedback.subList( 0, firstPrompt );
+            feedback = rawFeedback.subList( firstPrompt, rawFeedbackSize );
+            int     feedbackSize    = feedback.size();
+            int[]   prompts         = 
                 IntStream.range( 0, feedbackSize )
                     .filter( i -> 
                         feedback.get( i ).startsWith( SETUP_TEXT_PROMPT )
-                    )
-                    .findFirst().orElse( feedbackSize );
-            
-            prolog = feedback.subList( 0, firstPrompt );
-            List<String>    commands        = 
-                feedback.subList( firstPrompt, feedbackSize );
-            int             commandsSize    = commands.size();
-            int[]   prompts         = 
-                IntStream.range( 0, commandsSize )
-                    .filter( i -> 
-                        commands.get( i ).startsWith( SETUP_TEXT_PROMPT )
                     )
                     .toArray();
 
@@ -349,13 +428,12 @@ class SetupPhaseTest
             {
                 int             promptInx   = prompts[inx];
                 int             end         = inx < prompts.length - 1 ? 
-                    prompts[inx + 1] : commandsSize;
+                    prompts[inx + 1] : feedbackSize;
                 String          firstLine   = feedback.get( promptInx );
                 String          prompt      = 
                     firstLine.substring( 0, promptLen );
                 String          status      = firstLine.substring( promptLen );
-                List<String>    suffix      = 
-                    feedback.subList( promptInx + 1, end );
+                List<String>    suffix      = feedback.subList( promptInx + 1, end );
                 buckets.add( new CommandBucket( prompt, status, suffix ) );
             }
         }
@@ -365,61 +443,16 @@ class SetupPhaseTest
     {
         private final List<String>  toRegister;
         private final List<String>  toDeploy;
+        private final List<String>  players;
+        
+        private record ShipLists( List<String> reg, List<String> dep ) {}
         
         public UpdateParser( List<String> feedback )
         {
-            int     feedbackSize    = feedback.size();
-            int     firstLineInx    = 
-                IntStream.range( 0, feedbackSize )
-                    .filter( i -> feedback.get( i ).contains( "To Register" ) )
-                    .findFirst().orElse( -1 );
-            if ( firstLineInx < 0 )
-            {
-                toRegister = Collections.emptyList();
-                toDeploy = Collections.emptyList();
-            }
-            else
-            {
-                // sanity check...
-                // First two lines look something like this:
-                //     To Register       To Deploy
-                //     =============     ===========
-                assertTrue( firstLineInx < feedbackSize + 1 );
-                String  headerLine1 = feedback.get( firstLineInx );
-                String  headerLine2 = feedback.get( firstLineInx + 1 );
-                assertTrue( headerLine1.contains( "To Deploy" ) );
-                assertTrue( headerLine2.contains( "====" ) );
-                int     midPoint    = headerLine1.indexOf( "To Deploy" );
-                int     startInx    = firstLineInx + 2;
-                int     endInx      = 
-                    IntStream.range( startInx, feedbackSize )
-                        .filter( i -> feedback.get( i ).isBlank() )
-                        .findFirst().orElse( feedbackSize );
-                toRegister = IntStream.range( startInx, endInx )
-                    .mapToObj( feedback::get )
-                    .map( s -> 
-                        s.substring( 0, Math.min( s.length(), midPoint ) )
-                            .trim()
-                    )
-                    .filter( s -> !s.isEmpty() )
-                    .toList();
-                toDeploy = IntStream.range( startInx, endInx )
-                    .mapToObj( feedback::get )
-                    .filter( s -> s.length() >= midPoint )
-                    .map( s -> s.substring( midPoint ).trim() )
-                    .filter( s -> !s.isEmpty() )
-                    .toList();
-            }
-        }
-        
-        public List<String> toReportString()
-        {
-            List<String>    list    = new ArrayList<>();
-            list.add( "To Register" );
-            list.addAll( toRegister );
-            list.add( "To Deploy" );
-            list.addAll( toDeploy );
-            return list;
+            ShipLists   lists   = getShipLists( feedback );
+            toRegister = lists.reg();
+            toDeploy = lists.dep();
+            players = getPlayers( feedback );
         }
         
         public List<String> getToRegister()
@@ -430,9 +463,119 @@ class SetupPhaseTest
         public List<String> getToDeploy()
         {
             return toDeploy;
-        }  
-    }
-    
+        }
+        
+        public List<String> getPlayers()
+        {
+            return players;
+        }
+        
+        private static List<String> getPlayers( List<String> feedback )
+        {
+            int     start           = 
+                getSectionStart( 
+                    0,
+                    i -> feedback.get( i ).contains( PLAYERS ),
+                    feedback
+                );
+            assertTrue( start >= 0 );
+            
+            int             end     =
+                getSectionEnd(
+                    start + 2,
+                    i -> feedback.get( i ).isBlank(),
+                    feedback
+                );
+            assertTrue( end > start );
+            
+            // sanity check; this section looks something like:
+            //    Players
+            //    =======
+            //    John
+            //    Jane
+            assertTrue( feedback.get( start + 1 ).contains( "=" ) );
+            
+            List<String>    players = feedback.subList( start + 2, end );
+            return players;
+        }
+        
+        private static int getSectionStart( 
+            int          from,
+            IntPredicate isStart, 
+            List<String> feedback
+        )
+        {
+            int size    = feedback.size();
+            int start   = 
+                IntStream.range( from, size )
+                    .filter( isStart::test )
+                    .findFirst().orElse( -1 );
+            return start;
+        }
+        
+        private static int getSectionEnd( 
+            int          from,
+            IntPredicate isEnd, 
+            List<String> feedback
+        )
+        {
+            int size    = feedback.size();
+            int end     = 
+                IntStream.range( from, size )
+                    .filter( isEnd::test )
+                    .findFirst().orElse( size );
+            return end;
+        }
+        
+        private static ShipLists getShipLists( List<String> feedback )
+        {
+            int     feedbackSize    = feedback.size();
+            int     tableStart      = 
+                getSectionStart( 
+                    0,
+                    i -> feedback.get( i ).contains( "To Register" ),
+                    feedback
+                );
+            // hard-fail if start of ships table isn't found
+            assertTrue( tableStart >= 0 );
+            int     tableEnd        = 
+                getSectionEnd(
+                    tableStart + 2,
+                    i -> feedback.get( i ).isBlank(),
+                    feedback
+                );
+
+            // sanity check...
+            // First two lines look something like this:
+            //     To Register       To Deploy
+            //     =============     ===========
+            assertTrue( tableStart < feedbackSize + 1 );
+            String  headerLine1 = feedback.get( tableStart );
+            String  headerLine2 = feedback.get( tableStart + 1 );
+            assertTrue( headerLine1.contains( "To Deploy" ) );
+            assertTrue( headerLine2.contains( "====" ) );
+            int     midPoint    = headerLine1.indexOf( "To Deploy" );
+            assertTrue( midPoint > 0 );
+
+            int     startInx    = tableStart + 2;
+            List<String> regList = IntStream.range( startInx, tableEnd )
+                .mapToObj( feedback::get )
+                .map( s -> 
+                    s.substring( 0, Math.min( s.length(), midPoint ) )
+                        .trim()
+                )
+                .filter( s -> !s.isEmpty() )
+                .toList();
+            List<String> depList = IntStream.range( startInx, tableEnd )
+                .mapToObj( feedback::get )
+                .filter( s -> s.length() >= midPoint )
+                .map( s -> s.substring( midPoint ).trim() )
+                .filter( s -> !s.isEmpty() )
+                .toList();
+            ShipLists   lists   = new ShipLists( regList, depList );
+            return lists;
+        }
+    }    
     private record RoundTripResult( 
         TextProvisioner provisioner,
         SetupPhase      setup,
