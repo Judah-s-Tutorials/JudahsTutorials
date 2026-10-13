@@ -3,21 +3,18 @@ package com.acmemail.judah.battleship.ui.text;
 import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
 import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
-import static com.acmemail.judah.battleship.StatusMessages.PLAYERS;
-import static com.acmemail.judah.battleship.StatusMessages.SETUP_TEXT_PROMPT;
-import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_NAME;
+import static com.acmemail.judah.battleship.StatusMessages.PLAYERS;
+import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
+import static com.acmemail.judah.battleship.StatusMessages.TEXT_PROMPT;
+import static com.acmemail.judah.battleship.StatusMessages.TO_DEPLOY_HEADER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
-import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.acmemail.judah.battleship.Provisioner;
 import com.acmemail.judah.battleship.TextProvisioner;
 import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
 import com.acmemail.judah.battleship.model.default_ship_types.Carrier;
@@ -71,7 +69,7 @@ class SetupPhaseTest
         List<String>    commands    =
             List.of( dimCommand, "done", "y" );
         RoundTripResult result      = execRoundTrip( provisioner, commands );
-        assertTrue( contains( result.feedback, SUCCESS ) );
+        assertTrue( contains( result.feedback(), SUCCESS ) );
         
         assertEquals( expRows, provisioner.getRows() );
         assertEquals( expCols, provisioner.getCols() );
@@ -87,13 +85,13 @@ class SetupPhaseTest
         List<String>        commands    =
             List.of( dimCommand, "done", "y" );
         RoundTripResult     result      = execRoundTrip( null, commands );
-        TextProvisioner     provisioner = result.provisioner();
+        Provisioner         provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
         
         assertEquals( expRows, provisioner.getRows() );
         assertEquals( expCols, provisioner.getCols() );
-        assertFalse( result.setup().isQuit() );
-        assertTrue( contains( feedback, SETUP_TEXT_PROMPT ) );
+        assertFalse( result.phase().isQuit() );
+        assertTrue( contains( feedback, TEXT_PROMPT ) );
         assertTrue( contains( feedback, ARE_YOU_SURE ) );
         assertTrue( contains( feedback, "done" ) );
         assertTrue( contains( feedback, SUCCESS ) );
@@ -121,11 +119,11 @@ class SetupPhaseTest
     {
         RoundTripResult     result      = 
             execRoundTrip( null, List.of( "q!" ) );
-        assertTrue( result.setup().isQuit() );
+        assertTrue( result.phase().isQuit() );
      
         result      = 
             execRoundTrip( null, List.of( "d!" ) );
-        assertFalse( result.setup().isQuit() );
+        assertFalse( result.phase().isQuit() );
     }
     
     @Test
@@ -142,12 +140,12 @@ class SetupPhaseTest
                 "y"
             );
         RoundTripResult     result      = execRoundTrip( null, commands );
-        TextProvisioner     provisioner = result.provisioner();
+        Provisioner         provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
         RoundTripParser     parser      = new RoundTripParser( feedback );
         assertEquals( 3, parser.buckets.size() );
         assertFalse( provisioner.getToRegister().isEmpty() );
-        assertFalse( result.setup().isQuit() );
+        assertFalse( result.phase().isQuit() );
     }
     
     @Test
@@ -173,12 +171,12 @@ class SetupPhaseTest
                 "y"
             );
         RoundTripResult     result      = execRoundTrip( null, commands );
-        TextProvisioner     provisioner = result.provisioner();
+        Provisioner         provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
         RoundTripParser     parser      = new RoundTripParser( feedback );
         assertEquals( 3, parser.buckets.size() );
         assertFalse( provisioner.getToRegister().isEmpty() );
-        assertTrue( result.setup().isQuit() );
+        assertTrue( result.phase().isQuit() );
     }
     
     @Test
@@ -194,12 +192,12 @@ class SetupPhaseTest
                 "y"
             );
         RoundTripResult     result      = execRoundTrip( null, commands );
-        TextProvisioner     provisioner = result.provisioner();
+        Provisioner         provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
 
         assertEquals( expRows, provisioner.getRows() );
         assertEquals( expCols, provisioner.getCols() );
-        assertFalse( result.setup().isQuit() );
+        assertFalse( result.phase().isQuit() );
         assertTrue( contains( feedback, SUCCESS ) );
     }
     
@@ -218,12 +216,12 @@ class SetupPhaseTest
                 "y"
             );
         RoundTripResult     result      = execRoundTrip( null, commands );
-        TextProvisioner     provisioner = result.provisioner();
+        Provisioner         provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
 
         assertEquals( expRows, provisioner.getRows() );
         assertEquals( expCols, provisioner.getCols() );
-        assertFalse( result.setup().isQuit() );
+        assertFalse( result.phase().isQuit() );
         assertTrue( contains( feedback, INVALID_ARG_COUNT ) );
         assertTrue( contains( feedback, FAILURE ) );
         assertTrue( contains( feedback, SUCCESS ) );
@@ -325,7 +323,7 @@ class SetupPhaseTest
         RoundTripParser     rtParser    = 
             new RoundTripParser( result.feedback() );
         UpdateParser        parser      = new UpdateParser( rtParser.feedback );
-        TextProvisioner     provisioner = result.provisioner();
+        Provisioner         provisioner = result.provisioner();
         
         assertEquals( expList, parser.getPlayers() );
         assertEquals( expList, provisioner.getPlayers() );
@@ -336,9 +334,9 @@ class SetupPhaseTest
     {
         List<String>        commands    = List.of( "add," + "", "done!" );
         RoundTripResult     result      = execRoundTrip( null, commands );
-        TextProvisioner     provisioner = result.provisioner();
+        Provisioner         provisioner = result.provisioner();
         List<String>        feedback    = result.feedback();
-        SetupPhase          setup       = result.setup();
+        TextPhase           setup       = result.phase();
         assertTrue( contains( feedback, FAILURE ) );
         assertTrue( contains( feedback, INVALID_NAME ) );
         assertTrue( provisioner.getPlayers().isEmpty() );
@@ -373,70 +371,12 @@ class SetupPhaseTest
         List<String> toSetup
     )
     {
-        String                  script      = 
-            String.join( "\n", toSetup ) + "\n";
-        StringReader            reader      = new StringReader( script );
-        ByteArrayOutputStream   fromSetup   = new ByteArrayOutputStream();
-        PrintStream             outStream   = new PrintStream( fromSetup );
         TextProvisioner         worker      = provisioner != null ? 
             provisioner : TextProvisioner.of();
-        SetupPhase              setup       =
-            new SetupPhase( worker, reader, outStream );
-        try
-        {
-            setup.exec();
-        }
-        catch ( Exception exc )
-        {
-            fail( "unexpected exception", exc );
-        }
-        String                  clientData  = fromSetup.toString();
-        List<String>            feedback    = clientData.lines().toList();
-        RoundTripResult         result      =
-            new RoundTripResult( worker, setup, toSetup, feedback );
+        PhaseGetter             getter      = (r,p) -> new SetupPhase( worker, r, p );
+        RoundTripResult         result      = 
+            TextTestUtils.execRoundTrip(worker, getter, toSetup);
         return result;
-    }
-    
-    private class RoundTripParser
-    {
-        public final List<String>           prolog;
-        public final List<String>           feedback; 
-        public final List<CommandBucket>    buckets = new ArrayList<>();
-        
-        public RoundTripParser( List<String> rawFeedback )
-        {
-            int     rawFeedbackSize = rawFeedback.size();
-            int     promptLen       = SETUP_TEXT_PROMPT.length();
-            int     firstPrompt     =
-                IntStream.range( 0, rawFeedbackSize )
-                    .filter( i -> 
-                        rawFeedback.get( i ).startsWith( SETUP_TEXT_PROMPT )
-                    )
-                    .findFirst().orElse( rawFeedbackSize );
-            
-            prolog = rawFeedback.subList( 0, firstPrompt );
-            feedback = rawFeedback.subList( firstPrompt, rawFeedbackSize );
-            int     feedbackSize    = feedback.size();
-            int[]   prompts         = 
-                IntStream.range( 0, feedbackSize )
-                    .filter( i -> 
-                        feedback.get( i ).startsWith( SETUP_TEXT_PROMPT )
-                    )
-                    .toArray();
-
-            for ( int inx = 0 ; inx < prompts.length ; ++inx )
-            {
-                int             promptInx   = prompts[inx];
-                int             end         = inx < prompts.length - 1 ? 
-                    prompts[inx + 1] : feedbackSize;
-                String          firstLine   = feedback.get( promptInx );
-                String          prompt      = 
-                    firstLine.substring( 0, promptLen );
-                String          status      = firstLine.substring( promptLen );
-                List<String>    suffix      = feedback.subList( promptInx + 1, end );
-                buckets.add( new CommandBucket( prompt, status, suffix ) );
-            }
-        }
     }
     
     private class UpdateParser
@@ -552,9 +492,9 @@ class SetupPhaseTest
             assertTrue( tableStart < feedbackSize + 1 );
             String  headerLine1 = feedback.get( tableStart );
             String  headerLine2 = feedback.get( tableStart + 1 );
-            assertTrue( headerLine1.contains( "To Deploy" ) );
+            assertTrue( headerLine1.contains( TO_DEPLOY_HEADER ) );
             assertTrue( headerLine2.contains( "====" ) );
-            int     midPoint    = headerLine1.indexOf( "To Deploy" );
+            int     midPoint    = headerLine1.indexOf( TO_DEPLOY_HEADER );
             assertTrue( midPoint > 0 );
 
             int     startInx    = tableStart + 2;
@@ -575,21 +515,5 @@ class SetupPhaseTest
             ShipLists   lists   = new ShipLists( regList, depList );
             return lists;
         }
-    }    
-    private record RoundTripResult( 
-        TextProvisioner provisioner,
-        SetupPhase      setup,
-        List<String>    input,
-        List<String>    feedback
-    )
-    {
-    }
-    
-    private record CommandBucket( 
-        String prompt,
-        String status,
-        List<String> suffix
-    )
-    {
     }
 }

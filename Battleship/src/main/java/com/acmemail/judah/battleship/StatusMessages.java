@@ -77,10 +77,8 @@ public class StatusMessages
         Messages.getString("StatusMessages.34"); //$NON-NLS-1$
     public static final String  NOT_ALL_DEPLOYED    =
         Messages.getString("StatusMessages.35"); //$NON-NLS-1$
-    public static final String  SETUP_TEXT_PROMPT   =
+    public static final String  TEXT_PROMPT         =
         Messages.getString("StatusMessages.36"); //$NON-NLS-1$
-    public static final String  CONFIG_TEXT_PROMPT  =
-        Messages.getString("StatusMessages.37"); //$NON-NLS-1$
     public static final String  ARE_YOU_SURE        =
         Messages.getString("StatusMessages.38"); //$NON-NLS-1$
     public static final String  FAILURE             =
@@ -89,4 +87,20 @@ public class StatusMessages
         Messages.getString("StatusMessages.40"); //$NON-NLS-1$
     public static final String  INVALID_NAME        =
         Messages.getString("StatusMessages.41"); //$NON-NLS-1$
+    public static final String  CONFIG_GRID_START   =
+        "Grid Start";
+    public static final String  CONFIG_GRID_END     =
+        "Grid End";
+    public static final String  CONFIG_SHIPS_START  =
+        "Ship Table START";
+    public static final String  CONFIG_SHIPS_END    =
+        "Ship Table END";
+    public static final String  HELP_END            =
+        "====== End Help ======";
+    public static final String  TO_REGISTER_HEADER  =
+        "To Register";
+    public static final String  TO_DEPLOY_HEADER    =
+        "To Deploy";
+    public static final String  DEPLOYED_HEADER     =
+        "Deployed";
 }

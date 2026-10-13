@@ -791,6 +791,24 @@ class TextProvisionerTest
     }
     
     @Test
+    public void testSetRowsCols()
+    {
+        TextProvisioner provisioner = TextProvisioner.of();
+        assertNull( provisioner.getRows() );
+        assertNull( provisioner.getCols() );
+
+        provisioner.setRows( 15 );
+        provisioner.setCols( 12 );
+        assertEquals( 15, provisioner.getRows() );
+        assertEquals( 12, provisioner.getCols() );
+
+        provisioner.setRows( null );
+        provisioner.setCols( null );
+        assertNull( provisioner.getRows() );
+        assertNull( provisioner.getCols() );
+    }
+
+    @Test
     public void testEmptyFile() throws IOException
     {
         Path    testFile    = tempDir.resolve( "test.txt" );

@@ -1,11 +1,19 @@
 package com.acmemail.judah.battleship.ui.text;
 
+import static com.acmemail.judah.battleship.StatusMessages.CONFIG_GRID_END;
+import static com.acmemail.judah.battleship.StatusMessages.CONFIG_GRID_START;
+import static com.acmemail.judah.battleship.StatusMessages.CONFIG_SHIPS_END;
+import static com.acmemail.judah.battleship.StatusMessages.CONFIG_SHIPS_START;
+import static com.acmemail.judah.battleship.StatusMessages.DEPLOYED_HEADER;
+import static com.acmemail.judah.battleship.StatusMessages.HELP_END;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COORDINATES;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_C_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ORIENTATION;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_REC_NUM;
 import static com.acmemail.judah.battleship.StatusMessages.NOT_ALL_DEPLOYED;
+import static com.acmemail.judah.battleship.StatusMessages.TEXT_PROMPT;
+import static com.acmemail.judah.battleship.StatusMessages.TO_DEPLOY_HEADER;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +22,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
@@ -22,7 +31,6 @@ import com.acmemail.judah.battleship.Fleet.Proto;
 import com.acmemail.judah.battleship.Label;
 import com.acmemail.judah.battleship.Provisioner;
 import com.acmemail.judah.battleship.Result;
-import com.acmemail.judah.battleship.TextProvisioner;
 import com.acmemail.judah.battleship.artwork.text.BasicTextGrid;
 import com.acmemail.judah.battleship.model.Grid2D;
 import com.acmemail.judah.battleship.model.GridCoords;
@@ -31,7 +39,7 @@ import com.acmemail.judah.battleship.model.Ship2D;
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.util.LineWrapper;
 
-public class ConfigPhase
+public class ConfigPhase implements TextPhase
 {
     private static final int        lineLen     = 60;
     private static final String[]   graphs      =   { 
@@ -117,7 +125,7 @@ public class ConfigPhase
         + "display the current disposition "
         + "of the to-be-deployed and deployed lists. ",
         
-        "==================================="
+        HELP_END
     };
     private static final List<String>   list    = List.of( graphs );
     
@@ -131,16 +139,18 @@ public class ConfigPhase
     /** Destination for status and error output; defaults to stdout. */
     private final   PrintStream     outStream;
     
-    public ConfigPhase( TextProvisioner provisioner )
+    /**
+     * Constructor.
+     * Creates a new instance
+     * with the given Provisioner, 
+     * and default input, and output streams.
+
+     * @param provisioner   the given Provisioner
+     * 
+     * @see #ConfigPhase(Provisioner, Reader, PrintStream)
+     */
+    public ConfigPhase( Provisioner provisioner )
     {
-//        Objects.requireNonNull( provisioner, "provisioner" );
-//        this.provisioner = provisioner;
-//        textGrid = new BasicTextGrid( Grid2D.getHomeGrid() );
-//        fleet = new Fleet();
-//        provisioner.getToDeploy().forEach( 
-//            t -> fleet.addToBeDeployed( t, null ) 
-//        );
-//        Configurator.nextState();
         this( provisioner, null, null );
     }
 
@@ -148,25 +158,21 @@ public class ConfigPhase
      * Constructor.
      * Allows the operator-input source and the output destination
      * to be supplied by the caller, for example by a test driver.
-     * Any argument may be null,
-     * in which case the corresponding default
-     * ({@code provisioner}: a new TextProvisioner;
-     * {@code reader}: stdin;
-     * {@code outStream}: stdout)
-     * is used instead.
+     * The source and destination may be null,
+     * stdin and stdout will be used.
      *
-     * @param provisioner   TextProvisioner to be used internally; may be null
+     * @param provisioner   Provisioner to be used internally; may not be null
      * @param reader        source of operator input; may be null
      * @param outStream     destination for status and error output; may be null
      */
     public ConfigPhase(
-        TextProvisioner provisioner,
+        Provisioner     provisioner,
         Reader          reader,
         PrintStream     outStream
     )
     {
-        this.provisioner = provisioner != null ?
-            provisioner : TextProvisioner.of();
+        Objects.requireNonNull( provisioner, "provisioner" );
+        this.provisioner = provisioner;
         Reader  actReader   = reader != null ?
             reader : new InputStreamReader( System.in );
         this.consoleReader  = actReader instanceof BufferedReader buffered ?
@@ -192,30 +198,36 @@ public class ConfigPhase
         return quit;
     }
     
+    /**
+     * Returns the encapsulated TextProvisioner.
+     * 
+     * @return  the encapsulated TextProvisioner
+     */
+    public Provisioner getProvisioner()
+    {
+        return provisioner;
+    }
+    
     private void execLoop()
     {
-        final String    prompt  = "Enter a command (? for help): ";
         configComplete = false;
         quit = false;
         really = false;
         while ( !quit && !configComplete )
         {
             showShipTable();
-            printOut( prompt );
+            printOut( TEXT_PROMPT );
             String      command = readLine( consoleReader );
             execCommand( command );
             if ( quit )
             {
                 if ( !really )
-                {
-                    if ( !areYouSure( "Quit" ) )
-                        quit = false;
-                }
+                    quit = areYouSure( "Quit" );
             }
             else if ( configComplete )
             {
-                if ( areYouSure( "Setup complete" ) )
-                    configComplete = true;
+                if ( !really )
+                    configComplete = areYouSure( "Setup complete" );
             }
         }
     }
@@ -324,6 +336,8 @@ public class ConfigPhase
     private void showGrid()
     {
         List<String>    lines   = textGrid.toPrintString();
+        lines.add( 0, CONFIG_GRID_START );
+        lines.add( CONFIG_GRID_END );
         writeOut( lines );
     }
     
@@ -414,8 +428,8 @@ public class ConfigPhase
     private void showDimensions()
     {
         final String    fmt     = "Grid: %d rows, %d columns";
-        int         rows        = provisioner.getRows();
-        int         cols        = provisioner.getCols();
+        Integer     rows        = provisioner.getRows();
+        Integer     cols        = provisioner.getCols();
         String      gridStr     = String.format( fmt, rows, cols );
         writeOut( List.of( gridStr ) );
     }
@@ -424,11 +438,9 @@ public class ConfigPhase
     {
         final String    fmt         = "%-25s %s";
         final String    headingFmt  = "%-25s %s";
-        final String    regHeading  = "To Be Deployed";
-        final String    depHeading  = "Deployed";
         final String    underScore  = "===============";
         final String    heading1    = 
-            String.format( headingFmt, regHeading, depHeading );
+            String.format( headingFmt, TO_DEPLOY_HEADER, DEPLOYED_HEADER );
         final String    heading2    = 
             String.format( headingFmt, underScore, underScore );
         
@@ -438,6 +450,7 @@ public class ConfigPhase
         int                 depCount    = deployed.size();
         int                 numLines    = Math.max( toDepCount, depCount );
         List<String>        lines       = new ArrayList<String>();
+        lines.add( CONFIG_SHIPS_START );
         lines.add( heading1 );
         lines.add( heading2 );
 //        System.out.println( heading1 );
@@ -452,6 +465,7 @@ public class ConfigPhase
                 String.format( fmt, toDepString, depString );
             lines.add( output );
         }
+        lines.add( CONFIG_SHIPS_END );
         lines.add( "" );
         writeOut( lines );
     }

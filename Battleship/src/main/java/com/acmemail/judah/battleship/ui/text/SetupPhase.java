@@ -12,13 +12,15 @@ import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.TextProvisioner;
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.util.LineWrapper;
-import static com.acmemail.judah.battleship.StatusMessages.SETUP_TEXT_PROMPT;
+import static com.acmemail.judah.battleship.StatusMessages.TEXT_PROMPT;
 import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
 import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
 import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
 import static com.acmemail.judah.battleship.StatusMessages.PLAYERS;
+import static com.acmemail.judah.battleship.StatusMessages.TO_REGISTER_HEADER;
+import static com.acmemail.judah.battleship.StatusMessages.TO_DEPLOY_HEADER;
 
-public class SetupPhase
+public class SetupPhase implements TextPhase
 {
     /** Maximum line length for printing help message. */
     private static final int        lineLen     = 60;
@@ -201,7 +203,7 @@ public class SetupPhase
      */
     private void execLoop()
     {
-        final String    prompt  = SETUP_TEXT_PROMPT;
+        final String    prompt  = TEXT_PROMPT;
         setupComplete = false;
         quit = false;
         try
@@ -374,11 +376,9 @@ public class SetupPhase
     {
         final String    fmt         = "%-20s %-20s";
         List<String>    output      = new ArrayList<>();
-        final String    regHeading  = "To Register";
-        final String    depHeading  = "To Deploy";
         final String    underScore  = "===============";
         final String    heading1    = 
-            String.format( fmt, regHeading, depHeading );
+            String.format( fmt, TO_REGISTER_HEADER, TO_DEPLOY_HEADER );
         final String    heading2    = 
             String.format( fmt, underScore, underScore );
         

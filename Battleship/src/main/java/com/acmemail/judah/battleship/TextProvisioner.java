@@ -1,12 +1,9 @@
 package com.acmemail.judah.battleship;
 
-import static com.acmemail.judah.battleship.StatusMessages.DUP_PLAYER;
-import static com.acmemail.judah.battleship.StatusMessages.DUP_SHIP_TYPE;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_BREADTH;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COL_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_LENGTH;
-import static com.acmemail.judah.battleship.StatusMessages.INVALID_NAME;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_P_RECORD;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ROW_COUNT;
@@ -20,7 +17,6 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
@@ -31,11 +27,6 @@ import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import com.acmemail.judah.battleship.model.ShipType2D;
-import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
-import com.acmemail.judah.battleship.model.default_ship_types.Carrier;
-import com.acmemail.judah.battleship.model.default_ship_types.Cruiser;
-import com.acmemail.judah.battleship.model.default_ship_types.Destroyer;
-import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
 
 /**
  * An instance of this class
@@ -152,26 +143,18 @@ public class TextProvisioner implements Provisioner
             .setQuote( '"' )
             .get();
     
-    /** List of ships types to register at the start of the game. */
-    private final List<ShipType2D>  toRegister  = new ArrayList<>();
-    /** List of ships types to deploy at the start of the game. */
-    private final List<ShipType2D>  toDeploy    = new ArrayList<>();
-    /** List of ships types to deploy at the start of the game. */
-    private final List<String>      players     = new ArrayList<>();
-    /** 
-     * List of errors discovered during parsing. 
+    /** Encapsulates all provisioning data accumulated during parsing. */
+    private final BasicProvisioner  delegate    = new BasicProvisioner();
+    /**
+     * List of errors discovered during parsing.
      * @see #resetSuccess()
      */
     private final List<String>      errors      = new ArrayList<>();
-    /** 
-     * The status of the parsing operation. 
+    /**
+     * The status of the parsing operation.
      * @see #resetSuccess()
      */
     private boolean                 success     = true;
-    /** Number of grid rows configured during parsing; null if none. */
-    private Integer                 rows        = null;
-    /** Number of grid columns configured during parsing; null if none. */
-    private Integer                 cols        = null;
     
     /**
      * Default constructor.
@@ -323,22 +306,19 @@ public class TextProvisioner implements Provisioner
     @Override
     public List<ShipType2D> getToRegister()
     {
-        List<ShipType2D>    list    = Collections.unmodifiableList( toRegister );
-        return list;
+        return delegate.getToRegister();
     }
 
     @Override
     public List<ShipType2D> getToDeploy()
     {
-        List<ShipType2D>    list    = Collections.unmodifiableList( toDeploy );
-        return list;
+        return delegate.getToDeploy();
     }
 
     @Override
     public List<String> getPlayers()
     {
-        List<String>    list    = Collections.unmodifiableList( players );
-        return list;
+        return delegate.getPlayers();
     }
 
     /**
@@ -378,13 +358,33 @@ public class TextProvisioner implements Provisioner
     @Override
     public Integer getRows()
     {
-        return rows;
+        return delegate.getRows();
     }
 
     @Override
     public Integer getCols()
     {
-        return cols;
+        return delegate.getCols();
+    }
+
+    /**
+     * Sets the number of grid rows.
+     *
+     * @param rows  the number of grid rows; may be null
+     */
+    public void setRows( Integer rows )
+    {
+        delegate.setRows( rows );
+    }
+
+    /**
+     * Sets the number of grid columns.
+     *
+     * @param cols  the number of grid columns; may be null
+     */
+    public void setCols( Integer cols )
+    {
+        delegate.setCols( cols );
     }
 
     /**
@@ -513,21 +513,21 @@ public class TextProvisioner implements Provisioner
 
             if ( testRows < 1 )
             {
-                String  errMessage  = 
+                String  errMessage  =
                     formatErrorMessage( INVALID_ROW_COUNT, strRows );
                 errStack.push( errMessage );
             }
             else
-                rows = testRows;
-            
+                delegate.setRows( testRows );
+
             if ( testCols < 1 )
             {
-                String  errMessage  = 
+                String  errMessage  =
                     formatErrorMessage( INVALID_COL_COUNT, strCols );
                 errStack.push( errMessage );
             }
             else
-                cols = testCols;
+                delegate.setCols( testCols );
         }
         
         processErrStack( rec, errStack );
@@ -588,15 +588,18 @@ public class TextProvisioner implements Provisioner
             
             if ( errStack.isEmpty() )
             {
-                ShipType2D  shipType    = 
+                ShipType2D  shipType    =
                     new ShipType2D( type, intLength, intBreadth, null );
-                if ( getShipType( shipType ) != null )
-                    errStack.push( 
-                        formatErrorMessage( DUP_SHIP_TYPE, shipType.typeName()
-                        ) 
+                try
+                {
+                    delegate.addToRegister( shipType );
+                }
+                catch ( BattleshipException exc )
+                {
+                    errStack.push(
+                        formatErrorMessage( exc.getMessage(), shipType.typeName() )
                     );
-                else
-                    toRegister.add( shipType );
+                }
             }
         }
         else
@@ -637,22 +640,16 @@ public class TextProvisioner implements Provisioner
         {
             String      strType = rec.get( 1 );
             ShipType2D  type    = getShipType( strType );
-            if ( type == null )
+            if ( type == null || !delegate.removeFromRegister( type ) )
             {
-                String  errMessage  = 
-                    formatErrorMessage( SHIP_TYPE_NOT_FOUND, type );
+                String  errMessage  =
+                    formatErrorMessage( SHIP_TYPE_NOT_FOUND, strType );
                 errStack.push( errMessage );
-            }
-            else
-            {
-                while ( toDeploy.remove( type ) )
-                    ;
-                toRegister.remove( type );
             }
         }
         processErrStack( rec, errStack );
     }
-    
+
     /**
      * Process a CSV record containing an UNDEPLOY command
      * (a command to reverse a previous DEPLOY command;
@@ -679,26 +676,18 @@ public class TextProvisioner implements Provisioner
         {
             String      strType = rec.get( 1 );
             ShipType2D  type    = getShipType( strType );
-            if ( type == null )
+            if ( type == null || !delegate.removeFromDeploy( type ) )
             {
-                String  errMessage  = 
-                    formatErrorMessage( SHIP_TYPE_NOT_FOUND, type );
+                String  errMessage  =
+                    formatErrorMessage( SHIP_TYPE_NOT_FOUND, strType );
                 errStack.push( errMessage );
             }
-            else if ( !toDeploy.contains( type ) )
-            {
-                String  errMessage  = 
-                    formatErrorMessage( SHIP_TYPE_NOT_FOUND, type );
-                errStack.push( errMessage );
-            }
-            else
-                toDeploy.remove( type );
         }
         processErrStack( rec, errStack );
     }
-    
+
     /**
-     * This method simplifies the deeply nested logic in 
+     * This method simplifies the deeply nested logic in
      * {@link #type(CSVRecord)}.
      * It registers every default that is not already registered.
      * If the type is already registered,
@@ -709,24 +698,18 @@ public class TextProvisioner implements Provisioner
      */
     private void registerDefaultTypes( Deque<String> errStack )
     {
-        ShipType2D[]    defaultTypes    =
+        for ( ShipType2D defType : BasicProvisioner.getDefaultTypes() )
         {
-            Battleship.getType(),
-            Carrier.getType(),
-            Cruiser.getType(),
-            Destroyer.getType(),
-            Submarine.getType(),
-        };
-        for ( ShipType2D defType : defaultTypes )
-        {
-            if ( toRegister.contains( defType ) )
+            try
             {
-                String  err = 
-                    formatErrorMessage( DUP_SHIP_TYPE, defType.typeName() );
-                errStack.push( err ); 
+                delegate.addToRegister( defType );
             }
-            else
-                toRegister.add( defType );
+            catch ( BattleshipException exc )
+            {
+                errStack.push(
+                    formatErrorMessage( exc.getMessage(), defType.typeName() )
+                );
+            }
         }
     }
 
@@ -773,7 +756,7 @@ public class TextProvisioner implements Provisioner
                 errStack.push( err );
             }
             else
-                toDeploy.add( type );
+                delegate.addToDeploy( type );
         }
         processErrStack( rec, errStack );
     }
@@ -807,18 +790,14 @@ public class TextProvisioner implements Provisioner
         else
         {
             String      name    = rec.get( 1 );
-            if ( name.isEmpty() )
+            try
             {
-                String  message = formatErrorMessage( INVALID_NAME, name );
-                errStack.push( message );
+                delegate.addPlayer( name );
             }
-            else if ( players.contains( name ) )
+            catch ( BattleshipException exc )
             {
-                String  message = formatErrorMessage( DUP_PLAYER, name );
-                errStack.push( message );
+                errStack.push( formatErrorMessage( exc.getMessage(), name ) );
             }
-            else
-                players.add( name );
         }
         processErrStack( rec, errStack );
     }
@@ -848,7 +827,7 @@ public class TextProvisioner implements Provisioner
         else
         {
             String  player      = rec.get( 1 );
-            if ( !players.remove( player ) )
+            if ( !delegate.removePlayer( player ) )
             {
                 String  errMessage  = 
                     formatErrorMessage( PLAYER_NOT_FOUND, player );
@@ -969,23 +948,6 @@ public class TextProvisioner implements Provisioner
     }
     
     /**
-     * Given a ShipType2D object,
-     * get from the list of ship types to be registered,
-     * the object with the same name 
-     * as the given object.
-     * Null is returned if not found.
-     * 
-     * @param shipType  the given ship type
-     * 
-     * @return  the ShipType2D object, or null if not found
-     */
-    private ShipType2D getShipType( ShipType2D shipType )
-    {
-        ShipType2D  type    = getShipType( shipType.typeName() );
-        return type;
-    }
-    
-    /**
      * Obtain from the list of ship types to  be registered,
      * the object with the given name. 
      * Null is returned if not found.
@@ -996,8 +958,8 @@ public class TextProvisioner implements Provisioner
      */
     private ShipType2D getShipType( String name )
     {
-        ShipType2D  type    = 
-            toRegister.stream()
+        ShipType2D  type    =
+            delegate.getToRegister().stream()
                 .filter( t -> name.equals( t.typeName() ) )
                 .findFirst().orElse( null );
         return type;
