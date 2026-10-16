@@ -5,6 +5,7 @@ import static com.acmemail.judah.battleship.StatusMessages.CONFIG_GRID_START;
 import static com.acmemail.judah.battleship.StatusMessages.CONFIG_SHIPS_END;
 import static com.acmemail.judah.battleship.StatusMessages.CONFIG_SHIPS_START;
 import static com.acmemail.judah.battleship.StatusMessages.DEPLOYED_HEADER;
+import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
 import static com.acmemail.judah.battleship.StatusMessages.HELP_END;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COORDINATES;
@@ -12,6 +13,7 @@ import static com.acmemail.judah.battleship.StatusMessages.INVALID_C_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ORIENTATION;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_REC_NUM;
 import static com.acmemail.judah.battleship.StatusMessages.NOT_ALL_DEPLOYED;
+import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
 import static com.acmemail.judah.battleship.StatusMessages.TEXT_PROMPT;
 import static com.acmemail.judah.battleship.StatusMessages.TO_DEPLOY_HEADER;
 
@@ -208,6 +210,32 @@ public class ConfigPhase implements TextPhase
         return provisioner;
     }
     
+    public List<ShipType2D> getToBeDeployed()
+    {
+        List<Proto>         toDeployProtos  = fleet.getToBeDeployedProtos();
+        List<ShipType2D>    toDeploy        = 
+            toDeployProtos.stream()
+                .map( p -> p.getType() )
+                .toList();
+        return toDeploy;
+    }
+    
+    public List<ShipType2D> getDeployedTypes()
+    {
+        List<Proto>         deployedProtos  = fleet.getAllDeployedProtos();
+        List<ShipType2D>    deployed        = 
+            deployedProtos.stream()
+                .map( p -> p.getType() )
+                .toList();
+        return deployed;
+    }
+    
+    public List<Ship2D> getDeployedShips()
+    {
+        List<Ship2D>    deployed        = fleet.getAllDeployedShips();
+        return deployed;
+    }
+    
     private void execLoop()
     {
         configComplete = false;
@@ -234,7 +262,7 @@ public class ConfigPhase implements TextPhase
     
     private void execCommand( String command )
     {
-        String[]    args        = command.split( "," );
+        String[]    args        = split( command );
         String      workCommand = args.length == 0 ? 
             "" : args[0].trim().toUpperCase();
         Result      result      = new Result();
@@ -254,7 +282,7 @@ public class ConfigPhase implements TextPhase
         default -> result.addMessage( INVALID_C_COMMAND, false );
         }
         printOut( workCommand + ": " );
-        String          status  = result.getStatus() ? "success" : "failure";
+        String          status  = result.getStatus() ? SUCCESS : FAILURE;
         List<String>    errors  = result.getMessages();
         writeOut( status );
         List<String>    errLines    = 
@@ -265,22 +293,22 @@ public class ConfigPhase implements TextPhase
     private void deploy( String command, Result result )
     {
         // deploy,num,coords,orientation[,remark]
-        String[]            args        = command.split( ",", 5 );
+        String[]            args        = split( command );
         int                 recNum      = 0;
         int                 argCount    = args.length;
         List<Proto>         toDeploy    = fleet.getToBeDeployedProtos();
         GridCoords          coords      = null;
         Orientation         orient      = null;
-        if ( argCount < 3 )
+        if ( argCount != 4 )
             result.addMessage( INVALID_ARG_COUNT, false );
         else if ( (recNum = getRecNum( args[1] )) == 0 )
-            result.addMessage( INVALID_REC_NUM );
+            result.addMessage( INVALID_REC_NUM, false );
         else if ( recNum > toDeploy.size() )
-            result.addMessage( INVALID_REC_NUM );
+            result.addMessage( INVALID_REC_NUM, false );
         else if ( (coords = getGridCoords( args[2] ) ) == null )
-            result.addMessage( INVALID_COORDINATES );
+            result.addMessage( INVALID_COORDINATES, false );
         else if ( (orient = getOrientation( args[3])) == null )
-            result.addMessage( INVALID_ORIENTATION );
+            result.addMessage( INVALID_ORIENTATION, false );
         else
         {
             Proto       proto       = toDeploy.get( recNum - 1 );
@@ -311,7 +339,7 @@ public class ConfigPhase implements TextPhase
     private void undeploy( String command, Result result )
     {
         // undeploy,num
-        String[]            args        = command.split( ",", 5 );
+        String[]            args        = split( command );
         int                 recNum      = 0;
         int                 argCount    = args.length;
         List<Proto>         deploy      = fleet.getAllDeployedProtos();
@@ -339,6 +367,25 @@ public class ConfigPhase implements TextPhase
         lines.add( 0, CONFIG_GRID_START );
         lines.add( CONFIG_GRID_END );
         writeOut( lines );
+    }
+    
+    /**
+     * Splits a string into tokens,
+     * using "," as a delimiter 
+     * and ignoring spaces.
+     * The following strings all split into: {@code [a,b]}
+     * <ul>
+     *      <li>{@code "a,b"}</li>
+     *      <li>{@code "a , b"}</li>
+     *      <li>{@code "   a   ,   b   "}</li>
+     * </ul>
+     * @param toSplit
+     * @return
+     */
+    private String[] split( String toSplit )
+    {
+        String[]    tokens  = toSplit.split( "\\s*,\\s*");
+        return tokens;
     }
     
     private static String readLine( BufferedReader reader )
@@ -453,8 +500,6 @@ public class ConfigPhase implements TextPhase
         lines.add( CONFIG_SHIPS_START );
         lines.add( heading1 );
         lines.add( heading2 );
-//        System.out.println( heading1 );
-//        System.out.println( heading2 );
         for ( int inx = 0 ; inx < numLines ; ++inx )
         {
             String  toDepString = inx < toDepCount ?
@@ -472,7 +517,7 @@ public class ConfigPhase implements TextPhase
     
     private String getToDeployStr( int inx, Proto proto )
     {
-        final String fmt    = "%3d. %s, %dX%d";
+        final String fmt    = "%3d. %s %dX%d";
         ShipType2D  type        = proto.getType();
         String      name        = type.typeName();
         int         length      = type.length();
@@ -483,7 +528,7 @@ public class ConfigPhase implements TextPhase
     
     private String getDeployedStr( int inx, Proto proto )
     {
-        final String fmt    = "%3d. %s, %dX%d, %s %s";
+        final String fmt    = "%3d. %s %dX%d %s %s";
         ShipType2D  type        = proto.getType();
         String      name        = type.typeName();
         int         length      = type.length();

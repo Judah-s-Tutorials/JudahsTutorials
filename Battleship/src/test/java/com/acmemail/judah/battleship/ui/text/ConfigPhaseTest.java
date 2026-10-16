@@ -3,6 +3,13 @@ package com.acmemail.judah.battleship.ui.text;
 import static com.acmemail.judah.battleship.StatusMessages.CONFIG_SHIPS_END;
 import static com.acmemail.judah.battleship.StatusMessages.CONFIG_SHIPS_START;
 import static com.acmemail.judah.battleship.StatusMessages.DEPLOYED_HEADER;
+import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
+import static com.acmemail.judah.battleship.StatusMessages.INTERSECTS_SHIP;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_COORDINATES;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_ORIENTATION;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_REC_NUM;
+import static com.acmemail.judah.battleship.StatusMessages.OUT_OF_BOUNDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -30,7 +37,6 @@ import com.acmemail.judah.battleship.model.default_ship_types.Carrier;
 import com.acmemail.judah.battleship.model.default_ship_types.Cruiser;
 import com.acmemail.judah.battleship.model.default_ship_types.Destroyer;
 import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 
 public class ConfigPhaseTest
 {
@@ -142,22 +148,318 @@ public class ConfigPhaseTest
     @Test
     public void testShipListsRightShorter()
     {
+        // 1. Provisioner should have a least 5 ships to deploy
+        //    so when we deploy 2 the list of ships to deploy will
+        //    be longer than the deployed list.
+        // 2. The to-deploy list should contain no dupes, so that
+        //    we can verify that the 2 deployed ships have been
+        //    removed from the to-deploy list.
         assertTrue( defProvisioner.getToDeploy().size() > 4 );
         List<String>    commands    = 
             List.of( 
-                "deploy,1,A1,Horizontal",
-                "deploy,1,A2,Horizontal",
-                "update", 
+                "deploy,1,A1,Horizontal", // for result, see buckets[0]
+                "deploy,1,B1,Horizontal", // for result, see buckets[1]
+                "update",  // for result, see buckets[2]
                 "q!"
             );
         RoundTripResult     result      = execRoundTrip( commands );
         List<String>        feedback    = result.feedback();
-        UpdateParser        parser      = new UpdateParser( feedback );
+        RoundTripParser     rtParser    = new RoundTripParser( feedback );
+        List<CommandBucket> buckets     = rtParser.buckets;
+        // sanity check:
+        assertEquals( commands.size(), buckets.size() );
+        
+        List<String>        updFeedback = buckets.get( 2 ).output();
+        UpdateParser        parser      = new UpdateParser( updFeedback );
         List<String>        toDeploy    = parser.getToDeploy();
         List<String>        deployed    = parser.getDeployed();
+        
+        int                 origSize        = allDefaultTypeNames.size();
+        int                 toDeploySize    = toDeploy.size();
+        int                 deployedSize    = deployed.size();
+        assertEquals( 2, deployedSize );
+        assertEquals( origSize - 2, toDeploySize );
+        assertEquals( allDefaultTypeNames.size() - 2, toDeploySize );
+        deployed.forEach( s -> assertFalse( isShipInList( s, toDeploy ) ) );
+    }
+    
+    @Test
+    public void testShipListsLeftShorter()
+    {
+        // 1. Provisioner should have a least 3 ships to deploy
+        //    so when we deploy toDeploy().size() - 1 ships
+        //    the list of ships to deploy will have one element
+        //    and the list of ships to deploy will have more
+        //    than one element.
+        // 2. The number of ships to deploy must be less than the
+        //    number of rows in the grid in order for the deploy
+        //    algorithm to work.
+        // 3. The to-deploy list should contain no dupes, so that
+        //    we can verify that the deployed ships have been
+        //    removed from the to-deploy list.
+        List<ShipType2D>    orig        = defProvisioner.getToDeploy();
+        int                 origSize    = orig.size();
+        assertTrue( origSize > 2 );
+        
+        // Deploy all the ships except one.
+        List<String>    commands    = new ArrayList<>();
+        IntStream.range( 0, origSize - 1 )
+            .map( i -> 'A' + i )
+            .mapToObj( i -> (char)i + "1" )
+            .map( s -> "deploy,1," + s + ",Horizontal" )
+            .forEach( commands::add );
+        int             updateInx   = commands.size();
+        commands.add( "update" );
+        commands.add( "q!" );
+
+        RoundTripResult     result      = execRoundTrip( commands );
+        List<String>        feedback    = result.feedback();
+        RoundTripParser     rtParser    = new RoundTripParser( feedback );
+        List<CommandBucket> buckets     = rtParser.buckets;
+        // sanity check:
+        assertEquals( commands.size(), buckets.size() );
+        
+        List<String>        updFeedback = buckets.get( updateInx ).output();
+        UpdateParser        parser      = new UpdateParser( updFeedback );
+        List<String>        toDeploy    = parser.getToDeploy();
+        List<String>        deployed    = parser.getDeployed();
+        
+        int                 toDeploySize    = toDeploy.size();
+        int                 deployedSize    = deployed.size();
+        assertEquals( 1, toDeploySize );
+        assertEquals( origSize - 1, deployedSize );
+        assertFalse( isShipInList( toDeploy.getFirst(), deployed ) );
+    }
+    
+    @Test
+    public void testShipListsLeftEmpty()
+    {
+        List<String>    origNames       = 
+            defProvisioner.getToDeploy().stream()
+                .map( t -> t.typeName() )
+                .toList();
+        int                 origSize    = origNames.size();
+        
+        // Deploy all the ships.
+        List<String>    commands    = new ArrayList<>();
+        IntStream.range( 0, origSize )
+            .map( i -> 'A' + i )
+            .mapToObj( i -> (char)i + "1" )
+            .map( s -> "deploy,1," + s + ",Horizontal" )
+            .forEach( commands::add );
+        int             updateInx   = commands.size();
+        commands.add( "update" );
+        commands.add( "q!" );
+
+        RoundTripResult     result      = execRoundTrip( commands );
+        List<String>        feedback    = result.feedback();
+        RoundTripParser     rtParser    = new RoundTripParser( feedback );
+        List<CommandBucket> buckets     = rtParser.buckets;
+        // sanity check:
+        assertEquals( commands.size(), buckets.size() );
+        
+        List<String>        updFeedback = buckets.get( updateInx ).output();
+        UpdateParser        parser      = new UpdateParser( updFeedback );
+        List<String>        toDeploy    = parser.getToDeploy();
+        List<String>        deployed    = parser.getDeployed();
+        
+        int                 toDeploySize    = toDeploy.size();
+        int                 deployedSize    = deployed.size();
+        assertEquals( 0, toDeploySize );
+        assertEquals( origSize, deployedSize );
+        origNames.forEach( s -> assertTrue( contains( deployed, s ) ) );
+    }
+    
+    @Test
+    public void testDeployGoRight()
+    {
+        List<ShipType2D>    origToDeploy    = 
+            new ArrayList<>( defProvisioner.getToDeploy() );
+        // 1. Provisioner must have a least 3 ships to deploy
+        //    so when we can deploy two and still have ships
+        //    that haven't been deployed.
+        // 2. The to-deploy list must contain no dupes, so that
+        //    we can verify that the deployed ships have been
+        //    removed from the to-deploy list.
+        assertTrue( origToDeploy.size() > 2 );
+        
+        List<String>        commands        =
+            List.of( 
+                "deploy,1,A1,Horizontal", // for result, see buckets[0]
+                "deploy,1,B1,Horizontal", // for result, see buckets[1]
+                "q!"
+            );
+        RoundTripResult     result      = execRoundTrip( commands );
+        List<String>        feedback    = result.feedback();
+        RoundTripParser     rtParser    = new RoundTripParser( feedback );
+        assertFalse( contains( rtParser.feedback, FAILURE ) );
+        TextPhase           phase       = result.phase();
+        assertTrue( phase instanceof ConfigPhase );
+        
+        ConfigPhase         configPhase = (ConfigPhase)phase;
+        List<ShipType2D>    toDeploy    = configPhase.getToBeDeployed();
+        List<ShipType2D>    deployed    = configPhase.getDeployedTypes();
+        IntStream.range( 0, 2 )
+            .mapToObj( origToDeploy::get )
+            .forEach( t -> {
+                assertFalse( toDeploy.contains( t ) );
+                assertTrue( deployed.contains( t ) );
+            });
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= {"deploy,1,A1,H,extra", "deploy,1,A1"} )
+    public void testDeployGoWrongArgCount( String command )
+    {
+        List<String>    commands    = List.of( command, "q!" );
+        RoundTripResult result      = execRoundTrip( commands );
+        List<String>    feedback    = result.feedback();
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, INVALID_ARG_COUNT ) );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= 
+        {"deploy,0,A1,H", "deploy,100,A1,H", "deploy,a,A1,H", } )
+    public void testDeployGoWrongRecNum( String command )
+    {
+        List<String>    commands    = List.of( command, "q!" );
+        RoundTripResult result      = execRoundTrip( commands );
+        List<String>    feedback    = result.feedback();
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, INVALID_REC_NUM ) );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= 
+        {"deploy,1,AA,H", "deploy,1,11,H", "deploy,1,1A,H" } )
+    public void testDeployGoWrongCoords( String command )
+    {
+        List<String>    commands    = List.of( command, "q!" );
+        RoundTripResult result      = execRoundTrip( commands );
+        List<String>    feedback    = result.feedback();
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, INVALID_COORDINATES ) );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= 
+        {"deploy,1,A1,q", "deploy,1,A1,0" } )
+    public void testDeployGoWrongOrientation( String command )
+    {
+        List<String>    commands    = List.of( command, "q!" );
+        RoundTripResult result      = execRoundTrip( commands );
+        List<String>    feedback    = result.feedback();
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, INVALID_ORIENTATION ) );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= 
+        {"deploy,1,Z1,V", "deploy,1,A100,H" } )
+    public void testDeployGoWrongOOB( String command )
+    {
+        List<String>    commands    = List.of( command, "q!" );
+        RoundTripResult result      = execRoundTrip( commands );
+        List<String>    feedback    = result.feedback();
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, OUT_OF_BOUNDS ) );
+    }
+    
+    @Test
+    public void testDeployGoWrongOverLapping()
+    {
+        List<String>    commands    = 
+            List.of( 
+                "deploy,1,A1,H",
+                "deploy,1,A1,V",
+                "q!"
+        );
+        RoundTripResult result      = execRoundTrip( commands );
+        List<String>    feedback    = result.feedback();
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, INTERSECTS_SHIP ) );
+    }
+    
+    @Test
+    public void testUnDeployGoRight()
+    {
+        List<ShipType2D>    origToDeploy    = 
+            new ArrayList<>( defProvisioner.getToDeploy() );
+        int                 origSize        = origToDeploy.size();
+        
+        List<String>        commands    = new ArrayList<>();
+        // Deploy all ships
+        IntStream.range( 0, origSize )
+            .map( i -> 'A' + i )
+            .mapToObj( i -> (char)i + "1" )
+            .map( s -> "deploy,1," + s + ",Horizontal" )
+            .forEach( commands::add );
+        // Undeploy all ships
+        IntStream.range( 0, origSize )
+            .map( i -> 'A' + i )
+            .mapToObj( i -> (char)i + "1" )
+            .map( s -> "undeploy,1" )
+            .forEach( commands::add );
+        commands.add( "q!" );            
+            
+        RoundTripResult     result      = execRoundTrip( commands );
+        List<String>        rawFeedback = result.feedback();
+        RoundTripParser     rtParser    = new RoundTripParser( rawFeedback );
+        List<String>        feedback    = rtParser.feedback;
+        assertFalse( contains( feedback, FAILURE ) );
+        TextPhase           phase       = result.phase();
+        assertTrue( phase instanceof ConfigPhase );
+        
+        ConfigPhase         configPhase = (ConfigPhase)phase;
+        List<ShipType2D>    toDeploy    = configPhase.getToBeDeployed();
+        List<ShipType2D>    deployed    = configPhase.getDeployedTypes();
+        assertEquals( toDeploy.size(), origSize );
         assertTrue( deployed.isEmpty() );
-        assertEquals( allDefaultTypeNames.size(), toDeploy.size() );
-        assertTrue( containsAll( allDefaultTypeNames, toDeploy ) );
+    }
+    
+    @Test
+    public void testWhitespace()
+    {
+        List<String>    commands    =
+            List.of(
+                " deploy , 1 , A1 , Horizontal ",
+                " undeploy , 1 ",
+                " update ",
+                " help ",
+                " q! "
+            );
+        RoundTripResult     result      = execRoundTrip( commands );
+        List<String>        rawFeedback = result.feedback();
+        assertFalse( contains( rawFeedback, FAILURE ) );
+    }
+
+    /**
+     * Determine whether the ship specified on the given line is present
+     * on one of the lines in the given list.
+     * We don't know the exact format of the lines,
+     * but we assume the ship is named
+     * in a line's first token
+     * 
+     * @param shipLine  the given line
+     * @param list      the given list of lines
+     * 
+     * @return  
+     *      true if the ship identified on shipLine is present
+     *      on a line in list
+     */
+    private static boolean isShipInList( String shipLine, List<String> list )
+    {
+        // shipLine should be congruent to:
+        //     1. Battleship 3x1 A1 horizontal
+        // so ship name will be tokens[1]
+        String[]    tokens  = shipLine.split( "\\s+" );
+        String      ship    = tokens[1];
+        boolean     result  =
+            list.stream()
+                .filter( s -> s.contains( ship ) )
+                .findAny().isPresent();
+        return result;
     }
     
     private static Provisioner getDefaultProvisioner()

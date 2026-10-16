@@ -1,5 +1,14 @@
 package com.acmemail.judah.battleship.ui.text;
 
+import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
+import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
+import static com.acmemail.judah.battleship.StatusMessages.HELP_END;
+import static com.acmemail.judah.battleship.StatusMessages.PLAYERS;
+import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
+import static com.acmemail.judah.battleship.StatusMessages.TEXT_PROMPT;
+import static com.acmemail.judah.battleship.StatusMessages.TO_DEPLOY_HEADER;
+import static com.acmemail.judah.battleship.StatusMessages.TO_REGISTER_HEADER;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,13 +21,6 @@ import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.TextProvisioner;
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.util.LineWrapper;
-import static com.acmemail.judah.battleship.StatusMessages.TEXT_PROMPT;
-import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
-import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
-import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
-import static com.acmemail.judah.battleship.StatusMessages.PLAYERS;
-import static com.acmemail.judah.battleship.StatusMessages.TO_REGISTER_HEADER;
-import static com.acmemail.judah.battleship.StatusMessages.TO_DEPLOY_HEADER;
 
 public class SetupPhase implements TextPhase
 {
@@ -96,7 +98,8 @@ public class SetupPhase implements TextPhase
         "\t-- u, update: display the updated configuration",
         "\t-- done: mark setup complete",
         "\t-- q, quit: exit from this application",
-        "==================================="
+        
+        HELP_END
     };
     /** List of paragraphs in help message; to be formatted for printing. */
     private static final List<String>   list    = List.of( graphs );
