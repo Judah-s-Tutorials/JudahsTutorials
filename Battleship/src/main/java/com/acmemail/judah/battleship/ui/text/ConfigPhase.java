@@ -43,8 +43,10 @@ import com.acmemail.judah.battleship.util.LineWrapper;
 
 public class ConfigPhase implements TextPhase
 {
+    /** The maximum length of a line when formatting the help message. */
     private static final int        lineLen     = 60;
-    private static final String[]   graphs      =   { 
+    /** Paragraphs in the help message. */
+    private static final String[]   helpGraphs  =   { 
         "This is the game's configuration phase. "
         + "In this phase you configure and deploy your fleet, "
         + "specifying the home square "
@@ -129,14 +131,22 @@ public class ConfigPhase implements TextPhase
         
         HELP_END
     };
-    private static final List<String>   list    = List.of( graphs );
+    /** List of lines in help message. */
+    private static final List<String>   list    = List.of( helpGraphs );
     
+    /** Source of the provisioning data. */
     private final   Provisioner     provisioner;
+    /** Collection of ships after deployment. */
     private final   Fleet           fleet;
+    /** Text-based grid showing ship deployment. */
     private final   BasicTextGrid   textGrid;
+    /** True if configuration is complete; see {@link #execLoop()}. */
     private boolean configComplete;
+    /** True if the configuration process is to be abandoned. */
     private boolean quit;
+    /** If true, skips the "are you sure" prompt when terminating. */
     private boolean really;
+    /** Source for command input; defaults to stdin. */
     private final BufferedReader  consoleReader;
     /** Destination for status and error output; defaults to stdout. */
     private final   PrintStream     outStream;
@@ -145,9 +155,9 @@ public class ConfigPhase implements TextPhase
      * Constructor.
      * Creates a new instance
      * with the given Provisioner, 
-     * and default input, and output streams.
+     * and default input and output streams.
 
-     * @param provisioner   the given Provisioner
+     * @param provisioner   the given Provisioner; may not be null.
      * 
      * @see #ConfigPhase(Provisioner, Reader, PrintStream)
      */
@@ -189,12 +199,19 @@ public class ConfigPhase implements TextPhase
         Configurator.nextState();
     }
 
+    /**
+     * Public entry for starting the command processing loop.
+     */
     public void exec()
     {
         showHelp();
         execLoop();
     }
     
+    /**
+     * Returns true if the process has been abandoned
+     * because a quit command was encountered.
+     */
     public boolean isQuit()
     {
         return quit;
@@ -210,6 +227,12 @@ public class ConfigPhase implements TextPhase
         return provisioner;
     }
     
+    /**
+     * Returns a list of ship types that must be deployed,
+     * but haven't been deployed yet.
+     * 
+     * @return  a list of ship types that must be deployed
+     */
     public List<ShipType2D> getToBeDeployed()
     {
         List<Proto>         toDeployProtos  = fleet.getToBeDeployedProtos();
@@ -220,6 +243,11 @@ public class ConfigPhase implements TextPhase
         return toDeploy;
     }
     
+    /**
+     * Returns a list of ship types that have been deployed.
+     * 
+     * @return  a list of ship types that have been deployed
+     */
     public List<ShipType2D> getDeployedTypes()
     {
         List<Proto>         deployedProtos  = fleet.getAllDeployedProtos();
@@ -230,12 +258,30 @@ public class ConfigPhase implements TextPhase
         return deployed;
     }
     
+    /**
+     * Returns a list of ship types that have been deployed.
+     * 
+     * @return  a list of ships that have been deployed
+     */
     public List<Ship2D> getDeployedShips()
     {
         List<Ship2D>    deployed        = fleet.getAllDeployedShips();
         return deployed;
     }
     
+    /**
+     * Execute the command processing loop.
+     * At the start of each loop execution,
+     * the updated list of ship types to be deployed
+     * and ship types that have been deployed
+     * is displayed.
+     * A prompt is displayed, 
+     * and a command is read from the console reader
+     * and forwarded to {@link #execCommand(String)} for processing.
+     * The loop terminates
+     * when the process is quit,
+     * or declared complete.
+     */
     private void execLoop()
     {
         configComplete = false;
@@ -260,6 +306,16 @@ public class ConfigPhase implements TextPhase
         }
     }
     
+    /**
+     * Execute a command;
+     * identification of the command is case-insensitive.
+     * After execution,
+     * the outcome is printed to {@code outstream},
+     * including error messages collected
+     * during command processing.
+     * 
+     * @param command   the command to execute
+     */
     private void execCommand( String command )
     {
         String[]    args        = split( command );
@@ -299,7 +355,7 @@ public class ConfigPhase implements TextPhase
         List<Proto>         toDeploy    = fleet.getToBeDeployedProtos();
         GridCoords          coords      = null;
         Orientation         orient      = null;
-        if ( argCount != 4 )
+        if ( argCount != 4 || argCount > 5 )
             result.addMessage( INVALID_ARG_COUNT, false );
         else if ( (recNum = getRecNum( args[1] )) == 0 )
             result.addMessage( INVALID_REC_NUM, false );

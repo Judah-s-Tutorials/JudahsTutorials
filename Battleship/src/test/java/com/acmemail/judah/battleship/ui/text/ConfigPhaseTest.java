@@ -7,6 +7,7 @@ import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
 import static com.acmemail.judah.battleship.StatusMessages.INTERSECTS_SHIP;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COORDINATES;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_C_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ORIENTATION;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_REC_NUM;
 import static com.acmemail.judah.battleship.StatusMessages.OUT_OF_BOUNDS;
@@ -419,6 +420,18 @@ public class ConfigPhaseTest
     }
     
     @Test
+    public void testInvalidCommand()
+    {
+        String          invalidCmd      = "invalidCommand";
+        List<String>    commands        = List.of( invalidCmd, "q!" );
+        RoundTripResult result          = execRoundTrip( commands );
+        List<String>    feedback        = result.feedback();
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, INVALID_C_COMMAND ) );
+        assertTrue( containsIC( feedback, invalidCmd ) );
+    }
+    
+    @Test
     public void testWhitespace()
     {
         List<String>    commands    =
@@ -487,6 +500,19 @@ public class ConfigPhaseTest
         return containsAll;
     }
     
+    private static boolean containsIC( 
+        Collection<String> source, 
+        String target
+    )
+    {
+        List<String>    sourceUC    =
+            source.stream()
+            .map( String::toUpperCase )
+            .toList();
+        String          targetUC    = target.toUpperCase();
+        boolean         contains    = contains( sourceUC, targetUC );
+        return contains;
+    }
     private static boolean contains( Collection<String> source, String target )
     {
         boolean contains    =

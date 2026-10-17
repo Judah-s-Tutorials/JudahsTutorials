@@ -63,7 +63,7 @@ public class TextGridParser
     {
         Predicate<String>   isColumnHeader  = s -> s.matches( ".*\\d+.*" );
         Predicate<String>   isLabeledRow    = 
-            s -> s.matches( "^\\s*[A-Z]+" );
+            s -> s.matches( "^\\s*[A-Z]+.*" );
         
         input = lines;
         int     inputSize       = input.size();
@@ -84,7 +84,7 @@ public class TextGridParser
         int     endColHeader    =
             IntStream.range( beginColHeader, inputSize )
             .filter( i -> !isColumnHeader.test( input.get( i ) ) )
-            .findFirst().orElse( -1 );
+            .findFirst().orElse( 0 );
         
         columnHeader = endColHeader > beginColHeader ?
             input.subList( beginColHeader, endColHeader ) : 
@@ -94,11 +94,12 @@ public class TextGridParser
             input.subList( beginGrid, endGrid ) : 
             Collections.emptyList();
         
-        labeledRows = 
+        labeledRows = endGrid > endColHeader ?
             IntStream.range( endColHeader, endGrid )
                 .mapToObj( input::get )
                 .filter( isLabeledRow::test )
-                .toList();
+                .toList()
+            : Collections.emptyList();
 
         name = beginColHeader > 0 ? input.get( beginColHeader - 1 ) : "";
     }
