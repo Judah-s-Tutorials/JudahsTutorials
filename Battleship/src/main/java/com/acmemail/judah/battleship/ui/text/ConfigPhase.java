@@ -41,6 +41,95 @@ import com.acmemail.judah.battleship.model.Ship2D;
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.util.LineWrapper;
 
+/**
+ * This class reads and executes text commands from an input stream,
+ * typically the operator console (stdin).
+ * Status, error messages, and command output are written to an output stream,
+ * typically the operator console (stdout).
+ * The main purpose of these commands
+ * is to move ships from a to-be-deployed state
+ * to a deployed state.
+ * There are two commands that do this:
+ * <ol>
+ *      <li>
+ *          <code>deploy,seq#,coords,orientation</code><br>
+ *          This command moves a ship from the to-be-deployed list
+ *          to the deployed list.
+ *          The arguments are:
+ *          <ul>    
+ *              <li>
+ *                  <code>seq#</code>: 
+ *                  The sequence number of a ship in the to-be-deployed list
+ *              </li>
+ *              <li>
+ *                  <code>coords</code>: 
+ *                  The coordinates at which the ship is to be deployed.
+ *              </li>
+ *              <li>
+ *                  <code>orientation</code>: 
+ *                  The orientation of the ship when deployed,
+ *                  horizontal or vertical.
+ *              </li>
+ *          </ul>
+ *      <p>
+ *          Example:<br>
+ *          <code>&nbsp;&nbsp;&nbsp;&nbsp;deploy,1,A!,vertical</code>
+ *      </li>
+ *      <li>
+ *          <code>undeploy,seq#</code><br>
+ *          This command reverses a prior {@code deploy} command;
+ *          <em>seq#</em> is the sequence number of the target ship
+ *          in the deployed list.
+ *          Example:<br>
+ *          <code>&nbsp;&nbsp;&nbsp;&nbsp;undeploy,1</code>
+ *      </li>
+ * </ol>
+ * <p>
+ * Additional commands related housekeeping are:
+ * <ol>
+ *      <li>
+ *          <code>?,h,help</code>: show the help message.
+ *      </li>
+ *      <li>
+ *          <code>show,show-grid</code>: 
+ *          Display a textual representation of the grid
+ *          as it is currently configured.
+ *      </li>
+ *      <li>
+ *          <code>upd,update</code>: 
+ *          Display a table describing the status
+ *          of all ships to be deployed,
+ *          and all the have been deployed.
+ *      </li>
+ *      <li>
+ *          <code>q,quit</code>: 
+ *          Exit from the configuration process
+ *          discarding all data.
+ *          The operator is prompted with an
+ *          "are you sure" message.
+ *      </li>
+ *      <li>
+ *          <code>q!,quit!</code>: 
+ *          Same as <code>quit</code>,
+ *          but skips the "are you sure" step.
+ *      </li>
+ *      <li>
+ *          <code>done</done>:
+ *          Mark the configuration process complete,
+ *          and go on to the next phase of the game.
+ *          This command is invalid
+ *          unless all the ships in the to-be-deployed list
+ *          have been deployed.
+ *          The operator is prompted with an
+ *          "are you sure" message.
+ *      </li>
+ *      <li>
+ *          <code>done!</code>: 
+ *          Same as <code>done</code>,
+ *          but skips the "are you sure" step.
+ *      </li>
+ * </ol>
+ */
 public class ConfigPhase implements TextPhase
 {
     /** The maximum length of a line when formatting the help message. */
@@ -346,6 +435,28 @@ public class ConfigPhase implements TextPhase
         writeOut( errLines );
     }
     
+    /**
+     * Validate and execute a {@code deploy} command.
+     * Including the command,
+     * the client passes four arguments.
+     * The second argument is the sequence number
+     * of a ship type in the to-be-deployed list.
+     * The third is coordinates at which
+     * the ship is to be deployed;
+     * when deployed at the given coordinates
+     * the ship must not fall outside the bounds
+     * of the physical grid,
+     * or intersect a previously deployed ship.
+     * The fourth is the orientation of the deployed ship,
+     * which may be any token beginning with 'v' (for vertical)
+     * or 'h' (for horizontal).
+     * The status of command execution,
+     * and a list of error messages (if any)
+     * are via the given result container.
+     * 
+     * @param command   the command arguments
+     * @param result    the given result container
+     */
     private void deploy( String command, Result result )
     {
         // deploy,num,coords,orientation[,remark]
@@ -379,9 +490,25 @@ public class ConfigPhase implements TextPhase
         }
     }
     
+    /**
+     * Validates and executes the {@code done} command.
+     * Issuing this command is invalid unless all the ships
+     * in the to-be-deployed list are deployed. 
+     * The status of command execution,
+     * and a list of error messages (if any)
+     * are via the given result container.
+     * If the command is valid
+     * the {@code configComplete} flag is set to true,
+     * the {@code really} flag is set
+     * to the given value,
+     * otherwise they are ignored.
+     * 
+     * @param command   the command
+     * @param result    a container for storing the result
+     * @param really    the given value for the {@code really} flag
+     */
     private void done( String command, Result result, boolean really )
     {
-        // deploy,num,coords,orientation[,remark]
         List<Proto>         toDeploy    = fleet.getToBeDeployedProtos();
         if ( toDeploy.size() != 0  )
             result.addMessage( NOT_ALL_DEPLOYED, false );
@@ -392,6 +519,15 @@ public class ConfigPhase implements TextPhase
         }
     }
     
+    /**
+     * Reverse a previous {@code deploy} action.
+     * The client passes as the command's second argument
+     * the sequence number of the ship to undeploy
+     * in the deployed list.
+     * 
+     * @param command   the command and its arguments
+     * @param result    container to hold the status of command execution
+     */
     private void undeploy( String command, Result result )
     {
         // undeploy,num
@@ -417,6 +553,10 @@ public class ConfigPhase implements TextPhase
         }
     }
 
+    /**
+     * Display a textual version of the physical grid
+     * showing its current configuration.
+     */
     private void showGrid()
     {
         List<String>    lines   = textGrid.toPrintString();
@@ -435,8 +575,9 @@ public class ConfigPhase implements TextPhase
      *      <li>{@code "a , b"}</li>
      *      <li>{@code "   a   ,   b   "}</li>
      * </ul>
-     * @param toSplit
-     * @return
+     * @param toSplit   the string to be split
+     * 
+     * @return  the array of strings resulting from the split
      */
     private String[] split( String toSplit )
     {
@@ -444,21 +585,17 @@ public class ConfigPhase implements TextPhase
         return tokens;
     }
     
-    private static String readLine( BufferedReader reader )
-    {
-        String  line;
-        try
-        {
-            line = reader.readLine().trim();
-        }
-        catch ( IOException exc )
-        {
-            String  msg = "Unexpected error reading from console";
-            throw new BattleshipException( msg, exc);
-        }
-        return line;
-    }
-    
+    /**
+     * Ask if the operator is sure that a command is to be executed.
+     * Usually applies to {@code done} or {@code quit}.
+     * The caller passes a brief prompt that identifies
+     * the command in question.
+     * The operator can reply with any token beginning with y or n.
+     * 
+     * @param prompt    prompt that identifies the command in question
+     * 
+     * @return  true if the operator approves the operation
+     */
     private boolean areYouSure( String prompt )
     {
         final String    areYouSure  = "are you sure? (y/n) ";
@@ -470,10 +607,29 @@ public class ConfigPhase implements TextPhase
         return result;
     }
     
+    /**
+     * "No-operation,"
+     * a method that does not,
+     * but can be convenient for use in lambdas.
+     */
     private void noop()
     {
     }
     
+    /**
+     * Validates and interprets an argument that identifies
+     * the orientation  of a deployed ship.
+     * Blank/empty strings are invalid.
+     * Any string that begins with 'h' or 'v' is acceptable.
+     * Returns null if the string cannot be validated.
+     * 
+     * @param strOrientation    the string to interpret
+     * 
+     * @return  
+     *      HORIZONTAL if strOrientation begins with 'h,'
+     *      VERTICAL if it begins with 'v,'
+     *      null for anything else.
+     */
     private Orientation getOrientation( String strOrientation )
     {
         Orientation orientation = null;
@@ -493,6 +649,19 @@ public class ConfigPhase implements TextPhase
         return orientation;
     }
     
+    /**
+     * Translates a given string representing a coordinate label,
+     * for example, "A1," "C4,"
+     * into a GridCoords object in which
+     * coordinates are stored in 0-origin, rectangular form.
+     * Returns null if the input string is invalid.
+     * 
+     * @param strLabel  the given string to translate
+     * 
+     * @return  
+     *      the corresponding GridCoords object,
+     *      or null if strLabel is invalid
+     */
     private GridCoords getGridCoords( String strLabel )
     {
         Label       label   = new Label( strLabel );
@@ -500,6 +669,18 @@ public class ConfigPhase implements TextPhase
         return coords;
     }
     
+    /**
+     * Converts a string into an integer value
+     * representing a record number.
+     * Record numbers are expected to be represented
+     * as positive, non-zero values.
+     * Returns 0 if the string cannot be converted
+     * to a positive value.
+     * 
+     * @param strRecNum the string to convert
+     * 
+     * @return  the converted integer, or 0 if invalid
+     */
     private int getRecNum( String strRecNum )
     {
         int     recNum  = 0;
@@ -513,6 +694,9 @@ public class ConfigPhase implements TextPhase
         return recNum;
     }
     
+    /**
+     * Writes the help message to the designated output stream.
+     */
     private void showHelp()
     {
         LineWrapper     wrapper     = new LineWrapper( lineLen, list );
@@ -520,14 +704,23 @@ public class ConfigPhase implements TextPhase
         writeOut( wrappedList );
     }
     
+    /**
+     * Writes the updated grid configuration information,
+     * including the lists of to-be-deployed and deployed ships,
+     * to the designated output stream.
+     */
     private void showUpdate()
     {
-        printOut( "%nCURRENT CONFIGURATION%n" );
+        printOut( "\nCURRENT CONFIGURATION\n" );
         showDimensions();
         showShipTable();
         printOut( "" );
     }
     
+    /**
+     * Describes the dimensions of the grid as a single string,
+     * and writes it to the designated output stream.
+     */
     private void showDimensions()
     {
         final String    fmt     = "Grid: %d rows, %d columns";
@@ -537,6 +730,10 @@ public class ConfigPhase implements TextPhase
         writeOut( List.of( gridStr ) );
     }
 
+    /**
+     * Formats the to-be-deployed and deployed lists as a table,
+     * and writes it to the designated output stream.
+     */
     private void showShipTable()
     {
         final String    fmt         = "%-25s %s";
@@ -571,6 +768,19 @@ public class ConfigPhase implements TextPhase
         writeOut( lines );
     }
     
+    /**
+     * Formats a given sequence number
+     * and prototype of a ship in the to-be-deployed list
+     * into a single line of text
+     * and returns it, e.g.:
+     * <pre>
+     *     2. Battleship 4x1</pre>
+     *  
+     * @param inx   the given sequence number
+     * @param proto the given prototype
+     * 
+     * @return  the formatted text
+     */
     private String getToDeployStr( int inx, Proto proto )
     {
         final String fmt    = "%3d. %s %dX%d";
@@ -582,6 +792,19 @@ public class ConfigPhase implements TextPhase
         return configStr;
     }
     
+    /**
+     * Formats a given sequence number
+     * and prototype of a ship in the deployed list
+     * into a single line of text
+     * and returns it, e.g.:
+     * <pre>
+     *     1. Battleship 4X1 A1 HORIZONTAL</pre>
+     *  
+     * @param inx   the given sequence number
+     * @param proto the given prototype
+     * 
+     * @return  the formatted text
+     */
     private String getDeployedStr( int inx, Proto proto )
     {
         final String fmt    = "%3d. %s %dX%d %s %s";
@@ -635,5 +858,31 @@ public class ConfigPhase implements TextPhase
     {
         lines.forEach( outStream::println );
         outStream.flush();
+    }
+    
+    /**
+     * Read and return a line from a given BufferedReader.
+     * I/O exceptions are caught and re-raised
+     * as an unchecked exception.
+     * 
+     * @param reader    the given BufferedReader
+     * 
+     * @return  the line read from the BufferedReader, trimmed
+     * 
+     * @throws BattleshipEception if an I/O error occurs
+     */
+    private static String readLine( BufferedReader reader )
+    {
+        String  line;
+        try
+        {
+            line = reader.readLine().trim();
+        }
+        catch ( IOException exc )
+        {
+            String  msg = "Unexpected error reading from console";
+            throw new BattleshipException( msg, exc);
+        }
+        return line;
     }
 }
