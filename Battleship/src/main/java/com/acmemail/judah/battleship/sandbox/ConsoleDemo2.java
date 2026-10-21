@@ -34,6 +34,6 @@ public class ConsoleDemo2
         grid.attack( coords2 );
         grid.attack( coords4 );
         BasicTextGrid   textGrid    = new BasicTextGrid( grid );
-        textGrid.printGrid();
+        textGrid.printGrid( System.out);
     }
 }

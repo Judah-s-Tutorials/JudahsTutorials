@@ -1,5 +1,10 @@
 package com.acmemail.judah.battleship.ui.text;
 
+/**
+ * This interface defines the common functionality
+ * required of both the {@link ConfigPhase}
+ * and {@link SetupPhase} classes.
+ */
 public interface TextPhase
 {
     /**

@@ -40,6 +40,7 @@ import com.acmemail.judah.battleship.model.Orientation;
 import com.acmemail.judah.battleship.model.Ship2D;
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.util.LineWrapper;
+import com.acmemail.judah.battleship.util.PrintStreamUtils;
 
 /**
  * This class reads and executes text commands from an input stream,
@@ -114,7 +115,7 @@ import com.acmemail.judah.battleship.util.LineWrapper;
  *          but skips the "are you sure" step.
  *      </li>
  *      <li>
- *          <code>done</done>:
+ *          <code>done</code>:
  *          Mark the configuration process complete,
  *          and go on to the next phase of the game.
  *          This command is invalid
@@ -379,7 +380,7 @@ public class ConfigPhase implements TextPhase
         while ( !quit && !configComplete )
         {
             showShipTable();
-            printOut( TEXT_PROMPT );
+            PrintStreamUtils.printOut( outStream, TEXT_PROMPT );
             String      command = readLine( consoleReader );
             execCommand( command );
             if ( quit )
@@ -426,13 +427,13 @@ public class ConfigPhase implements TextPhase
         case "" -> noop();
         default -> result.addMessage( INVALID_C_COMMAND, false );
         }
-        printOut( workCommand + ": " );
+        PrintStreamUtils.printOut( outStream, workCommand + ": " );
         String          status  = result.getStatus() ? SUCCESS : FAILURE;
         List<String>    errors  = result.getMessages();
-        writeOut( status );
+        PrintStreamUtils.writeOut( outStream, status );
         List<String>    errLines    = 
             errors.stream().map( "    "::concat ).toList();
-        writeOut( errLines );
+        PrintStreamUtils.writeOut( outStream, errLines );
     }
     
     /**
@@ -562,7 +563,7 @@ public class ConfigPhase implements TextPhase
         List<String>    lines   = textGrid.toPrintString();
         lines.add( 0, CONFIG_GRID_START );
         lines.add( CONFIG_GRID_END );
-        writeOut( lines );
+        PrintStreamUtils.writeOut( outStream, lines );
     }
     
     /**
@@ -600,7 +601,7 @@ public class ConfigPhase implements TextPhase
     {
         final String    areYouSure  = "are you sure? (y/n) ";
         String  fullPrompt  = prompt + "; " + areYouSure;
-        printOut( fullPrompt );
+        PrintStreamUtils.printOut( outStream, fullPrompt );
         String  reply       = readLine( consoleReader ).toUpperCase();
         boolean result      = reply.isEmpty() ? 
             false : reply.charAt( 0 ) == 'Y';
@@ -701,7 +702,7 @@ public class ConfigPhase implements TextPhase
     {
         LineWrapper     wrapper     = new LineWrapper( lineLen, list );
         List<String>    wrappedList = wrapper.getWrappedList();
-        writeOut( wrappedList );
+        PrintStreamUtils.writeOut( outStream, wrappedList );
     }
     
     /**
@@ -711,10 +712,10 @@ public class ConfigPhase implements TextPhase
      */
     private void showUpdate()
     {
-        printOut( "\nCURRENT CONFIGURATION\n" );
+        PrintStreamUtils.printOut( outStream, "CURRENT CONFIGURATION" );
         showDimensions();
         showShipTable();
-        printOut( "" );
+        PrintStreamUtils.printOut( outStream, "" );
     }
     
     /**
@@ -727,7 +728,7 @@ public class ConfigPhase implements TextPhase
         Integer     rows        = provisioner.getRows();
         Integer     cols        = provisioner.getCols();
         String      gridStr     = String.format( fmt, rows, cols );
-        writeOut( List.of( gridStr ) );
+        PrintStreamUtils.writeOut( outStream, gridStr );
     }
 
     /**
@@ -765,7 +766,7 @@ public class ConfigPhase implements TextPhase
         }
         lines.add( CONFIG_SHIPS_END );
         lines.add( "" );
-        writeOut( lines );
+        PrintStreamUtils.writeOut( outStream, lines );
     }
     
     /**
@@ -821,44 +822,6 @@ public class ConfigPhase implements TextPhase
             String.format( fmt, inx, name, length, breadth, labelStr, orient );
         return configStr;
     }
-
-    /**
-     * Write a single string to this instance's output stream
-     * <em>without</em> a line separator,
-     * and flush the stream before returning.
-     *
-     * @param line  the string to write
-     */
-    private void printOut( String line )
-    {
-        outStream.print( line );
-        outStream.flush();
-    }
-
-    /**
-     * Write a single string followed by a line-separator
-     * to this instance's output stream,
-     * and flush the stream before returning.
-     *
-     * @param line  the string to write
-     */
-    private void writeOut( String line )
-    {
-        writeOut( List.of( line ) );
-    }
-
-    /**
-     * Write each string in a list to this instance's output stream.
-     * Each string is written on a separate line;
-     * the stream is flushed before returning.
-     *
-     * @param lines the strings to write
-     */
-    private void writeOut( List<String> lines )
-    {
-        lines.forEach( outStream::println );
-        outStream.flush();
-    }
     
     /**
      * Read and return a line from a given BufferedReader.
@@ -869,7 +832,7 @@ public class ConfigPhase implements TextPhase
      * 
      * @return  the line read from the BufferedReader, trimmed
      * 
-     * @throws BattleshipEception if an I/O error occurs
+     * @throws BattleshipException if an I/O error occurs
      */
     private static String readLine( BufferedReader reader )
     {

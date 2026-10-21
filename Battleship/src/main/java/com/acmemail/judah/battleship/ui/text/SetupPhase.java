@@ -21,7 +21,24 @@ import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.TextProvisioner;
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.util.LineWrapper;
+import com.acmemail.judah.battleship.util.PrintStreamUtils;
 
+/**
+ * Encapsulates the logic for
+ * soliciting and processing textual commands
+ * to drive the setup process.
+ * This process include:
+ * <ul>
+ *      <li>Determining the dimensions of the game grid.</li>
+ *      <li>Determining the players of the game.</li>
+ *      <li>Defining the types of ships that may be deployed on the grid.</li>
+ *      <li>Determining which ships must be deployed prior to starting the game.</li>
+ * </ul>
+ * 
+ * @author Jack
+ * 
+ * @see ConfigPhase
+ */
 public class SetupPhase implements TextPhase
 {
     /** Maximum line length for printing help message. */
@@ -213,7 +230,7 @@ public class SetupPhase implements TextPhase
         {
             while ( !setupComplete )
             {
-                printOut( prompt );
+                PrintStreamUtils.printOut( outStream, prompt );
                 String  command = consoleReader.readLine();
                 execCommand( command );
                 if ( quit )
@@ -254,11 +271,11 @@ public class SetupPhase implements TextPhase
     private boolean areYouSure( String prompt ) throws IOException
     {
         String  fullPrompt  = prompt + "; " + ARE_YOU_SURE;
-        printOut( fullPrompt );
+        PrintStreamUtils.printOut( outStream, fullPrompt );
         String  reply       = consoleReader.readLine().trim().toUpperCase();
         boolean result      = reply.charAt( 0 ) == 'Y';
         String  status      = result ? "yes" : "no";
-        writeOut( status );
+        PrintStreamUtils.writeOut( outStream, status );
         return result;
     }
     
@@ -277,7 +294,7 @@ public class SetupPhase implements TextPhase
      *      are written to stderr.
      * </li>
      * </ol>
-     * @param command
+     * @param command the command to execute
      */
     private void execCommand( String command )
     {
@@ -293,13 +310,13 @@ public class SetupPhase implements TextPhase
         case "Q!", "QUIT!" -> quit = really = true;
         default -> provisioner.addRec( command );
         }
-        printOut( command + ": " );
+        PrintStreamUtils.printOut( outStream, command + ": " );
         String          status  = provisioner.isSuccess() ?
             SUCCESS : FAILURE;
         List<String>    errors  =
             provisioner.getErrors().stream().map( "    "::concat ).toList();
-        writeOut( status );
-        writeOut( errors );
+        PrintStreamUtils.writeOut( outStream, status );
+        PrintStreamUtils.writeOut( outStream, errors );
     }
 
     /**
@@ -309,7 +326,7 @@ public class SetupPhase implements TextPhase
     {
         LineWrapper     wrapper     = new LineWrapper( lineLen, list );
         List<String>    wrappedList = wrapper.getWrappedList();
-        writeOut( wrappedList );
+        PrintStreamUtils.writeOut( outStream, wrappedList );
     }
 
     /**
@@ -323,7 +340,7 @@ public class SetupPhase implements TextPhase
         lines.addAll( showDimensions() );
         lines.addAll( showShipTable() );
         lines.add( "" );
-        writeOut( lines );
+        PrintStreamUtils.writeOut( outStream, lines );
     }
     
     /**
@@ -423,43 +440,5 @@ public class SetupPhase implements TextPhase
         int     breadth     = type.breadth();
         String  configStr   = String.format( fmt, name, length, breadth );
         return configStr;
-    }
-
-    /**
-     * Write a single string to this instance's output stream
-     * <em>without</em> a line separator,
-     * and flush the stream before returning.
-     *
-     * @param line  the string to write
-     */
-    private void printOut( String line )
-    {
-        outStream.print( line );
-        outStream.flush();
-    }
-
-    /**
-     * Write a single string followed by a line-separator
-     * to this instance's output stream,
-     * and flush the stream before returning.
-     *
-     * @param line  the string to write
-     */
-    private void writeOut( String line )
-    {
-        writeOut( List.of( line ) );
-    }
-
-    /**
-     * Write each string in a list to this instance's output stream.
-     * Each string is written on a separate line;
-     * the stream is flushed before returning.
-     *
-     * @param lines the strings to write
-     */
-    private void writeOut( List<String> lines )
-    {
-        lines.forEach( outStream::println );
-        outStream.flush();
     }
 }
