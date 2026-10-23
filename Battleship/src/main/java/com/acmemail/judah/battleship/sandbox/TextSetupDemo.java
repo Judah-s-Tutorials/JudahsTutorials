@@ -2,7 +2,7 @@ package com.acmemail.judah.battleship.sandbox;
 
 import com.acmemail.judah.battleship.ui.text.SetupPhase;
 
-public class SetupPhaseDemo
+public class TextSetupDemo
 {
     public static void main( String[] args )
     {

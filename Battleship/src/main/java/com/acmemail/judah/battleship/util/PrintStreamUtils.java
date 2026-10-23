@@ -1,7 +1,13 @@
 package com.acmemail.judah.battleship.util;
 
+import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
+
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.List;
+
+import com.acmemail.judah.battleship.BattleshipException;
 
 /**
  * This class contains methods 
@@ -109,5 +115,63 @@ public class PrintStreamUtils
     {
         lines.forEach( str::println );
         str.flush();
+    }
+
+    
+    /**
+     * Prompt the operator with a yes/no "are you sure" message.
+     * Read and interpret the operator's response:
+     * return true if the string entered by the operator
+     * starts with 'Y' or 'y,'
+     * return false for anything else.
+     * 
+     * @param prompt    message to print before "are you sure?"
+     * @param reader    source of input
+     * @param outStream output destination
+     * 
+     * @return  true, if the operator replies "yes"     * 
+     * 
+     * @throws BattleshipException if an I/O error occurs
+     */
+    public static boolean areYouSure( 
+        String prompt,
+        BufferedReader reader,
+        PrintStream outStream
+    )
+    {
+        String  fullPrompt  = prompt + "; " + ARE_YOU_SURE;
+        printOut( outStream, fullPrompt );
+        String  reply       = readLine( reader ).trim().toUpperCase();
+        boolean result      = reply.charAt( 0 ) == 'Y';
+        String  status      = result ? "yes" : "no";
+        writeOut( outStream, status );
+        return result;
+    }
+    
+    /**
+     * Reads and returns a line of text
+     * from the given input source.
+     * I/O exceptions are caught
+     * and recast as BattleshipExceptions.
+     * 
+     * @param reader    the given input source
+     * 
+     * @return  a line of text from the given input source
+     * 
+     * @throws BattleshipException if an I/O error occurs
+     */
+    public static String readLine( BufferedReader reader )
+    {
+        String  line;
+        try
+        {
+            line = reader.readLine().trim();
+        }
+        catch ( IOException exc )
+        {
+            String  msg = "Unexpected error reading from console";
+            throw new BattleshipException( msg, exc);
+        }
+        return line;
     }
 }

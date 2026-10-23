@@ -294,6 +294,9 @@ public class BasicTextGrid
         char[]          cellChar  = { ' ' };
         if ( gridCell.getShip() != null )
         {
+            // Note: there's no special character for representing a ship;
+            // we just use the default spaces, and change the foreground
+            // and background colors.
             cellStr.append( bgShipColor );
             if ( gridCell.isSplatted() )
             {

@@ -25,11 +25,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import com.acmemail.judah.battleship.model.ShipType2D;
-import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
-import com.acmemail.judah.battleship.model.default_ship_types.Carrier;
-import com.acmemail.judah.battleship.model.default_ship_types.Cruiser;
-import com.acmemail.judah.battleship.model.default_ship_types.Destroyer;
-import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
 
 /**
  * Verifies that each default ship type class

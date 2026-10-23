@@ -103,4 +103,18 @@ public class StatusMessages
         "To Deploy";
     public static final String  DEPLOYED_HEADER     =
         "Deployed";
+    public static final String  ON                  =
+        "on";
+    public static final String  OFF                 =
+        "off";
+    public static final String  TRUE                =
+        "true";
+    public static final String  FALSE               =
+        "false";
+    public static final String  YES                 =
+        "true";
+    public static final String  NO                  =
+        "false";
+    public static final String  INVALID_ARG         =
+        "Invalid argument";
 }

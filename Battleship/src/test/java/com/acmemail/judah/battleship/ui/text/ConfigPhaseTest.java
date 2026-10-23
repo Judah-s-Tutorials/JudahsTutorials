@@ -11,11 +11,17 @@ import static com.acmemail.judah.battleship.StatusMessages.INVALID_C_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ORIENTATION;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_REC_NUM;
 import static com.acmemail.judah.battleship.StatusMessages.OUT_OF_BOUNDS;
+import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -29,8 +35,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.battleship.BasicProvisioner;
+import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
+import com.acmemail.judah.battleship.Constants;
 import com.acmemail.judah.battleship.Provisioner;
+import com.acmemail.judah.battleship.artwork.text.TextGridConstants;
 import com.acmemail.judah.battleship.model.Grid2D;
 import com.acmemail.judah.battleship.model.ShipType2D;
 import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
@@ -129,6 +138,18 @@ public class ConfigPhaseTest
             commands.add( "y" );
         RoundTripResult result  = execRoundTrip( provisioner, commands );
         assertFalse( result.phase().isQuit() );
+    }
+
+    @Test
+    public void testInvalidDone()
+    {
+        // done command will fail unless the fleet is fully deployed
+        List<String>        commands    = List.of( "done", "q!" );
+        RoundTripResult result  = execRoundTrip( defProvisioner, commands );
+        List<String>        feedback    = result.feedback();
+        assertTrue( result.phase().isQuit() );
+        assertTrue( contains( feedback, FAILURE ) ); // for done command
+        assertTrue( contains( feedback, SUCCESS ) ); // for q! command
     }
     
     @Test
@@ -284,6 +305,7 @@ public class ConfigPhaseTest
         //    removed from the to-deploy list.
         assertTrue( origToDeploy.size() > 2 );
         
+        // Implementation allows remarks, but currently ignores them
         List<String>        commands        =
             List.of( 
                 "deploy,1,A1,Horizontal", // for result, see buckets[0]
@@ -308,8 +330,46 @@ public class ConfigPhaseTest
             });
     }
     
+    @Test
+    public void testDeployGoRightWithRemark()
+    {
+        List<ShipType2D>    origToDeploy    = 
+            new ArrayList<>( defProvisioner.getToDeploy() );
+        // 1. Provisioner must have a least 3 ships to deploy
+        //    so when we can deploy two and still have ships
+        //    that haven't been deployed.
+        // 2. The to-deploy list must contain no dupes, so that
+        //    we can verify that the deployed ships have been
+        //    removed from the to-deploy list.
+        assertTrue( origToDeploy.size() > 2 );
+        
+        // Implementation allows remarks, but currently ignores them
+        List<String>        commands        =
+            List.of( 
+                "deploy,1,A1,Horizontal", // for result, see buckets[0]
+                "deploy,1,B1,Horizontal,remark", // for result, see buckets[2]
+                "q!"
+            );
+        RoundTripResult     result      = execRoundTrip( commands );
+        List<String>        feedback    = result.feedback();
+        RoundTripParser     rtParser    = new RoundTripParser( feedback );
+        assertFalse( contains( rtParser.feedback, FAILURE ) );
+        TextPhase           phase       = result.phase();
+        assertTrue( phase instanceof ConfigPhase );
+        
+        ConfigPhase         configPhase = (ConfigPhase)phase;
+        List<ShipType2D>    toDeploy    = configPhase.getToBeDeployed();
+        List<ShipType2D>    deployed    = configPhase.getDeployedTypes();
+        IntStream.range( 0, 2 )
+            .mapToObj( origToDeploy::get )
+            .forEach( t -> {
+                assertFalse( toDeploy.contains( t ) );
+                assertTrue( deployed.contains( t ) );
+            });
+    }
+    
     @ParameterizedTest
-    @ValueSource( strings= {"deploy,1,A1,H,extra", "deploy,1,A1"} )
+    @ValueSource( strings= {"deploy,1,A1,H,remark,extra", "deploy,1,A1"} )
     public void testDeployGoWrongArgCount( String command )
     {
         List<String>    commands    = List.of( command, "q!" );
@@ -344,8 +404,10 @@ public class ConfigPhaseTest
     }
     
     @ParameterizedTest
-    @ValueSource( strings= 
-        {"deploy,1,A1,q", "deploy,1,A1,0" } )
+    @ValueSource( strings= {
+        "deploy,1,A1,q", // invalid arg
+        "deploy,1,A1,0"  // invalid arg
+    } )
     public void testDeployGoWrongOrientation( String command )
     {
         List<String>    commands    = List.of( command, "q!" );
@@ -419,6 +481,25 @@ public class ConfigPhaseTest
         assertTrue( deployed.isEmpty() );
     }
     
+    @ParameterizedTest
+    @ValueSource( strings= {
+        "undeploy",       // too few args
+        "undeploy,1,1"    // too many args
+    } )
+    public void testUnDeployGoWrongArgCount( String command )
+    {
+        testUnDeployGoWrong( command, INVALID_ARG_COUNT );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= {
+        "undeploy,-1", "undeploy,0", "undeploy,20"
+    } )
+    public void testUnDeployGoWrongRecNum( String command )
+    {
+        testUnDeployGoWrong( command, INVALID_REC_NUM );
+    }
+
     @Test
     public void testInvalidCommand()
     {
@@ -445,6 +526,141 @@ public class ConfigPhaseTest
         RoundTripResult     result      = execRoundTrip( commands );
         List<String>        rawFeedback = result.feedback();
         assertFalse( contains( rawFeedback, FAILURE ) );
+    }
+    
+    @Test
+    public void testBufferedReader()
+    {
+        // Exercise an obscure path through the constructor by passing
+        // a BufferedReader instead of a naked StringReader.
+        String                  script      = "q!";
+        ByteArrayOutputStream   outBuff     = new ByteArrayOutputStream();
+        PrintStream             outStream   = new PrintStream( outBuff );
+        StringReader            strReader   = new StringReader( script );
+        BufferedReader          bufReader   = new BufferedReader( strReader );
+        Configurator.reset();
+        ConfigPhase             phase       = 
+            new ConfigPhase( defProvisioner, bufReader, outStream );
+        phase.exec();
+    }
+    
+    @Test
+    public void testEmptyCommand()
+    {
+        List<String>        script      = List.of( "", "q!" );
+        RoundTripResult     result      = execRoundTrip( script );
+        List<String>        rawFeedback = result.feedback();
+        assertFalse( contains( rawFeedback, FAILURE ) );
+    }
+    
+    @Test
+    public void testShow()
+    {
+        List<String>    script  =
+            List.of(
+                "deploy,1,A1,Horizontal", // buckets[0]
+                "deploy,1,B1,Horizontal", // buckets[1]
+                "show",                   // buckets[2]
+                "q!"
+            );
+        RoundTripResult     result      = execRoundTrip( script );
+        List<String>        rawFeedback = result.feedback();
+        assertFalse( contains( rawFeedback, FAILURE ) );
+        RoundTripParser     rtParser    = new RoundTripParser( rawFeedback );
+        List<CommandBucket> buckets     = rtParser.buckets;
+        // sanity check:
+        assertEquals( script.size(), buckets.size() );
+        CommandBucket       showBucket  = buckets.get( 2 );
+        TextGridParser      gridParser  = 
+            new TextGridParser( showBucket.output() );
+        assertEquals( Constants.HOME_GRID, gridParser.getName() );
+        
+        String              expColumns  = 
+            String.valueOf( Grid2D.getNumCols() );
+        List<String>        colHeader   = gridParser.getColumnHeader();
+        assertTrue( contains( colHeader, expColumns ) );
+        List<String>        labeledRows = gridParser.getLabeledRows();
+        int                 expRows     = defProvisioner.getRows();
+        int                 actRows     = labeledRows.size();
+        assertEquals( expRows, actRows );
+        
+        String              row0        = labeledRows.get( 0 );
+        String              row1        = labeledRows.get( 1 );
+        String              shipID      = TextGridConstants.FG_CYAN;
+        assertTrue( row0.contains( shipID ) );
+        assertTrue( row1.contains( shipID ) );
+        IntStream.range( 2, actRows )
+            .mapToObj( labeledRows::get )
+            .forEach( s -> assertFalse( s.contains( shipID ), s ) );
+    }
+    
+    @Test
+    public void testGetDeployedShips()
+    {
+        String              deploy      = "deploy,1,a1,h";
+        String              quit        = "q!";
+        List<String>        script      = List.of( deploy, quit );
+        RoundTripResult     result      = execRoundTrip( script );
+        List<String>        rawFeedback = result.feedback();
+        ConfigPhase         configPhase = 
+            result.phase() instanceof ConfigPhase config ? config : null;
+        assertNotNull( configPhase );
+        assertFalse( contains( rawFeedback, FAILURE ) );
+        assertEquals( 1, configPhase.getDeployedShips().size() );
+    }
+    
+    @Test
+    public void testQuitNotSure()
+    {
+        List<String>    script  =
+            List.of(
+                "quit",
+                "no",
+                "quit",
+                "gibberish",
+                "quit",
+                "",
+                "quit",
+                "y"
+            );   
+        RoundTripResult     result      = execRoundTrip( script );
+        List<String>        rawFeedback = result.feedback();
+        assertFalse( contains( rawFeedback, FAILURE ) );
+        RoundTripParser     rtParser    = new RoundTripParser( rawFeedback );
+        List<CommandBucket> buckets     = rtParser.buckets;
+        // sanity check:
+        assertEquals( 4, buckets.size() );
+        buckets.forEach( b -> assertTrue( b.status().contains( SUCCESS ) ) );
+    }
+
+    /**
+     * Execute an invalid command
+     * and validate that it fails
+     * with the given error message.
+     * 
+     * @param command   command to execute
+     * @param expErr    given error message
+     */
+    private void testUnDeployGoWrong( String command, String expErr )
+    {
+        List<String>    commands    = List.of( command, "q!" );
+        RoundTripResult result      = execRoundTrip( commands );
+        List<String>    feedback    = result.feedback();
+        assertTrue( contains( feedback, FAILURE ) );
+        assertTrue( contains( feedback, expErr ) );
+    }
+   
+    @Test
+    public void testGoWrongIOException()
+    {
+        TextTestUtils.IOThrower reader  = new TextTestUtils.IOThrower();
+        PrintStream             printer =
+            new PrintStream( new ByteArrayOutputStream() );
+        
+        Configurator.reset();
+        ConfigPhase config  = 
+            new ConfigPhase( defProvisioner, reader, printer );
+        assertThrows( BattleshipException.class, () -> config.exec() );
     }
 
     /**
@@ -495,7 +711,6 @@ public class ConfigPhaseTest
         boolean containsAll =
             exp.stream()
                 .filter( s -> !contains( act, s ) )
-                .peek( System.out::println )
                 .findAny().isEmpty();
         return containsAll;
     }

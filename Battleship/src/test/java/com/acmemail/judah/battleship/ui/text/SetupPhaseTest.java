@@ -12,9 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -27,6 +32,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Provisioner;
 import com.acmemail.judah.battleship.TextProvisioner;
 import com.acmemail.judah.battleship.model.default_ship_types.Battleship;
@@ -35,7 +42,7 @@ import com.acmemail.judah.battleship.model.default_ship_types.Cruiser;
 import com.acmemail.judah.battleship.model.default_ship_types.Destroyer;
 import com.acmemail.judah.battleship.model.default_ship_types.Submarine;
 
-class SetupPhaseTest
+public class SetupPhaseTest
 {
     private static final Set<String>    allDefaultTypeNames =
         Set.of( 
@@ -98,6 +105,23 @@ class SetupPhaseTest
         assertTrue( contains( feedback, "Setup complete" ) );
     }
     
+    @Test
+    public void testSetupPhaseBufferedReader()
+    {
+        // Exercise an obscure path through the constructor by passing
+        // a BufferedReader instead of a naked StringReader.
+        String                  script      = "q!";
+        ByteArrayOutputStream   outBuff     = new ByteArrayOutputStream();
+        PrintStream             outStream   = new PrintStream( outBuff );
+        StringReader            strReader   = new StringReader( script );
+        BufferedReader          bufReader   = new BufferedReader( strReader );
+        TextProvisioner         provisioner = TextProvisioner.of();
+        Configurator.reset();
+        SetupPhase              phase       = 
+            new SetupPhase( provisioner, bufReader, outStream );
+        phase.exec();
+    }
+
     @ParameterizedTest
     @ValueSource( strings= {"?","h","help" })
     public void testHelp( String command )
@@ -343,6 +367,20 @@ class SetupPhaseTest
         assertFalse( setup.isQuit() );
     }
     
+    @Test
+    public void testGoWrongIOException()
+    {
+        TextTestUtils.IOThrower reader      = new TextTestUtils.IOThrower();
+        PrintStream             printer     =
+            new PrintStream( new ByteArrayOutputStream() );
+        TextProvisioner         provisioner = TextProvisioner.of();
+        
+        Configurator.reset();
+        SetupPhase phase    = 
+            new SetupPhase( provisioner, reader, printer );
+        assertThrows( BattleshipException.class, () -> phase.exec() );
+    }
+
     private static boolean containsAll( 
         Collection<String> exp, 
         Collection<String> act

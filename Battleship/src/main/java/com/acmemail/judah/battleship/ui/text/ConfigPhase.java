@@ -222,7 +222,7 @@ public class ConfigPhase implements TextPhase
         HELP_END
     };
     /** List of lines in help message. */
-    private static final List<String>   list    = List.of( helpGraphs );
+    private static final List<String>   help    = List.of( helpGraphs );
     
     /** Source of the provisioning data. */
     private final   Provisioner     provisioner;
@@ -391,7 +391,7 @@ public class ConfigPhase implements TextPhase
             else if ( configComplete )
             {
                 if ( !really )
-                    configComplete = areYouSure( "Setup complete" );
+                    configComplete = areYouSure( "Configuration complete" );
             }
         }
     }
@@ -409,8 +409,8 @@ public class ConfigPhase implements TextPhase
     private void execCommand( String command )
     {
         String[]    args        = split( command );
-        String      workCommand = args.length == 0 ? 
-            "" : args[0].trim().toUpperCase();
+        // Note: split will never return a 0-length array
+        String      workCommand = args[0].trim().toUpperCase();
         Result      result      = new Result();
         result.setStatus( true );
         switch ( workCommand )
@@ -467,7 +467,7 @@ public class ConfigPhase implements TextPhase
         List<Proto>         toDeploy    = fleet.getToBeDeployedProtos();
         GridCoords          coords      = null;
         Orientation         orient      = null;
-        if ( argCount != 4 || argCount > 5 )
+        if ( argCount < 4 || argCount > 5 )
             result.addMessage( INVALID_ARG_COUNT, false );
         else if ( (recNum = getRecNum( args[1] )) == 0 )
             result.addMessage( INVALID_REC_NUM, false );
@@ -538,16 +538,17 @@ public class ConfigPhase implements TextPhase
         List<Proto>         deploy      = fleet.getAllDeployedProtos();
         if ( argCount != 2 )
             result.addMessage( INVALID_ARG_COUNT, false );
-        else if ( (recNum = getRecNum( args[1] )) == 0 )
-            result.addMessage( INVALID_REC_NUM );
+        else if ( (recNum = getRecNum( args[1] )) <= 0 )
+            result.addMessage( INVALID_REC_NUM, false );
         else if ( recNum > deploy.size() )
-            result.addMessage( INVALID_REC_NUM );
+            result.addMessage( INVALID_REC_NUM, false );
         else
         {
             Proto       proto       = deploy.get( recNum - 1 );
             Result      depResult   = fleet.undeploy( proto );
             if ( !depResult.getStatus() )
             {
+                // We can only get here if data is corrupted.
                 result.setStatus( false );
                 depResult.getMessages().forEach( result::addMessage );
             }
@@ -610,7 +611,7 @@ public class ConfigPhase implements TextPhase
     
     /**
      * "No-operation,"
-     * a method that does not,
+     * a method that does nothing,
      * but can be convenient for use in lambdas.
      */
     private void noop()
@@ -635,7 +636,7 @@ public class ConfigPhase implements TextPhase
     {
         Orientation orientation = null;
         if ( strOrientation.length() < 1 )
-            ;
+            ; // I believe it's impossible to end up here
         else
         {
             char    firstChar       = strOrientation.charAt( 0 );
@@ -700,7 +701,7 @@ public class ConfigPhase implements TextPhase
      */
     private void showHelp()
     {
-        LineWrapper     wrapper     = new LineWrapper( lineLen, list );
+        LineWrapper     wrapper     = new LineWrapper( lineLen, help );
         List<String>    wrappedList = wrapper.getWrappedList();
         PrintStreamUtils.writeOut( outStream, wrappedList );
     }
@@ -825,7 +826,7 @@ public class ConfigPhase implements TextPhase
     
     /**
      * Read and return a line from a given BufferedReader.
-     * I/O exceptions are caught and re-raised
+     * An I/O exception will be caught and re-raised
      * as an unchecked exception.
      * 
      * @param reader    the given BufferedReader
