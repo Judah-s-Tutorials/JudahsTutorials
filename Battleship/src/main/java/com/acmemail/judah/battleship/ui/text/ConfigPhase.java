@@ -261,7 +261,7 @@ public class ConfigPhase implements TextPhase
      * Allows the operator-input source and the output destination
      * to be supplied by the caller, for example by a test driver.
      * The source and destination may be null,
-     * stdin and stdout will be used.
+     * in which case stdin and stdout will be used.
      *
      * @param provisioner   Provisioner to be used internally; may not be null
      * @param reader        source of operator input; may be null

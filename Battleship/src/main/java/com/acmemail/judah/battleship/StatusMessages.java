@@ -117,4 +117,6 @@ public class StatusMessages
         "false";
     public static final String  INVALID_ARG         =
         "Invalid argument";
+    public static final String  GRID_NOT_FOUND      =
+        "Grid not found";
 }

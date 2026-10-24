@@ -229,7 +229,7 @@ public class Grid2D
      * @param coords    the given coordinates
      * 
      * @throws NullPointerException if coords is null
-     * @throws BattleshipException if configuration stage is complete
+     * @throws BattleshipException if a game is not in progress
      * @throws BattleshipException if coords is out of bounds
      */
     public void attack( GridCoords coords )
@@ -242,6 +242,28 @@ public class Grid2D
         if ( cell == null )
             cell = putEmptyCell( coords );
         cell.setSplatted();
+    }
+    
+    /**
+     * Reverses a previous attack command.
+     * The splatted state of the cell at the given coordinates
+     * is explicitly set to false.
+     * 
+     * @param coords    the previously attacked coordinates
+     * 
+     * @throws NullPointerException if coords is null
+     * @throws BattleshipException if a game is not in progress
+     * @throws BattleshipException if coords is out of bounds
+     */
+    public void unattack( GridCoords coords )
+    {
+        Objects.requireNonNull( coords, "coords" ); 
+        throwIfNotConfigComplete();
+        if ( !contains( coords ) )
+            throw new BattleshipException( OUT_OF_BOUNDS +  ": " + coords );
+        Cell2D  cell    = get( coords );
+        if ( cell != null )
+            cell.setSplatted( false );
     }
     
     /**

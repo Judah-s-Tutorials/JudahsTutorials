@@ -1,38 +1,70 @@
 package com.acmemail.judah.battleship.ui.text;
 
-import static com.acmemail.judah.battleship.StatusMessages.ARE_YOU_SURE;
 import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
 import static com.acmemail.judah.battleship.StatusMessages.FALSE;
+import static com.acmemail.judah.battleship.StatusMessages.GRID_NOT_FOUND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_COORDINATES;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_C_COMMAND;
-import static com.acmemail.judah.battleship.StatusMessages.NOT_ALL_DEPLOYED;
+import static com.acmemail.judah.battleship.StatusMessages.NO;
+import static com.acmemail.judah.battleship.StatusMessages.OFF;
+import static com.acmemail.judah.battleship.StatusMessages.ON;
+import static com.acmemail.judah.battleship.StatusMessages.OUT_OF_BOUNDS;
 import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
 import static com.acmemail.judah.battleship.StatusMessages.TEXT_PROMPT;
 import static com.acmemail.judah.battleship.StatusMessages.TRUE;
-import static com.acmemail.judah.battleship.StatusMessages.ON;
-import static com.acmemail.judah.battleship.StatusMessages.OFF;
 import static com.acmemail.judah.battleship.StatusMessages.YES;
-import static com.acmemail.judah.battleship.StatusMessages.NO;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.util.List;
 import java.util.Objects;
 
-import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Fleet;
-import com.acmemail.judah.battleship.Provisioner;
+import com.acmemail.judah.battleship.Label;
 import com.acmemail.judah.battleship.Result;
-import com.acmemail.judah.battleship.Fleet.Proto;
 import com.acmemail.judah.battleship.artwork.text.TextGridParent;
+import com.acmemail.judah.battleship.model.Cell2DView;
+import com.acmemail.judah.battleship.model.Grid2D;
+import com.acmemail.judah.battleship.model.GridCoords;
+import com.acmemail.judah.battleship.util.Command;
 import com.acmemail.judah.battleship.util.LineWrapper;
 import com.acmemail.judah.battleship.util.PrintStreamUtils;
+import com.acmemail.judah.battleship.util.UndoRedoManager;
 
+/**
+ * <ul>
+ * <li>
+ *      a, attack --
+ *      Attack an opponent at a given row/column address.
+ *      The arguments are the name of the opponent,
+ *      and the coordinates to attack.
+ *      If there are only two players,
+ *      the opponent name may be omitted.
+ *      Examples:
+<pre style="padding-left: 2em;">
+attack,john,b3
+attack,e7
+a,paul,f2</pre>
+ *      Players may not attack themselves.
+ * </li>
+ * <li>
+ *      s, strike --
+ *      Record a strike on the home grid.
+ *      The argument is the coordinate pair to attack.
+ *      Examples:
+<pre style="padding-left: 2em;">
+strike,c9
+s,a10</pre>
+ * </li>
+ * <li>u, undo -- undo the last action</li>
+ * <li>r, redo -- redo the last action</li>
+ * </ul>
+ */
 public class GamePhase
 {
     /** All the different ways the operator might say "on." */
@@ -59,6 +91,8 @@ public class GamePhase
     /** List of lines in help message. */
     private static final List<String>   help    = List.of( helpGraphs );
 
+    /** Undo/redo stacks. */
+    private final   UndoRedoManager undoStack;
     /** Collection of ships after deployment. */
     private final   Fleet           fleet;
     /** Source for command input; defaults to stdin. */
@@ -80,12 +114,12 @@ public class GamePhase
     /**
      * Constructor.
      * Creates a new instance
-     * with the given Provisioner, 
+     * with the given Fleet, 
      * and default input and output streams.
-
-     * @param provisioner   the given Provisioner; may not be null.
+     *
+     * @param fleet   the given Fleet; may not be null.
      * 
-     * @see #ConfigPhase(Provisioner, Reader, PrintStream)
+     * @see #GamePhase(Fleet, Reader, PrintStream)
      */
     public GamePhase( Fleet fleet )
     {
@@ -94,12 +128,13 @@ public class GamePhase
 
     /**
      * Constructor.
+     * Create a new instance encapsulating the given Fleet.
      * Allows the operator-input source and the output destination
      * to be supplied by the caller, for example by a test driver.
      * The source and destination may be null,
-     * stdin and stdout will be used.
+     * in which case stdin and stdout will be used.
      *
-     * @param provisioner   Provisioner to be used internally; may not be null
+     * @param fleet         the given fleet
      * @param reader        source of operator input; may be null
      * @param outStream     destination for status and error output; may be null
      */
@@ -116,6 +151,7 @@ public class GamePhase
         this.consoleReader  = actReader instanceof BufferedReader buffered ?
             buffered : new BufferedReader( actReader );
         this.outStream  = outStream != null ? outStream : System.out;
+        undoStack = new UndoRedoManager();
         gridParent = new TextGridParent();
         Configurator.nextState();
     }
@@ -189,7 +225,7 @@ public class GamePhase
         case "AUTO", "AUTO-UPDATE" -> autoUpdate( command, result );
         case "S", "STRIKE" -> strike( command, result );
         case "A", "ATTACK" -> attack( command, result );
-        case "REVISE" -> revise( command, result );
+        case "UNATTACK" -> unattack( command, result );
         case "" -> noop();
         default -> result.addMessage( INVALID_C_COMMAND, false );
         }
@@ -202,22 +238,173 @@ public class GamePhase
         PrintStreamUtils.writeOut( outStream, errLines );
     }
     
-    private Object revise(String command, Result result)
+    private void unattack( String command, Result result )
     {
-        // TODO Auto-generated method stub
-        return null;
+        String[]    args        = split( command );
+        int         argCount    = args.length;
+        Grid2D      grid        = null;
+        Label       labelCoords = null;
+        
+        if ( argCount < 2 || argCount > 3 )
+            result.addMessage( INVALID_ARG_COUNT, false );
+        else if ( (grid = getGrid( args )) == null )
+            result.addMessage( GRID_NOT_FOUND, false );
+        else if ( (labelCoords = getLabelCoords( args )) == null )
+            result.addMessage( INVALID_COORDINATES, false );
+        else if ( !grid.contains( labelCoords.getGridCoords() ) )
+            result.addMessage( OUT_OF_BOUNDS, false );
+        else
+        {
+            UnattackCommand unattack    = 
+                new UnattackCommand( grid, labelCoords );
+            undoStack.executeCommand( unattack );
+        }
     }
 
-    private Object attack(String command, Result result)
+    /**
+     * Validate and execute an {@code attack} command.
+     * Including the command,
+     * the client passes two or three arguments.
+     * If there are three arguments
+     * the second is taken as the name of the grid,
+     * and the third as the coordinates to attack.
+     * If there are two arguments,
+     * the second is taken as the coordinates to attack,
+     * and the grid is assumed to be the home grid.
+     * The command can fail because
+     * there are an incorrect number of arguments,
+     * the target grid cannot be found,
+     * the coordinates argument is malformed,
+     * or the coordinates are out-of-bounds.
+     * The result of command execution
+     * is recorded in the given Result container.
+     * 
+     * @param command   the command arguments
+     * @param result    the given result container
+     */
+    private void attack( String command, Result result )
     {
-        // TODO Auto-generated method stub
-        return null;
+        String[]    args        = split( command );
+        int         argCount    = args.length;
+        Grid2D      grid        = null;
+        
+        if ( argCount < 2 || argCount > 3 )
+            result.addMessage( INVALID_ARG_COUNT, false );
+        else if ( (grid = getGrid( args )) == null )
+            result.addMessage( GRID_NOT_FOUND, false );
+        else 
+            attack( grid, args, result );
     }
 
-    private Object strike(String command, Result result)
+    /**
+     * Validate and execute a {@code strike} command.
+     * Including the command,
+     * the client passes two arguments,
+     * the second being the coordinates
+     * on the home grid to attack.
+     * The command can fail because
+     * there are an incorrect number of arguments,
+     * the coordinates argument is malformed,
+     * or the coordinates are out-of-bounds.
+     * The result of command execution
+     * is recorded in the given Result container.
+     * 
+     * @param command   the command arguments
+     * @param result    the given result container
+     */
+    private void strike( String command, Result result )
     {
-        // TODO Auto-generated method stub
-        return null;
+        String[]    args        = split( command );
+        int         argCount    = args.length;
+        Grid2D      grid        = Grid2D.getHomeGrid();
+        
+        if ( argCount != 2 )
+            result.addMessage( INVALID_ARG_COUNT, false );
+        else
+            attack( grid, args, result );
+    }
+    
+    /**
+     * This helper method is for the direct support of
+     * {@link #attack(String, Result)} and
+     * {@link #strike(String, Result)}.
+     * The argument list from the attack/strike command is passed in.
+     * If there are two arguments,
+     * the second is taken to be the grid coordinates,
+     * otherwise the third is used.
+     * If valid, 
+     * an AttackCommand is generated and executed.
+     * <p>
+     * Precondition: 
+     * The length of the args array has been validated.
+     * 
+     * @param grid      the grid to attack
+     * @param args      the command arguments
+     * @param result    container for recording the operation result
+     */
+    private void attack( Grid2D grid, String[] args, Result result )
+    {
+        Label   labelCoords = getLabelCoords( args );
+        if ( labelCoords == null )
+            result.addMessage( INVALID_COORDINATES, false );
+        else if ( !grid.contains( labelCoords.getGridCoords() ) )
+            result.addMessage( OUT_OF_BOUNDS, false );
+        else
+        {
+            AttackCommand   attack  = new AttackCommand( grid, labelCoords );
+            undoStack.executeCommand( attack );
+        }
+    }
+    
+    /**
+     * This helper method is for the direct support of
+     * {@link #attack(String, Result)}.
+     * The argument list from the attack command is passed in,
+     * and, if there are more than two arguments,
+     * the second is taken to be the name of the target grid.
+     * If there are only two arguments,
+     * the home grid is assumed to be the target.
+     * If found, the target grid is returned,
+     * otherwise null is returned.
+     * 
+     * @param args  the argument list from the attack command
+     * 
+     * @return  the target grid, or null if not found
+     */
+    private static Grid2D getGrid( String[] args )
+    {
+        Grid2D  grid    = null;
+        if ( args.length > 2 )
+            grid = Grid2D.getGrid( args[1].trim() );
+        else
+            grid = Grid2D.getHomeGrid();
+        return grid;
+    }
+    
+    /**
+     * This helper method is for the direct support of
+     * {@link #attack(String, Result)} and
+     * {@link #strike(String, Result)}.
+     * The argument list from the attack/strike command is passed in.
+     * If there are two arguments,
+     * the second is taken to be the grid coordinates,
+     * otherwise the third is used.
+     * If valid, 
+     * the given argument is converted to a GridCoords object
+     * and returned,
+     * otherwise null is returned.
+     * 
+     * @param args      the argument list from the attack command
+     * 
+     * @return  the converted GridCoords object, or null if not found
+     */
+    private static Label getLabelCoords( String[] args )
+    {
+        String      labelArg    = args.length > 2 ? args[2] : args[1];
+        Label       labelCoords = new Label( labelArg.trim() );
+        if ( !labelCoords.isStatus() )
+            labelCoords = null;
+        return labelCoords;
     }
 
     /**
@@ -302,13 +489,8 @@ public class GamePhase
      * return false for anything else.
      * 
      * @param prompt    message to print before "are you sure?"
-     * @param reader    source of input
-     * @param outStream output destination
      * 
      * @return  true, if the operator replies "yes"
-     * 
-     * @throws IOException  
-     *      if an I/O error occurs when reading the operator's response
      */
     private boolean areYouSure( String prompt )
     {
@@ -344,5 +526,95 @@ public class GamePhase
     {
         String[]    tokens  = toSplit.split( "\\s*,\\s*");
         return tokens;
+    }
+    
+    /**
+     * Defines the actions to take when attacking a cell,
+     * or undoing a previously executed attack.
+     */
+    private static class AttackCommand implements Command
+    {
+        private final Grid2D        grid;
+        private final GridCoords    gridCoords;
+        
+        private boolean isSplattedOrig;
+        
+        /**
+         * Constructor.
+         * Fully initializes an object of this type.
+         * 
+         * @param grid          the grid being attacked
+         * @param labelCoords   the coordinates being attacked
+         */
+        public AttackCommand( Grid2D grid, Label labelCoords )
+        {
+            super();
+            this.grid = grid;
+            this.gridCoords = labelCoords.getGridCoords();
+        }
+
+        @Override
+        public void execute()
+        {
+            Cell2DView  cell    = grid.getCellView( gridCoords );
+            isSplattedOrig = cell.isSplatted();
+            grid.attack( gridCoords );
+        }
+
+        @Override
+        public void undo()
+        {
+            if ( isSplattedOrig )
+                grid.attack( gridCoords );
+            else
+                grid.unattack( gridCoords );
+            
+        }
+        
+    }
+    
+    /**
+     * Defines the actions to take when unattacking a cell,
+     * or undoing a previously executed unattack.
+     */
+    private static class UnattackCommand implements Command
+    {
+        private final Grid2D        grid;
+        private final GridCoords    gridCoords;
+        
+        private boolean isSplattedOrig;
+        
+        /**
+         * Constructor.
+         * Fully initializes an object of this type.
+         * 
+         * @param grid          the grid being unattacked
+         * @param labelCoords   the coordinates being unattacked
+         */
+        public UnattackCommand( Grid2D grid, Label labelCoords )
+        {
+            super();
+            this.grid = grid;
+            this.gridCoords = labelCoords.getGridCoords();
+        }
+
+        @Override
+        public void execute()
+        {
+            Cell2DView  cell    = grid.getCellView( gridCoords );
+            isSplattedOrig = cell.isSplatted();
+            grid.unattack( gridCoords );
+        }
+
+        @Override
+        public void undo()
+        {
+            if ( isSplattedOrig )
+                grid.attack( gridCoords );
+            else
+                grid.unattack( gridCoords );
+            
+        }
+        
     }
 }

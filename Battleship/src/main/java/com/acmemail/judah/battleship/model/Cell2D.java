@@ -89,11 +89,20 @@ public class Cell2D implements Cell2DView
 
     /**
      * Mark this cell splatted.
-     * Note: once splatted, a cell cannot be unsplatted.
      */
     public void setSplatted()
     {
-        this.splatted = true;
+        setSplatted( true );
+    }
+
+    /**
+     * Set the splatted state of this cell.
+     * This operation is available for the support
+     * of undo-style commands.
+     */
+    public void setSplatted( boolean state )
+    {
+        this.splatted = state;
     }
 
     /**
