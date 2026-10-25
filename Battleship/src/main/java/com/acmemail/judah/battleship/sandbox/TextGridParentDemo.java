@@ -17,6 +17,7 @@ public class TextGridParentDemo
     {
         List<String>   names            =
             List.of( "dick", "jane", "sally", "spot", "mom" );
+        Grid2D.reset( 11, 13 );
         
         List<Grid2D>    virtualGrids    = new ArrayList<>();
         virtualGrids.add( Grid2D.getHomeGrid() );

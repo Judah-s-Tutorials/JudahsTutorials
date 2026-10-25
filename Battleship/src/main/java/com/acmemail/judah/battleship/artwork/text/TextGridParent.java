@@ -146,8 +146,8 @@ public class TextGridParent
         gridHeight = validateGridHeight( allGrids );
         
         numCols = colCount > 0 ?
-            colCount : 
-            (dispWidth + colSepLen) / (gridWidth + colSepLen);
+            colCount :
+            Math.max( 1, (dispWidth + colSepLen) / (gridWidth + colSepLen) );
         tableWidth = numCols * gridWidth + (numCols - 1) * colSepLen;
         rowSep = ROW_SEP_STR.repeat( tableWidth );
         tableSep = TABLE_SEP_STR.repeat( tableWidth );
@@ -203,7 +203,7 @@ public class TextGridParent
             {
                 GridLines   grid    = list.get( col );
                 String      line    = grid.getLine( row );
-                int         lineLen = line.length();
+                int         lineLen = GridLines.visibleLineLength( line );
                 int         padding = gridWidth - lineLen;
                 rowBuilder.append( line );
                 rowBuilder.append( " ".repeat( padding ) );
@@ -334,9 +334,26 @@ public class TextGridParent
         {
             int maxLen  =
                 gridLines.stream()
-                    .mapToInt( String::length )
+                    .mapToInt( s -> visibleLineLength( s ) )
+                    .peek( System.out::println )
                     .max().orElse( 0 );
             return maxLen;
+        }
+        
+        /**
+         * Get the number of characters in a given string
+         * after stripping the ANSI escape sequences.
+         * 
+         * @param escapedStr    the given string
+         * 
+         * @return  the number of visible characters in escapedStr
+         */
+        private static int visibleLineLength( String escapedStr )
+        {
+            final String ansiRegex = "\\u001B\\[[;0-9]*[a-zA-Z]";
+            String  visibleChars    = escapedStr.replaceAll( ansiRegex, "" );
+            int     visibleCount    = visibleChars.length();
+            return visibleCount;
         }
     }
 }

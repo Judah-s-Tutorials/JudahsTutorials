@@ -32,7 +32,7 @@ public class UndoRedoManager
     {
         command.execute();
         undoStack.push( command );
-        redoStack.clear(); // Important: New actions clear redo history!
+        redoStack.clear(); // New actions clear redo history
     }
 
     /**
@@ -59,5 +59,14 @@ public class UndoRedoManager
             command.execute();
             undoStack.push( command ); // Put it back on undo stack
         }
+    }
+    
+    /**
+     * Return to an initial state.
+     */
+    public void init()
+    {
+        undoStack.clear();
+        redoStack.clear();
     }
 }

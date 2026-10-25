@@ -225,6 +225,8 @@ public class GamePhase
         case "AUTO", "AUTO-UPDATE" -> autoUpdate( command, result );
         case "S", "STRIKE" -> strike( command, result );
         case "A", "ATTACK" -> attack( command, result );
+        case "U", "UNDO" -> undoStack.undo();
+        case "R", "REDO" -> undoStack.redo();
         case "UNATTACK" -> unattack( command, result );
         case "" -> noop();
         default -> result.addMessage( INVALID_C_COMMAND, false );
@@ -435,7 +437,7 @@ public class GamePhase
     {
         String[]    args        = split( command );
         int         argCount    = args.length;
-        if ( argCount == 0 )
+        if ( argCount == 1 )
             autoUpdate = true;
         else if ( argCount > 1 )
             result.addMessage( INVALID_ARG_COUNT, false );
