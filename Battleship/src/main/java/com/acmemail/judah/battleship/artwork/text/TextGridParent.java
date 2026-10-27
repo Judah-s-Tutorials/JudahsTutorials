@@ -84,8 +84,8 @@ public class TextGridParent
     private final int               gridWidth;
     /** Width of the table, in characters. */
     private final int               tableWidth;
-    /** List of all grids in the table, expressed as {@link GridLines} */
-    private final List<GridLines>   allGrids;
+    /** List of all grids in the table */
+    private final List<Grid2D>      allGrids;
     
     /**
      * Creates a TextGridParent using the given display width.
@@ -141,9 +141,10 @@ public class TextGridParent
     {
         allGrids = getAllGrids();
         colSep = " " + COL_SEP_STR.repeat( 1 ) + " ";
-        int     colSepLen   = colSep.length();
-        gridWidth = validateGridWidth( allGrids );
-        gridHeight = validateGridHeight( allGrids );
+        int             colSepLen       = colSep.length();
+        List<GridLines> allGridLines    = getAllGridLines( allGrids );
+        gridWidth = validateGridWidth( allGridLines );
+        gridHeight = validateGridHeight( allGridLines );
         
         numCols = colCount > 0 ?
             colCount :
@@ -164,14 +165,15 @@ public class TextGridParent
     public List<String> exec()
     {
         int     nextGrid    = 0;
-        int     numGrids    = allGrids.size();
+        List<GridLines> allGridLines    = getAllGridLines( allGrids );
+        int     numGrids    = allGridLines.size();
         List<String>    allTables   = new ArrayList<>();
         while ( nextGrid < numGrids )
         {
             int fromGrid    = nextGrid;
             nextGrid = (int)Math.min( nextGrid + numCols, numGrids );
             List<String>    table   = 
-                layout( allGrids.subList( fromGrid, nextGrid ) );
+                layout( allGridLines.subList( fromGrid, nextGrid ) );
             allTables.addAll( table );
             if ( nextGrid < numGrids )
                 allTables.add( rowSep );
@@ -267,15 +269,27 @@ public class TextGridParent
      * 
      * @return  a list of all currently declared grids
      */
-    private static List<GridLines> getAllGrids()
+    private static List<Grid2D> getAllGrids()
     {
-        Grid2D  homeGrid    = Grid2D.getHomeGrid();
-        List<Grid2D>    grids   = new ArrayList<>( Grid2D.getAllGrids() );
+        Grid2D          homeGrid    = Grid2D.getHomeGrid();
+        List<Grid2D>    grids       = new ArrayList<>( Grid2D.getAllGrids() );
         grids.remove( homeGrid );
         grids.addFirst( homeGrid );
+        return grids;
+    }
+    
+    /**
+     * Gets a list of all currently declared grids,
+     * ensuring that the home grid is first in the list.
+     * 
+     * @param allGrids  a list of all declared grids, home grid first
+     * 
+     * @return  a list of GridLines corresponding to currently declared grids
+     */
+    private static List<GridLines> getAllGridLines( List<Grid2D> allGrids )
+    {
         List<GridLines> gridLines   =
-            grids
-            .stream()
+            allGrids.stream()
             .map( GridLines::new )
             .toList();
         return gridLines;
@@ -335,7 +349,6 @@ public class TextGridParent
             int maxLen  =
                 gridLines.stream()
                     .mapToInt( s -> visibleLineLength( s ) )
-                    .peek( System.out::println )
                     .max().orElse( 0 );
             return maxLen;
         }

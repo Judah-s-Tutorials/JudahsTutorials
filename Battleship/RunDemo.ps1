@@ -17,6 +17,8 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
+#    "-Dexec.mainClass=com.acmemail.judah.battleship.sandbox.TextGameDemo" `
+#    "-Dexec.mainClass=com.acmemail.judah.battleship.sandbox.TextGridParentDemo" `
 mvn org.codehaus.mojo:exec-maven-plugin:3.1.0:java `
     "-Dexec.mainClass=com.acmemail.judah.battleship.sandbox.TextGameDemo" `
     "-Dexec.classpathScope=compile"

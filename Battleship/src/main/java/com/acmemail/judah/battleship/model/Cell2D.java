@@ -86,6 +86,14 @@ public class Cell2D implements Cell2DView
     {
         isOpponent = true;
     }
+    
+    /**
+     * Designate whether or not this cell is occupied by an opponent.
+     */
+    public void setOpponent( boolean isOpponent )
+    {
+        this.isOpponent = isOpponent;
+    }
 
     /**
      * Mark this cell splatted.

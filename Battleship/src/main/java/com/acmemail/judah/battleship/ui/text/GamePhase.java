@@ -21,7 +21,6 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.util.List;
-import java.util.Objects;
 
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Fleet;
@@ -39,18 +38,33 @@ import com.acmemail.judah.battleship.util.UndoRedoManager;
 /**
  * <ul>
  * <li>
- *      a, attack --
- *      Attack an opponent at a given row/column address.
+ *      h, hit --
+ *      Record a hit on an opponent at a given row/column address.
  *      The arguments are the name of the opponent,
  *      and the coordinates to attack.
  *      If there are only two players,
  *      the opponent name may be omitted.
  *      Examples:
 <pre style="padding-left: 2em;">
-attack,john,b3
-attack,e7
-a,paul,f2</pre>
+hit,john,b3
+hit,e7
+h,paul,f2</pre>
+ * </li>
+ * <li>
+ *      m, miss --
+ *      Record a miss on an opponent's grid
+ *      at a given row/column address.
+ *      The arguments are the name of the opponent,
+ *      and the coordinates to attack.
+ *      If there are only two players,
+ *      the opponent name may be omitted.
+ *      Examples:
+<pre style="padding-left: 2em;">
+miss,john,b3
+miss,e7
+m,paul,f2</pre>
  *      Players may not attack themselves.
+ *      The attack is assumed to be a miss.
  * </li>
  * <li>
  *      s, strike --
@@ -65,7 +79,7 @@ s,a10</pre>
  * <li>r, redo -- redo the last action</li>
  * </ul>
  */
-public class GamePhase
+public class GamePhase implements TextPhase
 {
     /** All the different ways the operator might say "on." */
     private static final List<String>   ON_ALIASES  = 
@@ -93,8 +107,6 @@ public class GamePhase
 
     /** Undo/redo stacks. */
     private final   UndoRedoManager undoStack;
-    /** Collection of ships after deployment. */
-    private final   Fleet           fleet;
     /** Source for command input; defaults to stdin. */
     private final   BufferedReader  consoleReader;
     /** Destination for status and error output; defaults to stdout. */
@@ -123,7 +135,7 @@ public class GamePhase
      */
     public GamePhase( Fleet fleet )
     {
-        this( fleet, null, null );
+        this( null, null );
     }
 
     /**
@@ -139,13 +151,10 @@ public class GamePhase
      * @param outStream     destination for status and error output; may be null
      */
     public GamePhase(
-        Fleet       fleet,
         Reader      reader,
         PrintStream outStream
     )
     {
-        Objects.requireNonNull( fleet, "fleet" );
-        this.fleet = fleet;
         Reader  actReader   = reader != null ?
             reader : new InputStreamReader( System.in );
         this.consoleReader  = actReader instanceof BufferedReader buffered ?
@@ -224,7 +233,8 @@ public class GamePhase
         case "Q!", "QUIT!" -> quit = really = true;
         case "AUTO", "AUTO-UPDATE" -> autoUpdate( command, result );
         case "S", "STRIKE" -> strike( command, result );
-        case "A", "ATTACK" -> attack( command, result );
+        case "HIT" -> attack( command, true, result );
+        case "MISS" -> attack( command, false, result );
         case "U", "UNDO" -> undoStack.undo();
         case "R", "REDO" -> undoStack.redo();
         case "UNATTACK" -> unattack( command, result );
@@ -282,9 +292,10 @@ public class GamePhase
      * is recorded in the given Result container.
      * 
      * @param command   the command arguments
+     * @param isHit     true, if the attack hit an opponent's ship
      * @param result    the given result container
      */
-    private void attack( String command, Result result )
+    private void attack( String command, boolean isHit, Result result )
     {
         String[]    args        = split( command );
         int         argCount    = args.length;
@@ -295,7 +306,7 @@ public class GamePhase
         else if ( (grid = getGrid( args )) == null )
             result.addMessage( GRID_NOT_FOUND, false );
         else 
-            attack( grid, args, result );
+            attack( grid, args, isHit, result );
     }
 
     /**
@@ -357,6 +368,28 @@ public class GamePhase
             undoStack.executeCommand( attack );
         }
     }
+
+    private void attack( 
+        Grid2D grid, 
+        String[] args, 
+        boolean isHit, 
+        Result result 
+    )
+    {
+        Label   labelCoords = getLabelCoords( args );
+        if ( labelCoords == null )
+            result.addMessage( INVALID_COORDINATES, false );
+        else if ( !grid.contains( labelCoords.getGridCoords() ) )
+            result.addMessage( OUT_OF_BOUNDS, false );
+        else
+        {
+            Command         attack  = isHit ?
+                new HitCommand( grid, labelCoords ) :
+                new MissCommand(grid, labelCoords );
+//            AttackCommand   attack  = new AttackCommand( grid, labelCoords );
+            undoStack.executeCommand( attack );
+        }
+    }
     
     /**
      * This helper method is for the direct support of
@@ -364,8 +397,11 @@ public class GamePhase
      * The argument list from the attack command is passed in,
      * and, if there are more than two arguments,
      * the second is taken to be the name of the target grid.
+     * The name of the target grid may be omitted 
+     * if there is a single opponent.
      * If there are only two arguments,
-     * the home grid is assumed to be the target.
+     * and there is a single opponent,
+     * the target grid is assumed to be the opponent's.
      * If found, the target grid is returned,
      * otherwise null is returned.
      * 
@@ -379,7 +415,16 @@ public class GamePhase
         if ( args.length > 2 )
             grid = Grid2D.getGrid( args[1].trim() );
         else
-            grid = Grid2D.getHomeGrid();
+        {
+            Grid2D          homeGrid    = Grid2D.getHomeGrid();
+            List<Grid2D>    allGrids    = Grid2D.getAllGrids();
+            if ( allGrids.size() == 2 )
+            {
+                grid = allGrids.get( 0 );
+                if ( grid == homeGrid )
+                    grid = allGrids.get( 1 );
+            }
+        }
         return grid;
     }
     
@@ -571,10 +616,104 @@ public class GamePhase
             else
                 grid.unattack( gridCoords );
             
-        }
-        
+        }        
     }
     
+    /**
+     * Defines the actions to take when an opponent's cell is hit,
+     * or undoing a previously executed hit.
+     */
+    private static class HitCommand implements Command
+    {
+        private final Grid2D        grid;
+        private final GridCoords    gridCoords;
+        
+        private boolean isSplattedOrig;
+        private boolean isOpponentOrig;
+        
+        /**
+         * Constructor.
+         * Fully initializes an object of this type.
+         * 
+         * @param grid          the grid being attacked
+         * @param labelCoords   the coordinates being attacked
+         */
+        public HitCommand( Grid2D grid, Label labelCoords )
+        {
+            super();
+            this.grid = grid;
+            this.gridCoords = labelCoords.getGridCoords();
+        }
+
+        @Override
+        public void execute()
+        {
+            Cell2DView  cell    = grid.getCellView( gridCoords );
+            isSplattedOrig = cell.isSplatted();
+            isOpponentOrig = cell.isOpponent();
+            grid.attack( gridCoords );
+            grid.setOpponent( gridCoords );
+        }
+
+        @Override
+        public void undo()
+        {
+            if ( isSplattedOrig )
+                grid.attack( gridCoords );
+            else
+                grid.unattack( gridCoords );
+            grid.setOpponent( gridCoords, isOpponentOrig );
+        }
+    }
+    
+    /**
+     * Defines the actions to take when an attack
+     * on an opponent's cell is a miss,
+     * or undoing a previously executed miss.
+     */
+    private static class MissCommand implements Command
+    {
+        private final Grid2D        grid;
+        private final GridCoords    gridCoords;
+        
+        private boolean isSplattedOrig;
+        private boolean isOpponentOrig;
+        
+        /**
+         * Constructor.
+         * Fully initializes an object of this type.
+         * 
+         * @param grid          the grid being attacked
+         * @param labelCoords   the coordinates being attacked
+         */
+        public MissCommand( Grid2D grid, Label labelCoords )
+        {
+            super();
+            this.grid = grid;
+            this.gridCoords = labelCoords.getGridCoords();
+        }
+
+        @Override
+        public void execute()
+        {
+            Cell2DView  cell    = grid.getCellView( gridCoords );
+            isSplattedOrig = cell.isSplatted();
+            isOpponentOrig = cell.isOpponent();
+            grid.attack( gridCoords );
+            grid.setOpponent( gridCoords, false );
+        }
+
+        @Override
+        public void undo()
+        {
+            if ( isSplattedOrig )
+                grid.attack( gridCoords );
+            else
+                grid.unattack( gridCoords );
+            grid.setOpponent( gridCoords, isOpponentOrig );
+        }
+    }
+
     /**
      * Defines the actions to take when unattacking a cell,
      * or undoing a previously executed unattack.

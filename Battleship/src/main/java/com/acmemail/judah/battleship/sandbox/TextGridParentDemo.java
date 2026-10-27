@@ -22,9 +22,7 @@ public class TextGridParentDemo
         List<Grid2D>    virtualGrids    = new ArrayList<>();
         virtualGrids.add( Grid2D.getHomeGrid() );
         Grid2D.getHomeGrid();
-        names.stream()
-            .map( Grid2D::new )
-            .forEach( g -> System.out.println( g.getName() ) );
+        names.forEach( Grid2D::new );
         TextGridParent  gridMaker   = new TextGridParent();
         List<String>    gridLines   = gridMaker.exec();
         gridLines.forEach( System.out::println );

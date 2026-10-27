@@ -286,6 +286,25 @@ public class Grid2D
     }
     
     /**
+     * Designate whether or not a cell belongs to an opponent.
+     * 
+     * @param coords    the coordinates of the cell to mark
+     * 
+     * @throws NullPointerException if coords is null
+     * @throws BattleshipException if coords is out of bounds
+     */
+    public void setOpponent( GridCoords coords, boolean isOpponent )
+    {
+        Objects.requireNonNull( coords, "coords" );
+        if ( !contains( coords ) )
+            throw new BattleshipException( OUT_OF_BOUNDS +  ": " + coords );
+        Cell2D  cell    = get( coords );
+        if ( cell == null )
+            cell = putEmptyCell( coords );
+        cell.setOpponent( isOpponent );
+    }
+
+    /**
      * Mark the cell at the given coordinates 
      * as belonging to an opponent.
      * 
