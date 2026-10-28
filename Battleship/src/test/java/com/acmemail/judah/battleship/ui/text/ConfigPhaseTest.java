@@ -148,8 +148,8 @@ public class ConfigPhaseTest
         RoundTripResult result  = execRoundTrip( defProvisioner, commands );
         List<String>        feedback    = result.feedback();
         assertTrue( result.phase().isQuit() );
-        assertTrue( contains( feedback, FAILURE ) ); // for done command
-        assertTrue( contains( feedback, SUCCESS ) ); // for q! command
+        assertTrue( TextTestUtils.contains( feedback, FAILURE ) ); // for done command
+        assertTrue( TextTestUtils.contains( feedback, SUCCESS ) ); // for q! command
     }
     
     @Test
@@ -289,7 +289,9 @@ public class ConfigPhaseTest
         int                 deployedSize    = deployed.size();
         assertEquals( 0, toDeploySize );
         assertEquals( origSize, deployedSize );
-        origNames.forEach( s -> assertTrue( contains( deployed, s ) ) );
+        origNames.forEach( s -> 
+            assertTrue( TextTestUtils.contains( deployed, s ) )
+        );
     }
     
     @Test
@@ -315,7 +317,7 @@ public class ConfigPhaseTest
         RoundTripResult     result      = execRoundTrip( commands );
         List<String>        feedback    = result.feedback();
         RoundTripParser     rtParser    = new RoundTripParser( feedback );
-        assertFalse( contains( rtParser.feedback, FAILURE ) );
+        assertFalse( TextTestUtils.contains( rtParser.feedback, FAILURE ) );
         TextPhase           phase       = result.phase();
         assertTrue( phase instanceof ConfigPhase );
         
@@ -353,7 +355,7 @@ public class ConfigPhaseTest
         RoundTripResult     result      = execRoundTrip( commands );
         List<String>        feedback    = result.feedback();
         RoundTripParser     rtParser    = new RoundTripParser( feedback );
-        assertFalse( contains( rtParser.feedback, FAILURE ) );
+        assertFalse( TextTestUtils.contains( rtParser.feedback, FAILURE ) );
         TextPhase           phase       = result.phase();
         assertTrue( phase instanceof ConfigPhase );
         
@@ -375,8 +377,8 @@ public class ConfigPhaseTest
         List<String>    commands    = List.of( command, "q!" );
         RoundTripResult result      = execRoundTrip( commands );
         List<String>    feedback    = result.feedback();
-        assertTrue( contains( feedback, FAILURE ) );
-        assertTrue( contains( feedback, INVALID_ARG_COUNT ) );
+        assertTrue( TextTestUtils.contains( feedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( feedback, INVALID_ARG_COUNT ) );
     }
     
     @ParameterizedTest
@@ -387,8 +389,8 @@ public class ConfigPhaseTest
         List<String>    commands    = List.of( command, "q!" );
         RoundTripResult result      = execRoundTrip( commands );
         List<String>    feedback    = result.feedback();
-        assertTrue( contains( feedback, FAILURE ) );
-        assertTrue( contains( feedback, INVALID_REC_NUM ) );
+        assertTrue( TextTestUtils.contains( feedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( feedback, INVALID_REC_NUM ) );
     }
     
     @ParameterizedTest
@@ -399,8 +401,8 @@ public class ConfigPhaseTest
         List<String>    commands    = List.of( command, "q!" );
         RoundTripResult result      = execRoundTrip( commands );
         List<String>    feedback    = result.feedback();
-        assertTrue( contains( feedback, FAILURE ) );
-        assertTrue( contains( feedback, INVALID_COORDINATES ) );
+        assertTrue( TextTestUtils.contains( feedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( feedback, INVALID_COORDINATES ) );
     }
     
     @ParameterizedTest
@@ -413,8 +415,8 @@ public class ConfigPhaseTest
         List<String>    commands    = List.of( command, "q!" );
         RoundTripResult result      = execRoundTrip( commands );
         List<String>    feedback    = result.feedback();
-        assertTrue( contains( feedback, FAILURE ) );
-        assertTrue( contains( feedback, INVALID_ORIENTATION ) );
+        assertTrue( TextTestUtils.contains( feedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( feedback, INVALID_ORIENTATION ) );
     }
     
     @ParameterizedTest
@@ -425,8 +427,8 @@ public class ConfigPhaseTest
         List<String>    commands    = List.of( command, "q!" );
         RoundTripResult result      = execRoundTrip( commands );
         List<String>    feedback    = result.feedback();
-        assertTrue( contains( feedback, FAILURE ) );
-        assertTrue( contains( feedback, OUT_OF_BOUNDS ) );
+        assertTrue( TextTestUtils.contains( feedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( feedback, OUT_OF_BOUNDS ) );
     }
     
     @Test
@@ -440,8 +442,8 @@ public class ConfigPhaseTest
         );
         RoundTripResult result      = execRoundTrip( commands );
         List<String>    feedback    = result.feedback();
-        assertTrue( contains( feedback, FAILURE ) );
-        assertTrue( contains( feedback, INTERSECTS_SHIP ) );
+        assertTrue( TextTestUtils.contains( feedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( feedback, INTERSECTS_SHIP ) );
     }
     
     @Test
@@ -470,7 +472,7 @@ public class ConfigPhaseTest
         List<String>        rawFeedback = result.feedback();
         RoundTripParser     rtParser    = new RoundTripParser( rawFeedback );
         List<String>        feedback    = rtParser.feedback;
-        assertFalse( contains( feedback, FAILURE ) );
+        assertFalse( TextTestUtils.contains( feedback, FAILURE ) );
         TextPhase           phase       = result.phase();
         assertTrue( phase instanceof ConfigPhase );
         
@@ -507,8 +509,8 @@ public class ConfigPhaseTest
         List<String>    commands        = List.of( invalidCmd, "q!" );
         RoundTripResult result          = execRoundTrip( commands );
         List<String>    feedback        = result.feedback();
-        assertTrue( contains( feedback, FAILURE ) );
-        assertTrue( contains( feedback, INVALID_C_COMMAND ) );
+        assertTrue( TextTestUtils.contains( feedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( feedback, INVALID_C_COMMAND ) );
         assertTrue( containsIC( feedback, invalidCmd ) );
     }
     
@@ -525,7 +527,7 @@ public class ConfigPhaseTest
             );
         RoundTripResult     result      = execRoundTrip( commands );
         List<String>        rawFeedback = result.feedback();
-        assertFalse( contains( rawFeedback, FAILURE ) );
+        assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
     }
     
     @Test
@@ -550,7 +552,7 @@ public class ConfigPhaseTest
         List<String>        script      = List.of( "", "q!" );
         RoundTripResult     result      = execRoundTrip( script );
         List<String>        rawFeedback = result.feedback();
-        assertFalse( contains( rawFeedback, FAILURE ) );
+        assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
     }
     
     @Test
@@ -565,7 +567,7 @@ public class ConfigPhaseTest
             );
         RoundTripResult     result      = execRoundTrip( script );
         List<String>        rawFeedback = result.feedback();
-        assertFalse( contains( rawFeedback, FAILURE ) );
+        assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
         RoundTripParser     rtParser    = new RoundTripParser( rawFeedback );
         List<CommandBucket> buckets     = rtParser.buckets;
         // sanity check:
@@ -578,7 +580,7 @@ public class ConfigPhaseTest
         String              expColumns  = 
             String.valueOf( Grid2D.getNumCols() );
         List<String>        colHeader   = gridParser.getColumnHeader();
-        assertTrue( contains( colHeader, expColumns ) );
+        assertTrue( TextTestUtils.contains( colHeader, expColumns ) );
         List<String>        labeledRows = gridParser.getLabeledRows();
         int                 expRows     = defProvisioner.getRows();
         int                 actRows     = labeledRows.size();
@@ -605,7 +607,7 @@ public class ConfigPhaseTest
         ConfigPhase         configPhase = 
             result.phase() instanceof ConfigPhase config ? config : null;
         assertNotNull( configPhase );
-        assertFalse( contains( rawFeedback, FAILURE ) );
+        assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
         assertEquals( 1, configPhase.getDeployedShips().size() );
     }
     
@@ -625,7 +627,7 @@ public class ConfigPhaseTest
             );   
         RoundTripResult     result      = execRoundTrip( script );
         List<String>        rawFeedback = result.feedback();
-        assertFalse( contains( rawFeedback, FAILURE ) );
+        assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
         RoundTripParser     rtParser    = new RoundTripParser( rawFeedback );
         List<CommandBucket> buckets     = rtParser.buckets;
         // sanity check:
@@ -646,8 +648,8 @@ public class ConfigPhaseTest
         List<String>    commands    = List.of( command, "q!" );
         RoundTripResult result      = execRoundTrip( commands );
         List<String>    feedback    = result.feedback();
-        assertTrue( contains( feedback, FAILURE ) );
-        assertTrue( contains( feedback, expErr ) );
+        assertTrue( TextTestUtils.contains( feedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( feedback, expErr ) );
     }
    
     @Test
@@ -710,7 +712,7 @@ public class ConfigPhaseTest
     {
         boolean containsAll =
             exp.stream()
-                .filter( s -> !contains( act, s ) )
+                .filter( s -> !TextTestUtils.contains( act, s ) )
                 .findAny().isEmpty();
         return containsAll;
     }
@@ -725,16 +727,7 @@ public class ConfigPhaseTest
             .map( String::toUpperCase )
             .toList();
         String          targetUC    = target.toUpperCase();
-        boolean         contains    = contains( sourceUC, targetUC );
-        return contains;
-    }
-    private static boolean contains( Collection<String> source, String target )
-    {
-        boolean contains    =
-            source.stream()
-                .filter( s -> s.contains( target ) )
-                .findAny()
-                .isPresent();
+        boolean         contains    = TextTestUtils.contains( sourceUC, targetUC );
         return contains;
     }
 

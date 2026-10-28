@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringReader;
+import java.util.Collection;
 import java.util.List;
 
 import com.acmemail.judah.battleship.Provisioner;
@@ -69,6 +70,26 @@ public class TextTestUtils
         RoundTripResult         result      =
             new RoundTripResult( provisioner, phase, toProcessor, feedback );
         return result;
+    }
+    
+    /**
+     * Returns true if the given target
+     * is contained in any element
+     * of the given list.
+     * 
+     * @param source    the give list
+     * @param target    the given target
+     * 
+     * @return  true if target is contained in any element of list
+     */
+    public static boolean contains( Collection<String> source, String target )
+    {
+        boolean contains    =
+            source.stream()
+                .filter( s -> s.contains( target ) )
+                .findAny()
+                .isPresent();
+        return contains;
     }
 
     /**

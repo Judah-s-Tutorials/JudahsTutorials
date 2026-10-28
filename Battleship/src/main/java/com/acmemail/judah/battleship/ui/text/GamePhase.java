@@ -21,6 +21,9 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.util.List;
+import java.util.function.BooleanSupplier;
+
+import org.apache.commons.lang3.function.BooleanConsumer;
 
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Fleet;
@@ -74,6 +77,30 @@ m,paul,f2</pre>
 <pre style="padding-left: 2em;">
 strike,c9
 s,a10</pre>
+ * </li>
+ * <li>
+ *      unstrike --
+ *      This command is intended to reverse a previously
+ *      (and, presumably, erroneously) executed strike command.
+ *      The argument is the coordinate pair to un-strike.
+ *      The cell at the given coordinates
+ *      is explicitly set to unattacked.
+ *      Example:
+<pre style="padding-left: 2em;">
+unstrike,c9</pre>
+ * </li>
+ * <li>
+ *      unattack --
+ *      This command is intended to reverse a previously
+ *      (and, presumably, erroneously) executed hit or miss command.
+ *      The arguments are the name of the opponent,
+ *      and the coordinates to attack.
+ *      If there are only two players,
+ *      the opponent name may be omitted.
+ *      Examples:
+<pre style="padding-left: 2em;">
+unattack,paul,c9
+unattack,a1</pre>
  * </li>
  * <li>u, undo -- undo the last action</li>
  * <li>r, redo -- redo the last action</li>
@@ -233,6 +260,7 @@ public class GamePhase implements TextPhase
         case "Q!", "QUIT!" -> quit = really = true;
         case "AUTO", "AUTO-UPDATE" -> autoUpdate( command, result );
         case "S", "STRIKE" -> strike( command, result );
+        case "UNSTRIKE" -> unstrike( command, result );
         case "HIT" -> attack( command, true, result );
         case "MISS" -> attack( command, false, result );
         case "U", "UNDO" -> undoStack.undo();
@@ -248,7 +276,7 @@ public class GamePhase implements TextPhase
         List<String>    errLines    = 
             errors.stream().map( "    "::concat ).toList();
         PrintStreamUtils.writeOut( outStream, errLines );
-    }
+    }    
     
     private void unattack( String command, Result result )
     {
@@ -329,46 +357,72 @@ public class GamePhase implements TextPhase
     {
         String[]    args        = split( command );
         int         argCount    = args.length;
-        Grid2D      grid        = Grid2D.getHomeGrid();
+        Label       labelCoords = getLabelCoords( args );
         
         if ( argCount != 2 )
             result.addMessage( INVALID_ARG_COUNT, false );
+        else if ( labelCoords == null )
+            result.addMessage( INVALID_COORDINATES, false );
         else
-            attack( grid, args, result );
+        {
+            StrikeCommand   cmd = new StrikeCommand( labelCoords );
+            undoStack.executeCommand( cmd );
+        }
+    }
+
+    /**
+     * Validate and execute an {@code unstrike} command.
+     * Including the command,
+     * the client passes two arguments,
+     * the second being the coordinates
+     * on the home grid to unstrike.
+     * The command can fail because
+     * there are an incorrect number of arguments,
+     * the coordinates argument is malformed,
+     * or the coordinates are out-of-bounds.
+     * The result of command execution
+     * is recorded in the given Result container.
+     * 
+     * @param command   the command arguments
+     * @param result    the given result container
+     */
+    private void unstrike( String command, Result result )
+    {
+        String[]    args        = split( command );
+        int         argCount    = args.length;
+        Label       labelCoords = getLabelCoords( args );
+        
+        if ( argCount != 2 )
+            result.addMessage( INVALID_ARG_COUNT, false );
+        else if ( labelCoords == null )
+            result.addMessage( INVALID_COORDINATES, false );
+        else
+        {
+            UnstrikeCommand   cmd = new UnstrikeCommand( labelCoords );
+            undoStack.executeCommand( cmd );
+        }
     }
     
     /**
      * This helper method is for the direct support of
-     * {@link #attack(String, Result)} and
-     * {@link #strike(String, Result)}.
-     * The argument list from the attack/strike command is passed in.
+     * {@link #miss(String, Result)} and
+     * {@link #hit(String, Result)}.
+     * The argument list from the hit/miss command is passed in.
      * If there are two arguments,
      * the second is taken to be the grid coordinates,
      * otherwise the third is used.
      * If valid, 
-     * an AttackCommand is generated and executed.
+     * a HitCoomand or MissCommand is generated and executed.
      * <p>
      * Precondition: 
      * The length of the args array has been validated.
      * 
      * @param grid      the grid to attack
      * @param args      the command arguments
+     * @param isHit     
+     *      true if this is a hit command, false for a miss command
      * @param result    container for recording the operation result
      */
-    private void attack( Grid2D grid, String[] args, Result result )
-    {
-        Label   labelCoords = getLabelCoords( args );
-        if ( labelCoords == null )
-            result.addMessage( INVALID_COORDINATES, false );
-        else if ( !grid.contains( labelCoords.getGridCoords() ) )
-            result.addMessage( OUT_OF_BOUNDS, false );
-        else
-        {
-            AttackCommand   attack  = new AttackCommand( grid, labelCoords );
-            undoStack.executeCommand( attack );
-        }
-    }
-
     private void attack( 
         Grid2D grid, 
         String[] args, 
@@ -383,10 +437,7 @@ public class GamePhase implements TextPhase
             result.addMessage( OUT_OF_BOUNDS, false );
         else
         {
-            Command         attack  = isHit ?
-                new HitCommand( grid, labelCoords ) :
-                new MissCommand(grid, labelCoords );
-//            AttackCommand   attack  = new AttackCommand( grid, labelCoords );
+            Command attack  = new AttackCommand( grid, labelCoords, isHit );
             undoStack.executeCommand( attack );
         }
     }
@@ -482,27 +533,34 @@ public class GamePhase implements TextPhase
     {
         String[]    args        = split( command );
         int         argCount    = args.length;
-        if ( argCount == 1 )
-            autoUpdate = true;
-        else if ( argCount > 1 )
+        if ( argCount > 2 )
             result.addMessage( INVALID_ARG_COUNT, false );
         else
         {
-            boolean test    = evalOffOrOn( args[1], result );
+            boolean test    = evalOffOrOn( args, result );
             if ( result.getStatus() )
-                autoUpdate = test;
+            {
+//                autoUpdate = test;
+                AutoCommand auto    =
+                    new AutoCommand( test, b -> autoUpdate = b, () -> autoUpdate );
+                undoStack.executeCommand( auto );
+            }
         }
     }
     
-    private static boolean evalOffOrOn( String token, Result result )
+    private static boolean evalOffOrOn( String[] args, Result result )
     {
-        boolean isOn    = false;
-        if ( ON_ALIASES.contains( token ) )
-            isOn = true;
-        else if ( OFF_ALIASES.contains( token ) )
-            isOn = false;
-        else
-            result.addMessage( INVALID_ARG, false );
+        boolean isOn    = true;
+        if ( args.length > 1 )
+        {
+            String  token   = args[1];
+            if ( ON_ALIASES.contains( token ) )
+                isOn = true;
+            else if ( OFF_ALIASES.contains( token ) )
+                isOn = false;
+            else
+                result.addMessage( INVALID_ARG, false );
+        }
         return isOn;
     }
 
@@ -583,8 +641,10 @@ public class GamePhase implements TextPhase
     {
         private final Grid2D        grid;
         private final GridCoords    gridCoords;
+        private final boolean       isHit;
         
         private boolean isSplattedOrig;
+        private boolean isOpponentOrig;
         
         /**
          * Constructor.
@@ -593,11 +653,12 @@ public class GamePhase implements TextPhase
          * @param grid          the grid being attacked
          * @param labelCoords   the coordinates being attacked
          */
-        public AttackCommand( Grid2D grid, Label labelCoords )
+        public AttackCommand( Grid2D grid, Label labelCoords, boolean isHit )
         {
             super();
             this.grid = grid;
             this.gridCoords = labelCoords.getGridCoords();
+            this.isHit = isHit;
         }
 
         @Override
@@ -605,7 +666,9 @@ public class GamePhase implements TextPhase
         {
             Cell2DView  cell    = grid.getCellView( gridCoords );
             isSplattedOrig = cell.isSplatted();
+            isOpponentOrig = cell.isOpponent();
             grid.attack( gridCoords );
+            grid.setOpponent( gridCoords, isHit );
         }
 
         @Override
@@ -615,102 +678,63 @@ public class GamePhase implements TextPhase
                 grid.attack( gridCoords );
             else
                 grid.unattack( gridCoords );
-            
+            grid.setOpponent( gridCoords, isOpponentOrig );
         }        
     }
     
-    /**
-     * Defines the actions to take when an opponent's cell is hit,
-     * or undoing a previously executed hit.
-     */
-    private static class HitCommand implements Command
+    private static class StrikeCommand implements Command
     {
-        private final Grid2D        grid;
         private final GridCoords    gridCoords;
+        private boolean             isSplattedOrig;
         
-        private boolean isSplattedOrig;
-        private boolean isOpponentOrig;
-        
-        /**
-         * Constructor.
-         * Fully initializes an object of this type.
-         * 
-         * @param grid          the grid being attacked
-         * @param labelCoords   the coordinates being attacked
-         */
-        public HitCommand( Grid2D grid, Label labelCoords )
+        public StrikeCommand( Label labelCoords )
         {
-            super();
-            this.grid = grid;
-            this.gridCoords = labelCoords.getGridCoords();
+            gridCoords = labelCoords.getGridCoords();
         }
-
+        
         @Override
         public void execute()
         {
-            Cell2DView  cell    = grid.getCellView( gridCoords );
+            Grid2D      home    = Grid2D.getHomeGrid();
+            Cell2DView  cell    = home.getCellView( gridCoords );
             isSplattedOrig = cell.isSplatted();
-            isOpponentOrig = cell.isOpponent();
-            grid.attack( gridCoords );
-            grid.setOpponent( gridCoords );
+            home.attack( gridCoords );
         }
-
+        
         @Override
         public void undo()
         {
-            if ( isSplattedOrig )
-                grid.attack( gridCoords );
-            else
-                grid.unattack( gridCoords );
-            grid.setOpponent( gridCoords, isOpponentOrig );
+            Grid2D      home    = Grid2D.getHomeGrid();
+            if ( !isSplattedOrig )
+                home.unattack( gridCoords );
         }
     }
     
-    /**
-     * Defines the actions to take when an attack
-     * on an opponent's cell is a miss,
-     * or undoing a previously executed miss.
-     */
-    private static class MissCommand implements Command
+    private static class UnstrikeCommand implements Command
     {
-        private final Grid2D        grid;
         private final GridCoords    gridCoords;
+        private boolean             isSplattedOrig;
         
-        private boolean isSplattedOrig;
-        private boolean isOpponentOrig;
-        
-        /**
-         * Constructor.
-         * Fully initializes an object of this type.
-         * 
-         * @param grid          the grid being attacked
-         * @param labelCoords   the coordinates being attacked
-         */
-        public MissCommand( Grid2D grid, Label labelCoords )
+        public UnstrikeCommand( Label labelCoords )
         {
-            super();
-            this.grid = grid;
-            this.gridCoords = labelCoords.getGridCoords();
+            gridCoords = labelCoords.getGridCoords();
         }
-
+        
         @Override
         public void execute()
         {
-            Cell2DView  cell    = grid.getCellView( gridCoords );
+            Grid2D      home    = Grid2D.getHomeGrid();
+            Cell2DView  cell    = home.getCellView( gridCoords );
             isSplattedOrig = cell.isSplatted();
-            isOpponentOrig = cell.isOpponent();
-            grid.attack( gridCoords );
-            grid.setOpponent( gridCoords, false );
+            home.unattack( gridCoords );
         }
-
+        
         @Override
         public void undo()
         {
+            Grid2D      home    = Grid2D.getHomeGrid();
             if ( isSplattedOrig )
-                grid.attack( gridCoords );
-            else
-                grid.unattack( gridCoords );
-            grid.setOpponent( gridCoords, isOpponentOrig );
+                home.attack( gridCoords );
         }
     }
 
@@ -757,5 +781,31 @@ public class GamePhase implements TextPhase
             
         }
         
+    }
+    
+    private static class AutoCommand implements Command
+    {
+        private final BooleanConsumer   setter;
+        private final BooleanSupplier   getter;
+        private final boolean           newState;
+        private boolean origState;
+        
+        public AutoCommand( boolean newState, BooleanConsumer setter, BooleanSupplier getter )
+        {
+            this.newState = newState;
+            this.setter = setter;
+            this.getter = getter;
+        }
+        
+        public void execute()
+        {
+            origState = getter.getAsBoolean();
+            setter.accept( newState );
+        }
+        
+        public void undo()
+        {
+            setter.accept( origState );
+        }
     }
 }

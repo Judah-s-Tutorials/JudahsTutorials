@@ -84,7 +84,7 @@ public class RoundTripParser
      * There is one special case: 
      * the first line after the command prompt
      * comes at the end of the command prompt,
-     * we split the first line into two.
+     * so we split the first line into two.
      * Assumption:
      * the feedback associated with a command
      * can be split into four parts:
