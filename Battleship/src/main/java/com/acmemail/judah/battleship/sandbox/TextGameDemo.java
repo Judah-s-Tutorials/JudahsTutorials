@@ -35,7 +35,7 @@ public class TextGameDemo
         Configurator.nextState();
         config( fleet );
         prov.getPlayers().forEach( Grid2D::new );
-        GamePhase   game    = new GamePhase( fleet );
+        GamePhase   game    = new GamePhase();
         game.exec();
     }
     

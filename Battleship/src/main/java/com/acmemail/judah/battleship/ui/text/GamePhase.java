@@ -5,8 +5,8 @@ import static com.acmemail.judah.battleship.StatusMessages.FALSE;
 import static com.acmemail.judah.battleship.StatusMessages.GRID_NOT_FOUND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COORDINATES;
-import static com.acmemail.judah.battleship.StatusMessages.INVALID_C_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.NO;
 import static com.acmemail.judah.battleship.StatusMessages.OFF;
 import static com.acmemail.judah.battleship.StatusMessages.ON;
@@ -26,7 +26,6 @@ import java.util.function.BooleanSupplier;
 import org.apache.commons.lang3.function.BooleanConsumer;
 
 import com.acmemail.judah.battleship.Configurator;
-import com.acmemail.judah.battleship.Fleet;
 import com.acmemail.judah.battleship.Label;
 import com.acmemail.judah.battleship.Result;
 import com.acmemail.judah.battleship.artwork.text.TextGridParent;
@@ -151,29 +150,25 @@ public class GamePhase implements TextPhase
     private boolean                 really;
 
     /**
-     * Constructor.
+     * Default constructor.
      * Creates a new instance
-     * with the given Fleet, 
-     * and default input and output streams.
-     *
-     * @param fleet   the given Fleet; may not be null.
+     * with the default input and output streams.
      * 
-     * @see #GamePhase(Fleet, Reader, PrintStream)
+     * @see #GamePhase( Reader, PrintStream)
      */
-    public GamePhase( Fleet fleet )
+    public GamePhase()
     {
         this( null, null );
     }
 
     /**
      * Constructor.
-     * Create a new instance encapsulating the given Fleet.
+     * Create a new instance encapsulating the current grid configuration.
      * Allows the operator-input source and the output destination
      * to be supplied by the caller, for example by a test driver.
      * The source and destination may be null,
      * in which case stdin and stdout will be used.
      *
-     * @param fleet         the given fleet
      * @param reader        source of operator input; may be null
      * @param outStream     destination for status and error output; may be null
      */
@@ -267,7 +262,7 @@ public class GamePhase implements TextPhase
         case "R", "REDO" -> undoStack.redo();
         case "UNATTACK" -> unattack( command, result );
         case "" -> noop();
-        default -> result.addMessage( INVALID_C_COMMAND, false );
+        default -> result.addMessage( INVALID_COMMAND, false );
         }
         PrintStreamUtils.printOut( outStream, workCommand + ": " );
         String          status  = result.getStatus() ? SUCCESS : FAILURE;
@@ -357,11 +352,11 @@ public class GamePhase implements TextPhase
     {
         String[]    args        = split( command );
         int         argCount    = args.length;
-        Label       labelCoords = getLabelCoords( args );
+        Label       labelCoords;
         
         if ( argCount != 2 )
             result.addMessage( INVALID_ARG_COUNT, false );
-        else if ( labelCoords == null )
+        else if ( (labelCoords = getLabelCoords( args )) == null )
             result.addMessage( INVALID_COORDINATES, false );
         else
         {
@@ -390,11 +385,11 @@ public class GamePhase implements TextPhase
     {
         String[]    args        = split( command );
         int         argCount    = args.length;
-        Label       labelCoords = getLabelCoords( args );
+        Label       labelCoords;
         
         if ( argCount != 2 )
             result.addMessage( INVALID_ARG_COUNT, false );
-        else if ( labelCoords == null )
+        else if ( (labelCoords = getLabelCoords( args )) == null )
             result.addMessage( INVALID_COORDINATES, false );
         else
         {
@@ -498,10 +493,15 @@ public class GamePhase implements TextPhase
      */
     private static Label getLabelCoords( String[] args )
     {
+        Grid2D      homeGrid    = Grid2D.getHomeGrid();
         String      labelArg    = args.length > 2 ? args[2] : args[1];
         Label       labelCoords = new Label( labelArg.trim() );
         if ( !labelCoords.isStatus() )
             labelCoords = null;
+        // TODO Grid2D.contains should be static
+        else if ( !homeGrid.contains( labelCoords.getGridCoords() ) )
+            labelCoords = null;
+        
         return labelCoords;
     }
 
@@ -748,6 +748,7 @@ public class GamePhase implements TextPhase
         private final GridCoords    gridCoords;
         
         private boolean isSplattedOrig;
+        private boolean isOpponentOrig;
         
         /**
          * Constructor.
@@ -769,6 +770,7 @@ public class GamePhase implements TextPhase
             Cell2DView  cell    = grid.getCellView( gridCoords );
             isSplattedOrig = cell.isSplatted();
             grid.unattack( gridCoords );
+            grid.setOpponent( gridCoords, false );
         }
 
         @Override
@@ -778,9 +780,8 @@ public class GamePhase implements TextPhase
                 grid.attack( gridCoords );
             else
                 grid.unattack( gridCoords );
-            
+            grid.setOpponent( gridCoords, isOpponentOrig );
         }
-        
     }
     
     private static class AutoCommand implements Command
