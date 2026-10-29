@@ -41,6 +41,7 @@ class GamePhaseTest
     private static final String             MISS            = "miss";
     private static final String             HIT             = "hit";
     private static final String             STRIKE          = "strike";
+    private static final String             SHOW            = "show";
     private static final String             QUIT            = "quit";
     private static final String             QUITB           = "quit!";
     private static final int                NUM_COLS        = 11;
@@ -96,7 +97,7 @@ class GamePhaseTest
     public void testSimpleHit()
     {
         Label           label       = new Label( "A1" );
-        String          hit         = "hit," + OPP_ONE + "," + label.getLabel();
+        String          hit         = hit( OPP_ONE, label );
         List<String>    script      = List.of( hit, QUITB );
         RoundTripResult result      = execRoundTrip( script );
         assertTrue( result.phase().isQuit() );
@@ -106,6 +107,7 @@ class GamePhaseTest
     @Test
     public void testSimpleStrike()
     {
+        // Strike both an occupied cell and an unoccupied cell
         Label           labelOccupied   = getOccupiedCell();
         Label           labelUnoccupied = getUnoccupiedCell();
         String          strikeO         = strike( labelOccupied );
@@ -263,6 +265,34 @@ class GamePhaseTest
         testAuto( UNDO );
     }
     
+    @Test
+    public void testShow()
+    {
+        String          autoOff     = auto( "off" );
+        List<String>    script      =
+            List.of(
+                autoOff, // bucket[0]; expect no-update to follow
+                SHOW,    // bucket[1]; expect no auto-update to follow;
+                         //            expect command output to contain update
+                QUITB    // bucket[2]
+            );
+        RoundTripResult     result      = execRoundTrip( script );
+        List<String>        rawFeedback = result.feedback();
+        RoundTripParser     parser      = new RoundTripParser( rawFeedback );
+        List<CommandBucket> buckets     = parser.buckets;
+        assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( rawFeedback, SUCCESS ) );
+        assertTrue( result.phase().isQuit() );
+        assertEquals( script.size(), buckets.size() );
+        
+        CommandBucket       bucket0     = buckets.get( 0 );
+        CommandBucket       bucket1     = buckets.get( 1 );
+        assertFalse( hasAutoUpdate( bucket0 ) );
+        assertFalse( hasUpdateOutput( bucket0 ) );
+        assertFalse( hasAutoUpdate( bucket1 ) );
+        assertTrue( hasUpdateOutput( bucket1 ) );
+    }
+    
     /**
      * Test toggling the auto command.
      * First: explicitly make sure auto is off.
@@ -284,10 +314,9 @@ class GamePhaseTest
             List.of(
                 autoOff, // bucket[0]; expect no-update to follow
                 autoOn,  // bucket[1]; expect update to follow
-                miss,    // bucket[2]; expect update to follow
-                turnOff, // bucket[3]; expect no-update to follow
-                miss,    // bucket[4]; expect no-update to follow
-                QUITB    // bucket[5]; update not tested
+                turnOff, // bucket[2]; expect no-update to follow
+                miss,    // bucket[3]; expect no-update to follow
+                QUITB    // bucket[4]; update not tested
             );
         RoundTripResult     result      = execRoundTrip( script );
         List<String>        rawFeedback = result.feedback();
@@ -298,11 +327,11 @@ class GamePhaseTest
         assertTrue( result.phase().isQuit() );
         assertEquals( script.size(), buckets.size() );
         
-        assertFalse( hasUpdate( buckets.get( 0 ) ) );
-        assertTrue( hasUpdate( buckets.get( 1 ) ) );
-        assertTrue( hasUpdate( buckets.get( 2 ) ) );
-        assertFalse( hasUpdate( buckets.get( 3 ) ) );
-        assertFalse( hasUpdate( buckets.get( 4 ) ) );
+        assertFalse( hasAutoUpdate( buckets.get( 0 ) ) );
+        assertTrue( hasAutoUpdate( buckets.get( 1 ) ) );
+        assertFalse( hasAutoUpdate( buckets.get( 2 ) ) );
+        assertFalse( hasAutoUpdate( buckets.get( 3 ) ) );
+        assertFalse( hasAutoUpdate( buckets.get( 4 ) ) );
     }
 
     /**
@@ -456,8 +485,51 @@ class GamePhaseTest
     }
     
     /**
-     * Return true if the given bucket
+     * Return true if the given bucket's suffix
      * appears to contain an update block.
+     * Not to be confused with a bucket
+     * that contains an update block
+     * in it's output,
+     * as will be the case of the SHOW command.
+     * 
+     * @param bucket    the given bucket
+     * 
+     * @return  true if bucket appears to contain an update block
+     * 
+     * @see #hasUpdate(List)
+     */
+    private static boolean hasAutoUpdate( CommandBucket bucket )
+    {
+        List<String>    suffix      = bucket.suffix();
+        boolean         result      = hasUpdate( suffix );
+        return result;
+    }
+    
+    /**
+     * Return true if the given bucket's output
+     * appears to contain an update block.
+     * Not to be confused with a bucket
+     * that contains an update block
+     * in it's suffix,
+     * as will be the case when auto-update is turned on.
+     * 
+     * @param bucket    the given bucket
+     * 
+     * @return  true if bucket appears to contain an update block
+     * 
+     * @see #hasUpdate(List)
+     */
+    private static boolean hasUpdateOutput( CommandBucket bucket )
+    {
+        List<String>    output      = bucket.output();
+        boolean         result      = hasUpdate( output );
+        return result;
+    }
+    
+    
+    /**
+     * Return true if the given lines of text
+     * appear to contain an update block.
      * This is the block of text
      * that encapsulates the text-based display
      * of the game's physical grid.
@@ -467,18 +539,17 @@ class GamePhaseTest
      * in the update block
      * and not elsewhere.
      * 
-     * @param bucket    the given bucket
+     * @param text  the given lines of text
      * 
      * @return  true if bucket appears to contain an update block
      */
-    private static boolean hasUpdate( CommandBucket bucket )
+    private static boolean hasUpdate( List<String> text )
     {
         String          vLineStr    = String.valueOf( TextGridConstants.VLINE );
-        List<String>    suffix      = bucket.suffix();
         boolean         result      =
-            TextTestUtils.contains( suffix, OPP_ONE ) &&
-            TextTestUtils.contains( suffix, OPP_TWO ) &&
-            TextTestUtils.contains( suffix, vLineStr );
+            TextTestUtils.contains( text, OPP_ONE ) &&
+            TextTestUtils.contains( text, OPP_TWO ) &&
+            TextTestUtils.contains( text, vLineStr );
         return result;
     }
     
