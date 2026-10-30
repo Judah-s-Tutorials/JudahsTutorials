@@ -3,6 +3,7 @@ package com.acmemail.judah.battleship.ui.text;
 import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
 import static com.acmemail.judah.battleship.StatusMessages.FALSE;
 import static com.acmemail.judah.battleship.StatusMessages.GRID_NOT_FOUND;
+import static com.acmemail.judah.battleship.StatusMessages.HELP_END;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COMMAND;
@@ -101,8 +102,51 @@ unstrike,c9</pre>
 unattack,paul,c9
 unattack,a1</pre>
  * </li>
- * <li>u, undo -- undo the last action</li>
- * <li>r, redo -- redo the last action</li>
+ * <li>
+ *      q, quit --
+ *      Quit the game without finishing it.
+ *      The operator will be prompted with 
+ *      "Are you sure?"
+ *      Any response beginning with 'y'
+ *      will terminate the game;
+ *      any other response will result
+ *      in game continuation.
+ * </li>
+ * <li>
+ *      q!, quit! --
+ *      This is the same as quit,
+ *      except the "Are you sure?" logic is skipped,
+ *      and the game is abruptly terminated.
+ * </li>
+ * <li>
+ *      go, game-over --
+ *      Declare the game finished,
+ *      and exit to post-processing.
+ *      The operator will be prompted with 
+ *      "Are you sure?"
+ *      Any response beginning with 'y'
+ *      will exit the game;
+ *      any other response will result
+ *      in game continuation.
+ * </li>
+ * <li>
+ *      go!, game-over! --
+ *      This is the same as game-over,
+ *      except the "Are you sure?" logic is skipped,
+ *      and the game is abruptly exited.
+ * </li>
+ * <li>
+ *      u, undo -- 
+ *      undo the last action;
+ *      not applicable to {@code quit}
+ *      or {@code game-over}.
+ * </li>
+ * <li>
+ *      r, redo -- 
+ *      redo the last action;
+ *      not applicable to {@code quit}
+ *      or {@code game-over}.
+ * </li>
  * </ul>
  */
 public class GamePhase implements TextPhase
@@ -126,6 +170,8 @@ public class GamePhase implements TextPhase
         + "and its arguments, "
         + "one command per line. "
         + "For example, the command: ",
+        
+        HELP_END
     };
     
     /** List of lines in help message. */
@@ -205,12 +251,20 @@ public class GamePhase implements TextPhase
         return quit;
     }
     
+    /**
+     * Execute a loop,
+     * reading and executing commands
+     * read from {@link #consoleReader}.
+     * The loop terminates
+     * when a quit, or game-over command is encountered.
+     */
     private void execLoop()
     {
         gameComplete = false;
         quit = false;
         really = false;
-        while ( !quit && !gameComplete )
+        boolean done    = false;
+        while ( !done )
         {
             showGrids( autoUpdate );
             PrintStreamUtils.printOut( outStream, TEXT_PROMPT );
@@ -221,11 +275,13 @@ public class GamePhase implements TextPhase
             {
                 if ( !really )
                     quit = areYouSure( "Quit" );
+                done = quit;
             }
             else if ( gameComplete )
             {
                 if ( !really )
                     gameComplete = areYouSure( "Setup complete" );
+                done = gameComplete;
             }
         }
     }
@@ -251,8 +307,6 @@ public class GamePhase implements TextPhase
         {
         case "?", "H", "HELP"  -> showHelp();
         case "SHOW", "SHOW-GRID" -> showGrids( true );
-        case "Q", "QUIT" -> quit = true;
-        case "Q!", "QUIT!" -> quit = really = true;
         case "AUTO", "AUTO-UPDATE" -> autoUpdate( command, result );
         case "S", "STRIKE" -> strike( command, result );
         case "UNSTRIKE" -> unstrike( command, result );
@@ -262,6 +316,10 @@ public class GamePhase implements TextPhase
         case "R", "REDO" -> undoStack.redo();
         case "UNATTACK" -> unattack( command, result );
         case "" -> noop();
+        case "Q", "QUIT" -> quit = true;
+        case "Q!", "QUIT!" -> quit = really = true;
+        case "GO", "GAME-OVER" -> gameComplete = true;
+        case "GO!", "GAME-OVER!" -> gameComplete = really = true;
         default -> result.addMessage( INVALID_COMMAND, false );
         }
         PrintStreamUtils.printOut( outStream, workCommand + ": " );
@@ -286,8 +344,6 @@ public class GamePhase implements TextPhase
             result.addMessage( GRID_NOT_FOUND, false );
         else if ( (labelCoords = getLabelCoords( args )) == null )
             result.addMessage( INVALID_COORDINATES, false );
-        else if ( !grid.contains( labelCoords.getGridCoords() ) )
-            result.addMessage( OUT_OF_BOUNDS, false );
         else
         {
             UnattackCommand unattack    = 
@@ -400,8 +456,8 @@ public class GamePhase implements TextPhase
     
     /**
      * This helper method is for the direct support of
-     * {@link #miss(String, Result)} and
-     * {@link #hit(String, Result)}.
+     * {@link #attack(String, boolean, Result)} and
+     * {@link #attack(String, boolean, Result)}.
      * The argument list from the hit/miss command is passed in.
      * If there are two arguments,
      * the second is taken to be the grid coordinates,
@@ -428,8 +484,6 @@ public class GamePhase implements TextPhase
         Label   labelCoords = getLabelCoords( args );
         if ( labelCoords == null )
             result.addMessage( INVALID_COORDINATES, false );
-        else if ( !grid.contains( labelCoords.getGridCoords() ) )
-            result.addMessage( OUT_OF_BOUNDS, false );
         else
         {
             Command attack  = new AttackCommand( grid, labelCoords, isHit );
@@ -439,7 +493,7 @@ public class GamePhase implements TextPhase
     
     /**
      * This helper method is for the direct support of
-     * {@link #attack(String, Result)}.
+     * {@link #attack(String, boolean, Result)}.
      * The argument list from the attack command is passed in,
      * and, if there are more than two arguments,
      * the second is taken to be the name of the target grid.
@@ -476,7 +530,7 @@ public class GamePhase implements TextPhase
     
     /**
      * This helper method is for the direct support of
-     * {@link #attack(String, Result)} and
+     * {@link #attack(String, boolean, Result)} and
      * {@link #strike(String, Result)}.
      * The argument list from the attack/strike command is passed in.
      * If there are two arguments,
@@ -540,7 +594,6 @@ public class GamePhase implements TextPhase
             boolean test    = evalOffOrOn( args, result );
             if ( result.getStatus() )
             {
-//                autoUpdate = test;
                 AutoCommand auto    =
                     new AutoCommand( test, b -> autoUpdate = b, () -> autoUpdate );
                 undoStack.executeCommand( auto );
@@ -548,6 +601,28 @@ public class GamePhase implements TextPhase
         }
     }
     
+    /**
+     * Examine an argument list representing a boolean, 
+     * and determine whether it should be interpreted
+     * as true or false:
+     * a) if there's only one argument, the result is true;
+     * b) if there is more than one argument,
+     * the result is determined by comparing args[1]
+     * to the tokens in {@link #ON_ALIASES} (true)
+     * and {@link #OFF_ALIASES} (false).
+     * If args[1] exists, and contains value other than
+     * the on- and off-aliases,
+     * an illegal argument results,
+     * and the result object is updated accordingly.
+     * Arguments after args[1] are ignored.
+     * 
+     * @param args      the arguments to examine
+     * @param result    the result of the examination
+     * 
+     * @return  
+     *      true, if args is valid and evaluates to true,
+     *      otherwise false
+     */
     private static boolean evalOffOrOn( String[] args, Result result )
     {
         boolean isOn    = true;
@@ -682,6 +757,9 @@ public class GamePhase implements TextPhase
         }        
     }
     
+    /**
+     * Encapsulates undo/redo logic for the strike command.
+     */
     private static class StrikeCommand implements Command
     {
         private final GridCoords    gridCoords;
@@ -710,6 +788,9 @@ public class GamePhase implements TextPhase
         }
     }
     
+    /**
+     * Encapsulates undo/redo logic for the unstrike command.
+     */
     private static class UnstrikeCommand implements Command
     {
         private final GridCoords    gridCoords;
@@ -784,6 +865,9 @@ public class GamePhase implements TextPhase
         }
     }
     
+    /**
+     * Encapsulates undo/redo logic for the auto command.
+     */
     private static class AutoCommand implements Command
     {
         private final BooleanConsumer   setter;
@@ -791,7 +875,11 @@ public class GamePhase implements TextPhase
         private final boolean           newState;
         private boolean origState;
         
-        public AutoCommand( boolean newState, BooleanConsumer setter, BooleanSupplier getter )
+        public AutoCommand( 
+            boolean newState, 
+            BooleanConsumer setter, 
+            BooleanSupplier getter 
+        )
         {
             this.newState = newState;
             this.setter = setter;

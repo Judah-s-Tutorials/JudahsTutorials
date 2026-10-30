@@ -2,6 +2,7 @@ package com.acmemail.judah.battleship.ui.text;
 
 import static com.acmemail.judah.battleship.StatusMessages.FAILURE;
 import static com.acmemail.judah.battleship.StatusMessages.GRID_NOT_FOUND;
+import static com.acmemail.judah.battleship.StatusMessages.HELP_END;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COMMAND;
@@ -12,9 +13,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -23,6 +27,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.battleship.BasicProvisioner;
 import com.acmemail.judah.battleship.Configurator;
@@ -72,6 +77,11 @@ class GamePhaseTest
     @BeforeEach
     public void beforeEach()
     {
+        resetConfig( 2 );
+    }
+    
+    private void resetConfig( int numOpponents )
+    {
         Grid2D.reset( NUM_ROWS, NUM_COLS );
         Configurator.reset();
         Configurator.nextState();
@@ -82,9 +92,13 @@ class GamePhaseTest
         homeShips.forEach( homeGrid::put );
 
         oppOneGrid = new Grid2D( OPP_ONE );
-        oppTwoGrid = new Grid2D( OPP_TWO );
         oppOneShips = deployHorizontal( 1, 1 );
-        oppTwoShips = deployVertical( 2, 2 );
+
+        if ( numOpponents > 1 )
+        {
+            oppTwoGrid = new Grid2D( OPP_TWO );
+            oppTwoShips = deployVertical( 2, 2 );
+        }
         
         Configurator.nextState();
         assertTrue( Configurator.isConfigComplete() );
@@ -97,14 +111,24 @@ class GamePhaseTest
     }
     
     @Test
+    public void testGamePhaseReaderPrintStream()
+    {        
+        StringReader    strReader   = new StringReader( "abcd" );
+        new GamePhase( strReader, System.out );
+        
+        // Exercise unusual path where caller passes a BufferedRead explicitly
+        BufferedReader  bufReader   = new BufferedReader( strReader );
+        new GamePhase( bufReader, System.out );
+    }
+    
+    @Test
     public void testSimpleMiss()
     {
         Label           label       = new Label( "A1" );
         String          miss        = buildCommand( MISS, OPP_ONE, label );
-        List<String>    script      = List.of( miss, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertIsMiss( OPP_ONE, label );
+        Consumer<RoundTripResult>   validator   = 
+            r -> assertIsMiss( OPP_ONE, label );
+        testSimpleCommand( List.of( miss ), validator );
     }
     
     @Test
@@ -112,25 +136,24 @@ class GamePhaseTest
     {
         Label           label       = new Label( "A1" );
         String          hit         = buildCommand( HIT, OPP_ONE, label );
-        List<String>    script      = List.of( hit, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertIsHit( OPP_ONE, label );
+        Consumer<RoundTripResult>   validator   = 
+            r -> assertIsHit( OPP_ONE, label );
+        testSimpleCommand( List.of( hit ), validator );
     }
     
     @Test
     public void testSimpleStrike()
     {
         // Strike both an occupied cell and an unoccupied cell
-        Label           occupied    = getOccupiedCell();
         Label           unoccupied  = getUnoccupiedCell();
-        String          strikeO     = buildCommand( STRIKE, occupied );
+        Label           occupied    = getOccupiedCell();
         String          strikeU     = buildCommand( STRIKE, unoccupied );
-        List<String>    script      = List.of( strikeO, strikeU, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertIsStrike( occupied );
-        assertIsStrike( unoccupied );
+        String          strikeO     = buildCommand( STRIKE, occupied );
+        List<String>    commands    = List.of( strikeU, strikeO );
+        testSimpleCommand( commands, r -> {
+            assertIsStrike( unoccupied );
+            assertIsStrike( occupied );
+        });
     }
     
     @Test
@@ -142,18 +165,17 @@ class GamePhaseTest
         String          strikeU     = buildCommand( STRIKE, unoccupied );
         String          unstrikeO   = buildCommand( UNSTRIKE, occupied );
         String          unstrikeU   = buildCommand( UNSTRIKE, unoccupied );
-        List<String>    script      = 
+        List<String>    commands    = 
             List.of( 
                 strikeO, 
                 strikeU, 
                 unstrikeO, 
-                unstrikeU, 
-                QUITB
+                unstrikeU
             );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertNotIsStrike( occupied );
-        assertNotIsStrike( unoccupied );
+        testSimpleCommand( commands, r -> {
+            assertNotStrike( unoccupied );
+            assertNotStrike( occupied );
+        });
     }
     
     @Test
@@ -170,13 +192,12 @@ class GamePhaseTest
                 miss, 
                 hit,
                 unmiss,
-                unhit,
-                QUITB
+                unhit
             );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertNotAttacked( OPP_ONE, labelMiss );
-        assertNotAttacked( OPP_ONE, labelHit );
+        testSimpleCommand( script, r -> {
+            assertNotAttacked( OPP_ONE, labelMiss );
+            assertNotAttacked( OPP_ONE, labelHit );
+        });
     }
     
     @Test
@@ -186,9 +207,7 @@ class GamePhaseTest
         String          miss        = buildCommand( MISS, OPP_ONE, label );
         String          hit         = buildCommand( HIT, OPP_ONE, label );
         List<String>    script      = List.of( miss, hit, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertIsHit( OPP_ONE, label );
+        testSimpleCommand( script, r -> assertIsHit( OPP_ONE, label ) );
     }
     
     @Test
@@ -198,9 +217,25 @@ class GamePhaseTest
         String          miss        = buildCommand( MISS, OPP_ONE, label );
         String          hit         = buildCommand( HIT, OPP_ONE, label );
         List<String>    script      = List.of( hit, miss, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertIsMiss( OPP_ONE, label );
+        testSimpleCommand( script, r -> assertIsMiss( OPP_ONE, label ) );
+    }
+    
+    @Test
+    public void testUndoHit()
+    {
+        Label           label       = new Label( "A1" );
+        String          hit         = buildCommand( HIT, OPP_ONE, label );
+        List<String>    script      = List.of( hit );
+        testUndo1x1( script, r -> assertNotAttacked( OPP_ONE, label ) );
+    }
+    
+    @Test
+    public void testUndoMiss()
+    {
+        Label           label       = new Label( "A1" );
+        String          miss        = buildCommand( MISS, OPP_ONE, label );
+        List<String>    script      = List.of( miss );
+        testUndo1x1( script, r -> assertNotAttacked( OPP_ONE, label ) );
     }
     
     @Test
@@ -209,10 +244,8 @@ class GamePhaseTest
         Label           label       = new Label( "A1" );
         String          miss        = buildCommand( MISS, OPP_ONE, label );
         String          hit         = buildCommand( HIT, OPP_ONE, label );
-        List<String>    script      = List.of( miss, hit, UNDO, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertIsMiss( OPP_ONE, label );
+        List<String>    script      = List.of( miss, hit );
+        testUndo1x1( script, r -> assertIsMiss( OPP_ONE, label ) );
     }
     
     @Test
@@ -221,42 +254,16 @@ class GamePhaseTest
         Label           label       = new Label( "A1" );
         String          miss        = buildCommand( MISS, OPP_ONE, label );
         String          hit         = buildCommand( HIT, OPP_ONE, label );
-        List<String>    script      = List.of( hit, miss, UNDO, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertIsHit( OPP_ONE, label );
-    }
-    
-    @Test
-    public void testUndoHit()
-    {
-        Label           label       = new Label( "A1" );
-        String          hit         = buildCommand( HIT, OPP_ONE, label );
-        List<String>    script      = List.of( hit, UNDO, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertNotAttacked( OPP_ONE, label );
-    }
-    
-    @Test
-    public void testUndoMiss()
-    {
-        Label           label       = new Label( "A1" );
-        String          miss        = buildCommand( MISS, OPP_ONE, label );
-        List<String>    script      = List.of( miss, UNDO, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertNotAttacked( OPP_ONE, label );
+        List<String>    script      = List.of( hit, miss );
+        testUndo1x1( script, r -> assertIsHit( OPP_ONE, label ) );
     }
     
     public void testUndoStrike()
     {
         Label           label       = new Label( "A1" );
         String          strike      = buildCommand( STRIKE, label );
-        List<String>    script      = List.of( strike, UNDO, QUITB );
-        RoundTripResult result      = execRoundTrip( script );
-        assertTrue( result.phase().isQuit() );
-        assertNotIsStrike(  label );
+        List<String>    script      = List.of( strike );
+        testUndo1x1( script, r -> assertNotStrike(  label ) );
     }
     
     @Test
@@ -310,7 +317,7 @@ class GamePhaseTest
         // Strike twice, undo twice, final status should be is-not-strike
         Label           label       = new Label( "A1" );
         String          strike      = buildCommand( STRIKE, label );
-        testUndo2x2( strike, () -> assertNotIsStrike( label ) );
+        testUndo2x2( strike, () -> assertNotStrike( label ) );
     }
     
     @Test
@@ -321,7 +328,7 @@ class GamePhaseTest
         Label           label       = new Label( "A1" );
         String          strike      = buildCommand( STRIKE, label );
         String          unstrike    = buildCommand( UNSTRIKE, label );
-        Runnable        validator   = () -> assertNotIsStrike( label );
+        Runnable        validator   = () -> assertNotStrike( label );
         testUndo2x1( unstrike, validator, strike );
     }
     
@@ -340,12 +347,12 @@ class GamePhaseTest
     @Test
     public void testUndoUnattack2x1()
     {
-        // Strike, then unattack twice; 
-        // undo once, final status should be not-is-attacked
+        // Attack, then unattack once; 
+        // undo once, final status should be is-attacked
         Label           label       = new Label( "A1" );
         String          miss        = buildCommand( MISS, OPP_ONE, label );
         String          unattack    = buildCommand( UNATTACK, OPP_ONE, label );
-        Runnable        validator   = () -> assertIsAttacked( OPP_ONE, label );
+        Runnable        validator   = () -> assertNotAttacked( OPP_ONE, label );
         testUndo2x1( unattack, validator, miss );
     }
     
@@ -356,23 +363,134 @@ class GamePhaseTest
         // undo twice, final status should be is-attacked
         Label           label       = new Label( "A1" );
         String          miss        = buildCommand( MISS, OPP_ONE, label );
-        String          unattack    = buildCommand( UNATTACK, label );
-        Runnable        validator   = () -> assertNotAttacked( OPP_ONE, label );
+        String          unattack    = buildCommand( UNATTACK, OPP_ONE, label );
+        Runnable        validator   = () -> assertIsAttacked( OPP_ONE, label );
         testUndo2x2( unattack, validator, miss );
+    }
+    
+    @Test
+    public void testAutoNoArg()
+    {
+        List<String>                script      = List.of( AUTO, QUITB );
+        Consumer<RoundTripResult>   validator   = r -> {
+            List<String>        rawFeedback = r.feedback();
+            RoundTripParser     parser      = new RoundTripParser( rawFeedback );
+            List<CommandBucket> buckets     = parser.buckets;
+            //sanity check
+            assertTrue( buckets.size() > 0 );
+            CommandBucket       bucket0     = buckets.get( 0 );
+            assertTrue( hasAutoUpdate( bucket0 ) );
+        };
+        testSimpleCommand( script, validator );
     }
     
     @Test
     public void testAuto()
     {
-        testAuto( auto( "off" ) );
+        testAutoOff( auto( "off" ) );
     }
     
     @Test
     public void testAutoUndo()
     {
-        testAuto( UNDO );
+        testAutoOff( UNDO );
     }
     
+    @Test
+    public void testRedoHit()
+    {
+        Label           label       = new Label( "A1" );
+        String          hit         = buildCommand( HIT, OPP_ONE, label );
+        List<String>    script      = List.of( hit );
+        testRedo( script, r -> assertIsAttacked( OPP_ONE, label ) );
+    }
+    
+    @Test
+    public void testRedoMiss()
+    {
+        Label           label       = new Label( "A1" );
+        String          miss        = buildCommand( MISS, OPP_ONE, label );
+        List<String>    script      = List.of( miss );
+        testRedo( script, r -> assertIsAttacked( OPP_ONE, label ) );
+    }
+    
+    @Test
+    public void testRedoStrike()
+    {
+        // Strike both an occupied cell and an unoccupied cell
+        Label           label       = getUnoccupiedCell();
+        String          strike      = buildCommand( STRIKE, label );
+        List<String>    commands    = List.of( strike );
+        testRedo( commands, r -> assertIsStrike( label ) );
+    }
+    
+    @Test
+    public void testRedoUnstrike()
+    {
+        Label           cell        = getOccupiedCell();
+        String          strike      = buildCommand( STRIKE, cell );
+        String          unstrike    = buildCommand( UNSTRIKE, cell );
+        List<String>    script      = List.of( strike, unstrike );
+        testRedo( script, r -> assertNotStrike( cell ) );
+    }
+    
+    @Test
+    public void testAutoRedo()
+    {
+        Label           label       = new Label( "a1" );
+        String          autoOn      = auto( "on" );
+        String          autoOff     = auto( "off" );
+        String          miss        = buildCommand( MISS, OPP_ONE, label );
+        List<String>    script      =
+            List.of(
+                autoOff, // bucket[0]; expect no-update to follow
+                autoOn,  // bucket[1]; expect update to follow
+                UNDO,    // bucket[2]; expect no-update to follow
+                REDO,    // bucket[3]; expect update to follow
+                miss,    // bucker[4]; expect update to follow
+                autoOff, // bucket[6]; expect no-update to follow
+                UNDO,    // bucket[7]; expect update to follow
+                miss,    // bucket[8]; expect update to follow
+                QUITB    // bucket[9]; update not tested
+            );
+        List<Boolean>    expResults  =
+            List.of(
+                false,   // bucket[0]; expect no-update to follow
+                true,    // bucket[1]; expect update to follow
+                false,   // bucket[2]; expect no-update to follow
+                true,    // bucket[3]; expect update to follow
+                true,    // bucker[4]; expect update to follow
+                false,   // bucket[6]; expect no-update to follow
+                true,    // bucket[7]; expect update to follow
+                true,    // bucket[8]; expect update to follow
+                false    // bucket[9]; update not tested
+            );
+        // sanity check
+        assertEquals( script.size(), expResults.size() );
+        RoundTripResult     result      = execRoundTrip( script );
+        List<String>        rawFeedback = result.feedback();
+        RoundTripParser     parser      = new RoundTripParser( rawFeedback );
+        List<CommandBucket> buckets     = parser.buckets;
+
+        int                 bucketCount = buckets.size();
+        // sanity check
+        assertEquals( script.size(), bucketCount );
+
+        assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( rawFeedback, SUCCESS ) );
+        assertTrue( result.phase().isQuit() );
+        
+        int numLoops    = bucketCount - 1;
+        for ( int inx = 0 ; inx < numLoops ; ++inx )
+        {
+            String          strInx      = String.valueOf( inx );
+            CommandBucket   bucket      = buckets.get( inx );
+            boolean         expResult   = expResults.get( inx );
+            boolean         actResult   = hasAutoUpdate( bucket );
+            assertEquals( expResult, actResult, strInx );
+        }
+    }
+
     @Test
     public void testShow()
     {
@@ -401,28 +519,99 @@ class GamePhaseTest
         assertTrue( hasUpdateOutput( bucket1 ) );
     }
     
-    @Test
-    public void testQuit()
+    @ParameterizedTest
+    @ValueSource( strings= { "", "   " } )
+    public void testNoop( String noop )
     {
-        List<String>    script  = List.of( QUIT, "NO", QUIT, "YES" );
-        
+        testSimpleCommand( List.of( noop ), r -> {} );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= { "?", "h", "help" } )
+    public void testHelp( String help )
+    {
+        List<String>    script  = List.of( help, QUITB );
         RoundTripResult     result      = execRoundTrip( script );
         List<String>        rawFeedback = result.feedback();
         assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
         assertTrue( TextTestUtils.contains( rawFeedback, SUCCESS ) );
-        assertTrue( result.phase().isQuit() );
+        assertTrue( TextTestUtils.contains( rawFeedback, HELP_END ) );
+    }
+
+    @ParameterizedTest
+    @ValueSource( strings= { "q", "quit" } )
+    public void testQuit( String quit )
+    {
+        List<String>    script  = List.of( quit, "NO", quit, "YES" );
+        testGameExit( script, true );
+    }
+    @ParameterizedTest
+    @ValueSource( strings= { "q!", "quit!" } )
+    public void testQuitReally( String quit )
+    {
+        List<String>    script  = List.of( quit );
+        testGameExit( script, true );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= { "go", "game-over" } )
+    public void testGameOver( String gameOver )
+    {
+        List<String>    script  = List.of( gameOver, "NO", gameOver, "YES" );
+        testGameExit( script, false );
+    }
+    
+    @ParameterizedTest
+    @ValueSource( strings= { "go!", "game-over!" } )
+    public void testGameOverReally( String gameOver )
+    {
+        List<String>    script  = List.of( "go!" );
+        testGameExit( script, false );
     }
     
     @Test
-    public void testQuitReally()
+    public void testOneOpponent()
     {
-        List<String>    script  = List.of( QUITB );
+        resetConfig( 1 );
+        Label           missCell        = new Label( "A1" );
+        Label           hitCell         = new Label( "A2" );
+        Label           unattackCell    = new Label( "A3" );
         
+        String          miss            = buildCommand( MISS, missCell );
+        String          hit             = buildCommand( HIT, hitCell );
+        String          attack          = buildCommand( HIT, unattackCell );
+        String          unattack        = buildCommand( UNATTACK, unattackCell );
+        
+        List<String>    script          =
+            List.of( miss, hit, attack, unattack );
+        
+        testSimpleCommand( script, r -> {
+            assertIsMiss( OPP_ONE, missCell );
+            assertIsHit( OPP_ONE, hitCell );
+            assertNotAttacked( OPP_ONE, unattackCell );
+        });
+    }
+    
+    /**
+     * Execute a given script
+     * ending with a quit or game-over.
+     * Every command in the script
+     * must complete successfully.
+     * Validate the result.
+     * 
+     * @param script    script to execute
+     * @param expQuit   expected return from GamePhase.isQuit().
+     */
+    private void testGameExit( 
+        List<String> script, 
+        boolean expQuit
+    )
+    {
         RoundTripResult     result      = execRoundTrip( script );
         List<String>        rawFeedback = result.feedback();
         assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
         assertTrue( TextTestUtils.contains( rawFeedback, SUCCESS ) );
-        assertTrue( result.phase().isQuit() );
+        assertEquals( expQuit, result.phase().isQuit() );
     }
     
     @ParameterizedTest
@@ -438,6 +627,21 @@ class GamePhaseTest
         assertTrue( TextTestUtils.contains( rawFeedback, expError ), command );
     }
     
+    private void testSimpleCommand( 
+        List<String> commands, 
+        Consumer<RoundTripResult> validator
+    )
+    {
+        List<String>    script      = new ArrayList<>( commands );
+        script.add( QUITB );
+        RoundTripResult result      = execRoundTrip( script );
+        List<String>    feedback    = result.feedback();
+        assertTrue( TextTestUtils.contains( feedback, SUCCESS ) );
+        assertFalse( TextTestUtils.contains( feedback, FAILURE ) );
+        assertTrue( result.phase().isQuit() );
+        validator.accept( result );
+    }
+
     /**
      * Test toggling the auto command.
      * First: explicitly make sure auto is off.
@@ -449,7 +653,7 @@ class GamePhaseTest
      * 
      * @param turnOff   the command to turn auto off
      */
-    private void testAuto( String turnOff )
+    private void testAutoOff( String turnOff )
     {
         Label           label       = new Label( "a1" );
         String          autoOn      = auto( "on" );
@@ -477,6 +681,30 @@ class GamePhaseTest
         assertFalse( hasAutoUpdate( buckets.get( 2 ) ) );
         assertFalse( hasAutoUpdate( buckets.get( 3 ) ) );
         assertFalse( hasAutoUpdate( buckets.get( 4 ) ) );
+    }
+    
+    /**
+     * Add UNDO, QUITB to a given list of commands
+     * and validate the result.
+     * 
+     * @param commands      given list of commands
+     * @param validator     logic for validating a result.
+     */
+    private void testUndo1x1( 
+        List<String> commands, 
+        Consumer<RoundTripResult> validator
+    )
+    {
+        List<String>    script      = 
+            Stream.concat(
+                commands.stream(),
+                Stream.of( UNDO, QUITB )
+            ).toList();
+        RoundTripResult result      = execRoundTrip( script );
+        List<String>    feedback    = result.feedback();
+        assertTrue( TextTestUtils.contains( feedback, SUCCESS ) );
+        assertTrue( result.phase().isQuit() );
+        validator.accept( result );
     }
 
     /**
@@ -535,6 +763,30 @@ class GamePhaseTest
         RoundTripResult result      = execRoundTrip( script );
         assertTrue( result.phase().isQuit() );
         validator.run();
+    }
+    
+    /**
+     * Add UNDO, REDO, QUITB to a given list of commands
+     * and validate the result.
+     * 
+     * @param commands      given list of commands
+     * @param validator     logic for validating a result.
+     */
+    private void testRedo( 
+        List<String> commands, 
+        Consumer<RoundTripResult> validator
+    )
+    {
+        List<String>    script      = 
+            Stream.concat(
+                commands.stream(),
+                Stream.of( UNDO, REDO, QUITB )
+            ).toList();
+        RoundTripResult result      = execRoundTrip( script );
+        List<String>    feedback    = result.feedback();
+        assertTrue( TextTestUtils.contains( feedback, SUCCESS ) );
+        assertTrue( result.phase().isQuit() );
+        validator.accept( result );
     }
 
     /**
@@ -631,7 +883,7 @@ class GamePhaseTest
         assertEquals( cell.getShip(), getShip( label ) );
     }
     
-    private static void assertNotIsStrike( Label label )
+    private static void assertNotStrike( Label label )
     {
         Grid2D  grid                = Grid2D.getHomeGrid();
         GridCoords      coords      = label.getGridCoords();
