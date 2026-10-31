@@ -34,6 +34,28 @@ public class UndoRedoManager
         undoStack.push( command );
         redoStack.clear(); // New actions clear redo history
     }
+    
+    /**
+     * Returns true if the undo stack is non-empty.
+     * 
+     * @return  true if the undo stack is non-empty
+     */
+    public boolean hasUndo()
+    {
+        boolean hasUndo = !undoStack.isEmpty();
+        return hasUndo;
+    }
+    
+    /**
+     * Returns true if the redo stack is non-empty.
+     * 
+     * @return  true if the redo stack is non-empty
+     */
+    public boolean hasRedo()
+    {
+        boolean hasRedo = !redoStack.isEmpty();
+        return hasRedo;
+    }
 
     /**
      * Undo the last executed action.

@@ -8,13 +8,15 @@ import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COORDINATES;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_GRID;
 import static com.acmemail.judah.battleship.StatusMessages.NO;
 import static com.acmemail.judah.battleship.StatusMessages.OFF;
 import static com.acmemail.judah.battleship.StatusMessages.ON;
-import static com.acmemail.judah.battleship.StatusMessages.OUT_OF_BOUNDS;
+import static com.acmemail.judah.battleship.StatusMessages.REDO_UNAVAILABLE;
 import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
 import static com.acmemail.judah.battleship.StatusMessages.TEXT_PROMPT;
 import static com.acmemail.judah.battleship.StatusMessages.TRUE;
+import static com.acmemail.judah.battleship.StatusMessages.UNDO_UNAVAILABLE;
 import static com.acmemail.judah.battleship.StatusMessages.YES;
 
 import java.io.BufferedReader;
@@ -23,6 +25,7 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.util.List;
 import java.util.function.BooleanSupplier;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.function.BooleanConsumer;
 
@@ -153,10 +156,12 @@ public class GamePhase implements TextPhase
 {
     /** All the different ways the operator might say "on." */
     private static final List<String>   ON_ALIASES  = 
-        List.of( ON, TRUE, YES, "1" );
+        Stream.of( ON, TRUE, YES, "1" )
+            .map( String::toUpperCase ).toList();
     /** All the different ways the operator might say "off." */
     private static final List<String>   OFF_ALIASES = 
-        List.of( OFF, FALSE, NO, "0" );
+        Stream.of( OFF, FALSE, NO, "0" )
+            .map( String::toUpperCase ).toList();
     /** The maximum length of a line when formatting the help message. */
     private static final int        lineLen     = 60;
     /** Paragraphs in the help message. */
@@ -312,8 +317,8 @@ public class GamePhase implements TextPhase
         case "UNSTRIKE" -> unstrike( command, result );
         case "HIT" -> attack( command, true, result );
         case "MISS" -> attack( command, false, result );
-        case "U", "UNDO" -> undoStack.undo();
-        case "R", "REDO" -> undoStack.redo();
+        case "U", "UNDO" -> undo( command, result );
+        case "R", "REDO" -> redo( command, result );
         case "UNATTACK" -> unattack( command, result );
         case "" -> noop();
         case "Q", "QUIT" -> quit = true;
@@ -329,8 +334,64 @@ public class GamePhase implements TextPhase
         List<String>    errLines    = 
             errors.stream().map( "    "::concat ).toList();
         PrintStreamUtils.writeOut( outStream, errLines );
-    }    
+    }
     
+    /**
+     * Validates and executes an undo command.
+     * The operation can fail because the command is formatted incorrectly,
+     * or because there is nothing to undo.
+     * The caller passes a Result object
+     * in which the status of the operation is reported.
+     * 
+     * @param command   the command to execute
+     * @param result    container for the result of the operation
+     */
+    private void undo( String command, Result result )
+    {
+        String[]    args        = split( command );
+        if ( args.length > 1 )
+            result.addMessage( INVALID_ARG_COUNT, false );
+        else if ( !undoStack.hasUndo() )
+            result.addMessage( UNDO_UNAVAILABLE, false );
+        else
+            undoStack.undo();
+    }
+    
+    /**
+     * Validates and executes a redo command.
+     * The operation can fail because the command is formatted incorrectly,
+     * or because there is nothing to redo.
+     * The caller passes a Result object
+     * in which the status of the operation is reported.
+     * 
+     * @param command   the command to execute
+     * @param result    container for the result of the operation
+     */
+    private void redo( String command, Result result )
+    {
+        String[]    args        = split( command );
+        if ( args.length > 1 )
+            result.addMessage( INVALID_ARG_COUNT, false );
+        else if ( !undoStack.hasRedo() )
+            result.addMessage( REDO_UNAVAILABLE, false );
+        else
+            undoStack.redo();
+    }
+    
+    /**
+     * Execute an unattack command on an opponent's grid,
+     * presumably reversing a prior hit or miss command.
+     * Explicitly resets the is-attacked and is-occupied 
+     * state of the target cell.
+     * The command can fail because it's improperly formatted,
+     * or provides an incorrect grid name or grid coordinates.
+     * The caller passes a container
+     * for recording the result of command processing.
+     * 
+     * @param command   the command containing the unattack instructions
+     * @param result    
+     *      container for recording the outcome of attempted execution
+     */
     private void unattack( String command, Result result )
     {
         String[]    args        = split( command );
@@ -340,8 +401,10 @@ public class GamePhase implements TextPhase
         
         if ( argCount < 2 || argCount > 3 )
             result.addMessage( INVALID_ARG_COUNT, false );
-        else if ( (grid = getGrid( args )) == null )
-            result.addMessage( GRID_NOT_FOUND, false );
+        else if ( (grid = getGrid( args, result )) == null )
+        {
+            // error message already recorded by getGrid
+        }
         else if ( (labelCoords = getLabelCoords( args )) == null )
             result.addMessage( INVALID_COORDINATES, false );
         else
@@ -382,9 +445,11 @@ public class GamePhase implements TextPhase
         
         if ( argCount < 2 || argCount > 3 )
             result.addMessage( INVALID_ARG_COUNT, false );
-        else if ( (grid = getGrid( args )) == null )
-            result.addMessage( GRID_NOT_FOUND, false );
-        else 
+        else if ( (grid = getGrid( args, result )) == null )
+        {
+            // error message already recorded by getGrid
+        }
+        else
             attack( grid, args, isHit, result );
     }
 
@@ -509,14 +574,23 @@ public class GamePhase implements TextPhase
      * 
      * @return  the target grid, or null if not found
      */
-    private static Grid2D getGrid( String[] args )
+    private static Grid2D getGrid( String[] args, Result result )
     {
-        Grid2D  grid    = null;
+        Grid2D  homeGrid    = Grid2D.getHomeGrid();
+        Grid2D  grid        = null;
         if ( args.length > 2 )
+        {
             grid = Grid2D.getGrid( args[1].trim() );
+            if ( grid == homeGrid )
+            {
+                grid = null;
+                result.addMessage( INVALID_GRID, false );
+            }
+            else if ( grid == null )
+                result.addMessage( GRID_NOT_FOUND, false );
+        }
         else
         {
-            Grid2D          homeGrid    = Grid2D.getHomeGrid();
             List<Grid2D>    allGrids    = Grid2D.getAllGrids();
             if ( allGrids.size() == 2 )
             {
@@ -524,6 +598,8 @@ public class GamePhase implements TextPhase
                 if ( grid == homeGrid )
                     grid = allGrids.get( 1 );
             }
+            else
+                result.addMessage( GRID_NOT_FOUND, false );
         }
         return grid;
     }
@@ -628,7 +704,7 @@ public class GamePhase implements TextPhase
         boolean isOn    = true;
         if ( args.length > 1 )
         {
-            String  token   = args[1];
+            String  token   = args[1].toUpperCase();
             if ( ON_ALIASES.contains( token ) )
                 isOn = true;
             else if ( OFF_ALIASES.contains( token ) )
@@ -714,11 +790,16 @@ public class GamePhase implements TextPhase
      */
     private static class AttackCommand implements Command
     {
+        /** The target grid. */
         private final Grid2D        grid;
+        /** The target coordinates. */
         private final GridCoords    gridCoords;
+        /** True, if the target coordinates are occupied. */
         private final boolean       isHit;
         
+        /** The original is-attacked state. */
         private boolean isSplattedOrig;
+        /** The original is-occupied state. */
         private boolean isOpponentOrig;
         
         /**
@@ -727,6 +808,7 @@ public class GamePhase implements TextPhase
          * 
          * @param grid          the grid being attacked
          * @param labelCoords   the coordinates being attacked
+         * @param isHit         true if the target coordinates are occupied
          */
         public AttackCommand( Grid2D grid, Label labelCoords, boolean isHit )
         {
@@ -762,9 +844,16 @@ public class GamePhase implements TextPhase
      */
     private static class StrikeCommand implements Command
     {
+        /** The target coordinates on the home grid. */
         private final GridCoords    gridCoords;
+        /** The original is-attacked state. */
         private boolean             isSplattedOrig;
         
+        /**
+         * Constructor.
+         * 
+         * @param labelCoords   the target coordinates
+         */
         public StrikeCommand( Label labelCoords )
         {
             gridCoords = labelCoords.getGridCoords();
@@ -790,12 +879,21 @@ public class GamePhase implements TextPhase
     
     /**
      * Encapsulates undo/redo logic for the unstrike command.
+     * Note that the unstrike command, itself, 
+     * is intended to reverse a previously executed strike command.
      */
     private static class UnstrikeCommand implements Command
     {
+        /** Target coordinates on the home grid. */
         private final GridCoords    gridCoords;
+        /** Is-attacked state prior to command execution. */
         private boolean             isSplattedOrig;
         
+        /**
+         * Constructor.
+         * 
+         * @param labelCoords   target of the unstrike command
+         */
         public UnstrikeCommand( Label labelCoords )
         {
             gridCoords = labelCoords.getGridCoords();
@@ -822,13 +920,19 @@ public class GamePhase implements TextPhase
     /**
      * Defines the actions to take when unattacking a cell,
      * or undoing a previously executed unattack.
+     * Note that unattack itself is intended
+     * to reverse a prior hit or miss command.
      */
     private static class UnattackCommand implements Command
     {
+        /** The target grid. */
         private final Grid2D        grid;
+        /** The target coordinates. */
         private final GridCoords    gridCoords;
         
+        /** The original is-attacked state. */
         private boolean isSplattedOrig;
+        /** The original is-occupied state. */
         private boolean isOpponentOrig;
         
         /**
@@ -850,6 +954,7 @@ public class GamePhase implements TextPhase
         {
             Cell2DView  cell    = grid.getCellView( gridCoords );
             isSplattedOrig = cell.isSplatted();
+            isOpponentOrig = cell.isOpponent();
             grid.unattack( gridCoords );
             grid.setOpponent( gridCoords, false );
         }
@@ -870,11 +975,22 @@ public class GamePhase implements TextPhase
      */
     private static class AutoCommand implements Command
     {
+        /** Logic to set the auto state. */
         private final BooleanConsumer   setter;
+        /** Logic to obtain the auto state. */
         private final BooleanSupplier   getter;
+        /** The value to set the auto state on execute. */
         private final boolean           newState;
+        /** The auto state before execution. */
         private boolean origState;
         
+        /**
+         * Constructor.
+         * 
+         * @param newState  the value to set the auto state on execution
+         * @param setter    logic to set the auto state
+         * @param getter    logic to obtain the auto state
+         */
         public AutoCommand( 
             boolean newState, 
             BooleanConsumer setter, 
@@ -886,12 +1002,14 @@ public class GamePhase implements TextPhase
             this.getter = getter;
         }
         
+        @Override
         public void execute()
         {
             origState = getter.getAsBoolean();
             setter.accept( newState );
         }
         
+        @Override
         public void undo()
         {
             setter.accept( origState );

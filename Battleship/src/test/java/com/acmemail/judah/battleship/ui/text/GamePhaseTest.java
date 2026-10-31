@@ -7,7 +7,10 @@ import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_ARG_COUNT;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COMMAND;
 import static com.acmemail.judah.battleship.StatusMessages.INVALID_COORDINATES;
+import static com.acmemail.judah.battleship.StatusMessages.INVALID_GRID;
+import static com.acmemail.judah.battleship.StatusMessages.REDO_UNAVAILABLE;
 import static com.acmemail.judah.battleship.StatusMessages.SUCCESS;
+import static com.acmemail.judah.battleship.StatusMessages.UNDO_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,11 +33,11 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import com.acmemail.judah.battleship.BasicProvisioner;
+import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.Configurator;
 import com.acmemail.judah.battleship.Label;
 import com.acmemail.judah.battleship.Provisioner;
 import com.acmemail.judah.battleship.artwork.text.TextGridConstants;
-import com.acmemail.judah.battleship.artwork.text.TextGridParent;
 import com.acmemail.judah.battleship.model.Cell2DView;
 import com.acmemail.judah.battleship.model.Grid2D;
 import com.acmemail.judah.battleship.model.GridCoords;
@@ -55,7 +58,6 @@ class GamePhaseTest
     private static final String             UNSTRIKE        = "unstrike";
     private static final String             UNATTACK        = "unattack";
     private static final String             SHOW            = "show";
-    private static final String             QUIT            = "quit";
     private static final String             QUITB           = "quit!";
     private static final int                NUM_COLS        = 11;
     private static final int                NUM_ROWS        = 13;
@@ -68,11 +70,6 @@ class GamePhaseTest
         );
     
     private Grid2D              homeGrid        = Grid2D.getHomeGrid();
-    private Grid2D              oppOneGrid;
-    private Grid2D              oppTwoGrid;
-    private List<Ship2D>        oppOneShips;
-    private List<Ship2D>        oppTwoShips;
-    private GamePhase           gamePhase;
     
     @BeforeEach
     public void beforeEach()
@@ -91,13 +88,11 @@ class GamePhaseTest
         homeGrid = Grid2D.getHomeGrid();
         homeShips.forEach( homeGrid::put );
 
-        oppOneGrid = new Grid2D( OPP_ONE );
-        oppOneShips = deployHorizontal( 1, 1 );
+        new Grid2D( OPP_ONE );
 
         if ( numOpponents > 1 )
         {
-            oppTwoGrid = new Grid2D( OPP_TWO );
-            oppTwoShips = deployVertical( 2, 2 );
+            new Grid2D( OPP_TWO );
         }
         
         Configurator.nextState();
@@ -258,6 +253,7 @@ class GamePhaseTest
         testUndo1x1( script, r -> assertIsHit( OPP_ONE, label ) );
     }
     
+    @Test
     public void testUndoStrike()
     {
         Label           label       = new Label( "A1" );
@@ -347,8 +343,8 @@ class GamePhaseTest
     @Test
     public void testUndoUnattack2x1()
     {
-        // Attack, then unattack once; 
-        // undo once, final status should be is-attacked
+        // Attack, then unattack twice; 
+        // undo once, final status should be not-attacked
         Label           label       = new Label( "A1" );
         String          miss        = buildCommand( MISS, OPP_ONE, label );
         String          unattack    = buildCommand( UNATTACK, OPP_ONE, label );
@@ -357,15 +353,27 @@ class GamePhaseTest
     }
     
     @Test
-    public void testUndoUnattack2x2()
+    public void testMissUndoUnattack2x2()
     {
-        // Strike, then unattack twice; 
-        // undo twice, final status should be is-attacked
+        // Miss, then unattack twice; 
+        // undo twice, final status should be attacked/missed
         Label           label       = new Label( "A1" );
         String          miss        = buildCommand( MISS, OPP_ONE, label );
         String          unattack    = buildCommand( UNATTACK, OPP_ONE, label );
-        Runnable        validator   = () -> assertIsAttacked( OPP_ONE, label );
+        Runnable        validator   = () -> assertIsMiss( OPP_ONE, label );
         testUndo2x2( unattack, validator, miss );
+    }
+    
+    @Test
+    public void testHitUndoUnattack2x2()
+    {
+        // Hit, then unattack twice; 
+        // undo twice, final status should be attacked/hit
+        Label           label       = new Label( "A1" );
+        String          hit         = buildCommand( HIT, OPP_ONE, label );
+        String          unattack    = buildCommand( UNATTACK, OPP_ONE, label );
+        Runnable        validator   = () -> assertIsHit( OPP_ONE, label );
+        testUndo2x2( unattack, validator, hit );
     }
     
     @Test
@@ -447,11 +455,11 @@ class GamePhaseTest
                 autoOn,  // bucket[1]; expect update to follow
                 UNDO,    // bucket[2]; expect no-update to follow
                 REDO,    // bucket[3]; expect update to follow
-                miss,    // bucker[4]; expect update to follow
-                autoOff, // bucket[6]; expect no-update to follow
-                UNDO,    // bucket[7]; expect update to follow
-                miss,    // bucket[8]; expect update to follow
-                QUITB    // bucket[9]; update not tested
+                miss,    // bucket[4]; expect update to follow
+                autoOff, // bucket[5]; expect no-update to follow
+                UNDO,    // bucket[6]; expect update to follow
+                miss,    // bucket[7]; expect update to follow
+                QUITB    // bucket[8]; update not tested
             );
         List<Boolean>    expResults  =
             List.of(
@@ -459,11 +467,11 @@ class GamePhaseTest
                 true,    // bucket[1]; expect update to follow
                 false,   // bucket[2]; expect no-update to follow
                 true,    // bucket[3]; expect update to follow
-                true,    // bucker[4]; expect update to follow
-                false,   // bucket[6]; expect no-update to follow
+                true,    // bucket[4]; expect update to follow
+                false,   // bucket[5]; expect no-update to follow
+                true,    // bucket[6]; expect update to follow
                 true,    // bucket[7]; expect update to follow
-                true,    // bucket[8]; expect update to follow
-                false    // bucket[9]; update not tested
+                false    // bucket[8]; update not tested
             );
         // sanity check
         assertEquals( script.size(), expResults.size() );
@@ -565,7 +573,7 @@ class GamePhaseTest
     @ValueSource( strings= { "go!", "game-over!" } )
     public void testGameOverReally( String gameOver )
     {
-        List<String>    script  = List.of( "go!" );
+        List<String>    script  = List.of( gameOver );
         testGameExit( script, false );
     }
     
@@ -592,28 +600,6 @@ class GamePhaseTest
         });
     }
     
-    /**
-     * Execute a given script
-     * ending with a quit or game-over.
-     * Every command in the script
-     * must complete successfully.
-     * Validate the result.
-     * 
-     * @param script    script to execute
-     * @param expQuit   expected return from GamePhase.isQuit().
-     */
-    private void testGameExit( 
-        List<String> script, 
-        boolean expQuit
-    )
-    {
-        RoundTripResult     result      = execRoundTrip( script );
-        List<String>        rawFeedback = result.feedback();
-        assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
-        assertTrue( TextTestUtils.contains( rawFeedback, SUCCESS ) );
-        assertEquals( expQuit, result.phase().isQuit() );
-    }
-    
     @ParameterizedTest
     @MethodSource( "invalidCommands" )
     public void testCommandsGoWrong( GoWrong context )
@@ -627,6 +613,15 @@ class GamePhaseTest
         assertTrue( TextTestUtils.contains( rawFeedback, expError ), command );
     }
     
+    /**
+     * Execute a script, and validate the result.
+     * The quit-really command is automatically
+     * added to the end of the list of commands
+     * supplied by the caller.
+     * 
+     * @param commands  the commands constituting the script
+     * @param validator logic to validate the result
+     */
     private void testSimpleCommand( 
         List<String> commands, 
         Consumer<RoundTripResult> validator
@@ -684,6 +679,28 @@ class GamePhaseTest
     }
     
     /**
+     * Execute a given script
+     * ending with a quit or game-over.
+     * Every command in the script
+     * must complete successfully.
+     * Validate the result.
+     * 
+     * @param script    script to execute
+     * @param expQuit   expected return from GamePhase.isQuit().
+     */
+    private void testGameExit( 
+        List<String> script, 
+        boolean expQuit
+    )
+    {
+        RoundTripResult     result      = execRoundTrip( script );
+        List<String>        rawFeedback = result.feedback();
+        assertFalse( TextTestUtils.contains( rawFeedback, FAILURE ) );
+        assertTrue( TextTestUtils.contains( rawFeedback, SUCCESS ) );
+        assertEquals( expQuit, result.phase().isQuit() );
+    }
+
+    /**
      * Add UNDO, QUITB to a given list of commands
      * and validate the result.
      * 
@@ -732,7 +749,10 @@ class GamePhaseTest
                 Stream.of( command, command, UNDO, QUITB )
             ).toList();
         RoundTripResult result      = execRoundTrip( script );
+        List<String>    feedback    = result.feedback();
         assertTrue( result.phase().isQuit() );
+        assertTrue( TextTestUtils.contains( feedback, SUCCESS ) );
+        assertFalse( TextTestUtils.contains( feedback, FAILURE ) );
         validator.run();
     }
 
@@ -761,7 +781,10 @@ class GamePhaseTest
                 Stream.of( command, command, UNDO, UNDO, QUITB )
             ).toList();
         RoundTripResult result      = execRoundTrip( script );
+        List<String>    feedback    = result.feedback();
         assertTrue( result.phase().isQuit() );
+        assertTrue( TextTestUtils.contains( feedback, SUCCESS ) );
+        assertFalse( TextTestUtils.contains( feedback, FAILURE ) );
         validator.run();
     }
     
@@ -813,11 +836,10 @@ class GamePhaseTest
     
     /**
      * Construct a string incorporating
-     * the given command, name, and label.
-     * Example: {@code miss,Paul,A1}.
+     * the given command and label.
+     * Example: {@code strike,A1}.
      * 
      * @param command   the given command
-     * @param name      the given name
      * @param label     the given label
      * 
      * @return
@@ -844,14 +866,18 @@ class GamePhaseTest
         return auto;
     }
     
+    /**
+     * Assert that the current state
+     * of the given coordinates on the named grid
+     * is attacked/unoccupied.
+     * 
+     * @param name  the name of the target grid
+     * @param label the given coordinates
+     */
     private static void assertIsMiss( String name, Label label )
     {
         Grid2D  grid    = Grid2D.getGrid( name );
-        assertIsMiss( grid, label );
-    }
-    
-    private static void assertIsMiss( Grid2D grid, Label label )
-    {
+        // sanity check
         assertNotNull( grid );
         GridCoords      coords      = label.getGridCoords();
         Cell2DView      cell        = grid.getCellView( coords );
@@ -859,14 +885,18 @@ class GamePhaseTest
         assertFalse( cell.isOpponent() );
     }
     
+    /**
+     * Assert that the current state
+     * of the given coordinates on the named grid
+     * is attacked/occupied.
+     * 
+     * @param name  the name of the target grid
+     * @param label the given coordinates
+     */
     private static void assertIsHit( String name, Label label )
     {
         Grid2D  grid    = Grid2D.getGrid( name );
-        assertIsHit( grid, label );
-    }
-    
-    private static void assertIsHit( Grid2D grid, Label label )
-    {
+        // sanity check
         assertNotNull( grid );
         GridCoords      coords      = label.getGridCoords();
         Cell2DView      cell        = grid.getCellView( coords );
@@ -874,6 +904,13 @@ class GamePhaseTest
         assertTrue( cell.isOpponent() );
     }
     
+    /**
+     * Assert that the current state
+     * of the given coordinates on the home grid
+     * is attacked.
+     * 
+     * @param label the given coordinates
+     */
     private static void assertIsStrike( Label label )
     {
         Grid2D  grid                = Grid2D.getHomeGrid();
@@ -882,38 +919,53 @@ class GamePhaseTest
         assertTrue( cell.isSplatted() );
         assertEquals( cell.getShip(), getShip( label ) );
     }
-    
+        
+    /**
+     * Assert that the current state
+     * of the given coordinates on the home grid
+     * is not-attacked.
+     * 
+     * @param label the given coordinates
+     */
     private static void assertNotStrike( Label label )
     {
-        Grid2D  grid                = Grid2D.getHomeGrid();
+        Grid2D          grid        = Grid2D.getHomeGrid();
         GridCoords      coords      = label.getGridCoords();
         Cell2DView      cell        = grid.getCellView( coords );
         assertFalse( cell.isSplatted() );
         assertEquals( cell.getShip(), getShip( label ) );
     }
     
+    /**
+     * Assert that the current state
+     * of the given coordinates on the named grid
+     * is attacked/occupied.
+     * 
+     * @param name  the name of the target grid
+     * @param label the given coordinates
+     */
     private static void assertIsAttacked( String name, Label label )
     {
         Grid2D  grid    = Grid2D.getGrid( name );
-        assertIsAttacked( grid, label );
-    }
-    
-    private static void assertIsAttacked( Grid2D grid, Label label )
-    {
+        // sanity check
         assertNotNull( grid );
         GridCoords      coords      = label.getGridCoords();
         Cell2DView      cell        = grid.getCellView( coords );
         assertTrue( cell.isSplatted() );
     }
     
+    /**
+     * Assert that the current state
+     * of the given coordinates on the named grid
+     * is not-attacked/not-occupied
+     * 
+     * @param name  the name of the target grid
+     * @param label the given coordinates
+     */
     private static void assertNotAttacked( String name, Label label )
     {
         Grid2D  grid    = Grid2D.getGrid( name );
-        assertNotAttacked( grid, label );
-    }
-    
-    private static void assertNotAttacked( Grid2D grid, Label label )
-    {
+        // sanity check
         assertNotNull( grid );
         GridCoords      coords      = label.getGridCoords();
         Cell2DView      cell        = grid.getCellView( coords );
@@ -934,6 +986,7 @@ class GamePhaseTest
      * @return  true if bucket appears to contain an update block
      * 
      * @see #hasUpdate(List)
+     * @see CommandBucket
      */
     private static boolean hasAutoUpdate( CommandBucket bucket )
     {
@@ -955,6 +1008,7 @@ class GamePhaseTest
      * @return  true if bucket appears to contain an update block
      * 
      * @see #hasUpdate(List)
+     * @see CommandBucket
      */
     private static boolean hasUpdateOutput( CommandBucket bucket )
     {
@@ -990,18 +1044,42 @@ class GamePhaseTest
         return result;
     }
     
+    /**
+     * Gets the coordinates of an unoccupied cell
+     * on the home grid.
+     * 
+     * @return  the coordinates of an unoccupied cell on the home grid
+     * 
+     * @see #getCell(Predicate)
+     */
     private static Label getUnoccupiedCell()
     {
         Label       label   = getCell( c -> c.getShip() == null );
         return label;
     }
     
+    /**
+     * Gets the coordinates of an occupied cell
+     * on the home grid.
+     * 
+     * @return  the coordinates of an occupied cell on the home grid
+     * 
+     * @see #getCell(Predicate)
+     */
     private static Label getOccupiedCell()
     {
         Label       label   = getCell( c -> c.getShip() != null );
         return label;
     }
     
+    /**
+     * Gets the coordinates of a cell on the home grid
+     * that satisfies the given predicate.
+     * If such as cell is not found,
+     * an assertion is raised.
+     * 
+     * @return  the coordinates of an occupied cell on the home grid
+     */
     private static Label getCell( Predicate<Cell2DView> pred )
     {
         Grid2D      home    = Grid2D.getHomeGrid();
@@ -1021,6 +1099,17 @@ class GamePhaseTest
         return label;
     }
     
+    /**
+     * Find the ship
+     * that occupies the given coordinates.
+     * If none, null is returned.
+     * 
+     * @param label the given coordinates
+     * 
+     * @return
+     *      the ship that occupies the given coordinates;
+     *      null is if none
+     */
     private static Ship2D getShip( Label label )
     {
         Grid2D          grid        = Grid2D.getHomeGrid();
@@ -1033,6 +1122,31 @@ class GamePhaseTest
         return ship;
     }
     
+    /**
+     * Encapsulates a simple algorithm
+     * for vertically deploying ships on a grid.
+     * The ship-types to deploy are specified in 
+     * {@link #toDeploy}.
+     * In order to prevent multiple grids
+     * from appearing identical,
+     * the caller chooses the deployment orientation
+     * (see also {@link #deployHorizontal(int, int)},
+     * and the deployment row and starting column.
+     * The deployment row should be chosen
+     * so that the longest ship 
+     * will not exceed the grid bounds.
+     * If the algorithm fails
+     * (if a ship falls outside the grid,
+     * or two ships are allocated the same cell(s))
+     * an assertion is thrown.
+     * 
+     * @param row       the deployment row
+     * @param startCol  the starting column
+     * 
+     * @return  a list of deployed ships
+     * 
+     * @throws BattleshipException if the algorithm fails
+     */
     private List<Ship2D> deployVertical( int row, int startCol )
     {
         Orientation orient  = Orientation.VERTICAL;
@@ -1047,6 +1161,32 @@ class GamePhaseTest
         return ships;
     }
     
+    /**
+     * Encapsulates a simple algorithm
+     * for horizontally deploying ships on a grid.
+     * The ship-types to deploy are specified in 
+     * {@link #toDeploy}.
+     * In order to prevent multiple grids
+     * from appearing identical,
+     * the caller chooses the deployment orientation
+     * (see also {@link #deployVertical(int, int)},
+     * and the deployment column and starting row.
+     * The deployment column should be chosen
+     * so that the longest ship 
+     * will not exceed the grid bounds.
+     * If the algorithm fails
+     * (if a ship falls outside the grid,
+     * or two ships are allocated the same cell(s))
+     * an assertion is thrown.
+     * 
+     * @param col       the deployment column
+     * @param startRow  the starting row
+     * 
+     * @return  a list of deployed ships
+     * 
+     * @throws BattleshipException if the algorithm fails
+     */
+    @SuppressWarnings("unused")
     private List<Ship2D> deployHorizontal( int col, int startRow )
     {
         Orientation     orient  = Orientation.HORIZONTAL;
@@ -1061,8 +1201,15 @@ class GamePhaseTest
         return ships;
     }
     
+    /**
+     * Generates a stream of invalid commands
+     * for go-wrong testing.
+     * 
+     * @return  a stream of invalid commands
+     */
     private static Stream<GoWrong> invalidCommands()
     {
+        String  homeGrid    = Grid2D.getHomeGrid().getName();
         List<GoWrong>   commands    =
             List.of( 
                 new GoWrong( STRIKE, INVALID_ARG_COUNT ),
@@ -1080,35 +1227,49 @@ class GamePhaseTest
                 new GoWrong( MISS + "," + OPP_ONE + ",A1,x", INVALID_ARG_COUNT ),
                 new GoWrong( MISS + "," + OPP_ONE + ",xx", INVALID_COORDINATES ),
                 new GoWrong( MISS + "," + OPP_ONE + ",a20", INVALID_COORDINATES ),
+                new GoWrong( MISS + "," + homeGrid + ",a1", INVALID_GRID ),
                 
                 new GoWrong( HIT + ",a1", GRID_NOT_FOUND ),
                 new GoWrong( HIT + "," + OPP_ONE, GRID_NOT_FOUND ),
                 new GoWrong( HIT + "," + OPP_ONE + ",A1,x", INVALID_ARG_COUNT ),
                 new GoWrong( HIT + "," + OPP_ONE + ",xx", INVALID_COORDINATES ),
                 new GoWrong( HIT + "," + OPP_ONE + ",20", INVALID_COORDINATES ),
+                new GoWrong( HIT + "," + homeGrid + ",a1", INVALID_GRID ),
                 
                 new GoWrong( UNATTACK + ",a1", GRID_NOT_FOUND ),
                 new GoWrong( UNATTACK + "," + OPP_ONE, GRID_NOT_FOUND ),
                 new GoWrong( UNATTACK + "," + OPP_ONE + ",A1,x", INVALID_ARG_COUNT ),
                 new GoWrong( UNATTACK + "," + OPP_ONE + ",xx", INVALID_COORDINATES ),
                 new GoWrong( UNATTACK + "," + OPP_ONE + ",20", INVALID_COORDINATES ),
+                new GoWrong( UNATTACK + "," + homeGrid + ",a1", INVALID_GRID ),
                 
                 new GoWrong( AUTO + ",invalid", INVALID_ARG ),
                 new GoWrong( AUTO + ",on,xx", INVALID_ARG_COUNT ),
+                
+                new GoWrong( UNDO + ",xx", INVALID_ARG_COUNT ),
+                new GoWrong( UNDO, UNDO_UNAVAILABLE ),
+                new GoWrong( REDO + ",xx", INVALID_ARG_COUNT ),
+                new GoWrong( REDO, REDO_UNAVAILABLE ),
+                
                 new GoWrong( "notacommand", INVALID_COMMAND )
             );
             
         return commands.stream();
     }
     
-    private void visualize()
-    {
-        TextGridParent  parent  = new TextGridParent();
-        parent.exec().forEach( System.out::println );
-    }
-    
+    /**
+     * Execute a given script on a GamePhase object
+     * and return the result.
+     * 
+     * @param script the given script
+     * 
+     * @return  
+     *      a {@link RoundTripResult} object
+     *      containing the result of executing 
+     *      the given script
+     */
     private static RoundTripResult execRoundTrip( 
-        List<String> inputData
+        List<String> script
     )
     {
         assertTrue( Configurator.isConfigComplete() );
@@ -1117,14 +1278,14 @@ class GamePhaseTest
             (r,p) -> new GamePhase( r, p );
             
         RoundTripResult result      = 
-            TextTestUtils.execRoundTrip( prov, getter, inputData );
+            TextTestUtils.execRoundTrip( prov, getter, script );
         return result;
     }
     
     /**
      * Encapsulate an invalid command,
      * and the expected error message
-     * obtained from attempting to execute the command.
+     * to be obtained from attempting to execute the command.
      * 
      * @param   command     the invalid command
      * @param   expError    the expected error message

@@ -112,13 +112,19 @@ public class StatusMessages
     public static final String  FALSE               =
         "false";
     public static final String  YES                 =
-        "true";
+        "yes";
     public static final String  NO                  =
-        "false";
+        "no";
     public static final String  INVALID_ARG         =
         "Invalid argument";
     public static final String  GRID_NOT_FOUND      =
         "Grid not found";
     public static final String  INVALID_COMMAND     =
         "Invalid command";
+    public static final String  INVALID_GRID        =
+        "Invalid GRID";
+    public static final String  UNDO_UNAVAILABLE    =
+        "Nothing to undo";
+    public static final String  REDO_UNAVAILABLE    =
+        "Nothing to redo";
 }
