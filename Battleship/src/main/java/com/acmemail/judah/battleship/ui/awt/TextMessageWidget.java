@@ -171,7 +171,7 @@ public class TextMessageWidget
      */
     public void setNumCols( int cols )
     {
-        messageArea.setRows( cols );
+        messageArea.setColumns( cols );
     }
     
     /**
@@ -185,8 +185,8 @@ public class TextMessageWidget
     public List<String> getLines()
     {
         String          text        = messageArea.getText();
-        String[]        linesArr    = text.split( "\\r?\\n" );
-        List<String>    linesList   = Arrays.asList( linesArr );
+        List<String>    linesList   = text.isEmpty() ?
+            List.of() : Arrays.asList( text.split( "\\r?\\n" ) );
         return linesList;
     }
     
