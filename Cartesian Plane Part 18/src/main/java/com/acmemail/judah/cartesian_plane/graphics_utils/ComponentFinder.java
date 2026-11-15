@@ -43,9 +43,6 @@ import javax.swing.SwingUtilities;
  * 
  * @author Jack Straub
  */
-/**
- * @author Jack Straub
- */
 public class ComponentFinder
 {   
     /** 

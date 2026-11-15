@@ -335,7 +335,7 @@ public class SetupPhase implements TextPhase
     private void showUpdate()
     {
         List<String>    lines   = new ArrayList<>();
-        lines.add( "%nCURRENT CONFIGURATION%n" );
+        lines.add( "\nCURRENT CONFIGURATION\n" );
         lines.addAll( showPlayers() );
         lines.addAll( showDimensions() );
         lines.addAll( showShipTable() );

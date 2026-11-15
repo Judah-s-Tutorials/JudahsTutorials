@@ -620,7 +620,7 @@ class GamePhaseTest
      * supplied by the caller.
      * 
      * @param commands  the commands constituting the script
-     * @param validator logic to validate the result
+     * @param setupValidator logic to validate the result
      */
     private void testSimpleCommand( 
         List<String> commands, 
@@ -705,7 +705,7 @@ class GamePhaseTest
      * and validate the result.
      * 
      * @param commands      given list of commands
-     * @param validator     logic for validating a result.
+     * @param setupValidator     logic for validating a result.
      */
     private void testUndo1x1( 
         List<String> commands, 
@@ -732,7 +732,7 @@ class GamePhaseTest
      * prior to executing the given command
      * 
      * @param command   command to execute
-     * @param validator logic to validate result
+     * @param setupValidator logic to validate result
      * @param prefix    
      *      0 or more commands to insert into the command stream
      */
@@ -764,7 +764,7 @@ class GamePhaseTest
      * prior to executing the given command
      * 
      * @param command   command to execute
-     * @param validator logic to validate result
+     * @param setupValidator logic to validate result
      * @param prefix    
      *      0 or more commands to insert into the command stream
      */
@@ -793,7 +793,7 @@ class GamePhaseTest
      * and validate the result.
      * 
      * @param commands      given list of commands
-     * @param validator     logic for validating a result.
+     * @param setupValidator     logic for validating a result.
      */
     private void testRedo( 
         List<String> commands, 

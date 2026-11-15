@@ -242,7 +242,7 @@ public class BasicProvisioner implements Provisioner
      *
      * @return a list of all default ship types
      */
-    static List<ShipType2D> getDefaultTypes()
+    public static List<ShipType2D> getDefaultTypes()
     {
         List<ShipType2D>   list    =
             List.of(

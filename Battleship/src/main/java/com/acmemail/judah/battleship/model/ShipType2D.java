@@ -3,6 +3,9 @@ package com.acmemail.judah.battleship.model;
 import java.awt.Image;
 import java.util.Objects;
 
+import com.acmemail.judah.battleship.BattleshipException;
+import com.acmemail.judah.battleship.StatusMessages;
+
 /**
  * An instance of this class encapsulates a ship type,
  * which includes it's name (e.g. "Battleship," "Destroyer")
@@ -43,10 +46,14 @@ public record ShipType2D(
 {
     /**
      * Compact constructor.
-     * Validates that typeName is non-null.
+     * Validates that typeName is non-null and non-blank.
+     * @throws NullPointerException if typeName is null
+     * @throws BattleshipException if typeName is blank
      */
     public ShipType2D
     {
         Objects.requireNonNull( typeName, "typeName" );
+        if ( typeName.isBlank() )
+            throw new BattleshipException( StatusMessages.INVALID_NAME );
     }
 }

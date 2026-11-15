@@ -8,6 +8,14 @@ import com.acmemail.judah.battleship.BattleshipException;
 
 public class ComponentUtils
 {
+    public static void invokeLater( Runnable task )
+    {
+        if ( SwingUtilities.isEventDispatchThread() )
+            task.run();
+        else
+            SwingUtilities.invokeLater( task );
+    }
+    
     public static void invokeAndWait( Runnable task )
     {
         if ( SwingUtilities.isEventDispatchThread() )
