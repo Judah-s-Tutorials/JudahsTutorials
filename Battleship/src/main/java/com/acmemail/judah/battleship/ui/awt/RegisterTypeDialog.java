@@ -1,14 +1,6 @@
 package com.acmemail.judah.battleship.ui.awt;
 
 import static com.acmemail.judah.battleship.StatusMessages.DUP_SHIP_TYPE;
-import static com.acmemail.judah.battleship.ui.awt.UIConstants.BREADTH_LABEL;
-import static com.acmemail.judah.battleship.ui.awt.UIConstants.CANCEL_LABEL;
-import static com.acmemail.judah.battleship.ui.awt.UIConstants.INVALID_TEXT_COLOR;
-import static com.acmemail.judah.battleship.ui.awt.UIConstants.LENGTH_LABEL;
-import static com.acmemail.judah.battleship.ui.awt.UIConstants.OK_LABEL;
-import static com.acmemail.judah.battleship.ui.awt.UIConstants.SHIP_TYPE_DIALOG_TITLE;
-import static com.acmemail.judah.battleship.ui.awt.UIConstants.TYPE_NAME_LABEL;
-import static com.acmemail.judah.battleship.ui.awt.UIConstants.VALID_TEXT_COLOR;
 import static com.acmemail.judah.battleship.ui.awt.UIConstants.*;
 
 import java.awt.BorderLayout;

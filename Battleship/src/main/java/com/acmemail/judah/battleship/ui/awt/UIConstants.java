@@ -47,6 +47,9 @@ public class UIConstants
     /** Text for a "copy selected" component, for example, a pushbutton. */
     public static final String  COPY_SELECTED               =
         "Copy Selected";
+    /** Glyph used to indicate the direction of a "copy selected" operation. */
+    public static final String  ARROW_GLYPH                 =
+        "→";
     /** Text for a "add defaults" component, for example, a pushbutton. */
     public static final String  ADD_DEFAULTS                =
         "Add Defaults";

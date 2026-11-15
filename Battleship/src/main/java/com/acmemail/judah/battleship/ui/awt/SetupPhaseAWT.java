@@ -3,6 +3,7 @@ package com.acmemail.judah.battleship.ui.awt;
 import static com.acmemail.judah.battleship.ui.awt.UIConstants.ADD_DEFAULTS;
 import static com.acmemail.judah.battleship.ui.awt.UIConstants.ADD_LABEL;
 import static com.acmemail.judah.battleship.ui.awt.UIConstants.ADD_NEW;
+import static com.acmemail.judah.battleship.ui.awt.UIConstants.ARROW_GLYPH;
 import static com.acmemail.judah.battleship.ui.awt.UIConstants.CANCEL_LABEL;
 import static com.acmemail.judah.battleship.ui.awt.UIConstants.COL_LABEL;
 import static com.acmemail.judah.battleship.ui.awt.UIConstants.COPY_SELECTED;
@@ -34,8 +35,8 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dialog.ModalityType;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.Image;
 import java.awt.LayoutManager;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -50,7 +51,6 @@ import java.util.function.Supplier;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -523,9 +523,8 @@ public class SetupPhaseAWT
      */
     private JPanel getCopierPanel()
     {
-        Image       image   = CopySelectedImage.getImage( 75, 20, 0 );
-        ImageIcon   arrow   = new ImageIcon( image );
-        JLabel      label   = new JLabel( arrow );
+        JLabel      label   = new JLabel( ARROW_GLYPH );
+        label.setFont( label.getFont().deriveFont( Font.BOLD, 24f ) );
         JButton     button  = new JButton( COPY_SELECTED );
         button.setName( UIConstants.SDN_COPY_BUTTON );
         button.addActionListener(  e -> copySelected()  );
