@@ -4,9 +4,7 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
 
 import com.acmemail.judah.battleship.components.ComponentFinder;
 import com.acmemail.judah.battleship.components.ComponentUtils;
@@ -61,7 +59,7 @@ public class RegisterTypeTestAssistant extends DialogTestAssistant
      */
     public int getLength()
     {
-        int length  = getInt( UIConstants.RDN_LENGTH );
+        int length  = getSpinnerInt( UIConstants.RDN_LENGTH );
         return length;
     }
     
@@ -74,7 +72,7 @@ public class RegisterTypeTestAssistant extends DialogTestAssistant
      */
     public int getBreadth()
     {
-        int breadth = getInt( UIConstants.RDN_BREADTH );
+        int breadth = getSpinnerInt( UIConstants.RDN_BREADTH );
         return breadth;
     }
     
@@ -87,7 +85,7 @@ public class RegisterTypeTestAssistant extends DialogTestAssistant
      */
     public void setLength( int length )
     {
-        setInt( length, UIConstants.RDN_LENGTH );
+        setSpinnerInt( length, UIConstants.RDN_LENGTH );
     }
     
     /**
@@ -99,7 +97,7 @@ public class RegisterTypeTestAssistant extends DialogTestAssistant
      */
     public void setBreadth( int breadth )
     {
-        setInt( breadth, UIConstants.RDN_BREADTH );
+        setSpinnerInt( breadth, UIConstants.RDN_BREADTH );
     }
     
     /**
@@ -166,43 +164,5 @@ public class RegisterTypeTestAssistant extends DialogTestAssistant
     {
         JButton comp    = getJButton( UIConstants.RDN_CANCEL_BUTTON );
         execTerminalAction( dialog, comp::doClick );
-    }
-
-    /**
-     * Gets the value of the JSpinner with the given name.
-     * 
-     * @param  name the given name
-     * 
-     * @return the integer value of the given JSpinner
-     * 
-     * @throws IllegalStateException if the operation can't be completed
-     */
-    private int getInt( String name )
-    {
-        JSpinner    spinner = getJSpinner( name );
-        Object[]    oVal    = new Object[1];
-        int         iVal    = 0;
-        ComponentUtils.invokeAndWait( () -> oVal[0] = spinner.getValue() );
-        if ( oVal[0] instanceof Number num )
-            iVal = num.intValue();
-        else
-            throw new IllegalStateException( "JSpinner is wrong type" );
-        return iVal;
-    }
-    
-    /**
-     * Sets the value of the JSpinner with the given name.
-     * 
-     * @param name  the given name
-     * @param iVal  the value to set
-     * 
-     * @throws IllegalStateException if the operation can't be completed
-     */
-    private void setInt( int iVal, String name )
-    {
-        JSpinner    spinner = getJSpinner( name );
-        if ( !(spinner.getModel() instanceof SpinnerNumberModel ) )
-            throw new IllegalStateException( "JSpinner is wrong type" );
-        ComponentUtils.invokeAndWait( () -> spinner.setValue( iVal ) );
     }
 }

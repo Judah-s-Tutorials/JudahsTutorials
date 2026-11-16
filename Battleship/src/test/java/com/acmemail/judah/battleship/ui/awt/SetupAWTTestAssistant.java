@@ -9,7 +9,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JList;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.ListModel;
 
@@ -73,15 +72,16 @@ public class SetupAWTTestAssistant extends DialogTestAssistant
             List<String> errors = initMap( dialog, s -> s.startsWith( "SDN" ) );
             errorList.addAll( errors );
         });
-        System.err.println( "SetupAWTDialogAssistant: begin error log" );
-        errorList.forEach( System.err::println );
-        System.err.println( "SetupAWTDialogAssistant: end error log" );
-        startGUIThread();
-        if ( errorList.size() > 0 )
+        
+        // Check for errors when trying to locate components
+        if ( !errorList.isEmpty() )
         {
-            String  error   = "Failed to instantiate and start dialog.";
-            throw new IllegalStateException( error );
+            errorList.addFirst( "Component location failure:" );
+            String  message = String.join( "\n", errorList );
+            throw new IllegalStateException( message );
         }
+        
+        startGUIThread();
     }
     
     /**
@@ -229,8 +229,10 @@ public class SetupAWTTestAssistant extends DialogTestAssistant
     private void selectItems ( String listName, int... indices )
     {
         JList<?>        jList   = getJList( listName );
-        jList.clearSelection();
-        jList.setSelectedIndices( indices );
+        ComponentUtils.invokeAndWait( () -> {
+            jList.clearSelection();
+            jList.setSelectedIndices( indices );
+        });
     }
 
     /**
@@ -242,7 +244,7 @@ public class SetupAWTTestAssistant extends DialogTestAssistant
      */
     public int getNumRows()
     {
-        int numRows = getInt( UIConstants.SDN_ROWS );
+        int numRows = getSpinnerInt( UIConstants.SDN_ROWS );
         return numRows;
     }
     
@@ -255,7 +257,7 @@ public class SetupAWTTestAssistant extends DialogTestAssistant
      */
     public void setNumRows( int newRows )
     {
-        setInt( UIConstants.SDN_ROWS, newRows );
+        setSpinnerInt( newRows, UIConstants.SDN_ROWS );
     }
     
     /**
@@ -267,7 +269,7 @@ public class SetupAWTTestAssistant extends DialogTestAssistant
      */
     public int getNumCols()
     {
-        int numCols = getInt( UIConstants.SDN_COLS );
+        int numCols = getSpinnerInt( UIConstants.SDN_COLS );
         return numCols;
     } 
     
@@ -280,7 +282,7 @@ public class SetupAWTTestAssistant extends DialogTestAssistant
      */
     public void setNumCols( int newCols )
     {
-        setInt( UIConstants.SDN_COLS, newCols );
+        setSpinnerInt( newCols, UIConstants.SDN_COLS );
     }
     
     /**
@@ -454,8 +456,10 @@ public class SetupAWTTestAssistant extends DialogTestAssistant
         typeAssist.setBreadth( breadth );
         typeAssist.setName( name );
         
-        // push the new-type dialog OK button, and wait for the dialog to close
-        waitForClosedEvent( typeDialog, typeAssist::clickOK );
+        // push the new-type dialog OK button...
+        // don't wait for the termination event this time, because
+        // the ship-type dialog is already waiting
+        typeAssist.clickOK();
         if ( typeDialog.isVisible() )
             throw new IllegalStateException( expectedNotVisible );
         List<String>    messages    = typeAssist.getMessages();
@@ -476,7 +480,10 @@ public class SetupAWTTestAssistant extends DialogTestAssistant
         startAddDialog();
         
         JDialog typeDialog  = typeAssist.getDialog();
-        waitForClosedEvent( typeDialog, typeAssist::clickCancel );
+        // push the new-type dialog cancel button...
+        // don't wait for the termination event this time, because
+        // the ship-type dialog is already waiting
+        typeAssist.clickCancel();
         if ( typeDialog.isVisible() )
             throw new IllegalStateException( expectedNotVisible );
         List<String>    messages    = typeAssist.getMessages();
@@ -513,48 +520,6 @@ public class SetupAWTTestAssistant extends DialogTestAssistant
         waitForOpenEvent( dialog, addButton::doClick );
         if ( !dialog.isVisible() )
             throw new IllegalStateException( expectedVisible );
-    }
-    
-    /**
-     * Gets the integer value of the spinner with the given name.
-     * 
-     * @param name  the given name
-     * 
-     * @return  the value of the spinner with the given name
-     * 
-     * @throws IllegalStateException if the operation fails
-     */
-    private int getInt( String name )
-    {
-        final Class<JSpinner>   clazz   = JSpinner.class;
-        JSpinner    spinner = getComponent( name, clazz );
-        Object[]    oVal    = new Object[1];
-        int         iVal    = -1;
-        ComponentUtils.invokeAndWait( () -> oVal[0] = spinner.getValue() );
-        if ( oVal[0] instanceof Number number )
-            iVal = number.intValue();
-        else
-        {
-            String      expected    = Number.class.getSimpleName();
-            Class<?>    actual      = oVal[0].getClass();
-            throwWrongType( name, expected, actual );
-        }
-        return iVal;
-    }
-    
-    /**
-     * Sets the integer value of the spinner with the given name.
-     * 
-     * @param name      the given name
-     * @param newVal    the value to set
-     * 
-     * @throws IllegalStateException if the operation fails
-     */
-    private void setInt( String name, int newVal )
-    {
-        final Class<JSpinner>   clazz   = JSpinner.class;
-        JSpinner    spinner = getComponent( name, clazz );
-        ComponentUtils.invokeAndWait( () -> spinner.setValue( newVal ) );
     }
     
     /**

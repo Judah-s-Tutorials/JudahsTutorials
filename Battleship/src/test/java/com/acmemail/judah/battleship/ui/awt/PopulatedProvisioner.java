@@ -47,7 +47,7 @@ public class PopulatedProvisioner extends BasicProvisioner
             .forEach( this::addPlayer );
         defTypes.forEach( this::addToRegister );
         altTypes.forEach( this::addToRegister );
-        altTypes.forEach( this::addToDeploy );
+        defTypes.forEach( this::addToDeploy );
         altTypes.forEach( this::addToDeploy );
     }
 }

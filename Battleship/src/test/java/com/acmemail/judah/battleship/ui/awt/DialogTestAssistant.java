@@ -23,6 +23,7 @@ import javax.swing.JList;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 
 import com.acmemail.judah.battleship.BattleshipException;
 import com.acmemail.judah.battleship.components.ComponentFinder;
@@ -66,17 +67,18 @@ public class DialogTestAssistant
      * Get a list of error messages 
      * from the text area component with the given name.
      * 
-     * @param name  = the given name
+     * @param name  = the given name, may not be null
      * 
      * @return  a list of error messages
      * 
      * @throws IllegalStateException if the operation cannot be completed
+     * @throws NullPointerException if name is null
      */
     public List<String> getMessages( String name )
     {
-        final String            compName    = UIConstants.SDN_MESSAGES;
+        Objects.requireNonNull( name, "name" );
         final Class<JTextArea>  clazz       = JTextArea.class;
-        JTextArea               textArea    = getComponent( compName, clazz );
+        JTextArea               textArea    = getComponent( name, clazz );
         String[]                text        = new String[1];
         
         ComponentUtils.invokeAndWait( () -> text[0] = textArea.getText() );
@@ -149,6 +151,7 @@ public class DialogTestAssistant
     /**
      * Executes the given action,
      * and waits for the given dialog to close.
+     * This is a noop if the dialog is not visible.
      * Throws an exception if the wait times-out.
      * 
      * @param dialog        the given dialog
@@ -165,15 +168,15 @@ public class DialogTestAssistant
                 public void componentHidden( ComponentEvent e ) {
                     closed.countDown();
                 }
-            };
+        };
 
         try
         {
             dialog.addComponentListener( closeListener );
-            closeAction.run();
-            if ( !closed.await( 10, TimeUnit.SECONDS) )
+            ComponentUtils.invokeLater( closeAction::run );
+            if ( !closed.await( 5, TimeUnit.SECONDS) )
             {
-                throw new IllegalStateException("Dialog never became visible");
+                throw new IllegalStateException(" Dialog failed to close" );
             }
         }
         catch ( InterruptedException exc )
@@ -188,6 +191,44 @@ public class DialogTestAssistant
         {
             dialog.removeComponentListener( closeListener );
         }
+    }
+
+    /**
+     * Gets the value of the JSpinner with the given name.
+     * 
+     * @param  name the given name
+     * 
+     * @return the integer value of the given JSpinner
+     * 
+     * @throws IllegalStateException if the operation can't be completed
+     */
+    public int getSpinnerInt( String name )
+    {
+        JSpinner    spinner = getJSpinner( name );
+        Object[]    oVal    = new Object[1];
+        int         iVal    = 0;
+        ComponentUtils.invokeAndWait( () -> oVal[0] = spinner.getValue() );
+        if ( oVal[0] instanceof Number num )
+            iVal = num.intValue();
+        else
+            throw new IllegalStateException( "JSpinner is wrong type" );
+        return iVal;
+    }
+    
+    /**
+     * Sets the value of the JSpinner with the given name.
+     * 
+     * @param name  the given name
+     * @param iVal  the value to set
+     * 
+     * @throws IllegalStateException if the operation can't be completed
+     */
+    public void setSpinnerInt( int iVal, String name )
+    {
+        JSpinner    spinner = getJSpinner( name );
+        if ( !(spinner.getModel() instanceof SpinnerNumberModel ) )
+            throw new IllegalStateException( "JSpinner is wrong type" );
+        ComponentUtils.invokeAndWait( () -> spinner.setValue( iVal ) );
     }
 
     /**
